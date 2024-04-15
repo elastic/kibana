@@ -13,7 +13,7 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
-import type { SingleMetricViewerEmbeddableApi } from '../embeddables';
+import type { SingleMetricViewerEmbeddableApi, MlEmbeddableBaseApi } from '../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';
 
 import type { MlCoreSetup } from '../plugin';
@@ -55,21 +55,21 @@ export function createOpenInSingleMetricViewerAction(
 
       if (isSingleMetricViewerEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, query$, selectedEntities, selectedDetectorIndex } = embeddable;
+        const { jobIds, selectedEntities, selectedDetectorIndex } = embeddable;
 
         return locator.getUrl(
           {
             page: ML_PAGES.SINGLE_METRIC_VIEWER,
             // @ts-ignore entities is not compatible with SerializableRecord
             pageState: {
-              timeRange: getEmbeddableTimeRange(embeddable),
+              timeRange: getEmbeddableTimeRange(embeddable as unknown as MlEmbeddableBaseApi),
               refreshInterval: {
                 display: 'Off',
                 pause: true,
                 value: 0,
               },
               jobIds: jobIds.getValue(),
-              query: query$?.getValue(),
+              query: {},
               entities: selectedEntities?.getValue(),
               detectorIndex: selectedDetectorIndex?.getValue(),
             },
