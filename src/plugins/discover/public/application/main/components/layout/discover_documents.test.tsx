@@ -82,8 +82,8 @@ describe('Discover documents layout', () => {
     const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
-    expect(findTestSubject(component, 'dscGridToolbar').exists()).toBe(true);
-    expect(findTestSubject(component, 'dscGridToolbarBottom').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbar').exists()).toBe(true);
+    expect(findTestSubject(component, 'unifiedDataTableToolbarBottom').exists()).toBe(true);
     expect(findTestSubject(component, 'viewModeToggle').exists()).toBe(true);
   });
 

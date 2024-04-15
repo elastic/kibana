@@ -97,6 +97,7 @@ import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -313,7 +314,7 @@ export class Plugin
           unifiedSearch: pluginsStart.unifiedSearch,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           element: params.element,
-          theme$: params.theme$,
+          theme: params.theme,
           storage: new Storage(window.localStorage),
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
@@ -411,7 +412,7 @@ export class Plugin
             unifiedSearch: pluginsStart.unifiedSearch,
             isCloud: Boolean(plugins.cloud?.isCloudEnabled),
             element: params.element,
-            theme$: params.theme$,
+            theme: params.theme,
             storage: new Storage(window.localStorage),
             setBreadcrumbs: params.setBreadcrumbs,
             history: params.history,
@@ -559,7 +560,10 @@ export class Plugin
         return getRuleStatusPanelLazy(props);
       },
       getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => {
-        return getAlertSummaryWidgetLazy(props);
+        const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
+          charts: plugins.charts,
+        };
+        return getAlertSummaryWidgetLazy({ ...props, dependencies });
       },
       getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
         return getRuleSnoozeModalLazy(props);

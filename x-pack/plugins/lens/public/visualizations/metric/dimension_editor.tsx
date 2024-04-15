@@ -580,7 +580,6 @@ export function DimensionEditorAdditionalSection({
                 defaultMessage: 'Bar orientation',
               })}
               data-test-subj="lnsMetric_progress_direction_buttons"
-              name="alignment"
               options={[
                 {
                   id: `${idPrefix}vertical`,

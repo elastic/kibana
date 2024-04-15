@@ -24,13 +24,17 @@ import type {
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantSettingToggledParams,
+  ReportInsightsGeneratedParams,
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
   ReportDetailsFlyoutOpenedParams,
   ReportDetailsFlyoutTabClickedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
+  ReportAssetCriticalityCsvImportedParams,
+  ReportAddRiskInputToTimelineClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './constants';
-import type { ReportAddRiskInputToTimelineClickedParams } from './events/entity_analytics/types';
 
 /**
  * Client which aggregate all the available telemetry tracking functions
@@ -51,39 +55,24 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.AlertsGroupingTakeAction, params);
   };
 
-  public reportAssistantInvoked = ({ conversationId, invokedBy }: ReportAssistantInvokedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, {
-      conversationId,
-      invokedBy,
-    });
+  public reportAssistantInvoked = (params: ReportAssistantInvokedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantInvoked, params);
   };
 
-  public reportAssistantMessageSent = ({
-    conversationId,
-    isEnabledKnowledgeBase,
-    isEnabledRAGAlerts,
-    role,
-  }: ReportAssistantMessageSentParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, {
-      conversationId,
-      isEnabledKnowledgeBase,
-      isEnabledRAGAlerts,
-      role,
-    });
+  public reportAssistantMessageSent = (params: ReportAssistantMessageSentParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantMessageSent, params);
   };
 
-  public reportAssistantQuickPrompt = ({
-    conversationId,
-    promptTitle,
-  }: ReportAssistantQuickPromptParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.AssistantQuickPrompt, {
-      conversationId,
-      promptTitle,
-    });
+  public reportAssistantQuickPrompt = (params: ReportAssistantQuickPromptParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssistantQuickPrompt, params);
   };
 
   public reportAssistantSettingToggled = (params: ReportAssistantSettingToggledParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.AssistantSettingToggled, params);
+  };
+
+  public reportInsightsGenerated = (params: ReportInsightsGeneratedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.InsightsGenerated, params);
   };
 
   public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {
@@ -106,6 +95,22 @@ export class TelemetryClient implements TelemetryClientStart {
       entity,
       selectedSeverity,
     });
+  };
+
+  public reportAssetCriticalityCsvPreviewGenerated = (
+    params: ReportAssetCriticalityCsvPreviewGeneratedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityCsvPreviewGenerated, params);
+  };
+
+  public reportAssetCriticalityFileSelected = (
+    params: ReportAssetCriticalityFileSelectedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityFileSelected, params);
+  };
+
+  public reportAssetCriticalityCsvImported = (params: ReportAssetCriticalityCsvImportedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AssetCriticalityCsvImported, params);
   };
 
   public reportMLJobUpdate = (params: ReportMLJobUpdateParams) => {

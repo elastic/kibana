@@ -19,10 +19,12 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
   const toggleDetails = (citation: Doc) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
-    if (itemIdToExpandedRowMapValues[citation.id]) {
-      delete itemIdToExpandedRowMapValues[citation.id];
+    if (itemIdToExpandedRowMapValues[citation.metadata._id]) {
+      delete itemIdToExpandedRowMapValues[citation.metadata._id];
     } else {
-      itemIdToExpandedRowMapValues[citation.id] = <EuiText size="s">{citation.content}</EuiText>;
+      itemIdToExpandedRowMapValues[citation.metadata._id] = (
+        <EuiText size="s">{citation.content}</EuiText>
+      );
     }
 
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -32,9 +34,9 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
     <EuiBasicTable
       columns={[
         {
-          field: 'id',
+          field: 'metadata._id',
           name: i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.idField', {
-            defaultMessage: 'Index Id',
+            defaultMessage: 'Index ID',
           }),
           truncateText: true,
         },
@@ -50,7 +52,9 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
                 iconSide="right"
                 size="s"
                 onClick={() => toggleDetails(citation)}
-                iconType={itemIdToExpandedRowMapValues[citation.id] ? 'arrowDown' : 'arrowRight'}
+                iconType={
+                  itemIdToExpandedRowMapValues[citation.metadata._id] ? 'arrowDown' : 'arrowRight'
+                }
               >
                 {i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.snippet', {
                   defaultMessage: 'Snippet',
