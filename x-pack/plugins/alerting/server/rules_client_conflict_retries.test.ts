@@ -263,6 +263,10 @@ function mockSavedObjectUpdateConflictErrorTimes(times: number) {
     attributes: {
       actions: [],
       scheduledTaskId: 'scheduled-task-id',
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending',
+      },
     },
     references: [],
   };
@@ -301,6 +305,12 @@ function setupRawRuleMocks(
       actions: [],
       muteAll: false,
       mutedInstanceIds: [],
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending',
+      },
       ...attributeOverrides,
     },
     references: [],

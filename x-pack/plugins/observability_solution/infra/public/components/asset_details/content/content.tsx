@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import React from 'react';
 import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
@@ -14,6 +15,7 @@ import {
   Dashboards,
   Logs,
   Metadata,
+  Metrics,
   Osquery,
   Overview,
   Processes,
@@ -30,6 +32,7 @@ export const Content = () => {
             ContentTabIds.OVERVIEW,
             ContentTabIds.LOGS,
             ContentTabIds.METADATA,
+            ContentTabIds.METRICS,
             ContentTabIds.PROCESSES,
             ContentTabIds.ANOMALIES,
             ContentTabIds.DASHBOARDS,
@@ -48,6 +51,9 @@ export const Content = () => {
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.METADATA}>
           <Metadata />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.METRICS}>
+          <Metrics />
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.OSQUERY}>
           <Osquery />
@@ -86,6 +92,11 @@ const TabPanel = ({
   const { renderedTabsSet, activeTabId } = useTabSwitcherContext();
 
   return renderedTabsSet.current.has(activeWhen) ? (
-    <div hidden={activeTabId !== activeWhen}>{children}</div>
+    <div
+      hidden={activeTabId !== activeWhen}
+      data-test-subj={`infraAssetDetails${capitalize(activeWhen)}TabContent`}
+    >
+      {children}
+    </div>
   ) : null;
 };

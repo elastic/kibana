@@ -53,7 +53,9 @@
     "@kbn/esql-validation-autocomplete",
     "@kbn/esql-ast",
     "@kbn/ai-assistant-management-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/management-settings-ids",
+    "@kbn/apm-utils"
   ],
   "exclude": ["target/**/*"]
 }
