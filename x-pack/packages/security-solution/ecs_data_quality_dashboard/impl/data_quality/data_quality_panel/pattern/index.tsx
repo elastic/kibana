@@ -274,10 +274,12 @@ const PatternComponent: React.FC<Props> = ({
         pattern,
         results: undefined,
         sizeInBytes:
-          getTotalSizeInBytes({
-            indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
-            stats,
-          }) ?? getFallbackValue(isILMAvailable), // It fallback to 0 only when isILMAvailable is true
+          isILMAvailable
+          ? getTotalSizeInBytes({
+              indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
+              stats,
+            }) ?? 0
+          : undefined,
         stats,
       });
     }
