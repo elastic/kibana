@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginStart {}
+
+export interface SearchNotebooksPluginStartDependencies {
+  console: ConsolePluginStart;
+}
