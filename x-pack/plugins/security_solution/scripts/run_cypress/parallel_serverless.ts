@@ -16,6 +16,7 @@ import cypress from 'cypress';
 import grep from '@cypress/grep/src/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
+import { exec } from 'child_process';
 import { createFailError } from '@kbn/dev-cli-errors';
 import axios, { AxiosError } from 'axios';
 import path from 'path';
@@ -24,9 +25,11 @@ import pRetry from 'p-retry';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
-import { exec } from 'child_process';
+import { catchAxiosErrorFormatAndThrow } from '../endpoint/common/format_axios_error';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 interface ProductType {
   product_line: string;
@@ -128,11 +131,16 @@ async function createSecurityProject(
   }
 
   try {
-    const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
-      headers: {
-        Authorization: `ApiKey ${apiKey}`,
-      },
-    });
+    const response = await axios
+      .post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
+        headers: {
+          Authorization: `ApiKey ${apiKey}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+
+    log.verbose('Create Security Project response:\n', response);
+
     return {
       name: response.data.name,
       id: response.data.id,
@@ -158,11 +166,13 @@ async function deleteSecurityProject(
   apiKey: string
 ): Promise<void> {
   try {
-    await axios.delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
-      headers: {
-        Authorization: `ApiKey ${apiKey}`,
-      },
-    });
+    await axios
+      .delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
+        headers: {
+          Authorization: `ApiKey ${apiKey}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
     log.info(`Project ${projectName} was successfully deleted!`);
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -182,16 +192,19 @@ async function resetCredentials(
   log.info(`${runnerId} : Reseting credentials`);
 
   const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
-    const response = await axios.post(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-internal-credentials`,
-      {},
-      {
-        headers: {
-          Authorization: `ApiKey ${apiKey}`,
-        },
-      }
-    );
+    const response = await axios
+      .post(
+        `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-internal-credentials`,
+        {},
+        {
+          headers: {
+            Authorization: `ApiKey ${apiKey}`,
+          },
+        }
+      )
+      .catch(catchAxiosErrorFormatAndThrow);
     log.info('Credentials have ben reset');
+    log.verbose(response);
     return {
       password: response.data.password,
       username: response.data.username,
@@ -218,17 +231,16 @@ async function resetCredentials(
 function waitForProjectInitialized(projectId: string, apiKey: string): Promise<void> {
   const fetchProjectStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if project is initialized.`);
-    const response = await axios.get(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/status`,
-      {
+    const response = await axios
+      .get(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/status`, {
         headers: {
           Authorization: `ApiKey ${apiKey}`,
         },
-      }
-    );
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
     if (response.data.phase !== 'initialized') {
       log.info(response.data);
-      throw new Error('Project is not initialized. A retry will be triggered soon...');
+      throw new Error(`Project not yet initialized [${response.data.phase}]. Retrying...`);
     } else {
       log.info('Project is initialized');
     }
@@ -253,11 +265,13 @@ function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Pr
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
-    const response = await axios.get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
+    const response = await axios
+      .get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
 
     log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
   };
@@ -281,11 +295,13 @@ function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Pr
 function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchKibanaStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if kibana is available.`);
-    const response = await axios.get(`${kbUrl}/api/status`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
+    const response = await axios
+      .get(`${kbUrl}/api/status`, {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
     if (response.data.status.overall.level !== 'available') {
       throw new Error(`${runnerId}: Kibana is not available. A retry will be triggered soon...`);
     } else {
@@ -314,11 +330,13 @@ function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise
   const fetchEsAccessAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if can be accessed.`);
 
-    await axios.get(`${esUrl}`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
+    await axios
+      .get(`${esUrl}`, {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
@@ -346,9 +364,11 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 
   const fetchLoginStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if login can be performed.`);
-    axios.post(`${kbUrl}/internal/security/login`, body, {
-      headers: API_HEADERS,
-    });
+    axios
+      .post(`${kbUrl}/internal/security/login`, body, {
+        headers: API_HEADERS,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
@@ -477,6 +497,13 @@ ${JSON.stringify(argv, null, 2)}
       ) {
         cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless';
       }
+
+      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
+        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
+      }
+      // eslint-disable-next-line require-atomic-updates
+      log = prefixedOutputLogger('cy.parallel(svl)', createToolingLogger());
+
       const tier: string = argv.tier;
       const endpointAddon: boolean = argv.endpointAddon;
       const cloudAddon: boolean = argv.cloudAddon;
@@ -558,8 +585,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ? getProductTypes(tier, endpointAddon, cloudAddon)
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
-              if (!API_KEY) {
-                log.info('API KEY to create project could not be retrieved.');
+              log.info(`Running spec file: ${filePath}`);if (!API_KEY) {
+                log.error('API KEY to create project could not be retrieved.');
                 // eslint-disable-next-line no-process-exit
                 return process.exit(1);
               }
@@ -574,7 +601,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               );
 
               if (!project) {
-                log.info('Failed to create project.');
+                log.error('Failed to create project.');
                 // eslint-disable-next-line no-process-exit
                 return process.exit(1);
               }
@@ -588,7 +615,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const credentials = await resetCredentials(project.id, id, API_KEY);
 
               if (!credentials) {
-                log.info('Credentials could not be reset.');
+                log.error('Credentials could not be reset.');
                 // eslint-disable-next-line no-process-exit
                 return process.exit(1);
               }
@@ -613,7 +640,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               // Normalized the set of available env vars in cypress
               const cyCustomEnv = {
-                CYPRESS_BASE_URL: project.kb_url,
+                BASE_URL: project.kb_url,
 
                 ELASTICSEARCH_URL: project.es_url,
                 ELASTICSEARCH_USERNAME: credentials.username,
@@ -626,6 +653,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
                 CLOUD_SERVERLESS: true,
                 IS_SERVERLESS: true,
+                CLOUD_QA_API_KEY: API_KEY,
                 // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
                 TEST_CLOUD: 1,
               };

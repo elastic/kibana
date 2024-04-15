@@ -144,6 +144,7 @@ export const dataLoaders = (
 ): void => {
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
+  const isCloudServerless = Boolean(config.env.CLOUD_SERVERLESS);
   const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
   const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
@@ -277,8 +278,8 @@ export const dataLoaders = (
     }: {
       endpointAgentIds: string[];
     }): Promise<DeleteAllEndpointDataResponse> => {
-      const { esClient } = await stackServicesPromise;
-      return deleteAllEndpointData(esClient, endpointAgentIds);
+      const { esClient, log } = await stackServicesPromise;
+      return deleteAllEndpointData(esClient, log, endpointAgentIds, !isCloudServerless);
     },
 
     /**
