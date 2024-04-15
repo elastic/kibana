@@ -111,17 +111,57 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
       ? [
           {
             field: 'indexed_document_count',
-            name: i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
-              defaultMessage: 'Docs upserted',
-            }),
+            name: (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="searchConnectors.index.syncJobs.documents.upserted.tooltip"
+                    defaultMessage="The number of {index} operations the connector sent to the Elasticsearch _bulk API during this sync. This includes net-new documents and updates to existing documents. This does not account for duplicate _ids, or any documents dropped by an ingest processor"
+                    values={{ index: <EuiCode>index</EuiCode> }}
+                  />
+                }
+              >
+                <>
+                  {i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
+                    defaultMessage: 'Docs upserted',
+                  })}
+                  <EuiIcon
+                    size="s"
+                    type="questionInCircle"
+                    color="subdued"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
+            ),
             sortable: true,
             truncateText: true,
           },
           {
             field: 'deleted_document_count',
-            name: i18n.translate('searchConnectors.searchIndices.deletedDocs.columnTitle', {
-              defaultMessage: 'Docs deleted',
-            }),
+            name: (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="searchConnectors.index.syncJobs.documents.deleted.tooltip"
+                    defaultMessage="The number of {delete} operations the connector sent to the Elasticsearch _bulk API at the conclusion of this sync. This may include documents dropped by Sync Rules. This does not include documents dropped by ingest processors. Documents are deleted from the index if the connector determines that they are no longer present in the data that should be fetched from the 3rd-party source."
+                    values={{ delete: <EuiCode>delete</EuiCode> }}
+                  />
+                }
+              >
+                <>
+                  {i18n.translate('searchConnectors.searchIndices.deletedDocs.columnTitle', {
+                    defaultMessage: 'Docs deleted',
+                  })}
+                  <EuiIcon
+                    size="s"
+                    type="questionInCircle"
+                    color="subdued"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
+            ),
             sortable: true,
             truncateText: true,
           },
