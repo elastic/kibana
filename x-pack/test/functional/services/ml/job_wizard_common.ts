@@ -654,7 +654,7 @@ export function MachineLearningJobWizardCommonProvider(
       });
 
       // click away from time popover
-      await testSubjects.click('mlJobWizardTimeRangeStep');
+      await this.goToTimeRangeStep();
 
       // assert time is set as expected
       await this.assertDateRangeSelection(origStartDate as string, shortDurationEndDate);
