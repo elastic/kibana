@@ -76,7 +76,6 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
           width: ${MAX_SIGNALS_FIELD_WIDTH}px;
         }
       `}
-      data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
       fullWidth
       helpText={helpText}
@@ -92,6 +91,7 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
           padding-left: 12px;
         `}
         isInvalid={isInvalid}
+        dataTestSubj={dataTestSubj}
         value={value as EuiFieldNumberProps['value']}
         onChange={handleMaxSignalsChange}
         isLoading={field.isValidating}
