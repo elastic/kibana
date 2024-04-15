@@ -37,13 +37,12 @@ export const getScheduleNotificationResponseActionsService =
         });
       }
       if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
-        // TODO TC: For now we do not support SentinelOne events
-        const filteredAlerts = alerts.filter((alert) => {
-          return alert['event.module'] !== 'sentinel_one';
+        const endpointAlerts = alerts.filter((alert) => {
+          return alert?.agent?.type === 'endpoint';
         });
-        if (filteredAlerts.length) {
+        if (endpointAlerts.length) {
           endpointResponseAction(responseAction, endpointAppContextService, {
-            alerts: filteredAlerts,
+            alerts: endpointAlerts,
           });
         }
       }

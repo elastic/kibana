@@ -18,12 +18,12 @@ export type Alert = ParsedTechnicalFields & {
   process?: {
     pid: string;
   };
-  'event.module'?: string;
 };
 
 export interface AlertAgent {
   id: string;
   name: string;
+  type: string;
 }
 
 export interface AlertWithAgent extends Alert {
