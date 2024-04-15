@@ -76,7 +76,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
             <EuiText size="s">
               {i18n.translate(
                 'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent',
-                { defaultMessage: 'Sync with Malware protection level' }
+                { defaultMessage: 'Sync with malware protection level' }
               )}{' '}
               <EuiIconTip
                 position="right"
@@ -84,8 +84,8 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
                   'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.tooltip',
                   {
                     defaultMessage:
-                      'Using this setting will automatically enable antivirus registration if Malware protection is set to prevent. ' +
-                      'In any other case antivirus registration will be disabled.',
+                      'Use this setting to automatically enable antivirus registration if malware protection is set to Prevent. ' +
+                      'In any other case, antivirus registration will be disabled.',
                   }
                 )}
               />
@@ -94,7 +94,7 @@ export const AntivirusRegistrationCard = memo<AntivirusRegistrationCardProps>(
               {i18n.translate(
                 'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.syncWithMalwarePrevent.currentOutcome',
                 {
-                  defaultMessage: '(with current Malware settings: {currentOutcome})',
+                  defaultMessage: '(Current level: {currentOutcome})',
                   values: {
                     currentOutcome: shouldEnableAntivirusRegistrationForSync(policy)
                       ? ENABLED
