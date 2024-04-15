@@ -107,6 +107,16 @@ export interface PerformanceMetricEvent {
    * Value for the metric 8
    */
   value8?: number;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Description label for the metric 9
+   */
+  key9?: string;
+  /**
+   * @group Free fields for custom metrics (searchable and aggregateable)
+   * Value for the metric 9
+   */
+  value9?: number;
 }
 
 export const METRIC_EVENT_SCHEMA: RootSchema<PerformanceMetricEvent> = {
@@ -188,5 +198,13 @@ export const METRIC_EVENT_SCHEMA: RootSchema<PerformanceMetricEvent> = {
   value8: {
     type: 'long',
     _meta: { description: 'Performance metric value 8', optional: true },
+  },
+  key9: {
+    type: 'keyword',
+    _meta: { description: 'Performance metric label 9', optional: true },
+  },
+  value9: {
+    type: 'long',
+    _meta: { description: 'Performance metric value 9', optional: true },
   },
 };
