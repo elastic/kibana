@@ -147,7 +147,6 @@ describe('create_query', () => {
       expect(createQuery(fields, fieldDescriptors)).toEqual({
         retriever: {
           rrf: {
-            window_size: 100,
             retrievers: [
               {
                 standard: {
@@ -336,7 +335,6 @@ describe('create_query', () => {
         expect(createQuery(fields, fieldDescriptors)).toEqual({
           retriever: {
             rrf: {
-              window_size: 100,
               retrievers: [
                 {
                   standard: {
@@ -443,7 +441,6 @@ describe('create_query', () => {
       expect(createQuery(fields, fieldDescriptors)).toEqual({
         retriever: {
           rrf: {
-            window_size: 100,
             retrievers: [
               {
                 standard: {

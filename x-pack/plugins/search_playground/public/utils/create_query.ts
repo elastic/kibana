@@ -190,7 +190,6 @@ export function createQuery(
     return {
       retriever: {
         rrf: {
-          window_size: 100,
           retrievers,
         },
       },
