@@ -7,6 +7,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   Adapters,
   DefaultEmbeddableApi,
@@ -16,7 +17,9 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import {
   HasLibraryTransforms,
+  PublishesBlockingError,
   PublishesDataLoading,
+  PublishingSubject,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type {
@@ -40,10 +43,16 @@ export type SearchEmbeddableSerializedState = SerializedTitles & {
   savedObjectId?: string;
 };
 
+interface PublishesRows {
+  rows: PublishingSubject<DataTableRecord[]>;
+}
+
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   HasSavedSearch &
   HasLibraryTransforms &
-  PublishesDataLoading;
+  PublishesDataLoading &
+  PublishesBlockingError &
+  PublishesRows;
 
 // TODO: Delete
 export interface SearchOutput extends EmbeddableOutput {

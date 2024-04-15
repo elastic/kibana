@@ -634,6 +634,7 @@ export class SavedSearchEmbeddable
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
+    console.log('renderReactComponent');
     const savedSearch = this.savedSearch;
 
     if (!searchProps || !savedSearch) {

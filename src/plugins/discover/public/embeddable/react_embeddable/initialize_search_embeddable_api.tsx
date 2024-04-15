@@ -16,9 +16,9 @@ import {
   SavedSearchByValueAttributes,
   SavedSearchUnwrapResult,
 } from '@kbn/saved-search-plugin/public';
-import { DiscoverServices } from '../build_services';
-import { SearchEmbeddableSerializedState } from './types';
-import { getSortForEmbeddable } from '../utils';
+import { DiscoverServices } from '../../build_services';
+import { SearchEmbeddableSerializedState } from '../types';
+import { getSortForEmbeddable } from '../../utils';
 
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableSerializedState,

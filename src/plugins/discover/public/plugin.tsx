@@ -468,21 +468,24 @@ export class DiscoverPlugin
         isEditable: () => coreStart.application.capabilities.discover.save as boolean,
       };
     };
+
     const getDiscoverServicesInternal = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return this.getDiscoverServices(coreStart, deps);
     };
-    // console.log('here');
+
     registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
-      // const startServices = await getStartServices();
-      const discoverServices = await getDiscoverServicesInternal();
-      const { getSearchEmbeddableFactory } = await import(
-        './embeddable/get_search_embeddable_factory'
-      );
-      return getSearchEmbeddableFactory({ services: discoverServices });
+      const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
+        getStartServices(),
+        getDiscoverServicesInternal(),
+        import('./embeddable/react_embeddable/get_search_embeddable_factory'),
+      ]);
+
+      return getSearchEmbeddableFactory({
+        startServices,
+        discoverServices,
+      });
     });
-    // const factory = new SearchEmbeddableFactory(getStartServices, getDiscoverServicesInternal);
-    // plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   /**
