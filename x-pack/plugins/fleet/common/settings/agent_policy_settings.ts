@@ -39,13 +39,14 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   },
   {
     name: 'agent.download.timeout',
+    hidden: true,
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutTitle', {
       defaultMessage: 'Agent binary download timeout',
     }),
     description: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription',
       {
-        defaultMessage: 'Timeout in seconds for downloading the agent binary',
+        defaultMessage: 'Timeout for downloading the agent binary',
       }
     ),
     learnMoreLink:
@@ -53,10 +54,11 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_download_timeout',
     },
-    schema: zodStringWithDurationValidation.default('120s'),
+    schema: zodStringWithDurationValidation.default('2h'),
   },
   {
     name: 'agent.download.target_directory',
+    hidden: true,
     api_field: {
       name: 'agent_download_target_directory',
     },
@@ -78,6 +80,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   },
   {
     name: 'agent.logging.metrics.period',
+    hidden: true,
     api_field: {
       name: 'agent_logging_metrics_period',
     },
@@ -96,5 +99,31 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
     schema: zodStringWithDurationValidation.default('30s'),
+  },
+  {
+    name: 'agent.monitoring.http',
+    hidden: true,
+    api_field: {
+      name: 'agent_monitoring_http',
+    },
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpTitle', {
+      defaultMessage: 'Agent HTTP monitoring',
+    }),
+    description: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription',
+      {
+        defaultMessage: 'Agent HTTP monitoring settings',
+      }
+    ),
+    learnMoreLink:
+      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#override-default-monitoring-port',
+    schema: z
+      .object({
+        enabled: z.boolean().describe('Enabled').default(false),
+        host: z.string().describe('Host').default('localhost'),
+        port: z.number().describe('Port').min(0).max(65353).default(6791),
+        'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
+      })
+      .default({}),
   },
 ];
