@@ -23,6 +23,7 @@ export interface EmbeddableConsoleDependencies {
   core: CoreStart;
   usageCollection?: UsageCollectionStart;
   setDispatch: (dispatch: Dispatch<EmbeddedConsoleAction> | null) => void;
+  isMonacoEnabled: boolean;
 }
 
 export type EmbeddedConsoleAction =

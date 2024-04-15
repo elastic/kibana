@@ -45,6 +45,7 @@ export const EmbeddableConsole = ({
   core,
   usageCollection,
   setDispatch,
+  isMonacoEnabled,
 }: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
@@ -124,7 +125,9 @@ export const EmbeddableConsole = ({
               </EuiButton>
             </div>
           </EuiThemeProvider>
-          {isConsoleOpen ? <ConsoleWrapper {...{ core, usageCollection, onKeyDown }} /> : null}
+          {isConsoleOpen ? (
+            <ConsoleWrapper {...{ core, usageCollection, onKeyDown, isMonacoEnabled }} />
+          ) : null}
         </section>
         <EuiScreenReaderOnly>
           <p aria-live="assertive">

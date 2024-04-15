@@ -111,6 +111,7 @@ export class ConsoleUIPlugin
   public start(core: CoreStart, deps: AppStartUIPluginDependencies): ConsolePluginStart {
     const {
       ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
+      dev: { enableMonaco: isMonacoEnabled },
     } = this.ctx.config.get<ClientConfigType>();
 
     const consoleStart: ConsolePluginStart = {};
@@ -132,6 +133,7 @@ export class ConsoleUIPlugin
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);
           },
+          isMonacoEnabled,
         });
       };
       consoleStart.isEmbeddedConsoleAvailable = () =>
