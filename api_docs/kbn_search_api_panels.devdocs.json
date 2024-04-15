@@ -1308,33 +1308,14 @@
             "label": "sharePlugin",
             "description": [],
             "signature": [
-              "{ toggleShareContextMenu: (options: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShowShareMenuOptions",
-                "text": "ShowShareMenuOptions"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; }"
+              " | undefined"
             ],
             "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
             "deprecated": false,
