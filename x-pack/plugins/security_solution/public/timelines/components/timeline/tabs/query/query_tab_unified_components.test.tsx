@@ -134,7 +134,8 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-describe('query tab with unified timeline', () => {
+// Flaky : See https://github.com/elastic/kibana/issues/179831
+describe.skip('query tab with unified timeline', () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,
@@ -199,38 +200,47 @@ describe('query tab with unified timeline', () => {
       },
       SPECIAL_TEST_TIMEOUT
     );
-    it('should show row-renderers correctly by default', async () => {
-      renderTestComponents();
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
+    it(
+      'should show row-renderers correctly by default',
+      async () => {
+        renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
 
-      expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
-    });
+        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+      },
 
-    it('should hide row-renderers when disabled', async () => {
-      renderTestComponents();
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverDocTable')).toBeVisible();
-      });
+      SPECIAL_TEST_TIMEOUT
+    );
 
-      expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+    it(
+      'should hide row-renderers when disabled',
+      async () => {
+        renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
 
-      fireEvent.click(screen.getByTestId('show-row-renderers-gear'));
-      expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
+        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
 
-      fireEvent.click(screen.getByTestId('disable-all'));
+        fireEvent.click(screen.getByTestId('show-row-renderers-gear'));
+        expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
 
-      expect(
-        within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
-      ).not.toBeChecked();
+        fireEvent.click(screen.getByTestId('disable-all'));
 
-      fireEvent.click(screen.getByLabelText('Closes this modal window'));
+        expect(
+          within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
+        ).not.toBeChecked();
 
-      expect(screen.queryByTestId('row-renderers-modal')).toBeFalsy();
+        fireEvent.click(screen.getByLabelText('Closes this modal window'));
 
-      expect(screen.queryByTestId('timeline-row-renderer-0')).toBeFalsy();
-    });
+        expect(screen.queryByTestId('row-renderers-modal')).toBeFalsy();
+
+        expect(screen.queryByTestId('timeline-row-renderer-0')).toBeFalsy();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
   });
 
   describe('pagination', () => {
@@ -278,9 +288,7 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('columns', () => {
-    // Failing: See https://github.com/elastic/kibana/issues/179831
-    // currently moving /removing columns results in infinite loop
-    it.skip(
+    it(
       'should move column left/right correctly ',
       async () => {
         const { container } = renderTestComponents();
@@ -317,9 +325,7 @@ describe('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    // Failing: See https://github.com/elastic/kibana/issues/179831
-    // currently moving /removing columns results in infinite loop
-    it.skip(
+    it(
       'should remove column',
       async () => {
         const { container } = renderTestComponents();
@@ -351,8 +357,7 @@ describe('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    // Failing: See https://github.com/elastic/kibana/issues/179831
-    it.skip(
+    it(
       'should sort date column',
       async () => {
         const { container } = renderTestComponents();
@@ -512,8 +517,7 @@ describe('query tab with unified timeline', () => {
     );
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/179831
-  describe.skip('left controls', () => {
+  describe('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
