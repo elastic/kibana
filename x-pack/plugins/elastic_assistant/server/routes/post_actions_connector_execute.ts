@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -21,6 +19,7 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { getLlmType } from './utils';
 import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
@@ -77,9 +76,6 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         try {
-          // Get the actions plugin start contract from the request context for the agents
-          const actionsClient = await assistantContext.actions.getActionsClientWithRequest(request);
-
           const authenticatedUser = assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return response.unauthorized({
@@ -113,10 +109,6 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           const connectorId = decodeURIComponent(request.params.connectorId);
-          const connectors = await actionsClient.getBulk({
-            ids: [connectorId],
-            throwIfSystemAction: false,
-          });
 
           // get the actions plugin start contract from the request context:
           const actions = (await context.elasticAssistant).actions;
@@ -172,33 +164,41 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
-            if (conversation?.title === 'New chat' && prevMessages) {
+            const NEW_CHAT = i18n.translate('xpack.elasticAssistant.server.newChat', {
+              defaultMessage: 'New chat',
+            });
+            if (conversation?.title === NEW_CHAT && prevMessages) {
               try {
-                const autoTitle = await executeAction({
+                const autoTitle = (await executeAction({
                   actions,
                   request,
                   connectorId,
-                  actionTypeId: connectors[0]?.actionTypeId,
+                  actionTypeId,
                   params: {
-                    subAction: request.body.subAction,
+                    subAction: 'invokeAI',
                     subActionParams: {
                       model: request.body.model,
                       messages: [
                         {
                           role: 'assistant',
-                          content:
-                            'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                          content: i18n.translate(
+                            'xpack.elasticAssistant.server.autoTitlePromptDescription',
+                            {
+                              defaultMessage:
+                                'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                            }
+                          ),
                         },
                         newMessage ?? prevMessages?.[0],
                       ],
-                      ...(connectors[0]?.actionTypeId === '.gen-ai'
+                      ...(actionTypeId === '.gen-ai'
                         ? { n: 1, stop: null, temperature: 0.2 }
                         : { temperature: 0, stopSequences: [] }),
                     },
                   },
                   logger,
-                });
-                if ((autoTitle as StaticResponse).status === 'ok') {
+                })) as unknown as StaticResponse; // TODO: Use function overloads in executeAction to avoid this cast when sending subAction: 'invokeAI',
+                if (autoTitle.status === 'ok') {
                   try {
                     // This regular expression captures a string enclosed in single or double quotes.
                     // It extracts the string content without the quotes.
@@ -206,8 +206,8 @@ export const postActionsConnectorExecuteRoute = (
                     // - "Hello, World!" => Captures: Hello, World!
                     // - 'Another Example' => Captures: Another Example
                     // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-                    const match = (autoTitle as StaticResponse).data.match(/^["']?([^"']+)["']?$/);
-                    const title = match ? match[1] : (autoTitle as StaticResponse).data;
+                    const match = autoTitle.data.match(/^["']?([^"']+)["']?$/);
+                    const title = match ? match[1] : autoTitle.data;
 
                     await conversationsDataClient?.updateConversation({
                       conversationUpdateProps: {
@@ -216,7 +216,7 @@ export const postActionsConnectorExecuteRoute = (
                       },
                     });
                   } catch (e) {
-                    /* empty */
+                    logger.warn(`Failed to update conversation with generated title: ${e.message}`);
                   }
                 }
               } catch (e) {

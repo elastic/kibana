@@ -51,7 +51,7 @@ export const EMPTY_SCREEN_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.assistant.emptyScreen.description',
   {
     defaultMessage:
-      'Ask me anything from Summarize this alert to Help me build a query using the following system prompt:',
+      'Ask me anything from "Summarize this alert" to "Help me build a query" using the following system prompt:',
   }
 );
 
