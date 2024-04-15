@@ -7,10 +7,9 @@
 
 import * as t from 'io-ts';
 
-export const ResultDocument = t.type({
+const ResultDocumentInterface = t.interface({
   batchId: t.string,
   indexName: t.string,
-  indexPattern: t.string,
   isCheckAll: t.boolean,
   checkedAt: t.number,
   docsCount: t.number,
@@ -29,6 +28,13 @@ export const ResultDocument = t.type({
   indexId: t.string,
   error: t.union([t.string, t.null]),
 });
+
+const ResultDocumentOptional = t.partial({
+  indexPattern: t.string,
+  checkedBy: t.string,
+});
+
+export const ResultDocument = t.intersection([ResultDocumentInterface, ResultDocumentOptional]);
 export type ResultDocument = t.TypeOf<typeof ResultDocument>;
 
 export const PostResultBody = ResultDocument;

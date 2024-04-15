@@ -13,6 +13,7 @@ export const resultDocument: ResultDocument = {
   indexPattern: 'logs-endpoint.alerts-*',
   isCheckAll: false,
   checkedAt: 1706526408000,
+  checkedBy: 'user_uuid_1',
   docsCount: 100,
   totalFieldCount: 1582,
   ecsFieldCount: 677,
