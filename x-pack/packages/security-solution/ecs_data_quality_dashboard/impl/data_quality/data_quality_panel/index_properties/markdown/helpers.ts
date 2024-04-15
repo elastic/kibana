@@ -219,10 +219,9 @@ export const getResultEmoji = (incompatible: number | undefined): string => {
 };
 
 export const getSummaryTableMarkdownHeader = (
-  isILMAvailable: boolean,
-  displayDocSize: boolean
+  includeDocSize: boolean
 ): string =>
-  isILMAvailable && displayDocSize
+  includeDocSize
     ? `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
 |${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
         DOCS
