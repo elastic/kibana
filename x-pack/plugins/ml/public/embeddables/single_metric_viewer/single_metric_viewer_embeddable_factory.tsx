@@ -13,6 +13,8 @@ import { pick } from 'lodash';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiResizeObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState, Suspense } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
 import moment from 'moment';
 import {
@@ -21,6 +23,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -120,6 +123,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
           const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
           const [jobsLoaded, setJobsLoaded] = useState(false);
+          const [error, setError] = useState<string | undefined>();
 
           const {
             mlApiServices,
@@ -168,8 +172,13 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           useEffect(function setUpJobsLoaded() {
             async function loadJobs() {
-              await mlJobService.loadJobsWrapper();
-              setJobsLoaded(true);
+              try {
+                await mlJobService.loadJobsWrapper();
+                setJobsLoaded(true);
+              } catch (e) {
+                const errorMessage = extractErrorMessage(e);
+                setError(errorMessage);
+              }
             }
             loadJobs();
             // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,15 +187,20 @@ export const getSingleMetricViewerEmbeddableFactory = (
           useEffect(
             function setUpSelectedJob() {
               async function fetchSelectedJob() {
-                if (mlApiServices && selectedJobId !== undefined) {
-                  const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
-                  const job = jobs[0];
-                  setSelectedJob(job);
+                if (mlApiServices && selectedJobId !== undefined && error === undefined) {
+                  try {
+                    const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
+                    const job = jobs[0];
+                    setSelectedJob(job);
+                  } catch (e) {
+                    const errorMessage = extractErrorMessage(e);
+                    setError(errorMessage);
+                  }
                 }
               }
               fetchSelectedJob();
             },
-            [selectedJobId, mlApiServices]
+            [selectedJobId, mlApiServices, error]
           );
 
           useEffect(
@@ -245,6 +259,24 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
             [setZoom, setSelectedForecastId]
           );
+
+          if (error) {
+            return (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.ml.singleMetricViewerEmbeddable.errorMessage"
+                    defaultMessage="Unable to load the ML single metric viewer data"
+                  />
+                }
+                color="danger"
+                iconType="warning"
+                css={{ width: '100%' }}
+              >
+                <p>{error}</p>
+              </EuiCallOut>
+            );
+          }
 
           return (
             <I18nContext>
