@@ -122,10 +122,5 @@ export function MachineLearningExpandedJobDetailsProvider(
       const visibleText = await testSubjects.getVisibleText('~mlADJobListMultiSelectActionsArea');
       expect(visibleText).to.be(expectedMsg);
     },
-
-    async assertColumnId(expectedId: string): Promise<void> {
-      const visibleText = await testSubjects.getVisibleText('mlJobListColumnId');
-      expect(visibleText).to.be(expectedId);
-    },
   };
 }

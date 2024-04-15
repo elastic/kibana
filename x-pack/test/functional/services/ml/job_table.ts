@@ -57,12 +57,12 @@ export function MachineLearningJobTableProvider(
   const find = getService('find');
 
   return new (class MlJobTable {
-    // What's the reason for asserting it like this?
-    // To me this looks, like it expects only one row to exist
-    // in the table and then asserts the content of one of the columns.
-    // What if the table has more rows ?
-    // Maybe asserting on the quick filter button state or
-    // something like that would work for more general scenarios ?
+    public async assertJobsInTable(expectedJobIds: string[]) {
+      for await (const expectedId of expectedJobIds) {
+        const visibleText = await testSubjects.getVisibleText('mlJobListColumnId');
+        expect(visibleText).to.be(expectedId);
+      }
+    }
     public async filterByState(quickFilterButton: QuickFilterButtonTypes): Promise<void> {
       await find.clickByCssSelector(
         `[data-test-subj="mlJobListSearchBar"] span[data-text="${quickFilterButton}"]`

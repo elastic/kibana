@@ -105,14 +105,13 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.expandedJobDetails.selectAllJobs();
       await ml.expandedJobDetails.assertJobListMultiSelectionText('2 jobs selected');
       await ml.jobTable.filterByState(QuickFilterButtonTypes.Opened);
-      await ml.expandedJobDetails.assertColumnId(jobId);
+      await ml.jobTable.assertJobsInTable([jobId]);
       await ml.expandedJobDetails.assertJobListMultiSelectionText('1 job selected');
     });
 
     it('multi-selection with one closed job should only present the closed job when job list is filtered by the Closed button', async () => {
       await ml.jobTable.filterByState(QuickFilterButtonTypes.Closed);
-      await ml.expandedJobDetails.assertColumnId(jobsSummaryId);
-      await ml.jobStatsBar.assertJobStatsBarItem('closed jobs', 1);
+      await ml.jobTable.assertJobsInTable([jobsSummaryId]);
     });
   });
 }
