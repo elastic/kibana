@@ -2587,6 +2587,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionParamsProps.producerId",
+            "type": "string",
+            "tags": [],
+            "label": "producerId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
