@@ -41,9 +41,11 @@ export const getScheduleNotificationResponseActionsService =
         const filteredAlerts = alerts.filter((alert) => {
           return alert['event.module'] !== 'sentinel_one';
         });
-        endpointResponseAction(responseAction, endpointAppContextService, {
-          alerts: filteredAlerts,
-        });
+        if (filteredAlerts.length) {
+          endpointResponseAction(responseAction, endpointAppContextService, {
+            alerts: filteredAlerts,
+          });
+        }
       }
     });
   };
