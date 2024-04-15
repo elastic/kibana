@@ -396,6 +396,9 @@ describe('RelatedIntegrations form part', () => {
         optionIndex: 0,
       });
       await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ integration: undefined, package: 'package-a', version: '^1.2.0' }],
@@ -427,6 +430,9 @@ describe('RelatedIntegrations form part', () => {
       });
       await setVersion({ input: screen.getByTestId(VERSION_INPUT_TEST_ID), value: '1.0.0' });
       await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ integration: undefined, package: 'package-a', version: '1.0.0' }],
@@ -434,7 +440,7 @@ describe('RelatedIntegrations form part', () => {
       });
     });
 
-    it('returns a saved earlier integration', async () => {
+    it('returns saved earlier integrations', async () => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [
           {
@@ -444,11 +450,21 @@ describe('RelatedIntegrations form part', () => {
             is_installed: false,
             is_enabled: false,
           },
+          {
+            package_name: 'package-b',
+            package_title: 'Package B',
+            integration_name: 'integration-a',
+            integration_title: 'Integration A',
+            latest_package_version: '1.0.0',
+            is_installed: false,
+            is_enabled: false,
+          },
         ],
       });
 
       const initialRelatedIntegrations: RelatedIntegration[] = [
         { package: 'package-a', version: '1.2.3' },
+        { package: 'package-b', integration: 'integration-a', version: '3.2.1' },
       ];
       const handleSubmit = jest.fn();
 
@@ -456,9 +472,15 @@ describe('RelatedIntegrations form part', () => {
         wrapper: createReactQueryWrapper(),
       });
       await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
 
       expect(handleSubmit).toHaveBeenCalledWith({
-        data: [{ integration: undefined, package: 'package-a', version: '1.2.3' }],
+        data: [
+          { package: 'package-a', integration: undefined, version: '1.2.3' },
+          { package: 'package-b', integration: 'integration-a', version: '3.2.1' },
+        ],
         isValid: true,
       });
     });
@@ -477,6 +499,9 @@ describe('RelatedIntegrations form part', () => {
         wrapper: createReactQueryWrapper(),
       });
       await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ integration: undefined, package: 'package-a', version: '1.2.3' }],
@@ -499,6 +524,9 @@ describe('RelatedIntegrations form part', () => {
         wrapper: createReactQueryWrapper(),
       });
       await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: [{ integration: undefined, package: 'package-a', version: '^1.2.3' }],
@@ -572,6 +600,9 @@ describe('RelatedIntegrations form part', () => {
       });
       await removeRelatedIntegrationRow();
       await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: undefined,
@@ -592,6 +623,9 @@ describe('RelatedIntegrations form part', () => {
       await waitForIntegrationsToBeLoaded();
       await removeRelatedIntegrationRow();
       await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
 
       expect(handleSubmit).toHaveBeenCalledWith({
         data: undefined,
