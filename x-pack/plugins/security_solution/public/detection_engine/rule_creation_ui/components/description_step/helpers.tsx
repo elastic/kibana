@@ -56,6 +56,11 @@ const NoteDescriptionContainer = styled(EuiFlexItem)`
   overflow-y: hidden;
 `;
 
+const SetupDescriptionContainer = styled(EuiFlexItem)`
+  height: 105px;
+  overflow-y: hidden;
+`;
+
 export const isNotEmptyArray = (values: string[]) => !isEmpty(values.join(''));
 
 const EuiBadgeWrap = styled(EuiBadge)`
@@ -646,4 +651,22 @@ export const buildAlertSuppressionMissingFieldsDescription = (
       description,
     },
   ];
+};
+
+export const buildSetupDescription = (label: string, setup: string): ListItems[] => {
+  if (setup.trim() !== '') {
+    return [
+      {
+        title: label,
+        description: (
+          <SetupDescriptionContainer>
+            <div data-test-subj="setupDescriptionItem" className="eui-yScrollWithShadows">
+              {setup}
+            </div>
+          </SetupDescriptionContainer>
+        ),
+      },
+    ];
+  }
+  return [];
 };

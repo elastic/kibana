@@ -87,11 +87,6 @@ describe('Synthetics Availability Transform Generator', () => {
               field: 'slo.id',
             },
           },
-          'slo.instanceId': {
-            terms: {
-              field: 'slo.instanceId',
-            },
-          },
           'slo.revision': {
             terms: {
               field: 'slo.revision',
@@ -132,12 +127,6 @@ describe('Synthetics Availability Transform Generator', () => {
           'slo.id': {
             script: {
               source: "emit('irrelevant')",
-            },
-            type: 'keyword',
-          },
-          'slo.instanceId': {
-            script: {
-              source: "emit('*')",
             },
             type: 'keyword',
           },

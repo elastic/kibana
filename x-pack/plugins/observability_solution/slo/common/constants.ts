@@ -43,7 +43,7 @@ export const LOW_PRIORITY_ACTION = {
 
 export const SLO_MODEL_VERSION = 2;
 export const SLO_RESOURCES_VERSION = 3.1;
-export const SLO_RESOURCES_VERSION_MAJOR = '3';
+export const SLO_RESOURCES_VERSION_MAJOR = 3;
 
 export const SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME = '.slo-observability.sli-mappings';
 export const SLO_COMPONENT_TEMPLATE_SETTINGS_NAME = '.slo-observability.sli-settings';

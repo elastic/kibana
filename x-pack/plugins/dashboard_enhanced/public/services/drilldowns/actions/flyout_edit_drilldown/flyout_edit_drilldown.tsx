@@ -41,7 +41,7 @@ export interface FlyoutEditDrilldownParams {
 }
 
 export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
-  HasDynamicActions &
+  Required<HasDynamicActions> &
   HasParentApi<Partial<PresentationContainer & TracksOverlays>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;

@@ -151,12 +151,6 @@ export default function ({ getService }: FtrProviderContext) {
                   script: { source: `emit('${id}')` },
                 },
                 'slo.revision': { type: 'long', script: { source: 'emit(2)' } },
-                'slo.instanceId': {
-                  script: {
-                    source: "emit('hosts:'+doc['hosts'].value)",
-                  },
-                  type: 'keyword',
-                },
               },
             },
             dest: {
@@ -169,7 +163,6 @@ export default function ({ getService }: FtrProviderContext) {
               group_by: {
                 'slo.id': { terms: { field: 'slo.id' } },
                 'slo.revision': { terms: { field: 'slo.revision' } },
-                'slo.instanceId': { terms: { field: 'slo.instanceId' } },
                 'slo.groupings.hosts': { terms: { field: 'hosts' } },
                 '@timestamp': { date_histogram: { field: '@timestamp', fixed_interval: '1m' } },
               },

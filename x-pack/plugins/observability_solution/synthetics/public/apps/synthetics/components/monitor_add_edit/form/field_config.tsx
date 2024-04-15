@@ -824,7 +824,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           id="xpack.synthetics.monitorConfig.indexResponseHeaders.helpText"
           defaultMessage="Controls the indexing of the HTTP response headers to "
         />
-        <EuiCode>http.response.body.headers</EuiCode>
+        <EuiCode>{'http.response.body.headers'}</EuiCode>
       </>
     ),
     props: (): Omit<EuiCheckboxProps, ControlledFieldProp> => ({
@@ -845,7 +845,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           id="xpack.synthetics.monitorConfig.indexResponseBody.helpText"
           defaultMessage="Controls the indexing of the HTTP response body contents to"
         />
-        <EuiCode>http.response.body.contents</EuiCode>
+        <EuiCode>{'http.response.body.contents'}</EuiCode>
       </>
     ),
     props: (): ResponseBodyIndexFieldProps => ({
@@ -1044,7 +1044,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.params.helpText"
         defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
         values={{
-          paramsValue: <EuiCode>params.value</EuiCode>,
+          paramsValue: <EuiCode>{'params.value'}</EuiCode>,
         }}
       />
     ),
@@ -1420,8 +1420,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.syntheticsArgs.mode.helpText"
         defaultMessage="If {any}, the monitor pings only one IP address for a hostname. If {all}, the monitor pings all resolvable IPs for a hostname. {all} is useful if you are using a DNS-load balancer and want to ping every IP address for the specified hostname."
         values={{
-          all: <EuiCode>all</EuiCode>,
-          any: <EuiCode>any</EuiCode>,
+          all: <EuiCode>{'all'}</EuiCode>,
+          any: <EuiCode>{'any'}</EuiCode>,
         }}
       />
     ),

@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -169,6 +168,11 @@ export const allowedExperimentalValues = Object.freeze({
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
+
+  /**
+   * Enables alerts suppression for new terms rules
+   */
+  alertSuppressionForNewTermsRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer

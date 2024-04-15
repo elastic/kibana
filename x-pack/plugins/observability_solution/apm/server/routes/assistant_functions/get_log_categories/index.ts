@@ -122,7 +122,7 @@ export async function getLogCategories({
 }
 
 // field/value pairs should match, or the field should not exist
-function getShouldMatchOrNotExistFilter(
+export function getShouldMatchOrNotExistFilter(
   keyValuePairs: Array<{
     field: string;
     value?: string;

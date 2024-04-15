@@ -26,7 +26,7 @@ import {
   mlNetworkSingleIpNullKqlQuery,
 } from '../../../urls/ml_conditional_links';
 
-describe('ml conditional links', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('ml conditional links', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
