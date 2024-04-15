@@ -196,7 +196,7 @@ export class ObservabilityAIAssistantPlugin
             client: savedObjectsClient,
           },
         }),
-        licensing: Promise.resolve({ license }),
+        licensing: Promise.resolve({ license, featureUsage: pluginsStart.licensing.featureUsage }),
       };
 
       return {

@@ -25,7 +25,7 @@ import type {
 
 export type ObservabilityAIAssistantRequestHandlerContext = Omit<
   CustomRequestHandlerContext<{
-    licensing: Pick<LicensingApiRequestHandlerContext, 'license'>;
+    licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
     // these two are here for compatibility with APM functions
     rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
     alerting: {
