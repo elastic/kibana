@@ -25,3 +25,19 @@ export enum APIRoutes {
   POST_CHAT_MESSAGE = '/internal/search_playground/chat',
   POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
 }
+
+export enum LLMs {
+  openai = 'openai',
+  openai_azure = 'openai_azure',
+}
+
+export interface ChatRequestData {
+  connector_id: string;
+  prompt: string;
+  indices: string;
+  citations: boolean;
+  elasticsearch_query: string;
+  summarization_model?: string;
+  source_fields: string;
+  doc_size: number;
+}

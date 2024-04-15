@@ -261,7 +261,11 @@ export default function AlertDetailsAppSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource]);
 
-  const overview = !!ruleParams.criteria ? (
+  if (!ruleParams.criteria) {
+    return null;
+  }
+
+  return (
     <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
       {ruleParams.criteria.map((criterion, index) => (
         <EuiFlexItem key={`criterion-${index}`}>
@@ -329,7 +333,5 @@ export default function AlertDetailsAppSection({
       )}
       <AlertHistoryChart alert={alert} dataView={dataView} rule={rule} />
     </EuiFlexGroup>
-  ) : null;
-
-  return overview;
+  );
 }

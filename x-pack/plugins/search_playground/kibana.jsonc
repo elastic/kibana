@@ -11,8 +11,12 @@
       "searchPlayground"
     ],
     "requiredPlugins": [
+      "actions",
+      "encryptedSavedObjects",
       "navigation",
-      "security"
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
     ],
     "optionalPlugins": [
       "cloud"

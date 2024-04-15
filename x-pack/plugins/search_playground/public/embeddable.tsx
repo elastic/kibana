@@ -5,36 +5,29 @@
  * 2.0.
  */
 
-import React, { ComponentType, lazy, LazyExoticComponent, Suspense } from 'react';
-import type { App } from './components/app';
-import { PlaygroundProviderProps } from './providers/playground_provider';
-import type { Toolbar } from './components/toolbar';
+import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { AppPluginStartDependencies } from './types';
 
-const lazyRender =
-  <P extends {}>(
-    Component: LazyExoticComponent<ComponentType<P>>
-  ): React.FC<React.ComponentProps<typeof Component>> =>
-  (props) =>
+export const Playground = dynamic(async () => ({
+  default: (await import('./components/app')).App,
+}));
+
+export const PlaygroundToolbar = dynamic(async () => ({
+  default: (await import('./components/toolbar')).Toolbar,
+}));
+
+export const PlaygroundProvider = dynamic(async () => ({
+  default: (await import('./providers/playground_provider')).PlaygroundProvider,
+}));
+
+export const getPlaygroundProvider =
+  (core: CoreStart, services: AppPluginStartDependencies) =>
+  (props: React.ComponentProps<typeof PlaygroundProvider>) =>
     (
-      <Suspense fallback={null}>
-        <Component {...props} />
-      </Suspense>
+      <KibanaContextProvider services={{ ...core, ...services }}>
+        <PlaygroundProvider {...props} />
+      </KibanaContextProvider>
     );
-
-export const Playground = lazyRender<React.ComponentProps<typeof App>>(
-  lazy<typeof App>(async () => ({
-    default: (await import('./components/app')).App,
-  }))
-);
-
-export const PlaygroundToolbar = lazyRender<React.ComponentProps<typeof Toolbar>>(
-  lazy<typeof Toolbar>(async () => ({
-    default: (await import('./components/toolbar')).Toolbar,
-  }))
-);
-
-export const PlaygroundProvider = lazyRender<PlaygroundProviderProps>(
-  lazy(async () => ({
-    default: (await import('./providers/playground_provider')).PlaygroundProvider,
-  }))
-);
