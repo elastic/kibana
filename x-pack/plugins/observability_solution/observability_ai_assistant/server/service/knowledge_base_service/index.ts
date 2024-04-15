@@ -13,6 +13,7 @@ import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
@@ -146,10 +147,13 @@ export class KnowledgeBaseService {
         model_id: elserModelId,
       });
 
-      if (
-        response.trained_model_stats[0]?.deployment_stats?.allocation_status.state ===
-        'fully_allocated'
-      ) {
+      const isReady = response.trained_model_stats.some((stats) =>
+        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[]).some(
+          (node) => node.routing_state.routing_state === 'started'
+        )
+      );
+
+      if (isReady) {
         return Promise.resolve();
       }
 
