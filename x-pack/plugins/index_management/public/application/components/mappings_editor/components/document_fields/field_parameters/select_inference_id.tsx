@@ -115,7 +115,11 @@ export const SelectInferenceId = ({ onChange, 'data-test-subj': dataTestSubj }: 
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsCreateInferenceApiLoading(true);
       try {
-        await ml?.mlApi?.trainedModels?.createInferenceEndpoint(inferenceId, taskType, modelConfig);
+        await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
+          inferenceId,
+          taskType,
+          modelConfig
+        );
         setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
         setIsCreateInferenceApiLoading(false);
         setInferenceAddError(undefined);

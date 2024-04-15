@@ -15,8 +15,6 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ModelConfig } from '@kbn/inference_integration_flyout/types';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import type { HttpService } from '../http_service';
@@ -287,18 +285,6 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       return httpService.http<estypes.MlPutTrainedModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/${modelId}`,
         method: 'POST',
-        version: '1',
-      });
-    },
-    createInferenceEndpoint(
-      inferenceId: string,
-      taskType: InferenceTaskType,
-      modelConfig: ModelConfig
-    ) {
-      return httpService.http<estypes.InferencePutModelResponse>({
-        path: `${ML_INTERNAL_BASE_PATH}/inference_models/create_inference_endpoint/${taskType}/${inferenceId}`,
-        method: 'POST',
-        body: JSON.stringify({ ...modelConfig }),
         version: '1',
       });
     },

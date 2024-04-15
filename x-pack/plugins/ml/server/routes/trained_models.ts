@@ -13,7 +13,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -31,7 +30,6 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
   modelDownloadsQuery,
-  createInferenceSchema,
 } from './schemas/inference_schema';
 import type { PipelineDefinition } from '../../common/types/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -890,47 +888,5 @@ export function trainedModelsRoutes(
           }
         }
       )
-    );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /internal/ml/inference_models/create_inference_endpoint/:taskType/:inferenceId Create Inference Endpoint
-   * @apiName CreateInferenceEndpoint
-   * @apiDescription Create Inference Endpoint
-   */
-  router.versioned
-    .post({
-      path: `${ML_INTERNAL_BASE_PATH}/inference_models/create_inference_endpoint/{taskType}/{inferenceId}`,
-      access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateInferenceEndpoint'],
-      },
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            params: createInferenceSchema,
-            body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          },
-        },
-      },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-        try {
-          const { inferenceId, taskType } = request.params;
-          const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
-            inferenceId,
-            taskType as InferenceTaskType,
-            request.body as InferenceModelConfig
-          );
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
-      })
     );
 }

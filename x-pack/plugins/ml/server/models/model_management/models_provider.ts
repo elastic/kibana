@@ -587,35 +587,19 @@ export class ModelsProvider {
   }
   /**
    * Puts the requested Inference endpoint id into elasticsearch, triggering elasticsearch to create the inference endpoint id
-   * @param inferenceId
-   * @param taskType
-   * @param modelConfig
+   * @param inferenceId - Inference Endpoint Id
+   * @param taskType - Inference Task type. Either sparse_embedding or text_embedding
+   * @param modelConfig - Model configuration based on service type
    */
   async createInferenceEndpoint(
     inferenceId: string,
     taskType: InferenceTaskType,
     modelConfig: InferenceModelConfig
   ) {
-    let esModelExists = false;
-    try {
-      await this._client.asInternalUser.inference.getModel({ inference_id: inferenceId });
-
-      esModelExists = true;
-    } catch (error) {
-      if (error.statusCode !== 404) {
-        throw error;
-      }
-      // model doesn't exist, ignore error
-    }
-
-    if (esModelExists) {
-      throw Boom.badRequest('Model already exists');
-    }
-    const putResponse = await this._client.asCurrentUser.inference.putModel({
+    return await this._client.asCurrentUser.inference.putModel({
       inference_id: inferenceId,
       task_type: taskType,
       model_config: modelConfig,
     });
-    return putResponse;
   }
 }
