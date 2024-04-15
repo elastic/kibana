@@ -19,6 +19,8 @@ import {
   SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import { EaInstallProgressStepId } from '../../../../common/logs_flow_progress_step_id';
+import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -28,7 +30,6 @@ import {
 } from '../../shared/get_elastic_agent_setup_command';
 import {
   InstallElasticAgentSteps,
-  ProgressStepId,
   EuiStepStatus,
 } from '../../shared/install_elastic_agent_steps';
 import {
@@ -220,6 +221,8 @@ export function InstallElasticAgent() {
     }
   }, [progressSucceded, refetchProgress]);
 
+  useFlowProgressTelemetry(progressData?.progress, 'custom_logs');
+
   const getCheckLogsStep = useCallback(() => {
     const progress = progressData?.progress;
     if (progress) {
@@ -372,7 +375,7 @@ export function InstallElasticAgent() {
           installProgressSteps={
             (progressData?.progress ?? {}) as Partial<
               Record<
-                ProgressStepId,
+                EaInstallProgressStepId,
                 { status: EuiStepStatus; message?: string }
               >
             >
