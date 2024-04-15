@@ -216,11 +216,11 @@ export function MachineLearningAPIProvider(
       return body.hits.hits.length > 0;
     },
 
-    async addForecast(jobId: string): Promise<void> {
+    async addForecast(jobId: string, requestBody: { duration: string }): Promise<void> {
       const { body, status } = await kbnSupertest
         .post(`/internal/ml/anomaly_detectors/${jobId}/_forecast`)
         .set(getCommonRequestHeader('1'))
-        .send({ duration: '1d' });
+        .send(requestBody);
       this.assertResponseStatusCode(200, status, body);
     },
 

@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.waitForJobState(jobId, JOB_STATE.CLOSED);
       await ml.api.openAnomalyDetectionJob(jobId);
 
-      await ml.api.addForecast(jobId);
+      await ml.api.addForecast(jobId, { duration: '1d' });
 
       await ml.api.assertForecastResultsExist(jobId);
 
