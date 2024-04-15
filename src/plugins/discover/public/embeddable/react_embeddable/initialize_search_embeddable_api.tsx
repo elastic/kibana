@@ -16,6 +16,7 @@ import {
   SavedSearch,
   SavedSearchByValueAttributes,
   SavedSearchUnwrapResult,
+  SortOrder,
 } from '@kbn/saved-search-plugin/public';
 
 import { DiscoverServices } from '../../build_services';
@@ -48,6 +49,20 @@ export const initializeSearchEmbeddableApi = async (
   );
   const savedSearch$ = new BehaviorSubject<SavedSearch>(savedSearch);
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  // const sort$ = new BehaviorSubject<SortOrder[]>(
+  //   initialAttributes?.sort ??
+  //     getSortForEmbeddable(
+  //       savedSearch,
+  //       getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
+  //       discoverServices.uiSettings
+  //     )
+  // );
+  // const rowHeight$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowHeight);
+  // const headerRowHeight$ = new BehaviorSubject<number | undefined>(
+  //   initialAttributes?.headerRowHeight
+  // );
+  // const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowsPerPage);
+  // const sampleSize$ = new BehaviorSubject<number | undefined>(initialAttributes?.sampleSize);
 
   // by reference
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
@@ -61,7 +76,6 @@ export const initializeSearchEmbeddableApi = async (
   );
 
   const savedSearchToAttributes = savedSearch$.pipe(skip(1)).subscribe((newSavedSearch) => {
-    // console.log('savedSearchToAttributes', newSavedSearch);
     const { searchSourceJSON, references: originalReferences } =
       savedSearch.searchSource.serialize();
 

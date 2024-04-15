@@ -37,6 +37,7 @@ import { SearchEmbeddableApi, SearchEmbeddableSerializedState, SearchProps } fro
 import { initializeFetch } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import { columnActions } from '@kbn/unified-data-table';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -198,49 +199,15 @@ export const getSearchEmbeddableFactory = ({
               searchDescription: savedSearch.description,
               description: savedSearch.description,
               searchTitle: savedSearch.title,
-              onAddColumn: (columnName: string) => {
-                if (!savedSearch.columns) {
-                  return;
-                }
-                const updatedColumns = columnActions.addColumn(
-                  savedSearch.columns,
-                  columnName,
-                  true
-                );
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
-              },
-              onRemoveColumn: (columnName: string) => {
-                if (!savedSearch.columns) {
-                  return;
-                }
-                const updatedColumns = columnActions.removeColumn(
-                  savedSearch.columns,
-                  columnName,
-                  true
-                );
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
-              },
-              onMoveColumn: (columnName: string, newIndex: number) => {
-                if (!savedSearch.columns) {
-                  return;
-                }
-                const updatedColumns = columnActions.moveColumn(
-                  savedSearch.columns,
-                  columnName,
-                  newIndex
-                );
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
-              },
               onSetColumns: (updatedColumns: string[]) => {
                 searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
               },
               onSort: (nextSort: string[][]) => {
-                console.log('onSort');
-                // const sortOrderArr: SortOrder[] = [];
-                // nextSort.forEach((arr) => {
-                //   sortOrderArr.push(arr as SortOrder);
-                // });
-                // this.updateInput({ sort: sortOrderArr });
+                const sortOrderArr: SortOrder[] = [];
+                nextSort.forEach((arr) => {
+                  sortOrderArr.push(arr as SortOrder);
+                });
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, sort: sortOrderArr });
               },
               onFilter: async (field, value, operator) => {
                 console.log('onFilter');
@@ -265,29 +232,21 @@ export const getSearchEmbeddableFactory = ({
               useNewFieldsApi: !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
               showTimeCol: !discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
               ariaLabelledBy: 'documentsAriaLabel',
-              // rowHeightState: this.input.rowHeight || savedSearch.rowHeight,
               rowHeightState: savedSearch.rowHeight,
               onUpdateRowHeight: (rowHeight) => {
-                console.log('onUpdateRowHeight');
-                // this.updateInput({ rowHeight });
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, rowHeight });
               },
-              // headerRowHeightState: this.input.headerRowHeight || savedSearch.headerRowHeight,
               headerRowHeightState: savedSearch.headerRowHeight,
               onUpdateHeaderRowHeight: (headerRowHeight) => {
-                console.log('onUpdateHeaderRowHeight');
-                // this.updateInput({ headerRowHeight });
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, headerRowHeight });
               },
-              // rowsPerPageState: this.input.rowsPerPage || savedSearch.rowsPerPage,
               rowsPerPageState: savedSearch.rowsPerPage,
               onUpdateRowsPerPage: (rowsPerPage) => {
-                console.log('onUpdateRowsPerPage');
-                // this.updateInput({ rowsPerPage });
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, rowsPerPage });
               },
-              // sampleSizeState: this.input.sampleSize || savedSearch.sampleSize,
               sampleSizeState: savedSearch.sampleSize,
               onUpdateSampleSize: (sampleSize) => {
-                console.log('onUpdateSampleSize');
-                // this.updateInput({ sampleSize });
+                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, sampleSize });
               },
               cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
             };

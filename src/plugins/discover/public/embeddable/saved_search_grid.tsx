@@ -15,6 +15,7 @@ import {
   type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
+  columnActions,
 } from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../components/discover_grid';
 import './saved_search_grid.scss';
@@ -28,11 +29,9 @@ export interface DiscoverGridEmbeddableProps
   totalHitCount?: number;
   query?: AggregateQuery | Query;
   interceptedWarnings?: SearchResponseWarning[];
-  onAddColumn: (column: string) => void;
-  onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
 
-  // setColumns: (columns: string[]) => void;
+  onSetColumns: (columns: string[]) => void;
 }
 
 export type DiscoverGridEmbeddableSearchProps = Omit<
@@ -43,8 +42,30 @@ export type DiscoverGridEmbeddableSearchProps = Omit<
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { interceptedWarnings, ...gridProps } = props;
+  const { interceptedWarnings, onSetColumns, ...gridProps } = props;
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+
+  const onAddColumn = useCallback(
+    (columnName: string) => {
+      if (!props.columns) {
+        return;
+      }
+      const updatedColumns = columnActions.addColumn(props.columns, columnName, true);
+      onSetColumns(updatedColumns);
+    },
+    [props.columns, onSetColumns]
+  );
+
+  const onRemoveColumn = useCallback(
+    (columnName: string) => {
+      if (!props.columns) {
+        return;
+      }
+      const updatedColumns = columnActions.removeColumn(props.columns, columnName, true);
+      onSetColumns(updatedColumns);
+    },
+    [props.columns, onSetColumns]
+  );
 
   const renderDocumentView = useCallback(
     (
@@ -62,21 +83,14 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         columnsMeta={customColumnsMeta}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
-        onRemoveColumn={props.onRemoveColumn}
-        onAddColumn={props.onAddColumn}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={props.query}
       />
     ),
-    [
-      props.dataView,
-      props.onAddColumn,
-      props.onFilter,
-      props.onRemoveColumn,
-      props.query,
-      props.savedSearchId,
-    ]
+    [props.dataView, props.onFilter, onRemoveColumn, props.query, props.savedSearchId, onAddColumn]
   );
 
   const renderCustomToolbarWithElements = useMemo(
@@ -99,6 +113,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     >
       <DiscoverGridMemoized
         {...gridProps}
+        onSetColumns={onSetColumns}
         totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
