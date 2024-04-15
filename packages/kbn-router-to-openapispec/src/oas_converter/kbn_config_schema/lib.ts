@@ -190,7 +190,7 @@ export const is = (schema: unknown): boolean => {
     const description = schema.getSchema().describe();
     // We ignore "any" @kbn/config-schema for the purposes of OAS generation...
     if (
-      description.type === 'any' ||
+      (description.type === 'any' && !('allow' in description)) ||
       (!isSchemaRequired(description) && isEmptyObjectAllowsUnknowns(description))
     ) {
       return false;
