@@ -237,6 +237,11 @@ export const allowedExperimentalValues = Object.freeze({
    *  Enables Security AI Assistant's Flyout mode
    */
   aiAssistantFlyoutMode: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
