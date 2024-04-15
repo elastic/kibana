@@ -11,7 +11,7 @@ import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 import { useKibana } from './use_kibana';
 import { APIRoutes, IndicesQuerySourceFields } from '../types';
-import { ChatForm, ChatFormFields, SourceFieldsData } from '../types';
+import { ChatForm, ChatFormFields } from '../types';
 import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
 
 export const useSourceIndicesFields = () => {
@@ -78,7 +78,7 @@ export const useSourceIndicesFields = () => {
 
   return {
     indices: selectedIndices,
-    fields: fields as SourceFieldsData,
+    fields,
     loading,
     addIndex,
     removeIndex,
