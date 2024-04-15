@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useController } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useEffect, useState } from 'react';
 import { useKibana } from './use_kibana';
@@ -17,6 +17,7 @@ import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../u
 export const useSourceIndicesFields = () => {
   const { services } = useKibana();
   const [loading, setLoading] = useState<boolean>(false);
+  const { resetField } = useFormContext<ChatForm>();
 
   const {
     field: { value: selectedIndices, onChange: onIndicesChange },
@@ -52,15 +53,16 @@ export const useSourceIndicesFields = () => {
   });
 
   useEffect(() => {
-    debugger;
     if (fields) {
+      resetField(ChatFormFields.queryFields);
       const defaultFields = getDefaultQueryFields(fields);
       const defaultSourceFields = getDefaultSourceFields(fields);
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
       onSourceFieldsChange(defaultSourceFields);
     }
     setLoading(false);
-  }, [fields, onElasticsearchQueryChange, onSourceFieldsChange, onIndicesChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields]);
 
   const addIndex = (newIndex: IndexName) => {
     const newIndices = [...selectedIndices, newIndex];

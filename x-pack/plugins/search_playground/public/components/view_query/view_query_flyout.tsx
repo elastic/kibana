@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
@@ -37,10 +37,10 @@ interface ViewQueryFlyoutProps {
 }
 
 export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => {
-  const { watch, setValue } = useFormContext<ChatForm>();
-  const selectedIndices: string[] = watch(ChatFormFields.indices);
-  const { fields } = useIndicesFields(selectedIndices || []);
-  const defaultFields = useMemo(() => getDefaultQueryFields(fields), [fields]);
+  const { getValues } = useFormContext<ChatForm>();
+  const selectedIndices: string[] = getValues(ChatFormFields.indices);
+  const { fields } = useIndicesFields(selectedIndices);
+  const defaultFields = getDefaultQueryFields(fields);
 
   const {
     field: { onChange: queryFieldsOnChange, value: queryFields },
@@ -49,27 +49,35 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
     defaultValue: defaultFields,
   });
 
+  const [tempQueryFields, setTempQueryFields] = useState(queryFields);
+
+  const {
+    field: { onChange: elasticsearchQueryChange },
+  } = useController({
+    name: ChatFormFields.elasticsearchQuery,
+  });
+
   const isQueryFieldSelected = (index: string, field: string) => {
-    return queryFields[index].includes(field);
+    return tempQueryFields[index].includes(field);
   };
 
   const toggleQueryField = (index: string, field: string) => {
     if (isQueryFieldSelected(index, field)) {
-      queryFieldsOnChange({
-        ...queryFields,
-        [index]: queryFields[index].filter((x: string) => x !== field),
+      setTempQueryFields({
+        ...tempQueryFields,
+        [index]: tempQueryFields[index].filter((x: string) => x !== field),
       });
     } else {
-      queryFieldsOnChange({
-        ...queryFields,
-        [index]: [...queryFields[index], field],
+      setTempQueryFields({
+        ...tempQueryFields,
+        [index]: [...tempQueryFields[index], field],
       });
     }
   };
 
   const saveQuery = () => {
-    setValue(ChatFormFields.queryFields, queryFields);
-    setValue(ChatFormFields.elasticsearchQuery, createQuery(queryFields, fields) as any);
+    queryFieldsOnChange(tempQueryFields);
+    elasticsearchQueryChange(createQuery(tempQueryFields, fields));
     onClose();
   };
 
@@ -99,7 +107,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
         <EuiFlexGroup>
           <EuiFlexItem grow={6}>
             <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
-              {JSON.stringify(createQuery(queryFields, fields), null, 2)}
+              {JSON.stringify(createQuery(tempQueryFields, fields), null, 2)}
             </EuiCodeBlock>
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
