@@ -70,10 +70,6 @@ export function SloItemActions({
 }: Props) {
   const {
     application: { navigateToUrl },
-    http: { basePath },
-    share: {
-      url: { locators },
-    },
     executionContext,
   } = useKibana().services;
   const executionContextName = executionContext.get().name;
