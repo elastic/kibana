@@ -25,7 +25,6 @@ import {
 } from '../../utils/create_query';
 
 const transformToErrorMessage = (defaultSourceFields: IndexFields): string | undefined => {
-  const errorMessage: string = 'No source fields found for ';
   const indices: string[] = [];
   Object.keys(defaultSourceFields).forEach((index: string) => {
     if (defaultSourceFields[index][0] === undefined) {
@@ -33,7 +32,7 @@ const transformToErrorMessage = (defaultSourceFields: IndexFields): string | und
     }
   });
 
-  return indices.length === 0 ? undefined : errorMessage.concat(indices.join());
+  return indices.length === 0 ? undefined : indices.join();
 };
 
 export const SourcesPanelForStartChat: React.FC = () => {
@@ -84,7 +83,14 @@ export const SourcesPanelForStartChat: React.FC = () => {
 
       {sourceFieldErrorMessage && (
         <EuiCallOut color="warning" iconType="warning">
-          <p>{sourceFieldErrorMessage}</p>
+          <p>
+            {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
+              defaultMessage: 'No source fields found for {errorMessage}',
+              values: {
+                errorMessage: sourceFieldErrorMessage,
+              },
+            })}
+          </p>
         </EuiCallOut>
       )}
 
