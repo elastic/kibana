@@ -40,8 +40,9 @@ import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
 import { transformTimelineItemToUnifiedRows } from '../utils';
-import { AdditionalRow } from './additional_row';
-import { RenderCustomBody } from './custom_grid_body';
+import { TimelineEventDetailRow } from './timeline_event_detail_row';
+import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
+import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -287,10 +288,13 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
+    /**
+     * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
+     */
     const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = useMemo(
       () => [
         {
-          id: 'additional-row-details',
+          id: TIMELINE_EVENT_DETAIL_ROW_ID,
           // The header cell should be visually hidden, but available to screen readers
           width: 0,
           headerCellRender: () => <></>,
@@ -304,7 +308,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           rowCellRender: (props) => {
             const { rowIndex, ...restProps } = props;
             return (
-              <AdditionalRow
+              <TimelineEventDetailRow
                 event={tableRows[rowIndex]}
                 rowIndex={rowIndex}
                 timelineId={timelineId}
@@ -318,6 +322,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [enabledRowRenderers, tableRows, timelineId]
     );
 
+    /**
+     * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
+     */
     const renderCustomBodyCallback = useCallback(
       ({
         Cell,
@@ -325,7 +332,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         visibleColumns,
         setCustomGridBodyProps,
       }: EuiDataGridCustomBodyProps) => (
-        <RenderCustomBody
+        <CustomTimelineDataGridBody
           rows={tableRows}
           Cell={Cell}
           visibleColumns={visibleColumns}

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { RenderCustomBodyProps } from './custom_grid_body';
-import { RenderCustomBody } from './custom_grid_body';
+import type { CustomTimelineDataGridBodyProps } from './custom_timeline_data_grid_body';
+import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -36,7 +36,7 @@ const mockVisibleColumns = ['@timestamp', 'message', 'user.name']
   .map((id) => defaultUdtHeaders.find((h) => h.id === id) as EuiDataGridColumn)
   .concat(additionalColumn);
 
-const defaultProps: RenderCustomBodyProps = {
+const defaultProps: CustomTimelineDataGridBodyProps = {
   Cell: MockCellComponent,
   visibleRowData: { startRow: 0, endRow: 2, visibleRowCount: 2 },
   rows: testDataRows as Array<DataTableRecord & TimelineItem>,
@@ -45,12 +45,12 @@ const defaultProps: RenderCustomBodyProps = {
   visibleColumns: mockVisibleColumns,
 };
 
-const renderTestComponents = (props?: RenderCustomBodyProps) => {
+const renderTestComponents = (props?: CustomTimelineDataGridBodyProps) => {
   const finalProps = props ? { ...defaultProps, ...props } : defaultProps;
 
   return render(
     <TestProviders>
-      <RenderCustomBody {...finalProps} />
+      <CustomTimelineDataGridBody {...finalProps} />
     </TestProviders>
   );
 };

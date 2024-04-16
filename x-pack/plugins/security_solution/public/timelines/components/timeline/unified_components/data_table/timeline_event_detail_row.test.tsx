@@ -9,8 +9,8 @@ import type { RowRenderer } from '../../../../../../common/types';
 import React from 'react';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { StatefulRowRenderer } from '../../body/events/stateful_row_renderer';
-import type { AdditionalRowProps } from './additional_row';
-import { AdditionalRow } from './additional_row';
+import type { TimelineEventDetailRowProps } from './timeline_event_detail_row';
+import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { render } from '@testing-library/react';
 import { useTimelineUnifiedDataTableContext } from './use_timeline_unified_data_table_context';
 
@@ -21,8 +21,8 @@ const setCellPropsMock = jest.fn();
 jest.mock('../../body/events/stateful_row_renderer');
 jest.mock('./use_timeline_unified_data_table_context');
 
-const renderTestComponent = (props: Partial<AdditionalRowProps> = {}) => {
-  const finalProps: AdditionalRowProps = {
+const renderTestComponent = (props: Partial<TimelineEventDetailRowProps> = {}) => {
+  const finalProps: TimelineEventDetailRowProps = {
     rowIndex: 0,
     event: mockData[0],
     timelineId: 'test-timeline-id',
@@ -37,12 +37,12 @@ const renderTestComponent = (props: Partial<AdditionalRowProps> = {}) => {
   };
   return render(
     <TestProviders>
-      <AdditionalRow {...finalProps} />
+      <TimelineEventDetailRow {...finalProps} />
     </TestProviders>
   );
 };
 
-describe('AdditionalRow', () => {
+describe('TimelineEventDetailRow', () => {
   beforeEach(() => {
     (StatefulRowRenderer as jest.Mock).mockReturnValue(<div>{'Test Row Renderer'}</div>);
 

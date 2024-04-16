@@ -10,40 +10,61 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
+import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 
-export type RenderCustomBodyProps = EuiDataGridCustomBodyProps & {
+export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
 };
 
-export const RenderCustomBody: FC<RenderCustomBodyProps> = (props) => {
-  const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers } = props;
+/**
+ *
+ * In order to render the additional row with every event ( which displays the row-renderer, notes and notes editor)
+ * we need to pass a way for EuiDataGrid to render the whole grid body via a custom component
+ *
+ * This component is responsible for styling and accessibility of the custom designed cells.
+ *
+ * In our case, we need TimelineExpandedRow ( technicall a data grid column which spans the whole width of the data grid)
+ * component to be shown as an addendum to the normal event row. As mentioned above, it displays the row-renderer, notes and notes editor
+ *
+ * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
+ *
+ * */
+export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
+  function CustomTimelineDataGridBody(props) {
+    const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers } = props;
 
-  const visibleRows = useMemo(
-    () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
-    [rows, visibleRowData]
-  );
+    const visibleRows = useMemo(
+      () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
+      [rows, visibleRowData]
+    );
 
-  return (
-    <>
-      {visibleRows.map((row, rowIndex) => (
-        <RenderCustomSingleRow
-          rowData={row}
-          rowIndex={rowIndex}
-          key={rowIndex}
-          visibleColumns={visibleColumns}
-          Cell={Cell}
-          enabledRowRenderers={enabledRowRenderers}
-        />
-      ))}
-    </>
-  );
-};
+    return (
+      <>
+        {visibleRows.map((row, rowIndex) => (
+          <CustomDataGridSingleRow
+            rowData={row}
+            rowIndex={rowIndex}
+            key={rowIndex}
+            visibleColumns={visibleColumns}
+            Cell={Cell}
+            enabledRowRenderers={enabledRowRenderers}
+          />
+        ))}
+      </>
+    );
+  }
+);
 
+/**
+ *
+ * A Simple Wrapper component for displaying a custom grid row
+ *
+ */
 const CustomGridRow = styled.div.attrs<{
   className?: string;
 }>((props) => ({
@@ -54,17 +75,27 @@ const CustomGridRow = styled.div.attrs<{
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
 `;
 
-/* below styles as per : https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer */
+/**
+ *
+ * A Simple Wrapper component for displaying a custom data grid `cell`
+ */
 const CustomGridRowCellWrapper = styled.div.attrs({ className: 'rowCellWrapper', role: 'row' })`
   display: flex;
 `;
 
-type RenderCustomSingleRowProps = {
+type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
-} & Pick<RenderCustomBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
+} & Pick<CustomTimelineDataGridBodyProps, 'visibleColumns' | 'Cell' | 'enabledRowRenderers'>;
 
-const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
+/**
+ *
+ * RenderCustomBody component above uses this component to display a single row.
+ *
+ * */
+const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
+  props: CustomTimelineDataGridSingleRowProps
+) {
   const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell } = props;
 
   const { canShowRowRenderer } = useStatefulRowRenderer({
@@ -72,8 +103,11 @@ const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
     rowRenderers: enabledRowRenderers,
   });
 
-  // removes the border between the actual row and Additional row
-  // which renders the AdditionalRow
+  /**
+   * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
+   * which renders the row-renderer, notes and notes editor
+   *
+   */
   const cellCustomStyle = useMemo(
     () =>
       canShowRowRenderer
@@ -91,8 +125,8 @@ const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
     >
       <CustomGridRowCellWrapper>
         {visibleColumns.map((column, colIndex) => {
-          // Skip the row details cell - we'll render it manually outside of the flex wrapper
-          if (column.id !== 'additional-row-details') {
+          // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
+          if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
             return (
               <Cell
                 style={cellCustomStyle}
@@ -105,6 +139,7 @@ const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
           return null;
         })}
       </CustomGridRowCellWrapper>
+      {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (
         <Cell
           colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
@@ -113,4 +148,4 @@ const RenderCustomSingleRow = (props: RenderCustomSingleRowProps) => {
       ) : null}
     </CustomGridRow>
   );
-};
+});

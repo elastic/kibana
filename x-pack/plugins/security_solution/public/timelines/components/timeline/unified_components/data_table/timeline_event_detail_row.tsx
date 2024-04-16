@@ -19,7 +19,7 @@ const ARIA_ROW_INDEX_OFFSET = 2;
 
 type RenderCellValueProps = EuiDataGridCellValueElementProps;
 
-export interface AdditionalRowOwnProps {
+export interface TimelineEventDetailRowOwnProps {
   rowIndex: number;
   event: TimelineItem;
   setCellProps?: (props: EuiDataGridSetCellProps) => void;
@@ -27,10 +27,26 @@ export interface AdditionalRowOwnProps {
   enabledRowRenderers: RowRenderer[];
 }
 
-export type AdditionalRowProps = RenderCellValueProps & AdditionalRowOwnProps;
+export type TimelineEventDetailRowProps = RenderCellValueProps & TimelineEventDetailRowOwnProps;
 
-const AdditionalRowComp: React.FC<AdditionalRowProps> = memo(
-  ({ rowIndex, event, setCellProps, timelineId, enabledRowRenderers }) => {
+/**
+ * Renders the additional row for the timeline
+ * This additional row is used to render:
+ * - the row renderers
+ * - the notes and text area when notes are being created.
+ *
+ * This components is also responsible for styling that additional row when
+ * a event/alert is expanded (i.e. when flyout is open and user is viewing the details of the event)
+ *
+ * */
+export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = memo(
+  function TimelineEventDetailRow({
+    rowIndex,
+    event,
+    setCellProps,
+    timelineId,
+    enabledRowRenderers,
+  }) {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     /*
@@ -72,8 +88,3 @@ const AdditionalRowComp: React.FC<AdditionalRowProps> = memo(
     );
   }
 );
-AdditionalRowComp.displayName = 'AdditionalRowComp';
-
-export const AdditionalRow = React.memo(AdditionalRowComp);
-// eslint-disable-next-line import/no-default-export
-export { AdditionalRow as default };
