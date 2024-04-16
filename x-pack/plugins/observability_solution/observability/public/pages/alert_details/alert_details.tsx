@@ -274,10 +274,7 @@ export function getScreenDescription(alertDetail: AlertData) {
       : ''
   }
 
-  Please suggestion root causes if possible.
-  Suggest next steps for the user to take.  
-
-  Utilize the following alert fields as background information for generating a response:
+  Use the following alert fields as background information for generating a response. Do not list them as bullet points in the response.
   ${Object.entries(getRelevantAlertFields(alertDetail))
     .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
     .join('\n')}  

@@ -102,15 +102,15 @@ ${JSON.stringify(downstreamDependencies, null, 2)}`
     return observabilityAIAssistant.getContextualInsightMessages({
       message: `I'm looking at an alert and trying to understand why it was triggered`,
       instructions: dedent(
-        `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.
-        Please use the following contexual information to determine the cause of the alert and suggest actions that I should take to investigate further.
+        `I'm an SRE. I am looking at an alert that was triggered. I want to understand why it was triggered, what it means, and what I should do next.        
 
+        The following contextual information is available to help me understand the alert:
         ${obsAlertContext}
 
-        Do not output the alert details as bullet points.
-        Instead, provide a summary of the alert and the context around it.
-        For example, if the alert is about a high error rate, provide information about the service, the environment, and any changes that may have occurred around the time of the alert.
-        Print timestamps as relative time, with absolute time in parentheses. Example: "The alert started 5 minutes ago (2021-01-01T00:00:00Z)
+        Be brief and to the point.
+        Do not list the alert details as bullet points.
+        Do refer to the contextual information provided above when relevant.
+        Pay specific attention to why the alert happened and what may have contributed to it.
         `
       ),
     });
