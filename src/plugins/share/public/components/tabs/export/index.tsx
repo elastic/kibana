@@ -10,23 +10,20 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { ExportContent } from './export_content';
-import { useShareTabsContext } from '../../context';
+import { useShareTabsContext, type ShareMenuItemV2 } from '../../context';
 
 type IExportTab = IModalTabDeclaration;
 
 const ExportTabContent = () => {
   const { shareMenuItems, objectType, isDirty, onClose } = useShareTabsContext()!;
 
-  const aggregateReportTypes = shareMenuItems;
-
   return (
     <ExportContent
-      {...{
-        objectType,
-        isDirty,
-        onClose,
-        aggregateReportTypes,
-      }}
+      objectType={objectType}
+      isDirty={isDirty}
+      onClose={onClose}
+      // are guaranteed that shareMenuItems will be a ShareMenuItem V2 variant
+      aggregateReportTypes={shareMenuItems as unknown as ShareMenuItemV2[]}
     />
   );
 };

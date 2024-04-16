@@ -13,8 +13,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import { ShareContext, ShareMenuItem } from '@kbn/share-plugin/public';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import { ShareContext, ShareMenuItem, ShareMenuItemV2 } from '@kbn/share-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
@@ -26,7 +26,7 @@ export const reportingCsvShareProvider = ({
   i18n: i18nStart,
   theme,
 }: ExportModalShareOpts) => {
-  const getShareMenuItems = ({ objectType, sharingData, onClose, toasts }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, sharingData, toasts }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -82,7 +82,7 @@ export const reportingCsvShareProvider = ({
       capabilityHasCsvReporting = true; // deprecated
     }
 
-    const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
+    const generateReportingJobCSV: ShareMenuItemV2['generateExport'] = ({ intl }) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
       return apiClient
         .createReportingJob(reportType, decoratedJobParams)
@@ -114,9 +114,6 @@ export const reportingCsvShareProvider = ({
             ),
             'data-test-subj': 'queueReportSuccess',
           });
-          if (onClose) {
-            onClose();
-          }
         })
         .catch((error) => {
           toasts.addError(error, {
@@ -161,20 +158,20 @@ export const reportingCsvShareProvider = ({
           />
         ),
         reportType,
-        label: 'CSV' as const,
+        label: 'CSV',
         copyURLButton: {
           id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
           dataTestSubj: 'shareReportingCopyURL',
           label: 'Post URL',
         },
-        generateReportButton: (
+        generateExportButtonLabel: (
           <FormattedMessage
             id="reporting.share.generateButtonLabelCSV"
             data-test-subj="generateReportButton"
             defaultMessage="Generate CSV"
           />
         ),
-        generateReport: generateReportingJobCSV,
+        generateExport: generateReportingJobCSV,
         generateCopyUrl: reportingUrl,
         absoluteUrl,
         renderCopyURLButton: true,

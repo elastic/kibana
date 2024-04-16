@@ -18,6 +18,8 @@ import type {
   ShareContext,
 } from '../../types';
 
+export type { ShareMenuItemV2 } from '../../types';
+
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
   allowShortUrl: boolean;

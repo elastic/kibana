@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { copyToClipboard } from '@elastic/eui';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 import { EmbedContent } from './embed_content';
 import { useShareTabsContext } from '../../context';
@@ -22,11 +21,6 @@ type IEmbedTab = IModalTabDeclaration<{ url: string; isNotSaved: boolean }>;
 
 const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '', isNotSaved: false }, action) => {
   switch (action.type) {
-    case EMBED_TAB_ACTIONS.SET_EMBED_URL:
-      return {
-        ...state,
-        url: action.payload,
-      };
     case EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED:
       return {
         ...state,
@@ -47,16 +41,6 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
     isDirty,
   } = useShareTabsContext()!;
 
-  const onChange = useCallback(
-    (shareUrl: string) => {
-      dispatch({
-        type: EMBED_TAB_ACTIONS.SET_EMBED_URL,
-        payload: shareUrl,
-      });
-    },
-    [dispatch]
-  );
-
   const setIsNotSaved = useCallback(() => {
     dispatch({
       type: EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED,
@@ -72,11 +56,9 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
         shareableUrl,
         isEmbedded,
         objectType,
-        isDirty,
         isNotSaved: state?.isNotSaved,
         setIsNotSaved,
       }}
-      onChange={onChange}
     />
   );
 };
@@ -92,15 +74,4 @@ export const embedTab: IEmbedTab = {
   }),
   reducer: embedTabReducer,
   content: EmbedTabContent,
-  modalActionBtn: {
-    id: 'embed',
-    dataTestSubj: 'copyEmbedUrlButton',
-    label: i18n.translate('share.link.copyEmbedCodeButton', {
-      defaultMessage: 'Copy Embed',
-    }),
-    handler: ({ state }) => {
-      copyToClipboard(state.url);
-    },
-    style: ({ state }) => state.isNotSaved,
-  },
 };

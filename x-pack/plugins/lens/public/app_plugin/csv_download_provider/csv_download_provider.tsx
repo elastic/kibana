@@ -107,10 +107,11 @@ export const downloadCsvShareProvider = ({
   atLeastGold,
   isNewVersion,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
+
     const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
       title: string;
       activeData: TableInspectorAdapter;
@@ -134,16 +135,14 @@ export const downloadCsvShareProvider = ({
       },
     };
 
-    const onClick = async () => {
-      await downloadCSVs({
+    const downloadCSVHandler = () =>
+      downloadCSVs({
         title,
         formatFactory: formatFactoryFn(),
         activeData,
         uiSettings,
         columnsSorting,
       });
-      onClose?.();
-    };
 
     if (!isNewVersion) {
       return [
@@ -156,7 +155,7 @@ export const downloadCsvShareProvider = ({
               <DownloadPanelContent
                 isDisabled={!csvEnabled}
                 warnings={getWarnings(activeData)}
-                onClick={onClick}
+                onClick={downloadCSVHandler}
               />
             ),
           },
@@ -167,9 +166,9 @@ export const downloadCsvShareProvider = ({
     return [
       {
         ...menuItemMetadata,
-        downloadCSVLens: onClick,
-        label: 'CSV' as const,
+        label: 'CSV',
         reportType: 'lens_csv',
+        generateExport: downloadCSVHandler,
         ...(atLeastGold()
           ? {
               helpText: (
@@ -178,7 +177,7 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Export a PDF, PNG, or CSV of this visualization."
                 />
               ),
-              generateReportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate export" />
               ),
               renderLayoutOptionSwitch: false,
@@ -194,7 +193,7 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateReportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
               showRadios: false,
