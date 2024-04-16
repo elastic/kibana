@@ -323,7 +323,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             customFields: [],
             description:
-              'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping:',
+              "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id).",
             duration: null,
             external_service: null,
             id: 'ee06877e50151293e75cd6c5bd81812c15c25be55ed970f91c6f7dc40e1eafa6',
@@ -693,7 +693,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               customFields: [],
               description:
-                'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A`',
+                "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`.",
               duration: null,
               external_service: null,
               id: firstCaseId,
@@ -703,8 +703,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               severity: 'low',
               status: 'open',
-              tags: ['auto-generated', 'rule:rule-test-id', 'host.name:A', 'rule', 'test'],
-              title: 'Test rule (Auto-created)',
+              tags: [
+                'auto-generated',
+                'rule:rule-test-id',
+                'host.name',
+                'host.name:A',
+                'rule',
+                'test',
+              ],
+              title: 'Test rule - Grouping by A (Auto-created)',
               totalAlerts: 3,
               totalComment: 0,
               updated_by: {
@@ -733,7 +740,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               customFields: [],
               description:
-                'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B`',
+                "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: B`.",
               duration: null,
               external_service: null,
               id: secondCaseId,
@@ -743,8 +750,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               severity: 'low',
               status: 'open',
-              tags: ['auto-generated', 'rule:rule-test-id', 'host.name:B', 'rule', 'test'],
-              title: 'Test rule (Auto-created)',
+              tags: [
+                'auto-generated',
+                'rule:rule-test-id',
+                'host.name',
+                'host.name:B',
+                'rule',
+                'test',
+              ],
+              title: 'Test rule - Grouping by B (Auto-created)',
               totalAlerts: 2,
               totalComment: 0,
               updated_by: {
@@ -981,10 +995,10 @@ export default ({ getService }: FtrProviderContext): void => {
             );
 
             expect(firstCase.description).to.be(
-              'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A`'
+              "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`."
             );
             expect(secondCase.description).to.be(
-              'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `unknown`'
+              "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: unknown`."
             );
 
             const firstCaseAttachments = await getAllComments({

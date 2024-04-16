@@ -12,13 +12,13 @@ same effect as a threshold of 40000. The default value is 3000.
 DescriptionReturns the approximate number of distinct values.Supported typesCan take any field type as input.Examples
 ```esql
 FROM hosts
-| STATS unique_ip0 = COUNT_DISTINCT(ip0), unique_ip1 = COUNT_DISTINCT(ip1)
+| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
 ```
 
 With the optional second parameter to configure the precision threshold:
 ```esql
 FROM hosts
-| STATS unique_ip0 = COUNT_DISTINCT(ip0, 80000), unique_ip1 = COUNT_DISTINCT(ip1, 5)
+| STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
 ```
 
 The expression can use inline functions. This example splits a string into

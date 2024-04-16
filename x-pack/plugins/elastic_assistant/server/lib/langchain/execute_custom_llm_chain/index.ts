@@ -105,6 +105,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     alertsIndexPattern,
     isEnabledKnowledgeBase,
     chain,
+    llm,
     esClient,
     modelExists,
     onNewReplacements,
