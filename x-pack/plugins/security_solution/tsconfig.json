@@ -196,6 +196,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/data-service",
     "@kbn/core-chrome-browser",
-    "@kbn/shared-ux-chrome-navigation"
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/core-ui-settings-browser-mocks"
   ]
 }

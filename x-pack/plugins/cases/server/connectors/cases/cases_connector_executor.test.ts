@@ -239,82 +239,94 @@ describe('CasesConnectorExecutor', () => {
           });
 
           expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
-          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
-            cases: [
-              {
-                id: 'mock-id-1',
-                title: 'Test rule (Auto-created)',
-                description:
-                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`',
-                owner: 'cases',
-                settings: {
-                  syncAlerts: false,
+          expect(casesClientMock.cases.bulkCreate.mock.calls).toMatchInlineSnapshot(`
+            Array [
+              Array [
+                Object {
+                  "cases": Array [
+                    Object {
+                      "connector": Object {
+                        "fields": null,
+                        "id": "none",
+                        "name": "none",
+                        "type": ".none",
+                      },
+                      "customFields": Array [],
+                      "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
+                      "id": "mock-id-1",
+                      "owner": "cases",
+                      "settings": Object {
+                        "syncAlerts": false,
+                      },
+                      "tags": Array [
+                        "auto-generated",
+                        "rule:rule-test-id",
+                        "host.name",
+                        "host.name:A",
+                        "dest.ip",
+                        "dest.ip:0.0.0.1",
+                        "rule",
+                        "test",
+                      ],
+                      "title": "Test rule - Grouping by A & 0.0.0.1 (Auto-created)",
+                    },
+                    Object {
+                      "connector": Object {
+                        "fields": null,
+                        "id": "none",
+                        "name": "none",
+                        "type": ".none",
+                      },
+                      "customFields": Array [],
+                      "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.1\`.",
+                      "id": "mock-id-2",
+                      "owner": "cases",
+                      "settings": Object {
+                        "syncAlerts": false,
+                      },
+                      "tags": Array [
+                        "auto-generated",
+                        "rule:rule-test-id",
+                        "host.name",
+                        "host.name:B",
+                        "dest.ip",
+                        "dest.ip:0.0.0.1",
+                        "rule",
+                        "test",
+                      ],
+                      "title": "Test rule - Grouping by B & 0.0.0.1 (Auto-created)",
+                    },
+                    Object {
+                      "connector": Object {
+                        "fields": null,
+                        "id": "none",
+                        "name": "none",
+                        "type": ".none",
+                      },
+                      "customFields": Array [],
+                      "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
+                      "id": "mock-id-3",
+                      "owner": "cases",
+                      "settings": Object {
+                        "syncAlerts": false,
+                      },
+                      "tags": Array [
+                        "auto-generated",
+                        "rule:rule-test-id",
+                        "host.name",
+                        "host.name:B",
+                        "dest.ip",
+                        "dest.ip:0.0.0.3",
+                        "rule",
+                        "test",
+                      ],
+                      "title": "Test rule - Grouping by B & 0.0.0.3 (Auto-created)",
+                    },
+                  ],
                 },
-                tags: [
-                  'auto-generated',
-                  'rule:rule-test-id',
-                  'host.name:A',
-                  'dest.ip:0.0.0.1',
-                  ...rule.tags,
-                ],
-                connector: {
-                  fields: null,
-                  id: 'none',
-                  name: 'none',
-                  type: '.none',
-                },
-                customFields: [],
-              },
-              {
-                id: 'mock-id-2',
-                title: 'Test rule (Auto-created)',
-                description:
-                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.1`',
-                owner: 'cases',
-                settings: {
-                  syncAlerts: false,
-                },
-                tags: [
-                  'auto-generated',
-                  'rule:rule-test-id',
-                  'host.name:B',
-                  'dest.ip:0.0.0.1',
-                  ...rule.tags,
-                ],
-                connector: {
-                  fields: null,
-                  id: 'none',
-                  name: 'none',
-                  type: '.none',
-                },
-                customFields: [],
-              },
-              {
-                id: 'mock-id-3',
-                title: 'Test rule (Auto-created)',
-                description:
-                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
-                owner: 'cases',
-                settings: {
-                  syncAlerts: false,
-                },
-                tags: [
-                  'auto-generated',
-                  'rule:rule-test-id',
-                  'host.name:B',
-                  'dest.ip:0.0.0.3',
-                  ...rule.tags,
-                ],
-                connector: {
-                  fields: null,
-                  id: 'none',
-                  name: 'none',
-                  type: '.none',
-                },
-                customFields: [],
-              },
-            ],
-          });
+              ],
+            ]
+          `);
 
           expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
         });
@@ -538,34 +550,38 @@ describe('CasesConnectorExecutor', () => {
 
           await connectorExecutor.execute(params);
 
-          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
-            cases: [
-              {
-                id: 'mock-id-3',
-                title: 'Test rule (Auto-created)',
-                description:
-                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
-                owner: 'cases',
-                settings: {
-                  syncAlerts: false,
+          expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
+            Object {
+              "cases": Array [
+                Object {
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "customFields": Array [],
+                  "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
+                  "id": "mock-id-3",
+                  "owner": "cases",
+                  "settings": Object {
+                    "syncAlerts": false,
+                  },
+                  "tags": Array [
+                    "auto-generated",
+                    "rule:rule-test-id",
+                    "host.name",
+                    "host.name:B",
+                    "dest.ip",
+                    "dest.ip:0.0.0.3",
+                    "rule",
+                    "test",
+                  ],
+                  "title": "Test rule - Grouping by B & 0.0.0.3 (Auto-created)",
                 },
-                tags: [
-                  'auto-generated',
-                  'rule:rule-test-id',
-                  'host.name:B',
-                  'dest.ip:0.0.0.3',
-                  ...rule.tags,
-                ],
-                connector: {
-                  fields: null,
-                  id: 'none',
-                  name: 'none',
-                  type: '.none',
-                },
-                customFields: [],
-              },
-            ],
-          });
+              ],
+            }
+          `);
         });
 
         it('does not add the rule URL to the description if the ruleUrl is null', async () => {
@@ -591,8 +607,8 @@ describe('CasesConnectorExecutor', () => {
           const description =
             casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
 
-          expect(description).toBe(
-            'This case is auto-created by Test rule. \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`'
+          expect(description).toMatchInlineSnapshot(
+            `"This case was created by the rule Test rule. The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`."`
           );
         });
 
@@ -628,8 +644,8 @@ describe('CasesConnectorExecutor', () => {
           const description =
             casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
 
-          expect(description).toBe(
-            'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `foo` equals `["bar",1,true,{}]` and `bar.foo` equals `test` and `baz` equals `my value`'
+          expect(description).toMatchInlineSnapshot(
+            `"This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`foo: [\\"bar\\",1,true,{}]\` and \`bar.foo: test\` and \`baz: my value\`."`
           );
         });
 
@@ -651,7 +667,7 @@ describe('CasesConnectorExecutor', () => {
           await connectorExecutor.execute({ ...params, groupingBy: [] });
           const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
 
-          expect(title).toBe('Test rule (2) (Auto-created)');
+          expect(title).toMatchInlineSnapshot(`"Test rule (2) (Auto-created)"`);
         });
 
         it(`trims the title correctly if the rule title including the suffix is bigger than ${MAX_TITLE_LENGTH}`, async () => {
@@ -677,8 +693,10 @@ describe('CasesConnectorExecutor', () => {
 
           const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
 
-          expect(title.length).toBe(MAX_TITLE_LENGTH);
-          expect(title.includes('(2) (Auto-created)')).toBe(true);
+          expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+          expect(title).toMatchInlineSnapshot(
+            `"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... (2) (Auto-created)"`
+          );
         });
 
         it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {
@@ -706,7 +724,9 @@ describe('CasesConnectorExecutor', () => {
           expect(tags).toEqual([
             'auto-generated',
             'rule:rule-test-id',
+            'host.name',
             'host.name:A',
+            'dest.ip',
             'dest.ip:0.0.0.1',
             'a'.repeat(MAX_LENGTH_PER_TAG),
           ]);
@@ -736,14 +756,18 @@ describe('CasesConnectorExecutor', () => {
           const systemTags = [
             'auto-generated',
             'rule:rule-test-id',
+            'host.name',
             'host.name:A',
+            'dest.ip',
             'dest.ip:0.0.0.1',
           ];
 
           expect(tags).toEqual([
             'auto-generated',
             'rule:rule-test-id',
+            'host.name',
             'host.name:A',
+            'dest.ip',
             'dest.ip:0.0.0.1',
             ...Array(MAX_TAGS_PER_CASE - systemTags.length).fill('foo'),
           ]);
@@ -783,8 +807,11 @@ describe('CasesConnectorExecutor', () => {
           expect(tags).toEqual([
             'auto-generated',
             'rule:rule-test-id',
+            'foo',
             'foo:["bar",1,true,{}]',
+            'bar.foo',
             'bar.foo:test',
+            'baz',
             'baz:my value',
             'rule',
             'test',
@@ -838,34 +865,38 @@ describe('CasesConnectorExecutor', () => {
             { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
           ]);
 
-          expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
-            cases: [
-              {
-                id: 'mock-id-4',
-                title: 'Test rule (Auto-created)',
-                description:
-                  'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`',
-                owner: 'cases',
-                settings: {
-                  syncAlerts: false,
+          expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
+            Object {
+              "cases": Array [
+                Object {
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "customFields": Array [],
+                  "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
+                  "id": "mock-id-4",
+                  "owner": "cases",
+                  "settings": Object {
+                    "syncAlerts": false,
+                  },
+                  "tags": Array [
+                    "auto-generated",
+                    "rule:rule-test-id",
+                    "host.name",
+                    "host.name:A",
+                    "dest.ip",
+                    "dest.ip:0.0.0.1",
+                    "rule",
+                    "test",
+                  ],
+                  "title": "Test rule - Grouping by A & 0.0.0.1 (Auto-created)",
                 },
-                tags: [
-                  'auto-generated',
-                  'rule:rule-test-id',
-                  'host.name:A',
-                  'dest.ip:0.0.0.1',
-                  ...rule.tags,
-                ],
-                connector: {
-                  fields: null,
-                  id: 'none',
-                  name: 'none',
-                  type: '.none',
-                },
-                customFields: [],
-              },
-            ],
-          });
+              ],
+            }
+          `);
         });
 
         describe('Custom Fields', () => {
@@ -905,28 +936,6 @@ describe('CasesConnectorExecutor', () => {
               ],
             },
           ];
-          const expectedCustomFieldValues = [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT as const,
-              value: 'default value',
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE as const,
-              value: true,
-            },
-            {
-              key: 'third_key',
-              type: CustomFieldTypes.TEXT as const,
-              value: 'N/A',
-            },
-            {
-              key: 'fourth_key',
-              type: CustomFieldTypes.TOGGLE as const,
-              value: false,
-            },
-          ];
 
           it('creates non existing cases with required custom fields correctly', async () => {
             casesClientMock.configure.get = jest.fn().mockResolvedValue(mockConfiguration);
@@ -946,34 +955,59 @@ describe('CasesConnectorExecutor', () => {
 
             await connectorExecutor.execute(params);
 
-            expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
-              cases: [
-                {
-                  id: 'mock-id-3',
-                  title: 'Test rule (Auto-created)',
-                  description:
-                    'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `B` and `dest.ip` equals `0.0.0.3`',
-                  owner: mockOwner,
-                  settings: {
-                    syncAlerts: false,
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
+              Object {
+                "cases": Array [
+                  Object {
+                    "connector": Object {
+                      "fields": null,
+                      "id": "none",
+                      "name": "none",
+                      "type": ".none",
+                    },
+                    "customFields": Array [
+                      Object {
+                        "key": "first_key",
+                        "type": "text",
+                        "value": "default value",
+                      },
+                      Object {
+                        "key": "second_key",
+                        "type": "toggle",
+                        "value": true,
+                      },
+                      Object {
+                        "key": "third_key",
+                        "type": "text",
+                        "value": "N/A",
+                      },
+                      Object {
+                        "key": "fourth_key",
+                        "type": "toggle",
+                        "value": false,
+                      },
+                    ],
+                    "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
+                    "id": "mock-id-3",
+                    "owner": "cases",
+                    "settings": Object {
+                      "syncAlerts": false,
+                    },
+                    "tags": Array [
+                      "auto-generated",
+                      "rule:rule-test-id",
+                      "host.name",
+                      "host.name:B",
+                      "dest.ip",
+                      "dest.ip:0.0.0.3",
+                      "rule",
+                      "test",
+                    ],
+                    "title": "Test rule - Grouping by B & 0.0.0.3 (Auto-created)",
                   },
-                  tags: [
-                    'auto-generated',
-                    'rule:rule-test-id',
-                    'host.name:B',
-                    'dest.ip:0.0.0.3',
-                    ...rule.tags,
-                  ],
-                  connector: {
-                    fields: null,
-                    id: 'none',
-                    name: 'none',
-                    type: '.none',
-                  },
-                  customFields: expectedCustomFieldValues,
-                },
-              ],
-            });
+                ],
+              }
+            `);
           });
 
           it('creates new cases with required custom fields if reopenClosedCases=false and there are closed cases', async () => {
@@ -995,35 +1029,59 @@ describe('CasesConnectorExecutor', () => {
               { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
             ]);
 
-            expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
-              cases: [
-                {
-                  id: 'mock-id-4',
-                  title: 'Test rule (Auto-created)',
-                  description:
-                    'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`',
-                  owner: mockOwner,
-                  settings: {
-                    syncAlerts: false,
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
+              Object {
+                "cases": Array [
+                  Object {
+                    "connector": Object {
+                      "fields": null,
+                      "id": "none",
+                      "name": "none",
+                      "type": ".none",
+                    },
+                    "customFields": Array [
+                      Object {
+                        "key": "first_key",
+                        "type": "text",
+                        "value": "default value",
+                      },
+                      Object {
+                        "key": "second_key",
+                        "type": "toggle",
+                        "value": true,
+                      },
+                      Object {
+                        "key": "third_key",
+                        "type": "text",
+                        "value": "N/A",
+                      },
+                      Object {
+                        "key": "fourth_key",
+                        "type": "toggle",
+                        "value": false,
+                      },
+                    ],
+                    "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
+                    "id": "mock-id-4",
+                    "owner": "cases",
+                    "settings": Object {
+                      "syncAlerts": false,
+                    },
+                    "tags": Array [
+                      "auto-generated",
+                      "rule:rule-test-id",
+                      "host.name",
+                      "host.name:A",
+                      "dest.ip",
+                      "dest.ip:0.0.0.1",
+                      "rule",
+                      "test",
+                    ],
+                    "title": "Test rule - Grouping by A & 0.0.0.1 (Auto-created)",
                   },
-                  tags: [
-                    'auto-generated',
-                    'rule:rule-test-id',
-                    'host.name:A',
-                    'dest.ip:0.0.0.1',
-                    ...rule.tags,
-                  ],
-
-                  connector: {
-                    fields: null,
-                    id: 'none',
-                    name: 'none',
-                    type: '.none',
-                  },
-                  customFields: expectedCustomFieldValues,
-                },
-              ],
-            });
+                ],
+              }
+            `);
           });
         });
       });
