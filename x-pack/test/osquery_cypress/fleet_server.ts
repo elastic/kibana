@@ -12,7 +12,7 @@ import {
   startFleetServer,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
 import { Manager } from './resource_manager';
-import { getLatestAvailableAgentVersion } from './utils';
+// import { getLatestAvailableAgentVersion } from './utils';
 
 export class FleetManager extends Manager {
   private fleetServer: StartedFleetServer | undefined = undefined;
@@ -26,7 +26,8 @@ export class FleetManager extends Manager {
   }
 
   public async setup(): Promise<void> {
-    const version = await getLatestAvailableAgentVersion(this.kbnClient);
+    const version = '8.13.0-SNAPSHOT';
+    // const version = await getLatestAvailableAgentVersion(this.kbnClient);
     this.fleetServer = await startFleetServer({
       kbnClient: this.kbnClient,
       logger: this.log,
