@@ -38,38 +38,43 @@ export const getChatParams = async (
   let chatModel;
   let chatPrompt;
 
-  if (connector.actionTypeId === OPENAI_CONNECTOR_ID) {
-    chatModel = new ActionsClientChatOpenAI({
-      actions,
-      logger,
-      request,
-      connectorId,
-      model,
-      traceId: uuidv4(),
-      signal: abortSignal,
-      // prevents the agent from retrying on failure
-      // failure could be due to bad connector, we should deliver that result to the client asap
-      maxRetries: 0,
-    });
-    chatPrompt = Prompt(prompt, {
-      citations,
-      context: true,
-      type: 'openai',
-    });
-  } else if (connector.actionTypeId === BEDROCK_CONNECTOR_ID) {
-    chatModel = new ActionsClientLlm({
-      actions,
-      logger,
-      request,
-      connectorId,
-      model,
-      traceId: uuidv4(),
-    });
-    chatPrompt = Prompt(prompt, {
-      citations,
-      context: true,
-      type: 'anthropic',
-    });
+  switch (connector.actionTypeId) {
+    case OPENAI_CONNECTOR_ID:
+      chatModel = new ActionsClientChatOpenAI({
+        actions,
+        logger,
+        request,
+        connectorId,
+        model,
+        traceId: uuidv4(),
+        signal: abortSignal,
+        // prevents the agent from retrying on failure
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+      });
+      chatPrompt = Prompt(prompt, {
+        citations,
+        context: true,
+        type: 'openai',
+      });
+      break;
+    case BEDROCK_CONNECTOR_ID:
+      chatModel = new ActionsClientLlm({
+        actions,
+        logger,
+        request,
+        connectorId,
+        model,
+        traceId: uuidv4(),
+      });
+      chatPrompt = Prompt(prompt, {
+        citations,
+        context: true,
+        type: 'anthropic',
+      });
+      break;
+    default:
+      break;
   }
 
   if (!chatModel || !chatPrompt) {
