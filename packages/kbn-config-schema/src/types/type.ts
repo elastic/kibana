@@ -11,16 +11,23 @@ import { META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
-export interface TypeOptions<T> {
-  defaultValue?: T | Reference<T> | (() => T);
-  validate?: (value: T) => string | void;
-  /** A human-friendly description of this type to be used in documentation */
+/** Meta fields used when introspecting runtime validation */
+export interface TypeMeta {
+  /**
+   * A human-friendly description of this type to be used in documentation.
+   */
   description?: string;
   /**
    * A string that uniquely identifies this schema. Used when generating OAS
    * to create refs instead of inline schemas.
    */
   id?: string;
+}
+
+export interface TypeOptions<T> {
+  defaultValue?: T | Reference<T> | (() => T);
+  validate?: (value: T) => string | void;
+  meta?: TypeMeta;
 }
 
 export interface SchemaStructureEntry {
@@ -94,12 +101,13 @@ export abstract class Type<V> {
       schema = schema.custom(convertValidationFunction(options.validate));
     }
 
-    if (options.description) {
-      schema = schema.description(options.description);
-    }
-
-    if (options.id) {
-      schema = schema.meta({ [META_FIELD_X_OAS_REF_ID]: options.id });
+    if (options.meta) {
+      if (options.meta.description) {
+        schema = schema.description(options.meta.description);
+      }
+      if (options.meta.id) {
+        schema = schema.meta({ [META_FIELD_X_OAS_REF_ID]: options.meta.id });
+      }
     }
 
     // Attach generic error handler only if it hasn't been attached yet since
