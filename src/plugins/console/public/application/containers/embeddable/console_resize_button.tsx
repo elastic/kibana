@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { EuiResizableButton, useEuiTheme, keys } from '@elastic/eui';
+import { EuiResizableButton, useEuiTheme, keys, EuiThemeComputed } from '@elastic/eui';
 
 const CONSOLE_MIN_HEIGHT = 200;
 
@@ -26,6 +26,16 @@ export interface EmbeddedConsoleResizeButtonProps {
   setConsoleHeight: React.Dispatch<React.SetStateAction<number>>;
 }
 
+export function getCurrentConsoleMaxSize(euiTheme: EuiThemeComputed<{}>) {
+  const euiBaseSize = parseInt(euiTheme.size.base, 10);
+  const winHeight = window.innerHeight;
+  const bodyStyle = getComputedStyle(document.body);
+  const headerOffset = parseInt(bodyStyle.getPropertyValue('--euiFixedHeadersOffset') ?? '0px', 10);
+
+  // We leave a buffer of baseSize to allow room for the user to hover on the top border for resizing
+  return Math.max(winHeight - headerOffset - euiBaseSize, CONSOLE_MIN_HEIGHT);
+}
+
 export const EmbeddedConsoleResizeButton = ({
   consoleHeight,
   setConsoleHeight,
@@ -34,21 +44,10 @@ export const EmbeddedConsoleResizeButton = ({
   const [maxConsoleHeight, setMaxConsoleHeight] = useState<number>(800);
   const initialConsoleHeight = useRef(consoleHeight);
   const initialMouseY = useRef(0);
-  const euiBaseSize = parseInt(euiTheme.size.base, 10);
 
   useEffect(() => {
     function handleResize() {
-      const winHeight = window.innerHeight;
-      const bodyStyle = getComputedStyle(document.body);
-      const headerOffset = parseInt(
-        bodyStyle.getPropertyValue('--euiFixedHeadersOffset') ?? '0px',
-        10
-      );
-
-      const newMaxConsoleHeight = Math.max(
-        winHeight - headerOffset - euiBaseSize,
-        CONSOLE_MIN_HEIGHT
-      );
+      const newMaxConsoleHeight = getCurrentConsoleMaxSize(euiTheme);
       // Calculate and save the console max height. This is the window height minus the header
       // offset minuse the base size to allow a small buffer for grabbing the resize button.
       if (maxConsoleHeight !== newMaxConsoleHeight) {
@@ -65,7 +64,7 @@ export const EmbeddedConsoleResizeButton = ({
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [maxConsoleHeight, euiBaseSize, consoleHeight, setConsoleHeight]);
+  }, [maxConsoleHeight, euiTheme, consoleHeight, setConsoleHeight]);
   const onResizeMouseMove = useCallback(
     (e: MouseEvent | TouchEvent) => {
       const currentMouseY = getMouseOrTouchY(e);

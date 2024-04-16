@@ -14,9 +14,11 @@ import {
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
+  EuiThemeComputed,
   EuiThemeProvider,
   EuiWindowEvent,
   keys,
+  useEuiTheme,
   useEuiThemeCSSVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,10 +33,9 @@ import * as store from '../../stores/embeddable_console';
 import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
 
 import './_index.scss';
-import { EmbeddedConsoleResizeButton } from './console_resize_button';
+import { EmbeddedConsoleResizeButton, getCurrentConsoleMaxSize } from './console_resize_button';
 
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
-const DEFAULT_CONSOLE_HEIGHT = '600';
 const CONSOLE_HEIGHT_STORAGE_KEY = 'sense:embeddedConsoleHeight';
 
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
@@ -45,6 +46,18 @@ const ConsoleWrapper = dynamic(async () => ({
   default: (await import('./console_wrapper')).ConsoleWrapper,
 }));
 
+const getInitialConsoleHeight = (euiTheme: EuiThemeComputed) => {
+  const localStorageHeight = localStorage.getItem(CONSOLE_HEIGHT_STORAGE_KEY);
+  if (localStorageHeight) {
+    try {
+      return parseInt(localStorageHeight, 10);
+    } catch {
+      // ignore bad local storage value
+    }
+  }
+  return getCurrentConsoleMaxSize(euiTheme);
+};
+
 export const EmbeddableConsole = ({
   core,
   usageCollection,
@@ -52,10 +65,9 @@ export const EmbeddableConsole = ({
   alternateView,
   isMonacoEnabled,
 }: EmbeddableConsoleDependencies) => {
+  const { euiTheme } = useEuiTheme();
   const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
-  const [consoleHeight, setConsoleHeight] = useState<number>(
-    parseInt(localStorage.getItem(CONSOLE_HEIGHT_STORAGE_KEY) ?? DEFAULT_CONSOLE_HEIGHT, 10)
-  );
+  const [consoleHeight, setConsoleHeight] = useState<number>(getInitialConsoleHeight(euiTheme));
 
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
