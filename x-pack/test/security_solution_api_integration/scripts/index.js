@@ -28,6 +28,10 @@ if (type !== 'server') {
       grepArgs = ['--grep', '/^(?!.*@skipInEss).*@ess.*/'];
       break;
 
+    case 'qaPeriodicEnv':
+      grepArgs = ['--grep', '/^(?!.*@skipInServerless).*@serverless.*/'];
+      break;
+
     case 'qaEnv':
       grepArgs = ['--grep', '/^(?!.*@skipInServerless).*@serverlessQA.*/'];
       break;
