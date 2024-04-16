@@ -104,7 +104,6 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   },
   {
     name: 'agent.monitoring.http',
-    hidden: true,
     api_field: {
       name: 'agent_monitoring_http',
     },
