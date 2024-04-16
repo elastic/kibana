@@ -465,7 +465,7 @@ describe('create_query', () => {
       });
     });
 
-    it('should return an error when no source fields', () => {
+    it('should return undefined with index name when no source fields found', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         'search-search-labs': {
           elser_query_fields: [],
@@ -475,7 +475,11 @@ describe('create_query', () => {
         },
       };
 
-      expect(() => getDefaultSourceFields(fieldDescriptors)).toThrowError('No source fields found');
+      const defaultSourceFields = getDefaultSourceFields(fieldDescriptors);
+
+      expect(defaultSourceFields).toEqual({
+        'search-search-labs': [undefined],
+      });
     });
 
     it('should return the first single field when no source fields', () => {

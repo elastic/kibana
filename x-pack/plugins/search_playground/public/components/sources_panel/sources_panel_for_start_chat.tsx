@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
 import { AddIndicesField } from './add_indices_field';
@@ -21,12 +21,26 @@ import {
   createQuery,
   getDefaultQueryFields,
   getDefaultSourceFields,
+  IndexFields,
 } from '../../utils/create_query';
+
+const transformToErrorMessage = (defaultSourceFields: IndexFields): string | undefined => {
+  const errorMessage: string = 'No source fields found for ';
+  const indices: string[] = [];
+  Object.keys(defaultSourceFields).forEach((index: string) => {
+    if (defaultSourceFields[index][0] === undefined) {
+      indices.push(index);
+    }
+  });
+
+  return indices.length === 0 ? undefined : errorMessage.concat(indices.join());
+};
 
 export const SourcesPanelForStartChat: React.FC = () => {
   const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();
   const { indices, isLoading } = useQueryIndices();
   const { fields } = useIndicesFields(selectedIndices || []);
+  const [sourceFieldErrorMessage, setSourceFieldErrorMessage] = useState<string>();
 
   const {
     field: { onChange: elasticsearchQueryOnChange },
@@ -45,9 +59,10 @@ export const SourcesPanelForStartChat: React.FC = () => {
   useEffect(() => {
     if (fields) {
       const defaultFields = getDefaultQueryFields(fields);
-      const defaultSourceFields = getDefaultSourceFields(fields);
       elasticsearchQueryOnChange(createQuery(defaultFields, fields));
+      const defaultSourceFields = getDefaultSourceFields(fields);
       sourceFieldsOnChange(defaultSourceFields);
+      setSourceFieldErrorMessage(transformToErrorMessage(defaultSourceFields));
     }
   }, [fields, elasticsearchQueryOnChange, sourceFieldsOnChange]);
 
@@ -65,6 +80,19 @@ export const SourcesPanelForStartChat: React.FC = () => {
         <EuiFlexItem>
           <IndicesTable indices={selectedIndices} onRemoveClick={removeIndex} />
         </EuiFlexItem>
+      )}
+
+      {sourceFieldErrorMessage && (
+        <EuiCallOut color="warning" iconType="warning">
+          <p>
+            {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
+              defaultMessage: '{errorMessage}',
+              values: {
+                errorMessage: sourceFieldErrorMessage,
+              },
+            })}
+          </p>
+        </EuiCallOut>
       )}
 
       {isLoading && (
