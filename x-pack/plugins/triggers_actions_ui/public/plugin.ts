@@ -379,7 +379,7 @@ export class Plugin
       },
     });
 
-    if (this.experimentalFeatures.globalAlertsPage) {
+    if (this.experimentalFeatures.stackAlertsPage) {
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: ALERTS_PAGE_ID,
         title: alertsFeatureTitle,
