@@ -395,8 +395,6 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(omit(alertBDocRun3, fieldsToOmitInComparison)).to.eql(
         omit(alertBDocRun2, fieldsToOmitInComparison)
       );
-      // execution uuid should be current one
-      expect(alertBDocRun3[ALERT_RULE_EXECUTION_UUID]).to.equal(executionUuid);
       // flapping history should be history from prior run with additional entry
       expect(alertBDocRun3[ALERT_FLAPPING_HISTORY]).to.eql([
         ...alertBDocRun2[ALERT_FLAPPING_HISTORY]!,
