@@ -34,9 +34,7 @@ run(async ({ log }) => {
   // const filePaths = paths.map((path) => (new File(path)).getRelativePath());
 
   if (!filePaths.length) {
-    throw createFailError(
-      `A top level .prettierrc file should exist and no file was found.`
-    );
+    throw createFailError(`A top level .prettierrc file should exist and no file was found.`);
   }
 
   if (filePaths.length > 1) {
