@@ -80,6 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         lastActivityText,
         `[data-test-subj=${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutFieldValue}]`
       );
+
+      await PageObjects.datasetQuality.closeFlyout();
+
       expect(lastActivityTextExists).to.eql(true);
     });
 

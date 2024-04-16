@@ -76,6 +76,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         lastActivityText,
         `[data-test-subj=${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutFieldValue}]`
       );
+
+      await PageObjects.datasetQuality.closeFlyout();
+
       expect(lastActivityTextExists).to.eql(true);
     });
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
 import { i18n } from '@kbn/i18n';
@@ -67,7 +67,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     }
   }, [lens, attributes, timeRange]);
 
-  const getOpenInLensAction = (): Action => {
+  const getOpenInLensAction = useMemo(() => {
     return {
       id: ACTION_OPEN_IN_LENS,
       type: 'link',
@@ -85,14 +85,14 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
         return openInLensCallback();
       },
     };
-  };
+  }, [openInLensCallback]);
 
   const logsExplorerLinkProps = useLinkToLogsExplorer({
     dataStreamStat: dataStreamStat!,
     query: { language: 'kuery', query: '_ignored:*' },
   });
 
-  const getOpenInLogsExplorerAction = (): Action => {
+  const getOpenInLogsExplorerAction = useMemo(() => {
     return {
       id: ACTION_EXPLORE_IN_LOGS_EXPLORER,
       type: 'link',
@@ -113,9 +113,9 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
       },
       order: 18,
     };
-  };
+  }, [logsExplorerLinkProps]);
 
-  const extraActions: Action[] = [getOpenInLensAction(), getOpenInLogsExplorerAction()];
+  const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
 
   return {
     attributes,
