@@ -574,7 +574,7 @@ export class DataViewsService {
       allowHidden:
         (indexPattern as DataViewSpec).allowHidden == null
           ? (indexPattern as DataView)?.getAllowHidden?.()
-          : false,
+          : (indexPattern as DataViewSpec).allowHidden,
     });
 
   private getFieldsAndIndicesForDataView = async (
