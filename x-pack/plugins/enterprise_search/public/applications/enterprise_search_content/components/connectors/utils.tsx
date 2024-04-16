@@ -223,7 +223,7 @@ export const getOrphanedJobsTooltip = (orphanedCount: number, isCrawler: boolean
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.orphanedTooltip"
-        defaultMessage="{orphanedCount} {orphanedCountText} - Number of sync jobs whose associated connector is not found"
+        defaultMessage="{orphanedCount} {orphanedCountText} - Number of sync jobs whose associated connector can't be found. The connector might have been deleted."
         values={{
           orphanedCount: <b>{orphanedCount}</b>,
           orphanedCountText: (
@@ -238,7 +238,7 @@ export const getOrphanedJobsTooltip = (orphanedCount: number, isCrawler: boolean
     ) : (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.orphanedCrawlerTooltip"
-        defaultMessage="{orphanedCount} {orphanedCountText} - Number of crawls whose associated crawler is not found"
+        defaultMessage="{orphanedCount} {orphanedCountText} - Number of crawl jobs whose associated crawler can't be found. The crawler might have been deleted."
         values={{
           orphanedCount: <b>{orphanedCount}</b>,
           orphanedCountText: (
