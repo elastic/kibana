@@ -78,6 +78,8 @@ export const GuideCard = ({
           theme,
           docLinks,
           http,
+          url,
+          navigateToUrl,
         },
       });
     }

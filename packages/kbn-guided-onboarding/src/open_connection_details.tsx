@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import * as conn from '@kbn/cloud/connection_details';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { BrowserUrlService } from '@kbn/share-plugin/public';
 
 export interface OpenConnectionDetailsParams {
   options: {
@@ -22,17 +23,26 @@ export interface OpenConnectionDetailsParams {
     overlays: CoreStart['overlays'];
     theme: CoreStart['theme'];
     http?: CoreStart['http'];
+    url?: BrowserUrlService;
+    navigateToUrl?: (url: string) => void;
   };
 }
 
-export const openConnectionDetails = ({options, dependencies}: OpenConnectionDetailsParams) => {
-  const { http } = dependencies;
+export const openConnectionDetails = async ({options, dependencies}: OpenConnectionDetailsParams) => {
+  const { http, docLinks, url } = dependencies;
+  const locator = url?.locators.get('MANAGEMENT_APP_LOCATOR');
+  const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
   const opts: conn.ConnectionDetailsOpts = {
+    navigateToUrl: (url: string) => {
+      if (flyoutRef) flyoutRef.close();
+      dependencies.navigateToUrl?.(url);
+    },
     links: {
-      learnMore: dependencies.docLinks.links.fleet.apiKeysLearnMore,
+      learnMore: docLinks.links.fleet.apiKeysLearnMore,
     },
     endpoints: options.endpoints,
     apiKeys: {
+      manageKeysLink: manageKeysLink,
       createKey: async ({ name }) => {
         if (!http) {
           throw new Error('HTTP service is not available');
@@ -82,6 +92,7 @@ export const openConnectionDetails = ({options, dependencies}: OpenConnectionDet
 
     return () => ReactDOM.unmountComponentAtNode(element);
   };
+  const flyoutRef = dependencies.overlays.openFlyout(mount, {size: 's'});
 
-  return dependencies.overlays.openFlyout(mount, {size: 's'});
+  return flyoutRef;
 };
