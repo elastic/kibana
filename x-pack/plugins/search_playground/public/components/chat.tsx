@@ -83,6 +83,11 @@ export const Chat = () => {
     [messages]
   );
 
+  const isToolBarActionsDisabled = useMemo(
+    () => chatMessages.length <= 1 || !!error || isRegenerating || isSubmitting,
+    [chatMessages, error, isSubmitting, isRegenerating]
+  );
+
   const regenerateMessages = async () => {
     setIsRegenerating(true);
     const formData = getValues();
@@ -138,7 +143,7 @@ export const Chat = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="sparkles"
-                    disabled={chatMessages.length <= 1 || !!error || isRegenerating}
+                    disabled={isToolBarActionsDisabled}
                     onClick={regenerateMessages}
                   >
                     <FormattedMessage
@@ -150,7 +155,7 @@ export const Chat = () => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     iconType="refresh"
-                    disabled={chatMessages.length <= 1 || !!error || isRegenerating}
+                    disabled={isToolBarActionsDisabled}
                     onClick={() => {
                       setMessages([]);
                     }}
