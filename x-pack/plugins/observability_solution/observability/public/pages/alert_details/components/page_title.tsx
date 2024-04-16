@@ -34,6 +34,8 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../alert_details';
+import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface PageTitleProps {
   alert: TopAlert | null;
@@ -53,6 +55,7 @@ export function pageTitleContent(ruleCategory: string) {
 
 export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
+  const { config } = usePluginContext();
 
   if (!alert) return <EuiLoadingSpinner />;
 
@@ -64,7 +67,9 @@ export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) 
     <div data-test-subj={dataTestSubj}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
         {pageTitleContent(alert.fields[ALERT_RULE_CATEGORY])}
-        {showExperimentalBadge && <ExperimentalBadge />}
+        {isAlertDetailsEnabledPerApp(alert, config) && showExperimentalBadge && (
+          <ExperimentalBadge />
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
