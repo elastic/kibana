@@ -87,35 +87,6 @@ function matchBrowserServer(selector, pkg) {
 
 /**
  * @param {import('./types').PluginSelector} selector
- * @param {string[] | undefined} packageNodeRoles
- */
-function matchNodeRoles(selector, packageNodeRoles) {
-  // no node roles, all plugins
-  if (selector.nodeRoles == null) {
-    return true;
-  }
-
-  // the migrator node needs to load all plugins, this can't be configured in the manifest
-  if (selector.nodeRoles?.migrator) {
-    return true;
-  }
-
-  // if the package doesn't specify the node roles, assume only for UI
-  packageNodeRoles = packageNodeRoles || ['ui'];
-  
-  if (selector.nodeRoles?.ui && packageNodeRoles.includes('ui')) {
-    return true;
-  }
-
-  if (selector.nodeRoles?.backgroundTasks && packageNodeRoles.includes('background_tasks')) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * @param {import('./types').PluginSelector} selector
  */
 function getPluginPackagesFilter(selector = {}) {
   /**
@@ -128,8 +99,7 @@ function getPluginPackagesFilter(selector = {}) {
     matchParentDirsLimit(selector, pkg.directory) &&
     (matchCategory(selector, pkg.getPluginCategories()) ||
       matchPluginPaths(selector, pkg.directory) ||
-      matchPluginParentDirs(selector, pkg.directory)) &&
-    matchNodeRoles(selector, pkg.manifest.plugin.nodeRoles);
+      matchPluginParentDirs(selector, pkg.directory))
 }
 
 /**

@@ -23,7 +23,7 @@ import {
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { PluginConfigDescriptor, PluginManifest } from '@kbn/core-plugins-server';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
@@ -302,7 +302,7 @@ export class PluginsService
     for (const plugin of plugins) {
       const isEnabled =
         enableAllPlugins ||
-        (await this.coreContext.configService.isEnabledAtPath(plugin.configPath));
+        ((await this.coreContext.configService.isEnabledAtPath(plugin.configPath)) && (this.matchNodeRoles(node, plugin.manifest)));
 
       if (pluginEnableStatuses.has(plugin.name)) {
         throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
@@ -363,6 +363,26 @@ export class PluginsService
     }
   }
 
+  private matchNodeRoles(node: InternalNodeServicePreboot, pluginManifest: PluginManifest): boolean {
+    // the migrator node needs to load all plugins, this can't be configured in the manifest
+    if (node.roles?.migrator) {
+      return true;
+    }
+
+    // if the manifest doesn't specify the node roles, assume only for UI
+    const pluginNodeRoles = pluginManifest.nodeRoles || ['ui'];
+
+    if (node.roles?.ui && pluginNodeRoles.includes('ui')) {
+      return true;
+    }
+
+    if (node.roles?.backgroundTasks && pluginNodeRoles.includes('background_tasks')) {
+      return true;
+    }
+
+    return false;
+  }
+
   /** Throws an error if the plugin's dependencies are invalid. */
   private validatePluginDependencies(
     node: InternalNodeServicePreboot,
@@ -379,14 +399,14 @@ export class PluginsService
             `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it is missing.`
           );
         }
-  
+
         const requiredPlugin = pluginEnableStatuses.get(requiredBundleId)!.plugin;
         if (!requiredPlugin.includesUiPlugin) {
           throw new Error(
             `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" but it doesn't have a UI bundle.`
           );
         }
-  
+
         if (requiredPlugin.manifest.type !== plugin.manifest.type) {
           throw new Error(
             `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" and expected to have "${manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
@@ -427,7 +447,7 @@ export class PluginsService
       .filter(
         (dependencyName) =>
           pluginEnableStatuses.get(dependencyName)?.plugin.manifest.type !==
-            pluginInfo.plugin.manifest.type ||
+          pluginInfo.plugin.manifest.type ||
           !this.shouldEnablePlugin(dependencyName, pluginEnableStatuses, [...parents, pluginName])
             .enabled
       );
