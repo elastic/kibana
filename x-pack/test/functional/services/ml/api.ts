@@ -28,7 +28,6 @@ import {
 import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
 import { getCommonRequestHeader } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlSecurityCommon } from './security_common';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
@@ -80,10 +79,7 @@ export interface TrainedModelVocabulary {
   vocabulary: string[];
 }
 
-export function MachineLearningAPIProvider(
-  { getService }: FtrProviderContext,
-  mlSecurityCommon: MlSecurityCommon
-) {
+export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');

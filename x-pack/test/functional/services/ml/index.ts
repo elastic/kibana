@@ -77,6 +77,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyCharts = AnomalyChartsProvider(context);
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context, anomalyCharts);
+  const api = MachineLearningAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
 
@@ -88,8 +89,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const dataDrift = MachineLearningDataDriftProvider(context);
 
-  const securityCommon = MachineLearningSecurityCommonProvider(context);
-  const api = MachineLearningAPIProvider(context, securityCommon);
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
@@ -151,6 +150,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
+  const securityCommon = MachineLearningSecurityCommonProvider(context);
   const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
