@@ -15,7 +15,7 @@ import { OsCondition } from './os_conditions';
 import type { CriteriaConditionsProps, Entry } from './types';
 
 export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
-  ({ os, entries, dataTestSubj }) => {
+  ({ os, entries, dataTestSubj, showValueListModal }) => {
     return (
       <EuiPanel
         color="subdued"
@@ -34,6 +34,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                 entry={entry}
                 index={index}
                 dataTestSubj={dataTestSubj}
+                showValueListModal={showValueListModal}
               />
               {nestedEntries?.length
                 ? nestedEntries.map((nestedEntry: Entry, nestedIndex: number) => (
@@ -43,6 +44,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                       index={nestedIndex}
                       isNestedEntry={true}
                       dataTestSubj={dataTestSubj}
+                      showValueListModal={showValueListModal}
                     />
                   ))
                 : null}

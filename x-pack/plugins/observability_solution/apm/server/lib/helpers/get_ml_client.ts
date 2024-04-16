@@ -11,7 +11,7 @@ import {
   MlModules,
 } from '@kbn/ml-plugin/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export interface MlClient {
   mlSystem: MlMlSystem;
@@ -23,7 +23,7 @@ export async function getMlClient({
   plugins,
   context,
   request,
-}: APMRouteHandlerResources) {
+}: MinimalAPMRouteHandlerResources) {
   const [coreContext, licensingContext] = await Promise.all([
     context.core,
     context.licensing,

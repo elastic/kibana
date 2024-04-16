@@ -974,6 +974,8 @@
       "@kbn/interpreter/*": ["packages/kbn-interpreter/*"],
       "@kbn/io-ts-utils": ["packages/kbn-io-ts-utils"],
       "@kbn/io-ts-utils/*": ["packages/kbn-io-ts-utils/*"],
+      "@kbn/ipynb": ["packages/kbn-ipynb"],
+      "@kbn/ipynb/*": ["packages/kbn-ipynb/*"],
       "@kbn/jest-serializers": ["packages/kbn-jest-serializers"],
       "@kbn/jest-serializers/*": ["packages/kbn-jest-serializers/*"],
       "@kbn/journeys": ["packages/kbn-journeys"],
