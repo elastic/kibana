@@ -56,6 +56,10 @@ export const LinkContent = ({
   const [isTextCopied, setTextCopied] = useState(false);
   const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
+  const isNotSaved = useCallback(() => {
+    return isDirty;
+  }, [isDirty]);
+
   const getUrlParamExtensions = useCallback(
     (tempUrl: string): string => {
       if (!urlParams) return tempUrl;
@@ -100,7 +104,7 @@ export const LinkContent = ({
   );
 
   const getSavedObjectUrl = useCallback(() => {
-    if (isDirty) {
+    if (isNotSaved()) {
       return;
     }
 
@@ -129,7 +133,7 @@ export const LinkContent = ({
       }),
     });
     return updateUrlParams(formattedUrl);
-  }, [getSnapshotUrl, isDirty, updateUrlParams]);
+  }, [getSnapshotUrl, isNotSaved, updateUrlParams]);
 
   const createShortUrl = useCallback(async () => {
     if (shareableUrlLocatorParams) {
@@ -168,6 +172,26 @@ export const LinkContent = ({
     });
   }, [allowShortUrl, createShortUrl, getSavedObjectUrl, getSnapshotUrl, objectType, setUrl, url]);
 
+  const renderSaveState =
+    objectType === 'lens' && isNotSaved() ? (
+      <FormattedMessage
+        id="share.link.lens.saveUrlBox"
+        defaultMessage="There are unsaved changes. Before you generate a link, save the {objectType}."
+        values={{ objectType }}
+      />
+    ) : objectType === 'lens' ? (
+      shortUrlCache ?? shareableUrl
+    ) : (
+      shareableUrl ?? shortUrlCache ?? ''
+    );
+
+  const lensOnClick = () => {
+    if (objectType === 'lens' && !isDirty) {
+      return copyUrlHelper();
+    } else {
+      return copyUrlHelper();
+    }
+  };
   return (
     <>
       <EuiForm>
@@ -182,9 +206,7 @@ export const LinkContent = ({
         <EuiSpacer size="l" />
         {objectType !== 'dashboard' && (
           <EuiCodeBlock whiteSpace="pre" css={{ paddingRight: '30px' }}>
-            {objectType === 'lens'
-              ? shortUrlCache ?? shareableUrl
-              : shareableUrl ?? shortUrlCache ?? ''}
+            {renderSaveState}
           </EuiCodeBlock>
         )}
         <EuiSpacer />
@@ -212,13 +234,14 @@ export const LinkContent = ({
               color={
                 objectType === 'dashboard' && allowShortUrl
                   ? 'primary'
-                  : isDirty
+                  : isNotSaved()
                   ? 'text'
                   : 'primary'
               }
               data-share-url={url}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
-              onClick={() => (objectType === 'lens' && isDirty ? null : copyUrlHelper())}
+              onClick={lensOnClick}
+              disabled={objectType === 'lens' && isDirty}
             >
               <FormattedMessage id="share.link.copyLinkButton" defaultMessage="Copy link" />
             </EuiButton>
