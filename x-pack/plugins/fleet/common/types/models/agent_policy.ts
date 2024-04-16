@@ -10,7 +10,7 @@ import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/type
 import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
 
-import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
+import type { PackagePolicy, PackagePolicyPackage, LimitedPackagePolicy } from './package_policy';
 import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -46,7 +46,7 @@ export interface NewAgentPolicy {
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
-  package_policies?: PackagePolicy[];
+  package_policies?: Array<PackagePolicy | LimitedPackagePolicy>;
   is_managed: boolean; // required for created policy
   updated_at: string;
   updated_by: string;
