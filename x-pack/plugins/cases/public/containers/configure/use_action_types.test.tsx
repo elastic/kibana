@@ -47,7 +47,7 @@ for (let i = 0; i <= 250; i = i + 1) {
       const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
         wrapper: appMockRenderer.AppWrapper,
       });
-      await waitForNextUpdate();
+      await waitForNextUpdate({ timeout: 2000 });
       expect(addErrorMock).toHaveBeenCalled();
     });
   });
