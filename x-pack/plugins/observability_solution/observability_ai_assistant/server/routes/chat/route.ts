@@ -12,7 +12,50 @@ import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { screenContextRt, messageRt } from '../runtime_types';
+import { screenContextRt, messageRt, functionRt } from '../runtime_types';
+import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+
+const chatCompleteBaseRt = t.type({
+  body: t.intersection([
+    t.type({
+      messages: t.array(messageRt),
+      connectorId: t.string,
+      persist: toBooleanRt,
+    }),
+    t.partial({
+      conversationId: t.string,
+      title: t.string,
+      responseLanguage: t.string,
+      instructions: t.array(
+        t.union([
+          t.string,
+          t.type({
+            doc_id: t.string,
+            text: t.string,
+          }),
+        ])
+      ),
+    }),
+  ]),
+});
+
+const chatCompleteInternalRt = t.intersection([
+  chatCompleteBaseRt,
+  t.type({
+    body: t.type({
+      screenContexts: t.array(screenContextRt),
+    }),
+  }),
+]);
+
+const chatCompletePublicRt = t.intersection([
+  chatCompleteBaseRt,
+  t.type({
+    body: t.partial({
+      actions: t.array(functionRt),
+    }),
+  }),
+]);
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -25,17 +68,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         name: t.string,
         messages: t.array(messageRt),
         connectorId: t.string,
-        functions: t.array(
-          t.intersection([
-            t.type({
-              name: t.string,
-              description: t.string,
-            }),
-            t.partial({
-              parameters: t.any,
-            }),
-          ])
-        ),
+        functions: t.array(functionRt),
       }),
       t.partial({
         functionCall: t.string,
@@ -82,92 +115,108 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
-const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-  options: {
-    tags: ['access:ai_assistant'],
-  },
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        messages: t.array(messageRt),
-        screenContexts: t.array(screenContextRt),
-        connectorId: t.string,
-        persist: toBooleanRt,
-      }),
-      t.partial({
-        conversationId: t.string,
-        title: t.string,
-        responseLanguage: t.string,
-        instructions: t.array(
-          t.union([
-            t.string,
-            t.type({
-              doc_id: t.string,
-              text: t.string,
-            }),
-          ])
-        ),
-      }),
-    ]),
-  }),
-  handler: async (resources): Promise<Readable> => {
-    const { request, params, service, context } = resources;
+async function chatComplete(
+  resources: ObservabilityAIAssistantRouteHandlerResources & {
+    params: t.TypeOf<typeof chatCompleteInternalRt>;
+  }
+) {
+  const { request, params, service } = resources;
 
-    const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-      service.getClient({ request }),
-      resources.plugins.cloud?.start() || Promise.resolve(undefined),
-      (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
-    ]);
+  const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
+    service.getClient({ request }),
+    resources.plugins.cloud?.start() || Promise.resolve(undefined),
+    (
+      await resources.context.core
+    ).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
+  ]);
 
-    if (!client) {
-      throw notImplemented();
-    }
+  if (!client) {
+    throw notImplemented();
+  }
 
-    const {
-      body: {
-        messages,
-        connectorId,
-        conversationId,
-        title,
-        persist,
-        screenContexts,
-        responseLanguage,
-        instructions,
-      },
-    } = params;
-
-    const controller = new AbortController();
-
-    request.events.aborted$.subscribe(() => {
-      controller.abort();
-    });
-
-    const functionClient = await service.getFunctionClient({
-      signal: controller.signal,
-      resources,
-      client,
-      screenContexts,
-    });
-
-    const response$ = client.complete({
+  const {
+    body: {
       messages,
       connectorId,
       conversationId,
       title,
       persist,
-      signal: controller.signal,
-      functionClient,
+      screenContexts,
       responseLanguage,
       instructions,
-      simulateFunctionCalling,
-    });
+    },
+  } = params;
 
-    return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));
+  const controller = new AbortController();
+
+  request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+
+  const functionClient = await service.getFunctionClient({
+    signal: controller.signal,
+    resources,
+    client,
+    screenContexts,
+  });
+
+  const response$ = client.complete({
+    messages,
+    connectorId,
+    conversationId,
+    title,
+    persist,
+    signal: controller.signal,
+    functionClient,
+    responseLanguage,
+    instructions,
+    simulateFunctionCalling,
+  });
+
+  return response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled));
+}
+
+const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  params: chatCompleteInternalRt,
+  handler: async (resources): Promise<Readable> => {
+    return observableIntoStream(await chatComplete(resources));
+  },
+});
+
+const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  params: chatCompletePublicRt,
+  handler: async (resources): Promise<Readable> => {
+    const {
+      body: { actions, ...restOfBody },
+    } = resources.params;
+    return observableIntoStream(
+      await chatComplete({
+        ...resources,
+        params: {
+          body: {
+            ...restOfBody,
+            screenContexts: [
+              {
+                actions,
+              },
+            ],
+          },
+        },
+      })
+    );
   },
 });
 
 export const chatRoutes = {
   ...chatRoute,
   ...chatCompleteRoute,
+  ...publicChatCompleteRoute,
 };
