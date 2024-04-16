@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
 import { useSetInitialValue } from './use_set_initial_value';
 import { useSetupAutocompletePolling } from './use_setup_autocomplete_polling';
+import { useSetupAutosave } from './use_setup_autosave';
 import { useServicesContext, useEditorReadContext } from '../../../contexts';
 
 export interface EditorProps {
@@ -37,6 +38,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   }, [initialTextValue, setInitialValue, toasts]);
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
+
+  useSetupAutosave({ value });
 
   return (
     <div
