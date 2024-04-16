@@ -58,11 +58,14 @@ export function MachineLearningJobTableProvider(
 
   return new (class MlJobTable {
     public async assertJobsInTable(expectedJobIds: string[]) {
-      for await (const expectedId of expectedJobIds) {
-        const visibleText = await testSubjects.getVisibleText('mlJobListColumnId');
-        expect(visibleText).to.be(expectedId);
-      }
+      const sortedExpectedIds = expectedJobIds.sort();
+      const sortedActualJobIds = (await this.parseJobTable()).map((row) => row.id).sort();
+      expect(sortedActualJobIds).to.eql(
+        sortedExpectedIds,
+        `Expected jobs in table to be [${sortedExpectedIds}], got [${sortedActualJobIds}]`
+      );
     }
+
     public async filterByState(quickFilterButton: QuickFilterButtonTypes): Promise<void> {
       await find.clickByCssSelector(
         `[data-test-subj="mlJobListSearchBar"] span[data-text="${quickFilterButton}"]`
@@ -70,7 +73,10 @@ export function MachineLearningJobTableProvider(
       const ariaPressed: boolean = await find.existsByCssSelector(
         `[data-test-subj="mlJobListSearchBar"] button[aria-pressed="true"] span[data-text="${quickFilterButton}"]`
       );
-      expect(ariaPressed).to.be(true);
+      expect(ariaPressed).to.eql(
+        true,
+        `Expected quick filter button [${quickFilterButton}] to be pressed, but it was not pressed`
+      );
     }
 
     public async clickJobRowCalendarWithAssertion(
