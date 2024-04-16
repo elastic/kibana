@@ -7,6 +7,7 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import { once } from 'lodash';
 import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
@@ -181,6 +182,9 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         handler: RequestHandler<P, Q, B, Context, Method>,
         internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
+        if (typeof route.validate === 'function') {
+          route = { ...route, validate: once(route.validate) };
+        }
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({

@@ -192,7 +192,7 @@ describe('Versioned route', () => {
     }
   );
 
-  it('idempotency: constructs lazily provided validations once', async () => {
+  it('constructs lazily provided validations once (idempotency)', async () => {
     let handler: RequestHandler;
     (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
     const versionedRouter = CoreVersionedRouter.from({ router });
