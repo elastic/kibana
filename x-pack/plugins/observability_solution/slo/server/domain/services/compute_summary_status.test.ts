@@ -6,28 +6,23 @@
  */
 
 import { createErrorBudget } from '../../services/fixtures/error_budget';
-import { createSLO } from '../../services/fixtures/slo';
 import { computeSummaryStatus } from './compute_summary_status';
 
 describe('ComputeSummaryStatus', () => {
   it("returns 'NO_DATA' when sliValue is -1", () => {
-    expect(computeSummaryStatus(createSLO(), -1, createErrorBudget())).toBe('NO_DATA');
+    expect(computeSummaryStatus({ target: 0.9 }, -1, createErrorBudget())).toBe('NO_DATA');
   });
 
   it("returns 'HEALTHY' when sliValue >= target objective", () => {
-    expect(
-      computeSummaryStatus(createSLO({ objective: { target: 0.9 } }), 0.9, createErrorBudget())
-    ).toBe('HEALTHY');
+    expect(computeSummaryStatus({ target: 0.9 }, 0.9, createErrorBudget())).toBe('HEALTHY');
 
-    expect(
-      computeSummaryStatus(createSLO({ objective: { target: 0.9 } }), 0.99, createErrorBudget())
-    ).toBe('HEALTHY');
+    expect(computeSummaryStatus({ target: 0.9 }, 0.99, createErrorBudget())).toBe('HEALTHY');
   });
 
   it("returns 'DEGRADING' when sliValue < target objective with some remaining error budget", () => {
     expect(
       computeSummaryStatus(
-        createSLO({ objective: { target: 0.9 } }),
+        { target: 0.9 },
         0.8,
         createErrorBudget({ remaining: 0.01, consumed: 0.99 })
       )
@@ -37,7 +32,7 @@ describe('ComputeSummaryStatus', () => {
   it("returns 'VIOLATED' when sliValue < target objective and error budget is consummed", () => {
     expect(
       computeSummaryStatus(
-        createSLO({ objective: { target: 0.9 } }),
+        { target: 0.9 },
         0.8,
         createErrorBudget({ remaining: 0, consumed: 1.34 })
       )
