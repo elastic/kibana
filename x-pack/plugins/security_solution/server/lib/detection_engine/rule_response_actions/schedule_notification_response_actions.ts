@@ -37,14 +37,9 @@ export const getScheduleNotificationResponseActionsService =
         });
       }
       if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
-        const endpointAlerts = alerts.filter((alert) => {
-          return alert?.agent?.type === 'endpoint';
+        endpointResponseAction(responseAction, endpointAppContextService, {
+          alerts,
         });
-        if (endpointAlerts.length) {
-          endpointResponseAction(responseAction, endpointAppContextService, {
-            alerts: endpointAlerts,
-          });
-        }
       }
     });
   };
