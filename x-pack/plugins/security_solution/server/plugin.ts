@@ -559,6 +559,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+      assistantAlertsInsights: config.experimentalFeatures.assistantAlertsInsights,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     });
 

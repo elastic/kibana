@@ -7,7 +7,6 @@
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Subject } from 'rxjs';
 import { Filter } from '@kbn/es-query';
-
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface GroupFilters {
@@ -28,6 +27,9 @@ export type GroupSloProps = EmbeddableSloProps & {
 };
 
 export interface EmbeddableSloProps {
+  sloId?: string;
+  sloInstanceId?: string;
+  remoteName?: string;
   reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
   overviewMode?: OverviewMode;
