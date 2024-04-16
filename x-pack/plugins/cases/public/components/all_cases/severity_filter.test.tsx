@@ -14,60 +14,58 @@ import { screen, waitFor, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
-for (let i = 0; i <= 300; i = i + 1) {
-  describe('Severity form field', () => {
-    const onChange = jest.fn();
-    let appMockRender: AppMockRenderer;
-    const props = {
-      selectedOptionKeys: [],
-      onChange,
-    };
+describe('Severity form field', () => {
+  const onChange = jest.fn();
+  let appMockRender: AppMockRenderer;
+  const props = {
+    selectedOptionKeys: [],
+    onChange,
+  };
 
-    beforeEach(() => {
-      appMockRender = createAppMockRenderer();
-    });
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+  });
 
-    it('renders', async () => {
-      appMockRender.render(<SeverityFilter {...props} />);
+  it('renders', async () => {
+    appMockRender.render(<SeverityFilter {...props} />);
 
-      const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
-      expect(popoverButton).toBeInTheDocument();
-      expect(popoverButton).not.toBeDisabled();
+    const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
+    expect(popoverButton).toBeInTheDocument();
+    expect(popoverButton).not.toBeDisabled();
 
-      userEvent.click(popoverButton);
+    userEvent.click(popoverButton);
 
-      await waitForEuiPopoverOpen();
+    await waitForEuiPopoverOpen();
 
-      const allOptions = await within(await screen.findByTestId('euiSelectableList')).findAllByRole(
-        'option'
-      );
+    const allOptions = await within(await screen.findByTestId('euiSelectableList')).findAllByRole(
+      'option'
+    );
 
-      expect(allOptions.length).toBe(4);
-      expect(allOptions[0]).toHaveAttribute('title', CaseSeverity.LOW);
-      expect(allOptions[1]).toHaveAttribute('title', CaseSeverity.MEDIUM);
-      expect(allOptions[2]).toHaveAttribute('title', CaseSeverity.HIGH);
-      expect(allOptions[3]).toHaveAttribute('title', CaseSeverity.CRITICAL);
-    });
+    expect(allOptions.length).toBe(4);
+    expect(allOptions[0]).toHaveAttribute('title', CaseSeverity.LOW);
+    expect(allOptions[1]).toHaveAttribute('title', CaseSeverity.MEDIUM);
+    expect(allOptions[2]).toHaveAttribute('title', CaseSeverity.HIGH);
+    expect(allOptions[3]).toHaveAttribute('title', CaseSeverity.CRITICAL);
+  });
 
-    it('selects the correct value when changed', async () => {
-      appMockRender.render(<SeverityFilter {...props} />);
+  it('selects the correct value when changed', async () => {
+    appMockRender.render(<SeverityFilter {...props} />);
 
-      userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
 
-      await waitForEuiPopoverOpen();
+    await waitForEuiPopoverOpen();
 
-      userEvent.click(
-        await within(await screen.findByTestId('euiSelectableList')).findByRole('option', {
-          name: 'high',
-        })
-      );
+    userEvent.click(
+      await within(await screen.findByTestId('euiSelectableList')).findByRole('option', {
+        name: 'high',
+      })
+    );
 
-      await waitFor(() => {
-        expect(onChange).toHaveBeenCalledWith({
-          filterId: 'severity',
-          selectedOptionKeys: ['high'],
-        });
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'severity',
+        selectedOptionKeys: ['high'],
       });
     });
   });
-}
+});
