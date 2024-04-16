@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { PackageClient } from '@kbn/fleet-plugin/server';
 import { PackageNotFoundError } from '@kbn/fleet-plugin/server/errors';
 import { PackageListItem, RegistryDataStream } from '@kbn/fleet-plugin/common';
@@ -14,9 +15,10 @@ import { Integration } from '../../../common/api_types';
 
 export async function getIntegrations(options: {
   packageClient: PackageClient;
+  logger: Logger;
   type?: DataStreamType;
 }): Promise<Integration[]> {
-  const { packageClient, type = DEFAULT_DATASET_TYPE } = options;
+  const { packageClient, logger, type = DEFAULT_DATASET_TYPE } = options;
 
   const packages = await packageClient.getPackages();
   const installedPackages = packages.filter((p) => p.status === 'installed');
@@ -27,7 +29,7 @@ export async function getIntegrations(options: {
       title: p.title,
       version: p.version,
       icons: p.icons,
-      datasets: await getDatasets({ packageClient, pkg: p, type }),
+      datasets: await getDatasets({ packageClient, logger, pkg: p, type }),
     }))
   );
 
@@ -36,14 +38,16 @@ export async function getIntegrations(options: {
 
 const getDatasets = async (options: {
   packageClient: PackageClient;
+  logger: Logger;
   pkg: PackageListItem;
   type: DataStreamType;
 }) => {
-  const { packageClient, pkg, type } = options;
+  const { packageClient, logger, pkg, type } = options;
 
   return (
     (await fetchDatasets({
       packageClient,
+      logger,
       name: pkg.name,
       version: pkg.version,
       type,
@@ -53,6 +57,7 @@ const getDatasets = async (options: {
 
 const fetchDatasets = async (options: {
   packageClient: PackageClient;
+  logger: Logger;
   name: string;
   version: string;
   type: DataStreamType;
@@ -71,7 +76,12 @@ const fetchDatasets = async (options: {
       return null;
     }
 
-    throw error;
+    const { name, version, logger } = options;
+    logger.error(
+      `There was an error when trying to fetch information about package ${name} version ${version}: ${error}`
+    );
+
+    return {};
   }
 };
 

@@ -23,12 +23,12 @@ const integrationsRoute = createDatasetQualityServerRoute({
   async handler(resources): Promise<{
     integrations: Integration[];
   }> {
-    const { params, plugins } = resources;
+    const { params, plugins, logger } = resources;
 
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asInternalUser;
 
-    const integrations = await getIntegrations({ packageClient, ...params.query });
+    const integrations = await getIntegrations({ packageClient, logger, ...params.query });
 
     return { integrations };
   },
