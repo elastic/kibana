@@ -21,6 +21,76 @@
     "functions": [
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.cancelSync",
+        "type": "Function",
+        "tags": [],
+        "label": "cancelSync",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", syncJobId: string) => Promise<",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorAPICancelSyncResponse",
+            "text": "ConnectorAPICancelSyncResponse"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-search-connectors/lib/cancel_sync.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.cancelSync.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/lib/cancel_sync.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.cancelSync.$2",
+            "type": "string",
+            "tags": [],
+            "label": "syncJobId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-connectors/lib/cancel_sync.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.cancelSyncs",
         "type": "Function",
         "tags": [],
@@ -1382,6 +1452,53 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.isSyncCancellable",
+        "type": "Function",
+        "tags": [],
+        "label": "isSyncCancellable",
+        "description": [],
+        "signature": [
+          "(syncStatus: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.SyncStatus",
+            "text": "SyncStatus"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.isSyncCancellable.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "syncStatus",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.SyncStatus",
+                "text": "SyncStatus"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/utils/sync_status_to_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.pageToPagination",
         "type": "Function",
         "tags": [],
@@ -1647,7 +1764,7 @@
         "label": "SyncJobsTable",
         "description": [],
         "signature": [
-          "({ isLoading, onPaginate, pagination, syncJobs, type, }: React.PropsWithChildren<SyncJobHistoryTableProps>) => JSX.Element"
+          "({ isLoading, onPaginate, pagination, syncJobs, type, cancelConfirmModalProps, }: React.PropsWithChildren<SyncJobHistoryTableProps>) => JSX.Element"
         ],
         "path": "packages/kbn-search-connectors/components/sync_jobs/sync_jobs_table.tsx",
         "deprecated": false,
@@ -1658,7 +1775,7 @@
             "id": "def-common.SyncJobsTable.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  isLoading,\n  onPaginate,\n  pagination,\n  syncJobs,\n  type,\n}",
+            "label": "{\n  isLoading,\n  onPaginate,\n  pagination,\n  syncJobs,\n  type,\n  cancelConfirmModalProps = {\n    onConfirmCb: () => {},\n    isLoading: false,\n    setSyncJobIdToCancel: () => {},\n    syncJobIdToCancel: undefined,\n  },\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<SyncJobHistoryTableProps>"
@@ -3434,6 +3551,31 @@
             "label": "sync_now",
             "description": [],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ConnectorAPICancelSyncResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorAPICancelSyncResponse",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connectors_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorAPICancelSyncResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connectors_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5968,6 +6110,20 @@
             "tags": [],
             "label": "totalDurationSeconds",
             "description": [],
+            "path": "packages/kbn-search-connectors/types/connector_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.SyncJobStatsByState.topErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "topErrors",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-search-connectors/types/connector_stats.ts",
             "deprecated": false,
             "trackAdoption": false

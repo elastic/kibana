@@ -17,6 +17,7 @@ import * as tabs from './tabs';
 import { getField } from '../shared/utils';
 import { EventKind } from '../shared/constants/event_kinds';
 import { useLeftPanelContext } from './context';
+import { LeftPanelTour } from './components/tour';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
 export const DocumentDetailsLeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
@@ -76,6 +77,7 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
 
   return (
     <>
+      <LeftPanelTour />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

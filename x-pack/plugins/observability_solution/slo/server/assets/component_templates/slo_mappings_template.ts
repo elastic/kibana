@@ -45,6 +45,34 @@ export const getSLOMappingsTemplate = (name: string): ClusterPutComponentTemplat
             },
           },
         },
+        // Synthetics specific fields
+        monitor: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            config_id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        observer: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            geo: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
         // SLO field mappings
         slo: {
           properties: {
