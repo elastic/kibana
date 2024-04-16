@@ -1,6 +1,163 @@
+import { ProductType, Project, CreateProjectRequestBody, Credentials, ProjectHandler } from './project_handler';
+import axios, { AxiosError } from 'axios';
+import pRetry from 'p-retry';
 
 
+const DEFAULT_REGION = 'aws-eu-west-1';
 
+export class ProxyHandler extends ProjectHandler {
 
+  constructor(baseEnvUrl: string) {
+    super(baseEnvUrl);
+  }
 
+  // Method to invoke the create project API for serverless.
+  async createSecurityProject(
+    projectName: string,
+    productTypes: ProductType[],
+    commit: string
+  ): Promise<Project | undefined> {
+    const body: CreateProjectRequestBody = {
+      name: projectName,
+      region_id: DEFAULT_REGION,
+      product_types: productTypes,
+    };
 
+    this.log.info(`Kibana override flag equals to ${process.env.KIBANA_MKI_USE_LATEST_COMMIT}!`);
+    if (
+      (process.env.KIBANA_MKI_USE_LATEST_COMMIT &&
+        process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1') ||
+      commit
+    ) {
+      const override = commit ? commit : process.env.BUILDKITE_COMMIT;
+      const kibanaOverrideImage = `${override?.substring(0, 12)}`;
+      this.log.info(
+        `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`
+      );
+      body.overrides = {
+        kibana: {
+          docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`,
+        },
+      };
+    }
+
+    try {
+      const response = await axios.post(
+        `${this.baseEnvUrl}/projects`,
+        body
+        // {
+        //   headers: {
+        //     Authorization: `ApiKey ${this.apiKey}`,
+        //   },
+        // }
+      );
+      return {
+        name: response.data.name,
+        id: response.data.project_id,
+        region: response.data.region_id,
+        es_url: `${response.data.elasticsearch_endpoint}:443`,
+        kb_url: `${response.data.kibana_endpoint}:443`,
+        product: response.data.project_type,
+        proxy_id: response.data.id,
+        proxy_org_id: response.data.organization_id,
+        proxy_org_name: response.data.organization_name,
+      };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const errorData = JSON.stringify(error.response?.data);
+        this.log.error(`${error.response?.status}:${errorData}`);
+      } else {
+        this.log.error(`${error.message}`);
+      }
+    }
+  }
+
+  // Method to invoke the delete project API for serverless.
+  async deleteSecurityProject(projectId: string, projectName: string): Promise<void> {
+    try {
+      await axios.delete(`${this.baseEnvUrl}/projects/${projectId}`, {
+        // headers: {
+        //   Authorization: `ApiKey ${this.apiKey}`,
+        // },
+      });
+      this.log.info(`Project ${projectName} was successfully deleted!`);
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        this.log.error(`${error.response?.status}:${error.response?.data}`);
+      } else {
+        this.log.error(`${error.message}`);
+      }
+    }
+  }
+
+  // Method to reset the credentials for the created project.
+  resetCredentials(projectId: string, runnerId: string): Promise<Credentials | undefined> {
+    this.log.info(`${runnerId} : Reseting credentials`);
+
+    const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
+      const response = await axios.post(
+        `${this.baseEnvUrl}/projects/${projectId}/_reset-internal-credentials`,
+        {},
+        {
+        //   headers: {
+            // Authorization: `ApiKey ${this.apiKey}`,
+        //   },
+        }
+      );
+      this.log.info('Credentials have ben reset');
+      return {
+        password: response.data.password,
+        username: response.data.username,
+      };
+    };
+
+    const retryOptions = {
+      onFailedAttempt: (error: Error | AxiosError) => {
+        if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+          this.log.info('Project is not reachable. A retry will be triggered soon..');
+        } else {
+          this.log.error(`${error.message}`);
+        }
+      },
+      retries: 100,
+      factor: 2,
+      maxTimeout: 20000,
+    };
+
+    return pRetry(fetchResetCredentialsStatusAttempt, retryOptions);
+  }
+
+  // Wait until Project is initialized
+  waitForProjectInitialized(projectId: string): Promise<void> {
+    const fetchProjectStatusAttempt = async (attemptNum: number) => {
+      this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
+      const response = await axios.get(
+        `${this.baseEnvUrl}/projects/${projectId}/status`,
+        {
+        //   headers: {
+            // Authorization: `ApiKey ${this.apiKey}`,
+        //   },
+        }
+      );
+      if (response.data.phase !== 'initialized') {
+        this.log.info(response.data);
+        throw new Error('Project is not initialized. A retry will be triggered soon...');
+      } else {
+        this.log.info('Project is initialized');
+      }
+    };
+    const retryOptions = {
+      onFailedAttempt: (error: Error | AxiosError) => {
+        if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+          this.log.info('Project is not reachable. A retry will be triggered soon...');
+        } else {
+          this.log.error(`${error.message}`);
+        }
+      },
+      retries: 100,
+      factor: 2,
+      maxTimeout: 20000,
+    };
+    return pRetry(fetchProjectStatusAttempt, retryOptions);
+  }
+}

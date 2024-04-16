@@ -30,11 +30,15 @@ export const samlAuthentication = async (
 
   on('task', {
     getSessionCookie: async (role: string | SecurityRoleName): Promise<string> => {
+      
+      // If proxy service is used, define the proxy org name to override the roles file.
+      console.log(`process proxy org is: ${config.env.PROXY_ORG}`)
+      const fileName = config.env.PROXY_ORG ? `${config.env.PROXY_ORG}.json` : undefined;
       const sessionManager = new SamlSessionManager({
         hostOptions,
         log,
         isCloud: config.env.CLOUD_SERVERLESS,
-      });
+      }, fileName);
       return sessionManager.getSessionCookieForRole(role);
     },
   });

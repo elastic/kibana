@@ -17,20 +17,40 @@ import grep from '@cypress/grep/src/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
 import { createFailError } from '@kbn/dev-cli-errors';
+import axios, { AxiosError } from 'axios';
 import path from 'path';
 import os from 'os';
+import pRetry from 'p-retry';
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { exec } from 'child_process';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
 
-import { ProductType, CloudHandler } from './project_handler/cloud_project_handler';
+import { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
+import { CloudHandler } from './project_handler/cloud_project_handler';
+import { ProxyHandler } from './project_handler/proxy_project_handler';
 
-const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
+const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
+  { product_line: 'security', product_tier: 'complete' },
+  { product_line: 'cloud', product_tier: 'complete' },
+  { product_line: 'endpoint', product_tier: 'complete' },
+] as const;
+
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-// const PROXY_URL = `${process.env.PROXY_URL}`;
+const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 
 let log: ToolingLog;
+const API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress-creds',
+  'x-elastic-internal-origin': 'security-solution',
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+});
+const PROVIDERS = Object.freeze({
+  providerType: 'basic',
+  providerName: 'cloud-basic',
+});
 
 const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   const userHomeDir = os.homedir();
@@ -43,11 +63,122 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   }
 };
 
-const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
-  { product_line: 'security', product_tier: 'complete' },
-  { product_line: 'cloud', product_tier: 'complete' },
-  { product_line: 'endpoint', product_tier: 'complete' },
-] as const;
+// Wait until elasticsearch status goes green
+function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
+  const fetchHealthStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
+
+    const response = await axios.get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+
+    log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info(
+          `${runnerId}: The Elasticsearch URL is not yet reachable. A retry will be triggered soon...`
+        );
+      }
+    },
+    retries: 50,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchHealthStatusAttempt, retryOptions);
+}
+
+// Wait until Kibana is available
+function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
+  const fetchKibanaStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if kibana is available.`);
+    const response = await axios.get(`${kbUrl}/api/status`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+    if (response.data.status.overall.level !== 'available') {
+      throw new Error(`${runnerId}: Kibana is not available. A retry will be triggered soon...`);
+    } else {
+      log.info(`${runnerId}: Kibana status overall is ${response.data.status.overall.level}.`);
+    }
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info(
+          `${runnerId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
+        );
+      } else {
+        log.info(`${runnerId}: ${error.message}`);
+      }
+    },
+    retries: 50,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+  return pRetry(fetchKibanaStatusAttempt, retryOptions);
+}
+
+// Wait for Elasticsearch to be accessible
+function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
+  const fetchEsAccessAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if can be accessed.`);
+
+    await axios.get(`${esUrl}`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info(
+          `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
+        );
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchEsAccessAttempt, retryOptions);
+}
+
+// Wait until application is ready
+function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<void> {
+  const body = {
+    ...PROVIDERS,
+    currentURL: '/',
+    params: credentials,
+  };
+
+  const fetchLoginStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if login can be performed.`);
+    axios.post(`${kbUrl}/internal/security/login`, body, {
+      headers: API_HEADERS,
+    });
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info('Project is not reachable. A retry will be triggered soon...');
+      } else {
+        log.error(`${error.message}`);
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+  return pRetry(fetchLoginStatusAttempt, retryOptions);
+}
 
 const getProductTypes = (
   tier: string,
@@ -90,9 +221,24 @@ export const cli = () => {
         return process.exit(1);
       }
 
+      const PROXY_URL = process.env.PROXY_URL 
+        ? process.env.PROXY_URL 
+        : undefined;
+
       const API_KEY = process.env.CLOUD_QA_API_KEY
         ? process.env.CLOUD_QA_API_KEY
         : getApiKeyFromElasticCloudJsonFile();
+
+      let cloudHandler: ProjectHandler;
+      if (PROXY_URL) {
+        cloudHandler = new ProxyHandler(PROXY_URL);
+      } else if (API_KEY) {
+        cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
+      } else {
+        log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
+        // eslint-disable-next-line no-process-exit
+        return process.exit(1);
+      }
 
       const PARALLEL_COUNT = process.env.PARALLEL_COUNT ? Number(process.env.PARALLEL_COUNT) : 1;
 
@@ -101,7 +247,6 @@ export const cli = () => {
           'The cloud environment to be provided with the env var CLOUD_ENV. Currently working only for QA so the script can proceed.'
         );
         // Abort when more environments will be integrated
-
         // return process.exit(0);
       }
 
@@ -225,10 +370,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       }
 
       const failedSpecFilePaths: string[] = [];
-      let cloudHandler: CloudHandler;
-      if (API_KEY) {
-        cloudHandler = new CloudHandler(API_KEY);
-      }
       const runSpecs = (filePaths: string[]) =>
         pMap(
           filePaths,
@@ -245,12 +386,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ? getProductTypes(tier, endpointAddon, cloudAddon)
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
-              if (!API_KEY) {
-                log.info('API KEY to create project could not be retrieved.');
-                // eslint-disable-next-line no-process-exit
-                return process.exit(1);
-              }
-
               log.info(`${id}: Creating project ${PROJECT_NAME}...`);
               // Creating project for the test to run
               const project = await cloudHandler.createSecurityProject(
@@ -266,7 +401,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               }
 
               context.addCleanupTask(() => {
-                const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+                let command: string;
+                if (PROXY_URL) {
+                  command = `curl DELETE ${PROXY_URL}/projects/${project.id}`
+                } else {
+                  command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+                }
                 exec(command);
               });
 
@@ -286,16 +426,16 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const auth = btoa(`${credentials.username}:${credentials.password}`);
 
               // Wait for elasticsearch status to go green.
-              await cloudHandler.waitForEsStatusGreen(project.es_url, auth, id);
+              await waitForEsStatusGreen(project.es_url, auth, id);
 
               // Wait until Kibana is available
-              await cloudHandler.waitForKibanaAvailable(project.kb_url, auth, id);
+              await waitForKibanaAvailable(project.kb_url, auth, id);
 
               // Wait for Elasticsearch to be accessible
-              await cloudHandler.waitForEsAccess(project.es_url, auth, id);
+              await waitForEsAccess(project.es_url, auth, id);
 
               // Wait until application is ready
-              await cloudHandler.waitForKibanaLogin(project.kb_url, credentials);
+              await waitForKibanaLogin(project.kb_url, credentials);
 
               // Normalized the set of available env vars in cypress
               const cyCustomEnv = {
@@ -304,7 +444,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ELASTICSEARCH_URL: project.es_url,
                 ELASTICSEARCH_USERNAME: credentials.username,
                 ELASTICSEARCH_PASSWORD: credentials.password,
-
+                
+                // Used in order to handle the correct role_users file loading.
+                PROXY_ORG: PROXY_URL ? project.proxy_org_name : undefined,
+                
                 KIBANA_URL: project.kb_url,
                 KIBANA_USERNAME: credentials.username,
                 KIBANA_PASSWORD: credentials.password,
