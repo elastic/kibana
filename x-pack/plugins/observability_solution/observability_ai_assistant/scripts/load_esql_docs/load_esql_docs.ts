@@ -146,6 +146,30 @@ yargs(process.argv.slice(2))
                       },
                     ];
 
+                  case 'esql-cross-clusters.html':
+                    return [
+                      {
+                        title: 'CROSS_CLUSTER',
+                        content: getSimpleText(),
+                      },
+                    ];
+
+                  case 'esql-query-api.html':
+                    return [
+                      {
+                        title: 'API',
+                        content: getSimpleText(),
+                      },
+                    ];
+
+                  case 'esql-kibana.html':
+                    return [
+                      {
+                        title: 'Kibana',
+                        content: getSimpleText(),
+                      },
+                    ];
+
                   case 'esql-functions-operators.html':
                     const sections = extractSections($element);
 
@@ -194,6 +218,7 @@ yargs(process.argv.slice(2))
                     });
 
                   default:
+                    log.debug('Dropping file', file);
                     break;
                 }
                 return [];
@@ -202,7 +227,13 @@ yargs(process.argv.slice(2))
           );
 
           const flattened = documents.flat().filter((doc) => {
-            return !doc.title.startsWith('ES|QL');
+            // ES|QL aggregate functions, ES|QL mathematical functions, ES|QL string functions etc
+            const isOverviewArticle = doc.title.startsWith('ES|QL');
+
+            if (isOverviewArticle) {
+              log.debug('Dropping overview article', doc.title);
+            }
+            return !isOverviewArticle;
           });
 
           const outDir = Path.join(
