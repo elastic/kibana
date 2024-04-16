@@ -15,6 +15,7 @@ export default function enterSpaceFunctionalTests({
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
   const spacesService = getService('spaces');
+  const browser = getService('browser');
 
   describe('Enter Space', function () {
     this.tags('includeFirefox');
@@ -80,6 +81,40 @@ export default function enterSpaceFunctionalTests({
       const newSpaceId = 'default';
       await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
       await PageObjects.spaceSelector.expectHomePage(newSpaceId);
+    });
+
+    it('allows user to navigate to different spaces with provided next route', async () => {
+      const spaceId = 'another-space';
+
+      await PageObjects.security.login(undefined, undefined, {
+        expectSpaceSelector: true,
+      });
+
+      const anchorElement = await PageObjects.spaceSelector.getSpaceCardAnchor(spaceId);
+      const path = await anchorElement.getAttribute('href');
+
+      const pathWithNextRoute = `${path}?next=/app/management/kibana/objects`;
+
+      await browser.navigateTo(pathWithNextRoute);
+
+      await PageObjects.spaceSelector.expectRoute(spaceId, '/app/management/kibana/objects');
+    });
+
+    it('falls back to the default home page if provided next route is malformed', async () => {
+      const spaceId = 'another-space';
+
+      await PageObjects.security.login(undefined, undefined, {
+        expectSpaceSelector: true,
+      });
+
+      const anchorElement = await PageObjects.spaceSelector.getSpaceCardAnchor(spaceId);
+      const path = await anchorElement.getAttribute('href');
+
+      const pathWithNextRoute = `${path}?next=http://example.com/evil`;
+
+      await browser.navigateTo(pathWithNextRoute);
+
+      await PageObjects.spaceSelector.expectRoute(spaceId, '/app/canvas');
     });
   });
 }
