@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type OperationIdCounter = ReturnType<typeof createOperationIdCounter>;
+export type OperationIdCounter = (name: string) => string;
 
 export const createOperationIdCounter = () => {
   const operationIdCounters = new Map<string, number>();
