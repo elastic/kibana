@@ -11,6 +11,7 @@ interface ModelFields {
   field: string;
   model_id: string;
   nested: boolean;
+  indices: string[];
 }
 
 export interface QuerySourceFields {
