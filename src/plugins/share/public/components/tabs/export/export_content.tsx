@@ -46,7 +46,7 @@ const CopyPOSTUrlButton = ({ unsavedChangesExist, postUrl }: ICopyPOSTUrlProps) 
         <EuiCopy textToCopy={postUrl ?? ''}>
           {(copy) => (
             <EuiButtonEmpty
-              iconType="copy"
+              iconType="copyClipboard"
               onClick={copy}
               data-test-subj="shareReportingCopyURL"
               flush="both"
@@ -217,7 +217,7 @@ const ExportContentUi = ({
         fill
         color="primary"
         onClick={getReport}
-        data-test-subj="generateExportButton"
+        data-test-subj="generateReportButton"
         isLoading={isCreatingExport}
       >
         {generateExportButtonLabel}

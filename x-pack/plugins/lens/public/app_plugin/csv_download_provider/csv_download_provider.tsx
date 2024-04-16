@@ -174,7 +174,7 @@ export const downloadCsvShareProvider = ({
               helpText: (
                 <FormattedMessage
                   id="xpack.lens.share.helpText"
-                  defaultMessage="Export a PDF, PNG, or CSV of this visualization."
+                  defaultMessage="Select the file type you would like to export for this visualization."
                 />
               ),
               generateExportButtonLabel: (
