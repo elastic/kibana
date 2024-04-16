@@ -255,7 +255,7 @@ const startFleetServerWithDocker = async ({
     `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
   );
 
-  let retryAttempt = isServerless ? 0 : 1;
+  let retryAttempt = 0;
   const attemptServerlessFleetServerSetup = async (): Promise<StartedServer> => {
     return log.indent(4, async () => {
       const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
