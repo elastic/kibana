@@ -128,7 +128,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
           <EuiSplitPanel.Inner grow={false} color="subdued">
             <EuiToolTip
               anchorProps={tooltipAncherProps}
-              content={getConnectedConnectorsTooltipContent(connectedCount)}
+              content={getConnectedConnectorsTooltipContent(connectedCount, isCrawler)}
             >
               <EuiBadge
                 color="success"
@@ -141,7 +141,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
 
             <EuiToolTip
               anchorProps={tooltipAncherProps}
-              content={getIncompleteConnectorsTooltip(incompleteCount)}
+              content={getIncompleteConnectorsTooltip(incompleteCount, isCrawler)}
             >
               <EuiBadge
                 color="warning"

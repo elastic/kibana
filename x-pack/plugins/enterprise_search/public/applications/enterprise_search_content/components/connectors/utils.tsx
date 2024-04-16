@@ -27,40 +27,77 @@ export const getConnectedConnectorsBadgeLabel = (connectedCount: number) => (
     }}
   />
 );
-export const getConnectedConnectorsTooltipContent = (connectedCount: number) => (
+export const getConnectedConnectorsTooltipContent = (
+  connectedCount: number,
+  isCrawler: boolean
+) => (
   <EuiText size="xs">
-    <FormattedMessage
-      id="xpack.enterpriseSearch.connectorStats.connectedTooltip"
-      defaultMessage="{connectedCount} {completeConnectorsText} - Number of connectors which are complete in the last 30 minutes"
-      values={{
-        completeConnectorsText: (
-          <b>
-            {i18n.translate('xpack.enterpriseSearch.connectorStats.connectorTooltipConnected', {
-              defaultMessage: `Connected connectors`,
-            })}
-          </b>
-        ),
-        connectedCount: <b>{connectedCount}</b>,
-      }}
-    />
+    {!isCrawler ? (
+      <FormattedMessage
+        id="xpack.enterpriseSearch.connectorStats.connectedTooltip"
+        defaultMessage="{connectedCount} {completeConnectorsText} - Number of connectors which are complete in the last 30 minutes"
+        values={{
+          completeConnectorsText: (
+            <b>
+              {i18n.translate('xpack.enterpriseSearch.connectorStats.connectorTooltipConnected', {
+                defaultMessage: `Connected connectors`,
+              })}
+            </b>
+          ),
+          connectedCount: <b>{connectedCount}</b>,
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.enterpriseSearch.connectorStats.connectedCrawlerTooltip"
+        defaultMessage="{connectedCount} {completeConnectorsText} - Number of crawlers that are configured and connected."
+        values={{
+          completeConnectorsText: (
+            <b>
+              {i18n.translate('xpack.enterpriseSearch.connectorStats.crawlerTooltipConnected', {
+                defaultMessage: `Connected crawlers`,
+              })}
+            </b>
+          ),
+          connectedCount: <b>{connectedCount}</b>,
+        }}
+      />
+    )}
   </EuiText>
 );
-export const getIncompleteConnectorsTooltip = (incompleteCount: number) => (
+export const getIncompleteConnectorsTooltip = (incompleteCount: number, isCrawler: boolean) => (
   <EuiText size="xs">
-    <FormattedMessage
-      id="xpack.enterpriseSearch.connectorStats.incompleteTooltip"
-      defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of connectors which are not ready to sync (i.e. the connector is not completely configured), or there’s no backend connector running which knows how to sync it."
-      values={{
-        incompleteConnectorsText: (
-          <b>
-            {i18n.translate('xpack.enterpriseSearch.connectorStats.incompleteTooltipConnected', {
-              defaultMessage: `Incomplete connectors`,
-            })}
-          </b>
-        ),
-        incompleteCount: <b>{incompleteCount}</b>,
-      }}
-    />
+    {!isCrawler ? (
+      <FormattedMessage
+        id="xpack.enterpriseSearch.connectorStats.incompleteTooltip"
+        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of connectors which are not ready to sync (i.e. the connector is not completely configured), or there’s no backend connector running which knows how to sync it."
+        values={{
+          incompleteConnectorsText: (
+            <b>
+              {i18n.translate('xpack.enterpriseSearch.connectorStats.incompleteTooltipConnected', {
+                defaultMessage: `Incomplete connectors`,
+              })}
+            </b>
+          ),
+          incompleteCount: <b>{incompleteCount}</b>,
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.enterpriseSearch.connectorStats.incompleteCrawlerTooltip"
+        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of crawlers that are not ready to crawl (i.e. the crawler is not completely configured)."
+        values={{
+          incompleteConnectorsText: (
+            <b>
+              {i18n.translate('xpack.enterpriseSearch.connectorStats.incompleteTooltipCrawler', {
+                defaultMessage: `Incomplete crawlers`,
+              })}
+            </b>
+          ),
+          incompleteCount: <b>{incompleteCount}</b>,
+        }}
+      />
+    )}
   </EuiText>
 );
 export const getIncompleteConnectorsBadgeLabel = (incompleteCount: number) => (
