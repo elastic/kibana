@@ -201,7 +201,10 @@ const getDocumentTypeRequestsFn =
         rollupInterval,
         filters: [...kql, ...currentRange],
       }),
-      ...(documentType !== ApmDocumentType.ServiceTransactionMetric
+      ...([
+        ApmDocumentType.TransactionMetric,
+        ApmDocumentType.ServiceTransactionMetric,
+      ].includes(documentType)
         ? {
             durationSummaryCheck: getRequest({
               documentType,

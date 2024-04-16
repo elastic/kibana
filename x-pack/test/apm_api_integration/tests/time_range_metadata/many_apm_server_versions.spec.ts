@@ -34,7 +34,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = moment(baseTime).add(5, 'minutes');
   const end = moment(baseTime).add(10, 'minutes');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177534
   registry.when(
     'Time range metadata when there are multiple APM Server versions',
     { config: 'basic', archives: [] },
@@ -116,7 +115,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const allHasSummaryField = response.body.sources
             .filter(
               (source) =>
-                source.documentType === ApmDocumentType.TransactionMetric &&
+                [
+                  ApmDocumentType.TransactionMetric,
+                  ApmDocumentType.ServiceTransactionMetric,
+                ].includes(source.documentType) &&
                 source.rollupInterval !== RollupInterval.OneMinute
             )
             .every((source) => {

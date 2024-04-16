@@ -78,7 +78,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177541
   registry.when(
     'Time range metadata when generating summary data',
     { config: 'basic', archives: [] },
@@ -122,10 +121,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(
               response.sources.filter(
                 (source) =>
-                  source.documentType === ApmDocumentType.TransactionMetric &&
-                  source.hasDurationSummaryField
+                  [
+                    ApmDocumentType.TransactionMetric,
+                    ApmDocumentType.ServiceTransactionMetric,
+                  ].includes(source.documentType) && source.hasDurationSummaryField
               ).length
-            ).to.eql(3);
+            ).to.eql(6);
           });
 
           it('returns false when summary field is available inside but not outside the range', async () => {
@@ -137,17 +138,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(
               response.sources.filter(
                 (source) =>
-                  source.documentType === ApmDocumentType.TransactionMetric &&
-                  !source.hasDurationSummaryField
+                  [
+                    ApmDocumentType.TransactionMetric,
+                    ApmDocumentType.ServiceTransactionMetric,
+                  ].includes(source.documentType) && !source.hasDurationSummaryField
               ).length
-            ).to.eql(2);
+            ).to.eql(4);
           });
         });
       });
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/177601
   registry.when(
     'Time range metadata when generating data',
     { config: 'basic', archives: [] },
