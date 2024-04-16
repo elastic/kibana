@@ -12,7 +12,7 @@ import { mockLogger } from '../test_utils';
 describe('estimateCapacity', () => {
   const logger = mockLogger();
 
-  beforeAll(() => {
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 
@@ -568,6 +568,9 @@ describe('estimateCapacity', () => {
       timestamp: expect.any(String),
       value: expect.any(Object),
     });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'the assumedRequiredThroughputPerMinutePerKibana (190) < capacityPerMinutePerKibana (200)'
+    );
   });
 
   test('marks estimated capacity as Warning state when capacity is insufficient for recent spikes of non-recurring workload, but sufficient for the recurring workload', async () => {
@@ -580,7 +583,7 @@ describe('estimateCapacity', () => {
             owner_ids: 1,
             overdue_non_recurring: 0,
             capacity_requirements: {
-              per_minute: 180,
+              per_minute: 175,
               per_hour: 0,
               per_day: 0,
             },
@@ -626,13 +629,16 @@ describe('estimateCapacity', () => {
         )
       )
     ).toMatchObject({
-      status: 'warn',
+      status: 'OK',
       timestamp: expect.any(String),
       value: expect.any(Object),
     });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (175) < capacityPerMinutePerKibana (200)'
+    );
   });
 
-  test('marks estimated capacity as Warning state when workload and load suggest capacity is insufficient', async () => {
+  test('marks estimated capacity as Error state when workload and load suggest capacity is insufficient', async () => {
     expect(
       estimateCapacity(
         logger,
@@ -688,10 +694,13 @@ describe('estimateCapacity', () => {
         )
       )
     ).toMatchObject({
-      status: 'warn',
+      status: 'OK',
       timestamp: expect.any(String),
       value: expect.any(Object),
     });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'the assumedRequiredThroughputPerMinutePerKibana (250) >= capacityPerMinutePerKibana (200) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) >= capacityPerMinutePerKibana (200)'
+    );
   });
 
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks forces recurring task capacity to zero', async () => {
@@ -825,7 +834,7 @@ describe('estimateCapacity', () => {
         )
       )
     ).toMatchObject({
-      status: 'warn',
+      status: 'error',
       timestamp: expect.any(String),
       value: {
         observed: {
