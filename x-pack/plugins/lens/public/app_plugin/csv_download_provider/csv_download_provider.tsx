@@ -168,7 +168,7 @@ export const downloadCsvShareProvider = ({
         ...menuItemMetadata,
         label: 'CSV' as const,
         reportType: 'lens_csv',
-        generateExport: downloadCSVHandler,
+        downloadCSVLens: downloadCSVHandler,
         ...(atLeastGold()
           ? {
               helpText: (
@@ -193,7 +193,7 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateExportButtonLabel: (
+              generateReportButton: (
                 <FormattedMessage
                   id="xpack.lens.share.csvButton"
                   data-test-subj="generateReportButton"
