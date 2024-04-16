@@ -20,7 +20,7 @@ import { ALERT_END, ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-da
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { colorTransformer } from '@kbn/observability-shared-plugin/common';
-import { KQLCustomIndicator } from '@kbn/slo-schema';
+import { KQLCustomIndicator, DurationUnit } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import type { WindowSchema } from '../../../../../../../typings';
@@ -29,7 +29,6 @@ import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section'
 import { getActionGroupFromReason } from '../../../utils/alert';
 import { useKibana } from '../../../../../../../utils/kibana_react';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
-
 function getDataTimeRange(
   timeRange: { gte: string; lte?: string },
   window: WindowSchema
@@ -112,7 +111,7 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   const longWindowUnit = relatedWindow?.longWindow.unit;
   const longWindowLookbackDuration =
     longWindowValue && longWindowUnit
-      ? moment.duration(longWindowValue as number, longWindowUnit as any)
+      ? moment.duration(longWindowValue as number, longWindowUnit as DurationUnit)
       : moment.duration(1, 'm');
   const longWindowLookbackDurationAsSeconds = longWindowLookbackDuration.asSeconds();
 
@@ -120,7 +119,7 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   const shortWindowUnit = relatedWindow?.shortWindow.unit;
   const shortWindowLookbackDuration =
     shortWindowValue && shortWindowUnit
-      ? moment.duration(shortWindowValue as number, shortWindowUnit as any)
+      ? moment.duration(shortWindowValue as number, shortWindowUnit as DurationUnit)
       : moment.duration(1, 'm');
   const shortWindowLookbackDurationAsSeconds = shortWindowLookbackDuration.asSeconds();
 
