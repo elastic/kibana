@@ -694,7 +694,9 @@ describe('CasesConnectorExecutor', () => {
           const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
 
           expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
-          expect(title.includes('(2) (Auto-created)')).toBe(true);
+          expect(title).toMatchInlineSnapshot(
+            `"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... (2) (Auto-created)"`
+          );
         });
 
         it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {

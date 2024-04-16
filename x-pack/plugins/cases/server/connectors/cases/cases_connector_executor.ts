@@ -751,6 +751,8 @@ export class CasesConnectorExecutor {
     grouping: GroupedAlerts['grouping'],
     oracleCounter: number
   ) {
+    const totalDots = 3;
+
     const groupingDescription = Object.entries(grouping)
       .map(([_, value]) => {
         return convertValueToString(value);
@@ -761,9 +763,17 @@ export class CasesConnectorExecutor {
       groupingDescription.length > 0 ? ` - Grouping by ${groupingDescription}` : ''
     }${oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : ''} (Auto-created)`;
 
-    const ruleNameTrimmed = params.rule.name.slice(0, MAX_TITLE_LENGTH - suffix.length - 1);
+    const ruleNameTrimmed = params.rule.name.slice(
+      0,
+      MAX_TITLE_LENGTH - suffix.length - totalDots - 1
+    );
 
-    return `${ruleNameTrimmed}${suffix}`;
+    const ruleNameTrimmedWithDots =
+      params.rule.name.length > ruleNameTrimmed.length
+        ? `${ruleNameTrimmed}${'.'.repeat(totalDots)}`
+        : ruleNameTrimmed;
+
+    return `${ruleNameTrimmedWithDots}${suffix}`;
   }
 
   private getCaseDescription(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
