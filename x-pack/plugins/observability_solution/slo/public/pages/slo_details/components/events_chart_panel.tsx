@@ -65,6 +65,7 @@ export function EventsChartPanel({ slo, range }: Props) {
     indicator: slo.indicator,
     groupings: slo.groupings,
     instanceId: slo.instanceId,
+    remoteName: slo.remote?.remoteName,
   });
 
   const dateFormat = uiSettings.get('dateFormat');
