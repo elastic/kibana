@@ -62,6 +62,9 @@ function createIndexRequest(
           if (type === 'cartesian_point') {
             esType = 'point';
           }
+          if (type === 'cartesian_shape') {
+            esType = 'shape';
+          }
           if (type === 'unsupported') {
             esType = 'integer_range';
           }

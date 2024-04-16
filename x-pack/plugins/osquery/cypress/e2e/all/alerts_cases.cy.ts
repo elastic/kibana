@@ -25,7 +25,9 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
-describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/170960
+// Failing: See https://github.com/elastic/kibana/issues/170960
+describe.skip('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let packId: string;
   let packName: string;

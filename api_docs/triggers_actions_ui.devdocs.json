@@ -2587,6 +2587,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionParamsProps.producerId",
+            "type": "string",
+            "tags": [],
+            "label": "producerId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4772,7 +4786,7 @@
             "label": "validate",
             "description": [],
             "signature": [
-              "(ruleParams: Params) => ",
+              "(ruleParams: Params, isServerless?: boolean | undefined) => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4799,6 +4813,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.RuleTypeModel.validate.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isServerless",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

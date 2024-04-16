@@ -10,3 +10,4 @@ export * from './duration';
 export * from './indicators';
 export * from './time_window';
 export * from './slo';
+export * from './settings';
