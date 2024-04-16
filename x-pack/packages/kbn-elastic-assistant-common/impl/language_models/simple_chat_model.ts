@@ -9,24 +9,27 @@ import {
   SimpleChatModel,
   type BaseChatModelParams,
 } from '@langchain/core/language_models/chat_models';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { type BaseMessage } from '@langchain/core/messages';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
+import { getDefaultArguments } from './constants';
+import { ExecuteConnectorRequestBody } from '../..';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
   content: prompt,
-  role,
+  role: role === 'human' ? 'user' : role,
 });
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actions: ActionsPluginStart;
   connectorId: string;
   logger: Logger;
+  llmType?: string;
+  model?: string;
+  temperature?: number;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 }
 
@@ -36,8 +39,19 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   #traceId: string;
+  llmType: string;
+  model?: string;
+  temperature?: number;
 
-  constructor({ actions, connectorId, logger, request }: CustomChatModelInput) {
+  constructor({
+    actions,
+    connectorId,
+    llmType,
+    logger,
+    model,
+    request,
+    temperature,
+  }: CustomChatModelInput) {
     super({});
 
     this.#actions = actions;
@@ -45,17 +59,23 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.#traceId = uuidv4();
     this.#logger = logger;
     this.#request = request;
+    this.llmType = llmType ?? 'openai';
+    this.model = model;
+    this.temperature = temperature;
   }
 
   _llmType() {
-    return 'custom';
+    return this.llmType;
   }
 
-  async _call(
-    messages: BaseMessage[],
-    options: this['ParsedCallOptions'],
-    runManager?: CallbackManagerForLLMRun
-  ): Promise<string> {
+  // Model type needs to be `base_chat_model` to work with LangChain OpenAI Tools
+  // We may want to make this configurable (ala _llmType) if different agents end up requiring different model types
+  // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
+  _modelType() {
+    return 'base_chat_model';
+  }
+
+  async _call(messages: BaseMessage[], options: this['ParsedCallOptions']): Promise<string> {
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
@@ -87,8 +107,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.#request.body.model,
           messages: bedrockMessages, // the assistant message
-          temperature: 0,
-          stopSequences: options?.stop,
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop),
         },
       },
     };
@@ -100,7 +119,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
 
     if (actionResult.status === 'error') {
       throw new Error(
-        `ChatBedrock: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+        `ActionsClientSimpleChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
       );
     }
 
@@ -108,7 +127,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
 
     if (typeof content !== 'string') {
       throw new Error(
-        `ChatBedrock: content should be a string, but it had an unexpected type: ${typeof content}`
+        `ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: ${typeof content}`
       );
     }
 

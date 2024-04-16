@@ -14,7 +14,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
 import {
   ActionsClientChatOpenAI,
-  ActionsClientLlm,
   ActionsClientSimpleChatModel,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
@@ -55,12 +54,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 }) => {
   // TODO implement llmClass for bedrock streaming
   // tracked here: https://github.com/elastic/security-team/issues/7363
-  const llmClass =
-    llmType === 'bedrock'
-      ? ActionsClientSimpleChatModel
-      : isStream
-      ? ActionsClientChatOpenAI
-      : ActionsClientLlm;
+  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
   const llm = new llmClass({
     actions,
@@ -120,33 +114,20 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool(assistantToolParams) ?? []
   );
 
-  console.log('TOOOOOOOLs', tools);
-
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
   // isStream check is not on agentType alone because typescript doesn't like
-  const executor =
-    llmType === 'bedrock'
-      ? await initializeAgentExecutorWithOptions(tools, llm, {
-          agentType: 'structured-chat-zero-shot-react-description',
-          memory,
-          verbose: true,
-          maxIterations: 3,
-          agentArgs: {
-            humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
-          },
-        })
-      : isStream
-      ? await initializeAgentExecutorWithOptions(tools, llm, {
-          agentType: 'openai-functions',
-          memory,
-          verbose: false,
-        })
-      : await initializeAgentExecutorWithOptions(tools, llm, {
-          agentType: 'chat-conversational-react-description',
-          memory,
-          verbose: false,
-        });
+  const executor = isStream
+    ? await initializeAgentExecutorWithOptions(tools, llm, {
+        agentType: 'openai-functions',
+        memory,
+        verbose: false,
+      })
+    : await initializeAgentExecutorWithOptions(tools, llm, {
+        agentType: 'structured-chat-zero-shot-react-description',
+        memory,
+        verbose: false,
+      });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing

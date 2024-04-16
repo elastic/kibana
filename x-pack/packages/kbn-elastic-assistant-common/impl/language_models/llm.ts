@@ -10,13 +10,11 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
+import { getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
 
 const LLM_TYPE = 'ActionsClientLlm';
-
-const DEFAULT_OPEN_AI_TEMPERATURE = 0.2;
-const DEFAULT_TEMPERATURE = 0;
 
 interface ActionsClientLlmParams {
   actions: ActionsPluginStart;
@@ -93,12 +91,7 @@ export class ActionsClientLlm extends LLM {
         subActionParams: {
           model: this.model,
           messages: [assistantMessage], // the assistant message
-          ...(this.llmType === 'openai'
-            ? { n: 1, stop: null, temperature: this.temperature ?? DEFAULT_OPEN_AI_TEMPERATURE }
-            : {
-                temperature: this.temperature ?? DEFAULT_TEMPERATURE,
-                stopSequences: ['\n\nHuman:', '\nObservation:'],
-              }),
+          ...getDefaultArguments(this.llmType, this.temperature),
         },
       },
     };
