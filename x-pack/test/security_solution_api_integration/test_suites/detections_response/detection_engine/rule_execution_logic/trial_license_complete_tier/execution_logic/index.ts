@@ -11,6 +11,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection Engine - Execution logic', function () {
     loadTestFile(require.resolve('./eql'));
     loadTestFile(require.resolve('./esql'));
+    loadTestFile(require.resolve('./esql_suppression'));
     loadTestFile(require.resolve('./machine_learning'));
     loadTestFile(require.resolve('./new_terms'));
     loadTestFile(require.resolve('./new_terms_alert_suppression'));
