@@ -16,17 +16,31 @@ import {
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_END } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { colorTransformer } from '@kbn/observability-shared-plugin/common';
 import { KQLCustomIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+import { LOW_PRIORITY_ACTION_ID } from '../../../../../../../../common/constants';
 import type { WindowSchema } from '../../../../../../../typings';
+import { TimeRange } from '../../../../../error_rate_chart/use_lens_definition';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
+import { getActionGroupFromReason } from '../../../utils/alert';
 import { useKibana } from '../../../../../../../utils/kibana_react';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
+
+function getDataTimeRange(
+  timeRange: { gte: string; lte?: string },
+  window: WindowSchema
+): TimeRange {
+  const windowDurationInMs = window.longWindow.value * 60 * 60 * 1000;
+  return {
+    from: new Date(new Date(timeRange.gte).getTime() - windowDurationInMs),
+    to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
+  };
+}
 
 interface Props {
   slo: GetSLOResponse;
@@ -84,14 +98,57 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
     getDataView();
   }, [index, dataViews, params, dataViewsService, groupBy, groupings]);
 
-  const intervalFactor = 1;
+  // Identify `intervalFactor` to adjust time ranges based on alert settings.
+  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
+  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
+  // If an alert is just starting, the visible time range to look back might not cover the
+  // long window yet, only then we'll take the short window to look back,
+  // otherwise it will be the long window.
+  const alertActionGroup =
+    alert.fields['kibana.alert.action_group'] !== 'recovered'
+      ? alert.fields['kibana.alert.action_group']
+      : LOW_PRIORITY_ACTION_ID;
+  const sloWindows = alert.fields['kibana.alert.rule.parameters']!.windows as WindowSchema[];
+  const relatedWindow = sloWindows.find((window) => window.actionGroup === alertActionGroup);
+
+  const longWindowValue = relatedWindow?.longWindow.value;
+  const longWindowUnit = relatedWindow?.longWindow.unit;
+  const longWindowLookbackDuration =
+    longWindowValue && longWindowUnit
+      ? moment.duration(longWindowValue as number, longWindowUnit as any)
+      : moment.duration(1, 'm');
+  const longWindowLookbackDurationAsSeconds = longWindowLookbackDuration.asSeconds();
+
+  const shortWindowValue = relatedWindow?.shortWindow.value;
+  const shortWindowUnit = relatedWindow?.shortWindow.unit;
+  const shortWindowLookbackDuration =
+    shortWindowValue && shortWindowUnit
+      ? moment.duration(shortWindowValue as number, shortWindowUnit as any)
+      : moment.duration(1, 'm');
+  const shortWindowLookbackDurationAsSeconds = shortWindowLookbackDuration.asSeconds();
+
+  const actionGroup = getActionGroupFromReason(alert.reason);
+  const actionGroupWindow = (
+    (alert.fields[ALERT_RULE_PARAMETERS]?.windows ?? []) as WindowSchema[]
+  ).find((window: WindowSchema) => window.actionGroup === actionGroup);
+
+  // @ts-ignore
+  const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], actionGroupWindow);
+  const timeRange = { min: moment(dataTimeRange.from), max: moment(dataTimeRange.to) };
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
 
-  const timeRange = {
-    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
-  };
+  const chartStartToAlertStart = (alert.start - dataTimeRange.from.getTime()) / 1000;
+
+  // Here we check if the available time range before the alert start is long enough
+  // to consider the long window lookback. We consider 3x the long window to be good enough
+  // to cover both the look back within the deviation and the baseline time range.
+  // If the available time range is shorter we fall back to the short window.
+  const lookbackDurationAsSeconds =
+    longWindowLookbackDurationAsSeconds * 3 < chartStartToAlertStart
+      ? longWindowLookbackDurationAsSeconds
+      : shortWindowLookbackDurationAsSeconds;
+  const intervalFactor = Math.max(1, lookbackDurationAsSeconds / 60);
 
   const logRateAnalysisTitle = i18n.translate(
     'xpack.slo.burnRateRule.alertDetails.logRateAnalysisTitle',
@@ -99,14 +156,6 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
       defaultMessage: 'Possible causes and remediations',
     }
   );
-
-  const alertActionGroup = alert.fields['kibana.alert.action_group'];
-  const sloWindows = alert.fields['kibana.alert.rule.parameters']!.windows as WindowSchema[];
-  const relatedWindow = sloWindows.find((window) => window.actionGroup === alertActionGroup);
-  const longWindowValue = relatedWindow?.longWindow.value;
-  const longWindowUnit = relatedWindow?.longWindow.unit;
-  const shortWindowValue = relatedWindow?.shortWindow.value;
-  const shortWindowUnit = relatedWindow?.shortWindow.unit;
 
   function getDeviationMax() {
     if (alertEnd) {
@@ -117,14 +166,14 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
     } else if (
       alertStart
         .clone()
-        .add(10 * shortWindowValue!, shortWindowUnit)
+        .add(10 * intervalFactor, 'minutes')
         .isAfter(moment(new Date()))
     ) {
       return moment(new Date()).valueOf();
     } else {
       return alertStart
         .clone()
-        .add(10 * shortWindowValue!, shortWindowUnit)
+        .add(10 * intervalFactor, 'minutes')
         .valueOf();
     }
   }
@@ -132,11 +181,16 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   const initialAnalysisStart = {
     baselineMin: alertStart
       .clone()
-      .subtract(longWindowValue, longWindowUnit)
-      .subtract(shortWindowValue, shortWindowUnit)
+      .subtract(13 * intervalFactor, 'minutes')
       .valueOf(),
-    baselineMax: alertStart.clone().subtract(shortWindowValue, shortWindowUnit).valueOf(),
-    deviationMin: alertStart.clone().subtract(shortWindowValue, shortWindowUnit).valueOf(),
+    baselineMax: alertStart
+      .clone()
+      .subtract(2 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMin: alertStart
+      .clone()
+      .subtract(1 * intervalFactor, 'minutes')
+      .valueOf(),
     deviationMax: getDeviationMax(),
   };
 
