@@ -27,6 +27,7 @@ const testProps: Props = {
   isDisabled: false,
   shouldRefocusPrompt: false,
   userPrompt: '',
+  isFlyoutMode: false,
 };
 describe('ChatSend', () => {
   beforeEach(() => {

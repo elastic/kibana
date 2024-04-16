@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * In a deployment where indices have a `green` health status, because there
