@@ -4,34 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Response } from 'supertest';
+import expect from '@kbn/expect';
 import {
   FunctionDefinition,
   MessageRole,
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { omit, pick } from 'lodash';
-import { PassThrough, Readable } from 'stream';
-import expect from '@kbn/expect';
-import {
-  ChatCompletionChunkEvent,
-  ConversationCreateEvent,
-  ConversationUpdateEvent,
-  MessageAddEvent,
-  StreamingChatResponseEvent,
-  StreamingChatResponseEventType,
-} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { pick } from 'lodash';
 import type OpenAI from 'openai';
-import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { Response } from 'supertest';
 import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
-import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
-
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const PUBLIC_COMPLETE_API_URL = `/api/observability_ai_assistant/chat/complete`;
 
@@ -52,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('Public complete', () => {
+  describe('/api/observability_ai_assistant/chat/complete', () => {
     let proxy: LlmProxy;
     let connectorId: string;
 
@@ -61,7 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
         instructions?: string[];
       },
-      cb: (conversationSimulator: LlmResponseSimulator, conversationRequest: body) => Promise<void>
+      cb: (conversationSimulator: LlmResponseSimulator) => Promise<void>
     ) {
       const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
 
@@ -197,12 +185,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('after adding an instruction', async () => {
-      let events: StreamingChatResponseEvent[];
-
       let body: string;
 
       before(async () => {
-        events = await getEvents(
+        await getEvents(
           {
             instructions: ['This is a random instruction'],
           },

@@ -24,13 +24,13 @@ describe('Synthetics Availability Transform Generator', () => {
       _meta: {
         managed: true,
         managed_by: 'observability',
-        version: 3.1,
+        version: 3.2,
       },
       defer_validation: true,
       description: 'Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]',
       dest: {
-        index: '.slo-observability.sli-v3.1',
-        pipeline: '.slo-observability.sli.pipeline-v3.1',
+        index: '.slo-observability.sli-v3.2',
+        pipeline: '.slo-observability.sli.pipeline-v3.2',
       },
       frequency: '1m',
       pivot: {
@@ -57,14 +57,24 @@ describe('Synthetics Availability Transform Generator', () => {
               fixed_interval: '1m',
             },
           },
-          config_id: {
+          'monitor.config_id': {
             terms: {
               field: 'config_id',
+            },
+          },
+          'monitor.name': {
+            terms: {
+              field: 'monitor.name',
             },
           },
           'observer.name': {
             terms: {
               field: 'observer.name',
+            },
+          },
+          'observer.geo.name': {
+            terms: {
+              field: 'observer.geo.name',
             },
           },
           'slo.groupings.monitor.name': {
@@ -162,7 +172,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
     expect(transform.pivot?.group_by).toEqual(
       expect.objectContaining({
-        config_id: {
+        'monitor.config_id': {
           terms: {
             field: 'config_id',
           },
@@ -186,7 +196,7 @@ describe('Synthetics Availability Transform Generator', () => {
 
     expect(transform.pivot?.group_by).not.toEqual(
       expect.objectContaining({
-        config_id: {
+        'monitor.config_id': {
           terms: {
             field: 'config_id',
           },

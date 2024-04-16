@@ -8,6 +8,7 @@ import { notImplemented } from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { Readable } from 'stream';
+import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
@@ -51,15 +52,6 @@ const chatCompletePublicRt = t.intersection([
   chatCompleteBaseRt,
   t.type({
     body: t.partial({
-      instructions: t.array(
-        t.union([
-          t.string,
-          t.type({
-            doc_id: t.string,
-            text: t.string,
-          }),
-        ])
-      ),
       actions: t.array(functionRt),
     }),
   }),
@@ -84,11 +76,12 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     ]),
   }),
   handler: async (resources): Promise<Readable> => {
-    const { request, params, service } = resources;
+    const { request, params, service, context } = resources;
 
-    const [client, cloudStart] = await Promise.all([
+    const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
       service.getClient({ request }),
       resources.plugins.cloud?.start(),
+      (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
     ]);
 
     if (!client) {
@@ -115,6 +108,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
             functionCall,
           }
         : {}),
+      simulateFunctionCalling,
     });
 
     return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));
@@ -128,9 +122,12 @@ async function chatComplete(
 ) {
   const { request, params, service } = resources;
 
-  const [client, cloudStart] = await Promise.all([
+  const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
     service.getClient({ request }),
     resources.plugins.cloud?.start() || Promise.resolve(undefined),
+    (
+      await resources.context.core
+    ).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
 
   if (!client) {
@@ -173,6 +170,7 @@ async function chatComplete(
     functionClient,
     responseLanguage,
     instructions,
+    simulateFunctionCalling,
   });
 
   return response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled));

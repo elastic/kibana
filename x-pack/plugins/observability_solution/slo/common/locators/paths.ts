@@ -25,8 +25,8 @@ export const paths = {
     `${SLOS_BASE_PATH}${SLOS_PATH}/edit/${encodeURIComponent(sloId)}?_a=${encodedParams}`,
   sloDetails: (sloId: string, instanceId?: string) =>
     !!instanceId
-      ? `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}?instanceId=${encodeURIComponent(
+      ? `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}?instanceId=${encodeURIComponent(
           instanceId
         )}`
-      : `${SLOS_BASE_PATH}${SLOS_PATH}/${encodeURIComponent(sloId)}`,
+      : `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}`,
 };
