@@ -10,9 +10,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
-import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { useSetInitialValue } from './use_set_initial_value';
 import { useSetupAutosave } from './use_setup_autosave';
+import { useResizeCheckerUtils } from './use_resize_checker_utils';
 import { useServicesContext, useEditorReadContext } from '../../../contexts';
 
 export interface EditorProps {
@@ -27,18 +27,18 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   } = useServicesContext();
   const { settings } = useEditorReadContext();
   const divRef = useRef<HTMLDivElement | null>(null);
-  const resizeChecker = useRef<ResizeChecker | null>(null);
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
-  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    resizeChecker.current = new ResizeChecker(divRef.current!);
-    resizeChecker.current.on('resize', () => {
-      editor.layout();
-    });
-  }, []);
+  const editorDidMountCallback = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      setupResizeChecker(divRef.current!, editor);
+    },
+    [setupResizeChecker]
+  );
 
   const editorWillUnmountCallback = useCallback(() => {
-    resizeChecker.current!.destroy();
-  }, []);
+    destroyResizeChecker();
+  }, [destroyResizeChecker]);
 
   const [value, setValue] = useState(initialTextValue);
 

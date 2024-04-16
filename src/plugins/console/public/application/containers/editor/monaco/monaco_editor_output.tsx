@@ -14,7 +14,6 @@ import Protobuf from 'pbf';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
-import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { useEditorReadContext, useRequestReadContext } from '../../../contexts';
 import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
 import {
@@ -23,6 +22,7 @@ import {
   safeExpandLiteralStrings,
   languageForContentType,
 } from '../utilities';
+import { useResizeCheckerUtils } from './use_resize_checker_utils';
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -32,18 +32,18 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const [value, setValue] = useState('');
   const [mode, setMode] = useState('text');
   const divRef = useRef<HTMLDivElement | null>(null);
-  const resizeChecker = useRef<ResizeChecker | null>(null);
+  const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
-  const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    resizeChecker.current = new ResizeChecker(divRef.current!);
-    resizeChecker.current.on('resize', () => {
-      editor.layout();
-    });
-  }, []);
+  const editorDidMountCallback = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      setupResizeChecker(divRef.current!, editor);
+    },
+    [setupResizeChecker]
+  );
 
   const editorWillUnmountCallback = useCallback(() => {
-    resizeChecker.current!.destroy();
-  }, []);
+    destroyResizeChecker();
+  }, [destroyResizeChecker]);
 
   useEffect(() => {
     if (data) {
