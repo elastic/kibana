@@ -137,7 +137,8 @@ export abstract class Type<V> {
   }
 
   /**
-   * @internal
+   * @note intended for internal use, if you need to use this please contact
+   *       the core team to discuss your use case.
    */
   public getSchema() {
     return this.internalSchema;
