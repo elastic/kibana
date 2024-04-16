@@ -252,7 +252,7 @@ describe('CasesConnectorExecutor', () => {
                         "type": ".none",
                       },
                       "customFields": Array [],
-                      "description": "This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
+                      "description": "This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
@@ -278,7 +278,7 @@ describe('CasesConnectorExecutor', () => {
                         "type": ".none",
                       },
                       "customFields": Array [],
-                      "description": "This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.1\`.",
+                      "description": "This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.1\`.",
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
@@ -304,7 +304,7 @@ describe('CasesConnectorExecutor', () => {
                         "type": ".none",
                       },
                       "customFields": Array [],
-                      "description": "This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
+                      "description": "This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
@@ -561,7 +561,7 @@ describe('CasesConnectorExecutor', () => {
                     "type": ".none",
                   },
                   "customFields": Array [],
-                  "description": "This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
+                  "description": "This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                   "id": "mock-id-3",
                   "owner": "cases",
                   "settings": Object {
@@ -608,7 +608,7 @@ describe('CasesConnectorExecutor', () => {
             casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
 
           expect(description).toMatchInlineSnapshot(
-            `"This case was created by the Case action in Test rule. The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`."`
+            `"This case was created by the case action in Test rule. The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`."`
           );
         });
 
@@ -645,7 +645,7 @@ describe('CasesConnectorExecutor', () => {
             casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
 
           expect(description).toMatchInlineSnapshot(
-            `"This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`foo: [\\"bar\\",1,true,{}]\` and \`bar.foo: test\` and \`baz: my value\`."`
+            `"This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`foo: [\\"bar\\",1,true,{}]\` and \`bar.foo: test\` and \`baz: my value\`."`
           );
         });
 
@@ -876,7 +876,7 @@ describe('CasesConnectorExecutor', () => {
                     "type": ".none",
                   },
                   "customFields": Array [],
-                  "description": "This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
+                  "description": "This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                   "id": "mock-id-4",
                   "owner": "cases",
                   "settings": Object {
@@ -987,7 +987,7 @@ describe('CasesConnectorExecutor', () => {
                         "value": false,
                       },
                     ],
-                    "description": "This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
+                    "description": "This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                     "id": "mock-id-3",
                     "owner": "cases",
                     "settings": Object {
@@ -1061,7 +1061,7 @@ describe('CasesConnectorExecutor', () => {
                         "value": false,
                       },
                     ],
-                    "description": "This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
+                    "description": "This case was created by the case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {

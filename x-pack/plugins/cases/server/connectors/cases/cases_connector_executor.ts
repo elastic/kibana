@@ -40,6 +40,12 @@ import type { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
 import { CasesConnectorError } from './cases_connector_error';
+import {
+  AUTO_CREATED_TITLE,
+  CASE_CREATED_BY_RULE_DESC,
+  GROUPED_BY_DESC,
+  GROUPED_BY_TITLE,
+} from './translations';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
@@ -760,8 +766,10 @@ export class CasesConnectorExecutor {
       .join(' & ');
 
     const suffix = `${
-      groupingDescription.length > 0 ? ` - Grouping by ${groupingDescription}` : ''
-    }${oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : ''} (Auto-created)`;
+      groupingDescription.length > 0 ? ` - ${GROUPED_BY_TITLE(groupingDescription)}` : ''
+    }${
+      oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : ''
+    } (${AUTO_CREATED_TITLE})`;
 
     const ruleNameTrimmed = params.rule.name.slice(
       0,
@@ -781,7 +789,7 @@ export class CasesConnectorExecutor {
       ? `[${params.rule.name}](${params.rule.ruleUrl})`
       : params.rule.name;
 
-    const description = `This case was created by the Case action in ${ruleName}.`;
+    const description = `${CASE_CREATED_BY_RULE_DESC(ruleName)}.`;
 
     const groupingDescription = Object.entries(grouping)
       .map(([key, value]) => {
@@ -790,7 +798,7 @@ export class CasesConnectorExecutor {
       .join(' and ');
 
     if (groupingDescription.length > 0) {
-      return `${description} The assigned alerts are grouped by ${groupingDescription}.`;
+      return `${description} ${GROUPED_BY_DESC(groupingDescription)}.`;
     }
 
     return `${description}`;
