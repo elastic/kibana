@@ -20,6 +20,7 @@ import {
 } from '../../../contexts';
 import { useSetInitialValue } from './use_set_initial_value';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
+import { useSetupAutocompletePolling } from './use_setup_autocomplete_polling';
 import { useSetupAutosave } from './use_setup_autosave';
 
 export interface EditorProps {
@@ -28,7 +29,14 @@ export interface EditorProps {
 
 export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const {
-    services: { notifications, esHostService, trackUiMetric, http },
+    services: {
+      notifications,
+      esHostService,
+      trackUiMetric,
+      http,
+      settings: settingsService,
+      autocompleteInfo,
+    },
   } = useServicesContext();
   const { toasts } = notifications;
   const { settings } = useEditorReadContext();
@@ -56,6 +64,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   useEffect(() => {
     setInitialValue({ initialTextValue, setValue, toasts });
   }, [initialTextValue, setInitialValue, toasts]);
+
+  useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
   useSetupAutosave({ value });
 

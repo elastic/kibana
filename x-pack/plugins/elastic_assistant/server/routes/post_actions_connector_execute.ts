@@ -302,7 +302,9 @@ export const postActionsConnectorExecuteRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
+          const assistantTools = (await context.elasticAssistant)
+            .getRegisteredTools(pluginName)
+            .filter((x) => x.id !== 'insights-tool'); // we don't (yet) support asking the assistant for NEW insights from a conversation
 
           // get a scoped esClient for assistant memory
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
