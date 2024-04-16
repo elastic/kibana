@@ -24,6 +24,7 @@ export const AgentBinarySection: React.FunctionComponent<AgentBinarySectionProps
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
+  const hasAllSettingsPrivileges = authz.fleet.allSettings;
 
   return (
     <>
@@ -46,8 +47,9 @@ export const AgentBinarySection: React.FunctionComponent<AgentBinarySectionProps
       <DownloadSourceTable
         downloadSources={downloadSources}
         deleteDownloadSource={deleteDownloadSource}
+        hasAllSettingsPrivileges={hasAllSettingsPrivileges}
       />
-      {authz.fleet.allSettings && (
+      {hasAllSettingsPrivileges && (
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty

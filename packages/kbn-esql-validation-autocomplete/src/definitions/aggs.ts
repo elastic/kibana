@@ -16,7 +16,7 @@ function createNumericAggDefinition({
 }: {
   name: string;
   description: string;
-  args?: Array<{ name: string; type: string; value: string; literalOnly?: boolean }>;
+  args?: Array<{ name: string; type: string; value: string; constantOnly?: boolean }>;
 }): FunctionDefinition {
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
@@ -28,11 +28,11 @@ function createNumericAggDefinition({
       {
         params: [
           { name: 'column', type: 'number', noNestingFunctions: true },
-          ...args.map(({ name: paramName, type, literalOnly }) => ({
+          ...args.map(({ name: paramName, type, constantOnly }) => ({
             name: paramName,
             type,
             noNestingFunctions: true,
-            literalOnly,
+            constantOnly,
           })),
         ],
         returnType: 'number',
@@ -94,7 +94,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the n percentile of a field.',
       }
     ),
-    args: [{ name: 'percentile', type: 'number', value: '90', literalOnly: true }],
+    args: [{ name: 'percentile', type: 'number', value: '90', constantOnly: true }],
   },
 ]
   .map(createNumericAggDefinition)

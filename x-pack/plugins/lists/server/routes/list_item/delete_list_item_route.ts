@@ -39,10 +39,11 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id, list_id: listId, value } = request.query;
+          const { id, list_id: listId, value, refresh } = request.query;
+          const shouldRefresh = refresh === 'true' ? true : false;
           const lists = await getListClient(context);
           if (id != null) {
-            const deleted = await lists.deleteListItem({ id });
+            const deleted = await lists.deleteListItem({ id, refresh: shouldRefresh });
             if (deleted == null) {
               return siemResponse.error({
                 body: `list item with id: "${id}" not found`,
@@ -66,6 +67,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
             } else {
               const deleted = await lists.deleteListItemByValue({
                 listId,
+                refresh: shouldRefresh,
                 type: list.type,
                 value,
               });
