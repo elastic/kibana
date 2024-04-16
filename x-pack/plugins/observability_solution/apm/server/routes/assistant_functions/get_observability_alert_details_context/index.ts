@@ -60,20 +60,21 @@ export async function getObservabilityAlertDetailsContext({
 }) {
   const alertStartedAt = query.alert_started_at;
   const serviceEnvironment = query['service.environment'];
-  const serviceName = await getServiceNameFromSignals({
-    query,
-    esClient,
-    coreContext,
-    apmEventClient,
-  });
-
   const hostName = query['host.name'];
-  const containerId = await getContainerIdFromSignals({
-    query,
-    esClient,
-    coreContext,
-    apmEventClient,
-  });
+  const [serviceName, containerId] = await Promise.all([
+    getServiceNameFromSignals({
+      query,
+      esClient,
+      coreContext,
+      apmEventClient,
+    }),
+    getContainerIdFromSignals({
+      query,
+      esClient,
+      coreContext,
+      apmEventClient,
+    }),
+  ]);
 
   const serviceSummaryPromise = serviceName
     ? getApmServiceSummary({
