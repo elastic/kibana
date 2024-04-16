@@ -16,6 +16,7 @@ import {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
+import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -76,7 +77,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             },
           })
         : new OpenAI({
-            baseURL: this.config.apiUrl,
+            baseURL: removeEndpointFromUrl(this.config.apiUrl),
             apiKey: this.secrets.apiKey,
             defaultHeaders: {
               ...this.config.headers,
