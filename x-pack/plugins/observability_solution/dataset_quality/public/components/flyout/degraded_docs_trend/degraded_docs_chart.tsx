@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
@@ -15,7 +15,6 @@ import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { useDegradedDocsChart } from '../../../hooks';
-import { getLensAttributes } from './lens_attributes';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
@@ -38,24 +37,8 @@ export function DegradedDocsChart({
     services: { lens },
   } = useKibanaContextForPlugin();
 
-  const { euiTheme } = useEuiTheme();
-
-  const {
-    attributes,
-    dataView,
-    filterQuery,
-    extraActions,
-    isChartLoading,
-    handleChartLoading,
-    setAttributes,
-  } = useDegradedDocsChart({ dataStream });
-
-  useEffect(() => {
-    if (dataView) {
-      const lensAttributes = getLensAttributes(euiTheme.colors.danger, dataView, filterQuery);
-      setAttributes(lensAttributes);
-    }
-  }, [dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
+  const { attributes, filterQuery, extraActions, isChartLoading, handleChartLoading } =
+    useDegradedDocsChart({ dataStream });
 
   return (
     <>

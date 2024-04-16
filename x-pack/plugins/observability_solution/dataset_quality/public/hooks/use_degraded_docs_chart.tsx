@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
@@ -38,6 +39,8 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
+  const { euiTheme } = useEuiTheme();
+
   const { dataStreamStat, timeRange } = useDatasetQualityFlyout();
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
@@ -56,6 +59,13 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   const handleChartLoading = (isLoading: boolean) => {
     setIsChartLoading(isLoading);
   };
+
+  useEffect(() => {
+    if (dataView) {
+      const lensAttributes = getLensAttributes(euiTheme.colors.danger, dataView, filterQuery);
+      setAttributes(lensAttributes);
+    }
+  }, [dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
