@@ -42,7 +42,7 @@ export const ShareMenuTabs = () => {
   }
 
   const formattedTitle =
-    objectType === 'lens' ? `Share this Lens visualiaztion` : `Share this ${objectType}`;
+    objectType === 'lens' ? `Share this Lens visualization` : `Share this ${objectType}`;
 
   return (
     <TabbedModal
