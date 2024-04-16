@@ -27,6 +27,7 @@ const kqlWithFiltersSchema = t.type({
         isMultiIndex: t.boolean,
         type: t.string,
         key: t.string,
+        field: t.string,
         params: t.any,
         value: t.string,
       }),
