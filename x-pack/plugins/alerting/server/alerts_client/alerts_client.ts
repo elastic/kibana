@@ -412,8 +412,8 @@ export class AlertsClient<
     const { alertsToReturn, recoveredAlertsToReturn } =
       this.legacyAlertsClient.getAlertsToSerialize(false);
 
-    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
+    const currentActiveAlerts = this.legacyAlertsClient.getProcessedAlerts('activeCurrent');
+    const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -422,7 +422,7 @@ export class AlertsClient<
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(alertsToReturn)) {
       // See if there's an existing active alert document
-      if (!!activeAlerts[id]) {
+      if (!!currentActiveAlerts[id]) {
         if (
           this.fetchedAlerts.data.hasOwnProperty(id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
@@ -436,7 +436,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               alert: this.fetchedAlerts.data[id],
-              legacyAlert: activeAlerts[id],
+              legacyAlert: currentActiveAlerts[id],
               rule: this.rule,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
@@ -446,7 +446,7 @@ export class AlertsClient<
         } else {
           // skip writing the alert document if the number of consecutive
           // active alerts is less than the rule alertDelay threshold
-          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+          if (currentActiveAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
             continue;
           }
           activeAlertsToIndex.push(
@@ -457,7 +457,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              legacyAlert: activeAlerts[id],
+              legacyAlert: currentActiveAlerts[id],
               rule: this.rule,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
@@ -478,7 +478,7 @@ export class AlertsClient<
       // If there is not, log an error because there should be
       if (this.fetchedAlerts.data.hasOwnProperty(id)) {
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
+          currentRecoveredAlerts[id]
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -487,7 +487,7 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: this.fetchedAlerts.data[id],
-                legacyAlert: recoveredAlerts[id],
+                legacyAlert: currentRecoveredAlerts[id],
                 rule: this.rule,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
@@ -503,7 +503,7 @@ export class AlertsClient<
         );
       } else {
         this.options.logger.debug(
-          `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
+          `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
             id
           ].getUuid()}`
         );

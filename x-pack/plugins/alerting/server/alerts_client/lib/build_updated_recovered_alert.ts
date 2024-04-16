@@ -7,8 +7,14 @@
 
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_RULE_EXECUTION_UUID,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { RawAlertInstance } from '@kbn/alerting-state-types';
+import { omit } from 'lodash';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
@@ -65,7 +71,9 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     ...refreshableAlertFields,
   });
 
-  return deepmerge.all([cleanedAlert, refreshableAlertFields, alertUpdates], {
+  const mergedAlerts = deepmerge.all([cleanedAlert, refreshableAlertFields, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
-  }) as Alert & AlertData;
+  });
+
+  return omit(mergedAlerts, ALERT_RULE_EXECUTION_UUID) as Alert & AlertData;
 };
