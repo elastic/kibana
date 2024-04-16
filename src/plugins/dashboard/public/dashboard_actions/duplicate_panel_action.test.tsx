@@ -8,14 +8,14 @@
 
 import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { ClonePanelAction, ClonePanelActionApi } from './clone_panel_action';
+import { DuplicatePanelAction, DuplicatePanelActionApi } from './duplicate_panel_action';
 
-describe('Clone panel action', () => {
-  let action: ClonePanelAction;
-  let context: { embeddable: ClonePanelActionApi };
+describe('Duplicate panel action', () => {
+  let action: DuplicatePanelAction;
+  let context: { embeddable: DuplicatePanelActionApi };
 
   beforeEach(() => {
-    action = new ClonePanelAction();
+    action = new DuplicatePanelAction();
     context = {
       embeddable: {
         uuid: 'superId',

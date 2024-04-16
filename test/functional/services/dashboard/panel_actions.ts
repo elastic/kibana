@@ -14,7 +14,7 @@ const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const INLINE_EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CONFIGURE_IN_LENS';
 const EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ = 'navigateToLensEditorLink';
 const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
-const CLONE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-clonePanel';
+const DUPLICATE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-duplicatePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
@@ -210,9 +210,9 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.openContextMenu();
     }
-    const isActionVisible = await this.testSubjects.exists(CLONE_PANEL_DATA_TEST_SUBJ);
+    const isActionVisible = await this.testSubjects.exists(DUPLICATE_PANEL_DATA_TEST_SUBJ);
     if (!isActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
+    await this.testSubjects.click(DUPLICATE_PANEL_DATA_TEST_SUBJ);
     await this.dashboard.waitForRenderComplete();
   }
 
@@ -356,7 +356,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectExistsClonePanelAction() {
     this.log.debug('expectExistsClonePanelAction');
-    await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
+    await this.expectExistsPanelAction(DUPLICATE_PANEL_DATA_TEST_SUBJ);
   }
 
   async expectExistsToggleExpandAction() {
@@ -382,7 +382,7 @@ export class DashboardPanelActionsService extends FtrService {
 
   async expectMissingDuplicatePanelAction() {
     this.log.debug('expectMissingDuplicatePanelAction');
-    await this.expectMissingPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
+    await this.expectMissingPanelAction(DUPLICATE_PANEL_DATA_TEST_SUBJ);
   }
 
   async expectMissingRemovePanelAction() {
