@@ -334,7 +334,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 component={MaxSignals}
                 componentProps={{
                   idAria: 'detectionEngineStepAboutRuleMaxSignals',
-                  'data-test-subj': 'detectionEngineStepAboutRuleMaxSignals',
+                  dataTestSubj: 'detectionEngineStepAboutRuleMaxSignals',
                   isDisabled: isLoading,
                 }}
               />

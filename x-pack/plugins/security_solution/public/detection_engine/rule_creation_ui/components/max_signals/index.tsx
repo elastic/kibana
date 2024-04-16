@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import type { EuiFieldNumberProps } from '@elastic/eui';
-import { EuiTextColor, EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiTextColor, EuiFormRow, EuiFieldNumber, EuiIcon } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/css';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
@@ -85,21 +85,14 @@ export const MaxSignals: React.FC<MaxSignalsFieldProps> = ({
       error={error}
     >
       <EuiFieldNumber
-        // This css is need until https://github.com/elastic/eui/pull/7666 gets merged in and kibana is updated to the new version of Eui
-        css={css`
-          padding-right: 40px;
-          padding-left: 12px;
-        `}
         isInvalid={isInvalid}
-        dataTestSubj={dataTestSubj}
         value={value as EuiFieldNumberProps['value']}
         onChange={handleMaxSignalsChange}
         isLoading={field.isValidating}
-        data-test-subj="input"
         placeholder={placeholder}
+        data-test-subj={dataTestSubj}
         disabled={isDisabled}
-        // @ts-ignore This is need until https://github.com/elastic/eui/pull/7666 gets merged in and kibana is updated to the new version of Eui
-        icon={hasWarning ? { side: 'right', type: 'warning', color: 'warning' } : undefined}
+        prepend={hasWarning ? <EuiIcon size="s" type="warning" color="warning" /> : undefined}
       />
     </EuiFormRow>
   );
