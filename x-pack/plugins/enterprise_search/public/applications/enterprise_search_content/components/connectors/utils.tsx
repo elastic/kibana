@@ -135,7 +135,7 @@ export const getRunningJobsTooltip = (inProgressCount: number, isCrawler: boolea
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.runningTooltip"
-        defaultMessage="{inProgressCount} {runningCountText} - Number of running sync jobs (This includes Idle Syncs)"
+        defaultMessage="{inProgressCount} {runningCountText} - Number of running sync jobs. This includes idle syncs."
         values={{
           inProgressCount: <b>{inProgressCount}</b>,
           runningCountText: (
