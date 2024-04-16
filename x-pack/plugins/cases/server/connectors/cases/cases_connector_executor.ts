@@ -801,7 +801,7 @@ export class CasesConnectorExecutor {
       return `${description} ${GROUPED_BY_DESC(groupingDescription)}.`;
     }
 
-    return `${description}`;
+    return description;
   }
 
   private getCaseTags(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
