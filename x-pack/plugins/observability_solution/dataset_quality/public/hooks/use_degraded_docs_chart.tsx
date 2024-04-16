@@ -9,6 +9,7 @@ import { Action } from '@kbn/ui-actions-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
@@ -33,9 +34,13 @@ const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
 
 interface DegradedDocsChartDeps {
   dataStream?: string;
+  breakdownDataViewField?: DataViewField;
 }
 
-export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
+export const useDegradedDocsChart = ({
+  dataStream,
+  breakdownDataViewField,
+}: DegradedDocsChartDeps) => {
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
@@ -62,10 +67,15 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
 
   useEffect(() => {
     if (dataView) {
-      const lensAttributes = getLensAttributes(euiTheme.colors.danger, dataView, filterQuery);
+      const lensAttributes = getLensAttributes(
+        euiTheme.colors.danger,
+        dataView,
+        filterQuery,
+        breakdownDataViewField?.name
+      );
       setAttributes(lensAttributes);
     }
-  }, [dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
+  }, [breakdownDataViewField?.name, dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
