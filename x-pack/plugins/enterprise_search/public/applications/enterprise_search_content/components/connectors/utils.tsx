@@ -70,7 +70,7 @@ export const getIncompleteConnectorsTooltip = (incompleteCount: number, isCrawle
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.incompleteTooltip"
-        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of connectors which are not ready to sync (i.e. the connector is not completely configured), or there’s no backend connector running which knows how to sync it."
+        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of connectors whose configuration is incomplete. Syncs won't be possible until the connector is fully configured and running."
         values={{
           incompleteConnectorsText: (
             <b>
