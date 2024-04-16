@@ -19,6 +19,7 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddableConsoleProps,
+  EmbeddedConsoleView,
 } from './types';
 import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
 
@@ -132,12 +133,16 @@ export class ConsoleUIPlugin
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);
           },
+          alternateView: this._embeddableConsole.alternateView,
         });
       };
       consoleStart.isEmbeddedConsoleAvailable = () =>
         this._embeddableConsole.isEmbeddedConsoleAvailable();
       consoleStart.openEmbeddedConsole = (content?: string) =>
         this._embeddableConsole.openEmbeddedConsole(content);
+      consoleStart.registerEmbeddedConsoleAlternateView = (view: EmbeddedConsoleView | null) => {
+        this._embeddableConsole.registerAlternateView(view);
+      };
     }
 
     return consoleStart;

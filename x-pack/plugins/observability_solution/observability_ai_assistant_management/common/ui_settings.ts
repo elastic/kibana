@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
+  aiAssistantSimulatedFunctionCalling,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   DEFAULT_LANGUAGE_OPTION,
@@ -62,6 +63,26 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     ),
     schema: schema.string(),
     type: 'string',
+    requiresPageReload: true,
+  },
+  [aiAssistantSimulatedFunctionCalling]: {
+    category: ['observability'],
+    name: i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingLabel',
+      {
+        defaultMessage: 'Simulate function calling',
+      }
+    ),
+    value: false,
+    description: i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingDescription',
+      {
+        defaultMessage:
+          '<em>[technical preview]</em> Use simulated function calling. Simulated function calling does not need API support for functions or tools, but it may decrease performance. Simulated function calling is currently always enabled for non-OpenAI connector, regardless of this setting.',
+      }
+    ),
+    schema: schema.boolean(),
+    type: 'boolean',
     requiresPageReload: true,
   },
 };
