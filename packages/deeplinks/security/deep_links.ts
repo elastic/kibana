@@ -8,6 +8,7 @@
 
 export enum SecurityPageName {
   administration = 'administration',
+  aiInsights = 'ai_insights',
   alerts = 'alerts',
   assets = 'assets',
   blocklist = 'blocklist',
@@ -83,5 +84,6 @@ export enum SecurityPageName {
   usersRisk = 'users-risk',
   entityAnalytics = 'entity_analytics',
   entityAnalyticsManagement = 'entity_analytics-management',
+  entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',
   coverageOverview = 'coverage-overview',
 }

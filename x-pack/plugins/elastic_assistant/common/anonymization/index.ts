@@ -28,6 +28,7 @@ export const DEFAULT_ALLOW = [
   'host.name',
   'host.risk.calculated_level',
   'host.risk.calculated_score_norm',
+  'kibana.alert.original_time',
   'kibana.alert.last_detected',
   'kibana.alert.risk_score',
   'kibana.alert.rule.description',

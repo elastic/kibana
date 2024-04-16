@@ -124,6 +124,9 @@ export const getIsRulePreviewDisabled = ({
   if (ruleType === 'esql') {
     return isEsqlPreviewDisabled({ isQueryBarValid, queryBar });
   }
+  if (ruleType === 'machine_learning') {
+    return machineLearningJobId.length === 0;
+  }
   if (
     !isQueryBarValid ||
     (dataSourceType === DataSourceType.DataView && !dataViewId) ||
@@ -137,9 +140,6 @@ export const getIsRulePreviewDisabled = ({
       threatMapping,
       isThreatQueryBarValid,
     });
-  }
-  if (ruleType === 'machine_learning') {
-    return machineLearningJobId.length === 0;
   }
   if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
     return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);

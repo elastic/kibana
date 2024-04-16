@@ -53,89 +53,6 @@
         "children": [
           {
             "parentPluginId": "securitySolution",
-            "id": "def-public.Plugin.kibanaBranch",
-            "type": "string",
-            "tags": [],
-            "label": "kibanaBranch",
-            "description": [
-              "\nThe current Kibana branch. e.g. 'main'"
-            ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.Plugin.kibanaVersion",
-            "type": "string",
-            "tags": [],
-            "label": "kibanaVersion",
-            "description": [
-              "\nThe current Kibana version. e.g. '8.0.0' or '8.0.0-SNAPSHOT'"
-            ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.Plugin.buildFlavor",
-            "type": "string",
-            "tags": [],
-            "label": "buildFlavor",
-            "description": [
-              "\nWhether the environment is 'serverless' or 'traditional'"
-            ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.Plugin.prebuiltRulesPackageVersion",
-            "type": "string",
-            "tags": [],
-            "label": "prebuiltRulesPackageVersion",
-            "description": [
-              "\nFor internal use. Specify which version of the Detection Rules fleet package to install\nwhen upgrading rules. If not provided, the latest compatible package will be installed,\nor if running from a dev environment or -SNAPSHOT build, the latest pre-release package\nwill be used (if fleet is available or not within an airgapped environment).\n\nNote: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`\nhook when navigating to a Security Solution page. The package version specified in\n`fleet_packages.json` in project root will always be installed first on Kibana start if\nthe package is not already installed."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.Plugin.experimentalFeatures",
-            "type": "Object",
-            "tags": [],
-            "label": "experimentalFeatures",
-            "description": [],
-            "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly alertSuppressionForNewTermsRuleEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
-            ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.Plugin.configSettings",
-            "type": "Object",
-            "tags": [],
-            "label": "configSettings",
-            "description": [],
-            "signature": [
-              "ConfigSettings"
-            ],
-            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.Unnamed",
             "type": "Function",
             "tags": [],
@@ -357,7 +274,7 @@
             "tags": [],
             "label": "registerAppLinks",
             "description": [
-              "\nRegister deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes."
+              "\nRegisters deepLinks and appUpdater for appLinks using license."
             ],
             "signature": [
               "(core: ",
@@ -568,7 +485,7 @@
               "\nExperimental flag needed to enable the link"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"expandableFlyoutInCreateRuleEnabled\" | \"expandableEventFlyoutEnabled\" | \"expandableTimelineFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"newUserDetailsFlyoutManagedUser\" | \"newHostDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"alertSuppressionForNewTermsRuleEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"jsonPrebuiltRulesDiffingEnabled\" | \"timelineEsqlTabDisabled\" | \"unifiedComponentsInTimelineEnabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"perFieldPrebuiltRulesDiffingEnabled\" | \"malwareOnWriteScanOptionAvailable\" | undefined"
+              "\"assistantModelEvaluation\" | \"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"expandableFlyoutInCreateRuleEnabled\" | \"expandableEventFlyoutEnabled\" | \"expandableTimelineFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"newUserDetailsFlyoutManagedUser\" | \"newHostDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"alertSuppressionForNewTermsRuleEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"jsonPrebuiltRulesDiffingEnabled\" | \"timelineEsqlTabDisabled\" | \"unifiedComponentsInTimelineEnabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"perFieldPrebuiltRulesDiffingEnabled\" | \"malwareOnWriteScanOptionAvailable\" | \"aiAssistantFlyoutMode\" | \"valueListItemsModalEnabled\" | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -648,7 +565,7 @@
               "\nExperimental flag needed to disable the link. Opposite of experimentalKey"
             ],
             "signature": [
-              "\"assistantModelEvaluation\" | \"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"chartEmbeddablesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"expandableFlyoutInCreateRuleEnabled\" | \"expandableEventFlyoutEnabled\" | \"expandableTimelineFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"newUserDetailsFlyoutManagedUser\" | \"newHostDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"alertSuppressionForNewTermsRuleEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"jsonPrebuiltRulesDiffingEnabled\" | \"timelineEsqlTabDisabled\" | \"unifiedComponentsInTimelineEnabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"perFieldPrebuiltRulesDiffingEnabled\" | \"malwareOnWriteScanOptionAvailable\" | undefined"
+              "\"assistantModelEvaluation\" | \"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"expandableFlyoutInCreateRuleEnabled\" | \"expandableEventFlyoutEnabled\" | \"expandableTimelineFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"newUserDetailsFlyoutManagedUser\" | \"newHostDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"alertSuppressionForNewTermsRuleEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"jsonPrebuiltRulesDiffingEnabled\" | \"timelineEsqlTabDisabled\" | \"unifiedComponentsInTimelineEnabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"perFieldPrebuiltRulesDiffingEnabled\" | \"malwareOnWriteScanOptionAvailable\" | \"aiAssistantFlyoutMode\" | \"valueListItemsModalEnabled\" | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -788,6 +705,22 @@
             "label": "path",
             "description": [
               "\nLink path relative to security root"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.LinkItem.sideNavFooter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sideNavFooter",
+            "description": [
+              "\nDisplays the link in the footer of the side navigation. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
@@ -2015,79 +1948,11 @@
           "label": "experimentalFeatures",
           "description": [],
           "signature": [
-            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly alertSuppressionForNewTermsRuleEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
+            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly alertSuppressionForNewTermsRuleEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly aiAssistantFlyoutMode: boolean; readonly valueListItemsModalEnabled: boolean; }"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "securitySolution",
-          "id": "def-public.PluginSetup.setAppLinksSwitcher",
-          "type": "Function",
-          "tags": [],
-          "label": "setAppLinksSwitcher",
-          "description": [],
-          "signature": [
-            "(appLinksSwitcher: ",
-            "AppLinksSwitcher",
-            ") => void"
-          ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "securitySolution",
-              "id": "def-public.PluginSetup.setAppLinksSwitcher.$1",
-              "type": "Function",
-              "tags": [],
-              "label": "appLinksSwitcher",
-              "description": [],
-              "signature": [
-                "AppLinksSwitcher"
-              ],
-              "path": "x-pack/plugins/security_solution/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "securitySolution",
-          "id": "def-public.PluginSetup.setDeepLinksFormatter",
-          "type": "Function",
-          "tags": [],
-          "label": "setDeepLinksFormatter",
-          "description": [],
-          "signature": [
-            "(deepLinksFormatter: ",
-            "DeepLinksFormatter",
-            ") => void"
-          ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "securitySolution",
-              "id": "def-public.PluginSetup.setDeepLinksFormatter.$1",
-              "type": "Function",
-              "tags": [],
-              "label": "deepLinksFormatter",
-              "description": [],
-              "signature": [
-                "DeepLinksFormatter"
-              ],
-              "path": "x-pack/plugins/security_solution/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -2122,41 +1987,6 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.setExtraRoutes",
-          "type": "Function",
-          "tags": [],
-          "label": "setExtraRoutes",
-          "description": [],
-          "signature": [
-            "(extraRoutes: ",
-            "RouteProps",
-            "<string, { [x: string]: string | undefined; }>[]) => void"
-          ],
-          "path": "x-pack/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "securitySolution",
-              "id": "def-public.PluginStart.setExtraRoutes.$1",
-              "type": "Array",
-              "tags": [],
-              "label": "extraRoutes",
-              "description": [],
-              "signature": [
-                "RouteProps",
-                "<string, { [x: string]: string | undefined; }>[]"
-              ],
-              "path": "x-pack/plugins/security_solution/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
           "returnComment": []
         },
         {
@@ -2240,6 +2070,56 @@
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setIsSolutionNavigationEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "setIsSolutionNavigationEnabled",
+          "description": [],
+          "signature": [
+            "(isSolutionNavigationEnabled: boolean) => void"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "securitySolution",
+              "id": "def-public.PluginStart.setIsSolutionNavigationEnabled.$1",
+              "type": "boolean",
+              "tags": [],
+              "label": "isSolutionNavigationEnabled",
+              "description": [],
+              "signature": [
+                "boolean"
+              ],
+              "path": "x-pack/plugins/security_solution/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.getSolutionNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "getSolutionNavigation",
+          "description": [],
+          "signature": [
+            "() => Promise<",
+            "SolutionNavigation",
+            ">"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -3134,7 +3014,7 @@
             "\nThe security solution generic experimental features"
           ],
           "signature": [
-            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly alertSuppressionForNewTermsRuleEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
+            "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly alertSuppressionForNewTermsRuleEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly aiAssistantFlyoutMode: boolean; readonly valueListItemsModalEnabled: boolean; }"
           ],
           "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
           "deprecated": false,
@@ -3310,7 +3190,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly alertSuppressionForNewTermsRuleEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; }"
+          "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly alertSuppressionForNewTermsRuleEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly aiAssistantFlyoutMode: boolean; readonly valueListItemsModalEnabled: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
@@ -3376,7 +3256,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly tGridEnabled: true; readonly tGridEventRenderedViewEnabled: true; readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: true; readonly chartEmbeddablesEnabled: true; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly insightsRelatedAlertsByProcessAncestry: true; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsEnabled: true; readonly endpointResponseActionsEnabled: true; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: false; readonly alertsPageChartsEnabled: true; readonly alertTypeEnabled: false; readonly expandableFlyoutInCreateRuleEnabled: true; readonly expandableEventFlyoutEnabled: false; readonly expandableTimelineFlyoutEnabled: false; readonly alertsPageFiltersEnabled: true; readonly assistantModelEvaluation: false; readonly newUserDetailsFlyout: true; readonly newUserDetailsFlyoutManagedUser: false; readonly newHostDetailsFlyout: true; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly alertSuppressionForNewTermsRuleEnabled: false; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: false; readonly jsonPrebuiltRulesDiffingEnabled: true; readonly timelineEsqlTabDisabled: false; readonly unifiedComponentsInTimelineEnabled: false; readonly analyzerDatePickersAndSourcererDisabled: false; readonly perFieldPrebuiltRulesDiffingEnabled: true; readonly malwareOnWriteScanOptionAvailable: false; }"
+          "{ readonly tGridEnabled: true; readonly tGridEventRenderedViewEnabled: true; readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: true; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly insightsRelatedAlertsByProcessAncestry: true; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionsEnabled: true; readonly endpointResponseActionsEnabled: true; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: false; readonly alertsPageChartsEnabled: true; readonly alertTypeEnabled: false; readonly expandableFlyoutInCreateRuleEnabled: true; readonly expandableEventFlyoutEnabled: false; readonly expandableTimelineFlyoutEnabled: false; readonly alertsPageFiltersEnabled: true; readonly assistantModelEvaluation: false; readonly newUserDetailsFlyout: true; readonly newUserDetailsFlyoutManagedUser: false; readonly newHostDetailsFlyout: true; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly alertSuppressionForNewTermsRuleEnabled: false; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: false; readonly jsonPrebuiltRulesDiffingEnabled: true; readonly timelineEsqlTabDisabled: false; readonly unifiedComponentsInTimelineEnabled: false; readonly analyzerDatePickersAndSourcererDisabled: false; readonly perFieldPrebuiltRulesDiffingEnabled: true; readonly malwareOnWriteScanOptionAvailable: false; readonly aiAssistantFlyoutMode: false; readonly valueListItemsModalEnabled: false; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,

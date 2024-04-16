@@ -90,7 +90,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/runSoon",
           ]
         `);
       });
@@ -178,7 +177,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:alert-type/my-feature/alert/get",
             "alerting:alert-type/my-feature/alert/find",
             "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
@@ -226,7 +224,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -243,6 +240,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkEnable",
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
+            "alerting:alert-type/my-feature/rule/runSoon",
           ]
         `);
       });
@@ -331,7 +329,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -348,6 +345,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkEnable",
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
+            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:alert-type/my-feature/alert/get",
             "alerting:alert-type/my-feature/alert/find",
             "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
@@ -396,7 +394,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -413,6 +410,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkEnable",
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
+            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:readonly-alert-type/my-feature/rule/get",
             "alerting:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
@@ -420,7 +418,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
             "alerting:readonly-alert-type/my-feature/rule/find",
             "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:readonly-alert-type/my-feature/rule/runSoon",
           ]
         `);
       });
@@ -513,7 +510,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -530,6 +526,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkEnable",
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
+            "alerting:alert-type/my-feature/rule/runSoon",
             "alerting:readonly-alert-type/my-feature/rule/get",
             "alerting:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
@@ -537,7 +534,6 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
             "alerting:readonly-alert-type/my-feature/rule/find",
             "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:readonly-alert-type/my-feature/rule/runSoon",
             "alerting:another-alert-type/my-feature/alert/get",
             "alerting:another-alert-type/my-feature/alert/find",
             "alerting:another-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
