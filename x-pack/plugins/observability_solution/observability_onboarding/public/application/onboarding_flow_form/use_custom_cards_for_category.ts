@@ -72,7 +72,7 @@ export function useCustomCardsForCategory(
               type: 'svg',
               src:
                 basePath?.prepend(
-                  '/plugins/home/assets/logos/opentelemetry.svg'
+                  '/plugins/observabilityOnboarding/assets/opentelemetry.svg'
                 ) ?? '',
             },
           ],
