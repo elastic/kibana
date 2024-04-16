@@ -17,10 +17,22 @@ import { DocumentDetailsPreviewPanelKey } from '../../preview';
 import { TestProviders } from '../../../../common/mock';
 import { i18n } from '@kbn/i18n';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),

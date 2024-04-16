@@ -7,15 +7,15 @@
 
 import { EuiSelectableOption } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { observabilityAppId } from '@kbn/observability-plugin/public';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Query } from '@kbn/es-query';
-import { observabilityAppId } from '@kbn/observability-plugin/public';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../utils/kibana_react';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/constants';
-import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { QuickFilters } from './common/quick_filters';
 
@@ -42,7 +42,7 @@ export function SloListSearchBar() {
   const loading = useSloCrudLoading();
 
   const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   });
 
   useEffect(() => {
