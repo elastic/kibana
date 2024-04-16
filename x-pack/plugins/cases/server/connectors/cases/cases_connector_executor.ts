@@ -786,7 +786,7 @@ export class CasesConnectorExecutor {
 
   private getCaseDescription(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
     const ruleName = params.rule.ruleUrl
-      ? `[${params.rule.name}](${params.rule.ruleUrl})`
+      ? `['${params.rule.name}'](${params.rule.ruleUrl})`
       : params.rule.name;
 
     const description = `${CASE_CREATED_BY_RULE_DESC(ruleName)}.`;

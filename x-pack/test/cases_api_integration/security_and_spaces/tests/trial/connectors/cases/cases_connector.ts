@@ -323,7 +323,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             customFields: [],
             description:
-              'This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id).',
+              "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id).",
             duration: null,
             external_service: null,
             id: 'ee06877e50151293e75cd6c5bd81812c15c25be55ed970f91c6f7dc40e1eafa6',
@@ -693,7 +693,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               customFields: [],
               description:
-                'This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`.',
+                "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`.",
               duration: null,
               external_service: null,
               id: firstCaseId,
@@ -740,7 +740,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               customFields: [],
               description:
-                'This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: B`.',
+                "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: B`.",
               duration: null,
               external_service: null,
               id: secondCaseId,
@@ -995,10 +995,10 @@ export default ({ getService }: FtrProviderContext): void => {
             );
 
             expect(firstCase.description).to.be(
-              'This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`.'
+              "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: A`."
             );
             expect(secondCase.description).to.be(
-              'This case was created by the Case action in [Test rule](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: unknown`.'
+              "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by `host.name: unknown`."
             );
 
             const firstCaseAttachments = await getAllComments({

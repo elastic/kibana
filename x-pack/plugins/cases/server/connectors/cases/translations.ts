@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const CASE_CREATED_BY_RULE_DESC = (ruleName: string) =>
   i18n.translate('xpack.cases.caseAction.caseCreatedByRuleDesc', {
-    defaultMessage: 'This case was created by the case action in {ruleName}',
+    defaultMessage: 'This case was created by the rule {ruleName}',
     values: {
       ruleName,
     },
