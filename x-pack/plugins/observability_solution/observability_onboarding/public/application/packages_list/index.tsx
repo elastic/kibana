@@ -40,6 +40,10 @@ interface Props {
   searchBarRef?: React.Ref<HTMLInputElement>;
   searchQuery?: string;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
+  /**
+   * When enabled, custom and integration cards are joined into a single list.
+   */
+  joinCardLists?: boolean;
 }
 
 type WrapperProps = Props & {
@@ -56,6 +60,7 @@ const PackageListGridWrapper = ({
   searchQuery,
   setSearchQuery,
   customCards,
+  joinCardLists = false,
 }: WrapperProps) => {
   const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
@@ -66,7 +71,8 @@ const PackageListGridWrapper = ({
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
-    customCards
+    customCards,
+    joinCardLists
   );
 
   React.useEffect(() => {
