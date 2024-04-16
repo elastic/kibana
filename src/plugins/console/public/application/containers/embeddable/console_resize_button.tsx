@@ -55,6 +55,9 @@ export const EmbeddedConsoleResizeButton = ({
         setMaxConsoleHeight(newMaxConsoleHeight);
       }
       if (consoleHeight > newMaxConsoleHeight && newMaxConsoleHeight > CONSOLE_MIN_HEIGHT) {
+        // When the current console height is greater than the new max height,
+        // we resize the console to the max height. This will ensure there is not weird
+        // behavior with the drag resize.
         setConsoleHeight(newMaxConsoleHeight);
       }
     }
@@ -119,6 +122,13 @@ export const EmbeddedConsoleResizeButton = ({
     },
     [maxConsoleHeight, setConsoleHeight]
   );
+  const onResizeDoubleClick = useCallback(() => {
+    if (consoleHeight < maxConsoleHeight) {
+      setConsoleHeight(maxConsoleHeight);
+    } else {
+      setConsoleHeight(maxConsoleHeight / 2);
+    }
+  }, [consoleHeight, maxConsoleHeight, setConsoleHeight]);
 
   return (
     <EuiResizableButton
@@ -127,6 +137,7 @@ export const EmbeddedConsoleResizeButton = ({
       onMouseDown={onResizeMouseDown}
       onTouchStart={onResizeMouseDown}
       onKeyDown={onResizeKeyDown}
+      onDoubleClick={onResizeDoubleClick}
     />
   );
 };
