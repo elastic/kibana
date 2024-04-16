@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Filter } from '@kbn/es-query';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import type { SortDirection } from '../slo_list_search_bar';
@@ -16,17 +17,28 @@ import { GroupListView } from './group_list_view';
 
 interface Props {
   groupBy: string;
-  kqlQuery: string;
+  kqlQuery?: string;
   sloView: SLOView;
-  sort: string;
-  direction: SortDirection;
+  sort?: string;
+  direction?: SortDirection;
+  filters?: Filter[];
+  lastRefreshTime?: number;
+  groupsFilter?: string[];
 }
 
-export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props) {
+export function GroupView({
+  kqlQuery,
+  sloView,
+  sort,
+  direction,
+  groupBy,
+  groupsFilter,
+  filters,
+  lastRefreshTime,
+}: Props) {
   const { state, onStateChange } = useUrlSearchState();
-  const { tagsFilter, statusFilter, filters, page, perPage, lastRefresh } = state;
-
-  const { data, isLoading, isError } = useFetchSloGroups({
+  const { tagsFilter, statusFilter, page, perPage, lastRefresh } = state;
+  const { data, isLoading, isError, isRefetching, refetch } = useFetchSloGroups({
     perPage,
     page: page + 1,
     groupBy,
@@ -35,13 +47,19 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
     statusFilter,
     filters,
     lastRefresh,
+    groupsFilter,
   });
+
+  useEffect(() => {
+    refetch();
+  }, [lastRefreshTime, refetch]);
+
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
     onStateChange({ page: pageNumber });
   };
 
-  if (isLoading) {
+  if (isLoading || isRefetching) {
     return (
       <EuiEmptyPrompt
         data-test-subj="sloGroupListLoading"

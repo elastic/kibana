@@ -2,12 +2,10 @@ CEIL
 
 Syntax
 Parameters
-n
+number
 Numeric expression. If null, the function returns null.
 DescriptionRound a number up to the nearest integer.
-This is a noop for long (including unsigned) and integer.
-      For double this picks the closest double value to the integer
-      similar to Math.ceil.
+This is a noop for long (including unsigned) and integer. For double this picks the closest double value to the integer similar to Math.ceil.
 Supported types
 Example
 ```esql

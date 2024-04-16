@@ -20,6 +20,7 @@ import {
 } from '../../../contexts';
 import { useSetInitialValue } from './use_set_initial_value';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
+import { useSetupAutosave } from './use_setup_autosave';
 
 export interface EditorProps {
   initialTextValue: string;
@@ -55,6 +56,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   useEffect(() => {
     setInitialValue({ initialTextValue, setValue, toasts });
   }, [initialTextValue, setInitialValue, toasts]);
+
+  useSetupAutosave({ value });
 
   return (
     <div
