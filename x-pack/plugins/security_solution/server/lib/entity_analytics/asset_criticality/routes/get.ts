@@ -12,12 +12,15 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+export const assetCriticalityGetRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'internal',

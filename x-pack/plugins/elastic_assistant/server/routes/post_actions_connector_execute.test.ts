@@ -134,6 +134,7 @@ const mockRequest = {
     isEnabledKnowledgeBase: true,
     isEnabledRAGAlerts: false,
     replacements: {},
+    model: 'gpt-4',
   },
   events: {
     aborted$: NEVER,
@@ -273,6 +274,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -310,6 +314,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -346,6 +353,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               await handler(mockContext, req, mockResponse);
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: true,
               });
@@ -378,6 +388,9 @@ describe('postActionsConnectorExecuteRoute', () => {
               await handler(mockContext, req, mockResponse);
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: false,
               });
@@ -410,6 +423,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -444,6 +460,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: true,
                 isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -484,6 +503,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -553,6 +575,9 @@ describe('postActionsConnectorExecuteRoute', () => {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: false,
                 isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
