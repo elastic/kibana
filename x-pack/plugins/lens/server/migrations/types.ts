@@ -8,7 +8,12 @@
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { Query, Filter } from '@kbn/es-query';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import type { LayerType, PersistableFilter, RowHeightMode, ValueLabelConfig } from '../../common/types';
+import type {
+  LayerType,
+  PersistableFilter,
+  RowHeightMode,
+  ValueLabelConfig,
+} from '../../common/types';
 
 export type CustomVisualizationMigrations = Record<string, () => MigrateFunctionsObject>;
 
