@@ -21,25 +21,6 @@ export class ShareMenuRegistry {
        * @param shareMenuProvider
        */
       register: (shareMenuProvider: ShareMenuProvider) => {
-        if (
-          !this.newVersionEnabled &&
-          (shareMenuProvider.id === 'csvReports' ||
-            shareMenuProvider.id === 'screenCaptureReports' ||
-            shareMenuProvider.id === 'csvDownloadLens')
-        ) {
-          if (this.shareMenuProviders.has(shareMenuProvider.id)) {
-            throw new Error(
-              `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
-            );
-          }
-          this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
-        } else if (
-          shareMenuProvider.id === 'csvReportsModal' ||
-          shareMenuProvider.id === 'modalImageReports' ||
-          shareMenuProvider.id === 'csvDownloadLens'
-        ) {
-          this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
-        }
         this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
       },
     };

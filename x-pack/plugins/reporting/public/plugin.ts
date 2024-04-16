@@ -209,18 +209,6 @@ export class ReportingPublicPlugin
 
     startServices$.subscribe(([{ application, i18n: i18nStart }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
-        shareSetup.register(
-          reportingCsvShareModalProvider({
-            apiClient,
-            uiSettings,
-            license,
-            application,
-            usesUiCapabilities,
-            theme: core.theme,
-            i18n: i18nStart,
-            intl: setupDeps.intl,
-          })
-        );
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
           // needed for Canvas and legacy tests
           shareSetup.register(
@@ -236,9 +224,22 @@ export class ReportingPublicPlugin
             })
           );
         }
-        if (shareSetup.isNewVersion()) {
+
+        shareSetup.register(
+          reportingCsvShareModalProvider({
+            apiClient,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+            i18n: i18nStart,
+          })
+        );
+
+        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
           shareSetup.register(
-            reportingCsvShareModalProvider({
+            reportingExportModalProvider({
               apiClient,
               uiSettings,
               license,
@@ -248,20 +249,6 @@ export class ReportingPublicPlugin
               i18n: i18nStart,
             })
           );
-
-          if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-            shareSetup.register(
-              reportingExportModalProvider({
-                apiClient,
-                uiSettings,
-                license,
-                application,
-                usesUiCapabilities,
-                theme: core.theme,
-                i18n: i18nStart,
-              })
-            );
-          }
         }
       });
     });
