@@ -55,9 +55,13 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
   const groups = alert.fields[ALERT_GROUP];
   const instanceId = alert.fields[ALERT_INSTANCE_ID];
   const featureIds = [rule.consumer as AlertConsumers];
-  const options = rule.params.criteria.map((criterion, index) => ({
-    text: generateChartTitleAndTooltip(criterion, 27).title,
-  }));
+  const options = rule.params.criteria.map((criterion, index) => {
+    const { title, tooltip } = generateChartTitleAndTooltip(criterion, 27);
+    return {
+      text: title,
+      title: tooltip,
+    };
+  });
   const [selectedCriterion, setSelectedCriterion] = useState<CustomMetricExpressionParams>(
     rule.params.criteria[0]
   );
