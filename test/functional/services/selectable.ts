@@ -95,8 +95,10 @@ export class SelectableService extends FtrService {
     await this.openIfClosed(buttonTestSubjectId, selectableBodyTestSubjectId);
 
     // Clear and set search text
-    await this.testSubjects.setValue(searchInputTestSubjectId, '');
-    await this.testSubjects.setValue(searchInputTestSubjectId, searchText);
+    await this.testSubjects.setValue(searchInputTestSubjectId, searchText, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.common.sleep(500);
 
     // Select options
