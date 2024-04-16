@@ -25,7 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
     'timePicker',
     'share',
+    'header',
   ]);
+  const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -111,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await testSubjects.exists('shareTopNavButton');
         });
       });
+
       after(async () => {
         await reportingAPI.teardownEcommerce();
         // TODO: emptyKibanaIndex fails in Serverless with
@@ -218,6 +221,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
       });
+
+      it('generate a report using ES|QL', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.contentType).to.equal('text/csv; charset=utf-8');
+
+        const csvFile = res.text;
+        expectSnapshot(csvFile).toMatch();
+      });
     });
 
     describe('Generate CSV: sparse data', () => {
@@ -299,6 +318,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
         await reset();
+      });
+
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
       });
 
       beforeEach(async () => {

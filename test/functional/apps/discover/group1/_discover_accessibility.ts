@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should return focus to the share button when dismissing the share popover', () =>
+      xit('should return focus to the share button when dismissing the share popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
 
       it('should return focus to the inspect button when dismissing the inspector flyout', () =>

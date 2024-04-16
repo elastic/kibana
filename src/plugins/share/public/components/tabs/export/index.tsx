@@ -34,7 +34,6 @@ const ExportTabContent = () => {
       absoluteUrl,
       generateCopyUrl,
       renderCopyURLButton,
-      showRadios,
     } = shareMenuItem;
 
     aggregateReportTypes.push({
@@ -50,7 +49,6 @@ const ExportTabContent = () => {
       absoluteUrl,
       generateCopyUrl,
       renderCopyURLButton,
-      showRadios,
     });
   });
 
