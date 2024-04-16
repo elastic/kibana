@@ -207,7 +207,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const timelineQueryFields = useMemo(() => {
     const columnFields = augumentedColumnHeaders.map((c) => c.id);
 
-    return [...columnFields, ...requiredFieldsForActions];
+    return columnFields.concat(requiredFieldsForActions);
   }, [augumentedColumnHeaders]);
 
   const timelineQuerySortField = useMemo(() => {
