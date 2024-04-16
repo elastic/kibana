@@ -35,13 +35,13 @@ run(async ({ log }) => {
 
   if (!filePaths.length) {
     throw createFailError(
-      `Error: A top level .prettierrc file should exist and no file was found.`
+      `A top level .prettierrc file should exist and no file was found.`
     );
   }
 
   if (filePaths.length > 1) {
     throw createFailError(
-      `Error: Only a single .prettierrc root file should exist and more than one were found.\n${listPaths(
+      `Only a single .prettierrc root file should exist and more than one were found.\n${listPaths(
         filePaths
       )}`
     );
@@ -51,7 +51,7 @@ run(async ({ log }) => {
     filePaths.length === 1 &&
     path.resolve(path.dirname(filePaths[0])) === path.resolve(REPO_ROOT)
   ) {
-    log.success('Success: Only one .prettierrc file found at the root level.');
+    log.success('Only one .prettierrc file found at the root level.');
   }
 
   process.exit(0);
