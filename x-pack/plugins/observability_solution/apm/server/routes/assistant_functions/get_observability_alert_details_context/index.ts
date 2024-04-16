@@ -19,6 +19,8 @@ import { getAssistantDownstreamDependencies } from '../get_apm_downstream_depend
 import { getLogCategories } from '../get_log_categories';
 import { ApmTimeseriesType, getApmTimeseries } from '../get_apm_timeseries';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
+import { getServiceNameFromSignals } from './get_service_name_from_signals';
+import { getContainerIdFromSignals } from './get_container_id_from_signals';
 
 export const observabilityAlertDetailsContextRt = t.intersection([
   t.type({
@@ -57,8 +59,23 @@ export async function getObservabilityAlertDetailsContext({
   query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
 }) {
   const alertStartedAt = query.alert_started_at;
+  const serviceEnvironment = query['service.environment'];
+  const serviceName = await getServiceNameFromSignals({
+    query,
+    esClient,
+    coreContext,
+    apmEventClient,
+  });
 
-  const serviceSummaryPromise = query['service.name']
+  const hostName = query['host.name'];
+  const containerId = await getContainerIdFromSignals({
+    query,
+    esClient,
+    coreContext,
+    apmEventClient,
+  });
+
+  const serviceSummaryPromise = serviceName
     ? getApmServiceSummary({
         apmEventClient,
         annotationsClient,
@@ -67,20 +84,20 @@ export async function getObservabilityAlertDetailsContext({
         mlClient,
         logger,
         arguments: {
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
           end: alertStartedAt,
         },
       })
     : undefined;
 
-  const downstreamDependenciesPromise = query['service.name']
+  const downstreamDependenciesPromise = serviceName
     ? getAssistantDownstreamDependencies({
         apmEventClient,
         arguments: {
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
           end: alertStartedAt,
         },
@@ -93,28 +110,32 @@ export async function getObservabilityAlertDetailsContext({
     arguments: {
       start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
       end: alertStartedAt,
-      'service.name': query['service.name'],
-      'host.name': query['host.name'],
-      'container.id': query['container.id'],
+      'service.name': serviceName,
+      'host.name': hostName,
+      'container.id': containerId,
     },
   });
 
   const serviceChangePointsPromise = getServiceChangePoints({
     apmEventClient,
     alertStartedAt,
-    query,
+    serviceName,
+    serviceEnvironment,
+    transactionType: query['transaction.type'],
+    transactionName: query['transaction.name'],
   });
 
   const exitSpanChangePointsPromise = getExitSpanChangePoints({
     apmEventClient,
     alertStartedAt,
-    query,
+    serviceName,
+    serviceEnvironment,
   });
 
   const anomaliesPromise = getAnomalies({
     start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
     end: moment(alertStartedAt).valueOf(),
-    environment: query['service.environment'],
+    environment: serviceEnvironment,
     mlClient,
     logger,
   });
@@ -148,13 +169,19 @@ export async function getObservabilityAlertDetailsContext({
 async function getServiceChangePoints({
   apmEventClient,
   alertStartedAt,
-  query,
+  serviceName,
+  serviceEnvironment,
+  transactionType,
+  transactionName,
 }: {
   apmEventClient: APMEventClient;
   alertStartedAt: string;
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  serviceName: string | undefined;
+  serviceEnvironment: string | undefined;
+  transactionType: string | undefined;
+  transactionName: string | undefined;
 }) {
-  if (!query['service.name']) {
+  if (!serviceName) {
     return [];
   }
 
@@ -166,39 +193,39 @@ async function getServiceChangePoints({
       stats: [
         {
           title: 'Latency',
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           timeseries: {
             name: ApmTimeseriesType.transactionLatency,
             function: LatencyAggregationType.p95,
-            'transaction.type': query['transaction.type'],
-            'transaction.name': query['transaction.name'],
+            'transaction.type': transactionType,
+            'transaction.name': transactionName,
           },
         },
         {
           title: 'Throughput',
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           timeseries: {
             name: ApmTimeseriesType.transactionThroughput,
-            'transaction.type': query['transaction.type'],
-            'transaction.name': query['transaction.name'],
+            'transaction.type': transactionType,
+            'transaction.name': transactionName,
           },
         },
         {
           title: 'Failure rate',
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           timeseries: {
             name: ApmTimeseriesType.transactionFailureRate,
-            'transaction.type': query['transaction.type'],
-            'transaction.name': query['transaction.name'],
+            'transaction.type': transactionType,
+            'transaction.name': transactionName,
           },
         },
         {
           title: 'Error events',
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           timeseries: {
             name: ApmTimeseriesType.errorEventRate,
           },
@@ -219,13 +246,15 @@ async function getServiceChangePoints({
 async function getExitSpanChangePoints({
   apmEventClient,
   alertStartedAt,
-  query,
+  serviceName,
+  serviceEnvironment,
 }: {
   apmEventClient: APMEventClient;
   alertStartedAt: string;
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  serviceName: string | undefined;
+  serviceEnvironment: string | undefined;
 }) {
-  if (!query['service.name']) {
+  if (!serviceName) {
     return [];
   }
 
@@ -237,16 +266,16 @@ async function getExitSpanChangePoints({
       stats: [
         {
           title: 'Exit span latency',
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           timeseries: {
             name: ApmTimeseriesType.exitSpanLatency,
           },
         },
         {
           title: 'Exit span failure rate',
-          'service.name': query['service.name'],
-          'service.environment': query['service.environment'],
+          'service.name': serviceName,
+          'service.environment': serviceEnvironment,
           timeseries: {
             name: ApmTimeseriesType.exitSpanFailureRate,
           },
