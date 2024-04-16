@@ -6,7 +6,6 @@
  */
 
 import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from '@kbn/core/public';
-import { parseNextURL } from '@kbn/std';
 
 import { AUTH_URL_HASH_QUERY_STRING_PARAMETER } from '../../../common/constants';
 
@@ -48,7 +47,7 @@ export const captureURLApp = Object.freeze({
         try {
           // This is an async import because it requires `url`, which is a sizable dependency.
           // Otherwise this becomes part of the "page load bundle".
-          const { parseNext } = await import('../../../common/parse_next');
+          const { parseNextURL } = await import('@kbn/std');
           const url = new URL(
             parseNextURL(window.location.href, http.basePath.serverBasePath),
             window.location.origin
