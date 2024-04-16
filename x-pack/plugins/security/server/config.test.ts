@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+const mockGetFipsFn = jest.fn();
 jest.mock('crypto', () => ({
   randomBytes: jest.fn(),
   constants: jest.requireActual('crypto').constants,
+  get getFips() {
+    return mockGetFipsFn;
+  },
 }));
 
 jest.mock('@kbn/utils', () => ({
@@ -61,6 +65,9 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -115,6 +122,9 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -168,6 +178,10 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -224,6 +238,10 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "roleManagementEnabled": false,
@@ -2444,5 +2462,86 @@ describe('createConfig()', () => {
         )?.accessAgreement?.message
       ).toEqual('Foo');
     });
+  });
+});
+
+describe('checkFipsConfig', () => {
+  let mockExit: jest.SpyInstance;
+  beforeAll(() => {
+    mockExit = jest.spyOn(process, 'exit').mockImplementation((exitCode) => {
+      throw new Error(`Fake Exit: ${exitCode}`);
+    });
+  });
+
+  afterAll(() => {
+    mockExit.mockRestore();
+  });
+
+  it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
+    const logger = loggingSystemMock.create().get();
+
+    try {
+      createConfig(ConfigSchema.validate({ fipsMode: { enabled: true } }), logger, {
+        isTLSEnabled: true,
+      });
+    } catch (e) {
+      expect(mockExit).toHaveBeenNthCalledWith(1, 78);
+    }
+
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+                        Array [
+                          Array [
+                            "Configuration mismatch error. xpack.security.fipsMode.enabled is set to true and the configured Node.js environment has FIPS disabled",
+                          ],
+                        ]
+                `);
+  });
+
+  it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled false, Nodejs FIPS mode true', async () => {
+    mockGetFipsFn.mockImplementationOnce(() => {
+      return 1;
+    });
+
+    const logger = loggingSystemMock.create().get();
+
+    try {
+      createConfig(ConfigSchema.validate({ fipsMode: { enabled: false } }), logger, {
+        isTLSEnabled: true,
+      });
+    } catch (e) {
+      expect(mockExit).toHaveBeenNthCalledWith(1, 78);
+    }
+
+    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+                        Array [
+                          Array [
+                            "Configuration mismatch error. xpack.security.fipsMode.enabled is set to false and the configured Node.js environment has FIPS enabled",
+                          ],
+                        ]
+                `);
+  });
+
+  it('should log an info message if FIPS mode is properly configured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode true', async () => {
+    mockGetFipsFn.mockImplementationOnce(() => {
+      return 1;
+    });
+
+    const logger = loggingSystemMock.create().get();
+
+    try {
+      createConfig(ConfigSchema.validate({ fipsMode: { enabled: true } }), logger, {
+        isTLSEnabled: true,
+      });
+    } catch (e) {
+      logger.error('Should not throw error!');
+    }
+
+    expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
+                        Array [
+                          Array [
+                            "Kibana is running in FIPS mode.",
+                          ],
+                        ]
+                `);
   });
 });

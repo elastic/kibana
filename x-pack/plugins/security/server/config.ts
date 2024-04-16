@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
+import crypto, { getFips } from 'crypto';
 import type { Duration } from 'moment';
 import path from 'path';
 
@@ -313,13 +313,38 @@ export const ConfigSchema = schema.object({
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  fipsMode: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
+
+function checkFipsConfig(config: RawConfigType, logger: Logger) {
+  const isFipsEnabled = config.fipsMode.enabled;
+  const isNodeRunningWithFipsEnabled = getFips() === 1;
+
+  // Check if FIPS is enabled in either setting
+  if (isFipsEnabled || isNodeRunningWithFipsEnabled) {
+    // FIPS must be enabled on both or log and error an exit Kibana
+    if (isFipsEnabled !== isNodeRunningWithFipsEnabled) {
+      logger.error(
+        `Configuration mismatch error. xpack.security.fipsMode.enabled is set to ${isFipsEnabled} and the configured Node.js environment has FIPS ${
+          isNodeRunningWithFipsEnabled ? 'enabled' : 'disabled'
+        }`
+      );
+      process.exit(78);
+    } else {
+      logger.info('Kibana is running in FIPS mode.');
+    }
+  }
+}
 
 export function createConfig(
   config: RawConfigType,
   logger: Logger,
   { isTLSEnabled }: { isTLSEnabled: boolean }
 ) {
+  checkFipsConfig(config, logger);
+
   let encryptionKey = config.encryptionKey;
   if (encryptionKey === undefined) {
     logger.warn(
