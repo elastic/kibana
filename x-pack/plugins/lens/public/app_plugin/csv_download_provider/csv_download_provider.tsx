@@ -194,7 +194,11 @@ export const downloadCsvShareProvider = ({
                 />
               ),
               generateExportButtonLabel: (
-                <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
+                <FormattedMessage
+                  id="xpack.lens.share.csvButton"
+                  data-test-subj="generateReportButton"
+                  defaultMessage="Download CSV"
+                />
               ),
               showRadios: false,
             }),

@@ -409,6 +409,7 @@ export const reportingExportModalProvider = ({
       generateExportButtonLabel: (
         <FormattedMessage
           id="reporting.printablePdfV2.generateButtonLabel"
+          data-test-subj="generateReportButton"
           defaultMessage="Generate export"
         />
       ),
@@ -442,6 +443,7 @@ export const reportingExportModalProvider = ({
         <FormattedMessage
           id="reporting.pngV2.generateButtonLabel"
           defaultMessage="Generate export"
+          data-test-subj="generateReportButton"
         />
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,

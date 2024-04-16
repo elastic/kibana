@@ -22,7 +22,6 @@ const ExportTabContent = () => {
       objectType={objectType}
       isDirty={isDirty}
       onClose={onClose}
-      // are guaranteed that shareMenuItems will be a ShareMenuItem V2 variant
       aggregateReportTypes={shareMenuItems as unknown as ShareMenuItemV2[]}
     />
   );
