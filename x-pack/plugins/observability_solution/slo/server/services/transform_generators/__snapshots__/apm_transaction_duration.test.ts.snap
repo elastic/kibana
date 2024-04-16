@@ -400,13 +400,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.1,
+    "version": 3.2,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.1",
-    "pipeline": ".slo-observability.sli.pipeline-v3.1",
+    "index": ".slo-observability.sli-v3.2",
+    "pipeline": ".slo-observability.sli.pipeline-v3.2",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -571,13 +571,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 3.1,
+    "version": 3.2,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.1",
-    "pipeline": ".slo-observability.sli.pipeline-v3.1",
+    "index": ".slo-observability.sli-v3.2",
+    "pipeline": ".slo-observability.sli.pipeline-v3.2",
   },
   "frequency": "1m",
   "pivot": Object {

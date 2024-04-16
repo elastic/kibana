@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
@@ -86,6 +86,7 @@ export interface EntryItemProps {
   operatorsList?: OperatorOption[];
   allowCustomOptions?: boolean;
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
+  showValueListModal: ElementType;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -106,6 +107,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   allowCustomOptions = false,
   getExtendedFields,
   exceptionItemIndex,
+  showValueListModal,
 }): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
@@ -499,6 +501,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             data-test-subj="exceptionBuilderEntryFieldList"
             allowLargeValueLists={allowLargeValueLists}
             aria-label={ariaLabel}
+            showValueListModal={showValueListModal}
           />
         );
       case OperatorTypeEnum.EXISTS:

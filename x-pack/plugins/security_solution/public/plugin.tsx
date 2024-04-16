@@ -248,6 +248,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
+        aiInsights: new subPluginClasses.AiInsights(),
         alerts: new subPluginClasses.Detections(),
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
@@ -280,6 +281,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.createSubPlugins();
     return {
+      aiInsights: subPlugins.aiInsights.start(this.experimentalFeatures.assistantAlertsInsights),
       alerts: subPlugins.alerts.start(storage),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
@@ -381,6 +383,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           experimentalFeatures: this.experimentalFeatures,
           upselling: upsellingService,
           capabilities: core.application.capabilities,
+          uiSettingsClient: core.uiSettings,
           ...(license.type != null && { license }),
         };
         updateAppLinks(links, linksPermissions);
