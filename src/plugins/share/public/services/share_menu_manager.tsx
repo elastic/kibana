@@ -174,7 +174,6 @@ export class ShareMenuManager {
                 isDirty,
                 isEmbedded: allowEmbed,
                 shareMenuItems: menuItems,
-                toasts,
                 onClose: () => {
                   onClose();
                   session.close();

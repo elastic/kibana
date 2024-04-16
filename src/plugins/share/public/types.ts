@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType, ReactElement } from 'react';
-import type { InjectedIntl } from '@kbn/i18n-react';
+import { ComponentType } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -52,7 +51,6 @@ export interface ShareContext {
   onClose: () => void;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
-  toasts: ToastsSetup;
 }
 
 /**
@@ -67,49 +65,16 @@ export interface ShareContextMenuPanelItem
   sortOrder?: number;
 }
 
-export type SupportedExportTypes =
-  | 'pngV2'
-  | 'printablePdfV2'
-  | 'csv_v2'
-  | 'csv_searchsource'
-  | 'lens_csv';
-
 /**
  * @public
  * Definition of a menu item rendered in the share menu. `shareMenuItem` is shown
  * directly in the context menu. If the item is clicked, the `panel` is shown.
  * */
-
-interface ShareMenuItemBase {
-  shareMenuItem?: ShareContextMenuPanelItem;
-}
-interface ShareMenuItemLegacy extends ShareMenuItemBase {
-  panel?: EuiContextMenuPanelDescriptor;
+export interface ShareMenuItem {
+  shareMenuItem: ShareContextMenuPanelItem;
+  panel: EuiContextMenuPanelDescriptor;
 }
 
-export interface ShareMenuItemV2 extends ShareMenuItemBase {
-  // extended props to support share modal
-  label: 'PDF' | 'CSV' | 'PNG';
-  reportType?: SupportedExportTypes;
-  requiresSavedState?: boolean;
-  helpText?: ReactElement;
-  copyURLButton?: { id: string; dataTestSubj: string; label: string };
-  generateExport: (args: {
-    intl: InjectedIntl;
-    optimizedForPrinting?: boolean;
-  }) => Promise<unknown>;
-  generateExportButtonLabel?: ReactElement;
-  theme?: ThemeServiceSetup;
-  renderLayoutOptionSwitch?: boolean;
-  layoutOption?: 'print';
-  absoluteUrl?: string;
-  generateCopyUrl?: URL;
-  renderCopyURLButton?: boolean;
-}
-
-export type ShareMenuItem = ShareMenuItemLegacy | ShareMenuItemV2;
-
-type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
 /**
  * @public
  * A source for additional menu items shown in the share context menu. Any provider
@@ -119,7 +84,8 @@ type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
  * */
 export interface ShareMenuProvider {
   readonly id: string;
-  getShareMenuItems: (context: ShareContext) => ShareMenuItemType[];
+
+  getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 }
 
 interface UrlParamExtensionProps {

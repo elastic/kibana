@@ -128,9 +128,10 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       });
     }
 
-    this.props.shareMenuItems.forEach(({ shareMenuItem }) => {
+    this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
       const panelId = panels.length + 1;
       panels.push({
+        ...panel,
         id: panelId,
       });
       menuItems.push({
