@@ -23,6 +23,7 @@ import { colorTransformer } from '@kbn/observability-shared-plugin/common';
 import { KQLCustomIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+import type { WindowSchema } from '../../../../../../../typings';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
 import { useKibana } from '../../../../../../../utils/kibana_react';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
@@ -99,6 +100,14 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
     }
   );
 
+  const alertActionGroup = alert.fields['kibana.alert.action_group'];
+  const sloWindows = alert.fields['kibana.alert.rule.parameters']!.windows as WindowSchema[];
+  const relatedWindow = sloWindows.find((window) => window.actionGroup === alertActionGroup);
+  const longWindowValue = relatedWindow?.longWindow.value;
+  const longWindowUnit = relatedWindow?.longWindow.unit;
+  const shortWindowValue = relatedWindow?.shortWindow.value;
+  const shortWindowUnit = relatedWindow?.shortWindow.unit;
+
   function getDeviationMax() {
     if (alertEnd) {
       return alertEnd
@@ -108,14 +117,14 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
     } else if (
       alertStart
         .clone()
-        .add(10 * intervalFactor, 'minutes')
+        .add(10 * shortWindowValue!, shortWindowUnit)
         .isAfter(moment(new Date()))
     ) {
       return moment(new Date()).valueOf();
     } else {
       return alertStart
         .clone()
-        .add(10 * intervalFactor, 'minutes')
+        .add(10 * shortWindowValue!, shortWindowUnit)
         .valueOf();
     }
   }
@@ -123,16 +132,11 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   const initialAnalysisStart = {
     baselineMin: alertStart
       .clone()
-      .subtract(13 * intervalFactor, 'minutes')
+      .subtract(longWindowValue, longWindowUnit)
+      .subtract(shortWindowValue, shortWindowUnit)
       .valueOf(),
-    baselineMax: alertStart
-      .clone()
-      .subtract(2 * intervalFactor, 'minutes')
-      .valueOf(),
-    deviationMin: alertStart
-      .clone()
-      .subtract(1 * intervalFactor, 'minutes')
-      .valueOf(),
+    baselineMax: alertStart.clone().subtract(shortWindowValue, shortWindowUnit).valueOf(),
+    deviationMin: alertStart.clone().subtract(shortWindowValue, shortWindowUnit).valueOf(),
     deviationMax: getDeviationMax(),
   };
 
