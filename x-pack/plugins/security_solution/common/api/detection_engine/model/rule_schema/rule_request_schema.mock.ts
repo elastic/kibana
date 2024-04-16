@@ -218,6 +218,7 @@ export const getUpdateNewTermsSchemaMock = (
 export const getCreateEqlRuleSchemaMock = (ruleId = 'rule-1'): EqlRuleCreateProps => ({
   description: 'Event correlation index pattern rule',
   name: 'Event correlation index pattern rule',
+  index: ['auditbeat-*'],
   severity: 'high',
   risk_score: 55,
   rule_id: ruleId,
