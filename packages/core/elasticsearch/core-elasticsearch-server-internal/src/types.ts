@@ -32,9 +32,9 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
  * @internal
  */
 export interface InternalElasticsearchServiceStart extends ElasticsearchServiceStart {
-  telemetry: {
+  metrics: {
     /**
-     * The number of milliseconds we had to wait unless ES was ready.
+     * The number of milliseconds we had to wait until ES was ready.
      *
      * Technically, this is the amount of time spent within the `isValidConnection` check of
      * the ES service's start method.

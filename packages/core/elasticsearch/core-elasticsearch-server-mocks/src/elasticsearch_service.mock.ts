@@ -116,7 +116,7 @@ const createInternalStartContractMock = () => {
   const startContract = createStartContractMock();
   const internalStartContractMock: MockedInternalElasticsearchServiceStart = {
     ...startContract,
-    telemetry: {
+    metrics: {
       elasticsearchWaitTime: 0,
     },
   };

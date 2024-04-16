@@ -613,7 +613,7 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
       const startContract = await soService.start(createStartDeps());
 
-      expect(startContract.telemetry.migrationDuration).toBeGreaterThan(0);
+      expect(startContract.metrics.migrationDuration).toBeGreaterThan(0);
     });
 
     describe('#getTypeRegistry', () => {

@@ -327,7 +327,7 @@ describe('#start', () => {
     const groups = regexp.exec(esMessage);
     const esWaitTime = parseInt(groups![1], 10);
 
-    expect(startContract.telemetry.elasticsearchWaitTime).toEqual(esWaitTime);
+    expect(startContract.metrics.elasticsearchWaitTime).toEqual(esWaitTime);
   });
 
   describe('skipStartupConnectionCheck', () => {

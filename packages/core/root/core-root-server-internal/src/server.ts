@@ -380,7 +380,7 @@ export class Server {
 
     const elasticsearchStart = await this.elasticsearch.start();
     this.uptimePerStep.elasticsearch = {
-      waitTime: elasticsearchStart.telemetry.elasticsearchWaitTime,
+      waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
     };
 
     const deprecationsStart = this.deprecations.start();
@@ -392,7 +392,7 @@ export class Server {
       node: await this.node.start(),
     });
     this.uptimePerStep.savedObjects = {
-      migrationTime: savedObjectsStart.telemetry.migrationDuration,
+      migrationTime: savedObjectsStart.metrics.migrationDuration,
     };
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 

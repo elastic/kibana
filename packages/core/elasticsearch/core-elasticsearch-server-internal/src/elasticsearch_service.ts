@@ -154,7 +154,13 @@ export class ElasticsearchService
 
       elasticsearchWaitTime = Math.round(performance.now() - elasticsearchWaitStartTime);
       this.log.info(
-        `Successfully connected to Elasticsearch after waiting for ${elasticsearchWaitTime} milliseconds`
+        `Successfully connected to Elasticsearch after waiting for ${elasticsearchWaitTime} milliseconds`,
+        {
+          event: {
+            type: 'kibana_started.elasticsearch.waitTime',
+            duration: elasticsearchWaitTime,
+          },
+        }
       );
 
       // Ensure inline scripting is enabled on the ES cluster
@@ -184,7 +190,7 @@ export class ElasticsearchService
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
-      telemetry: {
+      metrics: {
         elasticsearchWaitTime,
       },
     };

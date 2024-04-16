@@ -112,7 +112,7 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
           elasticsearch: {
             properties: {
               waitTime: {
-                type: 'float',
+                type: 'long',
                 _meta: {
                   description:
                     'Number of milliseconds Kibana waited for Elasticsearch during the its start phase',
@@ -123,7 +123,7 @@ export const registerKibanaStartedEvent = (analytics: AnalyticsServiceSetup) => 
           savedObjects: {
             properties: {
               migrationTime: {
-                type: 'float',
+                type: 'long',
                 _meta: {
                   description: 'Number of milliseconds it took to run the SO migration',
                 },

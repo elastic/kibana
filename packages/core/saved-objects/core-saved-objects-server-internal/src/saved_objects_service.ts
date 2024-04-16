@@ -80,7 +80,7 @@ export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSet
  * @internal
  */
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
-  telemetry: {
+  metrics: {
     /**
      * The number of milliseconds it took to run the SO migrator.
      *
@@ -391,7 +391,7 @@ export class SavedObjectsService
         return [...indices];
       },
       getAllIndices: () => [...allIndices],
-      telemetry: {
+      metrics: {
         migrationDuration,
       },
     };
