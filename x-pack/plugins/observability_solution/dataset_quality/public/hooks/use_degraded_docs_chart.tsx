@@ -90,6 +90,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   const logsExplorerLinkProps = useLinkToLogsExplorer({
     dataStreamStat: dataStreamStat!,
     query: { language: 'kuery', query: '_ignored:*' },
+    timeRangeConfig: timeRange,
   });
 
   const getOpenInLogsExplorerAction = useMemo(() => {
