@@ -123,7 +123,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
       </EuiModalHeader>
       <EuiModalBody>
         <Fragment>
-          <EuiTabs>{renderTabs()}</EuiTabs>
+          <EuiTabs data-test-subj={modalTitle}>{renderTabs()}</EuiTabs>
           {React.createElement(SelectedTabContent, {
             state: selectedTabState,
             dispatch,

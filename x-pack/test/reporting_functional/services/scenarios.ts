@@ -136,7 +136,7 @@ export function createScenarios(
   };
   const tryGeneratePngSuccess = async () => {
     await PageObjects.reporting.openExportTab();
-    await testSubjects.click('PngReportOption');
+    await testSubjects.click('pngV2-radioOption');
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryReportsNotAvailable = async () => {
