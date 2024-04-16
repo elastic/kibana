@@ -115,8 +115,6 @@ export class PluginServices {
     const timelineDataService: DataPublicPluginStart = {
       ...startPlugins.data,
       query,
-      // @ts-expect-error
-      _name: 'timeline',
     };
 
     timelineDataService.query.filterManager = new FilterManager(coreStart.uiSettings);
