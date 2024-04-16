@@ -16,7 +16,7 @@ import {
 import { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { fetch$, PublishingSubject } from '@kbn/presentation-publishing';
+import { fetch$, FetchContext, PublishingSubject } from '@kbn/presentation-publishing';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 
@@ -24,8 +24,8 @@ import { fetchTextBased } from '../../application/main/utils/fetch_text_based';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { DiscoverServices } from '../../build_services';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
-import { updateSearchSource } from '../utils/update_search_source';
 import { SearchEmbeddableApi } from '../types';
+import { updateSearchSource } from '../utils/update_search_source';
 
 export function initializeFetch({
   api,
@@ -36,7 +36,7 @@ export function initializeFetch({
     dataLoading$: BehaviorSubject<boolean | undefined>;
     blockingError$: BehaviorSubject<Error | undefined>;
     rows$: BehaviorSubject<DataTableRecord[]>;
-    searchSessionId$: BehaviorSubject<string | undefined>;
+    fetchContext$: BehaviorSubject<FetchContext | undefined>;
   };
   discoverServices: DiscoverServices;
 }) {
@@ -62,11 +62,13 @@ export function initializeFetch({
         const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
         const useTextBased = isTextBasedQuery(query);
         updateSearchSource(
+          discoverServices,
           savedSearch.searchSource,
           dataView,
           savedSearch.sort,
           getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings),
           useNewFieldsApi,
+          fetchContext,
           {
             sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           }
@@ -97,8 +99,24 @@ export function initializeFetch({
             // searchProps.totalHitCount = result.records.length;
             // searchProps.isPlainRecord = true;
             // searchProps.isSortEnabled = true;
-            return { rows: result.records, searchSessionId };
+            return { rows: result.records, fetchContext };
           }
+
+          // const parentContext = api.parentApi?.executionContext;
+          // const child: KibanaExecutionContext = {
+          //   type: SEARCH_EMBEDDABLE_TYPE,
+          //   name: 'discover',
+          //   id: savedSearch.id,
+          //   description: api.panelTitle?.getValue() || api.defaultPanelTitle?.getValue() || '',
+          //   // description: this.output.title || this.output.defaultTitle || '',
+          //   // url: this.output.editUrl,
+          // };
+          // const executionContext = parentContext
+          //   ? {
+          //       ...parentContext,
+          //       child,
+          //     }
+          //   : child;
 
           /**
            * Fetch via saved search
@@ -130,7 +148,7 @@ export function initializeFetch({
 
           return {
             rows: resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView)),
-            searchSessionId,
+            fetchContext,
           };
         } catch (error) {
           return { error };
@@ -139,14 +157,16 @@ export function initializeFetch({
     )
     .subscribe((next) => {
       api.dataLoading$.next(false);
-      if (next && next.hasOwnProperty('rows')) {
-        api.rows$.next(next.rows ?? []);
-      }
-      if (next && next.hasOwnProperty('searchSessionId') && next.searchSessionId !== undefined) {
-        api.searchSessionId$.next(next.searchSessionId);
-      }
-      if (next && next.hasOwnProperty('error')) {
-        api.blockingError$.next(next.error);
+      if (next) {
+        if (next.hasOwnProperty('rows')) {
+          api.rows$.next(next.rows ?? []);
+        }
+        if (next.hasOwnProperty('fetchContext') && next.fetchContext !== undefined) {
+          api.fetchContext$.next(next.fetchContext);
+        }
+        if (next.hasOwnProperty('error')) {
+          api.blockingError$.next(next.error);
+        }
       }
     });
 

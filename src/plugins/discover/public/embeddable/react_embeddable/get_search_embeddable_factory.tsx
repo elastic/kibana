@@ -11,33 +11,28 @@ import { BehaviorSubject } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_EMBEDDABLE_TYPE,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SHOW_FIELD_STATISTICS,
-} from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
-import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  FetchContext,
+  initializeTitles,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { SortOrder } from '@kbn/saved-search-plugin/public';
 
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
-import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
 import { getValidViewMode } from '../../application/main/utils/get_valid_view_mode';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { DiscoverServices } from '../../build_services';
-import { getSortForEmbeddable } from '../../utils';
-import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
-import { SavedSearchEmbeddableComponent } from '../saved_search_embeddable_component';
-import { SearchEmbeddableApi, SearchEmbeddableSerializedState, SearchProps } from '../types';
+import { SearchEmbeddableApi, SearchEmbeddableSerializedState } from '../types';
 import { initializeFetch } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
+import { SearchEmbeddablFieldStatsTableComponent } from './search_embeddable_field_stats_table_component';
+import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -67,7 +62,7 @@ export const getSearchEmbeddableFactory = ({
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
+      const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const {
         onUnmount,
         searchEmbeddableApi,
@@ -139,7 +134,7 @@ export const getSearchEmbeddableFactory = ({
           ...api,
           dataLoading$,
           blockingError$,
-          searchSessionId$,
+          fetchContext$,
           rows$: searchEmbeddableApi.rows$,
           savedSearch$: searchEmbeddableApi.savedSearch$,
         },
@@ -149,11 +144,7 @@ export const getSearchEmbeddableFactory = ({
       return {
         api,
         Component: () => {
-          const [savedSearch, rows, searchSessionId] = useBatchedPublishingSubjects(
-            searchEmbeddableApi.savedSearch$,
-            searchEmbeddableApi.rows$,
-            searchSessionId$
-          );
+          const savedSearch = useStateFromPublishingSubject(searchEmbeddableApi.savedSearch$);
 
           useEffect(() => {
             return () => {
@@ -162,7 +153,7 @@ export const getSearchEmbeddableFactory = ({
             };
           }, []);
 
-          const { dataView, columns, query, filters, viewMode } = useMemo(() => {
+          const { dataView, columns, query, viewMode } = useMemo(() => {
             const searchSourceQuery = savedSearch.searchSource.getField('query');
             return {
               dataView: savedSearch.searchSource.getField('index'),
@@ -200,59 +191,6 @@ export const getSearchEmbeddableFactory = ({
             [dataView]
           );
 
-          const searchProps: SearchProps | undefined = useMemo(() => {
-            if (!dataView) return;
-
-            return {
-              services: discoverServices,
-              columns,
-              savedSearchId: savedSearch.id,
-              filters,
-              dataView,
-              isLoading: false,
-              sort: getSortForEmbeddable(
-                savedSearch,
-                savedSearch.sort,
-                discoverServices.uiSettings
-              ),
-              rows,
-              searchDescription: savedSearch.description,
-              description: savedSearch.description,
-              searchTitle: savedSearch.title,
-              onSetColumns: (updatedColumns: string[]) => {
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, columns: updatedColumns });
-              },
-              onSort: (nextSort: string[][]) => {
-                const sortOrderArr: SortOrder[] = [];
-                nextSort.forEach((arr) => {
-                  sortOrderArr.push(arr as SortOrder);
-                });
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, sort: sortOrderArr });
-              },
-              onFilter: onAddFilter,
-              useNewFieldsApi: !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
-              showTimeCol: !discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-              ariaLabelledBy: 'documentsAriaLabel',
-              rowHeightState: savedSearch.rowHeight,
-              onUpdateRowHeight: (rowHeight) => {
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, rowHeight });
-              },
-              headerRowHeightState: savedSearch.headerRowHeight,
-              onUpdateHeaderRowHeight: (headerRowHeight) => {
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, headerRowHeight });
-              },
-              rowsPerPageState: savedSearch.rowsPerPage,
-              onUpdateRowsPerPage: (rowsPerPage) => {
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, rowsPerPage });
-              },
-              sampleSizeState: savedSearch.sampleSize,
-              onUpdateSampleSize: (sampleSize) => {
-                searchEmbeddableApi.savedSearch$.next({ ...savedSearch, sampleSize });
-              },
-              cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
-            };
-          }, [savedSearch, dataView, columns, filters, rows, onAddFilter]);
-
           if (
             discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
             viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
@@ -261,36 +199,33 @@ export const getSearchEmbeddableFactory = ({
           ) {
             return (
               <KibanaContextProvider services={discoverServices}>
-                <FieldStatisticsTable
-                  dataView={dataView}
-                  columns={columns}
-                  savedSearch={savedSearch}
-                  filters={filters}
-                  query={query}
+                <SearchEmbeddablFieldStatsTableComponent
+                  api={{
+                    ...api,
+                    fetchContext$,
+                    savedSearch$: searchEmbeddableApi.savedSearch$,
+                  }}
                   onAddFilter={onAddFilter}
-                  searchSessionId={searchSessionId}
                 />
               </KibanaContextProvider>
             );
           } else {
-            return searchProps ? (
+            return (
               <KibanaContextProvider services={discoverServices}>
                 <CellActionsProvider
                   getTriggerCompatibleActions={(triggerId, context) => Promise.resolve([])}
                 >
-                  <SavedSearchEmbeddableComponent
-                    searchProps={searchProps}
-                    query={query}
+                  <SearchEmbeddableGridComponent
+                    api={{
+                      ...api,
+                      rows$: searchEmbeddableApi.rows$,
+                      savedSearch$: searchEmbeddableApi.savedSearch$,
+                    }}
                     useLegacyTable={false} // TODO
-                    fetchedSampleSize={getAllowedSampleSize(
-                      searchProps.sampleSizeState,
-                      discoverServices.uiSettings
-                    )}
+                    onAddFilter={onAddFilter}
                   />
                 </CellActionsProvider>
               </KibanaContextProvider>
-            ) : (
-              <></>
             );
           }
         },

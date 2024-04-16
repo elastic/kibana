@@ -47,22 +47,11 @@ export const initializeSearchEmbeddableApi = async (
     initialState?.savedObjectId,
     unwrapResult as SavedSearchUnwrapResult
   );
+  const parentSearchSource = await discoverServices.data.search.searchSource.create();
+  savedSearch.searchSource.setParent(parentSearchSource);
+
   const savedSearch$ = new BehaviorSubject<SavedSearch>(savedSearch);
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
-  // const sort$ = new BehaviorSubject<SortOrder[]>(
-  //   initialAttributes?.sort ??
-  //     getSortForEmbeddable(
-  //       savedSearch,
-  //       getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
-  //       discoverServices.uiSettings
-  //     )
-  // );
-  // const rowHeight$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowHeight);
-  // const headerRowHeight$ = new BehaviorSubject<number | undefined>(
-  //   initialAttributes?.headerRowHeight
-  // );
-  // const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowsPerPage);
-  // const sampleSize$ = new BehaviorSubject<number | undefined>(initialAttributes?.sampleSize);
 
   // by reference
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
@@ -134,53 +123,3 @@ export const initializeSearchEmbeddableApi = async (
     },
   };
 };
-
-// const columns$ = new BehaviorSubject<string[]>(initialAttributes?.columns ?? []);
-// const sort$ = new BehaviorSubject<SortOrder[]>(
-//   initialAttributes?.sort ??
-//     getSortForEmbeddable(
-//       savedSearch,
-//       getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
-//       discoverServices.uiSettings
-//     )
-// );
-// const rowHeight$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowHeight);
-// const headerRowHeight$ = new BehaviorSubject<number | undefined>(
-//   initialAttributes?.headerRowHeight
-// );
-// const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialAttributes?.rowsPerPage);
-// const sampleSize$ = new BehaviorSubject<number | undefined>(initialAttributes?.sampleSize);
-
-// const attributes$ = new BehaviorSubject<SavedSearchByValueAttributes>(
-// initialAttributes ??
-//   ({
-//     ...savedSearch,
-//     columns: [] as string[],
-//     sort: getSortForEmbeddable(
-//       savedSearch,
-//       getSortForEmbeddable(savedSearch, undefined, discoverServices.uiSettings),
-//       discoverServices.uiSettings
-//     ),
-//   } as SavedSearchByValueAttributes)
-// );
-
-// console.log('initialAttributes', attributes$.getValue());
-
-// const latestStateSubscription = combineLatest([
-//   columns$,
-//   sort$,
-//   rowHeight$,
-//   headerRowHeight$,
-//   rowsPerPage$,
-//   sampleSize$,
-// ]).subscribe(([columns, sort, rowHeight, headerRowHeight, rowsPerPage, sampleSize]) =>
-//   attributes$.next({
-//     columns,
-//     sort,
-//     rowHeight,
-//     headerRowHeight,
-//     rowsPerPage,
-//     sampleSize,
-//   } as SavedSearchByValueAttributes)
-// );
-// // UNSUBSCRIBE

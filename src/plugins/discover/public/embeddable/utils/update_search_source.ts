@@ -5,17 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FetchContext } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+
+import { DiscoverServices } from '../../build_services';
 import { getSortForSearchSource } from '../../utils/sorting';
 
 export const updateSearchSource = (
+  discoverServices: DiscoverServices,
   searchSource: ISearchSource,
   dataView: DataView | undefined,
   sort: (SortOrder[] & string[][]) | undefined,
   sampleSize: number,
   useNewFieldsApi: boolean,
+  fetchContext: FetchContext,
   defaults: {
     sortDir: string;
   }
@@ -38,4 +43,29 @@ export const updateSearchSource = (
   } else {
     searchSource.removeField('fields');
   }
+
+  // update parent search source
+  const parentSearchSource = searchSource.getParent();
+  parentSearchSource?.setField('filter', fetchContext.filters);
+  parentSearchSource?.setField('query', fetchContext.query);
+
+  const getTimeRangeFilter = () => {
+    const timeRange =
+      fetchContext.timeslice !== undefined
+        ? {
+            from: new Date(fetchContext.timeslice[0]).toISOString(),
+            to: new Date(fetchContext.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : fetchContext.timeRange;
+
+    if (!dataView || !timeRange) return;
+    return discoverServices.timefilter.createFilter(dataView, timeRange);
+  };
+  const timeRangeFilter = getTimeRangeFilter();
+
+  const filters = timeRangeFilter
+    ? [timeRangeFilter, ...(fetchContext.filters ?? [])]
+    : fetchContext.filters;
+  parentSearchSource?.setField('filter', filters);
 };
