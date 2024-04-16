@@ -250,7 +250,9 @@ const ExportContentUi = ({
     <>
       <EuiForm>
         <EuiSpacer size="l" />
-        {helpText}
+        {objectType === 'lens'
+          ? 'Select the file type you would like to export for this lens visualization.'
+          : helpText}
         <EuiSpacer size="m" />
         {renderRadioOptions()}
         <EuiSpacer size="xl" />

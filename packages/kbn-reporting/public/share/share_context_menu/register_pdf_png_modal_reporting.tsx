@@ -19,49 +19,26 @@ import {
   ReportingSharingData,
 } from '.';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
-import { ReportingAPIClient } from '../../reporting_api_client';
 
-const getJobParams =
-  (
-    apiClient: ReportingAPIClient,
-    opts: JobParamsProviderOptions,
-    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
-  ) =>
-  () => {
-    const {
-      objectType,
-      sharingData: { title, layout, locatorParams },
-    } = opts;
+const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
+  const {
+    objectType,
+    sharingData: { title, layout, locatorParams },
+  } = opts;
 
-    const baseParams = {
-      objectType,
-      layout,
-      title,
-    };
-
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] };
-    } else if (type === 'pngV2') {
-      // single locator for PNG V2
-      return { ...baseParams, locatorParams };
-    }
-
-    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-    // Replace hashes with original RISON values.
-    const relativeUrl = opts.shareableUrl.replace(
-      window.location.origin + apiClient.getServerBasePath(),
-      ''
-    );
-
-    if (type === 'printablePdf') {
-      // multi URL for PDF
-      return { ...baseParams, relativeUrls: [relativeUrl] };
-    }
-
-    // single URL for PNG
-    return { ...baseParams, relativeUrl };
+  const baseParams = {
+    objectType,
+    layout,
+    title,
   };
+
+  if (type === 'printablePdfV2') {
+    // multi locator for PDF V2
+    return { ...baseParams, locatorParams: [locatorParams] };
+  }
+  // single locator for PNG V2
+  return { ...baseParams, locatorParams };
+};
 
 /**
  * This is used by Canvas
@@ -74,8 +51,7 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
-  intl,
-}: ExportPanelShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
+}: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -145,8 +121,6 @@ export const reportingScreenshotShareProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
 
-    const pngReportType = isV2Job ? 'pngV2' : 'png';
-
     const panelPng = {
       shareMenuItem: {
         name: pngPanelTitle,
@@ -164,10 +138,10 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pngReportType}
+            reportType={'pngV2'}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
+            getJobParams={getJobParams(jobProviderOptions, 'pngV2')}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
@@ -179,8 +153,6 @@ export const reportingScreenshotShareProvider = ({
     const pdfPanelTitle = i18n.translate('reporting.share.contextMenu.pdfReportsButtonLabel', {
       defaultMessage: 'PDF Reports',
     });
-
-    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
     const panelPdf = {
       shareMenuItem: {
@@ -199,11 +171,11 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pdfReportType}
+            reportType={'printablePdfV2'}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
+            getJobParams={getJobParams(jobProviderOptions, 'printablePdfV2')}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
@@ -223,9 +195,6 @@ export const reportingScreenshotShareProvider = ({
   };
 };
 
-export const isJobV2Params = ({ sharingData }: { sharingData: Record<string, unknown> }): boolean =>
-  sharingData.locatorParams != null;
-
 export const reportingExportModalProvider = ({
   apiClient,
   license,
@@ -233,8 +202,7 @@ export const reportingExportModalProvider = ({
   usesUiCapabilities,
   theme,
   i18n: i18nStart,
-  intl,
-}: ExportModalShareOpts & { intl: InjectedIntl }): ShareMenuProvider => {
+}: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -294,17 +262,32 @@ export const reportingExportModalProvider = ({
       sharingData,
     };
 
-    const isV2Job = isJobV2Params(jobProviderOptions);
-    const requiresSavedState = !isV2Job;
+    const requiresSavedState = sharingData.locatorParams === null;
 
-    const generateReportPDF = () => {
+    const relativePathPDF = apiClient.getReportingPublicJobPath(
+      'printablePdfV2',
+      apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'printablePdfV2')())
+    );
+
+    const relativePathPNG = apiClient.getReportingPublicJobPath(
+      'pngV2',
+      apiClient.getDecoratedJobParams(getJobParams(jobProviderOptions, 'pngV2')())
+    );
+
+    const generateReportPDF = ({
+      intl,
+      optimizedForPrinting = false,
+    }: {
+      intl: InjectedIntl;
+      optimizedForPrinting?: boolean;
+    }) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')(),
-        layout: { id: 'preserve_layout', dimensions },
+        ...getJobParams(jobProviderOptions, 'printablePdfV2')(),
+        layout: { id: optimizedForPrinting ? 'print' : 'preserve_layout', dimensions },
         objectType,
         title: sharingData.title,
       });
@@ -339,9 +322,6 @@ export const reportingExportModalProvider = ({
             ),
             'data-test-subj': 'queueReportSuccess',
           });
-          if (onClose) {
-            onClose();
-          }
         })
         .catch((error: any) => {
           toasts.addError(error, {
@@ -349,80 +329,18 @@ export const reportingExportModalProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-            ) as unknown as string,
+            toastMessage: error.body?.message,
           });
         });
     };
 
-    const generateReportPDFForPrinting = () => {
+    const generateReportPNG = ({ intl }: { intl: InjectedIntl }) => {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
       const dimensions = { height, width };
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'printablePdfV2')(),
-        layout: { id: 'print', dimensions },
-        objectType,
-        title: sharingData.title,
-      });
-      return apiClient
-        .createReportingJob('printablePdfV2', decoratedJobParams)
-        .then(() => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              { theme, i18n: i18nStart }
-            ),
-            'data-test-subj': 'queueReportSuccess',
-          });
-          if (onClose) {
-            onClose();
-          }
-        })
-        .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-            ) as unknown as string,
-          });
-        });
-    };
-
-    const generateReportPNG = () => {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      const dimensions = { height, width };
-
-      const decoratedJobParams = apiClient.getDecoratedJobParams({
-        ...getJobParams(apiClient, jobProviderOptions, 'pngV2')(),
+        ...getJobParams(jobProviderOptions, 'pngV2')(),
         layout: { id: 'preserve_layout', dimensions },
         objectType,
         title: sharingData.title,
@@ -457,9 +375,6 @@ export const reportingExportModalProvider = ({
             ),
             'data-test-subj': 'queueReportSuccess',
           });
-          if (onClose) {
-            onClose();
-          }
         })
         .catch((error: any) => {
           toasts.addError(error, {
@@ -467,10 +382,7 @@ export const reportingExportModalProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-            ) as unknown as string,
+            toastMessage: error.body?.message,
           });
         });
     };
@@ -485,10 +397,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PDF' as const,
-      showRadios:
-        objectType === 'dashboard' || objectType === 'lens' || objectType === 'visualization',
-      generateReportForPrinting: generateReportPDFForPrinting,
-      generateReport: generateReportPDF,
+      generateExport: generateReportPDF,
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
@@ -497,7 +406,7 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateReportButton: (
+      generateExportButtonLabel: (
         <FormattedMessage
           id="reporting.printablePdfV2.generateButtonLabel"
           defaultMessage="Generate export"
@@ -507,6 +416,7 @@ export const reportingExportModalProvider = ({
       theme,
       renderLayoutOptionSwitch: objectType === 'dashboard',
       renderCopyURLButton: true,
+      absoluteUrl: new URL(relativePathPDF, window.location.href).toString(),
     });
 
     shareActions.push({
@@ -519,9 +429,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
-      showRadios:
-        objectType === 'dashboard' || objectType === 'lens' || objectType === 'visualization',
-      generateReport: generateReportPNG,
+      generateExport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,
       helpText: (
@@ -530,7 +438,7 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateReportButton: (
+      generateExportButtonLabel: (
         <FormattedMessage
           id="reporting.pngV2.generateButtonLabel"
           defaultMessage="Generate export"
@@ -538,6 +446,7 @@ export const reportingExportModalProvider = ({
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderCopyURLButton: true,
+      absoluteUrl: new URL(relativePathPNG, window.location.href).toString(),
     });
 
     return shareActions;
