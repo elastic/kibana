@@ -32,12 +32,11 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     indexFilter,
     fields,
   }: GetFieldsOptions) {
-    const indexPatterns = new IndexPatternsFetcher(
-      this.esClient,
-      this.uiSettingsClient,
-      allowNoIndex,
-      this.rollupsEnabled
-    );
+    const indexPatterns = new IndexPatternsFetcher(this.esClient, {
+      uiSettingsClient: this.uiSettingsClient,
+      allowNoIndices: allowNoIndex,
+      rollupsEnabled: this.rollupsEnabled,
+    });
     return await indexPatterns
       .getFieldsForWildcard({
         pattern,

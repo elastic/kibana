@@ -41,8 +41,7 @@ export const handler: RequestHandler<{}, { indices: string | string[] }, string[
     const indexArray = parseIndices(indices);
     const core = await ctx.core;
     const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-    const uiSettings = core.uiSettings.client;
-    const indexPatterns = new IndexPatternsFetcher(elasticsearchClient, uiSettings, true);
+    const indexPatterns = new IndexPatternsFetcher(elasticsearchClient);
 
     const response: string[] = await indexPatterns.getExistingIndices(indexArray);
     return res.ok({ body: response });
