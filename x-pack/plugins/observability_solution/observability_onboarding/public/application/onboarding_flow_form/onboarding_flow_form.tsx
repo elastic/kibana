@@ -90,10 +90,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     (query: string) => () => {
       setIntegrationSearch(query);
       if (packageListRef.current) {
-        packageListRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
+        // adding a slight delay causes the search bar to be rendered
+        new Promise((r) => setTimeout(r, 10)).then(() =>
+          packageListRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        );
       }
     },
     [setIntegrationSearch]
