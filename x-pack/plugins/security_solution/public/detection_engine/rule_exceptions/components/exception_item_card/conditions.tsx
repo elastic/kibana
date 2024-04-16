@@ -26,6 +26,7 @@ import type {
   NonEmptyNestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ShowValueListModal } from '../../../../value_list/components/show_value_list_modal';
 
 import * as i18n from './translations';
 import { ValueWithSpaceWarning } from '../value_with_space_warning';
@@ -102,6 +103,12 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
             <EntryValueWrap>{currentValue}</EntryValueWrap>
           </EuiBadge>
         ));
+      } else if (type === 'list' && value) {
+        return (
+          <ShowValueListModal shouldShowContentIfModalNotAvailable listId={value.toString()}>
+            {value}
+          </ShowValueListModal>
+        );
       }
       return <EntryValueWrap>{value}</EntryValueWrap> ?? '';
     };

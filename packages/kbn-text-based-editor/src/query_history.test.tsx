@@ -82,12 +82,15 @@ describe('QueryHistory', () => {
           name: 'Last duration',
           sortable: false,
           width: '120px',
+          css: {
+            justifyContent: 'flex-end',
+          },
         },
         {
           actions: [],
           'data-test-subj': 'actions',
           name: '',
-          width: '40px',
+          width: '60px',
         },
       ]);
     });
@@ -127,6 +130,9 @@ describe('QueryHistory', () => {
         name: 'Last duration',
         sortable: false,
         width: 'auto',
+        css: {
+          justifyContent: 'flex-end',
+        },
       },
       {
         actions: [],

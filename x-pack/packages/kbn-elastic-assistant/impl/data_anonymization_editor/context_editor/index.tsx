@@ -10,13 +10,21 @@ import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import styled from '@emotion/styled';
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
 import * as i18n from './translations';
 import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './types';
+import { useAssistantContext } from '../../assistant_context';
 
 export const DEFAULT_PAGE_SIZE = 10;
+
+const Wrapper = styled.div`
+  > div > .euiSpacer {
+    block-size: 16px;
+  }
+`;
 
 const defaultSort: SortConfig = {
   sort: {
@@ -57,6 +65,9 @@ const ContextEditorComponent: React.FC<Props> = ({
   pageSize = DEFAULT_PAGE_SIZE,
 }) => {
   const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
+  const {
+    assistantAvailability: { hasUpdateAIAssistantAnonymization },
+  } = useAssistantContext();
   const [selected, setSelection] = useState<ContextEditorRow[]>([]);
   const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
     () => ({
@@ -76,7 +87,10 @@ const ContextEditorComponent: React.FC<Props> = ({
     [selected]
   );
 
-  const columns = useMemo(() => getColumns({ onListUpdated, rawData }), [onListUpdated, rawData]);
+  const columns = useMemo(
+    () => getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization }),
+    [hasUpdateAIAssistantAnonymization, onListUpdated, rawData]
+  );
 
   const rows = useMemo(
     () =>
@@ -112,19 +126,21 @@ const ContextEditorComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiInMemoryTable
-      allowNeutralSort={false}
-      childrenBetween={toolbar}
-      columns={columns}
-      compressed={true}
-      data-test-subj="contextEditor"
-      itemId={FIELDS.FIELD}
-      items={rows}
-      pagination={pagination}
-      search={search}
-      selection={selectionValue}
-      sorting={defaultSort}
-    />
+    <Wrapper>
+      <EuiInMemoryTable
+        allowNeutralSort={false}
+        childrenBetween={hasUpdateAIAssistantAnonymization ? toolbar : undefined}
+        columns={columns}
+        compressed={true}
+        data-test-subj="contextEditor"
+        itemId={FIELDS.FIELD}
+        items={rows}
+        pagination={pagination}
+        search={search}
+        selection={selectionValue}
+        sorting={defaultSort}
+      />
+    </Wrapper>
   );
 };
 

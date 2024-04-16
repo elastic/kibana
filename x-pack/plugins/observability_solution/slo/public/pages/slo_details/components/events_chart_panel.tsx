@@ -65,6 +65,7 @@ export function EventsChartPanel({ slo, range }: Props) {
     indicator: slo.indicator,
     groupings: slo.groupings,
     instanceId: slo.instanceId,
+    remoteName: slo.remote?.remoteName,
   });
 
   const dateFormat = uiSettings.get('dateFormat');
@@ -208,7 +209,14 @@ export function EventsChartPanel({ slo, range }: Props) {
                     showLegendExtra={false}
                     legendPosition={Position.Left}
                     noResults={
-                      <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+                      <EuiIcon
+                        type="visualizeApp"
+                        size="l"
+                        color="subdued"
+                        title={i18n.translate('xpack.slo.eventsChartPanel.euiIcon.noResultsLabel', {
+                          defaultMessage: 'no results',
+                        })}
+                      />
                     }
                     onPointerUpdate={handleCursorUpdate}
                     externalPointerEvents={{

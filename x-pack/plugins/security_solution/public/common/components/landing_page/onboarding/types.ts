@@ -10,6 +10,11 @@ import type React from 'react';
 import type { MutableRefObject } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ProductLine } from './configs';
+import type { StepLinkId } from './step_links/types';
+import type {
+  OnboardingHubStepOpenTrigger,
+  OnboardingHubStepFinishedTrigger,
+} from '../../../lib/telemetry/types';
 
 export interface Section {
   cards: Card[];
@@ -193,11 +198,13 @@ export type OnStepClicked = ({
   cardId,
   sectionId,
   isExpanded,
+  trigger,
 }: {
   stepId: StepId;
   cardId: CardId;
   sectionId: SectionId;
   isExpanded: boolean;
+  trigger: OnboardingHubStepOpenTrigger;
 }) => void;
 
 export type HandleStepClicked = ({
@@ -210,12 +217,16 @@ export type HandleStepClicked = ({
 
 export type ToggleTaskCompleteStatus = ({
   stepId,
+  stepLinkId,
   cardId,
   sectionId,
   undo,
+  trigger,
 }: {
   stepId: StepId;
+  stepLinkId?: StepLinkId;
   cardId: CardId;
   sectionId: SectionId;
   undo?: boolean;
+  trigger: OnboardingHubStepFinishedTrigger;
 }) => void;

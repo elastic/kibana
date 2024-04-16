@@ -533,6 +533,27 @@
         "children": [
           {
             "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.kibanaRequest",
+            "type": "Object",
+            "tags": [],
+            "label": "kibanaRequest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.SubActionConnector.logger",
             "type": "Object",
             "tags": [],
@@ -3356,6 +3377,27 @@
             "description": [],
             "signature": [
               "Services"
+            ],
+            "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ServiceParams.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/plugins/actions/server/sub_action_framework/types.ts",
             "deprecated": false,
