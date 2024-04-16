@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartPlugins } from '../../../../plugin';
 import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
-import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../types';
+import type { HapiReadableStream } from '../../../../types';
 import {
   ASSET_CRITICALITY_CSV_UPLOAD_URL,
   APP_ID,
@@ -23,12 +22,13 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
 import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const assetCriticalityCSVUploadRoute = (
-  router: SecuritySolutionPluginRouter,
+  router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
   config: ConfigType,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   const { errorRetries, maxBulkRequestBodySizeBytes } =
     config.entityAnalytics.assetCriticality.csvUpload;

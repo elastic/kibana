@@ -146,6 +146,27 @@ function verifyKeepColumns(
   return `KEEP ${columnsInKeep.join(', ')}`;
 }
 
+function escapeExpressionsInSort(sortCommand: string) {
+  const columnsInSort = split(sortCommand.replace(/^SORT\s*/, ''), ',')
+    .map((statement) => split(statement, '=')?.[0].trim())
+    .map((columnAndSortOrder) => {
+      let [, column, sortOrder = ''] = columnAndSortOrder.match(/^(.*?)\s*(ASC|DESC)?$/i) || [];
+      if (!column) {
+        return columnAndSortOrder;
+      }
+
+      if (sortOrder) sortOrder = ` ${sortOrder}`;
+
+      if (!column.match(/^[a-zA-Z0-9_\.@]+$/)) {
+        column = `\`${column}\``;
+      }
+
+      return `${column}${sortOrder}`;
+    });
+
+  return `SORT ${columnsInSort.join(', ')}`;
+}
+
 export function correctCommonEsqlMistakes(content: string, log: Logger) {
   return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
     const commands = splitIntoCommands(query);
@@ -171,6 +192,10 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
 
         case 'KEEP':
           formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
+          break;
+
+        case 'SORT':
+          formattedCommand = escapeExpressionsInSort(formattedCommand);
           break;
       }
       return formattedCommand;

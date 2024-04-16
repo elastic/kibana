@@ -15,6 +15,9 @@ import { getMessageContentAndRole } from './helpers';
 
 const LLM_TYPE = 'ActionsClientLlm';
 
+const DEFAULT_OPEN_AI_TEMPERATURE = 0.2;
+const DEFAULT_TEMPERATURE = 0;
+
 interface ActionsClientLlmParams {
   actions: ActionsPluginStart;
   connectorId: string;
@@ -22,6 +25,7 @@ interface ActionsClientLlmParams {
   logger: Logger;
   request: KibanaRequest;
   model?: string;
+  temperature?: number;
   traceId?: string;
 }
 
@@ -37,6 +41,7 @@ export class ActionsClientLlm extends LLM {
   protected llmType: string;
 
   model?: string;
+  temperature?: number;
 
   constructor({
     actions,
@@ -46,6 +51,7 @@ export class ActionsClientLlm extends LLM {
     logger,
     model,
     request,
+    temperature,
   }: ActionsClientLlmParams) {
     super({});
 
@@ -56,6 +62,7 @@ export class ActionsClientLlm extends LLM {
     this.#logger = logger;
     this.#request = request;
     this.model = model;
+    this.temperature = temperature;
   }
 
   _llmType() {
@@ -87,8 +94,8 @@ export class ActionsClientLlm extends LLM {
           model: this.model,
           messages: [assistantMessage], // the assistant message
           ...(this.llmType === 'openai'
-            ? { n: 1, stop: null, temperature: 0.2 }
-            : { temperature: 0, stopSequences: [] }),
+            ? { n: 1, stop: null, temperature: this.temperature ?? DEFAULT_OPEN_AI_TEMPERATURE }
+            : { temperature: this.temperature ?? DEFAULT_TEMPERATURE, stopSequences: [] }),
         },
       },
     };

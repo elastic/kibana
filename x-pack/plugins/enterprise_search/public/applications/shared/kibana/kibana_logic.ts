@@ -43,60 +43,82 @@ type RequiredFieldsOnly<T> = {
 export interface KibanaLogicProps {
   application: ApplicationStart;
   capabilities: Capabilities;
-  charts: ChartsPluginStart;
+  charts?: ChartsPluginStart;
   cloud?: CloudSetup;
   config: ClientConfigType;
-  connectorTypes: ConnectorDefinition[];
+  connectorTypes?: ConnectorDefinition[];
   console?: ConsolePluginStart;
-  data: DataPublicPluginStart;
+  data?: DataPublicPluginStart;
   esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
-  indexMappingComponent: React.FC<IndexMappingProps>;
+  indexMappingComponent?: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
-  lens: LensPublicStart;
-  ml: MlPluginStart;
+  lens?: LensPublicStart;
+  ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
-  searchPlayground: SearchPlaygroundPluginStart;
-  security: SecurityPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
+  security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
-  share: SharePluginStart;
-  uiSettings: IUiSettingsClient;
+  share?: SharePluginStart;
+  uiSettings?: IUiSettingsClient;
   user: AuthenticatedUser | null;
 }
 
-export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud' | 'console'> {
-  cloud: Partial<CloudSetup>;
-  consolePlugin: Partial<ConsolePluginStart>;
-  data: DataPublicPluginStart;
+export interface KibanaValues {
+  application: ApplicationStart;
+  capabilities: Capabilities;
+  charts: ChartsPluginStart | null;
+  cloud: CloudSetup | null;
+  config: ClientConfigType;
+  connectorTypes: ConnectorDefinition[];
+  consolePlugin: ConsolePluginStart | null;
+  data: DataPublicPluginStart | null;
+  esConfig: ESConfig;
+  guidedOnboarding: GuidedOnboardingPluginStart | null;
+  history: ScopedHistory;
+  indexMappingComponent: React.FC<IndexMappingProps> | null;
   isCloud: boolean;
-  lens: LensPublicStart;
+  isSidebarEnabled: boolean;
+  lens: LensPublicStart | null;
+  ml: MlPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
+  productAccess: ProductAccess;
+  productFeatures: ProductFeatures;
+  renderHeaderActions(HeaderActions?: FC): void;
+  searchPlayground: SearchPlaygroundPluginStart | null;
+  security: SecurityPluginStart | null;
+  setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
+  setChromeIsVisible(isVisible: boolean): void;
+  setDocTitle(title: string): void;
+  share: SharePluginStart | null;
+  uiSettings: IUiSettingsClient | null;
+  user: AuthenticatedUser | null;
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
-    application: [props.application || {}, {}],
-    capabilities: [props.capabilities || {}, {}],
-    charts: [props.charts, {}],
-    cloud: [props.cloud || {}, {}],
-    config: [props.config || {}, {}],
+    application: [props.application, {}],
+    capabilities: [props.capabilities, {}],
+    charts: [props.charts || null, {}],
+    cloud: [props.cloud || null, {}],
+    config: [props.config || null, {}],
     connectorTypes: [props.connectorTypes || [], {}],
-    consolePlugin: [props.console || {}, {}],
-    data: [props.data, {}],
+    consolePlugin: [props.console || null, {}],
+    data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
-    guidedOnboarding: [props.guidedOnboarding, {}],
+    guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
-    lens: [props.lens, {}],
-    ml: [props.ml, {}],
+    lens: [props.lens || null, {}],
+    ml: [props.ml || null, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };
@@ -108,17 +130,17 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
-    searchPlayground: [props.searchPlayground || {}, {}],
-    security: [props.security, {}],
+    searchPlayground: [props.searchPlayground || null, {}],
+    security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
-    share: [props.share, {}],
+    share: [props.share || null, {}],
     uiSettings: [props.uiSettings, {}],
-    user: [props.user, {}],
+    user: [props.user || null, {}],
   }),
   selectors: ({ selectors }) => ({
-    isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],
+    isCloud: [() => [selectors.cloud], (cloud?: CloudSetup) => Boolean(cloud?.isCloudEnabled)],
   }),
 });
 
