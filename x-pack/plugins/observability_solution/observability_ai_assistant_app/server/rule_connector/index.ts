@@ -24,16 +24,16 @@ import {
   SlackParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
-import { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
+import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import {
   ChatCompletionChunkEvent,
   MessageRole,
   StreamingChatResponseEventType,
-} from '../../common';
-import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
-import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
+} from '@kbn/observability-ai-assistant-plugin/common';
+import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
+import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
-import { CompatibleJSONSchema } from '../../common/functions/types';
+import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
@@ -58,21 +58,21 @@ const RuleSchema = schema.object({
   ruleUrl: schema.nullable(schema.string()),
 });
 
-const AlertSchema = schema.recordOf(schema.string(), schema.any());
-
-const AlertSummarySchema = schema.object({
-  new: schema.arrayOf(AlertSchema),
-  recovered: schema.arrayOf(AlertSchema),
-});
+const AlertStateSchema = schema.oneOf([
+  schema.literal('new'),
+  schema.literal('ongoing'),
+  schema.literal('recovered'),
+  schema.literal('unknown'),
+]);
 
 const ConnectorParamsSchema = schema.object({
   connector: schema.string(),
   message: schema.string({ minLength: 1 }),
   rule: RuleSchema,
-  alerts: AlertSummarySchema,
+  alertState: AlertStateSchema,
 });
 
-type AlertSummary = TypeOf<typeof AlertSummarySchema>;
+type AlertState = TypeOf<typeof AlertStateSchema>;
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 export type ConnectorParamsType = TypeOf<typeof ConnectorParamsSchema>;
 type RuleType = TypeOf<typeof RuleSchema>;
@@ -125,7 +125,7 @@ function renderParameterTemplates(
     connector: params.connector,
     message: params.message,
     rule: params.rule,
-    alerts: params.alerts,
+    alertState: params.alertState,
   };
 }
 
@@ -134,14 +134,13 @@ async function executor(
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
   const request = execOptions.request;
-  const alerts = execOptions.params.alerts;
-
   if (!request) {
-    throw new Error('AI Assistant connector requires a kibana request');
+    throw new Error('AI assistant connector needs a kibana request to execute');
   }
 
-  if (alerts.new.length === 0 && alerts.recovered.length === 0) {
-    // connector could be executed with only ongoing actions. we use this path as
+  const state = execOptions.params.alertState;
+  if (state !== 'new' && state !== 'recovered') {
+    // system connector action frequency can't be user configured. we use this flag as
     // dedup mechanism to prevent triggering the same worfklow for an ongoing alert
     return { actionId: execOptions.actionId, status: 'ok' };
   }
@@ -174,10 +173,7 @@ async function executor(
   const systemMessage = functionClient
     .getContexts()
     .find((def) => def.name === 'core')?.description;
-  const backgroundInstruction = getBackgroundProcessInstruction(
-    execOptions.params.rule,
-    execOptions.params.alerts
-  );
+  const backgroundInstruction = getBackgroundProcessInstruction(execOptions.params.rule, state);
 
   client
     .complete({
@@ -256,32 +252,28 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
         connector: params.connector,
         message: params.message,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
-        alerts: {
-          new: alerts.new.data,
-          recovered: alerts.recovered.data,
-        },
+        alertState:
+          alerts.new.count > 0
+            ? 'new'
+            : alerts.ongoing.count > 0
+            ? 'ongoing'
+            : alerts.recovered.count > 0
+            ? 'recovered'
+            : 'unknown',
       };
     },
   };
 };
 
-function getBackgroundProcessInstruction(rule: RuleType, alerts: AlertSummary) {
-  let instruction = `You are called as a background process because the following alerts have changed state for the rule ${JSON.stringify(
+function getBackgroundProcessInstruction(rule: RuleType, state: AlertState) {
+  let instruction = `You are called as a background process because the alert ${JSON.stringify(
     rule
-  )}:\n`;
-  if (alerts.new.length > 0) {
-    instruction += `- ${alerts.new.length} alerts have fired: ${JSON.stringify(alerts.new)}\n`;
-  }
-  if (alerts.recovered.length > 0) {
-    instruction += `- ${alerts.recovered.length} alerts have recovered: ${JSON.stringify(
-      alerts.recovered
-    )}\n`;
-  }
+  )} ${state === 'new' ? 'fired' : 'recovered'}.`;
   instruction +=
     ' As a background process you are not interacting with a user. Because of that DO NOT ask for user';
   instruction +=
     ' input if tasked to execute actions. You can generate multiple responses in a row.';
-  instruction += ' If available, include the link of the conversation at the end of your answer.';
+  instruction += ' If available, include the link to the conversation at the end of your answer.';
 
   return instruction;
 }
