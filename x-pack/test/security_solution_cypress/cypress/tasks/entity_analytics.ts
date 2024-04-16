@@ -29,7 +29,8 @@ import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../scree
 import { LOADING_SPINNER } from '../screens/loading';
 
 export const updateDashboardTimeRange = () => {
-  cy.get(GET_DATE_PICKER_APPLY_BUTTON(GLOBAL_FILTERS_CONTAINER)).click();
+  // eslint-disable-next-line cypress/no-force
+  cy.get(GET_DATE_PICKER_APPLY_BUTTON(GLOBAL_FILTERS_CONTAINER)).click({ force: true }); // Force to fix global timerange flakiness
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
 };
