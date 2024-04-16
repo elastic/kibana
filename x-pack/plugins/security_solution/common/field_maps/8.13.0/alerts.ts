@@ -11,6 +11,8 @@ import {
   ALERT_USER_CRITICALITY,
   LEGACY_ALERT_HOST_CRITICALITY,
   LEGACY_ALERT_USER_CRITICALITY,
+  ALERT_RULE_RULE_PARENT_ID,
+  ALERT_RULE_RULE_CHILDREN_IDS,
 } from '../field_names';
 
 export const alertsFieldMap8130 = {
@@ -41,6 +43,24 @@ export const alertsFieldMap8130 = {
   [ALERT_USER_CRITICALITY]: {
     type: 'keyword',
     array: false,
+    required: false,
+  },
+  /**
+   * Stores the criticality level for the user, as determined by analysts, in relation to the alert.
+   * The Criticality level is copied from the asset criticality index.
+   */
+  [ALERT_RULE_RULE_PARENT_ID]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  /**
+   * Stores the criticality level for the user, as determined by analysts, in relation to the alert.
+   * The Criticality level is copied from the asset criticality index.
+   */
+  [ALERT_RULE_RULE_CHILDREN_IDS]: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
 } as const;

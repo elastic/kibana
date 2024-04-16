@@ -63,6 +63,8 @@ import {
   SeverityMapping,
   ConcurrentSearches,
   DataViewId,
+  RuleParentId,
+  RuleChildrenIds,
   EventCategoryOverride,
   IndexPatternArray,
   ItemsPerSearch,
@@ -200,6 +202,8 @@ export const QuerySpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   savedId: SavedQueryId.optional(),
   dataViewId: DataViewId.optional(),
+  ruleParentId: RuleParentId.optional(),
+  ruleChildrenIds: RuleChildrenIds.optional(),
   responseActions: z.array(RuleResponseAction).optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
 });

@@ -242,6 +242,15 @@ export const IndexPatternArray = z.array(z.string());
 export type DataViewId = z.infer<typeof DataViewId>;
 export const DataViewId = z.string();
 
+export type RuleParentId = z.infer<typeof RuleParentId>;
+export const RuleParentId = z.string();
+
+export type RuleChildId = z.infer<typeof RuleChildId>;
+export const RuleChildId = z.string();
+
+export type RuleChildrenIds = z.infer<typeof RuleChildrenIds>;
+export const RuleChildrenIds = z.array(RuleChildId);
+
 export type SavedQueryId = z.infer<typeof SavedQueryId>;
 export const SavedQueryId = z.string();
 

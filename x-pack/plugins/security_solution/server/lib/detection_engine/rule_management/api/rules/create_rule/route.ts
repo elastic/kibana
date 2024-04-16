@@ -21,6 +21,7 @@ import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { createRules } from '../../../logic/crud/create_rules';
 import { readRules } from '../../../logic/crud/read_rules';
+import { updateRules } from '../../../logic/crud/update_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
@@ -108,6 +109,37 @@ export const createRuleRoute = (
             rulesClient,
             params: request.body,
           });
+
+          if (createdRule.params.type === 'query' && createdRule.params.ruleParentId != null) {
+            // check if the rule parent exists and if it does, modify that rule's children
+            const rule = await readRules({
+              rulesClient,
+              ruleId: undefined,
+              id: createdRule.params.ruleParentId,
+            });
+            if (rule != null && rule.params.type === 'query') {
+              const updatedInfo = {
+                ...rule,
+                params: {
+                  ...rule.params,
+                  ruleChildrenIds:
+                    rule.params.type === 'query' && createdRule.params.type === 'query'
+                      ? [
+                          ...(rule.params.ruleChildrenIds != null
+                            ? rule.params.ruleChildrenIds
+                            : []),
+                          createdRule.id,
+                        ]
+                      : [],
+                },
+              };
+              await updateRules({
+                rulesClient,
+                existingRule: rule,
+                ruleUpdate: transformValidate(updatedInfo),
+              });
+            }
+          }
 
           return response.ok({
             body: transformValidate(createdRule),

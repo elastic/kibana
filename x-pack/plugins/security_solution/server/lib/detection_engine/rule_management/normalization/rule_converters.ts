@@ -151,6 +151,8 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         savedId: params.saved_id,
         responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
+        ruleChildrenIds: params.rule_children_ids,
+        ruleParentId: params.rule_parent_id,
         alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
@@ -597,6 +599,8 @@ export const typeSpecificCamelToSnake = (
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
+        rule_children_ids: params.ruleChildrenIds,
+        rule_parent_id: params.ruleParentId,
         response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
         alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };

@@ -346,6 +346,10 @@ components:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+        rule_parent_id:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleParentId'
+        rule_children_ids:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleChildrenIds'
 
     QueryRuleDefaultableFields:
       type: object

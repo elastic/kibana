@@ -23,6 +23,8 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_REFERENCES,
   ALERT_RULE_RULE_ID,
+  ALERT_RULE_RULE_PARENT_ID,
+  ALERT_RULE_RULE_CHILDREN_IDS,
   ALERT_RULE_RULE_NAME_OVERRIDE,
   ALERT_RULE_TAGS,
   ALERT_RULE_TO,
@@ -45,6 +47,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { requiredOptional } from '@kbn/zod-helpers';
+import isEmpty from 'lodash/isEmpty';
 
 import { createHash } from 'crypto';
 
@@ -241,6 +244,10 @@ export const buildAlert = (
     [ALERT_RULE_REFERENCES]: params.references,
     [ALERT_RULE_RISK_SCORE_MAPPING]: requiredOptional(params.riskScoreMapping),
     [ALERT_RULE_RULE_ID]: params.ruleId,
+    [ALERT_RULE_RULE_PARENT_ID]:
+      params.type === 'query' && !isEmpty(params.ruleParentId) ? params.ruleParentId : '',
+    [ALERT_RULE_RULE_CHILDREN_IDS]:
+      params.type === 'query' && !isEmpty(params.ruleChildrenIds) ? params.ruleChildrenIds : [],
     [ALERT_RULE_RULE_NAME_OVERRIDE]: params.ruleNameOverride,
     [ALERT_RULE_SEVERITY_MAPPING]: params.severityMapping,
     [ALERT_RULE_TAGS]: tags,

@@ -1,8 +1,10 @@
 {
-  "name": "Simplest Query",
+  "name": "Child Rule",
   "description": "Simplest query with the least amount of fields required",
   "risk_score": 1,
   "severity": "high",
   "type": "query",
-  "query": "*"
+  "query": "*",
+  "index": ["auditbeat*"],
+  "rule_parent_id": "1de61089-267b-4568-a53b-a0f09cc0fe52"
 }
