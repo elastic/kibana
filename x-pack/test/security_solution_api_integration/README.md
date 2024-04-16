@@ -86,7 +86,7 @@ In this project, you can run various commands to execute tests and workflows, ea
          ```
       3. **Run tests for "exception_workflows" using the serverless runner in the "qaEnv" environment:**
          ```shell
-         npm run run-tests:dr:default exceptions/workflows serverless qaEnv
+         npm run run-tests:dr:default exceptions/workflows serverless qaPeriodicEnv
          ```
       4. **Run the server for "exception_workflows" in the "essEnv" environment:**
          ```shell
