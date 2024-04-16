@@ -22,8 +22,10 @@ export const getSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
   }
 };
 
-export const removeSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
-  const { [metaFields.META_FIELD_X_OAS_REF_ID]: id, ...rest } = schema as any;
+export const removeSharedComponentId = (
+  schema: OpenAPIV3.SchemaObject & { [metaFields.META_FIELD_X_OAS_REF_ID]?: string }
+) => {
+  const { [metaFields.META_FIELD_X_OAS_REF_ID]: id, ...rest } = schema;
   return rest;
 };
 
