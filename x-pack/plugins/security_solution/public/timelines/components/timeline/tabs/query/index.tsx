@@ -151,15 +151,17 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [kqlQueryExpression, kqlQueryLanguage]
   );
 
-  const combinedQueries = combineQueries({
-    config: esQueryConfig,
-    dataProviders,
-    indexPattern,
-    browserFields,
-    filters,
-    kqlQuery,
-    kqlMode,
-  });
+  const combinedQueries = useMemo(() => {
+    return combineQueries({
+      config: esQueryConfig,
+      dataProviders,
+      indexPattern,
+      browserFields,
+      filters,
+      kqlQuery,
+      kqlMode,
+    });
+  }, [esQueryConfig, dataProviders, indexPattern, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
@@ -199,18 +201,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
 
-  const getTimelineQueryFields = () => {
+  const timelineQueryFields = useMemo(() => {
     const columnFields = augumentedColumnHeaders.map((c) => c.id);
 
     return [...columnFields, ...requiredFieldsForActions];
-  };
+  }, [augumentedColumnHeaders]);
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
-    field: columnId,
-    direction: sortDirection as Direction,
-    esTypes: esTypes ?? [],
-    type: columnType,
-  }));
+  const timelineQuerySortField = useMemo(() => {
+    return sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+      field: columnId,
+      direction: sortDirection as Direction,
+      esTypes: esTypes ?? [],
+      type: columnType,
+    }));
+  }, [sort]);
 
   useEffect(() => {
     dispatch(
@@ -227,7 +231,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
-    fields: getTimelineQueryFields(),
+    fields: timelineQueryFields,
     filterQuery: combinedQueries?.filterQuery,
     id: timelineId,
     indexNames: selectedPatterns,
