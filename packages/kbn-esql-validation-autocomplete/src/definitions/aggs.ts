@@ -16,7 +16,7 @@ function createNumericAggDefinition({
 }: {
   name: string;
   description: string;
-  args?: Array<{ name: string; type: string; value: string; literalOnly?: boolean }>;
+  args?: Array<{ name: string; type: string; value: string; constantOnly?: boolean }>;
 }): FunctionDefinition {
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
@@ -28,11 +28,11 @@ function createNumericAggDefinition({
       {
         params: [
           { name: 'column', type: 'number', noNestingFunctions: true },
-          ...args.map(({ name: paramName, type, literalOnly }) => ({
+          ...args.map(({ name: paramName, type, constantOnly }) => ({
             name: paramName,
             type,
             noNestingFunctions: true,
-            literalOnly,
+            constantOnly,
           })),
         ],
         returnType: 'number',
@@ -94,7 +94,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         defaultMessage: 'Returns the n percentile of a field.',
       }
     ),
-    args: [{ name: 'percentile', type: 'number', value: '90', literalOnly: true }],
+    args: [{ name: 'percentile', type: 'number', value: '90', constantOnly: true }],
   },
 ]
   .map(createNumericAggDefinition)
@@ -147,7 +147,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       ],
     },
     {
-      name: 'st_centroid',
+      name: 'st_centroid_agg',
       type: 'agg',
       description: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.definitions.stCentroidDoc',
@@ -161,16 +161,34 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
           returnType: 'cartesian_point',
           examples: [
-            `from index | stats result = st_centroid(cartesian_field)`,
-            `from index | stats st_centroid(cartesian_field)`,
+            `from index | stats result = st_centroid_agg(cartesian_field)`,
+            `from index | stats st_centroid_agg(cartesian_field)`,
           ],
         },
         {
           params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
           returnType: 'geo_point',
           examples: [
-            `from index | stats result = st_centroid(geo_field)`,
-            `from index | stats st_centroid(geo_field)`,
+            `from index | stats result = st_centroid_agg(geo_field)`,
+            `from index | stats st_centroid_agg(geo_field)`,
+          ],
+        },
+      ],
+    },
+    {
+      name: 'values',
+      type: 'agg',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
+        defaultMessage: 'Returns all values in a group as an array.',
+      }),
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'expression', type: 'any', noNestingFunctions: true }],
+          returnType: 'any',
+          examples: [
+            'from index | stats all_agents=values(agents.keyword)',
+            'from index | stats all_sorted_agents=mv_sort(values(agents.keyword))',
           ],
         },
       ],

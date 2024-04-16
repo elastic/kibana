@@ -14,7 +14,7 @@ import {
   CONTAINER_ID,
   HOST_NAME,
 } from '../../../../common/es_fields/apm';
-import { getTypedSearch } from '../../diagnostics/create_typed_es_client';
+import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
 export type LogCategories =
   | Array<{
