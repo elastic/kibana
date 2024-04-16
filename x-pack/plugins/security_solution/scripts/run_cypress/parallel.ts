@@ -343,6 +343,7 @@ ${JSON.stringify(
 
                 fleetServer = await startFleetServer({
                   kbnClient,
+                  version: '8.13.0-SNAPSHOT',
                   logger: log,
                   port:
                     fleetServerPort ?? config.has('servers.fleetserver.port')
