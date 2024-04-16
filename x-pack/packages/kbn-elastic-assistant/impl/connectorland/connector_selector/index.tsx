@@ -50,14 +50,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
-    const {
-      data: aiConnectors,
-      isLoading: isLoadingConnectors,
-      isFetching: isFetchingConnectors,
-      refetch: refetchConnectors,
-    } = useLoadConnectors({ http });
+    const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({ http });
 
-    const isLoading = isLoadingConnectors || isFetchingConnectors;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
     const addNewConnectorOption = useMemo(() => {
@@ -97,7 +91,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           return {
             value: connector.id,
             'data-test-subj': connector.id,
-            inputDisplay: displayFancy ? displayFancy(connector.name) : connector.name,
+            inputDisplay: displayFancy?.(connector.name) ?? connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <strong>{connector.name}</strong>
@@ -165,11 +159,11 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           data-test-subj="connector-selector"
           disabled={localIsDisabled}
           hasDividers={true}
-          isLoading={isLoading}
           isOpen={modalForceOpen}
           onChange={onChange}
           options={allConnectorOptions}
-          valueOfSelected={selectedConnectorId ?? ''}
+          valueOfSelected={selectedConnectorId}
+          popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
         />
         {isConnectorModalVisible && (
           // Crashing management app otherwise
