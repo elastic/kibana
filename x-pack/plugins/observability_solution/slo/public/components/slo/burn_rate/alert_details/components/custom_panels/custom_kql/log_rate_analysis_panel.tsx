@@ -16,14 +16,14 @@ import {
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { colorTransformer } from '@kbn/observability-shared-plugin/common';
 import { KQLCustomIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { ALERT_ACTION_ID } from '../../../../../../../../common/constants';
+import { LOW_PRIORITY_ACTION_ID } from '../../../../../../../../common/constants';
 import type { WindowSchema } from '../../../../../../../typings';
 import { TimeRange } from '../../../../../error_rate_chart/use_lens_definition';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
@@ -38,13 +38,6 @@ function getDataTimeRange(
   const windowDurationInMs = window.longWindow.value * 60 * 60 * 1000;
   return {
     from: new Date(new Date(timeRange.gte).getTime() - windowDurationInMs),
-    to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
-  };
-}
-
-function getAlertTimeRange(timeRange: { gte: string; lte?: string }): TimeRange {
-  return {
-    from: new Date(timeRange.gte),
     to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
   };
 }
@@ -108,20 +101,31 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
   // If an alert would have a `5m` lookback, this would result in a factor of `5`.
-  // We always take the "long window" of the SLO to calculate the intervalFactor.
+  // If an alert is just starting, the visible time range to look back might not cover the
+  // long window yet, only then we'll take the short window to look back,
+  // otherwise it will be the long window.
   const alertActionGroup =
     alert.fields['kibana.alert.action_group'] !== 'recovered'
       ? alert.fields['kibana.alert.action_group']
-      : ALERT_ACTION_ID;
+      : LOW_PRIORITY_ACTION_ID;
   const sloWindows = alert.fields['kibana.alert.rule.parameters']!.windows as WindowSchema[];
   const relatedWindow = sloWindows.find((window) => window.actionGroup === alertActionGroup);
+
   const longWindowValue = relatedWindow?.longWindow.value;
   const longWindowUnit = relatedWindow?.longWindow.unit;
-  const lookbackDuration =
+  const longWindowLookbackDuration =
     longWindowValue && longWindowUnit
       ? moment.duration(longWindowValue as number, longWindowUnit as any)
       : moment.duration(1, 'm');
-  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
+  const longWindowLookbackDurationAsSeconds = longWindowLookbackDuration.asSeconds();
+
+  const shortWindowValue = relatedWindow?.shortWindow.value;
+  const shortWindowUnit = relatedWindow?.shortWindow.unit;
+  const shortWindowLookbackDuration =
+    shortWindowValue && shortWindowUnit
+      ? moment.duration(shortWindowValue as number, shortWindowUnit as any)
+      : moment.duration(1, 'm');
+  const shortWindowLookbackDurationAsSeconds = shortWindowLookbackDuration.asSeconds();
 
   const actionGroup = getActionGroupFromReason(alert.reason);
   const actionGroupWindow = (
@@ -131,10 +135,20 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   // @ts-ignore
   const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], actionGroupWindow);
   const timeRange = { min: moment(dataTimeRange.from), max: moment(dataTimeRange.to) };
-  // @ts-ignore
-  const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE]);
-  const alertStart = moment(alertTimeRange.from);
-  const alertEnd = moment(alertTimeRange.to);
+  const alertStart = moment(alert.start);
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
+
+  const chartStartToAlertStart = (alert.start - dataTimeRange.from.getTime()) / 1000;
+
+  // Here we check if the available time range before the alert start is long enough
+  // to consider the long window lookback. We consider 3x the long window to be good enough
+  // to cover both the look back within the deviation and the baseline time range.
+  // If the available time range is shorter we fall back to the short window.
+  const lookbackDurationAsSeconds =
+    longWindowLookbackDurationAsSeconds * 3 < chartStartToAlertStart
+      ? longWindowLookbackDurationAsSeconds
+      : shortWindowLookbackDurationAsSeconds;
+  const intervalFactor = Math.max(1, lookbackDurationAsSeconds / 60);
 
   const logRateAnalysisTitle = i18n.translate(
     'xpack.slo.burnRateRule.alertDetails.logRateAnalysisTitle',
