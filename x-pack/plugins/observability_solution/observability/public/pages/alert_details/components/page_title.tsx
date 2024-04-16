@@ -30,10 +30,7 @@ import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
 import { ExperimentalBadge } from '../../../components/experimental_badge';
-import {
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-} from '../alert_details';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../alert_details';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
@@ -59,9 +56,7 @@ export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) 
 
   if (!alert) return <EuiLoadingSpinner />;
 
-  const showExperimentalBadge =
-    alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID ||
-    alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
+  const showExperimentalBadge = alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID;
 
   return (
     <div data-test-subj={dataTestSubj}>
