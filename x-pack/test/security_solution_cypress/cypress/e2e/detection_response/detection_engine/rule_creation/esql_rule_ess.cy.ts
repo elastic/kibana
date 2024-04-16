@@ -16,6 +16,10 @@ import {
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
   RULE_NAME_OVERRIDE_DETAILS,
+  DEFINITION_DETAILS,
+  SUPPRESS_BY_DETAILS,
+  SUPPRESS_FOR_DETAILS,
+  SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 
 import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
@@ -38,6 +42,13 @@ import {
   fillRuleName,
   fillDescription,
   getAboutContinueButton,
+  fillAlertSuppressionFields,
+  selectAlertSuppressionPerInterval,
+  setAlertSuppressionDuration,
+  selectDoNotSuppressForMissingFields,
+  continueFromDefineStep,
+  fillAboutRuleMinimumAndContinue,
+  skipScheduleRuleAction,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -214,6 +225,59 @@ describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
       createRuleWithoutEnabling();
 
       cy.get(INVESTIGATION_FIELDS_VALUE_ITEM).should('have.text', CUSTOM_ESQL_FIELD);
+    });
+  });
+
+  describe('Alert suppression', () => {
+    beforeEach(() => {
+      login();
+      visit(CREATE_RULE_URL);
+    });
+    it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
+      const CUSTOM_ESQL_FIELD = '_custom_agent_name';
+      const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
+
+      const queryWithCustomFields = [
+        `from auditbeat* [metadata _id, _version, _index]`,
+        `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
+      ].join(' | ');
+
+      workaroundForResizeObserver();
+
+      selectEsqlRuleType();
+      expandEsqlQueryBar();
+      fillEsqlQueryBar(queryWithCustomFields);
+
+      // fill suppress by fields and select non-default suppression options
+      fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
+      selectAlertSuppressionPerInterval();
+      setAlertSuppressionDuration(2, 'h');
+      selectDoNotSuppressForMissingFields();
+      continueFromDefineStep();
+
+      // ensures details preview works correctly
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
+        getDetails(SUPPRESS_MISSING_FIELD).should(
+          'have.text',
+          'Do not suppress alerts for events with missing fields'
+        );
+      });
+
+      fillAboutRuleMinimumAndContinue(rule);
+      skipScheduleRuleAction();
+      createRuleWithoutEnabling();
+
+      // ensures rule details displayed correctly after rule created
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '45m');
+        getDetails(SUPPRESS_MISSING_FIELD).should(
+          'have.text',
+          'Do not suppress alerts for events with missing fields'
+        );
+      });
     });
   });
 });

@@ -7,9 +7,22 @@
 
 import { getEsqlRule } from '../../../../objects/rule';
 
-import { ESQL_QUERY_DETAILS, RULE_NAME_OVERRIDE_DETAILS } from '../../../../screens/rule_details';
+import {
+  ESQL_QUERY_DETAILS,
+  RULE_NAME_OVERRIDE_DETAILS,
+  SUPPRESS_FOR_DETAILS,
+  DEFINITION_DETAILS,
+  SUPPRESS_MISSING_FIELD,
+  SUPPRESS_BY_DETAILS,
+  DETAILS_TITLE,
+} from '../../../../screens/rule_details';
 
-import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
+import {
+  ESQL_QUERY_BAR,
+  ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS,
+} from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
@@ -23,6 +36,9 @@ import {
   fillOverrideEsqlRuleName,
   goToAboutStepTab,
   expandAdvancedSettings,
+  selectAlertSuppressionPerRuleExecution,
+  selectDoNotSuppressForMissingFields,
+  fillAlertSuppressionFields,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 
@@ -33,7 +49,8 @@ import { visit } from '../../../../tasks/navigation';
 
 const rule = getEsqlRule();
 
-const expectedValidEsqlQuery = 'from auditbeat* | stats count(event.category) by event.category';
+const expectedValidEsqlQuery =
+  'from auditbeat* | stats _count=count(event.category) by event.category';
 
 describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
   beforeEach(() => {
@@ -91,5 +108,76 @@ describe('Detection ES|QL rules, edit', { tags: ['@ess'] }, () => {
 
     // ensure rule name override is displayed on details page
     getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
+  });
+
+  describe('with configured suppression', () => {
+    const SUPPRESS_BY_FIELDS = ['event.category'];
+    const NEW_SUPPRESS_BY_FIELDS = ['event.category', '_count'];
+
+    beforeEach(() => {
+      createRule({
+        ...rule,
+        alert_suppression: {
+          group_by: SUPPRESS_BY_FIELDS,
+          duration: { value: 3, unit: 'h' },
+          missing_fields_strategy: 'suppress',
+        },
+      });
+    });
+
+    it('displays suppress options correctly on edit form and allows its editing', () => {
+      visit(RULES_MANAGEMENT_URL);
+      editFirstRule();
+
+      // check saved suppression settings
+      cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(0).should('be.enabled').should('have.value', 3);
+      cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).should('be.enabled').should('have.value', 'h');
+      cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
+      cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS).should('be.checked');
+
+      selectAlertSuppressionPerRuleExecution();
+      selectDoNotSuppressForMissingFields();
+      fillAlertSuppressionFields(['_count']);
+
+      saveEditedRule();
+
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(SUPPRESS_BY_DETAILS).should('have.text', NEW_SUPPRESS_BY_FIELDS.join(''));
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
+        getDetails(SUPPRESS_MISSING_FIELD).should(
+          'have.text',
+          'Do not suppress alerts for events with missing fields'
+        );
+      });
+    });
+  });
+
+  describe('without suppression', () => {
+    const SUPPRESS_BY_FIELDS = ['event.category'];
+
+    beforeEach(() => {
+      createRule(rule);
+    });
+
+    it('enables suppression on time interval', () => {
+      visit(RULES_MANAGEMENT_URL);
+      editFirstRule();
+
+      fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
+
+      saveEditedRule();
+
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
+        getDetails(SUPPRESS_MISSING_FIELD).should(
+          'have.text',
+          'Suppress and group alerts for events with missing fields'
+        );
+
+        // suppression functionality should be under Tech Preview
+        cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
+      });
+    });
   });
 });
