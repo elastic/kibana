@@ -781,7 +781,7 @@
         "label": "FindSLOGroupsParams",
         "description": [],
         "signature": [
-          "{ page?: string | undefined; perPage?: string | undefined; groupBy?: \"status\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\" | undefined; kqlQuery?: string | undefined; filters?: string | undefined; }"
+          "{ page?: string | undefined; perPage?: string | undefined; groupBy?: \"status\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\" | undefined; groupsFilter?: string | string[] | undefined; kqlQuery?: string | undefined; filters?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -4769,7 +4769,15 @@
           "LiteralC",
           "<\"status\">, ",
           "LiteralC",
-          "<\"slo.indicator.type\">]>; kqlQuery: ",
+          "<\"slo.indicator.type\">]>; groupsFilter: ",
+          "UnionC",
+          "<[",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">, ",
+          "StringC",
+          "]>; kqlQuery: ",
           "StringC",
           "; filters: ",
           "StringC",
