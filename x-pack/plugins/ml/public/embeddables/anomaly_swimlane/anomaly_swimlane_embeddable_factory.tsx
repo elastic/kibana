@@ -91,6 +91,10 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       return state.rawState as AnomalySwimLaneEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      if (!apiHasExecutionContext(parentApi)) {
+        throw new Error('Parent API does not have execution context');
+      }
+
       const services = await getServices(getStartServices);
 
       const [coreStartServices, pluginsStartServices, anomalySwimLaneServices] = services;
