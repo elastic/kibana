@@ -147,6 +147,10 @@ export const ImportExceptionListFlyout = React.memo(
       setFiles(inputFiles ?? null);
     }, []);
 
+    const importExceptionListFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'importExceptionListFlyoutTitle',
+    });
+
     return (
       <EuiFlyout
         ownFocus

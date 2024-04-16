@@ -169,7 +169,7 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
     }, []);
 
     const eventFiltersCreateFlyoutTitleId = useGeneratedHtmlId({
-      prefix: 'addExceptionFlyoutTitle',
+      prefix: 'eventFiltersCreateFlyoutTitle',
     });
 
     return (
@@ -177,12 +177,12 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
         size="l"
         onClose={handleOnClose}
         data-test-subj="eventFiltersCreateFlyout"
-        aria-labelledby={eventFiltersCreateFlyoutTitle}
+        aria-labelledby={eventFiltersCreateFlyoutTitleId}
         {...flyoutProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={eventFiltersCreateFlyoutTitle}>
+            <h2 id={eventFiltersCreateFlyoutTitleId}>
               {data ? (
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title.create.withData"
