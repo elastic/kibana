@@ -26,7 +26,7 @@ const PageTitleComponent: React.FC = () => {
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="pageTitle" gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj="title" size="l">
+        <EuiTitle data-test-subj="aiInsightsPageTitle" size="l">
           <h1>{i18n.AI_INSIGHTS_PAGE_TITLE}</h1>
         </EuiTitle>
       </EuiFlexItem>

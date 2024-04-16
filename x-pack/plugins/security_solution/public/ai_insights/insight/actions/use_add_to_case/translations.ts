@@ -29,3 +29,9 @@ export const CREATE_A_CASE_FOR_INSIGHT = (title: string) =>
       defaultMessage: 'Create a case for insight {title}',
     }
   );
+
+export const CASE_DESCRIPTION = (insightTitle: string) =>
+  i18n.translate('xpack.securitySolution.aiInsights.insight.actions.useAddToCase.caseDescription', {
+    values: { insightTitle },
+    defaultMessage: 'This case was opened for insight: _{insightTitle}_',
+  });

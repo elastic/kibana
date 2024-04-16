@@ -27,7 +27,7 @@ const SummaryComponent: React.FC<Props> = ({
   onToggleShowAnonymized,
   showAnonymized,
 }) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
+  <EuiFlexGroup data-test-subj="summary" justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>
       <SummaryCount
         alertsCount={alertsCount}

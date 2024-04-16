@@ -95,7 +95,7 @@ const InsightComponent: React.FC<Props> = ({
 
   return (
     <>
-      <EuiPanel data-tes-subj="insight" hasBorder={true}>
+      <EuiPanel data-test-subj="insight" hasBorder={true}>
         <EuiAccordion
           buttonContent={buttonContent}
           data-test-subj="insightAccordion"

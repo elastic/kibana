@@ -40,6 +40,10 @@ export const useAddToNewCase = ({
   const { alertsIndexPattern } = useAssistantContext();
 
   const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
+    initialValue: {
+      description: i18n.CASE_DESCRIPTION(title),
+      title,
+    },
     toastContent: i18n.ADD_TO_CASE_SUCCESS,
   });
   const openCreateCaseFlyout = useCallback(

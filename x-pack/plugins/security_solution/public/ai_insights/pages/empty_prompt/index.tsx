@@ -110,7 +110,12 @@ const EmptyPromptComponent: React.FC<Props> = ({
   }, [hasAssistantPrivilege, isDisabled, isLoading, onGenerate]);
 
   return (
-    <EuiFlexGroup alignItems="center" direction="column" gutterSize="none">
+    <EuiFlexGroup
+      alignItems="center"
+      data-test-subj="emptyPrompt"
+      direction="column"
+      gutterSize="none"
+    >
       <EuiFlexItem data-test-subj="emptyPromptContainer" grow={false}>
         <EuiEmptyPrompt actions={actions} body={body} title={title} />
       </EuiFlexItem>

@@ -68,9 +68,9 @@ const AiInsightsComponent: React.FC = () => {
     fetchInsights,
     generationIntervals,
     insights,
+    isLoading,
     lastUpdated,
     replacements,
-    isLoading,
   } = useInsights({
     connectorId,
     setConnectorId,
