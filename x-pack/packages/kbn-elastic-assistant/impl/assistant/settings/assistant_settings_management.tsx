@@ -50,6 +50,7 @@ interface Props {
   conversations: Record<string, Conversation>;
   selectedConversation: Conversation;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  isFlyoutMode: boolean;
 }
 
 /**
@@ -61,6 +62,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
     conversations,
+    isFlyoutMode,
   }) => {
     const {
       actionTypeRegistry,
@@ -69,10 +71,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       selectedSettingsTab,
       setSelectedSettingsTab,
       toasts,
-      assistantAvailability: { isAssistantEnabled },
     } = useAssistantContext();
 
-    const { data: anonymizationFields } = useFetchAnonymizationFields({ http, isAssistantEnabled });
+    const { data: anonymizationFields } = useFetchAnonymizationFields();
 
     // Connector details
     const { data: connectors } = useLoadConnectors({
@@ -258,6 +259,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               setAssistantStreamingEnabled={handleChange(setUpdatedAssistantStreamingEnabled)}
               onSelectedConversationChange={onHandleSelectedConversationChange}
               http={http}
+              isFlyoutMode={isFlyoutMode}
             />
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && (
