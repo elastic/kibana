@@ -730,6 +730,8 @@ export const internalRuleToAPIResponse = (
     actions,
     // Execution summary
     execution_summary: executionSummary ?? undefined,
+    // updated_date is only needed for prebuilt rule assets
+    updated_date: undefined,
   };
 };
 
@@ -763,6 +765,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     updated_by: '',
     created_at: new Date(0).toISOString(),
     created_by: '',
+    updated_date: prebuiltRuleAsset.updated_date,
     immutable: true,
     revision: 1,
   };
