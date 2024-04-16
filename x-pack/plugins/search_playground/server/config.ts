@@ -21,7 +21,7 @@ export type SearchPlaygroundConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<SearchPlaygroundConfig> = {
   exposeToBrowser: {
-    ui: false,
+    ui: true,
   },
   schema: configSchema,
 };

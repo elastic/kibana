@@ -30,55 +30,59 @@ export const navigationTree: NavigationTreeDefinition = {
           spaceBefore: 'm',
         },
         {
-          id: 'dev_tools',
-          title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-            defaultMessage: 'Dev Tools',
+          id: 'kibana',
+          title: i18n.translate('xpack.serverlessSearch.nav.kibana', {
+            defaultMessage: 'Kibana',
           }),
-          link: 'dev_tools:console',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-          },
           spaceBefore: 'm',
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+              },
+            },
+          ],
         },
         {
-          link: 'discover',
-          spaceBefore: 'm',
-        },
-        {
-          link: 'dashboards',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-          },
-        },
-        {
-          link: 'management:triggersActions',
-          title: i18n.translate('xpack.serverlessSearch.nav.alerts', {
-            defaultMessage: 'Alerts',
+          id: 'content',
+          title: i18n.translate('xpack.serverlessSearch.nav.content', {
+            defaultMessage: 'Content',
           }),
-        },
-        {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
-            defaultMessage: 'Index Management',
-          }),
-          link: 'management:index_management',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
           spaceBefore: 'm',
+          children: [
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
+                defaultMessage: 'Index Management',
+              }),
+              link: 'management:index_management',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+            {
+              title: CONNECTORS_LABEL,
+              link: 'serverlessConnectors',
+            },
+          ],
         },
         {
-          title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
-            defaultMessage: 'Pipelines',
+          id: 'build',
+          title: i18n.translate('xpack.serverlessSearch.nav.build', {
+            defaultMessage: 'Build',
           }),
-          link: 'management:ingest_pipelines',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
-        },
-        {
-          title: CONNECTORS_LABEL,
-          link: 'serverlessConnectors',
-        },
-        {
-          link: 'management:api_keys',
-          breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
           spaceBefore: 'm',
+          children: [
+            {
+              id: 'searchPlayground',
+              title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
+                defaultMessage: 'Playground',
+              }),
+              link: 'searchPlayground',
+            },
+          ],
         },
       ],
     },
@@ -86,12 +90,15 @@ export const navigationTree: NavigationTreeDefinition = {
   footer: [
     {
       type: 'navItem',
-      id: 'search_getting_started',
-      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-        defaultMessage: 'Get started',
+      id: 'dev_tools',
+      title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
+        defaultMessage: 'Dev Tools',
       }),
-      icon: 'launch',
-      link: 'serverlessElasticsearch',
+      link: 'dev_tools:console',
+      getIsActive: ({ pathNameSerialized, prepend }) => {
+        return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+      },
+      icon: 'editorCodeBlock',
     },
     {
       type: 'navGroup',
