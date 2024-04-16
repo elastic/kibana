@@ -15,7 +15,11 @@ import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
 import { type SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
+import {
+  useLogRateAnalysisStateContext,
+  useLogRateAnalysisReduxActions,
+} from '@kbn/aiops-components';
+
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useColumns, SIG_ITEMS_TABLE } from './use_columns';
 
@@ -53,14 +57,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const {
-    pinnedGroup,
-    pinnedSignificantItem,
-    selectedGroup,
-    selectedSignificantItem,
-    setPinnedSignificantItem,
-    setSelectedSignificantItem,
-  } = useLogRateAnalysisStateContext();
+  const { pinnedGroup, pinnedSignificantItem, selectedGroup, selectedSignificantItem } =
+    useLogRateAnalysisStateContext();
+  const { setPinnedSignificantItem, setSelectedSignificantItem } = useLogRateAnalysisReduxActions();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

@@ -25,7 +25,11 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
+import {
+  useLogRateAnalysisStateContext,
+  useLogRateAnalysisReduxActions,
+  type GroupTableItem,
+} from '@kbn/aiops-components';
 
 import { useData } from '../../../hooks/use_data';
 import { useDataSource } from '../../../hooks/use_data_source';
@@ -129,17 +133,16 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     [esSearchQuery]
   );
 
+  const { autoRunAnalysis, currentSelectedSignificantItem, currentSelectedGroup } =
+    useLogRateAnalysisStateContext();
   const {
-    autoRunAnalysis,
-    currentSelectedSignificantItem,
-    currentSelectedGroup,
     setAutoRunAnalysis,
     setInitialAnalysisStart,
     setPinnedSignificantItem,
     setPinnedGroup,
     setSelectedSignificantItem,
     setSelectedGroup,
-  } = useLogRateAnalysisStateContext();
+  } = useLogRateAnalysisReduxActions();
 
   const { documentStats, earliest, latest } = useData(
     dataView,

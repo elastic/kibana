@@ -30,7 +30,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { stringHash } from '@kbn/ml-string-hash';
-import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
+import {
+  useLogRateAnalysisStateContext,
+  useLogRateAnalysisReduxActions,
+  type GroupTableItem,
+} from '@kbn/aiops-components';
 
 import usePrevious from 'react-use/lib/usePrevious';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -90,8 +94,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
-    useLogRateAnalysisStateContext();
+  const { pinnedGroup, selectedGroup } = useLogRateAnalysisStateContext();
+  const { setPinnedGroup, setSelectedGroup } = useLogRateAnalysisReduxActions();
+  const dataViewId = dataView.id;
   const isMounted = useMountedState();
 
   const toggleDetails = (item: GroupTableItem) => {
