@@ -19,3 +19,8 @@ export * from './src/use_persist_exception_item';
 export * from './src/use_persist_exception_list';
 export * from './src/use_read_list_index';
 export * from './src/use_read_list_privileges';
+export * from './src/use_find_list_items';
+export * from './src/use_create_list_item';
+export * from './src/use_delete_list_item';
+export * from './src/use_patch_list_item';
+export * from './src/use_get_list_by_id';

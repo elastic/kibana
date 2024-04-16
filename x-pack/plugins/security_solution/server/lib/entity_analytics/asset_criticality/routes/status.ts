@@ -13,12 +13,12 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 
 export const assetCriticalityStatusRoute = (
-  router: SecuritySolutionPluginRouter,
+  router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
   router.versioned

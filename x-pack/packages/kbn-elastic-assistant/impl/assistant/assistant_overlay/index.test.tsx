@@ -24,7 +24,7 @@ describe('AssistantOverlay', () => {
   it('renders when isAssistantEnabled prop is true and keyboard shortcut is pressed', () => {
     const { getByTestId } = render(
       <TestProviders providerContext={{ assistantTelemetry }}>
-        <AssistantOverlay />
+        <AssistantOverlay isFlyoutMode={false} />
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
@@ -35,7 +35,7 @@ describe('AssistantOverlay', () => {
   it('modal closes when close button is clicked', () => {
     const { getByLabelText, queryByTestId } = render(
       <TestProviders>
-        <AssistantOverlay />
+        <AssistantOverlay isFlyoutMode={false} />
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
@@ -48,7 +48,7 @@ describe('AssistantOverlay', () => {
   it('Assistant invoked from shortcut tracking happens on modal open only (not close)', () => {
     render(
       <TestProviders providerContext={{ assistantTelemetry }}>
-        <AssistantOverlay />
+        <AssistantOverlay isFlyoutMode={false} />
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
@@ -64,7 +64,7 @@ describe('AssistantOverlay', () => {
   it('modal closes when shortcut is pressed and modal is already open', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <AssistantOverlay />
+        <AssistantOverlay isFlyoutMode={false} />
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
@@ -76,7 +76,7 @@ describe('AssistantOverlay', () => {
   it('modal does not open when incorrect shortcut is pressed', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <AssistantOverlay />
+        <AssistantOverlay isFlyoutMode={false} />
       </TestProviders>
     );
     fireEvent.keyDown(document, { key: 'a', ctrlKey: true });
