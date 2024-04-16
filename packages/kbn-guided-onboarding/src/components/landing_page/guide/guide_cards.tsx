@@ -31,7 +31,7 @@ export interface GuideCardsProps {
   activeFilter: GuideFilterValues;
   guidesState: GuideState[];
   filteredCards?: GuideCardConstants[];
-  openModal: OverlayStart['openModal'];
+  overlays: OverlayStart;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
   url: BrowserUrlService;

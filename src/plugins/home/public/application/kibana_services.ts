@@ -55,7 +55,7 @@ export interface HomeKibanaServices {
   welcomeService: WelcomeService;
   guidedOnboardingService?: GuidedOnboardingApi;
   cloud: CloudSetup;
-  openModal: OverlayStart['openModal'];
+  overlays: OverlayStart;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
 }

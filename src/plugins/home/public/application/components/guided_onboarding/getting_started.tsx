@@ -60,7 +60,7 @@ export const GettingStarted = () => {
     chrome,
     guidedOnboardingService,
     cloud,
-    openModal,
+    overlays,
     theme,
     i18nStart,
     docLinks,
@@ -245,7 +245,7 @@ export const GettingStarted = () => {
       activeFilter={filter as GuideFilterValues}
       guidesState={guidesState}
       filteredCards={filteredCards}
-      openModal={openModal}
+      overlays={overlays}
       i18nStart={i18nStart}
       theme={theme}
       docLinks={docLinks}

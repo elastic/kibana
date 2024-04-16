@@ -108,7 +108,7 @@ export class HomePublicPlugin
           welcomeService: this.welcomeService,
           guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
-          openModal: coreStart.overlays.openModal,
+          overlays: coreStart.overlays,
           theme: core.theme,
           i18nStart: coreStart.i18n,
         });
