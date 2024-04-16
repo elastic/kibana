@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
+import styled from '@emotion/styled';
+import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
-import { ContextEditor } from './context_editor';
 import { BatchUpdateListItem } from './context_editor/types';
 import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
+import { ContextEditorFlyout } from './context_editor_flyout';
+import { ContextEditor } from './context_editor';
 import { Stats } from './stats';
 
 const EditorContainer = styled.div`
@@ -26,11 +26,15 @@ export interface Props {
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
+  currentReplacements: AnonymizedData['replacements'] | undefined;
+  isFlyoutMode: boolean;
 }
 
 const DataAnonymizationEditorComponent: React.FC<Props> = ({
   selectedPromptContext,
   setSelectedPromptContexts,
+  currentReplacements,
+  isFlyoutMode,
 }) => {
   const isDataAnonymizable = useMemo<boolean>(
     () => getIsDataAnonymizable(selectedPromptContext.rawData),
@@ -57,6 +61,25 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
     },
     [selectedPromptContext, setSelectedPromptContexts]
   );
+
+  if (isFlyoutMode) {
+    return (
+      <EditorContainer data-test-subj="dataAnonymizationEditor">
+        <EuiPanel hasShadow={false} paddingSize="m">
+          {typeof selectedPromptContext.rawData === 'string' ? (
+            <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+          ) : (
+            <ContextEditorFlyout
+              selectedPromptContext={selectedPromptContext}
+              onListUpdated={onListUpdated}
+              currentReplacements={currentReplacements}
+              isDataAnonymizable={isDataAnonymizable}
+            />
+          )}
+        </EuiPanel>
+      </EditorContainer>
+    );
+  }
 
   return (
     <EditorContainer data-test-subj="dataAnonymizationEditor">
