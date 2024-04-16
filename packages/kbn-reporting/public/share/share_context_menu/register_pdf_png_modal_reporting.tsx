@@ -397,7 +397,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PDF' as const,
-      generateExport: generateReportPDF,
+      generateReport: generateReportPDF,
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
@@ -406,9 +406,10 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateExportButtonLabel: (
+      generateReportButton: (
         <FormattedMessage
           id="reporting.printablePdfV2.generateButtonLabel"
+          data-test-subj="generateReportButton"
           defaultMessage="Generate export"
         />
       ),
@@ -429,7 +430,7 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
-      generateExport: generateReportPNG,
+      generateReport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,
       helpText: (
@@ -438,10 +439,11 @@ export const reportingExportModalProvider = ({
           defaultMessage="Exports can take a few minutes to generate."
         />
       ),
-      generateExportButtonLabel: (
+      generateReportButton: (
         <FormattedMessage
           id="reporting.pngV2.generateButtonLabel"
           defaultMessage="Generate export"
+          data-test-subj="generateReportButton"
         />
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
