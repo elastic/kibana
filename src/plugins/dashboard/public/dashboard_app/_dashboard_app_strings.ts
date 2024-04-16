@@ -229,11 +229,11 @@ export const topNavStrings = {
       defaultMessage: 'Open dashboard settings',
     }),
   },
-  clone: {
-    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
-      defaultMessage: 'clone',
+  duplicate: {
+    label: i18n.translate('dashboard.topNave.duplicateButtonAriaLabel', {
+      defaultMessage: 'duplicate',
     }),
-    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
+    description: i18n.translate('dashboard.topNave.duplicateConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
