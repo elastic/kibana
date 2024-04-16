@@ -11,6 +11,7 @@ import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
 // FLAKY: https://github.com/elastic/kibana/issues/180853
+// Failing: See https://github.com/elastic/kibana/issues/180853
 describe.skip('Alert Test', { tags: ['@ess'] }, () => {
   let ruleName: string;
   let ruleId: string;
