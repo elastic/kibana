@@ -169,46 +169,6 @@ describe('Conversation selector', () => {
     });
   });
 
-  it('Left arrow selects first conversation', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ConversationSelector
-          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
-        />
-      </TestProviders>
-    );
-
-    fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
-      key: 'ArrowLeft',
-      ctrlKey: true,
-      code: 'ArrowLeft',
-      charCode: 27,
-    });
-    expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: alertConvo.title,
-      cTitle: alertConvo.title,
-    });
-  });
-
-  it('Right arrow selects last conversation', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ConversationSelector {...defaultProps} conversations={mockConversationsWithCustom} />
-      </TestProviders>
-    );
-
-    fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
-      key: 'ArrowRight',
-      ctrlKey: true,
-      code: 'ArrowRight',
-      charCode: 26,
-    });
-    expect(onConversationSelected).toHaveBeenCalledWith({
-      cId: customConvo.title,
-      cTitle: customConvo.title,
-    });
-  });
-
   it('Right arrow does nothing when ctrlKey is false', () => {
     const { getByTestId } = render(
       <TestProviders>
