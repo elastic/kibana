@@ -40,6 +40,7 @@ interface KBAgentDef {
   spot?: boolean;
   zones?: string[];
   nestedVirtualization?: boolean;
+  serviceAccount?: string;
 }
 type KibanaBuildkiteAgentLookup = Record<string, KBAgentDef>;
 
@@ -216,8 +217,10 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
     diskType: agent.diskType,
     enableNestedVirtualization: agent.nestedVirtualization,
     localSsds: agent.localSsds,
+    localSsdInterface: !!agent.localSsds ? 'nvme' : undefined,
     machineType: agent.machineType,
     preemptible: agent.spot,
+    serviceAccount: agent.serviceAccount,
   });
 }
 

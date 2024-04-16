@@ -21133,6 +21133,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.latest_executed_state",
+            "type": "Object",
+            "tags": [],
+            "label": "latest_executed_state",
+            "description": [],
+            "signature": [
+              "InstallLatestExecutedState",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21177,7 +21192,8 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"installed\" | \"already_installed\" | undefined"
+              "InstallResultStatus",
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
             "deprecated": false,
@@ -21722,6 +21738,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ [key: string]: any; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewAgentPolicy.advanced_settings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "advanced_settings",
             "description": [],
             "signature": [
               "{ [key: string]: any; } | null | undefined"

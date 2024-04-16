@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
-
-export type ConversationRole = 'system' | 'user' | 'assistant';
+import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
 
 export interface MessagePresentation {
   delay?: number;
   stream?: boolean;
 }
 
-export interface Message {
-  role: ConversationRole;
+// The ClientMessage is different from the Message in that it content
+// can be undefined and reader is the correct type which is unavailable in Zod
+export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
   reader?: ReadableStreamDefaultReader<Uint8Array>;
-  replacements?: Replacements;
   content?: string;
-  timestamp: string;
-  isError?: boolean;
   presentation?: MessagePresentation;
-  traceData?: {
-    transactionId: string;
-    traceId: string;
-  };
 }
 
 export interface ConversationTheme {
@@ -59,7 +51,7 @@ export interface Conversation {
   category: string;
   id: string;
   title: string;
-  messages: Message[];
+  messages: ClientMessage[];
   updatedAt?: Date;
   createdAt?: Date;
   replacements: Replacements;

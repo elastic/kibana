@@ -1396,6 +1396,73 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.ClientMessage",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClientMessage",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/elastic-assistant",
+            "scope": "public",
+            "docId": "kibKbnElasticAssistantPluginApi",
+            "section": "def-public.ClientMessage",
+            "text": "ClientMessage"
+          },
+          " extends Omit<{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; isError?: boolean | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, \"content\" | \"reader\">"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.ClientMessage.reader",
+            "type": "Object",
+            "tags": [],
+            "label": "reader",
+            "description": [],
+            "signature": [
+              "ReadableStreamDefaultReader<Uint8Array> | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.ClientMessage.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.ClientMessage.presentation",
+            "type": "Object",
+            "tags": [],
+            "label": "presentation",
+            "description": [],
+            "signature": [
+              "MessagePresentation",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.CodeBlockDetails",
         "type": "Interface",
         "tags": [],
@@ -1585,8 +1652,8 @@
                 "pluginId": "@kbn/elastic-assistant",
                 "scope": "public",
                 "docId": "kibKbnElasticAssistantPluginApi",
-                "section": "def-public.Message",
-                "text": "Message"
+                "section": "def-public.ClientMessage",
+                "text": "ClientMessage"
               },
               "[]"
             ],
@@ -1790,8 +1857,8 @@
                 "pluginId": "@kbn/elastic-assistant",
                 "scope": "public",
                 "docId": "kibKbnElasticAssistantPluginApi",
-                "section": "def-public.Message",
-                "text": "Message"
+                "section": "def-public.ClientMessage",
+                "text": "ClientMessage"
               },
               "[] | undefined"
             ],
@@ -1896,130 +1963,6 @@
             "label": "pipeline_exists",
             "description": [],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant",
-        "id": "def-public.Message",
-        "type": "Interface",
-        "tags": [],
-        "label": "Message",
-        "description": [],
-        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.role",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "role",
-            "description": [],
-            "signature": [
-              "\"user\" | \"system\" | \"assistant\""
-            ],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.reader",
-            "type": "Object",
-            "tags": [],
-            "label": "reader",
-            "description": [],
-            "signature": [
-              "ReadableStreamDefaultReader<Uint8Array> | undefined"
-            ],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.replacements",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "replacements",
-            "description": [],
-            "signature": [
-              "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
-            ],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.content",
-            "type": "string",
-            "tags": [],
-            "label": "content",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.timestamp",
-            "type": "string",
-            "tags": [],
-            "label": "timestamp",
-            "description": [],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.isError",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isError",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.presentation",
-            "type": "Object",
-            "tags": [],
-            "label": "presentation",
-            "description": [],
-            "signature": [
-              "MessagePresentation",
-              " | undefined"
-            ],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.Message.traceData",
-            "type": "Object",
-            "tags": [],
-            "label": "traceData",
-            "description": [],
-            "signature": [
-              "{ transactionId: string; traceId: string; } | undefined"
-            ],
-            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -15,9 +15,11 @@ import {
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HttpStart } from '@kbn/core-http-browser';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
 import type { Toolbar } from './components/toolbar';
@@ -34,6 +36,7 @@ export interface SearchPlaygroundPluginStart {
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export interface AppServicesContext {
@@ -41,27 +44,26 @@ export interface AppServicesContext {
   security: SecurityPluginStart;
   share: SharePluginStart;
   cloud?: CloudSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export enum ChatFormFields {
   question = 'question',
   citations = 'citations',
   prompt = 'prompt',
-  openAIKey = 'api_key',
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
-  docSize = 'docSize',
+  docSize = 'doc_size',
 }
 
 export interface ChatForm {
   [ChatFormFields.question]: string;
   [ChatFormFields.prompt]: string;
   [ChatFormFields.citations]: boolean;
-  [ChatFormFields.openAIKey]: string;
   [ChatFormFields.indices]: string[];
-  [ChatFormFields.summarizationModel]: string;
+  [ChatFormFields.summarizationModel]: LLMModel;
   [ChatFormFields.elasticsearchQuery]: { query: QueryDslQueryContainer };
   [ChatFormFields.sourceFields]: string[];
   [ChatFormFields.docSize]: number;
@@ -82,7 +84,7 @@ export interface Message {
 }
 
 export interface DocAnnotation {
-  metadata: { id: string; score: number };
+  metadata: { _id: string; _score: number; _index: string };
   pageContent: string;
 }
 
@@ -92,8 +94,8 @@ export interface Annotation {
 }
 
 export interface Doc {
-  id: string;
   content: string;
+  metadata: { _id: string; _score: number; _index: string };
 }
 
 export interface AIMessage extends Message {
@@ -103,11 +105,8 @@ export interface AIMessage extends Message {
 }
 
 export enum SummarizationModelName {
-  gpt3_5 = 'gpt-3.5-turbo',
-  gpt3_5_turbo_1106 = 'gpt-3.5-turbo-1106',
-  gpt3_5_turbo_16k = 'gpt-3.5-turbo-16k',
-  gpt3_5_turbo_16k_0613 = 'gpt-3.5-turbo-16k-0613',
-  gpt3_5_turbo = 'gpt-3.5-turbo-instruct',
+  gpt3_5_turbo = 'gpt-3.5-turbo',
+  gpt_4 = 'gpt-4',
 }
 
 export interface ElasticsearchIndex {
@@ -134,7 +133,7 @@ export type JSONValue = null | string | number | boolean | { [x: string]: JSONVa
 
 export interface ChatRequestOptions {
   options?: RequestOptions;
-  data?: Record<string, string | number | boolean>;
+  data?: ChatRequestData;
 }
 
 export type CreateMessage = Omit<Message, 'id'> & {
@@ -190,4 +189,12 @@ export interface UseChatHelpers {
     chatRequestOptions?: ChatRequestOptions
   ) => void;
   isLoading: boolean;
+}
+
+export interface LLMModel {
+  name: string;
+  value?: string;
+  icon: ComponentType;
+  disabled: boolean;
+  connectorId?: string;
 }

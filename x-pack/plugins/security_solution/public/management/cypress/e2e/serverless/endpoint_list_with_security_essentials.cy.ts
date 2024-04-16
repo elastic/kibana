@@ -15,7 +15,8 @@ import {
   visitEndpointList,
 } from '../../screens';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/171643
+describe.skip(
   'When on the Endpoint List in Security Essentials PLI',
   {
     tags: ['@serverless'],

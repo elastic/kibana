@@ -38,4 +38,5 @@ export interface ConnectorAdapter<
    */
   ruleActionParamsSchema: ObjectType;
   buildActionParams: (args: BuildActionParamsArgs<RuleActionParams>) => ConnectorParams;
+  getKibanaPrivileges?: ({ consumer }: { consumer: string }) => string[];
 }

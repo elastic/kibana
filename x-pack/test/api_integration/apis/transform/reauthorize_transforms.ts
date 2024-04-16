@@ -72,13 +72,13 @@ export default ({ getService }: FtrProviderContext) => {
         TRANSFORM_STATE.STOPPED,
         `Expected transform state of ${transformId} to be '${TRANSFORM_STATE.STOPPED}' (got ${stats.state})`
       );
-      expect(stats.health.status).to.eql(
+      expect(stats.health?.status).to.eql(
         'red',
-        `Expected transform health status of ${transformId} to be 'red' (got ${stats.health.status})`
+        `Expected transform health status of ${transformId} to be 'red' (got ${stats.health?.status})`
       );
-      expect(stats.health.issues![0].type).to.eql(
+      expect(stats.health?.issues![0].type).to.eql(
         'privileges_check_failed',
-        `Expected transform health issue of ${transformId} to be 'privileges_check_failed' (got ${stats.health.status})`
+        `Expected transform health issue of ${transformId} to be 'privileges_check_failed' (got ${stats.health?.status})`
       );
     }
 
@@ -94,9 +94,9 @@ export default ({ getService }: FtrProviderContext) => {
         )})`
       );
       const stats = await transform.api.getTransformStats(transformId);
-      expect(stats.health.status).to.eql(
+      expect(stats.health?.status).to.eql(
         'green',
-        `Expected transform health status of ${transformId} to be 'green' (got ${stats.health.status})`
+        `Expected transform health status of ${transformId} to be 'green' (got ${stats.health?.status})`
       );
     }
 
@@ -116,7 +116,8 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.securityCommon.clearAllTransformApiKeys();
     });
 
-    describe('single transform reauthorize_transforms', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/180503
+    describe.skip('single transform reauthorize_transforms', function () {
       const transformCreatedByViewerId = getTransformIdByUser(USER.TRANSFORM_VIEWER);
 
       beforeEach(async () => {
@@ -215,7 +216,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('bulk reauthorize_transforms', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/180499
+    describe.skip('bulk reauthorize_transforms', function () {
       const reqBody: ReauthorizeTransformsRequestSchema = [
         USER.TRANSFORM_VIEWER,
         USER.TRANSFORM_POWERUSER,

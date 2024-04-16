@@ -9,10 +9,12 @@ import { merge } from 'lodash/fp';
 import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
-import type { Message } from '../assistant_context/types';
+import type { ClientMessage } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
-export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
+export const getMessageFromRawResponse = (
+  rawResponse: FetchConnectorExecuteResponse
+): ClientMessage => {
   const { response, isStream, isError } = rawResponse;
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
   if (rawResponse) {

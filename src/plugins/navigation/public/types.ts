@@ -12,6 +12,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
@@ -46,17 +47,14 @@ export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cloud?: CloudStart;
   security?: SecurityPluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
-export type SolutionNavigationOptInStatus = 'visible' | 'hidden' | 'ask';
-
-export type SolutionType = 'es' | 'oblt' | 'security';
+export type SolutionType = 'es' | 'oblt' | 'security' | 'analytics';
 
 export interface ConfigSchema {
   solutionNavigation: {
-    featureOn: boolean;
     enabled: boolean;
-    optInStatus: SolutionNavigationOptInStatus;
-    defaultSolution: SolutionType | 'ask';
+    defaultSolution: SolutionType;
   };
 }

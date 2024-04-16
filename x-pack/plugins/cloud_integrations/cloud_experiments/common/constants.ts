@@ -38,6 +38,10 @@ export enum FEATURE_FLAG_NAMES {
    * Options are: 'header' (the chat button appears as part of the kibana header) and 'bubble' (floating chat button at the bottom of the screen).
    */
   'cloud-chat.chat-variant' = 'cloud-chat.chat-variant',
+  /**
+   * Used to enable the new stack navigation around solutions during the rollout period.
+   */
+  'navigation.solutionNavEnabled' = 'navigation.solutionNavEnabled',
 }
 
 /**

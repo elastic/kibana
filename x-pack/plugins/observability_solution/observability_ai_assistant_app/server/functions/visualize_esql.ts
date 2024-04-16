@@ -6,6 +6,7 @@
  */
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLSearchReponse } from '@kbn/es-types';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
@@ -28,6 +29,7 @@ export function registerVisualizeESQLFunction({
         path: '_query',
         body: {
           query: performantQuery,
+          version: ESQL_LATEST_VERSION,
         },
       })) as ESQLSearchReponse;
       const columns =

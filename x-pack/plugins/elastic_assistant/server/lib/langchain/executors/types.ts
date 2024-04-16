@@ -34,7 +34,11 @@ export interface AgentExecutorParams<T extends boolean> {
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
   isStream?: T;
-  onLlmResponse?: (content: string, traceData?: Message['traceData']) => Promise<void>;
+  onLlmResponse?: (
+    content: string,
+    traceData?: Message['traceData'],
+    isError?: boolean
+  ) => Promise<void>;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   elserId?: string;

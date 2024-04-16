@@ -4355,11 +4355,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/query_tab_content/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/query/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/query_tab_content/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/tabs/query/index.tsx"
           },
           {
             "plugin": "securitySolution",

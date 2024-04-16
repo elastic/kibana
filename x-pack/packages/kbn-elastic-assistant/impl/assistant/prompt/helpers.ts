@@ -6,8 +6,8 @@
  */
 
 import { Replacements, transformRawData } from '@kbn/elastic-assistant-common';
+import type { ClientMessage } from '../../assistant_context/types';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
-import type { Message } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
 import type { Prompt } from '../types';
 import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
@@ -18,12 +18,12 @@ export const getSystemMessages = ({
 }: {
   isNewChat: boolean;
   selectedSystemPrompt: Prompt | undefined;
-}): Message[] => {
+}): ClientMessage[] => {
   if (!isNewChat || selectedSystemPrompt == null) {
     return [];
   }
 
-  const message: Message = {
+  const message: ClientMessage = {
     content: selectedSystemPrompt.content,
     role: 'system',
     timestamp: new Date().toLocaleString(),
@@ -31,7 +31,9 @@ export const getSystemMessages = ({
 
   return [message];
 };
-
+interface ClientMessageWithReplacements extends ClientMessage {
+  replacements: Replacements;
+}
 export function getCombinedMessage({
   currentReplacements,
   getAnonymizedValue = defaultGetAnonymizedValue,
@@ -52,7 +54,7 @@ export function getCombinedMessage({
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
-}): Message {
+}): ClientMessageWithReplacements {
   let replacements: Replacements = currentReplacements ?? {};
   const onNewReplacements = (newReplacements: Replacements) => {
     replacements = { ...replacements, ...newReplacements };

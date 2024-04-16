@@ -52,7 +52,8 @@ interface Props {
  * Evaluation Settings -- development-only feature for evaluating models
  */
 export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
-  const { actionTypeRegistry, basePath, http } = useAssistantContext();
+  const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
+    useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
   const {
     data: evalResponse,
@@ -92,7 +93,27 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     },
     [setOutputIndex]
   );
-  // Dataset
+  /** Trace Options **/
+  const [showTraceOptions, setShowTraceOptions] = useState(false);
+  const onApmUrlChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, apmUrl: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithProjectChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithProject: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  const onLangSmithApiKeyChange = useCallback(
+    (e) => {
+      setTraceOptions({ ...traceOptions, langSmithApiKey: e.target.value });
+    },
+    [setTraceOptions, traceOptions]
+  );
+  /** Dataset **/
   const [useLangSmithDataset, setUseLangSmithDataset] = useState(true);
   const datasetToggleButton = useMemo(() => {
     return (
@@ -423,6 +444,59 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
             aria-label="evaluation-output-index-textfield"
           />
         </EuiFormRow>
+        <EuiText
+          size={'xs'}
+          css={css`
+            margin-top: 16px;
+          `}
+        >
+          <EuiLink color={'primary'} onClick={() => setShowTraceOptions(!showTraceOptions)}>
+            {i18n.SHOW_TRACE_OPTIONS}
+          </EuiLink>
+        </EuiText>
+        {showTraceOptions && (
+          <>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.APM_URL_LABEL}
+              fullWidth
+              helpText={i18n.APM_URL_DESCRIPTION}
+              css={css`
+                margin-top: 16px;
+              `}
+            >
+              <EuiFieldText
+                value={traceOptions.apmUrl}
+                onChange={onApmUrlChange}
+                aria-label="apm-url-textfield"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_PROJECT_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_PROJECT_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithProject}
+                onChange={onLangSmithProjectChange}
+                aria-label="langsmith-project-textfield"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              display="rowCompressed"
+              label={i18n.LANGSMITH_API_KEY_LABEL}
+              fullWidth
+              helpText={i18n.LANGSMITH_API_KEY_DESCRIPTION}
+            >
+              <EuiFieldText
+                value={traceOptions.langSmithApiKey}
+                onChange={onLangSmithApiKeyChange}
+                aria-label="langsmith-api-key-textfield"
+              />
+            </EuiFormRow>
+          </>
+        )}
       </EuiAccordion>
       <EuiHorizontalRule margin={'s'} />
       {/* Prediction Details*/}
