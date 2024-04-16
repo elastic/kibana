@@ -7,12 +7,12 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { getGroupKeysProse } from '../../../utils/slo/groupings';
 
 export interface SloDeleteConfirmationModalProps {
-  slo: SLOWithSummaryResponse | SLOResponse;
+  slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
   onConfirm: () => void;
 }
