@@ -23,10 +23,9 @@ describe('ScheduleNotificationResponseActions', () => {
     [ALERT_RULE_UUID]: 'rule-id-1',
     [ALERT_RULE_NAME]: 'rule-name-1',
   };
-  const signalTwo = { agent: { id: 'agent-id-2', type: 'endpoint' }, _id: 'alert-id-2' };
+  const signalTwo = { agent: { id: 'agent-id-2', type: 'filebeat' }, _id: 'alert-id-2' };
   // this shouldn't make it to the endpoint response action (because of different agent type)
-  const signalThree = { agent: { id: 'agent-id-3', type: 'filebeat' }, _id: 'alert-id-3' };
-  const getSignals = () => [signalOne, signalTwo, signalThree];
+  const getSignals = () => [signalOne, signalTwo];
 
   const osqueryActionMock = {
     create: jest.fn(),
@@ -70,8 +69,8 @@ describe('ScheduleNotificationResponseActions', () => {
     };
 
     const defaultResultParams = {
-      agent_ids: ['agent-id-1', 'agent-id-2', 'agent-id-3'],
-      alert_ids: ['alert-id-1', 'alert-id-2', 'alert-id-3'],
+      agent_ids: ['agent-id-1', 'agent-id-2'],
+      alert_ids: ['alert-id-1', 'alert-id-2'],
     };
     const defaultQueryResultParams = {
       ...defaultResultParams,
