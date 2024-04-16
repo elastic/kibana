@@ -154,7 +154,7 @@ export const TopValues: FC<Props> = ({
         {showSampledValues ? (
           <FormattedMessage
             id="xpack.dataVisualizer.dataGrid.field.topSampledValuesLabel"
-            defaultMessage="Top Sampled values"
+            defaultMessage="Top sampled values"
           />
         ) : (
           <FormattedMessage
