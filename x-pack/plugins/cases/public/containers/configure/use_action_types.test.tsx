@@ -15,35 +15,36 @@ import { useToasts } from '../../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/178760
-describe.skip('useActionTypes', () => {
-  let appMockRenderer: AppMockRenderer;
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
-  });
-
-  it('should fetch action types', async () => {
-    const spy = jest.spyOn(api, 'fetchActionTypes');
-    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
-      wrapper: appMockRenderer.AppWrapper,
+for (let i = 0; i <= 250; i = i + 1) {
+  describe('useActionTypes', () => {
+    let appMockRenderer: AppMockRenderer;
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRenderer = createAppMockRenderer();
     });
 
-    await waitForNextUpdate();
-    expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
-  });
+    it('should fetch action types', async () => {
+      const spy = jest.spyOn(api, 'fetchActionTypes');
+      const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+        wrapper: appMockRenderer.AppWrapper,
+      });
 
-  it('should show a toast eror message if failed to fetch', async () => {
-    const spy = jest.spyOn(api, 'fetchActionTypes');
-    spy.mockImplementation(() => {
-      throw new Error('Something went wrong');
+      await waitForNextUpdate();
+      expect(spy).toHaveBeenCalledWith({ signal: expect.any(AbortSignal) });
     });
-    const addErrorMock = jest.fn();
-    (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
-    const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
-      wrapper: appMockRenderer.AppWrapper,
+
+    it('should show a toast eror message if failed to fetch', async () => {
+      const spy = jest.spyOn(api, 'fetchActionTypes');
+      spy.mockImplementation(() => {
+        throw new Error('Something went wrong');
+      });
+      const addErrorMock = jest.fn();
+      (useToasts as jest.Mock).mockReturnValue({ addError: addErrorMock });
+      const { waitForNextUpdate } = renderHook(() => useGetActionTypes(), {
+        wrapper: appMockRenderer.AppWrapper,
+      });
+      await waitForNextUpdate();
+      expect(addErrorMock).toHaveBeenCalled();
     });
-    await waitForNextUpdate();
-    expect(addErrorMock).toHaveBeenCalled();
   });
-});
+}
