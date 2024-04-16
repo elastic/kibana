@@ -188,12 +188,18 @@ export const getSearchEmbeddableFactory = ({
             [dataView]
           );
 
-          return (
-            <KibanaContextProvider services={discoverServices}>
-              {discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
+          const renderAsFieldStatsTable = useMemo(
+            () =>
+              discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) &&
               viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
               dataView &&
-              Array.isArray(columns) ? (
+              Array.isArray(columns),
+            [viewMode, dataView, columns]
+          );
+
+          return (
+            <KibanaContextProvider services={discoverServices}>
+              {renderAsFieldStatsTable ? (
                 <SearchEmbeddablFieldStatsTableComponent
                   api={{
                     ...api,
