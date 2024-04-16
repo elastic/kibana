@@ -15,7 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
-import { ALERTS_URL_STORAGE_KEY } from './constants';
+import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { nonNullable } from '../../../../common/utils';
@@ -75,7 +75,7 @@ export const UrlSyncedAlertsSearchBar = ({
     savedQuery,
     setSavedQuery,
     clearSavedQuery,
-  } = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY);
+  } = useAlertSearchBarStateContainer(ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY);
 
   useEffect(() => {
     if (spaces) {
