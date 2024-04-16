@@ -192,6 +192,36 @@ describe('Versioned route', () => {
     }
   );
 
+  it('idempotency: constructs lazily provided validations once', async () => {
+    let handler: RequestHandler;
+    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    const lazyValidation = jest.fn(() => fooValidation);
+    versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: lazyValidation,
+      },
+      handlerFn
+    );
+
+    for (let i = 0; i < 10; i++) {
+      const { status } = await handler!(
+        {} as any,
+        createRequest({
+          version: '1',
+          body: { foo: 1 },
+          params: { foo: 1 },
+          query: { foo: 1 },
+        }),
+        responseFactory
+      );
+      expect(status).toBe(200);
+    }
+
+    expect(lazyValidation).toHaveBeenCalledTimes(1);
+  });
+
   describe('when in dev', () => {
     // NOTE: Temporary test to ensure single public API version is enforced
     it('only allows "2023-10-31" as public route versions', () => {
