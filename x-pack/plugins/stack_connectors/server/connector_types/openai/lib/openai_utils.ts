@@ -49,3 +49,14 @@ export const getRequestWithStreamOption = (
 
   return body;
 };
+
+// removes the chat completions endpoint from the OpenAI url in order
+// to provide the correct endpoint for the OpenAI node package
+export const removeEndpointFromUrl = (url: string): string => {
+  const endpointToRemove = '/chat/completions';
+  if (url.endsWith(endpointToRemove)) {
+    return url.slice(0, -endpointToRemove.length);
+  } else {
+    return url;
+  }
+};
