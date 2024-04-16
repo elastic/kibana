@@ -24,7 +24,11 @@ export function useCustomCardsForCategory(
 ): CustomCard[] | undefined {
   const history = useHistory();
   const location = useLocation();
-  const getUrlForApp = useKibana()?.services.application?.getUrlForApp;
+  const {
+    services: { application, http },
+  } = useKibana();
+  const getUrlForApp = application?.getUrlForApp;
+  const basePath = http?.basePath;
 
   const { href: systemLogsUrl } = reactRouterNavigate(
     history,
@@ -66,7 +70,10 @@ export function useCustomCardsForCategory(
           icons: [
             {
               type: 'svg',
-              src: '/XXXXXXXXXXXX/plugins/home/assets/logos/opentelemetry.svg',
+              src:
+                basePath?.prepend(
+                  '/plugins/home/assets/logos/opentelemetry.svg'
+                ) ?? '',
             },
           ],
           url: `${getUrlForApp?.('apm')}/onboarding#openTelemetry` ?? '',
@@ -153,7 +160,9 @@ export function useCustomCardsForCategory(
           icons: [
             {
               type: 'svg',
-              src: '/XXXXXXXXXXXX/plugins/home/assets/logos/system.svg',
+              src:
+                basePath?.prepend('/plugins/home/assets/logos/system.svg') ??
+                '',
             },
           ],
           url: systemLogsUrl,
