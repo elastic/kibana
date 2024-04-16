@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -44,7 +44,7 @@ export interface ApiKeysTableProps {
   onClick(apiKey: CategorizedApiKey): void;
   onDelete(apiKeys: CategorizedApiKey[]): void;
   totalItemCount?: number;
-  onTableChange: any;
+  onTableChange: ({ page, sort }: Criteria<CategorizedApiKey>) => void;
   pagination: any;
   onSearchChange: any;
   aggregations?: ApiKeyAggregations;

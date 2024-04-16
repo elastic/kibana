@@ -28,7 +28,6 @@ import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
 import type { CategorizedApiKey } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
-import type { ApiKey } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
@@ -104,7 +103,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
     setTableSort({ field: 'creation', direction: 'desc' });
   };
 
-  const onTableChange = ({ page, sort }: Criteria<ApiKey>) => {
+  const onTableChange = ({ page, sort }: Criteria<CategorizedApiKey>) => {
     setFrom(page?.index! * pageSize);
     setPageSize(page?.size!);
     if (sort) {

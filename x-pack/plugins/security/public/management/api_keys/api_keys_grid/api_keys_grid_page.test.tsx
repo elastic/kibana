@@ -96,17 +96,6 @@ describe('APIKeysGridPage', () => {
             },
           ],
         },
-        invalidated: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 0,
-              key_as_string: 'false',
-              doc_count: 0,
-            },
-          ],
-        },
         expired: {
           doc_count: 0,
         },

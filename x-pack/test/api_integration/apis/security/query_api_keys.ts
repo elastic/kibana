@@ -63,14 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
       return await createKey(`Alerting: ${randomString}`, 'rest', false);
     });
 
-    const metdataManagedKeys = Array.from({ length: 5 }, (_, i) => i).map(async (i) => {
+    const metadataManagedKeys = Array.from({ length: 5 }, (_, i) => i).map(async (i) => {
       const randomString = Math.random().toString(36).substring(7); // Generate a random string
       await createKey(`Managed_metadata_${randomString}`, 'rest', true);
     });
 
     const crossClusterKeys = isBasicLicense ? [] : await createCrossClusterKeys();
 
-    await Promise.all([...crossClusterKeys, ...restKeys, ...alertingKeys, ...metdataManagedKeys]);
+    await Promise.all([...crossClusterKeys, ...restKeys, ...alertingKeys, ...metadataManagedKeys]);
   };
 
   const cleanup = async () => {

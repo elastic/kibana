@@ -54,7 +54,6 @@ export function defineQueryApiKeysAndAggregationsRoute({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        // const max
         const esClient = (await context.core).elasticsearch.client;
         const authenticationService = getAuthenticationService();
 
@@ -109,14 +108,9 @@ export function defineQueryApiKeysAndAggregationsRoute({
                 field: 'type',
               },
             },
-            invalidated: {
-              terms: {
-                field: 'invalidated',
-              },
-            },
             expired: {
               filter: {
-                range: { expiration: { lte: 'now/m' } },
+                range: { expiration: { lte: 'now' } },
               },
             },
             managed: {
