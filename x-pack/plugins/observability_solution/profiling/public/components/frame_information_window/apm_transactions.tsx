@@ -239,7 +239,7 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
       },
       {
         field: 'transactionSamples',
-        name: i18n.translate('xpack.profiling.apmTransactions.columns.transactionName', {
+        name: i18n.translate('xpack.profiling.apmTransactions.columns.transactionSamples', {
           defaultMessage: 'Transaction Samples',
         }),
         width: '150px',
