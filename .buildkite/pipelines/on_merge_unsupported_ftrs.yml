@@ -98,21 +98,3 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
-
-  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    label: 'Defend Workflows Cypress Tests on Serverless'
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      provider: gcp
-      enableNestedVirtualization: true
-      localSsdInterface: nvme
-      localSsds: 1
-      machineType: n2-standard-4
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 14
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
