@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,6 +25,13 @@ import {
 } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+import type { SerializableRecord } from '@kbn/utility-types';
+import {
+  ASSET_DETAILS_FLYOUT_LOCATOR_ID,
+  ASSET_DETAILS_LOCATOR_ID,
+} from '@kbn/observability-shared-plugin/public';
+import { useHostsTableUrlState } from '../../../../pages/metrics/hosts/hooks/use_hosts_table_url_state';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { buildAssetIdFilter } from '../../../../utils/filters/build';
 import type {
   InfraSavedCustomDashboard,
@@ -44,13 +51,18 @@ import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state
 
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
+  const {
+    services: { share },
+  } = useKibanaContextForPlugin();
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [customDashboards, setCustomDashboards] = useState<DashboardItemWithTitle[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItemWithTitle>();
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const { metrics } = useDataViewsContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
+  // used for the flyout locator
+  const [tableProperties] = useHostsTableUrlState();
 
   const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: asset.type });
 
@@ -118,6 +130,37 @@ export function Dashboards() {
     currentDashboard,
     asset.type,
   ]);
+
+  const getLocatorParams = useCallback(
+    (params, isFlyoutView) => {
+      const flyoutParams = isFlyoutView ? { tableProperties: { ...tableProperties } } : {};
+      return {
+        assetDetails: { ...urlState, dashboardId: params.dashboardId },
+        assetType: asset.type,
+        assetId: asset.id,
+        ...flyoutParams,
+      };
+    },
+    [asset.id, asset.type, tableProperties, urlState]
+  );
+
+  const locator = useMemo(() => {
+    const isFlyoutView = renderMode.mode === 'flyout';
+
+    const baseLocator = share.url.locators.get(
+      isFlyoutView ? ASSET_DETAILS_FLYOUT_LOCATOR_ID : ASSET_DETAILS_LOCATOR_ID
+    );
+
+    if (!baseLocator) return;
+
+    return {
+      ...baseLocator,
+      getRedirectUrl: (params: SerializableRecord) =>
+        baseLocator.getRedirectUrl(getLocatorParams(params, isFlyoutView)),
+      navigate: (params: SerializableRecord) =>
+        baseLocator.navigate(getLocatorParams(params, isFlyoutView)),
+    };
+  }, [renderMode.mode, share.url.locators, getLocatorParams]);
 
   if (loading || status === FETCH_STATUS.LOADING) {
     return (
@@ -189,6 +232,7 @@ export function Dashboards() {
                 savedObjectId={urlState?.dashboardId}
                 getCreationOptions={getCreationOptions}
                 ref={setDashboard}
+                locator={locator}
               />
             )}
           </EuiFlexItem>
