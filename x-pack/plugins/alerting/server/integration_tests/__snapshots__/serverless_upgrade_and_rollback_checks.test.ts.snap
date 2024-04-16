@@ -1419,7 +1419,9 @@ Object {
   "keys": Object {
     "anomalyDetectorTypes": Object {
       "flags": Object {
+        "default": [Function],
         "error": [Function],
+        "presence": "optional",
       },
       "items": Array [
         Object {
@@ -1466,6 +1468,11 @@ Object {
             },
           ],
           "type": "alternatives",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "rules": Array [
