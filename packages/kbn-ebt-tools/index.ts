@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './src/withPerformanceMetrics';
+export * from './src/performance_metrics';
 export * from './src/performance_metric_events';

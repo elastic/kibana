@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { withPerformanceMetrics } from './withPerformanceMetrics';
+export { withPerformanceMetrics, perfomanceMarks } from './with_performance_metrics';
 export type { WithPerformanceMetricsProps } from './types';
+export { MarkPerformanceNavigation } from './mark_performance_navigation';
