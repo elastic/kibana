@@ -20,6 +20,7 @@ import {
 import React from 'react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -39,6 +40,9 @@ const mockContext = {
   http: {},
   modelEvaluatorEnabled: true,
   selectedSettingsTab: 'CONVERSATIONS_TAB',
+  assistantAvailability: {
+    isAssistantEnabled: true,
+  },
 };
 const onClose = jest.fn();
 const onSave = jest.fn().mockResolvedValue(() => {});
@@ -47,9 +51,10 @@ const onConversationSelected = jest.fn();
 const testProps = {
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
-  selectedConversation: welcomeConvo,
+  selectedConversationId: welcomeConvo.title,
   onClose,
   onSave,
+  isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
@@ -76,6 +81,12 @@ jest.mock('./use_settings_updater/use_settings_updater', () => {
   };
 });
 
+const queryClient = new QueryClient();
+
+const wrapper = (props: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+);
+
 describe('AssistantSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,7 +94,9 @@ describe('AssistantSettings', () => {
   });
 
   it('saves changes', async () => {
-    const { getByTestId } = render(<AssistantSettings {...testProps} />);
+    const { getByTestId } = render(<AssistantSettings {...testProps} />, {
+      wrapper,
+    });
 
     await act(async () => {
       fireEvent.click(getByTestId('save-button'));
@@ -94,7 +107,10 @@ describe('AssistantSettings', () => {
 
   it('saves changes and updates selected conversation when selected conversation has been deleted', async () => {
     const { getByTestId } = render(
-      <AssistantSettings {...testProps} selectedConversation={customConvo} />
+      <AssistantSettings {...testProps} selectedConversationId={customConvo.title} />,
+      {
+        wrapper,
+      }
     );
     await act(async () => {
       fireEvent.click(getByTestId('save-button'));
@@ -105,7 +121,9 @@ describe('AssistantSettings', () => {
   });
 
   it('on close is called when settings modal closes', () => {
-    const { getByTestId } = render(<AssistantSettings {...testProps} />);
+    const { getByTestId } = render(<AssistantSettings {...testProps} />, {
+      wrapper,
+    });
     fireEvent.click(getByTestId('cancel-button'));
     expect(onClose).toHaveBeenCalled();
   });
@@ -123,7 +141,9 @@ describe('AssistantSettings', () => {
         ...mockContext,
         selectedSettingsTab: tab === CONVERSATIONS_TAB ? ANONYMIZATION_TAB : CONVERSATIONS_TAB,
       }));
-      const { getByTestId } = render(<AssistantSettings {...testProps} />);
+      const { getByTestId } = render(<AssistantSettings {...testProps} />, {
+        wrapper,
+      });
       fireEvent.click(getByTestId(`${tab}-button`));
       expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
     });
@@ -132,7 +152,9 @@ describe('AssistantSettings', () => {
         ...mockContext,
         selectedSettingsTab: tab,
       }));
-      const { getByTestId } = render(<AssistantSettings {...testProps} />);
+      const { getByTestId } = render(<AssistantSettings {...testProps} />, {
+        wrapper,
+      });
       expect(getByTestId(`${tab}-tab`)).toBeInTheDocument();
     });
   });
