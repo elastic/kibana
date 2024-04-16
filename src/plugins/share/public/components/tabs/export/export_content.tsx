@@ -269,12 +269,6 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     }
   };
 
-  const styling =
-    selectedRadio === 'printablePdfV2' &&
-    (objectType === 'dashboard' || objectType === 'visualizations')
-      ? { justifyContent: 'center', alignItems: 'center' }
-      : {};
-
   return (
     <>
       <EuiForm>
