@@ -395,7 +395,6 @@ export function getLayersByType(state: State, byType?: string) {
 
 export function validateLayersForDimension(
   dimension: string,
-  dataLayers: XYDataLayerConfig[],
   allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
@@ -404,26 +403,44 @@ export function validateLayersForDimension(
       valid: false;
       payload: { shortMessage: string; longMessage: React.ReactNode };
     } {
+  const dataLayers = allLayers
+    .map((layer, i) => ({ layer, originalIndex: i }))
+    .filter(({ layer }) => isDataLayer(layer)) as Array<{
+    layer: XYDataLayerConfig;
+    originalIndex: number;
+  }>;
+
+  // filter out those layers with no accessors at all
+  const filteredLayers = dataLayers.filter(
+    ({ layer: { accessors, xAccessor, splitAccessor } }) =>
+      accessors.length > 0 || xAccessor != null || splitAccessor != null
+  );
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
   // * or should not miss on any
-  if (dataLayers.every(missingCriteria) || !dataLayers.some(missingCriteria)) {
+  if (
+    filteredLayers.every(({ layer }) => missingCriteria(layer)) ||
+    !filteredLayers.some(({ layer }) => missingCriteria(layer))
+  ) {
     return { valid: true };
   }
   // otherwise it's an error and it has to be reported
-  const layerMissingAccessors = allLayers.reduce((missing: number[], layer, i) => {
-    if (isDataLayer(layer) && missingCriteria(layer)) {
-      missing.push(i);
-    }
-    return missing;
-  }, []);
+  const layerMissingAccessors = filteredLayers.reduce(
+    (missing: number[], { layer, originalIndex }) => {
+      if (missingCriteria(layer)) {
+        missing.push(originalIndex);
+      }
+      return missing;
+    },
+    []
+  );
 
   return {
     valid: false,
     payload: getMessageIdsForDimension(
       dimension,
       layerMissingAccessors,
-      isHorizontalChart(dataLayers)
+      isHorizontalChart(dataLayers.map(({ layer }) => layer))
     ),
   };
 }
