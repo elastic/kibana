@@ -780,7 +780,7 @@
             "label": "user",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; name: string; }"
+              "{ id?: string | undefined; name: string; } | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -3323,6 +3323,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantSimulatedFunctionCalling",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSimulatedFunctionCalling",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.APIReturnType",
         "type": "Type",
         "tags": [],
@@ -5206,6 +5221,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.aiAssistantSimulatedFunctionCalling",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSimulatedFunctionCalling",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-server.ObservabilityAIAssistantServerRouteRepository",
         "type": "Type",
         "tags": [],
@@ -5973,6 +6003,55 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.createFunctionNotFoundError",
+        "type": "Function",
+        "tags": [],
+        "label": "createFunctionNotFoundError",
+        "description": [],
+        "signature": [
+          "(name: string) => ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionError",
+            "text": "ChatCompletionError"
+          },
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionErrorCode",
+            "text": "ChatCompletionErrorCode"
+          },
+          ".FunctionNotFoundError>"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.createFunctionNotFoundError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.createInternalServerError",
         "type": "Function",
         "tags": [],
@@ -6215,7 +6294,7 @@
             "label": "user",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; name: string; }"
+              "{ id?: string | undefined; name: string; } | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -6727,6 +6806,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.aiAssistantSimulatedFunctionCalling",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSimulatedFunctionCalling",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.BufferFlushEvent",
         "type": "Type",
         "tags": [],
@@ -6845,7 +6939,7 @@
           },
           ", \"namespace\" | \"user\" | \"conversation\"> & { conversation: { title: string; token_count?: ",
           "TokenCount",
-          " | undefined; }; }"
+          " | undefined; id?: string | undefined; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
         "deprecated": false,

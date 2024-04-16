@@ -29,6 +29,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
+import { getObsAIAssistantConnectorType } from './rule_connector';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -86,6 +87,10 @@ export class ObservabilityAIAssistantPlugin
     };
 
     const isEnabled = service.isEnabled();
+
+    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+      getObsAIAssistantConnectorType(service)
+    );
 
     return {
       service,

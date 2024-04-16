@@ -8,14 +8,14 @@
 import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
 
 export async function getApmAlertsClient({
   plugins,
   request,
-}: APMRouteHandlerResources) {
+}: MinimalAPMRouteHandlerResources) {
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
     request
