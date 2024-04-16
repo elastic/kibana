@@ -23,7 +23,6 @@ import { colorTransformer } from '@kbn/observability-shared-plugin/common';
 import { KQLCustomIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { LOW_PRIORITY_ACTION_ID } from '../../../../../../../../common/constants';
 import type { WindowSchema } from '../../../../../../../typings';
 import { TimeRange } from '../../../../../error_rate_chart/use_lens_definition';
 import { BurnRateAlert, BurnRateRule } from '../../../alert_details_app_section';
@@ -104,12 +103,10 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
   // If an alert is just starting, the visible time range to look back might not cover the
   // long window yet, only then we'll take the short window to look back,
   // otherwise it will be the long window.
-  const alertActionGroup =
-    alert.fields['kibana.alert.action_group'] !== 'recovered'
-      ? alert.fields['kibana.alert.action_group']
-      : LOW_PRIORITY_ACTION_ID;
-  const sloWindows = alert.fields['kibana.alert.rule.parameters']!.windows as WindowSchema[];
-  const relatedWindow = sloWindows.find((window) => window.actionGroup === alertActionGroup);
+  const alertActionGroup = getActionGroupFromReason(alert.reason);
+  const relatedWindow = (
+    (alert.fields[ALERT_RULE_PARAMETERS]?.windows ?? []) as WindowSchema[]
+  ).find((window: WindowSchema) => window.actionGroup === alertActionGroup);
 
   const longWindowValue = relatedWindow?.longWindow.value;
   const longWindowUnit = relatedWindow?.longWindow.unit;
@@ -127,13 +124,8 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
       : moment.duration(1, 'm');
   const shortWindowLookbackDurationAsSeconds = shortWindowLookbackDuration.asSeconds();
 
-  const actionGroup = getActionGroupFromReason(alert.reason);
-  const actionGroupWindow = (
-    (alert.fields[ALERT_RULE_PARAMETERS]?.windows ?? []) as WindowSchema[]
-  ).find((window: WindowSchema) => window.actionGroup === actionGroup);
-
   // @ts-ignore
-  const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], actionGroupWindow);
+  const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], relatedWindow);
   const timeRange = { min: moment(dataTimeRange.from), max: moment(dataTimeRange.to) };
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
