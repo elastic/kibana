@@ -17,11 +17,11 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../common/constants';
-import { KQLCustomIndicator, SLO } from '../../domain/models';
+import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
@@ -41,12 +41,12 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
   private async buildSource(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: KQLCustomIndicator,
     dataViewService: DataViewsService
   ) {
@@ -81,7 +81,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: KQLCustomIndicator) {
     const numerator = getElasticsearchQueryOrThrow(indicator.params.good);
     const denominator = getElasticsearchQueryOrThrow(indicator.params.total);
 

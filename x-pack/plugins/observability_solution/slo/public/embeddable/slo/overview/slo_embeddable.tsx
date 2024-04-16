@@ -92,8 +92,14 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     this.node = node;
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
-    const { sloId, sloInstanceId, showAllGroupByInstances, overviewMode, groupFilters } =
-      this.getInput();
+    const {
+      sloId,
+      sloInstanceId,
+      showAllGroupByInstances,
+      overviewMode,
+      groupFilters,
+      remoteName,
+    } = this.getInput();
     const queryClient = new QueryClient();
     const { observabilityRuleTypeRegistry } = this.deps.observability;
     const I18nContext = this.deps.i18n.Context;
@@ -149,6 +155,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
             sloInstanceId={sloInstanceId}
             reloadSubject={this.reloadSubject}
             showAllGroupByInstances={showAllGroupByInstances}
+            remoteName={remoteName}
           />
         );
       }

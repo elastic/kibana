@@ -8,6 +8,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
+import type { QueryDslQueryContainer } from '../common/types';
 
 /**
  * @deprecated Use data views api instead
@@ -39,4 +40,41 @@ export const findIndexPatternById = async (
   if (savedObjectsResponse.total > 0) {
     return savedObjectsResponse.saved_objects[0];
   }
+};
+
+const excludeTiersDsl = (excludedTiers: string) => {
+  const _tier = excludedTiers.split(',').map((tier) => tier.trim());
+  return {
+    bool: {
+      must_not: [
+        {
+          terms: {
+            _tier,
+          },
+        },
+      ],
+    },
+  };
+};
+
+interface GetIndexFilterDslOptions {
+  indexFilter?: QueryDslQueryContainer;
+  excludedTiers?: string;
+}
+
+export const getIndexFilterDsl = ({
+  indexFilter,
+  excludedTiers,
+}: GetIndexFilterDslOptions): QueryDslQueryContainer | undefined => {
+  if (!indexFilter) {
+    return excludedTiers ? excludeTiersDsl(excludedTiers) : undefined;
+  }
+
+  return !excludedTiers
+    ? indexFilter
+    : {
+        bool: {
+          must: [indexFilter, excludeTiersDsl(excludedTiers)],
+        },
+      };
 };

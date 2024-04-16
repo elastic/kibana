@@ -24,10 +24,10 @@ import {
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { InvalidTransformError } from '../../errors';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public async getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
@@ -47,11 +47,11 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildGroupBy(slo: SLO, indicator: SyntheticsAvailabilityIndicator) {
+  private buildGroupBy(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
     // These are the group by fields that will be used in `groupings` key
     // in the summary and rollup documents. For Synthetics, we want to use the
     // user-readible `monitor.name` and `observer.geo.name` fields by default,
@@ -106,7 +106,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   }
 
   private async buildSource(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: SyntheticsAvailabilityIndicator,
     spaceId: string,
     dataViewService: DataViewsService
@@ -179,7 +179,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(slo: SLO) {
+  private buildAggregations(slo: SLODefinition) {
     if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       throw new Error(
         "The sli.synthetics.availability indicator MUST have an 'Occurrences' budgeting method."

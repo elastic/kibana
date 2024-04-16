@@ -21,14 +21,14 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../common/constants';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
 
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
   public async getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
@@ -48,12 +48,12 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
   private async buildSource(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: TimesliceMetricIndicator,
     dataViewService: DataViewsService
   ) {
@@ -88,7 +88,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: TimesliceMetricIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
     if (indicator.params.metric.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.metric.equation}`);
     }

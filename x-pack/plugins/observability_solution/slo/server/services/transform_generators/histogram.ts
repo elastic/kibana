@@ -17,16 +17,16 @@ import { InvalidTransformError } from '../../errors';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../common/constants';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 import { GetHistogramIndicatorAggregation } from '../aggregations';
 
 export class HistogramTransformGenerator extends TransformGenerator {
   public async getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
@@ -46,12 +46,12 @@ export class HistogramTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
   private async buildSource(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: HistogramIndicator,
     dataViewService: DataViewsService
   ) {
@@ -87,7 +87,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: HistogramIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: HistogramIndicator) {
     const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator);
 
     return {

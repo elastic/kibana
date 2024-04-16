@@ -20,7 +20,7 @@ import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
-import { SLO, IndicatorTypes } from '../domain/models';
+import { SLODefinition, IndicatorTypes } from '../domain/models';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,
@@ -205,7 +205,7 @@ describe('TransformManager', () => {
 
 class DummyTransformGenerator extends TransformGenerator {
   async getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
@@ -215,7 +215,7 @@ class DummyTransformGenerator extends TransformGenerator {
 
 class FailTransformGenerator extends TransformGenerator {
   getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {

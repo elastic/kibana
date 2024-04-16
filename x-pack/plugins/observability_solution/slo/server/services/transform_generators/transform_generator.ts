@@ -12,16 +12,16 @@ import {
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
   public abstract getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest>;
 
-  public buildCommonRuntimeMappings(slo: SLO, dataView?: DataView): MappingRuntimeFields {
+  public buildCommonRuntimeMappings(slo: SLODefinition, dataView?: DataView): MappingRuntimeFields {
     return {
       'slo.id': {
         type: 'keyword',
@@ -39,12 +39,12 @@ export abstract class TransformGenerator {
     };
   }
 
-  public buildDescription(slo: SLO): string {
+  public buildDescription(slo: SLODefinition): string {
     return `Rolled-up SLI data for SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}]`;
   }
 
   public buildCommonGroupBy(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp',
     extraGroupByFields = {}
   ) {
@@ -103,7 +103,7 @@ export abstract class TransformGenerator {
   }
 
   public buildSettings(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp'
   ): TransformSettings {
     return {

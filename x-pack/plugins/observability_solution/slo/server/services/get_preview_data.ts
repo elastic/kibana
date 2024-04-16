@@ -42,6 +42,7 @@ interface Options {
   };
   interval: string;
   instanceId?: string;
+  remoteName?: string;
   groupBy?: string;
   groupings?: Record<string, unknown>;
 }
@@ -91,8 +92,12 @@ export class GetPreviewData {
 
     const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await typedSearch(this.esClient, {
-      index: indicator.params.index,
+      index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -186,8 +191,12 @@ export class GetPreviewData {
     if (!!indicator.params.filter)
       filter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -264,8 +273,12 @@ export class GetPreviewData {
 
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -326,8 +339,12 @@ export class GetPreviewData {
     ];
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -391,8 +408,12 @@ export class GetPreviewData {
 
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -441,8 +462,12 @@ export class GetPreviewData {
 
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -523,8 +548,12 @@ export class GetPreviewData {
         terms: { 'monitor.project.id': projects },
       });
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${SYNTHETICS_INDEX_PATTERN}`
+      : SYNTHETICS_INDEX_PATTERN;
+
     const result = await this.esClient.search({
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
       }),
@@ -612,6 +641,7 @@ export class GetPreviewData {
         instanceId: params.instanceId,
         range: params.range,
         groupBy: params.groupBy,
+        remoteName: params.remoteName,
         groupings: params.groupings,
         interval: `${bucketSize}m`,
       };

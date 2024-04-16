@@ -20,13 +20,13 @@ import {
   SLO_INGEST_PIPELINE_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { APMTransactionErrorRateIndicator, SLO } from '../../domain/models';
+import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { parseIndex } from './common';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public async getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
@@ -46,11 +46,11 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildGroupBy(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
+  private buildGroupBy(slo: SLODefinition, indicator: APMTransactionErrorRateIndicator) {
     // These groupBy fields must match the fields from the source query, otherwise
     // the transform will create permutations for each value present in the source.
     // E.g. if environment is not specified in the source query, but we include it in the groupBy,
@@ -74,7 +74,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   }
 
   private async buildSource(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: APMTransactionErrorRateIndicator,
     dataViewService: DataViewsService
   ) {
@@ -151,7 +151,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     };
   }
 
-  private buildAggregations(slo: SLO) {
+  private buildAggregations(slo: SLODefinition) {
     return {
       'slo.numerator': {
         filter: {

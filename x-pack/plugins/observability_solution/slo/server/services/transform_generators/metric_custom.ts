@@ -13,18 +13,18 @@ import { InvalidTransformError } from '../../errors';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  getSLOTransformId,
 } from '../../../common/constants';
-import { MetricCustomIndicator, SLO } from '../../domain/models';
+import { MetricCustomIndicator, SLODefinition } from '../../domain/models';
 import { GetCustomMetricIndicatorAggregation } from '../aggregations';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class MetricCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(
-    slo: SLO,
+    slo: SLODefinition,
     spaceId: string,
     dataViewService: DataViewsService
   ): Promise<TransformPutTransformRequest> {
@@ -44,12 +44,12 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
   private async buildSource(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: MetricCustomIndicator,
     dataViewService: DataViewsService
   ) {
@@ -84,7 +84,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: MetricCustomIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: MetricCustomIndicator) {
     if (indicator.params.good.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.good.equation}`);
     }
