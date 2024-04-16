@@ -56,7 +56,9 @@ export const removeEndpointFromUrl = (url: string): string => {
   const endpointToRemove = '/chat/completions';
   if (url.endsWith(endpointToRemove)) {
     return url.slice(0, -endpointToRemove.length);
-  } else {
-    return url;
+  } else if (url.endsWith(endpointToRemove + '/')) {
+    return url.slice(0, -(endpointToRemove + '/').length);
   }
+
+  return url;
 };
