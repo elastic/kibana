@@ -15,6 +15,7 @@ import { getFunctionDescription, isMetricDetector } from '../../get_function_des
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { useMlResultsService } from '../../../services/results_service';
 import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { MlEntity } from '../../../../embeddables';
 
 const plotByFunctionOptions = [
   {
@@ -50,7 +51,7 @@ export const PlotByFunctionControls = ({
   setFunctionDescription: (func: string) => void;
   selectedDetectorIndex: number;
   selectedJobId: string;
-  selectedEntities: Record<string, any>;
+  selectedEntities?: MlEntity;
   entityControlsCount: number;
 }) => {
   const toastNotificationService = useToastNotificationService();
@@ -59,7 +60,7 @@ export const PlotByFunctionControls = ({
   const getFunctionDescriptionToPlot = useCallback(
     async (
       _selectedDetectorIndex: number,
-      _selectedEntities: Record<string, any>,
+      _selectedEntities: MlEntity | undefined,
       _selectedJobId: string,
       _selectedJob: CombinedJob
     ) => {

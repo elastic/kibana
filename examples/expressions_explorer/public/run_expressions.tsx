@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import {
   EuiCodeBlock,
   EuiFlexItem,

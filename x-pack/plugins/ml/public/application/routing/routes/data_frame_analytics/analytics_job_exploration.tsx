@@ -10,14 +10,18 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { basicResolvers } from '../../resolvers';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../data_frame_analytics/pages/analytics_exploration')).Page,
+}));
 
 export const analyticsJobExplorationRouteFactory = (
   navigateToPath: NavigateToPath,

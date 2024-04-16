@@ -5,41 +5,38 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import moment from 'moment';
 
 import { EuiComment, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UserAvatar, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 
+import { useUserProfile } from '../../hooks/use_user_profile';
 import type { Message as MessageType } from '../../types';
 
 import { CopyActionButton } from './copy_action_button';
-import { useKibana } from '../../hooks/use_kibana';
 
 type UserMessageProps = Pick<MessageType, 'content' | 'createdAt'>;
 
 export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) => {
-  const { services } = useKibana();
-  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfileWithAvatar>();
-
-  useEffect(() => {
-    services.security?.userProfiles.getCurrent({ dataPath: 'avatar' }).then(setCurrentUserProfile);
-  }, [services]);
+  const currentUserProfile = useUserProfile();
 
   return (
     <EuiComment
-      username={currentUserProfile?.user.username}
+      username={i18n.translate('xpack.searchPlayground.chat.message.user.name', {
+        defaultMessage: 'You',
+      })}
       event={i18n.translate('xpack.searchPlayground.chat.message.user.event', {
         defaultMessage: 'asked',
       })}
       timestamp={
         createdAt &&
         i18n.translate('xpack.searchPlayground.chat.message.user.createdAt', {
-          defaultMessage: 'on {date}',
+          defaultMessage: 'at {time}',
           values: {
-            date: moment(createdAt).format('MMM DD, YYYY'),
+            time: moment(createdAt).format('HH:mm'),
           },
         })
       }

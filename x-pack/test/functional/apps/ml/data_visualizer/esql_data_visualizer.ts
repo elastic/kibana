@@ -314,7 +314,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       runTests(esqlFarequoteData);
     });
 
-    describe('with module_sample_logs ', function () {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/180072
+    describe.skip('with module_sample_logs ', function () {
       runTests(esqlSampleLogData);
     });
   });

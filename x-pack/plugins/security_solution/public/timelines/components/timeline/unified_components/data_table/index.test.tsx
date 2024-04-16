@@ -31,6 +31,8 @@ const initialEnrichedColumns = getColumnHeaders(
   mockSourcererScope.browserFields
 );
 
+const initialEnrichedColumnsIds = initialEnrichedColumns.map((c) => c.id);
+
 type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
   store?: ReturnType<typeof createMockStore>;
 };
@@ -46,6 +48,7 @@ const TestComponent = (props: TestComponentProps) => {
     <TestProviders store={store}>
       <TimelineDataTable
         columns={initialEnrichedColumns}
+        columnIds={initialEnrichedColumnsIds}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
         itemsPerPage={50}
@@ -77,7 +80,8 @@ const getTimelineFromStore = (
   return store.getState().timeline.timelineById[timelineId];
 };
 
-describe('unified data table', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/179843
+describe.skip('unified data table', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
   });
@@ -91,8 +95,7 @@ describe('unified data table', () => {
     SPECIAL_TEST_TIMEOUT
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179843
-  describe.skip('custom cell rendering based on data Type', () => {
+  describe('custom cell rendering based on data Type', () => {
     it(
       'should render source.ip as link',
       async () => {

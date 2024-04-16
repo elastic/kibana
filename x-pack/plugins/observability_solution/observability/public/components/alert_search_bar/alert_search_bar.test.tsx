@@ -135,7 +135,7 @@ describe('ObservabilityAlertSearchBar', () => {
       status: 'all',
     });
 
-    expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
+    const esQueryChangeParams = {
       bool: {
         filter: [
           {
@@ -160,7 +160,10 @@ describe('ObservabilityAlertSearchBar', () => {
         must_not: [],
         should: [],
       },
-    });
+    };
+    expect(mockedOnEsQueryChange).toHaveBeenCalledTimes(2);
+    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(1, esQueryChangeParams);
+    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(2, esQueryChangeParams);
   });
 
   it('should include filters in es query', async () => {

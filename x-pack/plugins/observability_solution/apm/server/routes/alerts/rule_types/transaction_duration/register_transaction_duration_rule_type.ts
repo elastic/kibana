@@ -72,9 +72,9 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFields,
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 import {
   averageOrPercentileAgg,
   getMultiTermsSortOrder,
@@ -233,7 +233,7 @@ export function registerTransactionDurationRuleType({
                   aggregationType: ruleParams.aggregationType,
                   transactionDurationField: field,
                 }),
-                ...getServiceGroupFieldsAgg(),
+                ...getApmAlertSourceFieldsAgg(),
               },
             },
           },
@@ -275,7 +275,7 @@ export function registerTransactionDurationRuleType({
           transactionDuration > thresholdMicroseconds
         ) {
           triggeredBuckets.push({
-            sourceFields: getServiceGroupFields(bucket),
+            sourceFields: getApmAlertSourceFields(bucket),
             transactionDuration,
             groupByFields,
             bucketKey,

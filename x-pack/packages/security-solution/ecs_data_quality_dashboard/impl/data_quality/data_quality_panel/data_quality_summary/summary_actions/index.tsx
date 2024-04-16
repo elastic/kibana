@@ -74,6 +74,7 @@ export const getAllMarkdownCommentsFromResults = ({
   const summaryTableMarkdownRows: string[] = summaryTableItems.map((item) => {
     const result: DataQualityCheckResult | undefined =
       patternRollup.results != null ? patternRollup.results[item.indexName] : undefined;
+    const sizeInBytes = getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats });
 
     return getSummaryTableMarkdownRow({
       docsCount: item.docsCount,
@@ -84,7 +85,7 @@ export const getAllMarkdownCommentsFromResults = ({
       incompatible: result?.incompatible,
       isILMAvailable,
       patternDocsCount: patternRollup.docsCount ?? 0,
-      sizeInBytes: getSizeInBytes({ indexName: item.indexName, stats: patternRollup.stats }),
+      sizeInBytes,
     }).trim();
   });
 

@@ -24,6 +24,21 @@ describe('`NormalizedExternalConnectorClient` class', () => {
     executeInputOptions = { params: { subAction: 'sub-action-1', subActionParams: {} } };
   });
 
+  it.each([
+    ['getAll', ['space-1']],
+    ['execute', [{ spaceId: 'space-1', params: {} }]],
+  ])('should error if %s() is called prior calling .setup()', async (methodName, methodArgs) => {
+    const testInstance = new NormalizedExternalConnectorClient(
+      unsecuredActionsClientMock.create(),
+      logger
+    );
+
+    await expect(
+      // @ts-ignore ignoring args and method name since we are only trying to validate that it errors out
+      testInstance[methodName](...methodArgs)
+    ).rejects.toHaveProperty('message', 'Instance has not been .setup()!');
+  });
+
   describe('#getConnectorInstance()', () => {
     let actionPluginConnectorClient: ActionsClientMock;
 
@@ -35,10 +50,10 @@ describe('`NormalizedExternalConnectorClient` class', () => {
 
     it('should search for the connector when first API call is done', async () => {
       const testInstance = new NormalizedExternalConnectorClient(
-        'foo',
         actionPluginConnectorClient,
         logger
       );
+      testInstance.setup('foo');
 
       expect(actionPluginConnectorClient.getAll).not.toHaveBeenCalled();
 
@@ -57,10 +72,10 @@ describe('`NormalizedExternalConnectorClient` class', () => {
         throw new Error('oh oh');
       });
       const testInstance = new NormalizedExternalConnectorClient(
-        'foo',
         actionPluginConnectorClient,
         logger
       );
+      testInstance.setup('foo');
       const executePromise = testInstance.execute(executeInputOptions);
 
       await expect(executePromise).rejects.toHaveProperty(
@@ -90,10 +105,10 @@ describe('`NormalizedExternalConnectorClient` class', () => {
     ])('should error if a connector instance %s', async (_, getResponse) => {
       (actionPluginConnectorClient.getAll as jest.Mock).mockResolvedValue(getResponse());
       const testInstance = new NormalizedExternalConnectorClient(
-        'foo',
         actionPluginConnectorClient,
         logger
       );
+      testInstance.setup('foo');
       const executePromise = testInstance.execute(executeInputOptions);
 
       await expect(executePromise).rejects.toEqual(
@@ -113,10 +128,10 @@ describe('`NormalizedExternalConnectorClient` class', () => {
 
     it('should call Action Plugin client `.execute()` with expected arguments', async () => {
       const testInstance = new NormalizedExternalConnectorClient(
-        'foo',
         actionPluginConnectorClient,
         logger
       );
+      testInstance.setup('foo');
       await testInstance.execute(executeInputOptions);
 
       expect(actionPluginConnectorClient.execute).toHaveBeenCalledWith({
@@ -139,10 +154,18 @@ describe('`NormalizedExternalConnectorClient` class', () => {
 
     it('should call Action Plugin client `.execute()` with expected arguments', async () => {
       const testInstance = new NormalizedExternalConnectorClient(
-        'foo',
         actionPluginConnectorClient,
-        logger
+        logger,
+        {
+          relatedSavedObjects: [
+            {
+              id: 'so-id-1',
+              type: 'so-type-1',
+            },
+          ],
+        }
       );
+      testInstance.setup('foo');
       await testInstance.execute(executeInputOptions);
 
       expect(actionPluginConnectorClient.execute).toHaveBeenCalledWith({
@@ -150,6 +173,12 @@ describe('`NormalizedExternalConnectorClient` class', () => {
         requesterId: 'background_task',
         spaceId: 'default',
         params: executeInputOptions.params,
+        relatedSavedObjects: [
+          {
+            id: 'so-id-1',
+            type: 'so-type-1',
+          },
+        ],
       });
     });
   });

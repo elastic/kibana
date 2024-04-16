@@ -39,7 +39,8 @@
     "@kbn/es-query",
     "@kbn/core-saved-objects-api-server",
     "@kbn/deeplinks-management",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

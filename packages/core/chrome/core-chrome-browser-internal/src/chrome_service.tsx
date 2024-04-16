@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { mergeMap, map, takeUntil, filter } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -245,7 +245,6 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
-      setChromeStyle,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();

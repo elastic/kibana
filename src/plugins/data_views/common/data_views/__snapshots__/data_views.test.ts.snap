@@ -26,6 +26,8 @@ FldList [
 
 exports[`IndexPatterns createAndSave will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
 
+exports[`IndexPatterns createAndSaveDataViewLazy will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: undefined]`;
+
 exports[`IndexPatterns delete will throw if insufficient access 1`] = `[DataViewInsufficientAccessError: Operation failed due to insufficient access, id: 1]`;
 
 exports[`IndexPatterns savedObjectToSpec 1`] = `

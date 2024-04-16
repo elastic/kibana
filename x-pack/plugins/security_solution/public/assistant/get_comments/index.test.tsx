@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { getComments } from '.';
-import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
-const user: ConversationRole = 'user';
+const user: MessageRole = 'user';
 const currentConversation = {
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
     provider: OpenAiProviderType.OpenAi,
   },
@@ -30,11 +31,15 @@ const currentConversation = {
 };
 const showAnonymizedValues = false;
 const testProps = {
+  abortStream: jest.fn(),
+  setIsStreaming: jest.fn(),
   refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
+  isEnabledLangChain: false,
   isFetchingResponse: false,
   currentConversation,
   showAnonymizedValues,
+  isFlyoutMode: false,
 };
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {
@@ -47,6 +52,7 @@ describe('getComments', () => {
       currentConversation: {
         category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
           provider: OpenAiProviderType.OpenAi,
         },

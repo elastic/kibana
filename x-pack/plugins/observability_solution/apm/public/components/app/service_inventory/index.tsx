@@ -268,10 +268,14 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext =
+    useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
+    if (!setScreenContext) {
+      return;
+    }
+
     if (isFailure(mainStatisticsStatus)) {
       return setScreenContext({
         screenDescription: 'The services have failed to load',

@@ -38,6 +38,7 @@ import type {
   NewPackagePolicy,
   PackageInfo,
   PackageVerificationResult,
+  InstallResultStatus,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
@@ -69,6 +70,8 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
+
+import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
@@ -458,24 +461,44 @@ async function installPackageFromRegistry({
         }`
       );
     }
-
-    return await installPackageCommon({
-      pkgName,
-      pkgVersion,
-      installSource,
-      installedPkg,
-      installType,
-      savedObjectsClient,
-      esClient,
-      spaceId,
-      force,
-      packageInstallContext,
-      paths,
-      verificationResult,
-      authorizationHeader,
-      ignoreMappingUpdateErrors,
-      skipDataStreamRollover,
-    });
+    const { enablePackagesStateMachine } = appContextService.getExperimentalFeatures();
+    if (enablePackagesStateMachine) {
+      return await installPackageWitStateMachine({
+        pkgName,
+        pkgVersion,
+        installSource,
+        installedPkg,
+        installType,
+        savedObjectsClient,
+        esClient,
+        spaceId,
+        force,
+        packageInstallContext,
+        paths,
+        verificationResult,
+        authorizationHeader,
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
+      });
+    } else {
+      return await installPackageCommon({
+        pkgName,
+        pkgVersion,
+        installSource,
+        installedPkg,
+        installType,
+        savedObjectsClient,
+        esClient,
+        spaceId,
+        force,
+        packageInstallContext,
+        paths,
+        verificationResult,
+        authorizationHeader,
+        ignoreMappingUpdateErrors,
+        skipDataStreamRollover,
+      });
+    }
   } catch (e) {
     sendEvent({
       ...telemetryEvent,
@@ -607,7 +630,6 @@ async function installPackageCommon(options: {
       .createTagClient({ client: savedObjectClientWithSpace });
 
     // try installing the package, if there was an error, call error handler and rethrow
-    // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
@@ -637,7 +659,187 @@ async function installPackageCommon(options: {
           ...telemetryEvent!,
           status: 'success',
         });
-        return { assets, status: 'installed', installType, installSource };
+        return { assets, status: 'installed' as InstallResultStatus, installType, installSource };
+      })
+      .catch(async (err: Error) => {
+        logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
+          error: { stack_trace: err.stack },
+        });
+        await handleInstallPackageFailure({
+          savedObjectsClient,
+          error: err,
+          pkgName,
+          pkgVersion,
+          installedPkg,
+          spaceId,
+          esClient,
+          authorizationHeader,
+        });
+        sendEvent({
+          ...telemetryEvent!,
+          errorMessage: err.message,
+        });
+        return { error: err, installType, installSource };
+      });
+  } catch (e) {
+    sendEvent({
+      ...telemetryEvent,
+      errorMessage: e.message,
+    });
+    return {
+      error: e,
+      installType,
+      installSource,
+    };
+  } finally {
+    span?.end();
+  }
+}
+
+async function installPackageWitStateMachine(options: {
+  pkgName: string;
+  pkgVersion: string;
+  installSource: InstallSource;
+  installedPkg?: SavedObject<Installation>;
+  installType: InstallType;
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+  force?: boolean;
+  packageInstallContext: PackageInstallContext;
+  paths: string[];
+  verificationResult?: PackageVerificationResult;
+  telemetryEvent?: PackageUpdateEvent;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
+  ignoreMappingUpdateErrors?: boolean;
+  skipDataStreamRollover?: boolean;
+}): Promise<InstallResult> {
+  const packageInfo = options.packageInstallContext.packageInfo;
+
+  const {
+    pkgName,
+    pkgVersion,
+    installSource,
+    installedPkg,
+    installType,
+    savedObjectsClient,
+    force,
+    esClient,
+    spaceId,
+    verificationResult,
+    authorizationHeader,
+    ignoreMappingUpdateErrors,
+    skipDataStreamRollover,
+    packageInstallContext,
+  } = options;
+  let { telemetryEvent } = options;
+  const logger = appContextService.getLogger();
+  logger.info(
+    `Install with enablePackagesStateMachine - Starting installation of ${pkgName}@${pkgVersion} from ${installSource} `
+  );
+
+  // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
+  await Promise.resolve();
+  const span = apm.startSpan(
+    `Install package from ${installSource} ${pkgName}@${pkgVersion}`,
+    'package'
+  );
+
+  if (!telemetryEvent) {
+    telemetryEvent = getTelemetryEvent(pkgName, pkgVersion);
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
+  }
+
+  try {
+    span?.addLabels({
+      packageName: pkgName,
+      packageVersion: pkgVersion,
+      installType,
+    });
+
+    const filteredPackages = getFilteredInstallPackages();
+    if (filteredPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
+
+    // if the requested version is the same as installed version, check if we allow it based on
+    // current installed package status and force flag, if we don't allow it,
+    // just return the asset references from the existing installation
+    if (
+      installedPkg?.attributes.version === pkgVersion &&
+      installedPkg?.attributes.install_status === 'installed'
+    ) {
+      if (!force) {
+        logger.debug(`${pkgName}-${pkgVersion} is already installed, skipping installation`);
+        return {
+          assets: [
+            ...installedPkg.attributes.installed_es,
+            ...installedPkg.attributes.installed_kibana,
+          ],
+          status: 'already_installed',
+          installType,
+          installSource,
+        };
+      }
+    }
+    const elasticSubscription = getElasticSubscription(packageInfo);
+    if (!licenseService.hasAtLeast(elasticSubscription)) {
+      logger.error(`Installation requires ${elasticSubscription} license`);
+      const err = new FleetError(`Installation requires ${elasticSubscription} license`);
+      sendEvent({
+        ...telemetryEvent,
+        errorMessage: err.message,
+      });
+      return { error: err, installType, installSource };
+    }
+
+    // Saved object client need to be scopped with the package space for saved object tagging
+    const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectClientWithSpace, { importSizeLimit: 15_000 });
+
+    const savedObjectTagAssignmentService = appContextService
+      .getSavedObjectsTagging()
+      .createInternalAssignmentService({ client: savedObjectClientWithSpace });
+
+    const savedObjectTagClient = appContextService
+      .getSavedObjectsTagging()
+      .createTagClient({ client: savedObjectClientWithSpace });
+
+    // try installing the package, if there was an error, call error handler and rethrow
+    return await _stateMachineInstallPackage({
+      savedObjectsClient,
+      savedObjectsImporter,
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      esClient,
+      logger,
+      installedPkg,
+      packageInstallContext,
+      installType,
+      spaceId,
+      verificationResult,
+      installSource,
+      authorizationHeader,
+      force,
+      ignoreMappingUpdateErrors,
+      skipDataStreamRollover,
+    })
+      .then(async (assets) => {
+        logger.debug(`Removing old assets from previous versions of ${pkgName}`);
+        await removeOldAssets({
+          soClient: savedObjectsClient,
+          pkgName: packageInfo.name,
+          currentVersion: packageInfo.version,
+        });
+        sendEvent({
+          ...telemetryEvent!,
+          status: 'success',
+        });
+        return { assets, status: 'installed' as InstallResultStatus, installType, installSource };
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {

@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -30,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const createRuntimeField = async (fieldName: string) => {
-    await PageObjects.discover.clickIndexPatternActions();
-    await PageObjects.discover.clickAddNewField();
+    await dataViews.clickAddFieldFromSearchBar();
     await fieldEditor.setName(fieldName);
     await fieldEditor.enableValue();
     await fieldEditor.typeScript("emit('abc')");

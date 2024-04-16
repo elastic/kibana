@@ -211,7 +211,7 @@ async function getRoleMappingsDeprecations(
   const roleMappingsWithReportingRole: string[] = Object.entries(roleMappings).reduce(
     (roleSet, current) => {
       const [roleName, role] = current;
-      const foundMapping = role.roles.find((roll) => deprecatedRoles.includes(roll));
+      const foundMapping = role.roles?.find((roll) => deprecatedRoles.includes(roll));
       if (foundMapping) {
         roleSet.push(`${roleName}[${foundMapping}]`);
       }

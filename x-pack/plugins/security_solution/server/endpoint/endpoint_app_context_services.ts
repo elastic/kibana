@@ -25,7 +25,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ResponseActionsClient } from './services';
-import { getResponseActionsClient } from './services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from './services';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -290,43 +290,26 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    let connectorActionsClient =
-      this.startDependencies.connectorActions.getUnsecuredActionsClient();
-
-    // If we have a task id and type, then call is coming from a background task and we need to use those
-    // values with the Action's plugin `UnsecuredActionsClient`'s `.execute()` method. To do so in a
-    // transparent way to the existing response action client, we create a Proxy here and trap the
-    // `GET execute` property and wrap it a function that will automatically inject this data into
-    // `execute()` calls
-    if (taskId && taskType) {
-      connectorActionsClient = new Proxy(connectorActionsClient, {
-        get(target, prop, receiver) {
-          if (prop === 'execute') {
-            return function (execArgs: Parameters<typeof connectorActionsClient['execute']>[0]) {
-              return target.execute({
-                ...execArgs,
-                relatedSavedObjects: [
-                  ...(execArgs.relatedSavedObjects ?? []),
-                  {
-                    id: taskId,
-                    type: taskType,
-                  },
-                ],
-              });
-            };
-          }
-
-          return Reflect.get(target, prop, receiver);
-        },
-      });
-    }
-
     return getResponseActionsClient(agentType, {
       endpointService: this,
       esClient: this.startDependencies.esClient,
       username,
       isAutomated: true,
-      connectorActions: connectorActionsClient,
+      connectorActions: new NormalizedExternalConnectorClient(
+        this.startDependencies.connectorActions.getUnsecuredActionsClient(),
+        this.createLogger('responseActions'),
+        {
+          relatedSavedObjects:
+            taskId && taskType
+              ? [
+                  {
+                    id: taskId,
+                    type: taskType,
+                  },
+                ]
+              : undefined,
+        }
+      ),
     });
   }
 

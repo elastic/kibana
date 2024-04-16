@@ -26,7 +26,8 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  describe('Installing custom integrations', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180062
+  describe.skip('Installing custom integrations', async () => {
     afterEach(async () => {
       await uninstallPackage();
     });

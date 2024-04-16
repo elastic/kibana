@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
-import { distinct, map, switchMap } from 'rxjs/operators';
+import { distinct, map, switchMap } from 'rxjs';
 import {
   AppMountParameters,
   CoreSetup,

@@ -32,6 +32,7 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
+import { RowHeightMode } from '../../../../common/types';
 import type { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId } from '../../../shared_components';
@@ -55,6 +56,7 @@ import {
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
+import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -294,8 +296,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     );
   }, [props.data, isNumericMap, columnConfig]);
 
-  const headerRowHeight = props.args.headerRowHeight ?? 'single';
-  const headerRowLines = props.args.headerRowHeightLines ?? 1;
+  const headerRowHeight = props.args.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT;
+  const headerRowLines = props.args.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES;
 
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -478,7 +480,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           data-test-subj="lnsDataTable"
           rowHeightsOptions={{
             defaultHeight: props.args.fitRowToContent
-              ? 'auto'
+              ? RowHeightMode.auto
               : props.args.rowHeightLines && props.args.rowHeightLines !== 1
               ? {
                   lineCount: props.args.rowHeightLines,

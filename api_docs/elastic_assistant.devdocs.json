@@ -193,27 +193,13 @@
           },
           {
             "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.allow",
+            "id": "def-server.AssistantToolParams.anonymizationFields",
             "type": "Array",
             "tags": [],
-            "label": "allow",
+            "label": "anonymizationFields",
             "description": [],
             "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "elasticAssistant",
-            "id": "def-server.AssistantToolParams.allowReplacement",
-            "type": "Array",
-            "tags": [],
-            "label": "allowReplacement",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
+              "{ id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1552,7 +1538,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1639,7 +1625,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
               "AnomalyDetectionRuleState",
               " | undefined) => Promise<{ payload: ",
               "AnomalyDetectionAlertPayload",

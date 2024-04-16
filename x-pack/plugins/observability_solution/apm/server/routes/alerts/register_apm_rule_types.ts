@@ -26,8 +26,10 @@ import {
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
+  CONTAINER_ID,
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
+  HOST_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
@@ -50,6 +52,14 @@ export const apmRuleTypeAlertFieldMap = {
     required: false,
   },
   [SERVICE_ENVIRONMENT]: {
+    type: 'keyword',
+    required: false,
+  },
+  [HOST_NAME]: {
+    type: 'keyword',
+    required: false,
+  },
+  [CONTAINER_ID]: {
     type: 'keyword',
     required: false,
   },

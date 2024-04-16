@@ -59,6 +59,7 @@ export type MainType =
   | 'shape'
   | 'search_as_you_type'
   | 'sparse_vector'
+  | 'semantic_text'
   | 'date'
   | 'date_nanos'
   | 'geo_point'
@@ -155,6 +156,8 @@ export type ParameterName =
   | 'points_only'
   | 'path'
   | 'dims'
+  | 'inference_id'
+  | 'reference_field'
   | 'depth_limit'
   | 'relations'
   | 'max_shingle_size'
@@ -191,6 +194,11 @@ type FieldParams = {
 };
 
 export type Field = FieldBasic & Partial<FieldParams>;
+
+export interface FieldWithSemanticTextInfo extends Field {
+  referenceField?: string;
+  inferenceId?: string;
+}
 
 export interface FieldMeta {
   childFieldsName: ChildFieldName | undefined;

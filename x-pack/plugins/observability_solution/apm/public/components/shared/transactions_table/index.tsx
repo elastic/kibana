@@ -153,7 +153,7 @@ export function TransactionsTable({
   ]);
 
   const { core, observabilityAIAssistant } = useApmPluginContext();
-  const { setScreenContext } = observabilityAIAssistant.service;
+  const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
     apmEnableTableSearchBar,
@@ -179,7 +179,7 @@ export function TransactionsTable({
     ]);
 
   useEffect(() => {
-    return setScreenContext({
+    return setScreenContext?.({
       data: [
         {
           name: 'top_transactions',

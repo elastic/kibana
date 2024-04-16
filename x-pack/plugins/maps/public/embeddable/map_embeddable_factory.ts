@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON, MAP_EMBEDDABLE_NAME } from '../../common/constants';

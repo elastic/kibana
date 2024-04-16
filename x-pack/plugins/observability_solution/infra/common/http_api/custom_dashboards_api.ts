@@ -12,24 +12,22 @@ const AssetTypeRT = rt.type({
   assetType: ItemTypeRT,
 });
 
-const CustomDashboardRT = rt.intersection([
-  AssetTypeRT,
-  rt.type({
-    dashboardIdList: rt.array(rt.string),
-  }),
-  rt.partial({
-    kuery: rt.string,
-  }),
-]);
+const PayloadRT = rt.type({
+  dashboardSavedObjectId: rt.string,
+  dashboardFilterAssetIdEnabled: rt.boolean,
+});
+
+const SavedObjectIdRT = rt.type({
+  id: rt.string,
+});
+
+export const InfraCustomDashboardRT = rt.intersection([AssetTypeRT, PayloadRT, SavedObjectIdRT]);
 
 /**
  GET endpoint
 */
-export const InfraGetCustomDashboardsRequestParamsRT = AssetTypeRT;
-export const InfraGetCustomDashboardsResponseBodyRT = CustomDashboardRT;
-export type InfraGetCustomDashboardsRequestParams = rt.TypeOf<
-  typeof InfraGetCustomDashboardsRequestParamsRT
->;
+export const InfraGetCustomDashboardsRequestPathParamsRT = AssetTypeRT;
+export const InfraGetCustomDashboardsResponseBodyRT = rt.array(InfraCustomDashboardRT);
 export type InfraGetCustomDashboardsResponseBody = rt.TypeOf<
   typeof InfraGetCustomDashboardsResponseBodyRT
 >;
@@ -37,11 +35,28 @@ export type InfraGetCustomDashboardsResponseBody = rt.TypeOf<
 /**
  * POST endpoint
  */
-export const InfraSaveCustomDashboardsRequestPayloadRT = CustomDashboardRT;
-export const InfraSaveCustomDashboardsResponseBodyRT = CustomDashboardRT;
+export const InfraSaveCustomDashboardsRequestPayloadRT = PayloadRT;
+export const InfraSaveCustomDashboardsResponseBodyRT = InfraCustomDashboardRT;
 export type InfraSaveCustomDashboardsRequestPayload = rt.TypeOf<
   typeof InfraSaveCustomDashboardsRequestPayloadRT
 >;
 export type InfraSaveCustomDashboardsResponseBody = rt.TypeOf<
   typeof InfraSaveCustomDashboardsResponseBodyRT
 >;
+
+/**
+ * PUT endpoint
+ */
+export const InfraUpdateCustomDashboardsRequestPathParamsRT = rt.intersection([
+  AssetTypeRT,
+  SavedObjectIdRT,
+]);
+
+/**
+ * DELETE endpoint
+ */
+export const InfraDeleteCustomDashboardsRequestParamsRT = rt.intersection([
+  AssetTypeRT,
+  SavedObjectIdRT,
+]);
+export const InfraDeleteCustomDashboardsResponseBodyRT = rt.string;
