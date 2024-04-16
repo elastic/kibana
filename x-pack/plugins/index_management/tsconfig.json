@@ -46,7 +46,8 @@
     "@kbn/console-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/index-management",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*"
