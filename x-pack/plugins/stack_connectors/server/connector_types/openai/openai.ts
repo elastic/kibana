@@ -155,7 +155,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-  public async runApi({ body }: RunActionParams): Promise<RunActionResponse> {
+  public async runApi({ body, signal }: RunActionParams): Promise<RunActionResponse> {
     const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
@@ -168,6 +168,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: sanitizedBody,
+      signal,
       // give up to 2 minutes for response
       timeout: 120000,
       ...axiosOptions,
@@ -313,7 +314,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @returns an object with the response string and the usage object
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({ body: JSON.stringify(body) });
+    const { signal, ...rest } = body;
+    const res = await this.runApi({ body: JSON.stringify(rest), signal });
 
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
