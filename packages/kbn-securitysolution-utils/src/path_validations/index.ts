@@ -51,7 +51,7 @@ export enum OperatingSystem {
 
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
-export type EventFiltersTypes = EntryTypes | 'exists' | 'list' | 'nested';
+export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
 
 export const validatePotentialWildcardInput = ({
   field = '',
