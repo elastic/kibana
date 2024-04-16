@@ -41,6 +41,7 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
       manifest = newManifest;
     }
   } catch (err) {
+    manifestManager.clearCachedUnifiedManifestsSO();
     logger.error(err);
   }
 

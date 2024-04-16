@@ -885,7 +885,7 @@ export class ManifestManager {
   }
 
   public async getAllUnifiedManifestsSOFromCache(): Promise<InternalUnifiedManifestSchema[]> {
-    // Fetch Unified Manifests from SO on getLatestManifest, cache them and remove on successful commit.
+    // Fetch Unified Manifests from SO on getLatestManifest, cache them and remove on successful commit / caught errors.
     // This is to avoid fetching Unified Manifests from SO on every getLatestManifest call which is every task run (1 minute).
     if (!this.cachedUnifiedManifestsSO.length) {
       this.cachedUnifiedManifestsSO =
@@ -894,7 +894,7 @@ export class ManifestManager {
     return this.cachedUnifiedManifestsSO;
   }
 
-  protected clearCachedUnifiedManifestsSO(): void {
+  public clearCachedUnifiedManifestsSO(): void {
     // Clear cached Unified Manifests after successful commit.
     this.cachedUnifiedManifestsSO = [];
   }
