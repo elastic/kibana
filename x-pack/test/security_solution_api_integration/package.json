@@ -97,7 +97,7 @@
     "exception_workflows:essentials:server:serverless": "npm run initialize-server:de:basic_essentials exceptions/workflows serverless",
     "exception_workflows:essentials:runner:serverless": "npm run run-tests:de:basic_essentials exceptions/workflows serverless serverlessEnv",
     "exception_workflows:essentials:qa:serverless": "npm run run-tests:de:basic_essentials exceptions/workflows serverless qaEnv",
-    "exception_workflows:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials exceptions/workflows serverless qaEnv",
+    "exception_workflows:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials exceptions/workflows serverlessQA qaPeriodicEnv",
     "exception_workflows:basic:server:ess": "npm run initialize-server:de:basic_essentials exceptions/workflows ess",
     "exception_workflows:basic:runner:ess": "npm run run-tests:de:basic_essentials exceptions/workflows ess essEnv",
 
