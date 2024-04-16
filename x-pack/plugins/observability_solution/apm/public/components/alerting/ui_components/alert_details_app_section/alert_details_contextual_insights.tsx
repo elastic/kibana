@@ -44,21 +44,18 @@ export function AlertDetailContextualInsights({
       serviceChangePoints,
       exitSpanChangePoints,
       anomalies,
-    } = await callApmApi(
-      'GET /internal/apm/assistant/get_apm_alert_details_context',
-      {
-        signal: null,
-        params: {
-          query: {
-            [SERVICE_NAME]: alert.fields[SERVICE_NAME],
-            [SERVICE_ENVIRONMENT]: alert.fields[SERVICE_ENVIRONMENT],
-            [TRANSACTION_TYPE]: alert.fields[TRANSACTION_TYPE],
-            [TRANSACTION_NAME]: alert.fields[TRANSACTION_NAME],
-            alert_started_at: new Date(alert.start).toISOString(),
-          },
+    } = await callApmApi('GET /internal/apm/assistant/get_apm_alert_details_context', {
+      signal: null,
+      params: {
+        query: {
+          [SERVICE_NAME]: alert.fields[SERVICE_NAME],
+          [SERVICE_ENVIRONMENT]: alert.fields[SERVICE_ENVIRONMENT],
+          [TRANSACTION_TYPE]: alert.fields[TRANSACTION_TYPE],
+          [TRANSACTION_NAME]: alert.fields[TRANSACTION_NAME],
+          alert_started_at: new Date(alert.start).toISOString(),
         },
-      }
-    );
+      },
+    });
 
     const serviceName = alert.fields[SERVICE_NAME];
     const serviceEnvironment = alert.fields[SERVICE_ENVIRONMENT];
@@ -110,10 +107,9 @@ export function AlertDetailContextualInsights({
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <ObservabilityAIAssistantContextualInsight
-          title={i18n.translate(
-            'xpack.apm.alertDetailContextualInsights.InsightButtonLabel',
-            { defaultMessage: 'Help me understand this alert' }
-          )}
+          title={i18n.translate('xpack.apm.alertDetailContextualInsights.InsightButtonLabel', {
+            defaultMessage: 'Help me understand this alert',
+          })}
           messages={getPromptMessages}
         />
       </EuiFlexItem>

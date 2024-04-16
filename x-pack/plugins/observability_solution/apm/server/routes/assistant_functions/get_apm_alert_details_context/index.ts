@@ -17,11 +17,7 @@ import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client
 import { getApmServiceSummary } from '../get_apm_service_summary';
 import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getLogCategories } from '../get_log_categories';
-import {
-  ApmTimeseriesType,
-  getApmTimeseries,
-  TimeseriesChangePoint,
-} from '../get_apm_timeseries';
+import { ApmTimeseriesType, getApmTimeseries, TimeseriesChangePoint } from '../get_apm_timeseries';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 
 export const apmAlertDetailsContextRt = t.intersection([
