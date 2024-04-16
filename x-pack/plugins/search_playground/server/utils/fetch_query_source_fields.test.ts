@@ -33,40 +33,41 @@ describe('fetch_query_source_fields', () => {
         workplace_index: {
           bm25_query_fields: [
             'metadata.summary',
-            'vector.model_id',
             'metadata.rolePermissions',
             'text',
             'metadata.name',
           ],
           dense_vector_query_fields: [],
           elser_query_fields: [
-            { field: 'vector.tokens', model_id: '.elser_model_2', nested: false },
+            {
+              field: 'vector.tokens',
+              model_id: '.elser_model_2',
+              nested: false,
+              indices: ['workplace_index'],
+            },
           ],
-          source_fields: [
-            'metadata.summary',
-            'vector.model_id',
-            'metadata.rolePermissions',
-            'text',
-            'metadata.name',
-          ],
+          source_fields: ['metadata.summary', 'metadata.rolePermissions', 'text', 'metadata.name'],
         },
         workplace_index2: {
           bm25_query_fields: [
             'metadata.summary',
             'content',
             'metadata.rolePermissions',
-            'content_vector.model_id',
             'metadata.name',
           ],
           dense_vector_query_fields: [],
           elser_query_fields: [
-            { field: 'content_vector.tokens', model_id: '.elser_model_2', nested: false },
+            {
+              field: 'content_vector.tokens',
+              model_id: '.elser_model_2',
+              nested: false,
+              indices: ['workplace_index2'],
+            },
           ],
           source_fields: [
             'metadata.summary',
             'content',
             'metadata.rolePermissions',
-            'content_vector.model_id',
             'metadata.name',
           ],
         },
@@ -85,7 +86,6 @@ describe('fetch_query_source_fields', () => {
         'search-example-main': {
           bm25_query_fields: [
             'page_content_key',
-            'page_content_e5_embbeding.model_id',
             'title',
             'main_button.button_title',
             'page_notification',
@@ -104,12 +104,12 @@ describe('fetch_query_source_fields', () => {
               field: 'page_content_e5_embbeding.predicted_value',
               model_id: '.multilingual-e5-small_linux-x86_64',
               nested: false,
+              indices: ['search-example-main'],
             },
           ],
           elser_query_fields: [],
           source_fields: [
             'page_content_key',
-            'page_content_e5_embbeding.model_id',
             'title',
             'main_button.button_title',
             'page_notification',
@@ -145,7 +145,6 @@ describe('fetch_query_source_fields', () => {
             'metadata.name',
             'passages.text',
             'metadata.summary',
-            'passages.vector.model_id',
             'metadata.content',
           ],
           dense_vector_query_fields: [
@@ -153,6 +152,7 @@ describe('fetch_query_source_fields', () => {
               field: 'passages.vector.predicted_value',
               model_id: '.multilingual-e5-small',
               nested: true,
+              indices: ['workplace_index_nested'],
             },
           ],
           elser_query_fields: [],
@@ -164,7 +164,6 @@ describe('fetch_query_source_fields', () => {
             'metadata.name',
             'passages.text',
             'metadata.summary',
-            'passages.vector.model_id',
             'metadata.content',
           ],
         },

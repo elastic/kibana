@@ -18,12 +18,15 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
-    const { isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists;
+    const { chain, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && chain != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
+
     const { chain } = params as EsqlKnowledgeBaseToolParams;
+    if (chain == null) return null;
+
     return new ChainTool({
       name: 'ESQLKnowledgeBaseTool',
       description:
