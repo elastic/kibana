@@ -78,6 +78,48 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(SENTINELONE_CONNECTOR_ID);
   }
 
+  private async handleResponseActionCreation<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      Partial<TMeta>
+    >
+  ): Promise<{
+    actionEsDoc: LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+    actionDetails: ActionDetails<TOutputContent, TParameters>;
+  }> {
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >(reqIndexOptions);
+
+    await this.updateCases({
+      command: reqIndexOptions.command,
+      caseIds: reqIndexOptions.case_ids,
+      alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      hosts: reqIndexOptions.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: reqIndexOptions.comment,
+    });
+
+    return {
+      actionEsDoc: actionRequestDoc,
+      actionDetails: await this.fetchActionDetails<ActionDetails<TOutputContent, TParameters>>(
+        actionRequestDoc.EndpointActions.action_id
+      ),
+    };
+  }
+
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
@@ -86,7 +128,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
       TOutputContent,
-      TMeta
+      Partial<TMeta> // Partial<> because the common Meta properties are actually set in this method for all requests
     >
   ): Promise<
     LogsEndpointAction<TParameters, TOutputContent, TMeta & SentinelOneActionRequestCommonMeta>
@@ -245,21 +287,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-
-    await this.updateCases({
-      command: reqIndexOptions.command,
-      caseIds: reqIndexOptions.case_ids,
-      alertIds: reqIndexOptions.alert_ids,
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      hosts: actionRequest.endpoint_ids.map((agentId) => {
-        return {
-          hostId: agentId,
-          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-        };
-      }),
-      comment: reqIndexOptions.comment,
-    });
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
 
     if (
       !actionRequestDoc.error &&
@@ -272,9 +301,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           command: actionRequestDoc.EndpointActions.data.command,
         },
       });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
     }
 
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return actionDetails;
   }
 
   async release(
@@ -309,21 +340,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-
-    await this.updateCases({
-      command: reqIndexOptions.command,
-      caseIds: reqIndexOptions.case_ids,
-      alertIds: reqIndexOptions.alert_ids,
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      hosts: actionRequest.endpoint_ids.map((agentId) => {
-        return {
-          hostId: agentId,
-          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-        };
-      }),
-      comment: reqIndexOptions.comment,
-    });
+    const { actionDetails, actionEsDoc: actionRequestDoc } =
+      await this.handleResponseActionCreation(reqIndexOptions);
 
     if (
       !actionRequestDoc.error &&
@@ -336,9 +354,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           command: actionRequestDoc.EndpointActions.data.command,
         },
       });
+
+      return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
     }
 
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return actionDetails;
   }
 
   async getFile(
@@ -355,9 +375,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      undefined,
-      {},
-      Omit<SentinelOneGetFileRequestMeta, keyof SentinelOneActionRequestCommonMeta>
+      ResponseActionGetFileParameters,
+      ResponseActionGetFileOutputContent,
+      Partial<SentinelOneGetFileRequestMeta>
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
@@ -388,8 +408,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       if (!error) {
         const { id: agentId } = await this.getAgentDetails(actionRequest.endpoint_ids[0]);
-
-        // TODO:PT should we retry here? case it takes a bit of time to add the entry to sentinelone activity log?
 
         const activitySearchCriteria: SentinelOneGetActivitiesParams = {
           // Activity type for fetching a file from a host machine in SentinelOne:
@@ -423,7 +441,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           const activityLogItem = activityLogSearchResponse.data?.data[0];
 
           reqIndexOptions.meta = {
-            commandBatchUuid: activityLogItem?.data.commandBatchUuid,
+            commandBatchUuid: activityLogItem?.data.commandBatchUuid, // FIXME:PT fix type once PR #180637 is merged
             activityId: activityLogItem?.id,
           };
         } else {
@@ -434,36 +452,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
-
-    await this.updateCases({
-      command: reqIndexOptions.command,
-      caseIds: reqIndexOptions.case_ids,
-      alertIds: reqIndexOptions.alert_ids,
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      hosts: actionRequest.endpoint_ids.map((agentId) => {
-        return {
-          hostId: agentId,
-          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-        };
-      }),
-      comment: reqIndexOptions.comment,
-    });
-
-    if (
-      !actionRequestDoc.error &&
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled
-    ) {
-      await this.writeActionResponseToEndpointIndex({
-        actionId: actionRequestDoc.EndpointActions.action_id,
-        agentId: actionRequestDoc.agent.id,
-        data: {
-          command: actionRequestDoc.EndpointActions.data.command,
-        },
-      });
-    }
-
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return (
+      await this.handleResponseActionCreation<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >(reqIndexOptions)
+    ).actionDetails;
   }
 
   async processPendingActions({
