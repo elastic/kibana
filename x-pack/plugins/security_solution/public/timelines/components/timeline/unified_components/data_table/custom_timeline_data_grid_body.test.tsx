@@ -15,6 +15,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { defaultUdtHeaders } from '../default_headers';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
+import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 
 const testDataRows = structuredClone(mockTimelineData);
 
@@ -28,13 +29,13 @@ const MockCellComponent = ({
   visibleRowIndex: number;
 }) => <div>{`Cell-${visibleRowIndex}-${colIndex}`}</div>;
 
-const additionalColumn = {
-  id: 'additional-row-details',
+const additionalTrailingColumn = {
+  id: TIMELINE_EVENT_DETAIL_ROW_ID,
 };
 
 const mockVisibleColumns = ['@timestamp', 'message', 'user.name']
   .map((id) => defaultUdtHeaders.find((h) => h.id === id) as EuiDataGridColumn)
-  .concat(additionalColumn);
+  .concat(additionalTrailingColumn);
 
 const defaultProps: CustomTimelineDataGridBodyProps = {
   Cell: MockCellComponent,
@@ -55,7 +56,7 @@ const renderTestComponents = (props?: CustomTimelineDataGridBodyProps) => {
   );
 };
 
-describe('CustomGridBody', () => {
+describe('CustomTimelineDataGridBody', () => {
   beforeEach(() => {
     (useStatefulRowRenderer as jest.Mock).mockReturnValue({
       canShowRowRenderer: true,

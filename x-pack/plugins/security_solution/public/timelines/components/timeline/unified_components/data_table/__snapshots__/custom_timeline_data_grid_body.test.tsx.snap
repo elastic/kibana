@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CustomGridBody should render exactly as snapshots 1`] = `
+exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
 .c0 {
   width: -webkit-fit-content;
   width: -moz-fit-content;
