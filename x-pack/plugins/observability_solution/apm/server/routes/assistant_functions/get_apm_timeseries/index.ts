@@ -211,8 +211,6 @@ export async function getApmTimeseries({
         statResult.change_point?.type ?? {}
       )?.[0] as ChangePointType;
 
-      console.log({ changePointType });
-
       return {
         stat: statResult.stat,
         group: statResult.stat.title,
