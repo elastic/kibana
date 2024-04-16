@@ -32,7 +32,7 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
-import { RowHeight } from '../../../../common/types';
+import { RowHeightMode } from '../../../../common/types';
 import type { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId } from '../../../shared_components';
@@ -480,7 +480,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           data-test-subj="lnsDataTable"
           rowHeightsOptions={{
             defaultHeight: props.args.fitRowToContent
-              ? RowHeight.Auto
+              ? RowHeightMode.auto
               : props.args.rowHeightLines && props.args.rowHeightLines !== 1
               ? {
                   lineCount: props.args.rowHeightLines,

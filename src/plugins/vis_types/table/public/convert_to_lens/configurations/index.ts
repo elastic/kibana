@@ -14,10 +14,10 @@ import {
 } from '@kbn/visualizations-plugin/common';
 import { TableVisParams } from '../../../common';
 
-enum RowHeight {
-  Auto = 'auto',
-  Single = 'single',
-  Custom = 'custom',
+enum RowHeightMode {
+  auto = 'auto',
+  single = 'single',
+  custom = 'custom',
 }
 
 const getColumns = (
@@ -54,8 +54,8 @@ const getRowHeight = (
 ): Pick<TableVisConfiguration, 'rowHeight' | 'headerRowHeight'> => {
   const { autoFitRowToContent } = params;
   return {
-    rowHeight: autoFitRowToContent ? RowHeight.Auto : RowHeight.Single,
-    headerRowHeight: autoFitRowToContent ? RowHeight.Auto : RowHeight.Single,
+    rowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.single,
+    headerRowHeight: autoFitRowToContent ? RowHeightMode.auto : RowHeightMode.single,
   };
 };
 

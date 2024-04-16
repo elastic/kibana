@@ -14,7 +14,7 @@ import {
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { render, screen } from '@testing-library/react';
 import { ReactNode } from 'react';
-import { RowHeight } from '../../../../common/types';
+import { RowHeightMode } from '../../../../common/types';
 import type { FormatFactory } from '../../../../common/types';
 import type { LensCellValueAction } from '../../../types';
 import { createGridColumns } from './columns';
@@ -73,7 +73,7 @@ const callCreateGridColumns = (
     params.onColumnResize ?? jest.fn(),
     params.onColumnHide ?? jest.fn(),
     params.alignments ?? {},
-    params.headerRowHeight ?? RowHeight.Auto,
+    params.headerRowHeight ?? RowHeightMode.auto,
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
     params.closeCellPopover ?? jest.fn(),

@@ -12,7 +12,7 @@ import { RowHeightSettings } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
-import { RowHeight } from '../../../../common/types';
+import { RowHeightMode } from '../../../../common/types';
 import { DEFAULT_PAGE_SIZE } from './table_basic';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
@@ -30,9 +30,9 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
       defaultRowHeight = DEFAULT_ROW_HEIGHT_LINES
     ) => {
       const rowHeightLines =
-        newHeightMode === RowHeight.Single
+        newHeightMode === RowHeightMode.single
           ? 1
-          : newHeightMode !== RowHeight.Auto
+          : newHeightMode !== RowHeightMode.auto
           ? defaultRowHeight
           : undefined;
       setState({

@@ -15,7 +15,7 @@ import {
   updateStoredRowHeight,
 } from '../utils/row_heights';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
-import { RowHeight, RowHeightSettingsProps } from '../components/row_height_settings';
+import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
 
 interface UseRowHeightProps {
   storage: Storage;
@@ -57,11 +57,11 @@ export const useRowHeight = ({
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
     switch (rowHeightLines) {
       case ROWS_HEIGHT_OPTIONS.auto:
-        return RowHeight.Auto;
+        return RowHeightMode.auto;
       case ROWS_HEIGHT_OPTIONS.single:
-        return RowHeight.Single;
+        return RowHeightMode.single;
       default:
-        return RowHeight.Custom;
+        return RowHeightMode.custom;
     }
   }, [rowHeightLines]);
 
@@ -70,10 +70,10 @@ export const useRowHeight = ({
       let newRowHeightLines: number;
 
       switch (newRowHeight) {
-        case RowHeight.Auto:
+        case RowHeightMode.auto:
           newRowHeightLines = ROWS_HEIGHT_OPTIONS.auto;
           break;
-        case RowHeight.Single:
+        case RowHeightMode.single:
           newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
           break;
         default:

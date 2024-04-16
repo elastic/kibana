@@ -26,7 +26,7 @@ import type {
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { LayerType } from '../../../common/types';
-import { RowHeight } from '../../../common/types';
+import { RowHeightMode } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import type {
   ColumnState,
@@ -47,8 +47,8 @@ export interface DatatableVisualizationState {
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
-  rowHeight?: RowHeight;
-  headerRowHeight?: RowHeight;
+  rowHeight?: RowHeightMode;
+  headerRowHeight?: RowHeightMode;
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
@@ -476,7 +476,7 @@ export const getDatatableVisualization = ({
             // rewrite colors and stops as two distinct arguments
             colors: (column.palette?.params?.stops || []).map(({ color }) => color),
             stops:
-              column.palette?.params?.name === RowHeight.Custom
+              column.palette?.params?.name === RowHeightMode.custom
                 ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
@@ -520,12 +520,12 @@ export const getDatatableVisualization = ({
         }),
       sortingColumnId: state.sorting?.columnId || '',
       sortingDirection: state.sorting?.direction || 'none',
-      fitRowToContent: state.rowHeight === RowHeight.Auto,
+      fitRowToContent: state.rowHeight === RowHeightMode.auto,
       headerRowHeight: state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT,
       rowHeightLines:
         !state.rowHeight || state.rowHeight === DEFAULT_ROW_HEIGHT ? 1 : state.rowHeightLines ?? 2,
       headerRowHeightLines:
-        state.headerRowHeight === RowHeight.Single
+        state.headerRowHeight === RowHeightMode.single
           ? 1
           : state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,

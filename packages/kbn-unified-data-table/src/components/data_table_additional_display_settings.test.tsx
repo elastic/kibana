@@ -17,7 +17,7 @@ import {
 import lodash from 'lodash';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RowHeight } from './row_height_settings';
+import { RowHeightMode } from './row_height_settings';
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
 
@@ -27,9 +27,9 @@ const renderDisplaySettings = (
   return render(
     <UnifiedDataTableAdditionalDisplaySettings
       sampleSize={10}
-      rowHeight={RowHeight.Custom}
+      rowHeight={RowHeightMode.custom}
       rowHeightLines={10}
-      headerRowHeight={RowHeight.Custom}
+      headerRowHeight={RowHeightMode.custom}
       headerRowHeightLines={5}
       {...props}
     />
@@ -45,9 +45,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         <UnifiedDataTableAdditionalDisplaySettings
           sampleSize={10}
           onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeight.Custom}
+          rowHeight={RowHeightMode.custom}
           rowHeightLines={10}
-          headerRowHeight={RowHeight.Custom}
+          headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
         />
       );
@@ -81,9 +81,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           maxAllowedSampleSize={500}
           sampleSize={50}
           onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeight.Custom}
+          rowHeight={RowHeightMode.custom}
           rowHeightLines={10}
-          headerRowHeight={RowHeight.Custom}
+          headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
         />
       );
@@ -115,9 +115,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         <UnifiedDataTableAdditionalDisplaySettings
           sampleSize={200}
           onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeight.Custom}
+          rowHeight={RowHeightMode.custom}
           rowHeightLines={10}
-          headerRowHeight={RowHeight.Custom}
+          headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
         />
       );
@@ -160,7 +160,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       const onChangeRowHeight = jest.fn();
       const onChangeRowHeightLines = jest.fn();
       renderDisplaySettings({
-        rowHeight: RowHeight.Custom,
+        rowHeight: RowHeightMode.custom,
         onChangeRowHeight,
         onChangeRowHeightLines,
       });
@@ -189,7 +189,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       const onChangeHeaderRowHeight = jest.fn();
       const onChangeHeaderRowHeightLines = jest.fn();
       renderDisplaySettings({
-        headerRowHeight: RowHeight.Custom,
+        headerRowHeight: RowHeightMode.custom,
         onChangeHeaderRowHeight,
         onChangeHeaderRowHeightLines,
       });

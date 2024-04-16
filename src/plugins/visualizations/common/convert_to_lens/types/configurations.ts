@@ -190,10 +190,10 @@ export interface ColumnState {
   palette?: PaletteOutput<CustomPaletteParams>;
 }
 
-enum RowHeight {
-  Auto = 'auto',
-  Single = 'single',
-  Custom = 'custom',
+enum RowHeightMode {
+  auto = 'auto',
+  single = 'single',
+  custom = 'custom',
 }
 
 export interface TableVisConfiguration {
@@ -201,8 +201,8 @@ export interface TableVisConfiguration {
   layerId: string;
   layerType: 'data';
   sorting?: SortingState;
-  rowHeight?: RowHeight;
-  headerRowHeight?: RowHeight;
+  rowHeight?: RowHeightMode;
+  headerRowHeight?: RowHeightMode;
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
