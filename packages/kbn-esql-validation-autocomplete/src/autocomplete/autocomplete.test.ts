@@ -1069,6 +1069,28 @@ describe('autocomplete', () => {
       26 /* b column in abs */
     );
 
+    // suggest both signature types as third argument
+    testSuggestions('from a | eval auto_bucket(dateField, numberField, ', [
+      ...getFieldNamesByType(['string', 'number']),
+      ...getFunctionSignaturesByReturnType(
+        'eval',
+        ['string', 'number'],
+        { evalMath: true },
+        undefined,
+        ['auto_bucket']
+      ),
+    ]);
+
+    // but fourth argument should only suggest type conditionally on the third argument
+    for (const type of ['string', 'number']) {
+      testSuggestions(`from a | eval auto_bucket(dateField, numberField, ${type}Field, `, [
+        ...getFieldNamesByType(type),
+        ...getFunctionSignaturesByReturnType('eval', type, { evalMath: true }, undefined, [
+          'auto_bucket',
+        ]),
+      ]);
+    }
+
     // Test suggestions for each possible param, within each signature variation, for each function
     for (const fn of evalFunctionsDefinitions) {
       // skip this fn for the moment as it's quite hard to test
