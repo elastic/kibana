@@ -7,7 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
 import { defer, from } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';
@@ -42,19 +42,12 @@ interface FieldSubType {
 }
 
 export class IndexPatternsFetcher {
-  private elasticsearchClient: ElasticsearchClient;
-  private allowNoIndices: boolean;
-  private rollupsEnabled: boolean;
-
   constructor(
-    elasticsearchClient: ElasticsearchClient,
-    allowNoIndices: boolean = false,
-    rollupsEnabled: boolean = false
-  ) {
-    this.elasticsearchClient = elasticsearchClient;
-    this.allowNoIndices = allowNoIndices;
-    this.rollupsEnabled = rollupsEnabled;
-  }
+    private readonly elasticsearchClient: ElasticsearchClient,
+    private readonly uiSettingsClient: IUiSettingsClient,
+    private readonly allowNoIndices: boolean = false,
+    private readonly rollupsEnabled: boolean = false
+  ) {}
 
   /**
    *  Get a list of field objects for an index pattern that may contain wildcards
@@ -96,6 +89,7 @@ export class IndexPatternsFetcher {
 
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
+      uiSettingsClient: this.uiSettingsClient,
       indices: pattern,
       metaFields,
       fieldCapsOptions: {

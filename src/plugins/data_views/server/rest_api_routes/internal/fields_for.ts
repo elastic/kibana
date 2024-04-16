@@ -126,7 +126,13 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;
-    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+    const uiSettings = core.uiSettings.client;
+    const indexPatterns = new IndexPatternsFetcher(
+      asCurrentUser,
+      uiSettings,
+      undefined,
+      isRollupsEnabled()
+    );
 
     const {
       pattern,

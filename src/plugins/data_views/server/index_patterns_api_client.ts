@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+} from '@kbn/core/server';
 import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserDataView } from './has_user_data_view';
-import { getIndexFilterDsl } from './utils';
 
 export class IndexPatternsApiServer implements IDataViewsApiClient {
-  esClient: ElasticsearchClient;
   constructor(
-    elasticsearchClient: ElasticsearchClient,
+    private readonly esClient: ElasticsearchClient,
     private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly rollupsEnabled: boolean,
-    private readonly excludedTiers: string
-  ) {
-    this.esClient = elasticsearchClient;
-  }
+    private readonly uiSettingsClient: IUiSettingsClient,
+    private readonly rollupsEnabled: boolean
+  ) {}
   async getFieldsForWildcard({
     pattern,
     metaFields,
@@ -34,6 +34,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(
       this.esClient,
+      this.uiSettingsClient,
       allowNoIndex,
       this.rollupsEnabled
     );
@@ -43,7 +44,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         metaFields,
         type,
         rollupIndex,
-        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers: this.excludedTiers }),
+        indexFilter,
         fields,
       })
       .catch((err) => {

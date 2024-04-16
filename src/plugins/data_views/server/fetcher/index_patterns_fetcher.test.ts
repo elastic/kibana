@@ -8,7 +8,8 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternsFetcher } from '.';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { DataViewMissingIndices, DataViewType } from '../../common';
 
 const rollupResponse = {
@@ -27,6 +28,9 @@ const rollupResponse = {
 describe('Index Pattern Fetcher - server', () => {
   let indexPatterns: IndexPatternsFetcher;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  const uiSettingsClient = uiSettingsServiceMock
+    .createStartContract()
+    .asScopedToClient({} as SavedObjectsClientContract);
   const response = {
     indices: ['b'],
     fields: [{ name: 'foo' }, { name: 'bar' }, { name: 'baz' }],
@@ -36,10 +40,10 @@ describe('Index Pattern Fetcher - server', () => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
-    indexPatterns = new IndexPatternsFetcher(esClient, false, true);
+    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, false, true);
   });
   it('calls fieldcaps once', async () => {
-    indexPatterns = new IndexPatternsFetcher(esClient, true, true);
+    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
     await indexPatterns.getFieldsForWildcard({ pattern: patternList });
     expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
   });
@@ -48,7 +52,7 @@ describe('Index Pattern Fetcher - server', () => {
     esClient.rollup.getRollupIndexCaps.mockResponse(
       rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
     );
-    indexPatterns = new IndexPatternsFetcher(esClient, true, true);
+    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
     await indexPatterns.getFieldsForWildcard({
       pattern: patternList,
       type: DataViewType.ROLLUP,
@@ -61,7 +65,7 @@ describe('Index Pattern Fetcher - server', () => {
     esClient.rollup.getRollupIndexCaps.mockResponse(
       rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
     );
-    indexPatterns = new IndexPatternsFetcher(esClient, true, false);
+    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, false);
     await indexPatterns.getFieldsForWildcard({
       pattern: patternList,
       type: DataViewType.ROLLUP,
@@ -72,7 +76,7 @@ describe('Index Pattern Fetcher - server', () => {
 
   describe('getExistingIndices', () => {
     test('getExistingIndices returns the valid matched indices', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, true, true);
+      indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
       indexPatterns.getFieldsForWildcard = jest
         .fn()
         .mockResolvedValueOnce({ indices: ['length'] })
@@ -83,7 +87,7 @@ describe('Index Pattern Fetcher - server', () => {
     });
 
     test('getExistingIndices checks the positive pattern if provided with a negative pattern', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, true, true);
+      indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
       const mockFn = jest.fn().mockResolvedValue({ indices: ['length'] });
       indexPatterns.getFieldsForWildcard = mockFn;
       const result = await indexPatterns.getExistingIndices(['-filebeat-*', 'filebeat-*']);
@@ -93,7 +97,7 @@ describe('Index Pattern Fetcher - server', () => {
     });
 
     test('getExistingIndices handles an error', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, true, true);
+      indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
       indexPatterns.getFieldsForWildcard = jest
         .fn()
         .mockImplementationOnce(async () => {
