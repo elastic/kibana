@@ -35,10 +35,6 @@ export const getVersionedContentString = (version: string): string => {
   return `application/json; Elastic-Api-Version=${version}`;
 };
 
-export const getJSONContentString = () => {
-  return 'application/json';
-};
-
 export const extractValidationSchemaFromRoute = (
   route: RouterRoute
 ): undefined | RouteValidatorConfig<unknown, unknown, unknown> => {
