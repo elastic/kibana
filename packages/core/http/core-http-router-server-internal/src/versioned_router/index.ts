@@ -7,4 +7,4 @@
  */
 export { resolvers as versionHandlerResolvers } from './handler_resolvers';
 export { CoreVersionedRouter } from './core_versioned_router';
-export type { HandlerResolutionStrategy } from './types';
+export type { HandlerResolutionStrategy, VersionedRouterRoute } from './types';
