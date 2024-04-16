@@ -17,11 +17,7 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import {
-  FIELDS_FOR_WILDCARD_PATH as path,
-  DATA_VIEWS_FIELDS_EXCLUDED_TIERS,
-} from '../../../common/constants';
-import { getIndexFilterDsl } from './utils';
+import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
 
 /**
  * Accepts one of the following:
@@ -124,10 +120,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;
-    const excludedTiers = await core.uiSettings.client.get<string>(
-      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
-    );
-    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+    const uiSettings = core.uiSettings.client;
+    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, {
+      uiSettingsClient: uiSettings,
+      rollupsEnabled: isRollupsEnabled(),
+    });
 
     const {
       pattern,
@@ -162,7 +159,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
+        indexFilter,
         allowHidden,
         includeEmptyFields,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
