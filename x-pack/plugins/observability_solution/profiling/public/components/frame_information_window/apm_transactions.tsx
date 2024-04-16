@@ -5,21 +5,24 @@
  * 2.0.
  */
 import {
-  CriteriaWithPagination,
+  Comparators,
+  Criteria,
+  EuiBasicTable,
   EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLink,
-  EuiSearchBarProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { NOT_AVAILABLE_LABEL } from '../../../common';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useAnyOfProfilingParams } from '../../hooks/use_profiling_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
-import type { APMTransactionsPerService } from '../../services';
 import { asNumber } from '../../utils/formatters/as_number';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
@@ -28,31 +31,52 @@ interface Props {
   functionName: string;
 }
 
-const search: EuiSearchBarProps = {
-  box: {
-    incremental: true,
-    schema: true,
-    placeholder: i18n.translate('xpack.profiling.apmTransactions.searchPlaceholder', {
-      defaultMessage: 'Search services or transactions by name',
-    }),
-  },
-};
-
-const sorting: EuiInMemoryTableProps<APMTransactionsPerService[]>['sorting'] = {
-  sort: {
-    field: 'serviceSamples',
-    direction: 'desc',
-  },
-};
-
-const PAGE_SIZE = 5;
-
 interface ServicesAndTransactions {
   serviceName: string;
   serviceSamples: number;
   transactionName: string | null;
   transactionSamples: number | null;
 }
+
+const findServicesAndTransactions = (
+  servicesAndTransactions: ServicesAndTransactions[],
+  pageIndex: number,
+  pageSize: number,
+  sortField: keyof ServicesAndTransactions,
+  sortDirection: 'asc' | 'desc',
+  filter: string
+) => {
+  let filteredItems: ServicesAndTransactions[] = servicesAndTransactions;
+  if (!isEmpty(filter)) {
+    filteredItems = servicesAndTransactions.filter((item) => item.serviceName.includes(filter));
+  }
+
+  let sortedItems: ServicesAndTransactions[];
+  if (sortField) {
+    sortedItems = filteredItems
+      .slice(0)
+      .sort(Comparators.property(sortField, Comparators.default(sortDirection)));
+  } else {
+    sortedItems = filteredItems;
+  }
+
+  let pageOfItems;
+
+  if (!pageIndex && !pageSize) {
+    pageOfItems = sortedItems;
+  } else {
+    const startIndex = pageIndex * pageSize;
+    pageOfItems = sortedItems.slice(
+      startIndex,
+      Math.min(startIndex + pageSize, filteredItems.length)
+    );
+  }
+
+  return {
+    pageOfItems,
+    totalItemCount: filteredItems.length,
+  };
+};
 
 export function APMTransactions({ functionName, serviceNames }: Props) {
   const {
@@ -65,54 +89,87 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
     setup: { observabilityShared },
   } = useProfilingDependencies();
 
-  const [pagination, setPagination] = useState({ pageIndex: 0 });
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+  const [sortField, setSortField] = useState<keyof ServicesAndTransactions>('serviceSamples');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [filter, setFilter] = useState('');
+  const [filterDebounced, setFilterDebounced] = useState('');
 
-  function onTableChange({ page: { index } }: CriteriaWithPagination<ServicesAndTransactions>) {
-    setPagination({ pageIndex: index });
-  }
-
-  const { status, data: transactionsPerServiceMap = {} } = useTimeRangeAsync(
-    ({ http }) => {
-      const pageStart = pagination.pageIndex * PAGE_SIZE;
-
-      return fetchTopNFunctionAPMTransactions({
-        http,
-        timeFrom: new Date(timeRange.start).getTime(),
-        timeTo: new Date(timeRange.end).getTime(),
-        functionName,
-        serviceNames: Object.keys(serviceNames).slice(pageStart, pageStart + PAGE_SIZE),
-      });
+  useDebounce(
+    () => {
+      setFilterDebounced(filter);
     },
-    [
-      fetchTopNFunctionAPMTransactions,
-      functionName,
-      pagination.pageIndex,
-      serviceNames,
-      timeRange.end,
-      timeRange.start,
-    ]
+    500,
+    [filter]
   );
 
-  const servicesAndTransactions: ServicesAndTransactions[] = useMemo(() => {
-    return Object.keys(serviceNames).flatMap((key) => {
-      const serviceTransactions = transactionsPerServiceMap[key];
-      return serviceTransactions?.transactions?.length
-        ? serviceTransactions.transactions.map((transaction) => ({
-            serviceName: key,
-            serviceSamples: serviceNames[key],
-            transactionName: transaction.name,
-            transactionSamples: transaction.samples,
-          }))
-        : [
-            {
-              serviceName: key,
-              serviceSamples: serviceNames[key],
-              transactionName: null,
-              transactionSamples: null,
-            },
-          ];
+  const onTableChange = ({ page, sort }: Criteria<ServicesAndTransactions>) => {
+    if (page) {
+      const { index, size } = page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
+    if (sort) {
+      const { field, direction } = sort;
+      setSortField(field);
+      setSortDirection(direction);
+    }
+  };
+
+  const initialServices: ServicesAndTransactions[] = useMemo(() => {
+    return Object.keys(serviceNames).map((key) => {
+      const samples = serviceNames[key];
+      return {
+        serviceName: key,
+        serviceSamples: samples,
+        transactionName: null,
+        transactionSamples: null,
+      };
     });
-  }, [serviceNames, transactionsPerServiceMap]);
+  }, [serviceNames]);
+
+  const { pageOfItems, totalItemCount } = useMemo(
+    () =>
+      findServicesAndTransactions(
+        initialServices,
+        pageIndex,
+        pageSize,
+        sortField,
+        sortDirection,
+        filterDebounced
+      ),
+    [initialServices, pageIndex, pageSize, sortField, sortDirection, filterDebounced]
+  );
+
+  const { status, data: transactionsPerServiceMap = pageOfItems } = useTimeRangeAsync(
+    ({ http }) => {
+      const serviceNamesToSearch = pageOfItems.map((item) => item.serviceName).sort();
+      if (serviceNamesToSearch.length) {
+        return fetchTopNFunctionAPMTransactions({
+          http,
+          timeFrom: new Date(timeRange.start).getTime(),
+          timeTo: new Date(timeRange.end).getTime(),
+          functionName,
+          serviceNames: serviceNamesToSearch,
+        }).then((resp) => {
+          return pageOfItems.flatMap((item) => {
+            const transactionDetails = resp[item.serviceName];
+            if (transactionDetails?.transactions?.length) {
+              return transactionDetails.transactions.map((transaction) => ({
+                ...item,
+                transactionName: transaction.name,
+                transactionSamples: transaction.samples,
+              }));
+            }
+            return [item];
+          });
+        });
+      }
+      return Promise.resolve(pageOfItems);
+    },
+    [fetchTopNFunctionAPMTransactions, functionName, pageOfItems, timeRange.end, timeRange.start]
+  );
 
   const isLoadingTransactions = status !== AsyncStatus.Settled;
 
@@ -155,7 +212,6 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
           defaultMessage: 'Transaction Name',
         }),
         truncateText: true,
-        sortable: true,
         render(_, { serviceName, transactionName }) {
           if (isLoadingTransactions) {
             return '--';
@@ -182,7 +238,6 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
         name: i18n.translate('xpack.profiling.apmTransactions.columns.transactionName', {
           defaultMessage: 'Transaction Samples',
         }),
-        sortable: true,
         width: '150px',
         render(_, { transactionSamples }) {
           if (isLoadingTransactions) {
@@ -204,18 +259,42 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
   );
 
   return (
-    <EuiInMemoryTable
-      loading={isLoadingTransactions}
-      tableCaption={i18n.translate('xpack.profiling.apmTransactions.tableCaption', {
-        defaultMessage: 'APM Services and Transactions links',
-      })}
-      items={servicesAndTransactions}
-      columns={columns}
-      pagination={{ ...pagination, pageSize: PAGE_SIZE, showPerPageOptions: false }}
-      onTableChange={onTableChange}
-      searchFormat="text"
-      search={search}
-      sorting={sorting}
-    />
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiFieldSearch
+          data-test-subj="profilingAPMTransactionsFieldText"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          isClearable
+          fullWidth
+          placeholder={i18n.translate('xpack.profiling.apmTransactions.searchPlaceholder', {
+            defaultMessage: 'Search services by name',
+          })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiBasicTable
+          loading={isLoadingTransactions}
+          tableCaption={i18n.translate('xpack.profiling.apmTransactions.tableCaption', {
+            defaultMessage: 'APM Services and Transactions links',
+          })}
+          items={transactionsPerServiceMap}
+          columns={columns}
+          pagination={{
+            pageIndex,
+            pageSize,
+            totalItemCount,
+            showPerPageOptions: false,
+          }}
+          sorting={{
+            sort: {
+              field: sortField,
+              direction: sortDirection,
+            },
+          }}
+          onChange={onTableChange}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
