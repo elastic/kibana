@@ -8,12 +8,14 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import { getResponseValidation } from '@kbn/core-http-server';
-import { versionHandlerResolvers } from '@kbn/core-http-router-server-internal';
+import {
+  versionHandlerResolvers,
+  ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION,
+} from '@kbn/core-http-router-server-internal';
 import type {
   CoreVersionedRouter,
   Router,
   VersionedRouterRoute,
-  ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION,
 } from '@kbn/core-http-router-server-internal';
 import {
   getPathParameters,
