@@ -23,7 +23,7 @@ describe('useAlertSuppression', () => {
   it('should return isSuppressionEnabled true if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
     jest
       .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-      .mockImplementationOnce(() => true);
+      .mockImplementation((flag) => flag === 'alertSuppressionForNewTermsRuleEnabled');
     const { result } = renderHook(() => useAlertSuppression('new_terms'));
 
     expect(result.current.isSuppressionEnabled).toBe(true);
@@ -50,5 +50,20 @@ describe('useAlertSuppression', () => {
     const { result } = renderHook(() => useAlertSuppression('OTHER_RULE_TYPE' as Type));
 
     expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+
+  it('should return isSuppressionEnabled false if ES|QL Feature Flag is disabled', () => {
+    const { result } = renderHook(() => useAlertSuppression('esql'));
+
+    expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+
+  it('should return isSuppressionEnabled true if ES|QL Feature Flag is enabled', () => {
+    jest
+      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+      .mockImplementation((flag) => flag === 'alertSuppressionForEsqlRuleEnabled');
+    const { result } = renderHook(() => useAlertSuppression('esql'));
+
+    expect(result.current.isSuppressionEnabled).toBe(true);
   });
 });
