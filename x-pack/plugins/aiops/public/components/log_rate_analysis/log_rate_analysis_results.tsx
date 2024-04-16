@@ -39,6 +39,7 @@ import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/ap
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
 import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 
+import { useStickyHistogram } from '../../application/redux/use_sticky_histogram';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import {
@@ -138,8 +139,6 @@ interface LogRateAnalysisResultsProps {
   /** End timestamp filter */
   latest: number;
   isBrushCleared: boolean;
-  /** Option to make main histogram sticky */
-  stickyHistogram?: boolean;
   /** Callback for resetting the analysis */
   onReset: () => void;
   /** Window parameters for the analysis */
@@ -163,7 +162,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   earliest,
   isBrushCleared,
   latest,
-  stickyHistogram,
   onReset,
   windowParameters,
   searchQuery,
@@ -175,6 +173,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
+  const stickyHistogram = useStickyHistogram();
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.

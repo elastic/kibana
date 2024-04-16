@@ -67,8 +67,6 @@ export interface LogRateAnalysisContentProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
-  /** Option to make the main histogram sticky */
-  stickyHistogram?: boolean;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -84,7 +82,6 @@ export interface LogRateAnalysisContentProps {
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
-  stickyHistogram,
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
@@ -277,7 +274,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           earliest={earliest}
           isBrushCleared={isBrushCleared}
           latest={latest}
-          stickyHistogram={stickyHistogram}
           onReset={clearSelection}
           sampleProbability={sampleProbability}
           searchQuery={searchQuery}

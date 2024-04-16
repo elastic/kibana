@@ -18,6 +18,7 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { LogRateAnalysisStateProvider } from '@kbn/aiops-components';
+import { LogRateAnalysisReduxProvider } from '../../application/redux/state';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
@@ -38,8 +39,6 @@ export interface LogRateAnalysisAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
-  /** Option to make main histogram sticky */
-  stickyHistogram?: boolean;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
 }
@@ -48,7 +47,6 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
-  stickyHistogram,
   showFrozenDataTierChoice = true,
 }) => {
   if (!dataView) return null;
@@ -69,13 +67,15 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <LogRateAnalysisStateProvider>
-            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <LogRateAnalysisPage stickyHistogram={stickyHistogram} />
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </LogRateAnalysisStateProvider>
+          <LogRateAnalysisReduxProvider>
+            <LogRateAnalysisStateProvider>
+              <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+                <DatePickerContextProvider {...datePickerDeps}>
+                  <LogRateAnalysisPage />
+                </DatePickerContextProvider>
+              </StorageContextProvider>
+            </LogRateAnalysisStateProvider>
+          </LogRateAnalysisReduxProvider>
         </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>

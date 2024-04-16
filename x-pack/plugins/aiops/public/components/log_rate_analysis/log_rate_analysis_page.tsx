@@ -35,11 +35,8 @@ import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
 
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
-interface Props {
-  stickyHistogram?: boolean;
-}
 
-export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
+export const LogRateAnalysisPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -179,7 +176,6 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
             onWindowParametersChange={onWindowParametersHandler}
-            stickyHistogram={stickyHistogram}
           />
         </EuiFlexGroup>
       </EuiPageSection>
