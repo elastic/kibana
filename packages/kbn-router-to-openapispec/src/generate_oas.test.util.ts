@@ -15,7 +15,9 @@ export const testSchema = schema.object({
   maybeNumber: schema.maybe(schema.number({ max: 1000, min: 1 })),
   booleanDefault: schema.boolean({
     defaultValue: true,
-    description: 'defaults to to true',
+    meta: {
+      description: 'defaults to to true',
+    },
   }),
   ipType: schema.ip({ versions: ['ipv4'] }),
   literalType: schema.literal('literallythis'),
@@ -23,8 +25,8 @@ export const testSchema = schema.object({
   map: schema.mapOf(schema.string(), schema.string()),
   record: schema.recordOf(schema.string(), schema.string()),
   union: schema.oneOf([
-    schema.string({ maxLength: 1, description: 'Union string' }),
-    schema.number({ min: 0, description: 'Union number' }),
+    schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
+    schema.number({ min: 0, meta: { description: 'Union number' } }),
   ]),
   uri: schema.uri({
     scheme: ['prototest'],

@@ -46,7 +46,7 @@ test.each([
 });
 
 test('refs', () => {
-  const fooSchema = schema.object({ n: schema.number() }, { id: 'foo' });
+  const fooSchema = schema.object({ n: schema.number() }, { meta: { id: 'foo' } });
   const barSchema = schema.object({ foo: fooSchema, s: schema.string() });
   const parsed = joi2JsonInternal(barSchema.getSchema());
   const ctx = createCtx({ refs: true });
