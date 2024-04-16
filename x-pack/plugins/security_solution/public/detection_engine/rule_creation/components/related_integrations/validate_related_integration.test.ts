@@ -24,11 +24,35 @@ describe('validateRelatedIntegration', () => {
 
       expect(result).toBeUndefined();
     });
+
+    it('validates empty package as a valid related integration', () => {
+      const relatedIntegration = { package: '', version: '1.2.3' };
+      const arg = {
+        value: relatedIntegration,
+        path: 'form.path.to.field',
+      } as ValidationFuncArg<RelatedIntegration, RelatedIntegration>;
+
+      const result = validateRelatedIntegration(arg);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('ignores version when package is empty', () => {
+      const relatedIntegration = { package: '', version: 'invalid' };
+      const arg = {
+        value: relatedIntegration,
+        path: 'form.path.to.field',
+      } as ValidationFuncArg<RelatedIntegration, RelatedIntegration>;
+
+      const result = validateRelatedIntegration(arg);
+
+      expect(result).toBeUndefined();
+    });
   });
 
   describe('with unsuccessful outcome', () => {
-    it('validates empty package', () => {
-      const relatedIntegration = { package: '', version: '1.2.3' };
+    it('validates empty version', () => {
+      const relatedIntegration = { package: 'some-package', version: '' };
       const arg = {
         value: relatedIntegration,
         path: 'form.path.to.field',
@@ -38,12 +62,12 @@ describe('validateRelatedIntegration', () => {
 
       expect(result).toMatchObject({
         code: 'ERR_FIELD_MISSING',
-        path: 'form.path.to.field.package',
+        path: 'form.path.to.field.version',
       });
     });
 
-    it('validates empty version', () => {
-      const relatedIntegration = { package: 'some-package', version: '' };
+    it('validates version with white spaces', () => {
+      const relatedIntegration = { package: 'some-package', version: '  ' };
       const arg = {
         value: relatedIntegration,
         path: 'form.path.to.field',

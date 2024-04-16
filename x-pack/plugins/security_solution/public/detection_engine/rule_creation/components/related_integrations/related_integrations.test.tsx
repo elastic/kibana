@@ -373,6 +373,77 @@ describe('RelatedIntegrations form part', () => {
       });
     });
 
+    it('returns empty integrations when submitting not filled form', async () => {
+      const handleSubmit = jest.fn();
+
+      render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
+
+      await addRelatedIntegrationRow();
+      await addRelatedIntegrationRow();
+      await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith({
+        data: [
+          { package: '', version: '' },
+          { package: '', version: '' },
+        ],
+        isValid: true,
+      });
+    });
+
+    it('returns a mix of filled and empty integrations', async () => {
+      const handleSubmit = jest.fn();
+
+      render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
+
+      await addRelatedIntegrationRow();
+      await addRelatedIntegrationRow();
+      await addRelatedIntegrationRow();
+      await selectFirstEuiComboBoxOption({
+        comboBoxToggleButton: screen.getAllByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID)[1],
+      });
+      await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith({
+        data: [
+          { package: '', version: '' },
+          { package: 'package-a', version: '^1.0.0' },
+          { package: '', version: '' },
+        ],
+        isValid: true,
+      });
+    });
+
+    it('returns an empty integration after clearing selected integration', async () => {
+      const handleSubmit = jest.fn();
+
+      render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
+
+      await addRelatedIntegrationRow();
+      await selectFirstEuiComboBoxOption({
+        comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
+      });
+      await clearEuiComboBoxSelection({
+        clearButton: screen.getByTestId(COMBO_BOX_CLEAR_BUTTON_TEST_ID),
+      });
+
+      await submitForm();
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith({
+        data: [{ package: '', version: '' }],
+        isValid: true,
+      });
+    });
+
     it('returns a selected integration', async () => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [
@@ -406,7 +477,7 @@ describe('RelatedIntegrations form part', () => {
       });
     });
 
-    it('returns a selected integration with version constraint modified ', async () => {
+    it('returns a selected integration with version constraint modified', async () => {
       fleetIntegrationsApi.fetchAllIntegrations.mockResolvedValue({
         integrations: [
           {
@@ -536,22 +607,6 @@ describe('RelatedIntegrations form part', () => {
   });
 
   describe('validation errors', () => {
-    it('shows an error after clearing selected integration', async () => {
-      render(<TestForm />, { wrapper: createReactQueryWrapper() });
-
-      await addRelatedIntegrationRow();
-      await selectFirstEuiComboBoxOption({
-        comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
-      });
-      await clearEuiComboBoxSelection({
-        clearButton: screen.getByTestId(COMBO_BOX_CLEAR_BUTTON_TEST_ID),
-      });
-
-      expect(screen.getByTestId(RELATED_INTEGRATION_ROW)).toHaveTextContent(
-        'Integration must be selected'
-      );
-    });
-
     it('shows an error when version constraint is invalid', async () => {
       render(<TestForm />, { wrapper: createReactQueryWrapper() });
 
@@ -568,68 +623,126 @@ describe('RelatedIntegrations form part', () => {
   });
 
   describe('removing an item', () => {
-    it('removes just added item', async () => {
-      render(<TestForm />, { wrapper: createReactQueryWrapper() });
+    describe('when there is more than one item', () => {
+      it('removes just added item', async () => {
+        render(<TestForm />, { wrapper: createReactQueryWrapper() });
 
-      await addRelatedIntegrationRow();
-      await removeRelatedIntegrationRow();
+        await addRelatedIntegrationRow();
+        await addRelatedIntegrationRow();
+        await removeLastRelatedIntegrationRow();
 
-      expect(screen.queryByTestId(RELATED_INTEGRATION_ROW)).not.toBeInTheDocument();
+        expect(screen.getAllByTestId(RELATED_INTEGRATION_ROW)).toHaveLength(1);
+      });
+
+      it('removes just added item after integration has been selected', async () => {
+        render(<TestForm />, { wrapper: createReactQueryWrapper() });
+
+        await addRelatedIntegrationRow();
+        await addRelatedIntegrationRow();
+        await selectFirstEuiComboBoxOption({
+          comboBoxToggleButton: screen.getAllByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID).at(-1)!,
+        });
+        await removeLastRelatedIntegrationRow();
+
+        expect(screen.getAllByTestId(RELATED_INTEGRATION_ROW)).toHaveLength(1);
+      });
+
+      it('submits an empty integration when just added integrations removed', async () => {
+        const handleSubmit = jest.fn();
+
+        render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
+
+        await addRelatedIntegrationRow();
+        await addRelatedIntegrationRow();
+        await selectFirstEuiComboBoxOption({
+          comboBoxToggleButton: screen.getAllByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID).at(-1)!,
+        });
+        await removeLastRelatedIntegrationRow();
+        await submitForm();
+        await waitFor(() => {
+          expect(handleSubmit).toHaveBeenCalled();
+        });
+
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: [{ package: '', version: '' }],
+          isValid: true,
+        });
+      });
     });
 
-    it('removes just added item after integration was selected', async () => {
-      render(<TestForm />, { wrapper: createReactQueryWrapper() });
+    describe('sticky last form row', () => {
+      it('does not remove the last item', async () => {
+        render(<TestForm />, { wrapper: createReactQueryWrapper() });
 
-      await addRelatedIntegrationRow();
-      await selectFirstEuiComboBoxOption({
-        comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
-      });
-      await removeRelatedIntegrationRow();
+        await addRelatedIntegrationRow();
+        await removeLastRelatedIntegrationRow();
 
-      expect(screen.queryByTestId(RELATED_INTEGRATION_ROW)).not.toBeInTheDocument();
-    });
-
-    it('submits undefined when all just added integrations removed', async () => {
-      const handleSubmit = jest.fn();
-
-      render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
-
-      await addRelatedIntegrationRow();
-      await selectFirstEuiComboBoxOption({
-        comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
-      });
-      await removeRelatedIntegrationRow();
-      await submitForm();
-      await waitFor(() => {
-        expect(handleSubmit).toHaveBeenCalled();
+        expect(screen.getAllByTestId(RELATED_INTEGRATION_ROW)).toHaveLength(1);
       });
 
-      expect(handleSubmit).toHaveBeenCalledWith({
-        data: undefined,
-        isValid: true,
-      });
-    });
+      it('disables remove button after clicking remove button on the last item', async () => {
+        render(<TestForm />, { wrapper: createReactQueryWrapper() });
 
-    it('submits undefined after previously saved integrations were removed', async () => {
-      const initialRelatedIntegrations: RelatedIntegration[] = [
-        { package: 'package-a', version: '^1.2.3' },
-      ];
-      const handleSubmit = jest.fn();
+        await addRelatedIntegrationRow();
+        await removeLastRelatedIntegrationRow();
 
-      render(<TestForm initialState={initialRelatedIntegrations} onSubmit={handleSubmit} />, {
-        wrapper: createReactQueryWrapper(),
+        expect(screen.getByTestId(REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID)).toBeDisabled();
       });
 
-      await waitForIntegrationsToBeLoaded();
-      await removeRelatedIntegrationRow();
-      await submitForm();
-      await waitFor(() => {
-        expect(handleSubmit).toHaveBeenCalled();
+      it('clears selected integration when clicking remove the last form row button', async () => {
+        render(<TestForm />, { wrapper: createReactQueryWrapper() });
+
+        await addRelatedIntegrationRow();
+        await selectFirstEuiComboBoxOption({
+          comboBoxToggleButton: getLastByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
+        });
+        await removeLastRelatedIntegrationRow();
+
+        expect(screen.queryByTestId(COMBO_BOX_SELECTION_TEST_ID)).not.toBeInTheDocument();
       });
 
-      expect(handleSubmit).toHaveBeenCalledWith({
-        data: undefined,
-        isValid: true,
+      it('submits an empty integration after clicking remove the last form row button', async () => {
+        const handleSubmit = jest.fn();
+
+        render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
+
+        await addRelatedIntegrationRow();
+        await selectFirstEuiComboBoxOption({
+          comboBoxToggleButton: getLastByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
+        });
+        await removeLastRelatedIntegrationRow();
+        await submitForm();
+        await waitFor(() => {
+          expect(handleSubmit).toHaveBeenCalled();
+        });
+
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: [{ package: '', version: '' }],
+          isValid: true,
+        });
+      });
+
+      it('submits an empty integration after previously saved integrations were removed', async () => {
+        const initialRelatedIntegrations: RelatedIntegration[] = [
+          { package: 'package-a', version: '^1.2.3' },
+        ];
+        const handleSubmit = jest.fn();
+
+        render(<TestForm initialState={initialRelatedIntegrations} onSubmit={handleSubmit} />, {
+          wrapper: createReactQueryWrapper(),
+        });
+
+        await waitForIntegrationsToBeLoaded();
+        await removeLastRelatedIntegrationRow();
+        await submitForm();
+        await waitFor(() => {
+          expect(handleSubmit).toHaveBeenCalled();
+        });
+
+        expect(handleSubmit).toHaveBeenCalledWith({
+          data: [{ package: '', version: '' }],
+          isValid: true,
+        });
       });
     });
   });
@@ -665,6 +778,11 @@ function TestForm({ initialState, onSubmit }: TestFormProps): JSX.Element {
   );
 }
 
+function getLastByTestId(testId: string): HTMLElement {
+  // getAllByTestId throws an error when there are no `testId` elements found
+  return screen.getAllByTestId(testId).at(-1)!;
+}
+
 function waitForIntegrationsToBeLoaded(): Promise<void> {
   return waitForElementToBeRemoved(screen.queryAllByRole('progressbar'));
 }
@@ -675,9 +793,15 @@ function addRelatedIntegrationRow(): Promise<void> {
   });
 }
 
-function removeRelatedIntegrationRow(): Promise<void> {
+function removeLastRelatedIntegrationRow(): Promise<void> {
   return act(async () => {
-    fireEvent.click(screen.getByTestId(REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID));
+    const lastRemoveButton = screen.getAllByTestId(REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID).at(-1);
+
+    if (!lastRemoveButton) {
+      throw new Error(`There are no "${REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID}" found`);
+    }
+
+    fireEvent.click(lastRemoveButton);
   });
 }
 

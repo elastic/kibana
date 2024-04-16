@@ -145,7 +145,7 @@ export interface DefineStepRule {
   queryBar: FieldValueQueryBar;
   dataViewId?: string;
   dataViewTitle?: string;
-  relatedIntegrations: RelatedIntegrationArray;
+  relatedIntegrations?: RelatedIntegrationArray;
   requiredFields: RequiredFieldArray;
   ruleType: Type;
   timeline: FieldValueTimeline;

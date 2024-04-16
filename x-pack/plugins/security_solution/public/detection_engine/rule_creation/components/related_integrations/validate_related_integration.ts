@@ -14,15 +14,13 @@ export function validateRelatedIntegration(
 ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined {
   const [{ value, path }] = args;
 
-  if (value.package.length === 0) {
-    return {
-      code: 'ERR_FIELD_MISSING',
-      path: `${path}.package`,
-      message: i18n.INTEGRATION_REQUIRED,
-    };
+  // It allows to submit empty fields for better UX
+  // When integration isn't selected version shouldn't be validated
+  if (value.package.trim().length === 0) {
+    return;
   }
 
-  if (value.version.length === 0) {
+  if (value.version.trim().length === 0) {
     return {
       code: 'ERR_FIELD_MISSING',
       path: `${path}.version`,

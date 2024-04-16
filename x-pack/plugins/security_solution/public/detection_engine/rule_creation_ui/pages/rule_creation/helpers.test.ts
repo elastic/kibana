@@ -145,6 +145,39 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
+    test('filters out empty related integrations', () => {
+      const result = formatDefineStepData({
+        ...mockData,
+        relatedIntegrations: [
+          { package: '', version: '' },
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          { package: '', version: '' },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        related_integrations: [
+          {
+            package: 'aws',
+            integration: 'route53',
+            version: '~1.2.3',
+          },
+          {
+            package: 'system',
+            version: '^1.2.3',
+          },
+        ],
+      });
+    });
+
     describe('saved_query and query rule types', () => {
       test('returns query rule if savedId provided but shouldLoadQueryDynamically != true', () => {
         const mockStepData: DefineStepRule = {

@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
 import type { ArrayItem, FieldConfig } from '../../../../shared_imports';
 import { FIELD_TYPES, UseField } from '../../../../shared_imports';
+import { DEFAULT_RELATED_INTEGRATION } from './default_related_integration';
 import { RelatedIntegrationField } from './related_integration_field';
 import { validateRelatedIntegration } from './validate_related_integration';
 
@@ -43,5 +44,5 @@ export function RelatedIntegrationFieldRow({
 const RELATED_INTEGRATION_FIELD_CONFIG: FieldConfig<RelatedIntegration, RelatedIntegration> = {
   type: FIELD_TYPES.JSON,
   validations: [{ validator: validateRelatedIntegration }],
-  defaultValue: { package: '', version: '' },
+  defaultValue: DEFAULT_RELATED_INTEGRATION,
 };

@@ -24,6 +24,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import type { Integration, RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { useIntegrations } from '../../../../detections/components/rules/related_integrations/use_integrations';
 import { IntegrationStatusBadge } from './integration_status_badge';
+import { DEFAULT_RELATED_INTEGRATION } from './default_related_integration';
 import * as i18n from './translations';
 
 interface RelatedIntegrationItemFormProps {
@@ -94,6 +95,16 @@ export function RelatedIntegrationField({
   );
 
   const hasError = Boolean(packageErrorMessage) || Boolean(versionErrorMessage);
+  const isLastField = relatedIntegrations.length === 1;
+  const isLastEmptyField = isLastField && field.value.package === '';
+  const handleRemove = useCallback(() => {
+    if (isLastField) {
+      field.setValue(DEFAULT_RELATED_INTEGRATION);
+      return;
+    }
+
+    onRemove();
+  }, [onRemove, field, isLastField]);
 
   return (
     <EuiFormRow
@@ -134,8 +145,8 @@ export function RelatedIntegrationField({
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             color="danger"
-            onClick={onRemove}
-            isDisabled={!integrations}
+            onClick={handleRemove}
+            isDisabled={!integrations || isLastEmptyField}
             iconType="trash"
             aria-label={i18n.REMOVE_RELATED_INTEGRATION_BUTTON_ARIA_LABEL}
             data-test-subj="relatedIntegrationRemove"
