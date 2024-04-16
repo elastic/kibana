@@ -54,7 +54,18 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    */
   enableQueryVersion?: boolean;
 
-  /** Human-friendly description of this route, should be usable for documentation */
+  /**
+   * Human-friendly description of this route, should be usable for documentation
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  description: `Retrieve foo resources given an ID. To retrieve a list of IDs use the GET /api/foo API.`,
+   * })
+   * ```
+   */
   description?: string;
 };
 
