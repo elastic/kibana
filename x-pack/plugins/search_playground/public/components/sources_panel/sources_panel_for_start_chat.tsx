@@ -84,14 +84,7 @@ export const SourcesPanelForStartChat: React.FC = () => {
 
       {sourceFieldErrorMessage && (
         <EuiCallOut color="warning" iconType="warning">
-          <p>
-            {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
-              defaultMessage: '{errorMessage}',
-              values: {
-                errorMessage: sourceFieldErrorMessage,
-              },
-            })}
-          </p>
+          <p>{sourceFieldErrorMessage}</p>
         </EuiCallOut>
       )}
 
