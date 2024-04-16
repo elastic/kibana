@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -113,11 +113,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
-    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>(filters);
-    // keep query bar filters in sync with redux filters
-    useEffect(() => {
-      setQueryBarFilters(getNonDropAreaFilters(filters));
-    }, [filters]);
+    const queryBarFilters = useMemo(() => getNonDropAreaFilters(filters), [filters]);
 
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
