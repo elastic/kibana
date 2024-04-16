@@ -7,7 +7,9 @@
  */
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { BasePath, PartialBasePathValue } from './base_path_service';
+import type { PartialBasePathValue } from '@kbn/core-http-server';
+
+import { BasePath } from './base_path_service';
 
 describe('BasePath', () => {
   describe('serverBasePath', () => {
