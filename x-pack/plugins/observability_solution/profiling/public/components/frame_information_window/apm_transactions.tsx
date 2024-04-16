@@ -188,6 +188,8 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
               data-test-subj="profilingColumnsLink"
               href={observabilityShared.locators.apm.serviceOverview.getRedirectUrl({
                 serviceName,
+                rangeFrom,
+                rangeTo,
               })}
             >
               {serviceName}
@@ -224,6 +226,8 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
                 href={observabilityShared.locators.apm.transactionDetailsByName.getRedirectUrl({
                   serviceName,
                   transactionName,
+                  rangeFrom,
+                  rangeTo,
                 })}
               >
                 {transactionName}
@@ -255,6 +259,8 @@ export function APMTransactions({ functionName, serviceNames }: Props) {
       isLoadingTransactions,
       observabilityShared.locators.apm.serviceOverview,
       observabilityShared.locators.apm.transactionDetailsByName,
+      rangeFrom,
+      rangeTo,
     ]
   );
 

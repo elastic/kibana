@@ -15,16 +15,11 @@ import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirec
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
-const _15_MIN_IN_MS = 15 * 60 * 1000;
-
 export function TransactionDetailsByNameLink() {
-  const currentTime = new Date();
-  const fallbackRangeFrom = new Date(currentTime.getTime() - _15_MIN_IN_MS);
-
   const {
     query: {
-      rangeFrom = fallbackRangeFrom.toISOString(),
-      rangeTo = currentTime.toISOString(),
+      rangeFrom = 'now-15m',
+      rangeTo = 'now',
       transactionName,
       serviceName,
     },
@@ -61,7 +56,26 @@ export function TransactionDetailsByNameLink() {
       );
     }
 
-    return null;
+    return (
+      <div
+        css={css`
+          height: 100%;
+          display: flex;
+        `}
+      >
+        <EuiEmptyPrompt
+          iconType="apmTrace"
+          title={
+            <h2>
+              {i18n.translate(
+                'xpack.apm.transactionDetailsLink.h2.transactionNotFound',
+                { defaultMessage: 'No transaction found' }
+              )}
+            </h2>
+          }
+        />
+      </div>
+    );
   }
 
   return (
