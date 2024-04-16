@@ -81,7 +81,11 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
                   onSelected={(slo) => {
                     setHasError(slo === undefined);
                     if (slo && 'id' in slo) {
-                      setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId,remoteName: slo.remote?.remoteName, });
+                      setSelectedSlo({
+                        sloId: slo.id,
+                        sloInstanceId: slo.instanceId,
+                        remoteName: slo.remote?.remoteName,
+                      });
                     }
                   }}
                 />
