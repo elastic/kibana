@@ -22,6 +22,7 @@ const testProps = {
   isSettingsModalVisible: false,
   selectedConversation: welcomeConvo,
   setIsSettingsModalVisible,
+  isFlyoutMode: false,
   onConversationSelected,
   conversations: {},
   refetchConversationsState: jest.fn(),
@@ -63,7 +64,7 @@ describe('AssistantSettingsButton', () => {
     expect(setIsSettingsModalVisible).toHaveBeenCalledWith(true);
   });
 
-  it('Settings modal is visble and calls correct actions per click', () => {
+  it('Settings modal is visible and calls correct actions per click', () => {
     const { getByTestId } = render(
       <AssistantSettingsButton {...testProps} isSettingsModalVisible />
     );
