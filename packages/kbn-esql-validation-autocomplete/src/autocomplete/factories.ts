@@ -287,11 +287,25 @@ function getUnitDuration(unit: number = 1) {
   return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
 }
 
+function getNowRoundedByHour() {
+  // round to the hour and remove the milliseconds
+  // i.e. "1985-01-01T05:00:00Z"
+  const nowDate = new Date();
+  nowDate.setMilliseconds(0);
+  nowDate.setSeconds(0);
+  nowDate.setMinutes(0);
+  return nowDate;
+}
+
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('number') && commandName === 'limit') {
-    // suggest 10/50/100
-    suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+  if (types.includes('number')) {
+    if (commandName === 'limit') {
+      // suggest 10/100/1000 for limit
+      suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+    } else {
+      suggestions.push(...buildConstantsDefinitions(['10', '30', '50'], ''));
+    }
   }
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular
@@ -319,7 +333,18 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
       } else {
         suggestions.push(...buildConstantsDefinitions(['string'], ''));
       }
+    } else {
+      suggestions.push(
+        ...buildValueDefinitions([getNowRoundedByHour().toISOString().replace('.000Z', 'Z')])
+      );
     }
+  }
+  if (types.includes('date')) {
+    suggestions.push(
+      ...buildConstantsDefinitions([
+        `to_datetime("${getNowRoundedByHour().toISOString().replace('.000Z', 'Z')}")`,
+      ])
+    );
   }
   return suggestions;
 }

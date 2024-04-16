@@ -595,8 +595,9 @@ async function getExpressionSuggestionsByType(
             getFieldsByType,
             {
               functions: canHaveAssignments,
-              fields: true,
+              fields: !argDef.constantOnly,
               variables: anyVariables,
+              literals: argDef.constantOnly,
             },
             {
               ignoreFields: isNewExpression
@@ -646,6 +647,7 @@ async function getExpressionSuggestionsByType(
               functions: true,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
+              literals: argDef.constantOnly,
             }
           ))
         );
@@ -980,10 +982,12 @@ async function getFieldsOrFunctionsSuggestions(
     functions,
     fields,
     variables,
+    literals = false,
   }: {
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
+    literals?: boolean;
   },
   {
     ignoreFn = [],
@@ -1033,7 +1037,7 @@ async function getFieldsOrFunctionsSuggestions(
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
-    getCompatibleLiterals(commandName, types)
+    literals ? getCompatibleLiterals(commandName, types) : []
   );
 
   return suggestions;
@@ -1121,24 +1125,26 @@ async function getFunctionArgsSuggestions(
       );
     }
 
-    const existingTypes = node.args.map((arg) =>
-      extractFinalTypeFromArg(arg, {
+    const existingTypes = node.args.map((nodeArg) =>
+      extractFinalTypeFromArg(nodeArg, {
         fields: fieldsMap,
         variables: variablesExcludingCurrentCommandOnes,
       })
     );
 
-    const supportedFieldTypes = fnDefinition.signatures
+    const validSignatures = fnDefinition.signatures
       // if existing arguments are preset already, use them to filter out incompatible signatures
       .filter((signature) => {
         if (existingTypes.length) {
           return existingTypes.every((type, index) => signature.params[index].type === type);
         }
         return true;
-      })
+      });
+
+    const supportedFieldTypes = validSignatures
       .flatMap((signature) => {
         if (signature.params.length > argIndex) {
-          return signature.params[argIndex].constantOnly ? '' : signature.params[argIndex].type;
+          return signature.params[argIndex].type;
         }
         if (signature.minParams) {
           return signature.params[signature.params.length - 1].type;
@@ -1146,6 +1152,8 @@ async function getFunctionArgsSuggestions(
         return [];
       })
       .filter(nonNullable);
+
+    const shouldBeConstant = validSignatures.some(({ params }) => params[argIndex]?.constantOnly);
 
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
@@ -1156,9 +1164,11 @@ async function getFunctionArgsSuggestions(
         option?.name,
         getFieldsByType,
         {
-          functions: true,
-          fields: true,
+          // @TODO: improve this to inherit the constant flag from the outer function
+          functions: !shouldBeConstant,
+          fields: !shouldBeConstant,
           variables: variablesExcludingCurrentCommandOnes,
+          literals: shouldBeConstant,
         },
         // do not repropose the same function as arg
         // i.e. avoid cases like abs(abs(abs(...))) with suggestions
@@ -1170,8 +1180,7 @@ async function getFunctionArgsSuggestions(
   }
 
   const hasMoreMandatoryArgs =
-    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-      argIndex ||
+    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length > 0 ||
     ('minParams' in refSignature && refSignature.minParams
       ? refSignature.minParams - 1 > argIndex
       : false);
@@ -1191,6 +1200,7 @@ async function getFunctionArgsSuggestions(
               functions: false,
               fields: false,
               variables: variablesExcludingCurrentCommandOnes,
+              literals: true,
             }
           ))
         );
