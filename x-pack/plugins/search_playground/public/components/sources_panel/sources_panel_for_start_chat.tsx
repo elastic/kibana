@@ -42,7 +42,7 @@ export const SourcesPanelForStartChat: React.FC = () => {
 
       {isLoading && (
         <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiLoadingSpinner size="l" />
+          <EuiLoadingSpinner size="l" data-test-subj="indicesLoading" />
         </EuiFlexGroup>
       )}
 

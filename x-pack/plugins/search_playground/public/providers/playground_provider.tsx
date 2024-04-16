@@ -8,9 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ChatForm, ChatFormFields } from '../types';
-import { DevTool } from "@hookform/devtools";
 
 const queryClient = new QueryClient({});
 
@@ -34,12 +32,8 @@ export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <ReactQueryDevtools /> */}
-
       <FormProvider {...form}>
         {children}
-        <DevTool control={form.control} placement="bottom-left" />
-
         </FormProvider>
     </QueryClientProvider>
   );

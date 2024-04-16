@@ -13,12 +13,7 @@ import { AddIndicesField } from './add_indices_field';
 import { IndicesList } from './indices_list';
 
 export const SourcesPanelSidebar: React.FC = () => {
-  const {
-    indices: selectedIndices,
-    removeIndex,
-    addIndex,
-    loading: fieldIndicesLoading,
-  } = useSourceIndicesFields();
+  const { indices: selectedIndices, removeIndex, addIndex, loading } = useSourceIndicesFields();
 
   return (
     <EuiFlexGroup direction="column">
@@ -40,7 +35,7 @@ export const SourcesPanelSidebar: React.FC = () => {
         <AddIndicesField
           selectedIndices={selectedIndices}
           onIndexSelect={addIndex}
-          loading={fieldIndicesLoading}
+          loading={loading}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

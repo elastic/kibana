@@ -106,7 +106,13 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem grow={6}>
-            <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
+            <EuiCodeBlock
+              language="json"
+              fontSize="m"
+              paddingSize="m"
+              lineNumbers
+              data-test-subj="ViewElasticsearchQueryResult"
+            >
               {JSON.stringify(createQuery(tempQueryFields, fields), null, 2)}
             </EuiCodeBlock>
           </EuiFlexItem>

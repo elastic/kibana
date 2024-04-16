@@ -38,7 +38,7 @@ export const useSourceIndicesFields = () => {
     name: ChatFormFields.sourceFields,
   });
 
-  const { data: fields } = useQuery<SourceFieldsData>({
+  const { data: fields } = useQuery({
     enabled: selectedIndices.length > 0,
     queryKey: ['fields', selectedIndices.toString()],
     queryFn: async () => {
