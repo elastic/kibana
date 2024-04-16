@@ -35,7 +35,7 @@ export const getConnectedConnectorsTooltipContent = (
     {!isCrawler ? (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.connectedTooltip"
-        defaultMessage="{connectedCount} {completeConnectorsText} - Number of connectors which are complete in the last 30 minutes"
+        defaultMessage="{connectedCount} {completeConnectorsText} - Number of connectors successfully configured and connected in the last 30 minutes."
         values={{
           completeConnectorsText: (
             <b>
@@ -85,7 +85,7 @@ export const getIncompleteConnectorsTooltip = (incompleteCount: number, isCrawle
     ) : (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.incompleteCrawlerTooltip"
-        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of crawlers whose configuration is incomplete. These crawlers are not ready to crawl.
+        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of crawlers whose configuration is incomplete. These crawlers are not ready to crawl."
         values={{
           incompleteConnectorsText: (
             <b>
