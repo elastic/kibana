@@ -843,7 +843,12 @@ export const getXyVisualization = ({
           accessors.length > 0 || xAccessor != null || splitAccessor != null
       );
       for (const [dimension, criteria] of checks) {
-        const result = validateLayersForDimension(dimension, filteredLayers, criteria);
+        const result = validateLayersForDimension(
+          dimension,
+          filteredLayers,
+          state.layers,
+          criteria
+        );
         if (!result.valid) {
           errors.push({
             severity: 'error',

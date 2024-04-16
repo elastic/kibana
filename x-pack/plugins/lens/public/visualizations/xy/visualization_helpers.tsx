@@ -395,7 +395,8 @@ export function getLayersByType(state: State, byType?: string) {
 
 export function validateLayersForDimension(
   dimension: string,
-  layers: XYDataLayerConfig[],
+  dataLayers: XYDataLayerConfig[],
+  allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
@@ -406,12 +407,12 @@ export function validateLayersForDimension(
   // Multiple layers must be consistent:
   // * either a dimension is missing in ALL of them
   // * or should not miss on any
-  if (layers.every(missingCriteria) || !layers.some(missingCriteria)) {
+  if (dataLayers.every(missingCriteria) || !dataLayers.some(missingCriteria)) {
     return { valid: true };
   }
   // otherwise it's an error and it has to be reported
-  const layerMissingAccessors = layers.reduce((missing: number[], layer, i) => {
-    if (missingCriteria(layer)) {
+  const layerMissingAccessors = allLayers.reduce((missing: number[], layer, i) => {
+    if (isDataLayer(layer) && missingCriteria(layer)) {
       missing.push(i);
     }
     return missing;
@@ -419,7 +420,11 @@ export function validateLayersForDimension(
 
   return {
     valid: false,
-    payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
+    payload: getMessageIdsForDimension(
+      dimension,
+      layerMissingAccessors,
+      isHorizontalChart(dataLayers)
+    ),
   };
 }
 
