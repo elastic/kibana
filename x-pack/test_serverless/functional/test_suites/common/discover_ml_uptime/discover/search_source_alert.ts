@@ -259,7 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      const alreadyHasData = Boolean(await testSubjects.exists('docTable'));
+      const alreadyHasData = await testSubjects.exists('docTable');
 
       if (!alreadyHasData) {
         await testSubjects.click('querySubmitButton');
