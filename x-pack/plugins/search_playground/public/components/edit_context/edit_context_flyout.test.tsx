@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { ViewQueryFlyout } from './view_query_flyout';
+import { EditContextFlyout } from './edit_context_flyout';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -18,6 +18,7 @@ jest.mock('../../hooks/use_indices_fields', () => ({
         elser_query_fields: [],
         dense_vector_query_fields: [],
         bm25_query_fields: ['field1', 'field2'],
+        source_fields: ['context_field1', 'context_field2'],
       },
     },
   }),
@@ -32,14 +33,14 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   return <FormProvider {...methods}>{children}</FormProvider>;
 };
 
-describe('ViewQueryFlyout component tests', () => {
+describe('EditContextFlyout component tests', () => {
   const onCloseMock = jest.fn();
 
   beforeEach(() => {
     render(
       <IntlProvider locale="en">
         <MockFormProvider>
-          <ViewQueryFlyout onClose={onCloseMock} />
+          <EditContextFlyout onClose={onCloseMock} />
         </MockFormProvider>
       </IntlProvider>
     );
@@ -50,11 +51,9 @@ describe('ViewQueryFlyout component tests', () => {
     expect(onCloseMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should see the view elasticsearch query', async () => {
-    expect(screen.getByTestId('ViewElasticsearchQueryResult')).toBeInTheDocument();
-    expect(screen.getByTestId('ViewElasticsearchQueryResult')).toHaveTextContent(
-      `{ "query": { "bool": { "should": [ { "multi_match": { "query": "{query}", "fields": [ "field1" ] } } ], "minimum_should_match": 1 } } }`
-    );
+  it('should see the context fields', async () => {
+    expect(screen.getByTestId('contextFieldsSelectable')).toBeInTheDocument();
+    expect(screen.getByTestId('contextFieldsSelectable')).toHaveTextContent(`context_field2`);
+    expect(screen.getByTestId('contextFieldsSelectable')).toHaveTextContent(`context_field1`);
   });
-
 });

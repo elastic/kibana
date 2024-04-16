@@ -20,7 +20,13 @@ const SUGGESTED_BM25_FIELDS = ['title', 'body_content', 'page_content_text', 'te
 
 const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = ['body_content', 'content', 'text', 'page_content_text'];
+const SUGGESTED_SOURCE_FIELDS = [
+  'body_content',
+  'content',
+  'text',
+  'page_content_text',
+  'text_field',
+];
 
 interface Matches {
   queryMatches: any[];
