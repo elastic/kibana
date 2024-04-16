@@ -42,8 +42,6 @@ export function SearchEmbeddablFieldStatsTableComponent({
 
   if (!dataView) return <></>;
 
-  console.log('fetch context', fetchContext);
-
   return (
     <FieldStatisticsTable
       dataView={dataView}

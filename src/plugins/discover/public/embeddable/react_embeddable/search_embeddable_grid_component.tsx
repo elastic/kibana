@@ -7,50 +7,64 @@
  */
 
 import React, { useMemo } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  isLegacyTableEnabled,
+  SEARCH_FIELDS_FROM_SOURCE,
+} from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataLoadingState } from '@kbn/unified-data-table';
-
-import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { BehaviorSubject } from 'rxjs';
+
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
+import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { DiscoverGridEmbeddable } from '../saved_search_grid';
 import type { EmbeddableComponentSearchProps, SearchEmbeddableApi } from '../types';
-import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 
 interface SavedSearchEmbeddableComponentProps {
-  useLegacyTable: boolean;
-  query?: AggregateQuery | Query;
-
-  onAddFilter: DocViewFilterFn;
   api: SearchEmbeddableApi & {
     savedSearch$: BehaviorSubject<SavedSearch>;
     rows$: BehaviorSubject<DataTableRecord[]>;
   };
+  query?: AggregateQuery | Query;
+  onAddFilter: DocViewFilterFn;
 }
 
 const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
+type SavedSearchProps = Omit<
+  EmbeddableComponentSearchProps,
+  | 'services'
+  | 'isLoading'
+  | 'rows'
+  | 'onFilter'
+  | 'useNewFieldsApi'
+  | 'showTimeCol'
+  | 'ariaLabelledBy'
+  | 'cellActionsTriggerId'
+  | 'dataView'
+> & { dataView?: DataView; sampleSizeState: number | undefined };
+
 export function SearchEmbeddableGridComponent({
-  useLegacyTable,
-  query,
   api,
+  query,
   onAddFilter,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const [savedSearch, rows] = useBatchedPublishingSubjects(api.savedSearch$, api.rows$);
-  console.log('rows', rows);
 
-  const savedSearchProps = useMemo(() => {
+  const savedSearchProps: SavedSearchProps = useMemo(() => {
     return {
       title: savedSearch.title,
       searchTitle: savedSearch.title,
@@ -89,6 +103,20 @@ export function SearchEmbeddableGridComponent({
     };
   }, [api.savedSearch$, savedSearch, discoverServices]);
 
+  const isTextBasedQueryMode = useMemo(
+    () => isTextBasedQuery(savedSearch.searchSource.getField('query')),
+    [savedSearch]
+  );
+
+  const useLegacyTable = useMemo(
+    () =>
+      isLegacyTableEnabled({
+        uiSettings: discoverServices.uiSettings,
+        isTextBasedQueryMode,
+      }),
+    [discoverServices, isTextBasedQueryMode]
+  );
+
   const searchProps: EmbeddableComponentSearchProps | undefined = useMemo(() => {
     const { dataView } = savedSearchProps;
     if (!dataView) return;
@@ -115,13 +143,11 @@ export function SearchEmbeddableGridComponent({
   }
 
   if (useLegacyTable) {
-    const isPlainRecord = isTextBasedQuery(query);
-
     return (
       <DiscoverDocTableEmbeddableMemoized
         {...searchProps}
         sampleSizeState={fetchedSampleSize}
-        isPlainRecord={isPlainRecord}
+        isPlainRecord={isTextBasedQueryMode}
       />
     );
   }

@@ -9,7 +9,6 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
-  Adapters,
   DefaultEmbeddableApi,
   Embeddable,
   EmbeddableOutput,

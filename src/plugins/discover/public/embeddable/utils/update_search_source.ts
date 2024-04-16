@@ -44,6 +44,7 @@ export const updateSearchSource = (
     searchSource.removeField('fields');
   }
 
+  // TODO: Make this better???
   // update parent search source
   const parentSearchSource = searchSource.getParent();
   parentSearchSource?.setField('filter', fetchContext.filters);

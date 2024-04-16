@@ -14,7 +14,7 @@ import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import {
@@ -153,16 +153,13 @@ export const getSearchEmbeddableFactory = ({
             };
           }, []);
 
-          const { dataView, columns, query, viewMode } = useMemo(() => {
-            const searchSourceQuery = savedSearch.searchSource.getField('query');
+          const { dataView, columns, viewMode } = useMemo(() => {
             return {
               dataView: savedSearch.searchSource.getField('index'),
               columns: savedSearch.columns ?? [],
-              query: searchSourceQuery, // inherited query?
-              filters: savedSearch.searchSource.getField('filter') as Filter[], // inherited filters?
               viewMode: getValidViewMode({
                 viewMode: savedSearch.viewMode,
-                isTextBasedQueryMode: isTextBasedQuery(searchSourceQuery),
+                isTextBasedQueryMode: isTextBasedQuery(savedSearch.searchSource.getField('query')),
               }),
             };
           }, [savedSearch]);
@@ -191,14 +188,12 @@ export const getSearchEmbeddableFactory = ({
             [dataView]
           );
 
-          if (
-            discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
-            viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
-            dataView &&
-            Array.isArray(columns)
-          ) {
-            return (
-              <KibanaContextProvider services={discoverServices}>
+          return (
+            <KibanaContextProvider services={discoverServices}>
+              {discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
+              viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
+              dataView &&
+              Array.isArray(columns) ? (
                 <SearchEmbeddablFieldStatsTableComponent
                   api={{
                     ...api,
@@ -207,13 +202,11 @@ export const getSearchEmbeddableFactory = ({
                   }}
                   onAddFilter={onAddFilter}
                 />
-              </KibanaContextProvider>
-            );
-          } else {
-            return (
-              <KibanaContextProvider services={discoverServices}>
+              ) : (
                 <CellActionsProvider
-                  getTriggerCompatibleActions={(triggerId, context) => Promise.resolve([])}
+                  getTriggerCompatibleActions={
+                    discoverServices.uiActions.getTriggerCompatibleActions
+                  }
                 >
                   <SearchEmbeddableGridComponent
                     api={{
@@ -221,13 +214,12 @@ export const getSearchEmbeddableFactory = ({
                       rows$: searchEmbeddableApi.rows$,
                       savedSearch$: searchEmbeddableApi.savedSearch$,
                     }}
-                    useLegacyTable={false} // TODO
                     onAddFilter={onAddFilter}
                   />
                 </CellActionsProvider>
-              </KibanaContextProvider>
-            );
-          }
+              )}
+            </KibanaContextProvider>
+          );
         },
       };
     },
