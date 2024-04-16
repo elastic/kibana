@@ -45,6 +45,19 @@ Object {
       ],
       "type": "string",
     },
+    "signal": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "any",
+    },
   },
   "preferences": Object {
     "stripUnknown": Object {
@@ -133,6 +146,19 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "signal": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "any",
     },
   },
   "preferences": Object {
