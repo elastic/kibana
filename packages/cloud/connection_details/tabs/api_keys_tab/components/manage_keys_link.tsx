@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useConnectionDetailsService } from '@kbn/cloud/connection_details/context';
+import { useConnectionDetailsService } from '../../../context';
+import { SpaNoRouterLink } from '../../../components/spa_no_router_link';
 
 export interface KeySetupFormProps {
   loading?: boolean;
@@ -23,10 +23,10 @@ export const ManageKeysLink: React.FC<KeySetupFormProps> = ({loading}) => {
   if (!link) return null;
 
   return (
-    <EuiLink external href={link} target="_blank">
+    <SpaNoRouterLink url={link} go={service.opts?.navigateToUrl}>
       {i18n.translate('cloud.connectionDetails.apiKeys.managerLinkLabel', {
         defaultMessage: 'Manage API keys',
       })}
-    </EuiLink>
+    </SpaNoRouterLink>
   );
 };

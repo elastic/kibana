@@ -4,6 +4,7 @@ export interface ConnectionDetailsOpts {
   links?: ConnectionDetailsOptsLinks;
   endpoints?: ConnectionDetailsOptsEndpoints;
   apiKeys?: ConnectionDetailsOptsApiKeys;
+  navigateToUrl?: (url: string) => void;
 }
 
 export interface ConnectionDetailsOptsLinks {
