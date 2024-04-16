@@ -61,6 +61,7 @@ export const AwsInputVarFields = ({
                     errors={[]}
                     forceShowErrors={false}
                     isEditPage={true}
+                    data-test-subj={field.dataTestSubj}
                   />
                 </Suspense>
               </div>
@@ -80,6 +81,7 @@ export const AwsInputVarFields = ({
                 fullWidth
                 value={field.value || ''}
                 onChange={(event) => onChange(field.id, event.target.value)}
+                data-test-subj={field.dataTestSubj}
               />
             </EuiFormRow>
           )}
