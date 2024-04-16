@@ -78,7 +78,8 @@ const PackageListGridWrapper = ({
   if (!isInitialHidden && isLoading) return <Loading />;
 
   const showPackageList =
-    (showSearchBar && !isInitialHidden) || showSearchBar === false;
+    (showSearchBar && !isInitialHidden && !!searchQuery) ||
+    showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
@@ -99,31 +100,30 @@ const PackageListGridWrapper = ({
                 },
               }}
               onChange={(arg) => {
-                if (setSearchQuery) {
-                  setSearchQuery(arg.queryText);
-                }
-                setIsInitialHidden(false);
+                setSearchQuery?.(arg.queryText);
+                if (isInitialHidden) setIsInitialHidden(false);
               }}
-              query={searchQuery}
+              query={searchQuery ?? ''}
             />
           </div>
         )}
-        {showPackageList && (
-          <PackageList
-            list={list}
-            searchTerm={searchQuery ?? ''}
-            showControls={false}
-            showSearchTools={false}
-            // we either don't need these properties (yet) or handle them upstream, but
-            // they are marked as required in the original API.
-            selectedCategory={selectedCategory}
-            setSearchTerm={() => {}}
-            setCategory={() => {}}
-            categories={[]}
-            setUrlandReplaceHistory={() => {}}
-            setUrlandPushHistory={() => {}}
-          />
-        )}
+        {showPackageList &&
+          ((showSearchBar && !!searchQuery) || !showSearchBar) && (
+            <PackageList
+              list={list}
+              searchTerm={searchQuery ?? ''}
+              showControls={false}
+              showSearchTools={false}
+              // we either don't need these properties (yet) or handle them upstream, but
+              // they are marked as required in the original API.
+              selectedCategory={selectedCategory}
+              setSearchTerm={() => {}}
+              setCategory={() => {}}
+              categories={[]}
+              setUrlandReplaceHistory={() => {}}
+              setUrlandPushHistory={() => {}}
+            />
+          )}
       </div>
     </Suspense>
   );

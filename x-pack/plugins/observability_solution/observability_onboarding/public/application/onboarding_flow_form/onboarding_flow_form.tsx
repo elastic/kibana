@@ -90,7 +90,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     (query: string) => () => {
       setIntegrationSearch(query);
       if (packageListSearchBarRef.current) {
-        packageListSearchBarRef.current.focus();
+        packageListSearchBarRef.current.value = query;
         packageListSearchBarRef.current.scrollIntoView({
           behavior: 'auto',
           block: 'center',
