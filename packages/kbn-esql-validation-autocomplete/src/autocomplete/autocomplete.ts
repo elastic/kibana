@@ -544,7 +544,7 @@ async function getExpressionSuggestionsByType(
         prevArg &&
         (prevArg.type === 'function' || (!Array.isArray(nodeArg) && prevArg.type !== nodeArg.type))
       ) {
-        if (!isLiteralItem(nodeArg) || !prevArg.literalOnly) {
+        if (!isLiteralItem(nodeArg) || !prevArg.constantOnly) {
           argDef = prevArg;
         }
       }
@@ -737,7 +737,7 @@ async function getExpressionSuggestionsByType(
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
     if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
       // it can be just literal values (i.e. "string")
-      if (argDef.literalOnly) {
+      if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
         suggestions.push(...getCompatibleLiterals(command.name, [argDef.type], [argDef.name]));
       } else {
@@ -1074,31 +1074,6 @@ async function getFunctionArgsSuggestions(
     argIndex -= 1;
   }
 
-  const existingTypes = node.args.map((arg) =>
-    extractFinalTypeFromArg(arg, {
-      fields: fieldsMap,
-      variables: variablesExcludingCurrentCommandOnes,
-    })
-  );
-
-  const types = fnDefinition.signatures
-    // if existing arguments are preset already, use them to filter out incompatible signatures
-    .filter((signature) => {
-      if (existingTypes.length) {
-        return existingTypes.every((type, index) => signature.params[index].type === type);
-      }
-      return true;
-    })
-    .flatMap((signature) => {
-      if (signature.params.length > argIndex) {
-        return signature.params[argIndex].type;
-      }
-      if (signature.minParams) {
-        return signature.params[signature.params.length - 1].type;
-      }
-      return [];
-    });
-
   const literalOptions = fnDefinition.signatures.reduce<string[]>((acc, signature) => {
     const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
     return literalOptionsForThisParameter ? acc.concat(literalOptionsForThisParameter) : acc;
@@ -1112,13 +1087,6 @@ async function getFunctionArgsSuggestions(
 
   // the first signature is used as reference
   const refSignature = fnDefinition.signatures[0];
-
-  const hasMoreMandatoryArgs =
-    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-      argIndex ||
-    ('minParams' in refSignature && refSignature.minParams
-      ? refSignature.minParams - 1 > argIndex
-      : false);
 
   const suggestions = [];
   const noArgDefined = !arg;
@@ -1153,11 +1121,37 @@ async function getFunctionArgsSuggestions(
       );
     }
 
+    const existingTypes = node.args.map((arg) =>
+      extractFinalTypeFromArg(arg, {
+        fields: fieldsMap,
+        variables: variablesExcludingCurrentCommandOnes,
+      })
+    );
+
+    const supportedFieldTypes = fnDefinition.signatures
+      // if existing arguments are preset already, use them to filter out incompatible signatures
+      .filter((signature) => {
+        if (existingTypes.length) {
+          return existingTypes.every((type, index) => signature.params[index].type === type);
+        }
+        return true;
+      })
+      .flatMap((signature) => {
+        if (signature.params.length > argIndex) {
+          return signature.params[argIndex].constantOnly ? '' : signature.params[argIndex].type;
+        }
+        if (signature.minParams) {
+          return signature.params[signature.params.length - 1].type;
+        }
+        return [];
+      })
+      .filter(nonNullable);
+
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
-        types,
+        supportedFieldTypes,
         command.name,
         option?.name,
         getFieldsByType,
@@ -1174,6 +1168,13 @@ async function getFunctionArgsSuggestions(
       ))
     );
   }
+
+  const hasMoreMandatoryArgs =
+    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+      argIndex ||
+    ('minParams' in refSignature && refSignature.minParams
+      ? refSignature.minParams - 1 > argIndex
+      : false);
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
@@ -1195,6 +1196,7 @@ async function getFunctionArgsSuggestions(
         );
       }
     }
+
     if (hasMoreMandatoryArgs) {
       // suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);

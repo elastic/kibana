@@ -64,6 +64,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
       showAllGroupByInstances,
       sloId: selectedSlo?.sloId,
       sloInstanceId: selectedSlo?.sloInstanceId,
+      remoteName: selectedSlo?.remoteName,
       overviewMode,
     });
 
@@ -73,14 +74,18 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem grow>
                 <SloSelector
                   singleSelection={true}
                   hasError={hasError}
                   onSelected={(slo) => {
                     setHasError(slo === undefined);
                     if (slo && 'id' in slo) {
-                      setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+                      setSelectedSlo({
+                        sloId: slo.id,
+                        sloInstanceId: slo.instanceId,
+                        remoteName: slo.remote?.remoteName,
+                      });
                     }
                   }}
                 />

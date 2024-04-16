@@ -195,6 +195,14 @@ export function registerQueryFunction({
               parameters: {
                 type: 'object',
                 properties: {
+                  guides: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['API', 'KIBANA', 'CROSS_CLUSTER'],
+                    },
+                    description: 'A list of guides',
+                  },
                   commands: {
                     type: 'array',
                     items: {
@@ -230,12 +238,19 @@ export function registerQueryFunction({
       }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
-        commands: string[];
-        functions: string[];
+        guides?: string[];
+        commands?: string[];
+        functions?: string[];
         intention: VisualizeESQLUserIntention;
       };
 
-      const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
+      const keywords = [
+        ...(args.commands ?? []),
+        ...(args.functions ?? []),
+        ...(args.guides ?? []),
+        'SYNTAX',
+        'OVERVIEW',
+      ].map((keyword) => keyword.toUpperCase());
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
@@ -381,7 +396,19 @@ export function registerQueryFunction({
             },
           };
         }),
-        startWith(createFunctionResponseMessage({ name: 'query', content: {} }))
+        startWith(
+          createFunctionResponseMessage({
+            name: 'query',
+            content: {},
+            data: {
+              documentation: {
+                intention: args.intention,
+                keywords,
+                files: messagesToInclude,
+              },
+            },
+          })
+        )
       );
     }
   );
