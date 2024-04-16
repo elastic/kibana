@@ -40,10 +40,14 @@ const setup = (
     buildFlavor = 'traditional',
     userSettings = {},
     uiSettingsValues,
+    currentLocation = '/n/es/app/foo',
+    basePath = '/n/es',
   }: {
     buildFlavor?: BuildFlavor;
     userSettings?: UserSettingsData;
     uiSettingsValues?: Record<string, any>;
+    currentLocation?: string;
+    basePath?: string;
   } = {}
 ) => {
   const config = {
@@ -84,6 +88,8 @@ const setup = (
   };
   coreStart.settings.globalClient = settingsGlobalClient;
   coreStart.chrome.setChromeStyle = setChromeStyle;
+  coreStart.application.currentLocation$ = of(currentLocation);
+  coreStart.http.basePath.get = jest.fn().mockReturnValue(basePath);
 
   return {
     plugin,
@@ -150,8 +156,8 @@ describe('Navigation Plugin', () => {
       };
 
       const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
-        { featureOn, defaultSolution: 'security' },
-        { uiSettingsValues }
+        { featureOn },
+        { uiSettingsValues, basePath: '/n/security/app/foo' }
       );
 
       plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
@@ -160,9 +166,26 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
 
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(
-        'security',
-        { onlyIfNotSet: true }
+        'security'
       );
+    });
+
+    it('should add the default solutionId in the basePath if not in currentLocation', async () => {
+      const uiSettingsValues: Record<string, any> = {
+        [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: true,
+      };
+
+      const { plugin, coreStart, unifiedSearch, cloud, cloudExperiments } = setup(
+        { featureOn, defaultSolution: 'oblt' }, // Default solution is observability
+        { uiSettingsValues, basePath: '/', currentLocation: '/app/bar' } // No solutionId in basePath
+      );
+
+      plugin.start(coreStart, { unifiedSearch, cloud, cloudExperiments });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
+      expect(coreStart.chrome.project.changeActiveSolutionNavigation).not.toHaveBeenCalled();
+      expect(coreStart.application.navigateToUrl).toHaveBeenCalledWith('/n/oblt/app/bar');
     });
 
     it('should add the opt in/out toggle in the user menu', async () => {
