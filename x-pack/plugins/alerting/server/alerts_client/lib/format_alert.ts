@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, get, isEmpty, merge, omit } from 'lodash';
+import { cloneDeep, get, isEmpty, isUndefined, merge, omit } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleAlertData } from '../../types';
 import { REFRESH_FIELDS_ALL } from './alert_conflict_resolver';
@@ -35,7 +35,7 @@ export const compactObject = (obj: Obj) => {
       // just filter out empty objects
       // keep any primitives or arrays, even empty arrays
       return (
-        !!obj[key] &&
+        !isUndefined(obj[key]) &&
         (Array.isArray(obj[key]) ||
           typeof obj[key] !== 'object' ||
           (typeof obj[key] === 'object' && !isEmpty(obj[key])))
