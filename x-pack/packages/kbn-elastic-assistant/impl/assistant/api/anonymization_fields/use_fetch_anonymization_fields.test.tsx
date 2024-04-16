@@ -10,11 +10,9 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
-import {
-  UseFetchAnonymizationFieldsParams,
-  useFetchAnonymizationFields,
-} from './use_fetch_anonymization_fields';
+import { useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { useAssistantContext } from '../../../assistant_context';
 
 const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
 
@@ -22,10 +20,7 @@ const http = {
   fetch: jest.fn().mockResolvedValue(statusResponse),
 } as unknown as HttpSetup;
 
-const defaultProps = {
-  http,
-  isAssistantEnabled: true,
-} as unknown as UseFetchAnonymizationFieldsParams;
+jest.mock('../../../assistant_context');
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
@@ -36,28 +31,31 @@ const createWrapper = () => {
 };
 
 describe('useFetchAnonymizationFields', () => {
+  (useAssistantContext as jest.Mock).mockReturnValue({
+    http,
+    assistantAvailability: {
+      isAssistantEnabled: true,
+    },
+  });
   it(`should make http request to fetch anonymization fields`, async () => {
-    renderHook(() => useFetchAnonymizationFields(defaultProps), {
+    renderHook(() => useFetchAnonymizationFields(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useFetchAnonymizationFields(defaultProps));
+      const { waitForNextUpdate } = renderHook(() => useFetchAnonymizationFields());
       await waitForNextUpdate();
-      expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-        '/api/elastic_assistant/anonymization_fields/_find',
-        {
-          method: 'GET',
-          query: {
-            page: 1,
-            per_page: 1000,
-          },
-          version: '2023-10-31',
-          signal: undefined,
-        }
-      );
+      expect(http.fetch).toHaveBeenCalledWith('/api/elastic_assistant/anonymization_fields/_find', {
+        method: 'GET',
+        query: {
+          page: 1,
+          per_page: 1000,
+        },
+        version: '2023-10-31',
+        signal: undefined,
+      });
 
-      expect(defaultProps.http.fetch).toHaveBeenCalled();
+      expect(http.fetch).toHaveBeenCalled();
     });
   });
 });

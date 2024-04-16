@@ -24,9 +24,15 @@ interface Props {
   isDataAnonymizable: boolean;
   anonymizationFields?: AnonymizationFieldResponse[];
   rawData?: string | Record<string, string[]>;
+  inline?: boolean;
 }
 
-const StatsComponent: React.FC<Props> = ({ isDataAnonymizable, anonymizationFields, rawData }) => {
+const StatsComponent: React.FC<Props> = ({
+  isDataAnonymizable,
+  anonymizationFields,
+  rawData,
+  inline,
+}) => {
   const { allowed, anonymized, total } = useMemo(
     () =>
       getStats({
@@ -40,17 +46,21 @@ const StatsComponent: React.FC<Props> = ({ isDataAnonymizable, anonymizationFiel
     <EuiFlexGroup alignItems="center" data-test-subj="stats" gutterSize="none">
       {isDataAnonymizable && (
         <StatFlexItem grow={false}>
-          <AllowedStat allowed={allowed} total={total} />
+          <AllowedStat allowed={allowed} total={total} inline={inline} />
         </StatFlexItem>
       )}
 
       <StatFlexItem grow={false}>
-        <AnonymizedStat anonymized={anonymized} isDataAnonymizable={isDataAnonymizable} />
+        <AnonymizedStat
+          anonymized={anonymized}
+          isDataAnonymizable={isDataAnonymizable}
+          inline={inline}
+        />
       </StatFlexItem>
 
       {isDataAnonymizable && (
         <StatFlexItem grow={false}>
-          <AvailableStat total={total} />
+          <AvailableStat total={total} inline={inline} />
         </StatFlexItem>
       )}
     </EuiFlexGroup>

@@ -6,16 +6,14 @@
  */
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
+import { useAssistantContext } from '../../../assistant_context';
 
 export interface UseFetchAnonymizationFieldsParams {
-  http: HttpSetup;
-  isAssistantEnabled: boolean;
   signal?: AbortSignal | undefined;
 }
 
@@ -28,36 +26,49 @@ export interface UseFetchAnonymizationFieldsParams {
  *
  * @returns {useQuery} hook for getting the status of the anonymization fields
  */
-export const useFetchAnonymizationFields = ({
-  http,
-  signal,
-  isAssistantEnabled,
-}: UseFetchAnonymizationFieldsParams) => {
-  const query = {
-    page: 1,
-    per_page: 1000, // Continue use in-memory paging till the new design will be ready
-  };
 
-  const cachingKeys = [
-    ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
-    query.page,
-    query.per_page,
-    API_VERSIONS.public.v1,
-  ];
+const QUERY = {
+  page: 1,
+  per_page: 1000, // Continue use in-memory paging till the new design will be ready
+};
 
-  return useQuery([cachingKeys, query], async () => {
-    if (!isAssistantEnabled) {
-      return { page: 0, perPage: 0, total: 0, data: [] };
-    }
-    const res = await http.fetch<FindAnonymizationFieldsResponse>(
-      ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
-      {
+export const CACHING_KEYS = [
+  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
+  QUERY.page,
+  QUERY.per_page,
+  API_VERSIONS.public.v1,
+];
+
+export const useFetchAnonymizationFields = (payload?: UseFetchAnonymizationFieldsParams) => {
+  const {
+    assistantAvailability: { isAssistantEnabled },
+    http,
+  } = useAssistantContext();
+
+  return useQuery<FindAnonymizationFieldsResponse, unknown, FindAnonymizationFieldsResponse>(
+    CACHING_KEYS,
+    async () =>
+      http.fetch(ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND, {
         method: 'GET',
         version: API_VERSIONS.public.v1,
-        query,
-        signal,
-      }
-    );
-    return res;
-  });
+        query: QUERY,
+        signal: payload?.signal,
+      }),
+    {
+      initialData: {
+        data: [],
+        page: 1,
+        perPage: 5,
+        total: 0,
+      },
+      placeholderData: {
+        data: [],
+        page: 1,
+        perPage: 5,
+        total: 0,
+      },
+      keepPreviousData: true,
+      enabled: isAssistantEnabled,
+    }
+  );
 };
