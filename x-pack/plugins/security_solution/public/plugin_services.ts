@@ -112,8 +112,6 @@ export class PluginServices {
     });
     const customDataService = this.startCustomDataService(query, startPlugins.data);
 
-    const timelineFilterManager = new FilterManager(coreStart.uiSettings);
-
     const timelineDataService: DataPublicPluginStart = {
       ...startPlugins.data,
       query,
@@ -121,7 +119,7 @@ export class PluginServices {
       _name: 'timeline',
     };
 
-    timelineDataService.query.filterManager = timelineFilterManager;
+    timelineDataService.query.filterManager = new FilterManager(coreStart.uiSettings);
 
     return {
       ...coreStart,
@@ -140,7 +138,6 @@ export class PluginServices {
       telemetry: this.telemetry.start(),
       customDataService,
       topValuesPopover: new TopValuesPopoverService(),
-      timelineFilterManager,
       timelineDataService,
     };
   }

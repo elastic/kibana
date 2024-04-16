@@ -44,7 +44,16 @@ export const createFilterLensAction = ({
   services: StartServices;
   negate?: boolean;
 }) => {
-  const { application, notifications, data: dataService, topValuesPopover } = services;
+  const {
+    application,
+    notifications,
+    data: dataService,
+    topValuesPopover,
+    timelineDataService,
+  } = services;
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
 
   let currentAppId: string | undefined;
   application.currentAppId$.subscribe((appId) => {
@@ -92,7 +101,7 @@ export const createFilterLensAction = ({
       const timeline = getTimelineById(store.getState(), TimelineId.active);
       // timeline is open add the filter to timeline, otherwise add filter to global filters
       const filterManager = timeline?.show
-        ? services.timelineFilterManager
+        ? timelineFilterManager
         : dataService.query.filterManager;
 
       addFilter({ filterManager, fieldName: field, value, dataViewId });

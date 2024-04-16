@@ -150,10 +150,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
       charts,
       docLinks,
       analytics,
-      timelineFilterManager,
       timelineDataService,
     },
   } = useKibana();
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
 
   const fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'] = useMemo(
     () => ({

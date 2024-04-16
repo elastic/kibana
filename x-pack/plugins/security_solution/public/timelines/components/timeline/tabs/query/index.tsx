@@ -126,7 +126,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { uiSettings, timelineFilterManager, timelineDataService } = useKibana().services;
+  const { uiSettings, timelineDataService } = useKibana().services;
+  const {
+    query: { filterManager: timelineFilterManager },
+  } = timelineDataService;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
