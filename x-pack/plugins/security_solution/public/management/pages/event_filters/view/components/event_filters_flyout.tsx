@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { lastValueFrom } from 'rxjs';
 
@@ -167,16 +168,21 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
       setException(formState.item);
     }, []);
 
+    const eventFiltersCreateFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'addExceptionFlyoutTitle',
+    });
+
     return (
       <EuiFlyout
         size="l"
         onClose={handleOnClose}
         data-test-subj="eventFiltersCreateFlyout"
+        aria-labelledby={eventFiltersCreateFlyoutTitle}
         {...flyoutProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={eventFiltersCreateFlyoutTitle}>
               {data ? (
                 <FormattedMessage
                   id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title.create.withData"

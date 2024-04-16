@@ -146,11 +146,17 @@ export const ImportExceptionListFlyout = React.memo(
     const handleFileChange = useCallback((inputFiles: FileList | null) => {
       setFiles(inputFiles ?? null);
     }, []);
+
     return (
-      <EuiFlyout ownFocus size="s" onClose={() => setDisplayImportListFlyout(false)}>
+      <EuiFlyout
+        ownFocus
+        size="s"
+        onClose={() => setDisplayImportListFlyout(false)}
+        aria-labelledby={importExceptionListFlyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{i18n.IMPORT_EXCEPTION_LIST_HEADER}</h2>
+            <h2 id={importExceptionListFlyoutTitleId}>{i18n.IMPORT_EXCEPTION_LIST_HEADER}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
