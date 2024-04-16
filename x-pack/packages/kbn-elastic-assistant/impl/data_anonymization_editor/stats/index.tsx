@@ -6,11 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { AllowedStat } from './allowed_stat';
 import { AnonymizedStat } from './anonymized_stat';
 import { getStats } from '../get_stats';
@@ -25,6 +26,7 @@ interface Props {
   anonymizationFields?: AnonymizationFieldResponse[];
   rawData?: string | Record<string, string[]>;
   inline?: boolean;
+  replacements?: Replacements;
 }
 
 const StatsComponent: React.FC<Props> = ({
@@ -32,14 +34,16 @@ const StatsComponent: React.FC<Props> = ({
   anonymizationFields,
   rawData,
   inline,
+  replacements,
 }) => {
   const { allowed, anonymized, total } = useMemo(
     () =>
       getStats({
         anonymizationFields,
         rawData,
+        replacements,
       }),
-    [anonymizationFields, rawData]
+    [anonymizationFields, rawData, replacements]
   );
 
   return (
@@ -53,7 +57,7 @@ const StatsComponent: React.FC<Props> = ({
       <StatFlexItem grow={false}>
         <AnonymizedStat
           anonymized={anonymized}
-          isDataAnonymizable={isDataAnonymizable}
+          isDataAnonymizable={isDataAnonymizable || anonymized > 0}
           inline={inline}
         />
       </StatFlexItem>
