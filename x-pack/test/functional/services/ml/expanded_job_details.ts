@@ -57,6 +57,7 @@ export function MachineLearningExpandedJobDetailsProvider(
           clearWithKeyboard: true,
         });
         await testSubjects.click('annotationFlyoutUpdateOrCreateButton');
+        await testSubjects.missingOrFail('mlAnnotationsFlyoutTextInput');
       });
 
       await jobTable.withDetailsOpen(jobId, async () => {
