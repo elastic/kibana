@@ -140,11 +140,15 @@ export function defineRoutes({
       } catch (e) {
         log.error('Failed to create the chat stream', e);
 
-        return response.badRequest({
-          body: {
-            message: e,
-          },
-        });
+        if (typeof e === 'string') {
+          return response.badRequest({
+            body: {
+              message: e,
+            },
+          });
+        }
+
+        throw e;
       }
 
       const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
