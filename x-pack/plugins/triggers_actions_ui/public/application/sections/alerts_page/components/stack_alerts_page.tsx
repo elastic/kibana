@@ -184,6 +184,7 @@ const PageContent = () => {
           <UrlSyncedAlertsSearchBar
             appName={ALERTS_PAGE_ID}
             featureIds={featureIds}
+            showFilterControls
             showFilterBar
             quickFilters={quickFilters}
             onActiveFeatureFiltersChange={setActiveFeatureFilters}
