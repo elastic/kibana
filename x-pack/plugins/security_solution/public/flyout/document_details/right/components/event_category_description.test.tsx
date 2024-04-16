@@ -73,7 +73,7 @@ describe('<EventCategoryDescription />', () => {
     });
 
     expect(getByTestId(`${EVENT_CATEGORY_DESCRIPTION_TEST_ID}-behavior`)).toHaveTextContent(
-      'BehaviorThis field is not an ecs field, description is not available.'
+      "BehaviorThis field doesn't have a description because it's not part of ECS."
     );
   });
 });

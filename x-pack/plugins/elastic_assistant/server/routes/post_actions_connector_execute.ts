@@ -19,13 +19,14 @@ import {
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { i18n } from '@kbn/i18n';
 import { getLlmType } from './utils';
 import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
 } from '../lib/telemetry/event_based_telemetry';
-import { executeAction } from '../lib/executor';
+import { executeAction, StaticResponse } from '../lib/executor';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
@@ -107,6 +108,11 @@ export const postActionsConnectorExecuteRoute = (
             };
           }
 
+          const connectorId = decodeURIComponent(request.params.connectorId);
+
+          // get the actions plugin start contract from the request context:
+          const actions = (await context.elasticAssistant).actions;
+
           if (conversationId) {
             const conversation = await conversationsDataClient?.getConversation({
               id: conversationId,
@@ -158,6 +164,66 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
 
+            const NEW_CHAT = i18n.translate('xpack.elasticAssistantPlugin.server.newChat', {
+              defaultMessage: 'New chat',
+            });
+            if (conversation?.title === NEW_CHAT && prevMessages) {
+              try {
+                const autoTitle = (await executeAction({
+                  actions,
+                  request,
+                  connectorId,
+                  actionTypeId,
+                  params: {
+                    subAction: 'invokeAI',
+                    subActionParams: {
+                      model: request.body.model,
+                      messages: [
+                        {
+                          role: 'assistant',
+                          content: i18n.translate(
+                            'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
+                            {
+                              defaultMessage:
+                                'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                            }
+                          ),
+                        },
+                        newMessage ?? prevMessages?.[0],
+                      ],
+                      ...(actionTypeId === '.gen-ai'
+                        ? { n: 1, stop: null, temperature: 0.2 }
+                        : { temperature: 0, stopSequences: [] }),
+                    },
+                  },
+                  logger,
+                })) as unknown as StaticResponse; // TODO: Use function overloads in executeAction to avoid this cast when sending subAction: 'invokeAI',
+                if (autoTitle.status === 'ok') {
+                  try {
+                    // This regular expression captures a string enclosed in single or double quotes.
+                    // It extracts the string content without the quotes.
+                    // Example matches:
+                    // - "Hello, World!" => Captures: Hello, World!
+                    // - 'Another Example' => Captures: Another Example
+                    // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+                    const match = autoTitle.data.match(/^["']?([^"']+)["']?$/);
+                    const title = match ? match[1] : autoTitle.data;
+
+                    await conversationsDataClient?.updateConversation({
+                      conversationUpdateProps: {
+                        id: conversationId,
+                        title,
+                      },
+                    });
+                  } catch (e) {
+                    logger.warn(`Failed to update conversation with generated title: ${e.message}`);
+                  }
+                }
+              } catch (e) {
+                /* empty */
+              }
+            }
+
             onLlmResponse = async (
               content: string,
               traceData: Message['traceData'] = {},
@@ -189,11 +255,6 @@ export const postActionsConnectorExecuteRoute = (
             };
           }
 
-          const connectorId = decodeURIComponent(request.params.connectorId);
-
-          // get the actions plugin start contract from the request context:
-          const actions = (await context.elasticAssistant).actions;
-
           // if not langchain, call execute action directly and return the response:
           if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
             logger.debug('Executing via actions framework directly');
@@ -219,8 +280,11 @@ export const postActionsConnectorExecuteRoute = (
             });
 
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+              actionTypeId,
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
               isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+              model: request.body.model,
+              assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
             });
             return response.ok({
               body: result,
@@ -295,8 +359,14 @@ export const postActionsConnectorExecuteRoute = (
             });
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+            actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
+            // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
+            // tracked here: https://github.com/elastic/security-team/issues/7363
+            assistantStreamingEnabled:
+              request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
           });
 
           return response.ok<
@@ -309,9 +379,12 @@ export const postActionsConnectorExecuteRoute = (
             onLlmResponse(error.message, {}, true);
           }
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+            actionTypeId: request.body.actionTypeId,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
+            model: request.body.model,
             errorMessage: error.message,
+            assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
           });
 
           return resp.error({

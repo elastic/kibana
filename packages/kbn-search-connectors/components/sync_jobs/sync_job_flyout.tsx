@@ -68,8 +68,14 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
                       defaultMessage: 'ID',
                     }),
                   },
+                  {
+                    field: 'index_name',
+                    name: i18n.translate('searchConnectors.syncJobs.flyout.sync.index', {
+                      defaultMessage: 'Index name',
+                    }),
+                  },
                 ]}
-                items={[{ id: syncJob.id }]}
+                items={[{ id: syncJob.id, index_name: syncJob.connector.index_name }]}
               />
             </FlyoutPanel>
           </EuiFlexItem>

@@ -7,11 +7,7 @@
 
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import {
-  type Logger,
-  SavedObjectsErrorHelpers,
-  type StartServicesAccessor,
-} from '@kbn/core/server';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -23,7 +19,6 @@ import {
   type IdentifierType,
   RiskScoreEntity,
 } from '../../../../../common/entity_analytics/risk_engine';
-import type { StartPlugins } from '../../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score_data_client';
@@ -44,7 +39,7 @@ import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
-import type { EntityAnalyticsConfig } from '../../types';
+import type { EntityAnalyticsConfig, EntityAnalyticsRoutesDeps } from '../../types';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -65,7 +60,7 @@ export const registerRiskScoringTask = ({
   telemetry,
   entityAnalyticsConfig,
 }: {
-  getStartServices: StartServicesAccessor<StartPlugins>;
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
   taskManager: TaskManagerSetupContract | undefined;
