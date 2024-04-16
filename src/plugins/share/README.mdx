@@ -18,31 +18,6 @@ generating deep links to other apps using *locators*, and creating short URLs.
 You can register an item into sharing context menu (which is displayed in
 Dashboard, Discover, and Visualize apps).
 
-### Example registration
-
-```ts
-import { ShareContext, ShareMenuItem } from 'src/plugins/share/public';
-
-plugins.share.register({
-  id: 'demo',
-  getShareMenuItems: (context) => [
-    {
-      panel: {
-        id: 'demo',
-        title: 'Panel title',
-        content: 'Panel content',
-      },
-      shareMenuItem: {
-        name: 'Demo list item (from share_example plugin)',
-      },
-    }
-  ],
-});
-```
-
-Now the "Demo list item" will appear under the "Share" menu in Discover and
-Dashboard applications.
-
 
 ## Locators
 
@@ -228,3 +203,16 @@ const url = await shortUrls.create({
 ```
 
 To resolve the short URL, navigate to `/r/s/<slug>` in the browser.
+
+### Redesign of Share Context menu
+April 2024 the share context menu changed from using EUI panels to a tabbed modal. One of the goals
+was to streamline the user experience and remove areas of confusion. For instance, the saved object
+and snapshot radio options in the Link portion was confusing to users. The following was implemented 
+in the redesign:
+
+When user clicks the ‘copy link’ button
+For dashboard: copy the “snapshot” URL to user clipboard
+For lens: copy the “saved object” URL to user clipboard. 
+If lens is not saved to library you cannot copy (show unsaved changed error as in figma)
+For discover: discover is saved: copy the “snapshot” URL to user clipboard
+Default to short URL where possible 

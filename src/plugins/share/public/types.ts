@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType, ReactElement } from 'react';
-import type { InjectedIntl } from '@kbn/i18n-react';
+import { ComponentType, ReactElement } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Capabilities, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
@@ -67,47 +66,32 @@ export interface ShareContextMenuPanelItem
   sortOrder?: number;
 }
 
-export type SupportedExportTypes =
-  | 'pngV2'
-  | 'printablePdfV2'
-  | 'csv_v2'
-  | 'csv_searchsource'
-  | 'lens_csv';
-
 /**
  * @public
- * Definition of a menu item rendered in the share menu. `shareMenuItem` is shown
- * directly in the context menu. If the item is clicked, the `panel` is shown.
+ * Definition of a menu item rendered in the share menu. In the redesign, the
+ * `shareMenuItem` is shown in a modal. However, Canvas
+ * uses the legacy panel implementation.
  * */
-
-interface ShareMenuItemBase {
+export interface ShareMenuItem {
   shareMenuItem?: ShareContextMenuPanelItem;
-}
-interface ShareMenuItemLegacy extends ShareMenuItemBase {
+  // needed for Canvas
   panel?: EuiContextMenuPanelDescriptor;
-}
-
-export interface ShareMenuItemV2 extends ShareMenuItemBase {
-  // extended props to support share modal
-  label: 'PDF' | 'CSV' | 'PNG';
-  reportType?: SupportedExportTypes;
+  label?: 'PDF' | 'CSV' | 'PNG';
+  reportType?: string;
   requiresSavedState?: boolean;
   helpText?: ReactElement;
   copyURLButton?: { id: string; dataTestSubj: string; label: string };
-  generateExport: (args: {
-    intl: InjectedIntl;
-    optimizedForPrinting?: boolean;
-  }) => Promise<unknown>;
-  generateExportButtonLabel?: ReactElement;
+  generateReportButton?: ReactElement;
+  generateReport?: Function;
+  generateReportForPrinting?: Function;
   theme?: ThemeServiceSetup;
+  downloadCSVLens?: Function;
   renderLayoutOptionSwitch?: boolean;
   layoutOption?: 'print';
   absoluteUrl?: string;
   generateCopyUrl?: URL;
   renderCopyURLButton?: boolean;
 }
-
-export type ShareMenuItem = ShareMenuItemLegacy | ShareMenuItemV2;
 
 type ShareMenuItemType = Omit<ShareMenuItem, 'intl'>;
 /**

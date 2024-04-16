@@ -14,7 +14,7 @@ import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
-import { ShareMenuV2 } from '../components/share_tabs';
+import { ShareMenu } from '../components/share_tabs';
 
 export class ShareMenuManager {
   private isOpen = false;
@@ -108,7 +108,7 @@ export class ShareMenuManager {
     const openModal = () => {
       const session = overlays.openModal(
         toMountPoint(
-          <ShareMenuV2
+          <ShareMenu
             shareContext={{
               allowEmbed,
               allowShortUrl,

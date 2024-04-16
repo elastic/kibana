@@ -12,7 +12,7 @@ import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
 import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
 import { linkTab, embedTab, exportTab } from './tabs';
 
-export const ShareMenuV2: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
+export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
     <ShareTabsContext.Provider value={shareContext}>
       <ShareMenuTabs />
