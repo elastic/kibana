@@ -249,7 +249,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
         );
-        await esArchiver.load(
+        await esArchiver.unload(
           'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
         );
       });
