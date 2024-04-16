@@ -247,7 +247,7 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat'
         );
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
