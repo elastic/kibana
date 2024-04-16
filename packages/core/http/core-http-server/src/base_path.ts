@@ -9,6 +9,22 @@
 import type { KibanaRequest } from './router';
 
 /**
+ * Config for a partial basePath value that is specific to a request.
+ * Partial basePath means that mulitple basePath values can be applied to a single request
+ * and they will be concatenated in the order of their index.
+ *
+ * @public
+ */
+export interface PartialBasePathValue {
+  /** A unique id for this basePath value */
+  id: string;
+  /** The partial base path string value */
+  basePath: string;
+  /** The index of the partial, lower means comes before other base path declared */
+  index: number;
+}
+
+/**
  * Access or manipulate the Kibana base path
  *
  * @public
@@ -38,10 +54,7 @@ export interface IBasePath {
   /**
    * sets `basePath` value, specific for an incoming request.
    */
-  set(
-    request: KibanaRequest,
-    requestSpecificBasePath: string | { id: string; basePath: string; index: number }
-  ): void;
+  set(request: KibanaRequest, requestSpecificBasePath: string | PartialBasePathValue): void;
 
   /**
    * Prepends `path` with the basePath.

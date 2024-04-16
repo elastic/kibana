@@ -8,14 +8,8 @@
 
 import { modifyUrl } from '@kbn/std';
 import { Request } from '@hapi/hapi';
-import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
+import type { KibanaRequest, IBasePath, PartialBasePathValue } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-
-export interface PartialBasePathValue {
-  id: string;
-  basePath: string;
-  index: number;
-}
 
 const isPartialBasePath = (obj?: string | PartialBasePathValue): obj is PartialBasePathValue =>
   !!obj && typeof obj === 'object';
