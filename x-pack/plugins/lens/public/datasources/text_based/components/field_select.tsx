@@ -57,19 +57,17 @@ export function FieldSelect({
 
   return (
     <FieldPicker<FieldOptionValue>
-      selectedOptions={
+      activeField={
         selectedField
-          ? ([
-              {
-                label: selectedField.fieldName,
-                value: {
-                  type: 'field',
-                  field: selectedField.fieldName,
-                  dataType: selectedField?.meta?.type,
-                },
+          ? ({
+              label: selectedField.fieldName,
+              value: {
+                type: 'field',
+                field: selectedField.fieldName,
+                dataType: selectedField?.meta?.type,
               },
-            ] as unknown as Array<FieldOption<FieldOptionValue>>)
-          : []
+            } as unknown as FieldOption<FieldOptionValue>)
+          : undefined
       }
       options={memoizedFieldOptions as Array<FieldOption<FieldOptionValue>>}
       onChoose={(choice) => {

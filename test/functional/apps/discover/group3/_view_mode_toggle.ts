@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscViewModeToggle');
 
           if (!useLegacyTable) {
-            await testSubjects.existOrFail('dscGridToolbar');
+            await testSubjects.existOrFail('unifiedDataTableToolbar');
           }
 
           const documentsTab = await testSubjects.find('dscViewModeDocumentButton');
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('dscViewModeToggle');
 
           if (!useLegacyTable) {
-            await testSubjects.existOrFail('dscGridToolbar');
+            await testSubjects.existOrFail('unifiedDataTableToolbar');
           }
         });
 
