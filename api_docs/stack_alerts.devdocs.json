@@ -406,7 +406,38 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.ES_QUERY_MAX_HITS_PER_EXECUTION",
+        "type": "number",
+        "tags": [],
+        "label": "ES_QUERY_MAX_HITS_PER_EXECUTION",
+        "description": [],
+        "signature": [
+          "10000"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS",
+        "type": "number",
+        "tags": [],
+        "label": "ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "stackAlerts",

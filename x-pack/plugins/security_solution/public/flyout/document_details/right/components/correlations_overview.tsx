@@ -72,7 +72,7 @@ export const CorrelationsOverview: React.FC = () => {
     getFieldsData,
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
-  const showCases = useShowRelatedCases();
+  const showCases = useShowRelatedCases({ getFieldsData });
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
     getFieldsData,
   });
