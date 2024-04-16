@@ -78,7 +78,8 @@ export function registerQueryFunction({
       name: 'execute_query',
       contexts: ['core'],
       visibility: FunctionVisibility.UserOnly,
-      description: 'Display the results of an ES|QL query',
+      description:
+        'Display the results of an ES|QL query. ONLY use this if the "query" function has been used before or if the user or screen context has provided a query you can use.',
       parameters: {
         type: 'object',
         properties: {
@@ -108,7 +109,7 @@ export function registerQueryFunction({
     {
       name: 'query',
       contexts: ['core'],
-      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. This function takes no arguments.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no arguments.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
     async ({ messages, connectorId, chat }, signal) => {

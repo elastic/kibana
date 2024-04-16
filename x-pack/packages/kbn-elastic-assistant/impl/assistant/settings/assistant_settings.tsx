@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,7 +23,6 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
@@ -38,6 +37,7 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
+import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -63,12 +63,11 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
+  isFlyoutMode: boolean;
   onSave: (success: boolean) => Promise<void>;
-  selectedConversation: Conversation;
+  selectedConversationId?: string;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
-  anonymizationFields: FindAnonymizationFieldsResponse;
-  refetchAnonymizationFieldsResults: () => Promise<FindAnonymizationFieldsResponse | undefined>;
 }
 
 /**
@@ -80,19 +79,22 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     defaultConnector,
     onClose,
     onSave,
-    selectedConversation: defaultSelectedConversation,
+    selectedConversationId: defaultSelectedConversationId,
     onConversationSelected,
     conversations,
-    anonymizationFields,
-    refetchAnonymizationFieldsResults,
+    isFlyoutMode,
   }) => {
     const {
       actionTypeRegistry,
       modelEvaluatorEnabled,
       http,
+      toasts,
       selectedSettingsTab,
       setSelectedSettingsTab,
     } = useAssistantContext();
+
+    const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
+      useFetchAnonymizationFields();
 
     const {
       conversationSettings,
@@ -116,19 +118,17 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
-    const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
-      () => {
-        return conversationSettings[defaultSelectedConversation.title];
-      }
+    const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>(
+      defaultSelectedConversationId
     );
     const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
-      setSelectedConversation(conversation);
+      setSelectedConversationId(conversation?.id);
     }, []);
-    useEffect(() => {
-      if (selectedConversation != null) {
-        setSelectedConversation(conversationSettings[selectedConversation.title]);
-      }
-    }, [conversationSettings, selectedConversation]);
+
+    const selectedConversation = useMemo(
+      () => (selectedConversationId ? conversationSettings[selectedConversationId] : undefined),
+      [conversationSettings, selectedConversationId]
+    );
 
     // Quick Prompt Selection State
     const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
@@ -157,7 +157,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     const handleSave = useCallback(async () => {
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
       const isSelectedConversationDeleted =
-        conversationSettings[defaultSelectedConversation.title] == null;
+        defaultSelectedConversationId &&
+        conversationSettings[defaultSelectedConversationId] == null;
       const newSelectedConversation: Conversation | undefined =
         Object.values(conversationSettings)[0];
       if (isSelectedConversationDeleted && newSelectedConversation != null) {
@@ -167,22 +168,27 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         });
       }
       const saveResult = await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+      });
       if (
         (anonymizationFieldsBulkActions?.create?.length ?? 0) > 0 ||
         (anonymizationFieldsBulkActions?.update?.length ?? 0) > 0 ||
         (anonymizationFieldsBulkActions?.delete?.ids?.length ?? 0) > 0
       ) {
-        refetchAnonymizationFieldsResults();
+        await refetchAnonymizationFieldsResults();
       }
-      onSave(saveResult);
+      await onSave(saveResult);
     }, [
       anonymizationFieldsBulkActions,
       conversationSettings,
-      defaultSelectedConversation.title,
+      defaultSelectedConversationId,
       onConversationSelected,
       onSave,
       refetchAnonymizationFieldsResults,
       saveSettings,
+      toasts,
     ]);
 
     return (
@@ -319,6 +325,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
                     onSelectedConversationChange={onHandleSelectedConversationChange}
                     http={http}
+                    isFlyoutMode={isFlyoutMode}
                   />
                 )}
                 {selectedSettingsTab === QUICK_PROMPTS_TAB && (
