@@ -96,7 +96,7 @@ const extractRequestBody = (
         schema,
       },
     };
-  }, {} as OpenAPIV3.RequestBodyObject['content']);
+  }, {});
 };
 
 const extractVersionedResponses = (
