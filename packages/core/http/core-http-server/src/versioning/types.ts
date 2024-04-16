@@ -240,6 +240,8 @@ export interface AddVersionOpts<P, Q, B> {
   version: ApiVersion;
   /**
    * Validation for this version of a route
+   * @note if providing a function to lazily load your validation schemas assume
+   *       that the function will only be called once.
    * @public
    */
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
