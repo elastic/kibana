@@ -524,18 +524,6 @@
             "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
           },
           {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
             "plugin": "home",
             "path": "src/plugins/home/public/application/application.tsx"
           },
@@ -1546,18 +1534,6 @@
           {
             "plugin": "watcher",
             "path": "x-pack/plugins/watcher/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
           },
           {
             "plugin": "profiling",
