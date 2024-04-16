@@ -132,7 +132,7 @@ const esqlSampleLogData: TestData = {
   sourceIndexOrSavedSearch: 'ft_module_sample_logs',
   expected: {
     hasDocCountChart: false,
-    totalDocCountFormatted: '149',
+    totalDocCountFormatted: '143',
     metricFields: [
       {
         fieldName: 'max_bytes_kb',
@@ -314,8 +314,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       runTests(esqlFarequoteData);
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/180072
-    describe.skip('with module_sample_logs ', function () {
+    describe('with module_sample_logs ', function () {
       runTests(esqlSampleLogData);
     });
   });
