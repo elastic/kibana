@@ -231,13 +231,6 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              color={
-                objectType === 'dashboard' && allowShortUrl
-                  ? 'primary'
-                  : isNotSaved()
-                  ? 'text'
-                  : 'primary'
-              }
               data-share-url={url}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={lensOnClick}
