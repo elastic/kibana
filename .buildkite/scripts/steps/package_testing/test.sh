@@ -64,7 +64,7 @@ trap "echoKibanaLogs" EXIT
 
 if [[ "$TEST_PACKAGE" == "fips" ]]; then
   set +e
-  vagrant ssh $TEST_PACKAGE -t -c "/home/vagrant/kibana/src/.buildkite/scripts/steps/fips/smoke_test.sh"
+  vagrant ssh $TEST_PACKAGE -t -c "/home/vagrant/kibana/.buildkite/scripts/steps/fips/smoke_test.sh"
   set -e
 
   # TODO: Remove

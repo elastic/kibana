@@ -19,9 +19,11 @@ configs=(
   "x-pack/test/functional/apps/security/config.ts"
 )
 
+cd /home/vagrant/kibana
+
 for config in "${configs[@]}"; do
   set +e
-  node ./scripts/functional_tests \
+  /usr/share/kibana/node/bin/node /home/vagrant/kibana/scripts/functional_tests \
     --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config"

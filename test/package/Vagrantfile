@@ -38,7 +38,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "fips" do |fips|
-    fips.vm.synced_folder '../../', '/home/vagrant/kibana/src', SharedFoldersEnableSymlinksCreate: false
+    fips.vm.synced_folder '../../', '/home/vagrant/kibana', SharedFoldersEnableSymlinksCreate: false
     fips.vm.provider :virtualbox do |vb|
       vb.memory = 4096
       vb.cpus = 2
