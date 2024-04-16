@@ -25,7 +25,9 @@ interface Props {
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
   isFlyoutMode: boolean;
-  onConnectorSelected: (conversation: Conversation) => void;
+  onConnectorIdSelected?: (connectorId: string) => void;
+  onConnectorSelected?: (conversation: Conversation) => void;
+  showLabel?: boolean;
 }
 
 const inputContainerClassName = css`
@@ -69,6 +71,8 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     selectedConnectorId,
     selectedConversation,
     isFlyoutMode,
+    showLabel = true,
+    onConnectorIdSelected,
     onConnectorSelected,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -112,12 +116,17 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               model,
             },
           });
-          if (conversation) {
+
+          if (conversation && onConnectorSelected != null) {
             onConnectorSelected(conversation);
           }
         }
+
+        if (onConnectorIdSelected != null) {
+          onConnectorIdSelected(connectorId);
+        }
       },
-      [selectedConversation, setApiConfig, onConnectorSelected]
+      [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
     );
 
     if (isFlyoutMode) {
@@ -168,11 +177,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.INLINE_CONNECTOR_LABEL}
-          </EuiText>
-        </EuiFlexItem>
+        {showLabel && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.INLINE_CONNECTOR_LABEL}
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {isOpen ? (
             <ConnectorSelector

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { Replacements } from '@kbn/elastic-assistant-common';
+
 export interface OptionalRequestParams {
   allow?: string[];
   allowReplacement?: string[];
-  replacements?: Record<string, string>;
+  replacements?: Replacements;
 }
 
 export const getOptionalRequestParams = ({
