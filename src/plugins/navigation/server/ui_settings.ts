@@ -33,6 +33,7 @@ export const getUiSettings = (config: NavigationConfig): Record<string, UiSettin
       schema: schema.boolean(),
       value: config.solutionNavigation.enabled,
       order: 1,
+      requiresPageReload: true,
     },
   };
 };

@@ -25,7 +25,9 @@ const setup = () => {
   };
 };
 
-const initAndRetrieveHandler = () => {
+const initAndRetrieveHandler = ({
+  isEnabledInGlobalSettings = true,
+}: { isEnabledInGlobalSettings?: boolean } = {}) => {
   const { http, request, response, toolkit } = setup();
 
   let handler: OnPreRoutingHandler | undefined;
@@ -33,7 +35,11 @@ const initAndRetrieveHandler = () => {
     handler = _handler;
   });
 
-  initSolutionOnRequestInterceptor({ http, defaultSolution: 'es' });
+  initSolutionOnRequestInterceptor({
+    http,
+    defaultSolution: 'es',
+    getIsEnabledInGlobalSettings: () => Promise.resolve(isEnabledInGlobalSettings),
+  });
 
   if (!handler) {
     throw new Error('Pre routing handler has not been set');
@@ -46,7 +52,11 @@ describe('initSolutionOnRequestInterceptor()', () => {
   test('sould register preRouting handler', () => {
     const { http } = setup();
     expect(http.registerOnPreRouting).not.toHaveBeenCalled();
-    initSolutionOnRequestInterceptor({ http, defaultSolution: 'es' });
+    initSolutionOnRequestInterceptor({
+      http,
+      defaultSolution: 'es',
+      getIsEnabledInGlobalSettings: jest.fn(),
+    });
     expect(http.registerOnPreRouting).toHaveBeenCalled();
   });
 
@@ -86,6 +96,32 @@ describe('initSolutionOnRequestInterceptor()', () => {
 
       expect(response.redirected).toHaveBeenCalledWith({
         headers: { location: `/mock-server-basepath/n/es${pathname}` }, // defaultSolution "es" has been added
+      });
+      expect(toolkit.rewriteUrl).not.toHaveBeenCalled();
+      expect(toolkit.next).not.toHaveBeenCalled();
+
+      response.redirected.mockReset();
+    }
+  });
+
+  test('sould strip the solutionId if disabled in global settings and requesting app or on space selector', async () => {
+    const { handler, request, response, toolkit, http } = initAndRetrieveHandler({
+      isEnabledInGlobalSettings: false, // Solution nav is disabled in global settings
+    });
+
+    // Calling an app path (discover) or the space selector **with** solutionId in the path
+    for (const [pathname, expected] of [
+      ['/n/es/app/discover', '/app/discover'],
+      ['/n/es/spaces/space_selector', '/spaces/space_selector'],
+    ]) {
+      request.url.pathname = pathname;
+
+      await handler(request, response, toolkit);
+
+      expect(http.basePath.set).not.toHaveBeenCalled();
+
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: { location: `/mock-server-basepath${expected}` }, // solutionId has been stripped
       });
       expect(toolkit.rewriteUrl).not.toHaveBeenCalled();
       expect(toolkit.next).not.toHaveBeenCalled();

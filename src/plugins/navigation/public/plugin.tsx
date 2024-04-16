@@ -241,11 +241,9 @@ export class NavigationPublicPlugin
 
         if (!enabled || userOptedOut === true) {
           chrome.project.changeActiveSolutionNavigation(null);
-          chrome.setChromeStyle('classic');
         } else {
           if (initialized) return;
 
-          // Read solution from URL
           const requestBasePath = core.http.basePath.get();
           const { serverBasePath } = core.http.basePath;
           const { solutionId } = getSolutionIdFromPath(requestBasePath, serverBasePath);

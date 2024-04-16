@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UiSettingsParams } from '@kbn/core/types';
 
-import { SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
+import { ENABLE_SOLUTION_NAV_UI_SETTING_ID, SOLUTION_NAV_FEATURE_FLAG_NAME } from '../common';
 import type { NavigationConfig } from './config';
 import { initSolutionOnRequestInterceptor } from './lib';
 import type {
@@ -43,10 +43,19 @@ export class NavigationServerPlugin
           ?.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
           .then((enabled) => {
             if (enabled) {
+              const soClient = coreStart.savedObjects.createInternalRepository();
+
+              const getIsEnabledInGlobalSettings = () =>
+                coreStart.uiSettings
+                  .globalAsScopedToClient(soClient)
+                  .get(ENABLE_SOLUTION_NAV_UI_SETTING_ID)
+                  .catch(() => false);
+
               core.uiSettings.registerGlobal(getUiSettings(config));
               initSolutionOnRequestInterceptor({
                 http: core.http,
                 defaultSolution: config.solutionNavigation.defaultSolution,
+                getIsEnabledInGlobalSettings,
               });
             } else {
               this.removeUiSettings(coreStart, getUiSettings(config));

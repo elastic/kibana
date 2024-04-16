@@ -18,11 +18,13 @@ import type { NavigationConfig } from '../config';
 export interface OnRequestInterceptorDeps {
   http: CoreSetup['http'];
   defaultSolution: NavigationConfig['solutionNavigation']['defaultSolution'];
+  getIsEnabledInGlobalSettings: () => Promise<boolean>;
 }
 
 export function initSolutionOnRequestInterceptor({
   http,
   defaultSolution,
+  getIsEnabledInGlobalSettings,
 }: OnRequestInterceptorDeps) {
   http.registerOnPreRouting(async function solutionOnPreRoutingHandler(
     request: KibanaRequest,
@@ -31,7 +33,8 @@ export function initSolutionOnRequestInterceptor({
   ) {
     const serverBasePath = http.basePath.serverBasePath;
     let path = request.url.pathname;
-    const isRequestingApplication = path.startsWith('/app');
+    let redirectUrl: string | null = null;
+    const isRequestingApplication = path.includes('/app/');
 
     // If navigating within the context of a solution, then we store the Solution's URL Context on the request,
     // and rewrite the request to not include the solution identifier in the URL.
@@ -40,20 +43,26 @@ export function initSolutionOnRequestInterceptor({
       serverBasePath
     );
 
-    let redirectUrl: string | null = null;
-
     // To avoid a double full page reload in case no solutionId is in the base path when accessing
     // the first Kibana app (or the space selector screen), we proactively redirect to the default solution.
-    // The client has a detection mechanism that will redirect to the correct solution if the current
-    // page does not belong to this default solution.
-    if (
-      !pathHasExplicitSolutionIdentifier &&
-      (path.includes('spaces/space_selector') || isRequestingApplication)
-    ) {
-      solutionId = defaultSolution;
-      path = addSolutionIdToPath('/', solutionId, path);
-      pathHasExplicitSolutionIdentifier = true;
-      redirectUrl = `${serverBasePath}${path}`;
+    // The client (`packages/core/chrome/core-chrome-browser-internal/src/project_navigation/project_navigation_service.ts`)
+    // has a detection mechanism that will redirect to the correct solution if the current page
+    // does not belong to this default solution.
+    if (path.includes('spaces/space_selector') || isRequestingApplication) {
+      const enabledInGlobalSettings = await getIsEnabledInGlobalSettings();
+      if (enabledInGlobalSettings && !pathHasExplicitSolutionIdentifier) {
+        solutionId = defaultSolution;
+        path = addSolutionIdToPath('/', solutionId, path);
+        pathHasExplicitSolutionIdentifier = true;
+        redirectUrl = `${serverBasePath}${path}`;
+      } else if (!enabledInGlobalSettings && pathHasExplicitSolutionIdentifier) {
+        // We have a solutionId in the path but the feature is disabled in advanced settings
+        // ---> Remove the solution id from the path
+        solutionId = null;
+        path = stripSolutionIdFromPath(path);
+        pathHasExplicitSolutionIdentifier = false;
+        redirectUrl = `${serverBasePath}${path}`;
+      }
     }
 
     if (pathHasExplicitSolutionIdentifier) {
@@ -71,6 +80,10 @@ export function initSolutionOnRequestInterceptor({
       }
 
       return toolkit.rewriteUrl(`${newPathname}${request.url.search}`);
+    } else if (redirectUrl) {
+      return response.redirected({
+        headers: { location: redirectUrl },
+      });
     }
 
     return toolkit.next();
