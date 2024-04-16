@@ -10,7 +10,7 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionsClientChatOpenAI } from '@kbn/elastic-assistant-common/impl/llm';
+import { ActionsClientChatOpenAI } from '@kbn/elastic-assistant-common/impl/language_models';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';

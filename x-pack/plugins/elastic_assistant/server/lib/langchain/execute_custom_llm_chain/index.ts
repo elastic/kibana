@@ -12,8 +12,11 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
-import { ActionsClientChatBedrock } from './chat_bedrock';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+  ActionsClientSimpleChatModel,
+} from '@kbn/elastic-assistant-common/impl/language_models';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
@@ -54,7 +57,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   const llmClass =
     llmType === 'bedrock'
-      ? ActionsClientChatBedrock
+      ? ActionsClientSimpleChatModel
       : isStream
       ? ActionsClientChatOpenAI
       : ActionsClientLlm;

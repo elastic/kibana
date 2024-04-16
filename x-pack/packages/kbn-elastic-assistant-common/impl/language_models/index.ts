@@ -6,4 +6,5 @@
  */
 
 export { ActionsClientChatOpenAI } from './openai';
-export { ActionsClientLlm } from './actions_client_llm';
+export { ActionsClientLlm } from './llm';
+export { ActionsClientSimpleChatModel } from './chat_bedrock';

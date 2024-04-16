@@ -30,7 +30,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 }
 
-export class ActionsClientChatBedrock extends SimpleChatModel {
+export class ActionsClientSimpleChatModel extends SimpleChatModel {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
@@ -74,7 +74,7 @@ export class ActionsClientChatBedrock extends SimpleChatModel {
       bedrockMessages.push(getMessageContentAndRole(messages[0].content));
     }
     this.#logger.debug(
-      `ActionsClientChatBedrock#_call\ntraceId: ${
+      `ActionsClientSimpleChatModel#_call\ntraceId: ${
         this.#traceId
       }\nassistantMessage:\n${JSON.stringify(bedrockMessages)} `
     );
