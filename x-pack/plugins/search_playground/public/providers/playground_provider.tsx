@@ -27,14 +27,11 @@ export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
       source_fields: [],
       indices: defaultValues?.indices || [],
     },
-    
   });
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FormProvider {...form}>
-        {children}
-        </FormProvider>
+      <FormProvider {...form}>{children}</FormProvider>
     </QueryClientProvider>
   );
 };

@@ -65,5 +65,4 @@ describe('ViewQueryFlyout component tests', () => {
       `{ "query": { "bool": { "should": [ { "multi_match": { "query": "{query}", "fields": [ "field1" ] } } ], "minimum_should_match": 1 } } }`
     );
   });
-
 });
