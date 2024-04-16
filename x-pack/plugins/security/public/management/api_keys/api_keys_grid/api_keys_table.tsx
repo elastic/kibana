@@ -82,9 +82,12 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   columns.push(
     {
       field: 'name',
-      name: i18n.translate('xpack.security.management.apiKeys.table.nameColumnName', {
-        defaultMessage: 'Name',
-      }),
+      name: (
+        <FormattedMessage
+          id="xpack.security.management.apiKeys.table.nameColumnName"
+          defaultMessage="Type"
+        />
+      ),
       sortable: true,
       render: (name: string, item: CategorizedApiKey) => {
         return (

@@ -38,8 +38,8 @@ import { APIKeysAPIClient } from '../api_keys_api_client';
 const parseSearchBarQuery = (query: Query): QueryContainer => {
   let parsedQuery = query;
 
-  if (parsedQuery.hasSimpleFieldClause('owner')) {
-    const ownerQueryValue = parsedQuery.getSimpleFieldClause('owner')!.value;
+  const ownerQueryValue = parsedQuery.getSimpleFieldClause('owner')?.value;
+  if (ownerQueryValue) {
     parsedQuery = parsedQuery
       .removeSimpleFieldClauses('owner')
       .addSimpleFieldValue('username', `${ownerQueryValue}`);

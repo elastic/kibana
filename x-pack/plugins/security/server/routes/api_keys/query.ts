@@ -113,6 +113,8 @@ export function defineQueryApiKeysAndAggregationsRoute({
                 range: { expiration: { lte: 'now' } },
               },
             },
+            // We need this bucket to separately count API keys that were created by the Alerting plugin using only the plugin name
+            // From v8.14.0, the Alerting plugin will create all keys with the `metadata.managed` field set to `true`
             managed: {
               filters: {
                 filters: {
