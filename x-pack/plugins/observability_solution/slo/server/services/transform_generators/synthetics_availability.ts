@@ -80,7 +80,9 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
        * to build a URL back to Synthetics */
       ...(includesDefaultGroupings && {
         'observer.name': { terms: { field: 'observer.name' } },
-        config_id: { terms: { field: 'config_id' } },
+        'observer.geo.name': { terms: { field: 'observer.geo.name' } },
+        'monitor.config_id': { terms: { field: 'config_id' } },
+        'monitor.name': { terms: { field: 'monitor.name' } },
       }),
       ...(hasMonitorIds && { 'monitor.id': { terms: { field: 'monitor.id' } } }),
       ...(hasTags && {
@@ -167,7 +169,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   private buildAggregations(slo: SLO) {
     if (!occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       throw new Error(
-        'The sli.synthetics.availability indicator MUST have an occurances budgeting method.'
+        "The sli.synthetics.availability indicator MUST have an 'Occurrences' budgeting method."
       );
     }
 

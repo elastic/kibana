@@ -35,6 +35,7 @@ import { StepModal } from '../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { WindowsInstallStep } from '../shared/windows_install_step';
 import { TroubleshootingLink } from '../shared/troubleshooting_link';
+import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 
 const defaultDatasetName = '';
 
@@ -214,6 +215,8 @@ export function InstallElasticAgent() {
       }, 2000);
     }
   }, [progressSucceded, refetchProgress]);
+
+  useFlowProgressTelemetry(progressData?.progress, 'custom_logs');
 
   const getCheckLogsStep = useCallback(() => {
     const progress = progressData?.progress;

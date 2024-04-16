@@ -63,6 +63,7 @@ import { EffectedPolicySelect } from '../../../../components/effected_policy_sel
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
+import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -456,6 +457,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           onChange: handleOnBuilderChange,
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception.os_types,
+          showValueListModal: ShowValueListModal,
         }),
       [
         autocompleteSuggestions,

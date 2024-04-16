@@ -136,7 +136,7 @@ const buildQueryMatch = (
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
             Array.isArray(dataProvider.queryMatch.value)
-              ? dataProvider.queryMatch.value
+              ? `(${dataProvider.queryMatch.value.join(' OR ')})`
               : prepareKQLParam(dataProvider.queryMatch.value)
           }`
       : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)

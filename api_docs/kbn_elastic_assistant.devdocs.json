@@ -123,11 +123,11 @@
         "type": "Function",
         "tags": [],
         "label": "AssistantOverlay",
-        "description": [
-          "\nModal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever\ncomponent currently has focus and any specific context it may provide through the SAssInterface."
-        ],
+        "description": [],
         "signature": [
-          "React.NamedExoticComponent<unknown> & { readonly type: () => JSX.Element; }"
+          "React.NamedExoticComponent<",
+          "Props",
+          ">"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/assistant_overlay/index.tsx",
         "deprecated": false,
@@ -642,14 +642,12 @@
         "type": "Function",
         "tags": [],
         "label": "useFetchCurrentUserConversations",
-        "description": [
-          "\nAPI call for fetching assistant conversations for the current user\n"
-        ],
+        "description": [],
         "signature": [
           "({ http, onFetch, signal, refetchOnWindowFocus, isAssistantEnabled, }: ",
           "UseFetchCurrentUserConversationsParams",
           ") => ",
-          "UseQueryResult",
+          "DefinedUseQueryResult",
           "<Record<string, ",
           {
             "pluginId": "@kbn/elastic-assistant",
@@ -680,9 +678,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "hook for getting the status of the conversations"
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -737,6 +733,17 @@
             "type": "boolean",
             "tags": [],
             "label": "hasConnectorsReadPrivilege",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.hasUpdateAIAssistantAnonymization",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasUpdateAIAssistantAnonymization",
             "description": [],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2111,6 +2118,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isNewConversationDefault",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Prompt.isFlyoutMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isFlyoutMode",
             "description": [],
             "signature": [
               "boolean | undefined"
