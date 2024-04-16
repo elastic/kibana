@@ -120,6 +120,8 @@ export interface DocumentCountChartProps {
   chartPointsSplitLabel: string;
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
+  /** Callback to set the autoRunAnalysis flag */
+  setAutoRunAnalysis?: (d: boolean) => void;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
   /** Optional style to override bar chart */
@@ -183,6 +185,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     interval,
     chartPointsSplitLabel,
     isBrushCleared,
+    setAutoRunAnalysis,
     autoAnalysisStart,
     barColorOverride,
     barStyleAccessor,
@@ -307,6 +310,15 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
+          if (setAutoRunAnalysis) {
+            setAutoRunAnalysis(
+              typeof startRange === 'number' &&
+                changePoint !== undefined &&
+                startRange >= changePoint.startTs &&
+                startRange <= changePoint.endTs
+            );
+          }
+
           const wp = getWindowParametersForTrigger(
             startRange,
             interval,
@@ -335,6 +347,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       timeRangeLatest,
       snapTimestamps,
       originalWindowParameters,
+      setAutoRunAnalysis,
       setWindowParameters,
       brushSelectionUpdateHandler,
       adjustedChartPoints,
@@ -539,7 +552,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
 };
 
 export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
-  const { initialAnalysisStart } = useLogRateAnalysisStateContext();
+  const { initialAnalysisStart, setAutoRunAnalysis } = useLogRateAnalysisStateContext();
 
-  return <DocumentCountChart {...props} autoAnalysisStart={initialAnalysisStart} />;
+  return (
+    <DocumentCountChart
+      {...props}
+      autoAnalysisStart={initialAnalysisStart}
+      setAutoRunAnalysis={setAutoRunAnalysis}
+    />
+  );
 };

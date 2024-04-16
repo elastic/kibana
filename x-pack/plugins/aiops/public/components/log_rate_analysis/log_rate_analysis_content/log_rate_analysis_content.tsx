@@ -136,8 +136,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   );
 
   const {
+    initialAnalysisStart,
+    autoRunAnalysis,
     currentSelectedSignificantItem,
     currentSelectedGroup,
+    setAutoRunAnalysis,
     setInitialAnalysisStart,
     setPinnedSignificantItem,
     setPinnedGroup,
@@ -203,7 +206,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         }
       : undefined;
 
-  const triggerAnalysis = useCallback(() => {
+  const triggerAnalysisForManualSelection = useCallback(() => {
+    setAutoRunAnalysis(true);
+  }, [setAutoRunAnalysis]);
+
+  const triggerAnalysisForChangePoint = useCallback(() => {
     if (documentCountStats) {
       const { interval, timeRangeEarliest, timeRangeLatest, changePoint } = documentCountStats;
 
@@ -219,6 +226,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         const snapTimestamps = getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval);
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
+        setAutoRunAnalysis(true);
         setInitialAnalysisStart(wpSnap);
       }
     }
@@ -245,24 +253,60 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         />
       )}
       <EuiHorizontalRule />
-      {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
-        <LogRateAnalysisResults
-          dataView={dataView}
-          analysisType={logRateAnalysisType}
-          earliest={earliest}
-          isBrushCleared={isBrushCleared}
-          latest={latest}
-          stickyHistogram={stickyHistogram}
-          onReset={clearSelection}
-          sampleProbability={sampleProbability}
-          searchQuery={searchQuery}
-          windowParameters={windowParameters}
-          barColorOverride={barColorOverride}
-          barHighlightColorOverride={barHighlightColorOverride}
-          onAnalysisCompleted={onAnalysisCompleted}
-          embeddingOrigin={embeddingOrigin}
-        />
-      )}
+      {autoRunAnalysis &&
+        earliest !== undefined &&
+        latest !== undefined &&
+        windowParameters !== undefined && (
+          <LogRateAnalysisResults
+            dataView={dataView}
+            analysisType={logRateAnalysisType}
+            earliest={earliest}
+            isBrushCleared={isBrushCleared}
+            latest={latest}
+            stickyHistogram={stickyHistogram}
+            onReset={clearSelection}
+            sampleProbability={sampleProbability}
+            searchQuery={searchQuery}
+            windowParameters={windowParameters}
+            barColorOverride={barColorOverride}
+            barHighlightColorOverride={barHighlightColorOverride}
+            onAnalysisCompleted={onAnalysisCompleted}
+            embeddingOrigin={embeddingOrigin}
+          />
+        )}
+      {!autoRunAnalysis &&
+        earliest !== undefined &&
+        latest !== undefined &&
+        windowParameters !== undefined && (
+          <EuiEmptyPrompt
+            color="subdued"
+            hasShadow={false}
+            hasBorder={false}
+            css={{ minWidth: '100%' }}
+            title={undefined}
+            titleSize="xs"
+            body={
+              <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptBody"
+                    defaultMessage="Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button below."
+                  />
+                </p>
+                <EuiButton
+                  data-test-subj="aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton"
+                  onClick={triggerAnalysisForChangePoint}
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptRunAnalysisButton"
+                    defaultMessage="Run analysis"
+                  />
+                </EuiButton>
+              </>
+            }
+            data-test-subj="aiopsChangePointDetectedPrompt"
+          />
+        )}
       {windowParameters === undefined && documentCountStats?.changePoint && (
         <EuiEmptyPrompt
           color="subdued"
@@ -298,12 +342,12 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
               <p>
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointPromptBody"
-                  defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or dip."
+                  defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or dip. To analyse the area highlighted in the chart, click the button below. For custom analysis of other areas, start by clicking on any of the non-highlighted bars in the histogram chart."
                 />
               </p>
               <EuiButton
                 data-test-subj="aiopsLogRateAnalysisContentRunAnalysisButton"
-                onClick={triggerAnalysis}
+                onClick={triggerAnalysisForManualSelection}
               >
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointPromptRunAnalysisButton"
@@ -325,7 +369,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
             <h2>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.emptyPromptTitle"
-                defaultMessage="Click a spike or dip in the histogram chart to start the analysis."
+                defaultMessage="Start by clicking a spike or dip in the histogram chart."
               />
             </h2>
           }

@@ -25,6 +25,8 @@ type SignificantItemOrNull = SignificantItem | null;
 type GroupOrNull = GroupTableItem | null;
 
 interface LogRateAnalysisState {
+  autoRunAnalysis: boolean;
+  setAutoRunAnalysis: Dispatch<SetStateAction<boolean>>;
   initialAnalysisStart: InitialAnalysisStart;
   setInitialAnalysisStart: Dispatch<SetStateAction<InitialAnalysisStart>>;
   pinnedSignificantItem: SignificantItemOrNull;
@@ -52,6 +54,7 @@ export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps>
   children,
   initialAnalysisStart: incomingInitialAnalysisStart,
 }) => {
+  const [autoRunAnalysis, setAutoRunAnalysis] = useState(true);
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
   >(incomingInitialAnalysisStart);
@@ -83,6 +86,8 @@ export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps>
 
   const contextValue: LogRateAnalysisState = useMemo(
     () => ({
+      autoRunAnalysis,
+      setAutoRunAnalysis,
       initialAnalysisStart,
       setInitialAnalysisStart,
       pinnedSignificantItem,
@@ -103,6 +108,8 @@ export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps>
       },
     }),
     [
+      autoRunAnalysis,
+      setAutoRunAnalysis,
       initialAnalysisStart,
       setInitialAnalysisStart,
       pinnedSignificantItem,
