@@ -75,8 +75,9 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
-
-  describe('@ess @serverless EQL type rules', () => {
+  
+  // FLAKY: https://github.com/elastic/kibana/issues/180641
+  describe.skip('@ess @serverless EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
