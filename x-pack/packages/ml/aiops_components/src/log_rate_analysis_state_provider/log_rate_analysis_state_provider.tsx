@@ -16,13 +16,17 @@ import React, {
 } from 'react';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
 import type { GroupTableItem } from './types';
 
+type InitialAnalysisStart = number | WindowParameters | undefined;
 type SignificantItemOrNull = SignificantItem | null;
 type GroupOrNull = GroupTableItem | null;
 
-interface LogRateAnalysisResultsTableRow {
+interface LogRateAnalysisState {
+  initialAnalysisStart: InitialAnalysisStart;
+  setInitialAnalysisStart: Dispatch<SetStateAction<InitialAnalysisStart>>;
   pinnedSignificantItem: SignificantItemOrNull;
   setPinnedSignificantItem: Dispatch<SetStateAction<SignificantItemOrNull>>;
   pinnedGroup: GroupOrNull;
@@ -36,12 +40,23 @@ interface LogRateAnalysisResultsTableRow {
   clearAllRowState: () => void;
 }
 
-export const logRateAnalysisResultsTableRowContext = createContext<
-  LogRateAnalysisResultsTableRow | undefined
->(undefined);
+export const logRateAnalysisStateContext = createContext<LogRateAnalysisState | undefined>(
+  undefined
+);
 
-export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) => {
-  // State that will be shared with all components
+interface LogRateAnalysisStateProviderProps {
+  initialAnalysisStart?: InitialAnalysisStart;
+}
+
+export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps> = ({
+  children,
+  initialAnalysisStart: incomingInitialAnalysisStart,
+}) => {
+  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
+    number | WindowParameters | undefined
+  >(incomingInitialAnalysisStart);
+
+  // Row state that will be shared with all components
   const [pinnedSignificantItem, setPinnedSignificantItem] = useState<SignificantItemOrNull>(null);
   const [pinnedGroup, setPinnedGroup] = useState<GroupOrNull>(null);
   const [selectedSignificantItem, setSelectedSignificantItem] =
@@ -66,8 +81,10 @@ export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) =>
     }
   }, [selectedGroup, pinnedGroup]);
 
-  const contextValue: LogRateAnalysisResultsTableRow = useMemo(
+  const contextValue: LogRateAnalysisState = useMemo(
     () => ({
+      initialAnalysisStart,
+      setInitialAnalysisStart,
       pinnedSignificantItem,
       setPinnedSignificantItem,
       pinnedGroup,
@@ -86,6 +103,8 @@ export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) =>
       },
     }),
     [
+      initialAnalysisStart,
+      setInitialAnalysisStart,
       pinnedSignificantItem,
       setPinnedSignificantItem,
       pinnedGroup,
@@ -101,19 +120,19 @@ export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) =>
 
   return (
     // Provider managing the state
-    <logRateAnalysisResultsTableRowContext.Provider value={contextValue}>
+    <logRateAnalysisStateContext.Provider value={contextValue}>
       {children}
-    </logRateAnalysisResultsTableRowContext.Provider>
+    </logRateAnalysisStateContext.Provider>
   );
 };
 
-export const useLogRateAnalysisResultsTableRowContext = () => {
-  const logRateAnalysisResultsTableRow = useContext(logRateAnalysisResultsTableRowContext);
+export const useLogRateAnalysisStateContext = () => {
+  const logRateAnalysisState = useContext(logRateAnalysisStateContext);
 
   // If `undefined`, throw an error.
-  if (logRateAnalysisResultsTableRow === undefined) {
-    throw new Error('useLogRateAnalysisResultsTableRowContext was used outside of its Provider');
+  if (logRateAnalysisState === undefined) {
+    throw new Error('useLogRateAnalysisStateContext was used outside of its Provider');
   }
 
-  return logRateAnalysisResultsTableRow;
+  return logRateAnalysisState;
 };

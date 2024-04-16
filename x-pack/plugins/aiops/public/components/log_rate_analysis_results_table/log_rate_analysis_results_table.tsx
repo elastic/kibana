@@ -32,13 +32,13 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components/src/log_rate_analysis_state_provider';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 import { MiniHistogram } from '../mini_histogram';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
-import { useLogRateAnalysisResultsTableRowContext } from './log_rate_analysis_results_table_row_provider';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { useViewInDiscoverAction } from './use_view_in_discover_action';
@@ -93,7 +93,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     selectedSignificantItem,
     setPinnedSignificantItem,
     setSelectedSignificantItem,
-  } = useLogRateAnalysisResultsTableRowContext();
+  } = useLogRateAnalysisStateContext();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

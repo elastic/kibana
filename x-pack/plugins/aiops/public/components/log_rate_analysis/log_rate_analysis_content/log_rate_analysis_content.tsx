@@ -26,6 +26,10 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import {
+  useLogRateAnalysisStateContext,
+  type GroupTableItem,
+} from '@kbn/aiops-components/src/log_rate_analysis_state_provider';
 
 import { useData } from '../../../hooks/use_data';
 
@@ -34,8 +38,6 @@ import {
   LogRateAnalysisResults,
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
-import type { GroupTableItem } from '../../log_rate_analysis_results_table/types';
-import { useLogRateAnalysisResultsTableRowContext } from '../../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
 const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
 const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
@@ -66,8 +68,6 @@ export function getDocumentCountStatsSplitLabel(
 export interface LogRateAnalysisContentProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** Timestamp for the start of the range for initial analysis */
-  initialAnalysisStart?: number | WindowParameters;
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
@@ -87,7 +87,6 @@ export interface LogRateAnalysisContentProps {
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   dataView,
-  initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
   stickyHistogram,
@@ -98,9 +97,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   embeddingOrigin,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
-  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
-    number | WindowParameters | undefined
-  >(incomingInitialAnalysisStart);
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
     LOG_RATE_ANALYSIS_TYPE.SPIKE
@@ -142,11 +138,12 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const {
     currentSelectedSignificantItem,
     currentSelectedGroup,
+    setInitialAnalysisStart,
     setPinnedSignificantItem,
     setPinnedGroup,
     setSelectedSignificantItem,
     setSelectedGroup,
-  } = useLogRateAnalysisResultsTableRowContext();
+  } = useLogRateAnalysisStateContext();
 
   const { documentStats, earliest, latest } = useData(
     dataView,
@@ -225,6 +222,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         setInitialAnalysisStart(wpSnap);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentCountStats]);
 
   return (
@@ -241,7 +239,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           isBrushCleared={isBrushCleared}
           totalCount={totalCount}
           sampleProbability={sampleProbability}
-          initialAnalysisStart={initialAnalysisStart}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           barStyleAccessor={barStyleAccessor}

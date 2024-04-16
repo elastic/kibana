@@ -40,6 +40,8 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
 
+import { useLogRateAnalysisStateContext } from '../log_rate_analysis_state_provider';
+
 import { BrushBadge } from './brush_badge';
 
 declare global {
@@ -120,7 +122,7 @@ export interface DocumentCountChartProps {
   isBrushCleared: boolean;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
-  /** Optional style to override bar chart  */
+  /** Optional style to override bar chart */
   barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
@@ -534,4 +536,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
       </div>
     </>
   );
+};
+
+export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
+  const { initialAnalysisStart } = useLogRateAnalysisStateContext();
+
+  return <DocumentCountChart {...props} autoAnalysisStart={initialAnalysisStart} />;
 };
