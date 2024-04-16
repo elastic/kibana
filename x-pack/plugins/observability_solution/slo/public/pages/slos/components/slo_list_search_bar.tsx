@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { EuiSelectableOption } from '@elastic/eui';
+import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/public';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../utils/kibana_react';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { useSloSummaryDataView } from '../hooks/use_summary_dataview';

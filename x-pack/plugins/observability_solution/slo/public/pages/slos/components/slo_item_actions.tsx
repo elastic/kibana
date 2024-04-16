@@ -70,7 +70,14 @@ export function SloItemActions({
 }: Props) {
   const {
     application: { navigateToUrl },
+    http: { basePath },
+    share: {
+      url: { locators },
+    },
+    executionContext,
   } = useKibana().services;
+  const executionContextName = executionContext.get().name;
+  const isDashboardContext = executionContextName === 'dashboards';
   const { hasWriteCapabilities } = useCapabilities();
   const navigateToClone = useCloneSlo();
 
@@ -234,18 +241,22 @@ export function SloItemActions({
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
             {showRemoteLinkIcon}
           </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            icon="dashboardApp"
-            key="addToDashboard"
-            onClick={handleAddToDashboard}
-            disabled={!hasWriteCapabilities}
-            data-test-subj="sloActionsAddToDashboard"
-          >
-            {i18n.translate('xpack.slo.item.actions.addToDashboard', {
-              defaultMessage: 'Add to Dashboard',
-            })}
-          </EuiContextMenuItem>,
-        ]}
+        ].concat(
+          !isDashboardContext ? (
+            <EuiContextMenuItem
+              icon="dashboardApp"
+              key="addToDashboard"
+              onClick={handleAddToDashboard}
+              data-test-subj="sloActionsAddToDashboard"
+            >
+              {i18n.translate('xpack.slo.item.actions.addToDashboard', {
+                defaultMessage: 'Add to Dashboard',
+              })}
+            </EuiContextMenuItem>
+          ) : (
+            []
+          )
+        )}
       />
     </EuiPopover>
   );

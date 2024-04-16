@@ -106,7 +106,8 @@ const loadDependencies = async (
   };
 };
 
-interface ConsoleWrapperProps extends Omit<EmbeddableConsoleDependencies, 'setDispatch'> {
+interface ConsoleWrapperProps
+  extends Omit<EmbeddableConsoleDependencies, 'setDispatch' | 'alternateView'> {
   onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
 }
 

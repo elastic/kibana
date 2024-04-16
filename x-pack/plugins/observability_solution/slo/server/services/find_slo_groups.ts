@@ -49,10 +49,10 @@ export class FindSLOGroups {
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
+    const groupsFilter = [params.groupsFilter ?? []].flat();
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
     let parsedFilters: any = {};
-
     try {
       parsedFilters = JSON.parse(filters);
     } catch (e) {
@@ -60,6 +60,8 @@ export class FindSLOGroups {
     }
 
     const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+
+    const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 
     const response = await typedSearch(this.esClient, {
       index: indices,
@@ -79,6 +81,7 @@ export class FindSLOGroups {
             terms: {
               field: groupBy,
               size: 10000,
+              ...(hasSelectedTags && { include: groupsFilter }),
             },
             aggs: {
               worst: {

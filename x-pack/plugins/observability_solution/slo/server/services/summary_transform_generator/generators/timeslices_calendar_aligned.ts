@@ -10,7 +10,7 @@ import { DurationUnit, SLODefinition } from '../../../domain/models';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_DESTINATION_INDEX_NAME,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
 } from '../../../../common/constants';
@@ -29,7 +29,7 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
       index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
     },
     source: {
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: `${SLO_DESTINATION_INDEX_NAME}*`,
       query: {
         bool: {
           filter: [

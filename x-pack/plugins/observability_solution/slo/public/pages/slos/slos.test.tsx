@@ -127,6 +127,11 @@ const mockKibana = () => {
           hasQuerySuggestions: () => {},
         },
       },
+      executionContext: {
+        get: () => ({
+          name: 'slo',
+        }),
+      },
     },
   });
 };
