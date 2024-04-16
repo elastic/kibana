@@ -8,13 +8,13 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'security']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'dashboard', 'security']);
   const testSubjects = getService('testSubjects');
   const userMenu = getService('userMenu');
 
   describe('user opt in/out', function describeIndexTests() {
     it('should allow the user to opt in or out', async () => {
-      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('discover', { basePath: '/n/es' });
 
       // we are in the new nav, search solution
       await testSubjects.existOrFail('kibanaProjectHeader');
