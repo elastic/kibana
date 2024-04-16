@@ -638,10 +638,18 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
 
   if (aggregationResponse && Object.keys(aggregationResponse).length > 0) {
     const { usernames, types, expired, managed } = aggregationResponse;
-    (types?.buckets as estypes.AggregationsStringTermsBucket[]).forEach((type) => {
+    const typeBuckets = types?.buckets.length
+      ? (types.buckets as estypes.AggregationsStringTermsBucket[])
+      : [];
+
+    const usernameBuckets = usernames?.buckets.length
+      ? (usernames.buckets as estypes.AggregationsStringTermsBucket[])
+      : [];
+
+    typeBuckets.forEach((type) => {
       typeFilters.add(type.key);
     });
-    (usernames?.buckets as estypes.AggregationsStringTermsBucket[]).forEach((username) => {
+    usernameBuckets.forEach((username) => {
       usernameFilters.add(username.key);
     });
     const { namePrefixBased, metadataBased } = managed?.buckets || {};
