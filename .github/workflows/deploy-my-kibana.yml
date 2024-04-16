@@ -29,3 +29,4 @@ jobs:
           vaultRoleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
           serverless: ${{ github.event.comment.body == '/oblt-deploy-serverless' }}
+          pr_label: "ci:project-deploy-observability"
