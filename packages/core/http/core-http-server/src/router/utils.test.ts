@@ -43,7 +43,7 @@ describe('getRequestValidation', () => {
 });
 
 describe('getResponseValidation', () => {
-  it('correctly extracts validation config', () => {
+  it('extracts validation config', () => {
     const validationDummy = {
       body: {} as unknown as ObjectType,
     };
@@ -51,10 +51,19 @@ describe('getResponseValidation', () => {
       request: {},
       response: validationDummy,
     };
-    const fullValidator: Validator = validationDummy;
 
     expect(getResponseValidation(fullValidatorContainer)).toBe(validationDummy);
-    fullValidatorContainer.response = undefined;
+  });
+
+  it('returns "undefined" when there is no response validation configured', () => {
+    const validationDummy = {
+      body: {} as unknown as ObjectType,
+    };
+    const fullValidatorContainer: Validator = {
+      request: {},
+    };
+    const fullValidator: Validator = validationDummy;
+
     expect(getResponseValidation(fullValidatorContainer)).toBe(undefined);
     expect(getResponseValidation(fullValidator)).toBe(undefined);
   });
