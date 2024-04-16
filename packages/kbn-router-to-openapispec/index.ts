@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { generateOpenApiDocument } from './src';
+export { generateOpenApiDocument } from './src/generate_oas';
