@@ -15,6 +15,7 @@ import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
 import { ContextEditorFlyout } from './context_editor_flyout';
 import { ContextEditor } from './context_editor';
+import { ReplacementsContextViewer } from './replacements_context_viewer';
 import { Stats } from './stats';
 
 const EditorContainer = styled.div`
@@ -67,7 +68,14 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
       <EditorContainer data-test-subj="dataAnonymizationEditor">
         <EuiPanel hasShadow={false} paddingSize="m">
           {typeof selectedPromptContext.rawData === 'string' ? (
-            <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+            selectedPromptContext.replacements != null ? (
+              <ReplacementsContextViewer
+                markdown={selectedPromptContext.rawData}
+                replacements={selectedPromptContext.replacements}
+              />
+            ) : (
+              <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+            )
           ) : (
             <ContextEditorFlyout
               selectedPromptContext={selectedPromptContext}
@@ -87,12 +95,20 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
         isDataAnonymizable={isDataAnonymizable}
         anonymizationFields={selectedPromptContext.contextAnonymizationFields?.data}
         rawData={selectedPromptContext.rawData}
+        replacements={selectedPromptContext.replacements}
       />
 
       <EuiSpacer size="s" />
 
       {typeof selectedPromptContext.rawData === 'string' ? (
-        <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+        selectedPromptContext.replacements != null ? (
+          <ReplacementsContextViewer
+            markdown={selectedPromptContext.rawData}
+            replacements={selectedPromptContext.replacements}
+          />
+        ) : (
+          <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+        )
       ) : (
         <ContextEditor
           anonymizationFields={
