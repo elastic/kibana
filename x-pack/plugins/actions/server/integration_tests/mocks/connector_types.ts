@@ -29,5 +29,6 @@ export const connectorTypes: string[] = [
   '.d3security',
   '.resilient',
   '.sentinelone',
+  '.observability-ai-assistant',
   '.cases',
 ];
