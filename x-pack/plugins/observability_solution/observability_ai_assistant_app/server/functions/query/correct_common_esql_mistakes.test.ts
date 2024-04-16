@@ -82,4 +82,16 @@ describe('correctCommonEsqlMistakes', () => {
       `FROM logs-*\n| KEEP date, whatever\n| RENAME whatever AS forever\n| SORT forever DESC`
     );
   });
+
+  it(`escapes the column name if SORT uses an expression`, () => {
+    expectQuery(
+      'FROM logs-* \n| STATS COUNT(*) by service.name\n| SORT COUNT(*) DESC',
+      'FROM logs-*\n| STATS COUNT(*) by service.name\n| SORT `COUNT(*)` DESC'
+    );
+
+    expectQuery(
+      'FROM logs-* \n| STATS COUNT(*) by service.name\n| SORT COUNT(*) DESC, @timestamp ASC',
+      'FROM logs-*\n| STATS COUNT(*) by service.name\n| SORT `COUNT(*)` DESC, @timestamp ASC'
+    );
+  });
 });

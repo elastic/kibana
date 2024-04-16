@@ -7,17 +7,12 @@
 
 import { Observable, Subscriber } from 'rxjs';
 import { v4 } from 'uuid';
-import { Parser } from 'xml2js';
-import type { Logger } from '@kbn/logging';
-import type { JSONSchema } from 'json-schema-to-ts';
 import {
   ChatCompletionChunkEvent,
-  createInternalServerError,
   StreamingChatResponseEventType,
   TokenCountEvent,
 } from '../../../../../common/conversation_complete';
 import type { BedrockChunkMember } from '../../../util/eventstream_serde_into_observable';
-import { convertDeserializedXmlWithJsonSchema } from '../../../util/convert_deserialized_xml_with_json_schema';
 import { parseSerdeChunkBody } from './parse_serde_chunk_body';
 import type {
   CompletionChunk,
@@ -26,52 +21,9 @@ import type {
   MessageStopChunk,
 } from './types';
 
-async function parseFunctionCallXml({
-  xml,
-  functions,
-}: {
-  xml: string;
-  functions?: Array<{ name: string; description: string; parameters?: JSONSchema }>;
-}) {
-  const parser = new Parser();
-
-  const parsedValue = await parser.parseStringPromise(xml);
-  const fnName = parsedValue.function_calls.invoke[0].tool_name[0];
-  const parameters = (
-    parsedValue.function_calls.invoke as Array<{ parameters: Array<Record<string, string[]>> }>
-  ).flatMap((invoke) => invoke.parameters ?? []);
-  const functionDef = functions?.find((fn) => fn.name === fnName);
-
-  if (!functionDef) {
-    throw createInternalServerError(
-      `Function definition for ${fnName} not found. ${
-        functions?.length
-          ? 'Available are: ' + functions.map((fn) => fn.name).join(', ') + '.'
-          : 'No functions are available.'
-      }`
-    );
-  }
-
-  const args = functionDef.parameters
-    ? convertDeserializedXmlWithJsonSchema(parameters, functionDef.parameters)
-    : {};
-
-  return {
-    name: fnName,
-    arguments: JSON.stringify(args),
-  };
-}
-
-export function processBedrockStream({
-  logger,
-  functions,
-}: {
-  logger: Logger;
-  functions?: Array<{ name: string; description: string; parameters?: JSONSchema }>;
-}) {
+export function processBedrockStream() {
   return (source: Observable<BedrockChunkMember>) =>
     new Observable<ChatCompletionChunkEvent | TokenCountEvent>((subscriber) => {
-      let functionCallsBuffer: string = '';
       const id = v4();
 
       // We use this to make sure we don't complete the Observable
@@ -98,63 +50,18 @@ export function processBedrockStream({
         }
 
         // completion: what we eventually want to emit
-        let completion = chunkBody.type !== 'message_delta' ? getCompletion(chunkBody) : '';
+        const completion =
+          chunkBody.type !== 'message_delta'
+            ? getCompletion(chunkBody)
+            : chunkBody.delta.stop_sequence || '';
 
-        const isStartOfFunctionCall = !functionCallsBuffer && completion.includes('<function');
-
-        const isEndOfFunctionCall =
-          functionCallsBuffer &&
-          chunkBody.type === 'message_delta' &&
-          chunkBody.delta.stop_sequence === '</function_calls>';
-
-        const isInFunctionCall = !!functionCallsBuffer;
-
-        if (isStartOfFunctionCall) {
-          // when we see the start of the function call, split on <function,
-          // set completion to the part before, and buffer the part after
-          const [before, after] = completion.split('<function');
-          functionCallsBuffer += `<function${after}`;
-          completion = before.trimEnd();
-        } else if (isEndOfFunctionCall) {
-          // parse the buffer as a function call
-          functionCallsBuffer += chunkBody.delta.stop_sequence ?? '';
-
-          logger.debug(`Parsing xml:\n${functionCallsBuffer}`);
-
-          subscriber.next({
-            id,
-            type: StreamingChatResponseEventType.ChatCompletionChunk,
-            message: {
-              content: '',
-              function_call: await parseFunctionCallXml({
-                xml: functionCallsBuffer,
-                functions,
-              }),
-            },
-          });
-          // reset the buffer
-          functionCallsBuffer = '';
-        } else if (isInFunctionCall) {
-          // write everything to the buffer
-          functionCallsBuffer += completion;
-          completion = '';
-        }
-
-        if (completion.trim()) {
-          // OpenAI tokens come roughly separately, Bedrock/Claude
-          // chunks are bigger, so we split them up to give a more
-          // responsive feel in the UI
-          const parts = completion.split(' ');
-          parts.forEach((part, index) => {
-            subscriber.next({
-              id,
-              type: StreamingChatResponseEventType.ChatCompletionChunk,
-              message: {
-                content: index === parts.length - 1 ? part : part + ' ',
-              },
-            });
-          });
-        }
+        subscriber.next({
+          id,
+          type: StreamingChatResponseEventType.ChatCompletionChunk,
+          message: {
+            content: completion,
+          },
+        });
       }
 
       source.subscribe({

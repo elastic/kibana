@@ -31,7 +31,7 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
-  LAST_CONVERSATION_TITLE_LOCAL_STORAGE_KEY,
+  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
@@ -70,19 +70,27 @@ export interface AssistantProviderProps {
   children: React.ReactNode;
   getComments: (commentArgs: {
     abortStream: () => void;
-    currentConversation: Conversation;
+    currentConversation?: Conversation;
     isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     refetchCurrentConversation: () => void;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
     setIsStreaming: (isStreaming: boolean) => void;
+    currentUserAvatar?: UserAvatar;
+    isFlyoutMode: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
   title?: string;
   toasts?: IToasts;
+}
+
+export interface UserAvatar {
+  color: string;
+  imageUrl?: string;
+  initials: string;
 }
 
 export interface UseAssistantContext {
@@ -105,17 +113,19 @@ export interface UseAssistantContext {
   baseConversations: Record<string, Conversation>;
   getComments: (commentArgs: {
     abortStream: () => void;
-    currentConversation: Conversation;
+    currentConversation?: Conversation;
     isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     refetchCurrentConversation: () => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
+    currentUserAvatar?: UserAvatar;
     setIsStreaming: (isStreaming: boolean) => void;
+    isFlyoutMode: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
-  getLastConversationTitle: (conversationTitle?: string) => string;
+  getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
@@ -125,7 +135,7 @@ export interface UseAssistantContext {
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
-  setLastConversationTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -191,8 +201,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     baseSystemPrompts
   );
 
-  const [localStorageLastConversationTitle, setLocalStorageLastConversationTitle] =
-    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_TITLE_LOCAL_STORAGE_KEY}`);
+  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
+    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
 
   /**
    * Local storage for knowledge base configuration, prefixed by assistant nameSpace
@@ -256,24 +266,25 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
-  const getLastConversationTitle = useCallback(
+  const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
     // if not, check local storage
     // last resort, go to welcome conversation
-    (conversationTitle?: string) =>
-      conversationTitle ?? localStorageLastConversationTitle ?? WELCOME_CONVERSATION_TITLE,
-    [localStorageLastConversationTitle]
+    (conversationId?: string) =>
+      conversationId ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+    [localStorageLastConversationId]
   );
 
   // Fetch assistant capabilities
   const { data: capabilities } = useCapabilities({ http, toasts });
-  const { assistantModelEvaluation: modelEvaluatorEnabled } =
+  const { assistantAlertsInsights, assistantModelEvaluation: modelEvaluatorEnabled } =
     capabilities ?? defaultAssistantFeatures;
 
   const value = useMemo(
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
+      assistantAlertsInsights,
       assistantAvailability,
       assistantTelemetry,
       augmentMessageCodeBlocks,
@@ -306,13 +317,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       toasts,
       traceOptions: sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversationTitle,
-      setLastConversationTitle: setLocalStorageLastConversationTitle,
+      getLastConversationId,
+      setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
     }),
     [
       actionTypeRegistry,
       alertsIndexPattern,
+      assistantAlertsInsights,
       assistantAvailability,
       assistantTelemetry,
       augmentMessageCodeBlocks,
@@ -342,8 +354,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       toasts,
       sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversationTitle,
-      setLocalStorageLastConversationTitle,
+      getLastConversationId,
+      setLocalStorageLastConversationId,
       baseConversations,
     ]
   );

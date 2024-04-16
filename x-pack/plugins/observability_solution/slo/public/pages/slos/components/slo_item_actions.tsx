@@ -75,7 +75,10 @@ export function SloItemActions({
     share: {
       url: { locators },
     },
+    executionContext,
   } = useKibana().services;
+  const executionContextName = executionContext.get().name;
+  const isDashboardContext = executionContextName === 'dashboards';
   const { hasWriteCapabilities } = useCapabilities();
 
   const sloDetailsUrl = basePath.prepend(
@@ -220,17 +223,22 @@ export function SloItemActions({
           >
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
           </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            icon="dashboardApp"
-            key="addToDashboard"
-            onClick={handleAddToDashboard}
-            data-test-subj="sloActionsAddToDashboard"
-          >
-            {i18n.translate('xpack.slo.item.actions.addToDashboard', {
-              defaultMessage: 'Add to Dashboard',
-            })}
-          </EuiContextMenuItem>,
-        ]}
+        ].concat(
+          !isDashboardContext ? (
+            <EuiContextMenuItem
+              icon="dashboardApp"
+              key="addToDashboard"
+              onClick={handleAddToDashboard}
+              data-test-subj="sloActionsAddToDashboard"
+            >
+              {i18n.translate('xpack.slo.item.actions.addToDashboard', {
+                defaultMessage: 'Add to Dashboard',
+              })}
+            </EuiContextMenuItem>
+          ) : (
+            []
+          )
+        )}
       />
     </EuiPopover>
   );
