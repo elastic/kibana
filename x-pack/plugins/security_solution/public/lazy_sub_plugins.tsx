@@ -10,6 +10,7 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
+import { AiInsights } from './ai_insights';
 import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
@@ -32,6 +33,7 @@ import { MachineLearning } from './machine_learning';
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
  */
 const subPluginClasses = {
+  AiInsights,
   Detections,
   Cases,
   Exceptions,

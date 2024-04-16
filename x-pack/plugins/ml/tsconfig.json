@@ -125,5 +125,6 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
     "@kbn/shared-ux-utility",
+    "@kbn/discover-utils",
   ],
 }

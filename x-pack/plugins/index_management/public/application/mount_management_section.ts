@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
-import { CoreSetup, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
+import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
@@ -58,7 +58,6 @@ export function getIndexManagementDependencies({
   config,
   cloud,
   startDependencies,
-  theme$,
   uiMetricService,
 }: {
   core: CoreStart;
@@ -70,18 +69,14 @@ export function getIndexManagementDependencies({
   config: AppDependencies['config'];
   cloud?: CloudSetup;
   startDependencies: StartDependencies;
-  theme$: Observable<CoreTheme>;
   uiMetricService: UiMetricService;
 }): AppDependencies {
-  const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } = core;
+  const { docLinks, application, uiSettings, settings } = core;
   const { url } = startDependencies.share;
   return {
     core: {
-      fatalErrors,
       getUrlForApp: application.getUrlForApp,
-      executionContext,
-      application,
-      http,
+      ...core,
     },
     plugins: {
       usageCollection,
@@ -105,7 +100,6 @@ export function getIndexManagementDependencies({
     url,
     docLinks,
     kibanaVersion,
-    theme$,
   };
 }
 
@@ -128,7 +122,7 @@ export async function mountManagementSection({
   config: AppDependencies['config'];
   cloud?: CloudSetup;
 }) {
-  const { element, setBreadcrumbs, history, theme$ } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -152,7 +146,6 @@ export async function mountManagementSection({
     isFleetEnabled,
     kibanaVersion,
     startDependencies,
-    theme$,
     uiMetricService,
     usageCollection,
   });

@@ -127,10 +127,11 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchConnectors: 30000
+  searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
   security: 81771
-  securitySolution: 82780
+  securitySolution: 98429
   securitySolutionEss: 16573
   securitySolutionServerless: 62488
   serverless: 16573

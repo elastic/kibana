@@ -85,7 +85,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
       setDeleteConfirmationModalOpen,
       setIsActionsPopoverOpen,
       setIsAddRuleFlyoutOpen,
-      setDashboardAttachmentReady,
     });
 
   return (

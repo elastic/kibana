@@ -6,12 +6,12 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Observable } from 'rxjs';
 import SemVer from 'semver/classes/semver';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   ApplicationStart,
-  CoreTheme,
+  I18nStart,
+  ThemeServiceStart,
   FatalErrorsStart,
   ScopedHistory,
   DocLinksStart,
@@ -39,6 +39,8 @@ export interface AppDependencies {
     executionContext: ExecutionContextStart;
     application: ApplicationStart;
     http: HttpSetup;
+    i18n: I18nStart;
+    theme: ThemeServiceStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
@@ -68,7 +70,6 @@ export interface AppDependencies {
   url: SharePluginStart['url'];
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
-  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({
