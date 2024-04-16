@@ -6,10 +6,9 @@
  */
 
 import { useCallback } from 'react';
-
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import { Conversation, Message } from '../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../assistant_context/types';
 import * as i18n from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {
@@ -21,16 +20,19 @@ import {
 import { WELCOME_CONVERSATION } from './sample_conversations';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: i18n.DEFAULT_CONVERSATION_TITLE,
+  id: '',
   messages: [],
-  replacements: [],
+  replacements: {},
   category: 'assistant',
   title: i18n.DEFAULT_CONVERSATION_TITLE,
 };
 
 interface CreateConversationProps {
   cTitle: string;
-  messages?: Message[];
+  messages?: ClientMessage[];
+  conversationIds?: string[];
+  apiConfig?: Conversation['apiConfig'];
+  isFlyoutMode: boolean;
 }
 
 interface SetApiConfigProps {
@@ -38,17 +40,26 @@ interface SetApiConfigProps {
   apiConfig: ApiConfig;
 }
 
+interface UpdateConversationTitleProps {
+  conversationId: string;
+  updatedTitle: string;
+}
+
 interface UseConversation {
-  clearConversation: (conversationId: string) => Promise<void>;
+  clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
-  removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
+  removeLastMessage: (conversationId: string) => Promise<ClientMessage[] | undefined>;
   setApiConfig: ({
     conversation,
     apiConfig,
   }: SetApiConfigProps) => Promise<Conversation | undefined>;
-  createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
+  createConversation: (conversation: Partial<Conversation>) => Promise<Conversation | undefined>;
   getConversation: (conversationId: string) => Promise<Conversation | undefined>;
+  updateConversationTitle: ({
+    conversationId,
+    updatedTitle,
+  }: UpdateConversationTitleProps) => Promise<Conversation>;
 }
 
 export const useConversation = (): UseConversation => {
@@ -66,7 +77,7 @@ export const useConversation = (): UseConversation => {
    */
   const removeLastMessage = useCallback(
     async (conversationId: string) => {
-      let messages: Message[] = [];
+      let messages: ClientMessage[] = [];
       const prevConversation = await getConversationById({ http, id: conversationId, toasts });
       if (prevConversation != null) {
         messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
@@ -83,21 +94,20 @@ export const useConversation = (): UseConversation => {
   );
 
   const clearConversation = useCallback(
-    async (conversationId: string) => {
-      const conversation = await getConversationById({ http, id: conversationId, toasts });
-      if (conversation && conversation.apiConfig) {
+    async (conversation: Conversation) => {
+      if (conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
           allSystemPrompts,
           conversation,
         })?.id;
 
-        await updateConversation({
+        return updateConversation({
           http,
           toasts,
-          conversationId,
+          conversationId: conversation.id,
           apiConfig: { ...conversation.apiConfig, defaultSystemPromptId },
           messages: [],
-          replacements: [],
+          replacements: {},
         });
       }
     },
@@ -108,10 +118,13 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversationId, and optionally add messages
    */
   const getDefaultConversation = useCallback(
-    ({ cTitle, messages }: CreateConversationProps): Conversation => {
+    ({ cTitle, messages, isFlyoutMode }: CreateConversationProps): Conversation => {
       const newConversation: Conversation =
         cTitle === i18n.WELCOME_CONVERSATION_TITLE
-          ? WELCOME_CONVERSATION
+          ? {
+              ...WELCOME_CONVERSATION,
+              messages: !isFlyoutMode ? WELCOME_CONVERSATION.messages : [],
+            }
           : {
               ...DEFAULT_CONVERSATION_STATE,
               id: '',
@@ -127,7 +140,7 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversation
    */
   const createConversation = useCallback(
-    async (conversation: Conversation): Promise<Conversation | undefined> => {
+    async (conversation: Partial<Conversation>): Promise<Conversation | undefined> => {
       return createConversationApi({ http, conversation, toasts });
     },
     [http, toasts]
@@ -175,12 +188,23 @@ export const useConversation = (): UseConversation => {
     [http, toasts]
   );
 
+  const updateConversationTitle = useCallback(
+    ({ conversationId, updatedTitle }: UpdateConversationTitleProps): Promise<Conversation> =>
+      updateConversation({
+        http,
+        conversationId,
+        title: updatedTitle,
+      }),
+    [http]
+  );
+
   return {
     clearConversation,
     getDefaultConversation,
     deleteConversation,
     removeLastMessage,
     setApiConfig,
+    updateConversationTitle,
     createConversation,
     getConversation,
   };

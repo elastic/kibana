@@ -27,12 +27,13 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
 
 // retrieves the index pattern from the aggregate query for ES|QL
 export function getIndexPatternFromESQLQuery(esql?: string): string {
-  const splitFroms = esql?.split(new RegExp(/FROM\s/, 'ig'));
+  let fromPipe = (esql || '').split('|')[0];
+  const splitFroms = fromPipe?.split(new RegExp(/FROM\s/, 'ig'));
   const fromsLength = splitFroms?.length ?? 0;
   if (splitFroms && splitFroms?.length > 2) {
-    esql = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
+    fromPipe = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
   }
-  const parsedString = esql?.replaceAll('`', '');
+  const parsedString = fromPipe?.replaceAll('`', '');
   // case insensitive match for the index pattern
   const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;\s]+)/, 'i');
   const matches = parsedString?.match(regex);

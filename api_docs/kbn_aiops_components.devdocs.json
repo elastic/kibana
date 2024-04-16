@@ -387,9 +387,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.LogRateHistogramItem",
                 "text": "LogRateHistogramItem"
               },
@@ -410,9 +410,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.LogRateHistogramItem",
                 "text": "LogRateHistogramItem"
               },
@@ -499,9 +499,9 @@
             "signature": [
               "number | ",
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.WindowParameters",
                 "text": "WindowParameters"
               },
@@ -633,9 +633,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.DocumentCountStatsChangePoint",
                 "text": "DocumentCountStatsChangePoint"
               },
@@ -663,17 +663,17 @@
         "signature": [
           "(windowParameters: ",
           {
-            "pluginId": "@kbn/aiops-utils",
+            "pluginId": "@kbn/aiops-log-rate-analysis",
             "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
             "section": "def-common.WindowParameters",
             "text": "WindowParameters"
           },
           ", force: boolean, logRateAnalysisType: ",
           {
-            "pluginId": "@kbn/aiops-utils",
+            "pluginId": "@kbn/aiops-log-rate-analysis",
             "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
             "section": "def-common.LogRateAnalysisType",
             "text": "LogRateAnalysisType"
           },
@@ -695,9 +695,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.WindowParameters",
                 "text": "WindowParameters"
               }

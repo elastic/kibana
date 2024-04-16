@@ -11,7 +11,7 @@ import moment from 'moment-timezone';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import { debounceTime, first, map } from 'rxjs/operators';
+import { debounceTime, first, map } from 'rxjs';
 
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';

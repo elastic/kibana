@@ -16,7 +16,6 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { ObservabilityApp } from '../../typings/common';
 
 function getSettingsFields({
   settingsKeys,
@@ -43,10 +42,11 @@ function getSettingsFields({
       fields[key] = field;
     }
   });
+
   return fields;
 }
 
-export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[]) {
+export function useEditableSettings(settingsKeys: string[]) {
   const {
     services: { settings },
   } = useKibana();

@@ -338,6 +338,7 @@ describe('Timeline save middleware', () => {
         savedSearchId: null,
         savedSearch: null,
         isDataProviderVisible: true,
+        sampleSize: 500,
       };
 
       expect(

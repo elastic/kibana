@@ -13,16 +13,18 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonIcon,
   Pagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ConnectorSyncJob, SyncJobType, SyncStatus } from '../..';
+import { ConnectorSyncJob, isSyncCancellable, SyncJobType, SyncStatus } from '../..';
 
 import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { SyncJobFlyout } from './sync_job_flyout';
+import { CancelSyncJobModal, CancelSyncModalProps } from './sync_job_cancel_modal';
 
 interface SyncJobHistoryTableProps {
   isLoading?: boolean;
@@ -30,6 +32,10 @@ interface SyncJobHistoryTableProps {
   pagination: Pagination;
   syncJobs: ConnectorSyncJob[];
   type: 'content' | 'access_control';
+  cancelConfirmModalProps?: Pick<CancelSyncModalProps, 'isLoading' | 'onConfirmCb'> & {
+    syncJobIdToCancel?: ConnectorSyncJob['id'];
+    setSyncJobIdToCancel: (syncJobId: ConnectorSyncJob['id'] | undefined) => void;
+  };
 }
 
 export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
@@ -38,6 +44,12 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
   pagination,
   syncJobs,
   type,
+  cancelConfirmModalProps = {
+    onConfirmCb: () => {},
+    isLoading: false,
+    setSyncJobIdToCancel: () => {},
+    syncJobIdToCancel: undefined,
+  },
 }) => {
   const [selectedSyncJob, setSelectedSyncJob] = useState<ConnectorSyncJob | undefined>(undefined);
   const columns: Array<EuiBasicTableColumn<ConnectorSyncJob>> = [
@@ -63,7 +75,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           {
             field: 'indexed_document_count',
             name: i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
-              defaultMessage: 'Docs added',
+              defaultMessage: 'Docs upserted',
             }),
             sortable: true,
             truncateText: true,
@@ -127,6 +139,33 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           onClick: (job) => setSelectedSyncJob(job),
           type: 'icon',
         },
+        ...(cancelConfirmModalProps
+          ? [
+              {
+                render: (job: ConnectorSyncJob) => {
+                  return isSyncCancellable(job.status) ? (
+                    <EuiButtonIcon
+                      iconType="cross"
+                      color="danger"
+                      onClick={() => cancelConfirmModalProps.setSyncJobIdToCancel(job.id)}
+                      aria-label={i18n.translate(
+                        'searchConnectors.index.syncJobs.actions.cancelSyncJob.caption',
+                        {
+                          defaultMessage: 'Cancel this sync job',
+                        }
+                      )}
+                    >
+                      {i18n.translate('searchConnectors.index.syncJobs.actions.deleteJob.caption', {
+                        defaultMessage: 'Delete',
+                      })}
+                    </EuiButtonIcon>
+                  ) : (
+                    <></>
+                  );
+                },
+              },
+            ]
+          : []),
       ],
     },
   ];
@@ -135,6 +174,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
     <>
       {Boolean(selectedSyncJob) && (
         <SyncJobFlyout onClose={() => setSelectedSyncJob(undefined)} syncJob={selectedSyncJob} />
+      )}
+      {Boolean(cancelConfirmModalProps) && cancelConfirmModalProps?.syncJobIdToCancel && (
+        <CancelSyncJobModal
+          {...cancelConfirmModalProps}
+          syncJobId={cancelConfirmModalProps.syncJobIdToCancel}
+          onCancel={() => cancelConfirmModalProps.setSyncJobIdToCancel(undefined)}
+        />
       )}
       <EuiBasicTable
         data-test-subj={`entSearchContent-index-${type}-syncJobs-table`}

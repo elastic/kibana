@@ -9,28 +9,29 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 interface Props {
   dataView?: DataView;
-  assetName: string;
+  assetId: string;
   dateRange: TimeRange;
 }
 
-export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
+export const KPIGrid = ({ assetId, dataView, dateRange }: Props) => {
   const { searchSessionId } = useLoadingStateContext();
 
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
-        field: 'host.name',
-        values: [assetName],
+        field: findInventoryFields('host').id,
+        values: [assetId],
         dataView,
       }),
     ];
-  }, [dataView, assetName]);
+  }, [dataView, assetId]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">

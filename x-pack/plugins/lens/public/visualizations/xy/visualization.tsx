@@ -208,20 +208,20 @@ export const getXyVisualization = ({
     return state;
   },
 
-  appendLayer(state, layerId, layerType, indexPatternId, extraArg) {
+  appendLayer(state, layerId, layerType, indexPatternId, extraArg, seriesType) {
     if (layerType === 'metricTrendline') {
       return state;
     }
 
-    const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
       layers: [
         ...state.layers,
         newLayerState({
-          seriesType: firstUsedSeriesType || state.preferredSeriesType,
           layerId,
           layerType,
+          seriesType:
+            seriesType || getDataLayers(state.layers)?.[0]?.seriesType || state.preferredSeriesType,
           indexPatternId,
           extraArg,
         }),
@@ -734,7 +734,7 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        addLayer={async (type, loadedGroupInfo) => {
+        addLayer={async (type, loadedGroupInfo, _, seriesType) => {
           if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
             await props.ensureIndexPattern(
               loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
@@ -745,8 +745,7 @@ export const getXyVisualization = ({
               group: loadedGroupInfo,
             });
           }
-
-          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo);
+          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo, seriesType);
         }}
       />
     );

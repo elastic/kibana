@@ -21,6 +21,7 @@ import {
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
+  TokenCountEvent,
 } from '../../common/conversation_complete';
 import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
@@ -240,11 +241,15 @@ export class KibanaClient {
             .split('\n')
             .map((line) => line.trim())
             .filter(Boolean)
-            .map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent)
+            .map(
+              (line) =>
+                JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent | TokenCountEvent
+            )
         ),
         filter(
           (line): line is ChatCompletionChunkEvent | ChatCompletionErrorEvent =>
-            line.type !== StreamingChatResponseEventType.BufferFlush
+            line.type === StreamingChatResponseEventType.ChatCompletionChunk ||
+            line.type === StreamingChatResponseEventType.ChatCompletionError
         ),
         throwSerializedChatCompletionErrors(),
         concatenateChatCompletionChunks()
@@ -329,7 +334,13 @@ export class KibanaClient {
               .split('\n')
               .map((line) => line.trim())
               .filter(Boolean)
-              .map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent)
+              .map(
+                (line) =>
+                  JSON.parse(line) as
+                    | StreamingChatResponseEvent
+                    | BufferFlushEvent
+                    | TokenCountEvent
+              )
           ),
           filter(
             (event): event is MessageAddEvent | ConversationCreateEvent =>

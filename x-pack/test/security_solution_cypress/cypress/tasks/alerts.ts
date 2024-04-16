@@ -319,8 +319,8 @@ export const openAlertsFieldBrowser = () => {
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     waitForAlerts();
-    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
-    cy.get('@checkbox').should('have.attr', 'checked');
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
+    cy.get('@checkbox').should('be.checked');
   }
 };
 

@@ -159,6 +159,7 @@ export interface PluginStartContract {
     params: Params,
     variables: Record<string, unknown>
   ): Params;
+  isSystemActionConnector: (connectorId: string) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -603,6 +604,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
+      isSystemActionConnector: (connectorId: string): boolean => {
+        return this.inMemoryConnectors.some(
+          (inMemoryConnector) =>
+            inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
+        );
+      },
     };
   }
 

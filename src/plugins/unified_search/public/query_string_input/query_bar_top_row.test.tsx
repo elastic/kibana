@@ -347,41 +347,6 @@ describe('QueryBarTopRowTopRow', () => {
     `);
   });
 
-  it('should render query input bar with hideRunQueryText when configured', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: sqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [stubIndexPattern],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-        hideTextBasedRunQueryLabel: true,
-      })
-    );
-
-    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(true);
-  });
-
-  it('should render query input bar with hideRunQueryText as undefined if not configured', () => {
-    const component = mount(
-      wrapQueryBarTopRowInContext({
-        query: sqlQuery,
-        isDirty: false,
-        screenTitle: 'SQL Screen',
-        timeHistory: mockTimeHistory,
-        indexPatterns: [stubIndexPattern],
-        showDatePicker: true,
-        dateRangeFrom: 'now-7d',
-        dateRangeTo: 'now',
-      })
-    );
-
-    expect(component.find(TEXT_BASED_EDITOR).prop('hideRunQueryText')).toBe(undefined);
-  });
-
   it('Should render custom data view picker', () => {
     const dataViewPickerOverride = <div data-test-subj="dataViewPickerOverride" />;
     const { getByTestId } = render(

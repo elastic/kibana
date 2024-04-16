@@ -1218,6 +1218,45 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-common.MIGRATION_CLIENT_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "MIGRATION_CLIENT_OPTIONS",
+        "description": [
+          "\nDefines settings for the elasticsearch-js client used for the SO migrations"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-common.MIGRATION_CLIENT_OPTIONS.maxRetries",
+            "type": "number",
+            "tags": [],
+            "label": "maxRetries",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server-internal",
+            "id": "def-common.MIGRATION_CLIENT_OPTIONS.requestTimeout",
+            "type": "number",
+            "tags": [],
+            "label": "requestTimeout",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

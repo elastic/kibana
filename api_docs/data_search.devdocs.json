@@ -2648,6 +2648,9 @@
             "tags": [],
             "label": "completion_status",
             "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/data/server/search/strategies/ese_search/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6991,7 +6994,9 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; fetch: (options?: ",
+                  "; history: ",
+                  "SearchRequest",
+                  "[]; fetch: (options?: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -7003,9 +7008,7 @@
                   "SearchResponse",
                   "<unknown, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>; history: ",
-                  "SearchRequest",
-                  "[]; setField: <K extends keyof ",
+                  ">>>; setField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -11902,7 +11905,7 @@
         "label": "aggregateQueryToAst",
         "description": [],
         "signature": [
-          "(query: ",
+          "({ query, timeField, titleForInspector, descriptionForInspector, }: { query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -11910,7 +11913,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          ", timeField?: string | undefined) => ",
+          "; timeField?: string | undefined; titleForInspector?: string | undefined; descriptionForInspector?: string | undefined; }) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -11927,38 +11930,71 @@
           {
             "parentPluginId": "data",
             "id": "def-common.aggregateQueryToAst.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "query",
+            "label": "{\n  query,\n  timeField,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
-            "signature": [
+            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.query",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "{ sql: string; } | { esql: string; }"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.timeField",
+                "type": "string",
+                "tags": [],
+                "label": "timeField",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.titleForInspector",
+                "type": "string",
+                "tags": [],
+                "label": "titleForInspector",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.aggregateQueryToAst.$1.descriptionForInspector",
+                "type": "string",
+                "tags": [],
+                "label": "descriptionForInspector",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
-            ],
-            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.aggregateQueryToAst.$2",
-            "type": "string",
-            "tags": [],
-            "label": "timeField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/expressions/aggregate_query_to_ast.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
+            ]
           }
         ],
         "returnComment": [],
@@ -34040,7 +34076,9 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; fetch: (options?: ",
+          "; history: ",
+          "SearchRequest",
+          "[]; fetch: (options?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -34052,9 +34090,7 @@
           "SearchResponse",
           "<unknown, Record<string, ",
           "AggregationsAggregate",
-          ">>>; history: ",
-          "SearchRequest",
-          "[]; setField: <K extends keyof ",
+          ">>>; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",

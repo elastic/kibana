@@ -682,7 +682,7 @@
                     "section": "def-common.Trigger",
                     "text": "Trigger"
                   },
-                  ") => void; readonly getTrigger: (triggerId: string) => ",
+                  ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
                   "TriggerContract",
                   "<object>; readonly registerAction: <Context extends object>(definition: ",
                   {
@@ -1632,9 +1632,7 @@
         "label": "useEditableSettings",
         "description": [],
         "signature": [
-          "(app: ",
-          "ObservabilityApp",
-          ", settingsKeys: string[]) => { fields: Record<string, ",
+          "(settingsKeys: string[]) => { fields: Record<string, ",
           {
             "pluginId": "@kbn/management-settings-types",
             "scope": "common",
@@ -1691,21 +1689,6 @@
           {
             "parentPluginId": "observabilityShared",
             "id": "def-public.useEditableSettings.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "app",
-            "description": [],
-            "signature": [
-              "ObservabilityApp"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_editable_settings.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "observabilityShared",
-            "id": "def-public.useEditableSettings.$2",
             "type": "Array",
             "tags": [],
             "label": "settingsKeys",

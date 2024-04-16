@@ -14,6 +14,7 @@ export interface PluginContextValue {
   appMountParameters: AppMountParameters;
   exploratoryView: ExploratoryViewPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  spaceId: string;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

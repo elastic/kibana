@@ -245,7 +245,7 @@
         "label": "ConstructorOptions",
         "description": [],
         "signature": [
-          "Omit<Options, \"byweekday\" | \"wkst\"> & { byweekday?: (string | number)[] | null | undefined; wkst?: number | \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | null | undefined; }"
+          "Omit<Options, \"wkst\" | \"byweekday\"> & { byweekday?: (string | number)[] | null | undefined; wkst?: number | \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | null | undefined; }"
         ],
         "path": "packages/kbn-rrule/rrule.ts",
         "deprecated": false,

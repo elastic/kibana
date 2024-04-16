@@ -150,6 +150,7 @@ describe('JiraParamsFields renders', () => {
     expect(results.getByTestId('descriptionTextArea')).toBeInTheDocument();
     expect(results.getByTestId('labelsComboBox')).toBeInTheDocument();
     expect(results.getByTestId('commentsTextArea')).toBeInTheDocument();
+    expect(results.getByTestId('otherFieldsJsonEditor')).toBeInTheDocument();
   });
 
   it('it shows loading when loading issue types', () => {
@@ -476,6 +477,18 @@ describe('JiraParamsFields renders', () => {
       ]);
     });
 
+    it('updates additional fields', () => {
+      const TEST_VALUE = '{"field_id":"bar"}';
+      const results = render(<JiraParamsFields {...defaultProps} />);
+      const otherFields = results.getByTestId('otherFieldsJsonEditor');
+
+      fireEvent.change(otherFields, {
+        target: { value: TEST_VALUE },
+      });
+
+      expect(editAction.mock.calls[0][1].incident.otherFields).toEqual(TEST_VALUE);
+    });
+
     it('Clears any left behind priority when issueType changes and hasPriority becomes false', async () => {
       useGetFieldsByIssueTypeMock
         .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)
@@ -525,6 +538,13 @@ describe('JiraParamsFields renders', () => {
           true
         );
       });
+    });
+
+    it('renders additional info for the additional fields field', () => {
+      const results = render(<JiraParamsFields {...defaultProps} />);
+      const additionalFields = results.getByText('Additional fields help');
+
+      expect(additionalFields).toBeInTheDocument();
     });
   });
 });

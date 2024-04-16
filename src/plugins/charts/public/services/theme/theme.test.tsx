@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { from } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { render, act as renderAct } from '@testing-library/react';
 

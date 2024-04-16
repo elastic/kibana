@@ -9,15 +9,11 @@ exports[`DocumentsPanel renders 1`] = `
       Array [
         Object {
           "field": "added",
-          "name": "Added",
+          "name": "Upserted",
         },
         Object {
           "field": "removed",
-          "name": "Removed",
-        },
-        Object {
-          "field": "total",
-          "name": "Total",
+          "name": "Deleted",
         },
         Object {
           "field": "volume",

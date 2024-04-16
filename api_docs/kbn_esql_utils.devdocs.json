@@ -373,6 +373,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.ESQL_LATEST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_LATEST_VERSION",
+        "description": [],
+        "signature": [
+          "\"2024.04.01\""
+        ],
+        "path": "packages/kbn-esql-utils/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.TextBasedLanguages",
         "type": "string",
         "tags": [],

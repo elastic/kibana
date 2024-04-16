@@ -47,7 +47,7 @@ steps:
     parallelism: 8
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:detection_engine:exceptions
@@ -67,5 +67,5 @@ steps:
     parallelism: 6
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1

@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export { filterStateStore } from './constants/latest';
-export type { FilterStateStore } from './constants/latest';
 export { alertsFilterQuerySchema } from './schemas/latest';
-
-export { filterStateStore as filterStateStoreV1 } from './constants/v1';
-export type { FilterStateStore as FilterStateStoreV1 } from './constants/v1';
 export { alertsFilterQuerySchema as alertsFilterQuerySchemaV1 } from './schemas/v1';

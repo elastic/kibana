@@ -22,8 +22,6 @@ export abstract class TransformGenerator {
   ): Promise<TransformPutTransformRequest>;
 
   public buildCommonRuntimeMappings(slo: SLO, dataView?: DataView): MappingRuntimeFields {
-    const groupings = [slo.groupBy].flat().filter((value) => !!value);
-    const hasGroupings = !groupings.includes(ALL_VALUE) && groupings.length;
     return {
       'slo.id': {
         type: 'keyword',
@@ -37,31 +35,8 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      ...(hasGroupings
-        ? {
-            'slo.instanceId': {
-              type: 'keyword',
-              script: {
-                source: this.buildInstanceId(slo),
-              },
-            },
-          }
-        : {
-            'slo.instanceId': {
-              type: 'keyword',
-              script: {
-                source: `emit('${ALL_VALUE}')`,
-              },
-            },
-          }),
       ...(dataView?.getRuntimeMappings?.() ?? {}),
     };
-  }
-
-  public buildInstanceId(slo: SLO): string {
-    const groups = [slo.groupBy].flat().filter((value) => !!value);
-    const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
-    return `emit(${groupings})`;
   }
 
   public buildDescription(slo: SLO): string {
@@ -82,24 +57,17 @@ export abstract class TransformGenerator {
 
     const groupings =
       !groups.includes(ALL_VALUE) && groups.length
-        ? groups.reduce(
-            (acc, field) => {
-              return {
-                ...acc,
-                [`slo.groupings.${field}`]: {
-                  terms: {
-                    field,
-                  },
+        ? groups.reduce((acc, field) => {
+            return {
+              ...acc,
+              [`slo.groupings.${field}`]: {
+                terms: {
+                  field,
                 },
-              };
-            },
-            {
-              'slo.instanceId': {
-                terms: { field: 'slo.instanceId' },
               },
-            }
-          )
-        : { 'slo.instanceId': { terms: { field: 'slo.instanceId' } } };
+            };
+          }, {})
+        : {};
 
     return {
       'slo.id': { terms: { field: 'slo.id' } },

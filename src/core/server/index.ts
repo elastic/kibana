@@ -165,7 +165,7 @@ export type {
   RouteValidationSpec,
   RouteValidationFunction,
   RouteValidatorOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RouteValidationResultFactory,
   RouteValidationError,
   RedirectResponseOptions,

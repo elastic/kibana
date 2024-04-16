@@ -25,6 +25,12 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    * Converts the `pageHeader` contents into an EuiEmptyPrompt when no `children` are present
    */
   isEmptyState?: boolean;
+
+  /**
+   * Combined with isEmptyState, this prop allows complete override of the empty page
+   */
+  emptyPageBody?: ReactNode;
+
   /**
    * Quick creation of EuiSideNav. Hooks up mobile instance too
    */

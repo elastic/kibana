@@ -8,8 +8,9 @@
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { categorizationFieldValidationSchema } from '../../../common/api/log_categorization/schema';
-import { AIOPS_API_ENDPOINT } from '../../../common/api';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
+
+import { categorizationFieldValidationSchema } from '@kbn/aiops-log-pattern-analysis/schema';
 import type { AiopsLicense } from '../../types';
 import { routeHandlerFactory } from './route_handler_factory';
 

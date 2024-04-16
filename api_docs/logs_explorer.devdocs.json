@@ -312,7 +312,7 @@
             "signature": [
               "Pick<Required<Partial<",
               "DiscoverServices",
-              ">>, \"data\" | \"history\" | \"uiSettings\" | \"timefilter\" | \"filterManager\"> & { urlStateStorage: ",
+              ">>, \"history\" | \"data\" | \"uiSettings\" | \"timefilter\" | \"filterManager\"> & { urlStateStorage: ",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "public",

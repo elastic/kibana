@@ -13,11 +13,12 @@ import {
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
+import type { NormalizedExternalConnectorClient } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
 
 export interface SentinelOneActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
-  connectorActions: ActionsClientMock;
+  connectorActions: NormalizedExternalConnectorClient;
 }
 
 const createSentinelOneAgentDetailsMock = (
@@ -176,7 +177,9 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
 const createConstructorOptionsMock = (): SentinelOneActionsClientOptionsMock => {
   return {
     ...responseActionsClientMock.createConstructorOptions(),
-    connectorActions: createConnectorActionsClientMock(),
+    connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(
+      createConnectorActionsClientMock()
+    ),
   };
 };
 

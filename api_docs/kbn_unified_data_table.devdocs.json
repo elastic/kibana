@@ -130,6 +130,74 @@
       },
       {
         "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-common.getRenderCustomToolbarWithElements",
+        "type": "Function",
+        "tags": [],
+        "label": "getRenderCustomToolbarWithElements",
+        "description": [
+          "\nRender custom element on the left side and all controls to the right"
+        ],
+        "signature": [
+          "({ leftSide, bottomSection, }: { leftSide?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; bottomSection?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }) => ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "common",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-common.UnifiedDataTableRenderCustomToolbar",
+            "text": "UnifiedDataTableRenderCustomToolbar"
+          }
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.getRenderCustomToolbarWithElements.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  leftSide,\n  bottomSection,\n}",
+            "description": [],
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-common.getRenderCustomToolbarWithElements.$1.leftSide",
+                "type": "Object",
+                "tags": [],
+                "label": "leftSide",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/unified-data-table",
+                "id": "def-common.getRenderCustomToolbarWithElements.$1.bottomSection",
+                "type": "Object",
+                "tags": [],
+                "label": "bottomSection",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+                ],
+                "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
         "id": "def-common.getRowsPerPageOptions",
         "type": "Function",
         "tags": [],
@@ -365,6 +433,52 @@
       },
       {
         "parentPluginId": "@kbn/unified-data-table",
+        "id": "def-common.renderCustomToolbar",
+        "type": "Function",
+        "tags": [],
+        "label": "renderCustomToolbar",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "common",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-common.UnifiedDataTableRenderCustomToolbarProps",
+            "text": "UnifiedDataTableRenderCustomToolbarProps"
+          },
+          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.renderCustomToolbar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "common",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-common.UnifiedDataTableRenderCustomToolbarProps",
+                "text": "UnifiedDataTableRenderCustomToolbarProps"
+              }
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-data-table",
         "id": "def-common.RowHeightSettings",
         "type": "Function",
         "tags": [],
@@ -418,7 +532,7 @@
         "label": "UnifiedDataTable",
         "description": [],
         "signature": [
-          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalControlColumns, externalAdditionalControls, rowsPerPageOptions, visibleCellActions, externalCustomRenderers, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, customGridColumnsConfiguration, customControlColumnsConfiguration, }: ",
+          "({ ariaLabelledBy, columns, columnsMeta, showColumnTokens, configHeaderRowHeight, headerRowHeightState, onUpdateHeaderRowHeight, controlColumnIds, dataView, loadingState, onFilter, onResize, onSetColumns, onSort, rows, searchDescription, searchTitle, settings, showTimeCol, showFullScreenButton, sort, useNewFieldsApi, isSortEnabled, isPaginationEnabled, cellActionsTriggerId, className, rowHeightState, onUpdateRowHeight, maxAllowedSampleSize, sampleSizeState, onUpdateSampleSize, isPlainRecord, rowsPerPageState, onUpdateRowsPerPage, onFieldEdited, services, renderCustomGridBody, renderCustomToolbar, trailingControlColumns, totalHits, onFetchMoreRecords, renderDocumentView, setExpandedDoc, expandedDoc, configRowHeight, showMultiFields, maxDocFieldsDisplayed, externalControlColumns, externalAdditionalControls, rowsPerPageOptions, visibleCellActions, externalCustomRenderers, consumer, componentsTourSteps, gridStyleOverride, rowLineHeightOverride, cellActionsMetadata, customGridColumnsConfiguration, customControlColumnsConfiguration, enableComparisonMode, }: ",
           {
             "pluginId": "@kbn/unified-data-table",
             "scope": "common",
@@ -437,7 +551,7 @@
             "id": "def-common.UnifiedDataTable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  trailingControlColumns,\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalControlColumns,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  visibleCellActions,\n  externalCustomRenderers,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  customGridColumnsConfiguration,\n  customControlColumnsConfiguration,\n}",
+            "label": "{\n  ariaLabelledBy,\n  columns,\n  columnsMeta,\n  showColumnTokens,\n  configHeaderRowHeight,\n  headerRowHeightState,\n  onUpdateHeaderRowHeight,\n  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,\n  dataView,\n  loadingState,\n  onFilter,\n  onResize,\n  onSetColumns,\n  onSort,\n  rows,\n  searchDescription,\n  searchTitle,\n  settings,\n  showTimeCol,\n  showFullScreenButton = true,\n  sort,\n  useNewFieldsApi,\n  isSortEnabled = true,\n  isPaginationEnabled = true,\n  cellActionsTriggerId,\n  className,\n  rowHeightState,\n  onUpdateRowHeight,\n  maxAllowedSampleSize,\n  sampleSizeState,\n  onUpdateSampleSize,\n  isPlainRecord = false,\n  rowsPerPageState,\n  onUpdateRowsPerPage,\n  onFieldEdited,\n  services,\n  renderCustomGridBody,\n  renderCustomToolbar,\n  trailingControlColumns,\n  totalHits,\n  onFetchMoreRecords,\n  renderDocumentView,\n  setExpandedDoc,\n  expandedDoc,\n  configRowHeight,\n  showMultiFields = true,\n  maxDocFieldsDisplayed = 50,\n  externalControlColumns,\n  externalAdditionalControls,\n  rowsPerPageOptions,\n  visibleCellActions,\n  externalCustomRenderers,\n  consumer = 'discover',\n  componentsTourSteps,\n  gridStyleOverride,\n  rowLineHeightOverride,\n  cellActionsMetadata,\n  customGridColumnsConfiguration,\n  customControlColumnsConfiguration,\n  enableComparisonMode,\n}",
             "description": [],
             "signature": [
               {
@@ -2151,6 +2265,38 @@
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.UnifiedDataTableProps.enableComparisonMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableComparisonMode",
+            "description": [
+              "\nSet to true to allow users to compare selected documents"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-data-table",
+            "id": "def-common.UnifiedDataTableProps.cellActionsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "cellActionsMetadata",
+            "description": [
+              "\nCustom set of properties used by some actions.\nAn action might require a specific set of metadata properties to render.\nThis data is sent directly to actions."
+            ],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2162,7 +2308,7 @@
         "tags": [],
         "label": "UnifiedDataTableRenderCustomToolbarProps",
         "description": [],
-        "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2176,7 +2322,7 @@
             "signature": [
               "EuiDataGridCustomToolbarProps"
             ],
-            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2192,7 +2338,7 @@
               "EuiDataGridToolBarAdditionalControlsOptions",
               "; }"
             ],
-            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2486,7 +2632,7 @@
           },
           ") => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
-        "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+        "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2507,7 +2653,7 @@
                 "text": "UnifiedDataTableRenderCustomToolbarProps"
               }
             ],
-            "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
+            "path": "packages/kbn-unified-data-table/src/components/custom_toolbar/render_custom_toolbar.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

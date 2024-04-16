@@ -27,6 +27,7 @@ import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-obje
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -520,6 +521,49 @@ export function defineRoutes(
       emailService.sendHTMLEmail({ to, subject, message, messageHTML });
 
       return res.ok({ body: { ok: true } });
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/{id}/_execute_connector',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const [_, { actions }] = await core.getStartServices();
+
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.execute({
+            actionId: req.params.id,
+            params: req.body.params,
+            source: {
+              type: ActionExecutionSourceType.HTTP_REQUEST,
+              source: req,
+            },
+            relatedSavedObjects: [],
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
+      }
     }
   );
 }

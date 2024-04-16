@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';

@@ -70,12 +70,12 @@ export function useFleetServerUnhealthy() {
   }, [notifications.toasts]);
 
   useEffect(() => {
-    if (!authz.fleet.allAgents || !authz.fleet.readAgentPolicies) {
+    if (!authz.fleet.allAgents || !authz.integrations.readIntegrationPolicies) {
       setIsLoading(false);
       return;
     }
     fetchData();
-  }, [fetchData, authz.fleet.allAgents, authz.fleet.readAgentPolicies]);
+  }, [fetchData, authz.fleet.allAgents, authz.integrations.readIntegrationPolicies]);
 
   return {
     isLoading,

@@ -47,7 +47,7 @@ describe('handleStreamStorage', () => {
   };
   let defaultProps = {
     responseStream: jest.fn() as unknown as Readable,
-    llmType: '.gen-ai',
+    actionTypeId: '.gen-ai',
     onMessageSent,
     logger: mockLogger,
   };
@@ -58,7 +58,7 @@ describe('handleStreamStorage', () => {
       stream.write(`data: ${JSON.stringify(chunk)}`);
       defaultProps = {
         responseStream: stream.transform,
-        llmType: '.gen-ai',
+        actionTypeId: '.gen-ai',
         onMessageSent,
         logger: mockLogger,
       };
@@ -85,7 +85,7 @@ describe('handleStreamStorage', () => {
       stream.write(encodeBedrockResponse('Simple.'));
       defaultProps = {
         responseStream: stream.transform,
-        llmType: '.gen-ai',
+        actionTypeId: '.gen-ai',
         onMessageSent,
         logger: mockLogger,
       };
@@ -93,11 +93,11 @@ describe('handleStreamStorage', () => {
 
     it('saves the final string successful streaming event', async () => {
       stream.complete();
-      await handleStreamStorage({ ...defaultProps, llmType: '.bedrock' });
+      await handleStreamStorage({ ...defaultProps, actionTypeId: '.bedrock' });
       expect(onMessageSent).toHaveBeenCalledWith('Simple.');
     });
     it('saves the error message on a failed streaming event', async () => {
-      const tokenPromise = handleStreamStorage({ ...defaultProps, llmType: '.bedrock' });
+      const tokenPromise = handleStreamStorage({ ...defaultProps, actionTypeId: '.bedrock' });
 
       stream.fail();
       await expect(tokenPromise).resolves.not.toThrow();

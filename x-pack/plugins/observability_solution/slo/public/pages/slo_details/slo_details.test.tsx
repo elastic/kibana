@@ -119,7 +119,7 @@ const mockKibana = () => {
       },
       executionContext: {
         get: () => ({
-          name: 'observability-overview',
+          name: 'slo',
         }),
       },
     },

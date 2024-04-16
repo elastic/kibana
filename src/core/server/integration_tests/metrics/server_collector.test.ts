@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
+import { take, filter } from 'rxjs';
 import supertest from 'supertest';
 import { Server as HapiServer } from '@hapi/hapi';
 import { createHttpServer } from '@kbn/core-http-server-mocks';

@@ -1278,13 +1278,107 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.saveStateToSavedObject",
+            "id": "def-public.MapEmbeddable.checkForDuplicateTitle",
             "type": "Function",
             "tags": [],
-            "label": "saveStateToSavedObject",
+            "label": "checkForDuplicateTitle",
             "description": [],
             "signature": [
-              "(title: string) => Promise<{ state: { savedObjectId: string; id: string; title?: string | undefined; query?: ",
+              "(newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "newTitle",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isTitleDuplicateConfirmed",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "onTitleDuplicate",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.saveToLibrary",
+            "type": "Function",
+            "tags": [],
+            "label": "saveToLibrary",
+            "description": [],
+            "signature": [
+              "(title: string) => Promise<string>"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable.saveToLibrary.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable.getByReferenceState",
+            "type": "Function",
+            "tags": [],
+            "label": "getByReferenceState",
+            "description": [],
+            "signature": [
+              "(libraryId: string) => { savedObjectId: string; id: string; title?: string | undefined; query?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1338,7 +1432,7 @@
               "MapExtent",
               " | undefined; mapSettings?: Partial<",
               "MapSettings",
-              "> | undefined; hiddenLayers?: string[] | undefined; hideFilterActions?: boolean | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }; savedObjectId: string; }>"
+              "> | undefined; hiddenLayers?: string[] | undefined; hideFilterActions?: boolean | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; }"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -1346,10 +1440,10 @@
             "children": [
               {
                 "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.saveStateToSavedObject.$1",
+                "id": "def-public.MapEmbeddable.getByReferenceState.$1",
                 "type": "string",
                 "tags": [],
-                "label": "title",
+                "label": "libraryId",
                 "description": [],
                 "signature": [
                   "string"
@@ -1364,10 +1458,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.savedObjectAttributesToState",
+            "id": "def-public.MapEmbeddable.getByValueState",
             "type": "Function",
             "tags": [],
-            "label": "savedObjectAttributesToState",
+            "label": "getByValueState",
             "description": [],
             "signature": [
               "() => { attributes: ",
@@ -1432,68 +1526,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.checkForDuplicateTitle",
-            "type": "Function",
-            "tags": [],
-            "label": "checkForDuplicateTitle",
-            "description": [],
-            "signature": [
-              "(newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<boolean>"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$1",
-                "type": "string",
-                "tags": [],
-                "label": "newTitle",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "isTitleDuplicateConfirmed",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "maps",
-                "id": "def-public.MapEmbeddable.checkForDuplicateTitle.$3",
-                "type": "Function",
-                "tags": [],
-                "label": "onTitleDuplicate",
-                "description": [],
-                "signature": [
-                  "() => void"
-                ],
-                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           },
           {

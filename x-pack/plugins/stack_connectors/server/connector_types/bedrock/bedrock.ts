@@ -275,9 +275,12 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   }
 
   /**
-   * Deprecated. Use invokeStream instead.
-   * TODO: remove once streaming work is implemented in langchain mode for security solution
-   * tracked here: https://github.com/elastic/security-team/issues/7363
+   * Non-streamed security solution AI Assistant requests
+   * Responsible for invoking the runApi method with the provided body.
+   * It then formats the response into a string
+   * @param messages An array of messages to be sent to the API
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   * @returns an object with the response string as a property called message
    */
   public async invokeAI({
     messages,

@@ -46,12 +46,12 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
-import { AddModelFlyout } from './add_model_flyout';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useModelActions } from './model_actions';
-import { ModelsTableToConfigMapping } from '.';
+import { ModelsTableToConfigMapping } from './config_mapping';
 import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';
@@ -65,7 +65,6 @@ import type {
 import { DeleteModelsModal } from './delete_models_modal';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { ListingPageUrlState } from '../../../common/types/common';
-import { ExpandedRow } from './expanded_row';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
@@ -103,6 +102,14 @@ interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
   pageUrlState: ListingPageUrlState;
 }
+
+const ExpandedRow = dynamic(async () => ({
+  default: (await import('./expanded_row')).ExpandedRow,
+}));
+
+const AddModelFlyout = dynamic(async () => ({
+  default: (await import('./add_model_flyout')).AddModelFlyout,
+}));
 
 const modelIdColumnName = i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {
   defaultMessage: 'ID',

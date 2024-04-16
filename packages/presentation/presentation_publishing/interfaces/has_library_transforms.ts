@@ -17,13 +17,17 @@ export interface HasLibraryTransforms<StateT extends object = object> {
    */
   canLinkToLibrary: () => Promise<boolean>;
   /**
-   * Saves embeddable to library
+   * Save embeddable to library
    *
-   * @returns {Promise<{ state: StateT; savedObjectId: string }>}
-   *   state: by-reference embeddable state replacing by-value embeddable state
-   *   savedObjectId: Saved object id for new saved object added to library
+   * @returns {Promise<string>} id of persisted library item
    */
-  saveStateToSavedObject: (title: string) => Promise<{ state: StateT; savedObjectId: string }>;
+  saveToLibrary: (title: string) => Promise<string>;
+  /**
+   *
+   * @returns {StateT}
+   *   by-reference embeddable state replacing by-value embeddable state
+   */
+  getByReferenceState: (libraryId: string) => StateT;
   checkForDuplicateTitle: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
@@ -44,7 +48,7 @@ export interface HasLibraryTransforms<StateT extends object = object> {
    * @returns {StateT}
    *   by-value embeddable state replacing by-reference embeddable state
    */
-  savedObjectAttributesToState: () => StateT;
+  getByValueState: () => StateT;
 }
 
 export const apiHasLibraryTransforms = <StateT extends object = object>(
@@ -54,9 +58,9 @@ export const apiHasLibraryTransforms = <StateT extends object = object>(
     unknownApi &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).canLinkToLibrary === 'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).canUnlinkFromLibrary === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).saveStateToSavedObject === 'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).savedObjectAttributesToState ===
-        'function' &&
+      typeof (unknownApi as HasLibraryTransforms<StateT>).saveToLibrary === 'function' &&
+      typeof (unknownApi as HasLibraryTransforms<StateT>).getByReferenceState === 'function' &&
+      typeof (unknownApi as HasLibraryTransforms<StateT>).getByValueState === 'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).checkForDuplicateTitle === 'function'
   );
 };
