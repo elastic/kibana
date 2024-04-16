@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
+import { isAllowed, isAnonymized, isDenied, Replacements } from '@kbn/elastic-assistant-common';
 
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Stats } from '../helpers';
@@ -13,9 +13,11 @@ import { Stats } from '../helpers';
 export const getStats = ({
   anonymizationFields = [],
   rawData,
+  replacements,
 }: {
   anonymizationFields?: AnonymizationFieldResponse[];
   rawData?: string | Record<string, string[]>;
+  replacements?: Replacements;
 }): Stats => {
   const ZERO_STATS = {
     allowed: 0,
@@ -35,7 +37,14 @@ export const getStats = ({
       total: anonymizationFields.length,
     };
   } else if (typeof rawData === 'string') {
-    return ZERO_STATS;
+    if (replacements == null) {
+      return ZERO_STATS;
+    } else {
+      return {
+        ...ZERO_STATS,
+        anonymized: Object.keys(replacements).length,
+      };
+    }
   } else {
     const rawFields = Object.keys(rawData);
 
