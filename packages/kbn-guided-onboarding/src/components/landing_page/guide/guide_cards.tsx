@@ -37,6 +37,7 @@ export interface GuideCardsProps {
   url: BrowserUrlService;
   cloud: CloudSetup;
   docLinks: CoreStart['docLinks'];
+  http: CoreStart['http'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 export const GuideCards = (props: GuideCardsProps) => {

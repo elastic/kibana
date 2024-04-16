@@ -62,6 +62,7 @@ export const GettingStarted = () => {
     cloud,
     overlays,
     theme,
+    http,
     i18nStart,
     docLinks,
     share,
@@ -249,6 +250,7 @@ export const GettingStarted = () => {
       i18nStart={i18nStart}
       theme={theme}
       docLinks={docLinks}
+      http={http}
       cloud={cloud!}
       url={share.url}
       navigateToUrl={application.navigateToUrl}
