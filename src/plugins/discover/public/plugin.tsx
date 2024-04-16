@@ -74,7 +74,7 @@ import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
   SEARCH_EMBEDDABLE_TYPE,
 } from './embeddable/constants';
-import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
+import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import { registerFeature } from './register_feature';
@@ -478,7 +478,7 @@ export class DiscoverPlugin
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
         getDiscoverServicesInternal(),
-        import('./embeddable/react_embeddable/get_search_embeddable_factory'),
+        import('./embeddable/get_search_embeddable_factory'),
       ]);
 
       return getSearchEmbeddableFactory({

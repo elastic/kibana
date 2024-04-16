@@ -21,9 +21,9 @@ import {
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-import type { DiscoverAppLocator } from '../../common';
-import { getDiscoverLocatorParams } from './get_discover_locator_params';
-import { apiHasSavedSearch, HasSavedSearch } from './types';
+import type { DiscoverAppLocator } from '../../../common';
+import { apiHasSavedSearch, HasSavedSearch } from '../types';
+import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 

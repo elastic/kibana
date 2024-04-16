@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { savedSearchMock } from '../__mocks__/saved_search';
+import { savedSearchMock } from '../../__mocks__/saved_search';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 describe('getDiscoverLocatorParams', () => {

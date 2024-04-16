@@ -20,12 +20,12 @@ import { fetch$, FetchContext, PublishingSubject } from '@kbn/presentation-publi
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 
-import { fetchTextBased } from '../../application/main/utils/fetch_text_based';
-import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
-import { DiscoverServices } from '../../build_services';
-import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
-import { SearchEmbeddableApi } from '../types';
-import { updateSearchSource } from '../utils/update_search_source';
+import { fetchTextBased } from '../application/main/utils/fetch_text_based';
+import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
+import { DiscoverServices } from '../build_services';
+import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
+import { SearchEmbeddableApi } from './types';
+import { updateSearchSource } from './utils/update_search_source';
 
 export function initializeFetch({
   api,

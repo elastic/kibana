@@ -19,9 +19,9 @@ import {
   SortOrder,
 } from '@kbn/saved-search-plugin/public';
 
-import { DiscoverServices } from '../../build_services';
-import { getSortForEmbeddable } from '../../utils';
-import { SearchEmbeddableSerializedState } from '../types';
+import { DiscoverServices } from '../build_services';
+import { getSortForEmbeddable } from '../utils';
+import { SearchEmbeddableSerializedState } from './types';
 
 export const initializeSearchEmbeddableApi = async (
   initialState: SearchEmbeddableSerializedState,
