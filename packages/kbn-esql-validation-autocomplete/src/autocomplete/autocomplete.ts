@@ -68,6 +68,7 @@ import {
   buildVariablesDefinitions,
   buildOptionDefinition,
   buildSettingDefinitions,
+  buildValueDefinitions,
 } from './factories';
 import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -1081,6 +1082,15 @@ async function getFunctionArgsSuggestions(
     }
     return [];
   });
+
+  const literalOptions = fnDefinition.signatures.reduce<string[]>((acc, signature) => {
+    const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
+    return literalOptionsForThisParameter ? acc.concat(literalOptionsForThisParameter) : acc;
+  }, [] as string[]);
+
+  if (literalOptions.length) {
+    return buildValueDefinitions(literalOptions);
+  }
 
   const arg = node.args[argIndex];
 

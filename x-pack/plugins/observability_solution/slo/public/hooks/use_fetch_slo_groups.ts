@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
+import {
+  useQuery,
+  RefetchOptions,
+  QueryObserverResult,
+  RefetchQueryFilters,
+} from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
@@ -20,6 +25,7 @@ interface SLOGroupsParams {
   page?: number;
   perPage?: number;
   groupBy?: string;
+  groupsFilter?: string[];
   kqlQuery?: string;
   tagsFilter?: SearchState['tagsFilter'];
   statusFilter?: SearchState['statusFilter'];
@@ -33,12 +39,16 @@ interface UseFetchSloGroupsResponse {
   isSuccess: boolean;
   isError: boolean;
   data: FindSLOGroupsResponse | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<FindSLOGroupsResponse | undefined, unknown>>;
 }
 
 export function useFetchSloGroups({
   page = 1,
   perPage = DEFAULT_SLO_GROUPS_PAGE_SIZE,
   groupBy = 'ungrouped',
+  groupsFilter = [],
   kqlQuery = '',
   tagsFilter,
   statusFilter,
@@ -73,9 +83,16 @@ export function useFetchSloGroups({
       return '';
     }
   }, [filterDSL, tagsFilter, statusFilter, dataView]);
-
-  const { data, isLoading, isSuccess, isError, isRefetching } = useQuery({
-    queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery, filters, lastRefresh }),
+  const { data, isLoading, isSuccess, isError, isRefetching, refetch } = useQuery({
+    queryKey: sloKeys.group({
+      page,
+      perPage,
+      groupBy,
+      groupsFilter,
+      kqlQuery,
+      filters,
+      lastRefresh,
+    }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOGroupsResponse>(
         '/internal/api/observability/slos/_groups',
@@ -84,6 +101,7 @@ export function useFetchSloGroups({
             ...(page && { page }),
             ...(perPage && { perPage }),
             ...(groupBy && { groupBy }),
+            ...(groupsFilter && { groupsFilter }),
             ...(kqlQuery && { kqlQuery }),
             ...(filters && { filters }),
           },
@@ -115,5 +133,6 @@ export function useFetchSloGroups({
     isSuccess,
     isError,
     isRefetching,
+    refetch,
   };
 }

@@ -7,9 +7,11 @@
 
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
-
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 
+type MockInternalEsClient = ReturnType<
+  typeof elasticsearchServiceMock.createScopedClusterClient
+>['asInternalUser'];
 jest.mock('../utils/create_or_update_index', () => ({
   createOrUpdateIndex: jest.fn(),
 }));
@@ -59,9 +61,7 @@ describe('AssetCriticalityDataClient', () => {
   });
 
   describe('#search()', () => {
-    let esClientMock: ReturnType<
-      typeof elasticsearchServiceMock.createScopedClusterClient
-    >['asInternalUser'];
+    let esClientMock: MockInternalEsClient;
     let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
     let subject: AssetCriticalityDataClient;
 

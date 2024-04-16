@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -171,6 +170,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
+   * Enables alerts suppression for new terms rules
+   */
+  alertSuppressionForNewTermsRuleEnabled: false,
+
+  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: true,
@@ -228,6 +232,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

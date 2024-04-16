@@ -14,7 +14,7 @@ import {
   CONTAINER_ID,
   HOST_NAME,
 } from '../../../../common/es_fields/apm';
-import { getTypedSearch } from '../../diagnostics/create_typed_es_client';
+import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
 export type LogCategories =
   | Array<{
@@ -122,7 +122,7 @@ export async function getLogCategories({
 }
 
 // field/value pairs should match, or the field should not exist
-function getShouldMatchOrNotExistFilter(
+export function getShouldMatchOrNotExistFilter(
   keyValuePairs: Array<{
     field: string;
     value?: string;

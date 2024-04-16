@@ -13,6 +13,7 @@ import { _version } from '../../common/underscore_version';
 import { id } from '../../common/id';
 import { meta } from '../../common/meta';
 import { value } from '../../common/value';
+import { refresh } from '../../common/refresh';
 
 export const patchListItemSchema = t.intersection([
   t.exact(
@@ -20,7 +21,7 @@ export const patchListItemSchema = t.intersection([
       id,
     })
   ),
-  t.exact(t.partial({ _version, meta, value })),
+  t.exact(t.partial({ _version, meta, value, refresh })),
 ]);
 
 export type PatchListItemSchema = t.OutputOf<typeof patchListItemSchema>;

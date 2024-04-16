@@ -6,7 +6,7 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation, Message } from '@kbn/elastic-assistant';
+import type { Conversation, ClientMessage } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
@@ -17,7 +17,7 @@ import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
-export interface ContentMessage extends Message {
+export interface ContentMessage extends ClientMessage {
   content: string;
 }
 const transformMessageWithReplacements = ({
@@ -26,7 +26,7 @@ const transformMessageWithReplacements = ({
   showAnonymizedValues,
   replacements,
 }: {
-  message: Message;
+  message: ClientMessage;
   content: string;
   showAnonymizedValues: boolean;
   replacements: Replacements;

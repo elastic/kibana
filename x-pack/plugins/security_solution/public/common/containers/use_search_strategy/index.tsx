@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { filter } from 'rxjs';
+import { catchError, filter, tap } from 'rxjs';
 import { noop, omit } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import type { Observable } from 'rxjs';
@@ -55,27 +55,22 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
         name: `${APP_UI_ID} searchStrategy ${factoryQueryType}`,
         spanName: 'batched search',
       });
-
-      const observable = data.search
+      // return observable directly, any extra subscription causes duplicate requests
+      return data.search
         .search<StrategyRequestInputType<QueryType>, StrategyResponseType<QueryType>>(
           { ...request, factoryQueryType } as StrategyRequestInputType<QueryType>,
-          {
-            strategy: 'securitySolutionSearchStrategy',
-            abortSignal,
-          }
+          { strategy: 'securitySolutionSearchStrategy', abortSignal }
         )
-        .pipe(filter((response) => !isRunningResponse(response)));
-
-      observable.subscribe({
-        next: (response) => {
-          endTracking('success');
-        },
-        error: () => {
-          endTracking(abortSignal.aborted ? 'aborted' : 'error');
-        },
-      });
-
-      return observable;
+        .pipe(
+          filter((response) => !isRunningResponse(response)),
+          catchError((error) => {
+            endTracking(abortSignal.aborted ? 'aborted' : 'error');
+            throw error;
+          }),
+          tap(() => {
+            endTracking('success');
+          })
+        );
     },
     [data.search, factoryQueryType, startTracking]
   );
@@ -131,10 +126,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
     (request) => {
       const startSearch = () => {
         abortCtrl.current = new AbortController();
-        start({
-          request,
-          abortSignal: abortCtrl.current.signal,
-        });
+        start({ request, abortSignal: abortCtrl.current.signal });
       };
 
       abortCtrl.current.abort();

@@ -32,12 +32,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   async function findFirstColumnTokens() {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.discover.waitUntilSearchingHasFinished();
     return await findFirstFieldIcons('euiDataGridBody > dataGridHeader');
   }
 
   async function findFirstDocViewerTokens() {
-    await dataGrid.clickRowToggle({ rowIndex: 0 });
-    return await findFirstFieldIcons('docTableDetailsFlyout');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.discover.waitUntilSearchingHasFinished();
+    let fieldTokens: string[] | undefined = [];
+    await retry.try(async () => {
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      fieldTokens = await findFirstFieldIcons('docTableDetailsFlyout');
+    });
+    return fieldTokens;
   }
 
   async function findFirstFieldIcons(elementSelector: string) {
@@ -48,7 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const fieldIcons = await element.findAllByCssSelector('.kbnFieldIcon svg');
 
       firstFieldIcons = await Promise.all(
-        fieldIcons.slice(0, 10).map((fieldIcon) => fieldIcon.getAttribute('aria-label'))
+        fieldIcons.slice(0, 10).map(async (fieldIcon) => {
+          return (await fieldIcon.getAttribute('aria-label')) ?? '';
+        })
       ).catch((error) => {
         log.debug(`error in findFirstFieldIcons: ${error.message}`);
         return undefined;
