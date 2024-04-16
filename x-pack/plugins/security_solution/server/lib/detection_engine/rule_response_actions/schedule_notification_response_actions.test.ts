@@ -24,7 +24,6 @@ describe('ScheduleNotificationResponseActions', () => {
     [ALERT_RULE_NAME]: 'rule-name-1',
   };
   const signalTwo = { agent: { id: 'agent-id-2', type: 'filebeat' }, _id: 'alert-id-2' };
-  // this shouldn't make it to the endpoint response action (because of different agent type)
   const getSignals = () => [signalOne, signalTwo];
 
   const osqueryActionMock = {
