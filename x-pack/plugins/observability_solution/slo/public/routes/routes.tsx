@@ -17,8 +17,10 @@ import {
   SLO_CREATE_PATH,
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
+  SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
+import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
 
 export const routes = {
   [SLOS_PATH]: {
@@ -52,6 +54,13 @@ export const routes = {
   [SLO_EDIT_PATH]: {
     handler: () => {
       return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [SLO_SETTINGS_PATH]: {
+    handler: () => {
+      return <SloSettingsPage />;
     },
     params: {},
     exact: true,
