@@ -177,7 +177,7 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Select the file type you would like to export for this visualization."
                 />
               ),
-              generateExportButtonLabel: (
+              generateReportButton: (
                 <FormattedMessage id="xpack.lens.share.export" defaultMessage="Generate export" />
               ),
               renderLayoutOptionSwitch: false,
