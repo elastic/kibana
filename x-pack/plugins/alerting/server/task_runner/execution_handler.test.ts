@@ -2474,6 +2474,7 @@ describe('Execution Handler', () => {
           name: rule.name,
           tags: rule.tags,
           consumer: 'test-consumer',
+          producer: 'alerts',
         },
         ruleUrl:
           'https://example.com/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
