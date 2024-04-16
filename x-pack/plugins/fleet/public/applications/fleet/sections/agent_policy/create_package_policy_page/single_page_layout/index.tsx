@@ -212,6 +212,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Retrieve agent count
   const agentPolicyId = agentPolicy?.id;
+  const setupAgentPolicyName =
+    selectedSetupTechnology === SetupTechnology.AGENTLESS ? agentPolicy?.name : newAgentPolicy.name;
 
   const { cancelClickHandler, cancelUrl } = useCancelAddPackagePolicy({
     from,
@@ -262,8 +264,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       agentPolicy,
       packageInfo,
       integrationInfo,
+      setupAgentPolicyName,
     }),
-    [agentPolicy, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [
+      agentPolicy,
+      cancelClickHandler,
+      cancelUrl,
+      from,
+      integrationInfo,
+      packageInfo,
+      setupAgentPolicyName,
+    ]
   );
 
   const stepSelectAgentPolicy = useMemo(
