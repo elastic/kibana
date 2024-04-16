@@ -104,7 +104,7 @@ export const downloadCsvShareProvider = ({
   formatFactoryFn,
   atLeastGold,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
@@ -139,7 +139,6 @@ export const downloadCsvShareProvider = ({
         uiSettings,
         columnsSorting,
       });
-      onClose?.();
     };
 
     return [

@@ -35,7 +35,6 @@ import {
   reportingExportModalProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
@@ -56,8 +55,6 @@ export interface ReportingPublicPluginStartDependencies {
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
-  // needed for lens csv
-  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -225,6 +222,7 @@ export class ReportingPublicPlugin
           })
         );
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+          // needed for Canvas and legacy tests
           shareSetup.register(
             reportingExportModalProvider({
               apiClient,
@@ -237,6 +235,33 @@ export class ReportingPublicPlugin
               intl: setupDeps.intl,
             })
           );
+        }
+        if (shareSetup.isNewVersion()) {
+          shareSetup.register(
+            reportingCsvShareModalProvider({
+              apiClient,
+              uiSettings,
+              license,
+              application,
+              usesUiCapabilities,
+              theme: core.theme,
+              i18n: i18nStart,
+            })
+          );
+
+          if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+            shareSetup.register(
+              reportingExportModalProvider({
+                apiClient,
+                uiSettings,
+                license,
+                application,
+                usesUiCapabilities,
+                theme: core.theme,
+                i18n: i18nStart,
+              })
+            );
+          }
         }
       });
     });

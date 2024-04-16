@@ -9,58 +9,20 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-import { ShareMenuItem } from '../../../types';
 import { ExportContent } from './export_content';
-import { useShareTabsContext } from '../../context';
+import { useShareTabsContext, type ShareMenuItem } from '../../context';
 
 type IExportTab = IModalTabDeclaration;
 
 const ExportTabContent = () => {
-  const { shareMenuItems, objectType, isDirty, onClose, toasts } = useShareTabsContext()!;
-
-  const aggregateReportTypes: ShareMenuItem[] = [];
-
-  shareMenuItems.map((shareMenuItem) => {
-    const {
-      helpText,
-      generateReportButton,
-      downloadCSVLens,
-      reportType,
-      renderLayoutOptionSwitch,
-      label,
-      generateReport,
-      generateReportForPrinting,
-      layoutOption,
-      absoluteUrl,
-      generateCopyUrl,
-      renderCopyURLButton,
-    } = shareMenuItem;
-
-    aggregateReportTypes.push({
-      reportType,
-      label,
-      generateReport,
-      generateReportButton,
-      helpText,
-      downloadCSVLens,
-      renderLayoutOptionSwitch,
-      layoutOption,
-      generateReportForPrinting,
-      absoluteUrl,
-      generateCopyUrl,
-      renderCopyURLButton,
-    });
-  });
+  const { shareMenuItems, objectType, isDirty, onClose } = useShareTabsContext()!;
 
   return (
     <ExportContent
-      {...{
-        objectType,
-        isDirty,
-        onClose,
-        toasts,
-        aggregateReportTypes,
-      }}
+      objectType={objectType}
+      isDirty={isDirty}
+      onClose={onClose}
+      aggregateReportTypes={shareMenuItems as unknown as ShareMenuItem[]}
     />
   );
 };

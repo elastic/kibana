@@ -41,12 +41,15 @@ export const ShareMenuTabs = () => {
     tabs.push(embedTab);
   }
 
+  const formattedTitle =
+    objectType === 'lens' ? `Share this Lens visualization` : `Share this ${objectType}`;
+
   return (
     <TabbedModal
       tabs={tabs}
-      modalWidth={483}
+      modalWidth={498}
       onClose={onClose}
-      modalTitle={`Share this ${objectType}`}
+      modalTitle={formattedTitle}
       defaultSelectedTabId="link"
     />
   );
