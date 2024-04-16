@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
-const NUMBER_OF_CAPABILITIES = 42;
+const NUMBER_OF_CAPABILITIES = 43;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');

@@ -15,7 +15,7 @@ import { USER } from '../../../../functional/services/ml/security_common';
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
 
-const NUMBER_OF_CAPABILITIES = 42;
+const NUMBER_OF_CAPABILITIES = 43;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
