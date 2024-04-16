@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import {
+  apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesTimeRange,
   initializeTimeRange,
@@ -211,11 +212,13 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           const I18nContext = i18n.Context;
           const timeBuckets = useTimeBuckets(uiSettings);
 
+          if (!apiHasExecutionContext(parentApi)) {
+            throw new Error('Parent API does not have execution context');
+          }
+
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
-            // TODO https://github.com/elastic/kibana/issues/180055
-            // @ts-ignore
-            parentApi?.executionContext?.value ?? { name: 'dashboard' },
+            parentApi.executionContext,
             ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
             uuid
           );
