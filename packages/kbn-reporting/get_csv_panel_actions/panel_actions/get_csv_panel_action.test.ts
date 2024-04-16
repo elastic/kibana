@@ -16,8 +16,8 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { ReportingAPIClient } from '../..';
-import type { ClientConfigType } from '../../types';
+import { ReportingAPIClient } from '@kbn/reporting-public';
+import type { ClientConfigType } from '@kbn/reporting-public/types';
 import {
   ActionContext,
   type PanelActionDependencies,

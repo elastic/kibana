@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { linkTab } from './link';
-export { embedTab } from './embed';
-export { exportTab } from './export';
+export { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';

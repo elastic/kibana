@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ReportingAPIClient } from '../../reporting_api_client';
+import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 
 interface I18nStrings {
   displayName: string;
