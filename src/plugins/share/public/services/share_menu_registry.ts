@@ -10,11 +10,6 @@ import { ShareContext, ShareMenuProvider } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
-  newVersionEnabled: boolean;
-
-  constructor({ newVersionEnabled }: { newVersionEnabled: boolean }) {
-    this.newVersionEnabled = newVersionEnabled;
-  }
 
   public setup() {
     return {
