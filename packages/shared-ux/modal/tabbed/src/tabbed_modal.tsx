@@ -121,6 +121,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           <EuiButton
             fill
             data-test-subj={modalActionBtn.dataTestSubj}
+            data-share-url={state.url}
             onClick={() => {
               modalActionBtn.handler({ state: selectedTabState });
             }}

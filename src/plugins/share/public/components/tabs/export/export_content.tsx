@@ -14,9 +14,9 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiIcon,
-  EuiModalFooter,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
@@ -93,32 +93,35 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
   const renderLayoutOptionsSwitch = useCallback(() => {
     if (renderLayoutOptionSwitch) {
       return (
-        <>
-          <EuiSwitch
-            label={
-              <EuiText size="s" css={{ textWrap: 'nowrap' }}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={
+                <EuiText size="s" css={{ textWrap: 'nowrap' }}>
+                  <FormattedMessage
+                    id="share.screenCapturePanelContent.optimizeForPrintingLabel"
+                    defaultMessage="For printing"
+                  />
+                </EuiText>
+              }
+              checked={usePrintLayout}
+              onChange={handlePrintLayoutChange}
+              data-test-subj="usePrintLayout"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiToolTip
+              content={
                 <FormattedMessage
-                  id="share.screenCapturePanelContent.optimizeForPrintingLabel"
-                  defaultMessage="For printing"
+                  id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
+                  defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
                 />
-              </EuiText>
-            }
-            css={{ display: 'block' }}
-            checked={usePrintLayout}
-            onChange={handlePrintLayoutChange}
-            data-test-subj="usePrintLayout"
-          />
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
-                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
-              />
-            }
-          >
-            <EuiIcon type="questionInCircle" />
-          </EuiToolTip>
-        </>
+              }
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     }
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
@@ -141,54 +144,58 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
   const showCopyURLButton = useCallback(() => {
     if (renderCopyURLButton)
       return (
-        <>
-          <EuiToolTip
-            content={
-              isDirty ? (
-                <FormattedMessage
-                  id="share.modalContent.unsavedStateErrorText"
-                  defaultMessage="Save your work before copying this URL."
-                />
-              ) : (
-                <FormattedMessage
-                  id="share.modalContent.savedStateErrorText"
-                  defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
-                />
-              )
-            }
-          >
-            <EuiCopy textToCopy={absoluteUrl ?? ''}>
-              {(copy) => (
-                <EuiButtonEmpty
-                  iconType="copy"
-                  flush="both"
-                  onClick={copy}
-                  data-test-subj="shareReportingCopyURL"
-                >
-                  <EuiToolTip
-                    id="share.savePostURLMessage"
-                    content="Unsaved changes. This URL will not reflect later saved changes unless you save."
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                isDirty ? (
+                  <FormattedMessage
+                    id="share.modalContent.unsavedStateErrorText"
+                    defaultMessage="Save your work before copying this URL."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="share.modalContent.savedStateErrorText"
+                    defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher."
+                  />
+                )
+              }
+            >
+              <EuiCopy textToCopy={absoluteUrl ?? ''}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    iconType="copy"
+                    flush="both"
+                    onClick={copy}
+                    data-test-subj="shareReportingCopyURL"
                   >
-                    <FormattedMessage
-                      id="share.modalContent.copyUrlButtonLabel"
-                      defaultMessage="Post URL"
-                    />
-                  </EuiToolTip>
-                </EuiButtonEmpty>
-              )}
-            </EuiCopy>
-          </EuiToolTip>
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="share.postURLWatcherMessage"
-                defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher. Unsaved changes: URL may change if you upgrade Kibana"
-              />
-            }
-          >
-            <EuiIcon type="questionInCircle" />
-          </EuiToolTip>
-        </>
+                    <EuiToolTip
+                      id="share.savePostURLMessage"
+                      content="Unsaved changes. This URL will not reflect later saved changes unless you save."
+                    >
+                      <FormattedMessage
+                        id="share.modalContent.copyUrlButtonLabel"
+                        defaultMessage="Post URL"
+                      />
+                    </EuiToolTip>
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                <FormattedMessage
+                  id="share.postURLWatcherMessage"
+                  defaultMessage="Copy this POST URL to call generation from outside Kibana or from Watcher. Unsaved changes: URL may change if you upgrade Kibana"
+                />
+              }
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
   }, [absoluteUrl, isDirty, renderCopyURLButton]);
 
@@ -277,13 +284,11 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
         {renderRadioOptions()}
         <EuiSpacer size="xl" />
       </EuiForm>
-      <EuiModalFooter // dashboard has three buttons in the footer and needs to have them in the footer
-        css={{ padding: 0, ...styling }}
-      >
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         {renderLayoutOptionsSwitch()}
         {showCopyURLButton()}
         {renderGenerateReportButton()}
-      </EuiModalFooter>
+      </EuiFlexGroup>
     </>
   );
 };
