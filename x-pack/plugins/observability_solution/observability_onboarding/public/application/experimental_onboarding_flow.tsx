@@ -4,22 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
+import { i18n } from '@kbn/i18n';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import {
-  EuiPageTemplate,
-  EuiSpacer,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+  EuiSpacer,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import backgroundImageUrl from './header/background.svg';
 import { Footer } from './footer/footer';
 import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form';
@@ -27,12 +28,14 @@ import { Header } from './header/header';
 import { SystemLogsPanel } from './quickstart_flows/system_logs';
 import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 
+const queryClient = new QueryClient();
+
 export function ExperimentalOnboardingFlow() {
   const history = useHistory();
   const location = useLocation();
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       {/* Test buttons to be removed once integrations selector has been implemented */}
       <EuiPageTemplate.Section grow={false} color="accent" restrictWidth>
         <EuiFlexGroup>
@@ -103,7 +106,7 @@ export function ExperimentalOnboardingFlow() {
         <Footer />
         <EuiSpacer size="xl" />
       </EuiPageTemplate.Section>
-    </>
+    </QueryClientProvider>
   );
 }
 
