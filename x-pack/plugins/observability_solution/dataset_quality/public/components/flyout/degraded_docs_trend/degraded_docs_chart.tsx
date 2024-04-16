@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
@@ -28,17 +29,21 @@ export function DegradedDocsChart({
   dataStream,
   timeRange,
   lastReloadTime,
+  dataView,
+  breakdownDataViewField,
 }: {
   dataStream?: string;
   timeRange: TimeRangeConfig;
   lastReloadTime: number;
+  dataView?: DataView;
+  breakdownDataViewField?: DataViewField;
 }) {
   const {
     services: { lens },
   } = useKibanaContextForPlugin();
 
   const { attributes, filterQuery, extraActions, isChartLoading, handleChartLoading } =
-    useDegradedDocsChart({ dataStream });
+    useDegradedDocsChart({ dataStream, breakdownDataViewField });
 
   return (
     <>

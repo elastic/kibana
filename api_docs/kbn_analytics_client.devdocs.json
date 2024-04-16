@@ -927,6 +927,18 @@
                 "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "securitySolutionServerless",
                 "path": "x-pack/plugins/security_solution_serverless/server/task_manager/nlp_cleanup_task/nlp_cleanup_task.ts"
               },

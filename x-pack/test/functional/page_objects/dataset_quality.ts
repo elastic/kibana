@@ -74,6 +74,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
     euiFlyoutCloseButton: 'euiFlyoutCloseButton',
+    unifiedHistogramBreakdownSelectorButton: 'unifiedHistogramBreakdownSelectorButton',
+    unifiedHistogramBreakdownSelectorSelectorSearch:
+      'unifiedHistogramBreakdownSelectorSelectorSearch',
+    unifiedHistogramBreakdownSelectorSelectable: 'unifiedHistogramBreakdownSelectorSelectable',
   };
 
   return {
@@ -203,24 +207,27 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async openDatasetFlyout(datasetName: string) {
       const cols = await this.parseDatasetTable();
-
       const datasetNameCol = cols['Dataset Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-
       const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
         (dName) => dName === datasetName
       );
-
       const expanderColumn = cols['0'];
       let expanderButtons: WebElementWrapper[];
-
       await retry.try(async () => {
         expanderButtons = await expanderColumn.getCellChildren(
           `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
         );
         expect(expanderButtons.length).to.be.greaterThan(0);
-        await expanderButtons[testDatasetRowIndex].click(); // Click "Open"
-        await testSubjects.existOrFail(testSubjectSelectors.euiFlyoutCloseButton);
+
+        // Check if 'title' attribute is "Expand" or "Collapse"
+        const isCollapsed =
+          (await expanderButtons[testDatasetRowIndex].getAttribute('title')) === 'Expand';
+
+        // Open if collapsed
+        if (isCollapsed) {
+          await expanderButtons[testDatasetRowIndex].click();
+        }
       });
     },
 
@@ -297,6 +304,20 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       // Close the date picker quick menu
       return testSubjects.click(testSubjectSelectors.superDatePickerToggleQuickMenuButton);
+    },
+
+    /**
+     * Selects a breakdown field from the unified histogram breakdown selector
+     * @param fieldText The text of the field to select. Use 'No breakdown' to clear the selection
+     */
+    async selectBreakdownField(fieldText: string) {
+      return euiSelectable.searchAndSelectOption(
+        testSubjectSelectors.unifiedHistogramBreakdownSelectorButton,
+        testSubjectSelectors.unifiedHistogramBreakdownSelectorSelectable,
+        testSubjectSelectors.unifiedHistogramBreakdownSelectorSelectorSearch,
+        fieldText,
+        fieldText
+      );
     },
   };
 }

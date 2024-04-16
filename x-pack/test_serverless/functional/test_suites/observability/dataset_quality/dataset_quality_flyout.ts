@@ -84,6 +84,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(lastActivityTextExists).to.eql(true);
     });
 
+    it('reflects the breakdown field state in url', async () => {
+      const testDatasetName = datasetNames[0];
+      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
+
+      const breakdownField = 'service.name';
+      await PageObjects.datasetQuality.selectBreakdownField(breakdownField);
+
+      // Wait for URL to contain "breakdownField:service.name"
+      await retry.tryForTime(5000, async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        expect(decodeURIComponent(currentUrl)).to.contain(`breakdownField:${breakdownField}`);
+      });
+
+      // Clear breakdown field
+      await PageObjects.datasetQuality.selectBreakdownField('No breakdown');
+
+      // Wait for URL to not contain "breakdownField"
+      await retry.tryForTime(5000, async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.not.contain('breakdownField');
+      });
+    });
+
     it('shows the integration details', async () => {
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
