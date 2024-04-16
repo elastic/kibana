@@ -19,60 +19,58 @@ const LABELS = {
   inProgress: i18n.STATUS_IN_PROGRESS,
 };
 
-for (let i = 0; i <= 250; i = i + 1) {
-  describe('StatusFilter', () => {
-    const onChange = jest.fn();
-    const defaultProps = {
-      selectedOptionKeys: [],
-      countClosedCases: 7,
-      countInProgressCases: 5,
-      countOpenCases: 2,
-      onChange,
-    };
+describe('StatusFilter', () => {
+  const onChange = jest.fn();
+  const defaultProps = {
+    selectedOptionKeys: [],
+    countClosedCases: 7,
+    countInProgressCases: 5,
+    countOpenCases: 2,
+    onChange,
+  };
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    it('should render', async () => {
-      render(<StatusFilter {...defaultProps} />);
+  it('should render', async () => {
+    render(<StatusFilter {...defaultProps} />);
 
-      expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
-      expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeDisabled();
+    expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
+    expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeDisabled();
 
-      userEvent.click(await screen.findByRole('button', { name: 'Status' }));
-      await waitForEuiPopoverOpen();
+    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    await waitForEuiPopoverOpen();
 
-      expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
-      expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
-      expect(await screen.findByRole('option', { name: LABELS.closed })).toBeInTheDocument();
-      expect((await screen.findAllByRole('option')).length).toBe(3);
-    });
+    expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: LABELS.closed })).toBeInTheDocument();
+    expect((await screen.findAllByRole('option')).length).toBe(3);
+  });
 
-    it('should call onStatusChanged when changing status to open', async () => {
-      render(<StatusFilter {...defaultProps} />);
+  it('should call onStatusChanged when changing status to open', async () => {
+    render(<StatusFilter {...defaultProps} />);
 
-      userEvent.click(await screen.findByRole('button', { name: 'Status' }));
-      await waitForEuiPopoverOpen();
-      userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
+    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    await waitForEuiPopoverOpen();
+    userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
 
-      await waitFor(() => {
-        expect(onChange).toHaveBeenCalledWith({
-          filterId: 'status',
-          selectedOptionKeys: [CaseStatuses.open],
-        });
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'status',
+        selectedOptionKeys: [CaseStatuses.open],
       });
     });
-
-    it('should not render hidden statuses', async () => {
-      render(<StatusFilter {...defaultProps} hiddenStatuses={[CaseStatuses.closed]} />);
-
-      userEvent.click(await screen.findByRole('button', { name: 'Status' }));
-      await waitForEuiPopoverOpen();
-
-      expect(await screen.findAllByRole('option')).toHaveLength(2);
-      expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
-      expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
-    });
   });
-}
+
+  it('should not render hidden statuses', async () => {
+    render(<StatusFilter {...defaultProps} hiddenStatuses={[CaseStatuses.closed]} />);
+
+    userEvent.click(await screen.findByRole('button', { name: 'Status' }));
+    await waitForEuiPopoverOpen();
+
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
+  });
+});
