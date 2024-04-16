@@ -1,10 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-observability",
-  "owner": [
-    "@elastic/appex-sharedux",
-    "@elastic/obs-ux-management-team"
-  ],
+  "owner": "@elastic/obs-ux-management-team",
   "description": "Serverless customizations for observability.",
   "plugin": {
     "id": "serverlessObservability",
@@ -22,6 +19,7 @@
       "observabilityShared",
       "management",
       "discover",
+      "security",
     ],
     "optionalPlugins": [],
     "requiredBundles": []

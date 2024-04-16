@@ -16,9 +16,8 @@
       "discover",
       "logsExplorer",
       "logsShared",
-      "observabilityAIAssistant",
       "observabilityShared",
-      "observability",
+      "slo",
       "share",
       "kibanaUtils",
       "datasetQuality"
@@ -29,7 +28,8 @@
       "unifiedSearch",
       "dataViews",
       "dataViewEditor",
-      "lens"
+      "lens",
+      "observabilityAIAssistant"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -6,7 +6,7 @@
  */
 
 import { BaseState, BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 export const wrapStateContainer =
   <StateA extends BaseState, StateB extends BaseState>({

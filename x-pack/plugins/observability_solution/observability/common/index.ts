@@ -53,6 +53,7 @@ export {
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
+  apmEnableServiceInventoryTableSearchBar,
 } from './ui_settings_keys';
 
 export {
@@ -60,9 +61,8 @@ export {
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
 
-export const sloFeatureId = 'slo';
 export const casesFeatureId = 'observabilityCases';
-
+export const sloFeatureId = 'slo';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
 // want to change it.
@@ -87,3 +87,5 @@ export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;
 export type { AlertsLocatorParams } from './locators/alerts';
+export { AlertsLocatorDefinition } from './locators/alerts';
+export { observabilityAlertFeatureIds } from './constants';

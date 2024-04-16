@@ -547,6 +547,13 @@ export const COLUMN_TAGS = i18n.translate(
   }
 );
 
+export const COLUMN_INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.integrationsTitle',
+  {
+    defaultMessage: 'Integrations',
+  }
+);
+
 export const COLUMN_ENABLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.enabledTitle',
   {

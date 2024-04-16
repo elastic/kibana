@@ -74,8 +74,8 @@ describe(
     });
 
     afterEach(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
-      cy.task('esArchiverUnload', 'user_managed_data');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
+      cy.task('esArchiverUnload', { archiveName: 'user_managed_data' });
       deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
       deleteCriticality({ idField: 'host.name', idValue: SIEM_KIBANA_HOST_NAME });
       deleteCriticality({ idField: 'user.name', idValue: USER_NAME });
@@ -129,9 +129,22 @@ describe(
             .contains('High Impact')
             .should('be.visible');
         });
+        it('should unassign asset criticality state', () => {
+          cy.log('asset criticality update');
+          expandFirstAlertUserFlyout();
+          selectAssetCriticalityLevel('High Impact');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('High Impact')
+            .should('be.visible');
+          selectAssetCriticalityLevel('Unassigned');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('Unassigned')
+            .should('be.visible');
+        });
       });
 
-      describe('Managed data section', () => {
+      // https://github.com/elastic/kibana/issues/179248
+      describe('Managed data section', { tags: ['@skipInServerless'] }, () => {
         beforeEach(() => {
           mockFleetInstalledIntegrations([
             {

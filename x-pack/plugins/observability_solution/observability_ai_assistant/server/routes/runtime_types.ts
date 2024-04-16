@@ -13,7 +13,7 @@ import {
   type ConversationUpdateRequest,
   type Message,
   MessageRole,
-  type ObservabilityAIAssistantScreenContext,
+  type ObservabilityAIAssistantScreenContextRequest,
 } from '../../common/types';
 
 const serializeableRt = t.any;
@@ -52,11 +52,22 @@ export const messageRt: t.Type<Message> = t.type({
   ]),
 });
 
+const tokenCountRt = t.type({
+  prompt: t.number,
+  completion: t.number,
+  total: t.number,
+});
+
 export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
   '@timestamp': t.string,
-  conversation: t.type({
-    title: t.string,
-  }),
+  conversation: t.intersection([
+    t.type({
+      title: t.string,
+    }),
+    t.partial({
+      token_count: tokenCountRt,
+    }),
+  ]),
   messages: t.array(messageRt),
   labels: t.record(t.string, t.string),
   numeric_labels: t.record(t.string, t.number),
@@ -75,26 +86,50 @@ export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.interse
 export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.intersection([
   baseConversationRt,
   t.type({
-    conversation: t.type({
-      id: t.string,
-      title: t.string,
-    }),
+    conversation: t.intersection([
+      t.type({
+        id: t.string,
+        title: t.string,
+      }),
+      t.partial({
+        token_count: tokenCountRt,
+      }),
+    ]),
   }),
 ]);
 
 export const conversationRt: t.Type<Conversation> = t.intersection([
   baseConversationRt,
-  t.type({
-    user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
-    namespace: t.string,
-    conversation: t.type({
-      id: t.string,
-      last_updated: t.string,
+  t.intersection([
+    t.type({
+      namespace: t.string,
+      conversation: t.intersection([
+        t.type({
+          id: t.string,
+          last_updated: t.string,
+        }),
+        t.partial({
+          token_count: tokenCountRt,
+        }),
+      ]),
     }),
+    t.partial({
+      user: t.intersection([t.type({ name: t.string }), t.partial({ id: t.string })]),
+    }),
+  ]),
+]);
+
+export const functionRt = t.intersection([
+  t.type({
+    name: t.string,
+    description: t.string,
+  }),
+  t.partial({
+    parameters: t.any,
   }),
 ]);
 
-export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContext> = t.partial({
+export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContextRequest> = t.partial({
   description: t.string,
   data: t.array(
     t.type({
@@ -103,4 +138,5 @@ export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContext> = t.
       value: t.any,
     })
   ),
+  actions: t.array(functionRt),
 });

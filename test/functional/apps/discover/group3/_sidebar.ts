@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
+  const dataViews = getService('dataViews');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 3 meta fields.';
@@ -96,9 +97,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show filters by type in text-based view', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
-        await browser.refresh();
-
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
@@ -114,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
-        expect(options).to.have.length(5);
+        expect(options).to.have.length(6);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '82 available fields.'
@@ -131,9 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show empty fields in text-based view', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
-        await browser.refresh();
-
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.discover.selectTextBaseLang();
 
@@ -433,9 +428,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show selected and available fields in text-based mode', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
-        await browser.refresh();
-
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
@@ -499,7 +491,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await PageObjects.discover.selectIndexPattern('with-timefield');
+        await dataViews.switchToAndValidate('with-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -516,7 +508,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           )}NoFieldsCallout-noFieldsExist`
         );
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await dataViews.switchToAndValidate('logstash-*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -544,7 +536,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await PageObjects.discover.selectIndexPattern('without-timefield');
+        await dataViews.switchToAndValidate('without-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -553,7 +545,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '6 available fields. 3 meta fields.'
         );
 
-        await PageObjects.discover.selectIndexPattern('with-timefield');
+        await dataViews.switchToAndValidate('with-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -567,7 +559,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           )}NoFieldsCallout-noFieldsMatch`
         );
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await dataViews.switchToAndValidate('logstash-*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -623,7 +615,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await PageObjects.discover.selectIndexPattern('indices-stats*');
+        await dataViews.switchToAndValidate('indices-stats*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -632,7 +624,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '6873 available fields. 3 meta fields.'
         );
 
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await dataViews.switchToAndValidate('logstash-*');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -648,9 +640,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should work with ad-hoc data views and runtime fields', async () => {
-        await PageObjects.discover.createAdHocDataView('logstash', true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
+        await dataViews.createFromSearchBar({
+          name: 'logstash',
+          adHoc: true,
+          hasTimeField: true,
+        });
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
         );
@@ -758,7 +752,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           INITIAL_FIELD_LIST_SUMMARY
         );
 
-        await PageObjects.discover.selectIndexPattern('with-timefield');
+        await dataViews.switchToAndValidate('with-timefield');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();

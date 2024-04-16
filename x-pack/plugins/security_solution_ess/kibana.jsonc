@@ -10,6 +10,8 @@
     "configPath": ["xpack", "securitySolutionEss"],
     "requiredPlugins": [
       "securitySolution",
+      "management",
+      "navigation",
       "licensing",
     ],
     "optionalPlugins": [

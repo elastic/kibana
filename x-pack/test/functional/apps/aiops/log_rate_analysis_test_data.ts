@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import { kibanaLogsDataViewTestData } from './log_rate_analysis/test_data/kibana_logs_data_view_test_data';
 import { farequoteDataViewTestData } from './log_rate_analysis/test_data/farequote_data_view_test_data';

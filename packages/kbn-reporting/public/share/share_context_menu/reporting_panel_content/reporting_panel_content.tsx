@@ -323,15 +323,17 @@ class ReportingPanelContentUi extends Component<Props, State> {
         }
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
             id: 'reporting.share.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
-          toastMessage: (
-            // eslint-disable-next-line react/no-danger
-            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-          ) as unknown as string,
+          toastMessage: intl.formatMessage({
+            id: 'reporting.share.panelContent.notification.reportingErrorToastMessage',
+            defaultMessage: `We couldn't create a report at this time.`,
+          }),
         });
         if (this.mounted) {
           this.setState({ isCreatingReportJob: false });

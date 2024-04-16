@@ -7,7 +7,7 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import {
   EuiBasicTable,
   EuiCallOut,

@@ -53,7 +53,7 @@ describe('Events Viewer', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   context('Fields rendering', () => {

@@ -61,23 +61,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined; }) => { title: string; references: { id: string; name: string; type: string; }[]; state: { adHocDataViews?: { [x: string]: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
-          },
-          "; } | undefined; datasourceStates: { [x: string]: {}; formBased?: undefined; } | { formBased: {}; }; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; query: ",
+          " | undefined; }) => { references: { name: string; id: string; type: string; }[]; visualizationType: string; state: { visualization: {}; datasourceStates: Record<string, unknown>; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -93,7 +77,15 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; visualization: {}; }; visualizationType: string; }"
+          "; filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; }; title: string; }"
         ],
         "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
         "deprecated": false,

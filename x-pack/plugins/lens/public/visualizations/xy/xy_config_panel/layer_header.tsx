@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiIcon,
-  EuiPopover,
-  EuiSelectable,
-  EuiPopoverTitle,
-  useEuiTheme,
-  EuiIconTip,
-} from '@elastic/eui';
-import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
+import { useEuiTheme, EuiIconTip } from '@elastic/eui';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -24,18 +16,12 @@ import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
 } from '../../../types';
-import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
-import {
-  annotationLayerHasUnsavedChanges,
-  isHorizontalChart,
-  isHorizontalSeries,
-} from '../state_helpers';
+import { State, XYAnnotationLayerConfig } from '../types';
+import { annotationLayerHasUnsavedChanges } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
-import { updateLayer } from '.';
 import {
   getAnnotationLayerTitle,
   isAnnotationsLayer,
-  isDataLayer,
   isReferenceLayer,
 } from '../visualization_helpers';
 
@@ -55,7 +41,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
       />
     );
   }
-  return <DataLayerHeader {...props} />;
+  return null;
 }
 
 export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<State>) {
@@ -66,7 +52,7 @@ export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<S
   return null;
 }
 
-function ReferenceLayerHeader() {
+export function ReferenceLayerHeader() {
   return (
     <StaticHeader
       icon={IconChartBarReferenceLine}
@@ -77,7 +63,7 @@ function ReferenceLayerHeader() {
   );
 }
 
-function AnnotationsLayerHeader({
+export function AnnotationsLayerHeader({
   title,
   hasUnsavedChanges,
 }: {
@@ -152,74 +138,5 @@ function AnnotationLayerHeaderContent({
       isMissingCurrent={!currentIndexPattern}
       onChangeIndexPattern={onChangeIndexPattern}
     />
-  );
-}
-
-function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
-  const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const { state, layerId } = props;
-  const layers = state.layers.filter(isDataLayer);
-  const layer = layers.find((l) => l.layerId === layerId)!;
-  const index = state.layers.findIndex((l) => l === layer)!;
-  const currentVisType = visualizationTypes.find(({ id }) => id === layer.seriesType)!;
-  const horizontalOnly = isHorizontalChart(state.layers);
-
-  return (
-    <EuiPopover
-      button={
-        <ChartSwitchTrigger
-          label={currentVisType.fullLabel || currentVisType.label}
-          icon={currentVisType.icon}
-          dataTestSubj="lns_layer_settings"
-          onClick={() => setPopoverIsOpen(!isPopoverOpen)}
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopoverIsOpen(false)}
-      display="block"
-      panelPaddingSize="s"
-      ownFocus
-    >
-      <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.layerPanel.layerVisualizationType', {
-          defaultMessage: 'Layer visualization type',
-        })}
-      </EuiPopoverTitle>
-      <div
-        css={css`
-          width: 320px;
-        `}
-      >
-        <EuiSelectable<{
-          key?: string;
-          label: string;
-          value?: string;
-          checked?: 'on' | 'off';
-        }>
-          singleSelection="always"
-          options={visualizationTypes
-            .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
-            .map((t) => ({
-              value: t.id,
-              key: t.id,
-              checked: t.id === currentVisType.id ? 'on' : undefined,
-              prepend: <EuiIcon type={t.icon} />,
-              label: t.fullLabel || t.label,
-              'data-test-subj': `lnsXY_seriesType-${t.id}`,
-            }))}
-          onChange={(newOptions) => {
-            const chosenType = newOptions.find(({ checked }) => checked === 'on');
-            if (!chosenType) {
-              return;
-            }
-            const id = chosenType.value!;
-            props.setState(updateLayer(state, { ...layer, seriesType: id as SeriesType }, index));
-            setPopoverIsOpen(false);
-          }}
-        >
-          {(list) => <>{list}</>}
-        </EuiSelectable>
-      </div>
-    </EuiPopover>
   );
 }

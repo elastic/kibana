@@ -7,7 +7,7 @@ set -euo pipefail
 source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Build Kibana artifacts"
-node scripts/build --all-platforms --debug --docker-cross-compile "${BUILD_ARGS[@]}"
+node scripts/build --all-platforms --debug --docker-cross-compile --skip-docker-fips "${BUILD_ARGS[@]}"
 
 echo "--- Extract default i18n messages"
 mkdir -p target/i18n

@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await synthtrace.clean();
+      await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
     it('shows the right number of rows in correct order', async () => {

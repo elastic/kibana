@@ -39,6 +39,7 @@ export const useDatasetQualityTable = () => {
     fullNames: showFullDatasetNames,
     timeRange,
     integrations,
+    namespaces,
     query,
   } = useSelector(service, (state) => state.context.filters);
 
@@ -133,10 +134,15 @@ export const useDatasetQualityTable = () => {
           })
         : visibleDatasets;
 
+    const filteredByNamespaces =
+      namespaces.length > 0
+        ? filteredByIntegrations.filter((dataset) => namespaces.includes(dataset.namespace))
+        : filteredByIntegrations;
+
     return query
-      ? filteredByIntegrations.filter((dataset) => dataset.rawName.includes(query))
-      : filteredByIntegrations;
-  }, [showInactiveDatasets, datasets, timeRange, integrations, query]);
+      ? filteredByNamespaces.filter((dataset) => dataset.rawName.includes(query))
+      : filteredByNamespaces;
+  }, [showInactiveDatasets, datasets, timeRange, integrations, namespaces, query]);
 
   const pagination = {
     pageIndex: page,

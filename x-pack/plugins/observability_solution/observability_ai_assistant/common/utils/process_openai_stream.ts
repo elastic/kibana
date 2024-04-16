@@ -7,6 +7,8 @@
 import OpenAI from 'openai';
 import { filter, map, Observable, tap } from 'rxjs';
 import { v4 } from 'uuid';
+import type { Logger } from '@kbn/logging';
+import { Message } from '..';
 import {
   type ChatCompletionChunkEvent,
   createInternalServerError,
@@ -14,15 +16,9 @@ import {
   StreamingChatResponseEventType,
 } from '../conversation_complete';
 
-export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
-  choices: Array<
-    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
-      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
-    }
-  >;
-};
+export type CreateChatCompletionResponseChunk = OpenAI.ChatCompletionChunk;
 
-export function processOpenAiStream() {
+export function processOpenAiStream(logger: Logger) {
   return (source: Observable<string>): Observable<ChatCompletionChunkEvent> => {
     const id = v4();
 
@@ -49,12 +45,25 @@ export function processOpenAiStream() {
           'object' in line && line.object === 'chat.completion.chunk'
       ),
       map((chunk): ChatCompletionChunkEvent => {
+        const delta = chunk.choices[0].delta;
+        if (delta.tool_calls && delta.tool_calls.length > 1) {
+          logger.warn(`More tools than 1 were called: ${JSON.stringify(delta.tool_calls)}`);
+        }
+
+        const functionCall: Omit<Message['message']['function_call'], 'trigger'> | undefined =
+          delta.tool_calls
+            ? {
+                name: delta.tool_calls[0].function?.name,
+                arguments: delta.tool_calls[0].function?.arguments,
+              }
+            : delta.function_call;
+
         return {
           id,
           type: StreamingChatResponseEventType.ChatCompletionChunk,
           message: {
-            content: chunk.choices[0].delta.content || '',
-            function_call: chunk.choices[0].delta.function_call,
+            content: delta.content ?? '',
+            function_call: functionCall,
           },
         };
       })

@@ -273,7 +273,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   );
 };
 
-interface Props {
+export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
@@ -300,6 +300,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     unifiedSearch,
   } = getPluginsStart();
   const services = {
+    ...coreStart,
     data,
     maps,
     embeddable,
@@ -312,7 +313,6 @@ export const IndexDataVisualizer: FC<Props> = ({
     uiActions,
     charts,
     unifiedSearch,
-    ...coreStart,
   };
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),

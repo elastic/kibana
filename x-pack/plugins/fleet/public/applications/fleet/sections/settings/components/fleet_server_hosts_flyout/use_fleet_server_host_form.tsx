@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   sendPostFleetServerHost,
   sendPutFleetServerHost,
+  useAuthz,
   useComboInput,
   useInput,
   useStartServices,
@@ -120,13 +121,14 @@ export function useFleetServerHostsForm(
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const { notifications, cloud } = useStartServices();
+  const authz = useAuthz();
   const { confirm } = useConfirmModal();
-  const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
+  const isEditDisabled = (fleetServerHost?.is_preconfigured || !authz.fleet.allSettings) ?? false;
 
-  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isEditDisabled);
   const isDefaultInput = useSwitchInput(
     fleetServerHost?.is_default ?? false,
-    isPreconfigured || fleetServerHost?.is_default
+    isEditDisabled || fleetServerHost?.is_default
   );
 
   const isServerless = cloud?.isServerlessEnabled;
@@ -135,14 +137,14 @@ export function useFleetServerHostsForm(
     isServerless && !fleetServerHost?.host_urls
       ? defaultFleetServerHost?.host_urls || []
       : fleetServerHost?.host_urls || [];
-  const hostUrlsDisabled = isPreconfigured || isServerless;
+  const hostUrlsDisabled = isEditDisabled || isServerless;
   const hostUrlsInput = useComboInput(
     'hostUrls',
     hostUrlsDefaultValue,
     validateFleetServerHosts,
     hostUrlsDisabled
   );
-  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isPreconfigured);
+  const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isEditDisabled);
 
   const inputs = useMemo(
     () => ({
@@ -210,6 +212,7 @@ export function useFleetServerHostsForm(
   ]);
 
   const isDisabled =
+    isEditDisabled ||
     isLoading ||
     (!hostUrlsInput.hasChanged &&
       !isDefaultInput.hasChanged &&

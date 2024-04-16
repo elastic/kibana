@@ -21,7 +21,7 @@
             "label": "payload",
             "description": [],
             "signature": [
-              "{ isDeprecated?: boolean | undefined; spaceId?: string | undefined; title: string; version: string; objectType: string; layout?: { id?: ",
+              "{ spaceId?: string | undefined; isDeprecated?: boolean | undefined; title: string; version: string; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -31,7 +31,7 @@
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
-              "> | undefined; zoom?: number | undefined; } | undefined; browserTimezone: string; pagingStrategy?: ",
+              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; browserTimezone: string; pagingStrategy?: ",
               "CsvPagingStrategy",
               " | undefined; }"
             ],
@@ -1214,7 +1214,7 @@
                 "section": "def-public.Job",
                 "text": "Job"
               },
-              ">"
+              " | undefined>"
             ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
@@ -1257,7 +1257,9 @@
             "parentPluginId": "@kbn/reporting-public",
             "id": "def-public.ReportingAPIClient.createImmediateReport",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "createImmediateReport",
             "description": [],
             "signature": [
@@ -1274,8 +1276,9 @@
               "<unknown>>"
             ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [],
             "children": [
               {
                 "parentPluginId": "@kbn/reporting-public",
@@ -1673,7 +1676,7 @@
             "label": "csv",
             "description": [],
             "signature": [
-              "{ scroll: { duration: string; size: number; }; }"
+              "{ enablePanelActionDownload: boolean; scroll: { duration: string; size: number; }; }"
             ],
             "path": "packages/kbn-reporting/public/types.ts",
             "deprecated": false,

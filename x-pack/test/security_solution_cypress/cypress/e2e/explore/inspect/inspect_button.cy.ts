@@ -27,7 +27,7 @@ const DATA_VIEW = 'auditbeat-*';
 // FLAKY: https://github.com/elastic/kibana/issues/178367
 describe.skip(
   'Inspect Explore pages',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     before(() => {
       // illegal_argument_exception: unknown setting [index.lifecycle.name]
@@ -40,8 +40,8 @@ describe.skip(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_users');
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_users' });
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {

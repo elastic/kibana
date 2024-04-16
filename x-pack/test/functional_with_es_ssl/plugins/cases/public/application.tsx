@@ -20,10 +20,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { EuiErrorBoundary } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 export interface RenderAppProps {
   mountParams: AppMountParameters;
@@ -95,32 +93,26 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
 
 const CasesFixtureApp: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
   const { mountParams, coreStart, pluginsStart } = deps;
-  const { history, theme$ } = mountParams;
+  const { history } = mountParams;
   const { cases } = pluginsStart;
 
   const CasesContext = cases.ui.getCasesContext();
 
   return (
-    <EuiErrorBoundary>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              ...coreStart,
-              ...pluginsStart,
-            }}
-          >
-            <StyledComponentsThemeProvider>
-              <Router history={history}>
-                <CasesContext owner={[]} permissions={permissions}>
-                  <CasesFixtureAppWithContext cases={cases} />
-                </CasesContext>
-              </Router>
-            </StyledComponentsThemeProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    </EuiErrorBoundary>
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaContextProvider
+        services={{
+          ...coreStart,
+          ...pluginsStart,
+        }}
+      >
+        <Router history={history}>
+          <CasesContext owner={[]} permissions={permissions}>
+            <CasesFixtureAppWithContext cases={cases} />
+          </CasesContext>
+        </Router>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

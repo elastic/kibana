@@ -28,7 +28,7 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import { decodeOrThrow } from '../../../common/api';
+import { decodeOrThrow } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
   SavedObjectsBulkResponseWithErrors,

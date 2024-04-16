@@ -361,7 +361,9 @@
             "type": "Object",
             "tags": [],
             "label": "schema",
-            "description": [],
+            "description": [
+              "\nValue validation schema.\nUsed to validate value on write and read.\n\nThis schema is also used for validating the user input in all settings fields {@link FieldRow} across Kibana UI.\nUse schema options to specify limits on the value. For example:\n`schema.number({ min: 0, max: 100 })`\n\nMore information about schema in https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -554,7 +556,7 @@
           "\nDenotes the scope of the setting"
         ],
         "signature": [
-          "\"global\" | \"namespace\""
+          "\"namespace\" | \"global\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

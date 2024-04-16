@@ -35,5 +35,6 @@
     "@kbn/discover-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/react-kibana-mount",
   ]
 }

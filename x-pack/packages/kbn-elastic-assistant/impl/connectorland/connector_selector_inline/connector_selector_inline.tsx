@@ -6,16 +6,17 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
-import { getActionTypeTitle, getGenAiConfig } from '../helpers';
+import { getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -23,14 +24,14 @@ interface Props {
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
+  isFlyoutMode: boolean;
+  onConnectorIdSelected?: (connectorId: string) => void;
+  onConnectorSelected?: (conversation: Conversation) => void;
+  showLabel?: boolean;
 }
 
 const inputContainerClassName = css`
   height: 32px;
-
-  .euiSuperSelect {
-    width: 400px;
-  }
 
   .euiSuperSelectControl {
     border: none;
@@ -46,9 +47,9 @@ const inputContainerClassName = css`
 `;
 
 const inputDisplayClassName = css`
+  margin-right: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 400px;
 `;
 
 const placeholderButtonClassName = css`
@@ -65,26 +66,25 @@ const placeholderButtonClassName = css`
  * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
-  ({ isDisabled = false, selectedConnectorId, selectedConversation }) => {
+  ({
+    isDisabled = false,
+    selectedConnectorId,
+    selectedConversation,
+    isFlyoutMode,
+    showLabel = true,
+    onConnectorIdSelected,
+    onConnectorSelected,
+  }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
+    const { assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
 
-    const { data: connectorsWithoutActionContext } = useLoadConnectors({ http });
-
-    const aiConnectors: AIConnector[] = useMemo(
-      () =>
-        connectorsWithoutActionContext
-          ? connectorsWithoutActionContext.map((c) => ({
-              ...c,
-              connectorTypeTitle: getActionTypeTitle(actionTypeRegistry.get(c.actionTypeId)),
-            }))
-          : [],
-      [actionTypeRegistry, connectorsWithoutActionContext]
-    );
+    const { data: aiConnectors } = useLoadConnectors({
+      http,
+    });
 
     const selectedConnectorName =
-      aiConnectors.find((c) => c.id === selectedConnectorId)?.name ??
+      (aiConnectors ?? []).find((c) => c.id === selectedConnectorId)?.name ??
       i18n.INLINE_CONNECTOR_PLACEHOLDER;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
@@ -93,7 +93,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     }, [isOpen]);
 
     const onChange = useCallback(
-      (connector: AIConnector) => {
+      async (connector: AIConnector) => {
         const connectorId = connector.id;
         if (connectorId === ADD_NEW_CONNECTOR) {
           return;
@@ -105,21 +105,68 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         setIsOpen(false);
 
         if (selectedConversation != null) {
-          setApiConfig({
-            conversationId: selectedConversation.id,
+          const conversation = await setApiConfig({
+            conversation: selectedConversation,
             apiConfig: {
               ...selectedConversation.apiConfig,
+              actionTypeId: connector.actionTypeId,
               connectorId,
-              connectorTypeTitle: connector.connectorTypeTitle,
               // With the inline component, prefer config args to handle 'new connector' case
-              provider: apiProvider ?? config?.apiProvider,
-              model: model ?? config?.defaultModel,
+              provider: apiProvider,
+              model,
             },
           });
+
+          if (conversation && onConnectorSelected != null) {
+            onConnectorSelected(conversation);
+          }
+        }
+
+        if (onConnectorIdSelected != null) {
+          onConnectorIdSelected(connectorId);
         }
       },
-      [selectedConversation, setApiConfig]
+      [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
     );
+
+    if (isFlyoutMode) {
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          className={inputContainerClassName}
+          direction="row"
+          gutterSize="xs"
+          justifyContent={'flexStart'}
+          responsive={false}
+        >
+          {!isFlyoutMode && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.INLINE_CONNECTOR_LABEL}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <ConnectorSelector
+              displayFancy={(displayText) => (
+                <EuiText
+                  className={inputDisplayClassName}
+                  size="s"
+                  color={euiThemeVars.euiColorPrimaryText}
+                >
+                  {displayText}
+                </EuiText>
+              )}
+              isOpen={isOpen}
+              isDisabled={localIsDisabled}
+              selectedConnectorId={selectedConnectorId}
+              setIsOpen={setIsOpen}
+              onConnectorSelectionChange={onChange}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
 
     return (
       <EuiFlexGroup
@@ -130,16 +177,18 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.INLINE_CONNECTOR_LABEL}
-          </EuiText>
-        </EuiFlexItem>
+        {showLabel && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.INLINE_CONNECTOR_LABEL}
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {isOpen ? (
             <ConnectorSelector
               displayFancy={(displayText) => (
-                <EuiText className={inputDisplayClassName} size="xs">
+                <EuiText css={inputDisplayClassName} size="s">
                   {displayText}
                 </EuiText>
               )}
@@ -159,7 +208,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
                 iconType="arrowDown"
                 isDisabled={localIsDisabled}
                 onClick={onConnectorClick}
-                size="xs"
+                size={'xs'}
               >
                 {selectedConnectorName}
               </EuiButtonEmpty>

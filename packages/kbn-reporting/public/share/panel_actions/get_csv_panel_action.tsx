@@ -6,23 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, NotificationsSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { firstValueFrom, Observable } from 'rxjs';
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  AnalyticsServiceStart,
+  CoreSetup,
+  CoreStart,
+  I18nStart,
+  NotificationsSetup,
+  ThemeServiceSetup,
+} from '@kbn/core/public';
+import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { ClientConfigType } from '../../types';
 import { checkLicense } from '../../license_check';
-import { ReportingAPIClient } from '../../reporting_api_client';
+import type { ReportingAPIClient } from '../../reporting_api_client';
+import { getI18nStrings } from './strings';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -41,28 +50,41 @@ export interface PanelActionDependencies {
 
 interface Params {
   apiClient: ReportingAPIClient;
+  csvConfig: ClientConfigType['csv'];
   core: CoreSetup;
   startServices$: Observable<[CoreStart, PanelActionDependencies, unknown]>;
   usesUiCapabilities: boolean;
+}
+
+interface ExecutionParams {
+  searchSource: SerializedSearchSourceFields;
+  columns: string[] | undefined;
+  title: string;
+  analytics: AnalyticsServiceStart;
+  i18nStart: I18nStart;
 }
 
 export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
+  private readonly i18nStrings: ReturnType<typeof getI18nStrings>;
   private readonly notifications: NotificationsSetup;
   private readonly apiClient: ReportingAPIClient;
+  private readonly enablePanelActionDownload: boolean;
+  private readonly theme: ThemeServiceSetup;
   private readonly startServices$: Params['startServices$'];
   private readonly usesUiCapabilities: boolean;
 
-  constructor({ core, apiClient, startServices$, usesUiCapabilities }: Params) {
+  constructor({ core, csvConfig, apiClient, startServices$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
-
-    this.notifications = core.notifications;
     this.apiClient = apiClient;
-
+    this.enablePanelActionDownload = csvConfig.enablePanelActionDownload === true;
+    this.notifications = core.notifications;
+    this.theme = core.theme;
     this.startServices$ = startServices$;
     this.usesUiCapabilities = usesUiCapabilities;
+    this.i18nStrings = getI18nStrings(apiClient);
   }
 
   public getIconType() {
@@ -70,9 +92,9 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public getDisplayName() {
-    return i18n.translate('reporting.share.panelAction.generateCsvPanelTitle', {
-      defaultMessage: 'Download CSV',
-    });
+    return this.enablePanelActionDownload
+      ? this.i18nStrings.download.displayName
+      : this.i18nStrings.generate.displayName;
   }
 
   public async getSharingData(savedSearch: SavedSearch) {
@@ -90,12 +112,14 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
 
     const [{ application }, { licensing }] = await firstValueFrom(this.startServices$);
     const license = await firstValueFrom(licensing.license$);
-    const licenseHasDownloadCsv = checkLicense(license.check('reporting', 'basic')).showLinks;
-    const capabilityHasDownloadCsv = this.usesUiCapabilities
-      ? application.capabilities.dashboard?.downloadCsv === true
-      : true; // deprecated
+    const licenseHasCsvReporting = checkLicense(license.check('reporting', 'basic')).showLinks;
 
-    if (!licenseHasDownloadCsv || !capabilityHasDownloadCsv) {
+    // NOTE: For historical reasons capability identifier is called `downloadCsv. It can not be renamed.
+    const capabilityHasCsvReporting = this.usesUiCapabilities
+      ? application.capabilities.dashboard?.downloadCsv === true
+      : true; // if we're using the deprecated "xpack.reporting.roles.enabled=true" setting, the panel action is always visible
+
+    if (!licenseHasCsvReporting || !capabilityHasCsvReporting) {
       return false;
     }
 
@@ -110,39 +134,27 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     return embeddable.getInput().viewMode !== ViewMode.EDIT;
   };
 
-  public execute = async (context: ActionContext) => {
-    const { embeddable } = context;
-
-    if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
-      throw new IncompatibleActionError();
-    }
-
-    const savedSearch = embeddable.getSavedSearch();
-
-    if (!savedSearch || this.isDownloading) {
-      return;
-    }
-
-    const { columns, getSearchSource } = await this.getSharingData(savedSearch);
-
+  /**
+   * Requires `xpack.reporting.csv.enablePanelActionDownload: true` in kibana.yml
+   * @deprecated
+   */
+  private executeDownload = async (params: ExecutionParams) => {
+    const { searchSource, columns, title, analytics, i18nStart } = params;
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
-      searchSource: getSearchSource({
-        addGlobalTimeFilter: !embeddable.hasTimeRange(),
-        absoluteTime: true,
-      }),
+      searchSource,
       columns,
-      title: savedSearch.title || '',
+      title,
       objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
     });
 
     this.isDownloading = true;
 
     this.notifications.toasts.addSuccess({
-      title: i18n.translate('reporting.share.panelAction.csvDownloadStartedTitle', {
-        defaultMessage: `CSV Download Started`,
-      }),
-      text: i18n.translate('reporting.share.panelAction.csvDownloadStartedMessage', {
-        defaultMessage: `Your CSV will download momentarily.`,
+      title: this.i18nStrings.download.toasts.success.title,
+      text: toMountPoint(this.i18nStrings.download.toasts.success.body, {
+        analytics,
+        i18n: i18nStart,
+        theme: this.theme,
       }),
       'data-test-subj': 'csvDownloadStarted',
     });
@@ -152,7 +164,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       .then(({ body, response }) => {
         this.isDownloading = false;
 
-        const download = `${savedSearch.title}.csv`;
+        const download = `${title}.csv`;
         const blob = new Blob([body as BlobPart], {
           type: response?.headers.get('content-type') || undefined,
         });
@@ -174,19 +186,78 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
         window.URL.revokeObjectURL(downloadObject);
         document.body.removeChild(a);
       })
-      .catch(this.onGenerationFail.bind(this));
+      .catch((error: unknown) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
+        this.isDownloading = false;
+        this.notifications.toasts.addDanger({
+          title: this.i18nStrings.download.toasts.error.title,
+          text: this.i18nStrings.download.toasts.error.body,
+          'data-test-subj': 'downloadCsvFail',
+        });
+      });
   };
 
-  private onGenerationFail(_error: Error) {
-    this.isDownloading = false;
-    this.notifications.toasts.addDanger({
-      title: i18n.translate('reporting.share.panelAction.failedCsvReportTitle', {
-        defaultMessage: `CSV download failed`,
-      }),
-      text: i18n.translate('reporting.share.panelAction.failedCsvReportMessage', {
-        defaultMessage: `We couldn't generate your CSV at this time.`,
-      }),
-      'data-test-subj': 'downloadCsvFail',
+  private executeGenerate = async (params: ExecutionParams) => {
+    const { searchSource, columns, title, analytics, i18nStart } = params;
+    const csvJobParams = this.apiClient.getDecoratedJobParams<JobAppParamsCSV>({
+      searchSource,
+      columns,
+      title,
+      objectType: 'search',
     });
-  }
+
+    await this.apiClient
+      .createReportingJob('csv_searchsource', csvJobParams)
+      .then((job) => {
+        if (job) {
+          this.notifications.toasts.addSuccess({
+            title: this.i18nStrings.generate.toasts.success.title,
+            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, {
+              analytics,
+              i18n: i18nStart,
+              theme: this.theme,
+            }),
+            'data-test-subj': 'csvReportStarted',
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        // eslint-disable-next-line no-console
+        console.error(error);
+        this.notifications.toasts.addDanger({
+          title: this.i18nStrings.generate.toasts.error.title,
+          text: this.i18nStrings.generate.toasts.error.body,
+          'data-test-subj': 'generateCsvFail',
+        });
+      });
+  };
+
+  public execute = async (context: ActionContext) => {
+    const { embeddable } = context;
+
+    if (!isSavedSearchEmbeddable(embeddable) || !(await this.isCompatible(context))) {
+      throw new IncompatibleActionError();
+    }
+
+    const savedSearch = embeddable.getSavedSearch();
+
+    if (!savedSearch || this.isDownloading) {
+      return;
+    }
+
+    const [{ i18n: i18nStart, analytics }] = await firstValueFrom(this.startServices$);
+    const { columns, getSearchSource } = await this.getSharingData(savedSearch);
+    const searchSource = getSearchSource({
+      addGlobalTimeFilter: !embeddable.hasTimeRange(),
+      absoluteTime: true,
+    });
+    const title = savedSearch.title || '';
+    const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
+
+    if (this.enablePanelActionDownload) {
+      return this.executeDownload(executionParams);
+    }
+    return this.executeGenerate(executionParams);
+  };
 }

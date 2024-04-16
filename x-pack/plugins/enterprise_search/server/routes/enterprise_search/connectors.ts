@@ -6,11 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTORS_INDEX,
+  cancelSync,
   deleteConnectorById,
   deleteConnectorSecret,
   fetchConnectorById,
@@ -28,13 +30,17 @@ import {
 
 import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
-import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
+import {
+  isResourceNotFoundException,
+  isStatusTransitionException,
+} from '@kbn/search-connectors/utils/identify_exceptions';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
+import { fetchUnattachedIndices } from '../../lib/indices/fetch_unattached_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
@@ -112,6 +118,40 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       await cancelSyncs(client.asCurrentUser, request.params.connectorId);
+      return response.ok();
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{syncJobId}/cancel_sync',
+      validate: {
+        params: schema.object({
+          syncJobId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        await cancelSync(client.asCurrentUser, request.params.syncJobId);
+      } catch (error) {
+        if (isStatusTransitionException(error)) {
+          return createError({
+            errorCode: ErrorCode.STATUS_TRANSITION_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.statusTransitionError',
+              {
+                defaultMessage:
+                  'Connector sync job cannot be cancelled. Connector is already cancelled or not in a cancelable state.',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
       return response.ok();
     })
   );
@@ -694,6 +734,44 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
 
       return response.ok();
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/available_indices',
+      validate: {
+        query: schema.object({
+          from: schema.number({ defaultValue: 0, min: 0 }),
+          search_query: schema.maybe(schema.string()),
+          size: schema.number({ defaultValue: 40, min: 0 }),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { from, size, search_query: searchQuery } = request.query;
+      const { client } = (await context.core).elasticsearch;
+
+      const { indexNames, totalResults } = await fetchUnattachedIndices(
+        client,
+        searchQuery,
+        from,
+        size
+      );
+
+      return response.ok({
+        body: {
+          indexNames,
+          meta: {
+            page: {
+              from,
+              size,
+              total: totalResults,
+            },
+          },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }

@@ -120,8 +120,8 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       ) : (
         <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
       )}
-      {!hideEmbeddedConsole && consolePlugin?.renderEmbeddableConsole !== undefined ? (
-        consolePlugin.renderEmbeddableConsole()
+      {!hideEmbeddedConsole && consolePlugin?.EmbeddableConsole !== undefined ? (
+        <consolePlugin.EmbeddableConsole />
       ) : (
         <></>
       )}

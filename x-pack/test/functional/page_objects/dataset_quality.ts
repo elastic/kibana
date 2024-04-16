@@ -60,9 +60,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
     datasetQualityHeaderButton: 'datasetQualityHeaderButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
+    datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
+    datasetQualityFlyoutIntegrationAction: (action: string) =>
+      `datasetQualityFlyoutIntegrationAction${action}`,
     datasetQualityFilterBarFieldSearch: 'datasetQualityFilterBarFieldSearch',
     datasetQualityIntegrationsSelectable: 'datasetQualityIntegrationsSelectable',
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
+    datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
+    datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
@@ -102,19 +107,23 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    async waitUntilTableLoaded() {
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    },
+
     async waitUntilSummaryPanelLoaded() {
       await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
       await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
     },
 
-    async parseSummaryPanel(): Promise<SummaryPanelKpi> {
+    async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
         { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
         { title: texts.datasetHealthGood, key: 'datasetHealthGood' },
         { title: texts.activeDatasets, key: 'activeDatasets' },
         { title: texts.estimatedData, key: 'estimatedData' },
-      ];
+      ].filter((item) => !excludeKeys.includes(item.key));
 
       const kpiTexts = await Promise.all(
         kpiTitleAndKeys.map(async ({ title, key }) => ({
@@ -149,6 +158,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async getDatasetTableRows(): Promise<WebElementWrapper[]> {
+      await this.waitUntilTableLoaded();
       const table = await testSubjects.find(testSubjectSelectors.datasetQualityTable);
       const tBody = await table.findByTagName('tbody');
       return tBody.findAllByTagName('tr');
@@ -172,6 +182,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityIntegrationsSelectableButton,
         testSubjectSelectors.datasetQualityIntegrationsSelectable,
         integrations
+      );
+    },
+
+    async filterForNamespaces(namespaces: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityNamespacesSelectableButton,
+        testSubjectSelectors.datasetQualityNamespacesSelectable,
+        namespaces
       );
     },
 
@@ -220,6 +238,20 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     getFlyoutLogsExplorerButton() {
       return testSubjects.find(testSubjectSelectors.datasetQualityHeaderButton);
+    },
+
+    openIntegrationActionsMenu() {
+      return testSubjects.click(testSubjectSelectors.datasetQualityFlyoutIntegrationActionsButton);
+    },
+
+    getIntegrationActionButtonByAction(action: string) {
+      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutIntegrationAction(action));
+    },
+
+    getIntegrationDashboardButtons() {
+      return testSubjects.findAll(
+        testSubjectSelectors.datasetQualityFlyoutIntegrationAction('Dashboard')
+      );
     },
 
     async doestTextExistInFlyout(text: string, elementSelector: string) {

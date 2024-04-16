@@ -18,7 +18,6 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsClient,
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
@@ -31,19 +30,14 @@ import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { SloOrphanSummaryCleanupTask } from './services/slo/tasks/orphan_summary_cleanup_task';
 import { ObservabilityConfig } from '.';
-import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
+import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,
@@ -54,14 +48,10 @@ import {
   bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
 } from './lib/annotations/bootstrap_annotations';
-import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
-import { slo, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
-import { DefaultResourceInstaller, DefaultSLOInstaller } from './services/slo';
-
 import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -75,16 +65,12 @@ interface PluginSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
-  taskManager: TaskManagerSetupContract;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
-  taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
 }
-
-const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 const o11yRuleTypes = [
   SLO_BURN_RATE_RULE_TYPE_ID,
@@ -97,7 +83,6 @@ const o11yRuleTypes = [
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
-  private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -290,65 +275,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const { ruleDataService } = plugins.ruleRegistry;
 
-    const savedObjectTypes = [SO_SLO_TYPE];
-    plugins.features.registerKibanaFeature({
-      id: sloFeatureId,
-      name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
-        defaultMessage: 'SLOs',
-      }),
-      order: 1200,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      app: [sloFeatureId, 'kibana'],
-      catalogue: [sloFeatureId, 'observability'],
-      alerting: sloRuleTypes,
-      privileges: {
-        all: {
-          app: [sloFeatureId, 'kibana'],
-          catalogue: [sloFeatureId, 'observability'],
-          api: ['slo_write', 'slo_read', 'rac'],
-          savedObject: {
-            all: savedObjectTypes,
-            read: [],
-          },
-          alerting: {
-            rule: {
-              all: sloRuleTypes,
-            },
-            alert: {
-              all: sloRuleTypes,
-            },
-          },
-          ui: ['read', 'write'],
-        },
-        read: {
-          app: [sloFeatureId, 'kibana'],
-          catalogue: [sloFeatureId, 'observability'],
-          api: ['slo_read', 'rac'],
-          savedObject: {
-            all: [],
-            read: savedObjectTypes,
-          },
-          alerting: {
-            rule: {
-              read: sloRuleTypes,
-            },
-            alert: {
-              read: sloRuleTypes,
-            },
-          },
-          ui: ['read'],
-        },
-      },
-    });
-
-    core.savedObjects.registerType(slo);
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
+    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
       alertsLocator,
       logsExplorerLocator,
     });
-    registerSloUsageCollector(plugins.usageCollection);
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
@@ -366,23 +298,11 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
       });
-
-      const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-
-      const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-      const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
-      sloInstaller.install();
     });
     /**
      * Register a config for the observability guide
      */
     plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
-
-    this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
-      plugins.taskManager,
-      this.logger,
-      config
-    );
 
     return {
       getAlertDetailsConfig() {
@@ -396,12 +316,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     };
   }
 
-  public start(core: CoreStart, plugins: PluginStart) {
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
-    const internalEsClient = core.elasticsearch.client.asInternalUser;
-
-    this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
-  }
+  public start(core: CoreStart, plugins: PluginStart) {}
 
   public stop() {}
 }

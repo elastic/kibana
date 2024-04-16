@@ -5,27 +5,14 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import { FunctionRegistrationParameters } from '.';
-import { ApmDocumentType } from '../../common/document_type';
-import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
-import { RollupInterval } from '../../common/rollup';
 import { ServiceHealthStatus } from '../../common/service_health_status';
 import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
 import { getMlClient } from '../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../lib/helpers/get_random_sampler';
-import { getServicesItems } from '../routes/services/get_services/get_services_items';
+import { getApmServiceList } from '../routes/assistant_functions/get_apm_service_list';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
-
-export interface ApmServicesListItem {
-  'service.name': string;
-  'agent.name'?: string;
-  'transaction.type'?: string;
-  alertsCount: number;
-  healthStatus: ServiceHealthStatus;
-  'service.environment'?: string[];
-}
 
 export function registerGetApmServicesListFunction({
   apmEventClient,
@@ -45,7 +32,6 @@ export function registerGetApmServicesListFunction({
       ),
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           'service.environment': {
             ...NON_EMPTY_STRING,
@@ -65,8 +51,6 @@ export function registerGetApmServicesListFunction({
           healthStatus: {
             type: 'array',
             description: 'Filter service list by health status',
-            additionalProperties: false,
-            additionalItems: false,
             items: {
               type: 'string',
               enum: [
@@ -82,7 +66,7 @@ export function registerGetApmServicesListFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      const { healthStatus } = args;
+      const { logger } = resources;
       const [apmAlertsClient, mlClient, randomSampler] = await Promise.all([
         getApmAlertsClient(resources),
         getMlClient(resources),
@@ -93,44 +77,15 @@ export function registerGetApmServicesListFunction({
         }),
       ]);
 
-      const start = datemath.parse(args.start)?.valueOf()!;
-      const end = datemath.parse(args.end)?.valueOf()!;
-
-      const serviceItems = await getServicesItems({
-        apmAlertsClient,
-        apmEventClient,
-        documentType: ApmDocumentType.TransactionMetric,
-        start,
-        end,
-        environment: args['service.environment'] || ENVIRONMENT_ALL.value,
-        kuery: '',
-        logger: resources.logger,
-        randomSampler,
-        rollupInterval: RollupInterval.OneMinute,
-        serviceGroup: null,
-        mlClient,
-        useDurationSummary: false,
-      });
-
-      let mappedItems = serviceItems.items.map((item): ApmServicesListItem => {
-        return {
-          'service.name': item.serviceName,
-          'agent.name': item.agentName,
-          alertsCount: item.alertsCount ?? 0,
-          healthStatus: item.healthStatus ?? ServiceHealthStatus.unknown,
-          'service.environment': item.environments,
-          'transaction.type': item.transactionType,
-        };
-      });
-
-      if (healthStatus && healthStatus.length) {
-        mappedItems = mappedItems.filter((item): boolean =>
-          healthStatus.includes(item.healthStatus)
-        );
-      }
-
       return {
-        content: mappedItems,
+        content: await getApmServiceList({
+          apmEventClient,
+          apmAlertsClient,
+          randomSampler,
+          mlClient,
+          logger,
+          arguments: args,
+        }),
       };
     }
   );

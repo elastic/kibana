@@ -8,35 +8,38 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const defaultFleetServerHostId = 'default-fleet-server';
-const defaultFleetServerHostUrl = 'https://localhost:8220';
 const defaultElasticsearchOutputId = 'es-default-output';
-const defaultElasticsearchOutputHostUrl = 'https://localhost:9200';
 
 export async function expectDefaultFleetServer({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
+  let defaultFleetServerHostUrl: string = '';
 
   await retry.waitForWithTimeout('get default fleet server', 30_000, async () => {
     const { body, status } = await supertest.get(
       `/api/fleet/fleet_server_hosts/${defaultFleetServerHostId}`
     );
-    if (status === 200 && body.item.host_urls.includes(defaultFleetServerHostUrl)) {
+    if (status === 200 && body.item.host_urls.length > 0) {
+      defaultFleetServerHostUrl = body.item.host_urls[0];
       return true;
     } else {
       throw new Error(`Expected default Fleet Server id ${defaultFleetServerHostId} to exist`);
     }
   });
+  return defaultFleetServerHostUrl;
 }
 
 export async function expectDefaultElasticsearchOutput({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
+  let defaultEsOutputUrl: string = '';
 
   await retry.waitForWithTimeout('get default Elasticsearch output', 30_000, async () => {
     const { body, status } = await supertest.get(
       `/api/fleet/outputs/${defaultElasticsearchOutputId}`
     );
-    if (status === 200 && body.item.hosts.includes(defaultElasticsearchOutputHostUrl)) {
+    if (status === 200 && body.item.hosts.length > 0) {
+      defaultEsOutputUrl = body.item.hosts[0];
       return true;
     } else {
       throw new Error(
@@ -44,6 +47,7 @@ export async function expectDefaultElasticsearchOutput({ getService }: FtrProvid
       );
     }
   });
+  return defaultEsOutputUrl;
 }
 
 export const kbnServerArgs = [
@@ -52,7 +56,7 @@ export const kbnServerArgs = [
     id: defaultFleetServerHostId,
     name: 'Default Fleet Server',
     is_default: true,
-    host_urls: [defaultFleetServerHostUrl],
+    host_urls: ['https://localhost:8220'],
   })}]`,
   `--xpack.fleet.outputs=[${JSON.stringify({
     id: defaultElasticsearchOutputId,
@@ -60,6 +64,6 @@ export const kbnServerArgs = [
     type: 'elasticsearch',
     is_default: true,
     is_default_monitoring: true,
-    hosts: [defaultElasticsearchOutputHostUrl],
+    hosts: ['https://localhost:9200'],
   })}]`,
 ];

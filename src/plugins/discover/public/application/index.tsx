@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { ExperimentalFeatures } from '../../common/config';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
@@ -19,6 +20,7 @@ export interface RenderAppProps {
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
   customizationContext: DiscoverCustomizationContext;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const renderApp = ({
@@ -26,6 +28,7 @@ export const renderApp = ({
   services,
   profileRegistry,
   customizationContext,
+  experimentalFeatures,
 }: RenderAppProps) => {
   const { history, capabilities, chrome, data, core } = services;
 
@@ -45,6 +48,7 @@ export const renderApp = ({
       services={services}
       profileRegistry={profileRegistry}
       customizationContext={customizationContext}
+      experimentalFeatures={experimentalFeatures}
       history={history}
     />,
     {

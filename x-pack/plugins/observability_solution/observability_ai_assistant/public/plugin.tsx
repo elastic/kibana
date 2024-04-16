@@ -14,10 +14,13 @@ import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
 import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
-import { createUseChat } from './hooks/use_chat';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
+import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
+import { createUseChat } from './hooks/use_chat';
 import { createService } from './service/create_service';
+import { createScreenContextAction } from './utils/create_screen_context_action';
+import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -26,8 +29,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
   ObservabilityAIAssistantService,
 } from './types';
-import { useUserPreferredLanguage } from './hooks/use_user_preferred_language';
-import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
+import { getObsAIAssistantConnectorType } from './rule_connector';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -86,6 +88,10 @@ export class ObservabilityAIAssistantPlugin
 
     const isEnabled = service.isEnabled();
 
+    pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+      getObsAIAssistantConnectorType(service)
+    );
+
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
@@ -107,6 +113,7 @@ export class ObservabilityAIAssistantPlugin
           )
         : null,
       getContextualInsightMessages,
+      createScreenContextAction,
     };
   }
 }

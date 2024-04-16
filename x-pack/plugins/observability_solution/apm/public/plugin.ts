@@ -42,7 +42,10 @@ import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/p
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import {
   FetchDataParams,
   ObservabilityPublicSetup,
@@ -71,7 +74,7 @@ import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
@@ -102,6 +105,7 @@ export interface ApmPluginSetupDeps {
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
@@ -127,6 +131,7 @@ export interface ApmPluginStartDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   fleet?: FleetStart;
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
@@ -137,7 +142,6 @@ export interface ApmPluginStartDeps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
@@ -436,7 +440,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
 
-    plugins.observabilityAIAssistant.service.register(
+    plugins.observabilityAIAssistant?.service.register(
       async ({ registerRenderFunction }) => {
         const mod = await import('./assistant_functions');
 

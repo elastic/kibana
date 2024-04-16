@@ -17,7 +17,8 @@ import { OWNERS } from '../../common/constants';
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
 
-describe('useGetCases', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/178163
+describe.skip('useGetCases', () => {
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });

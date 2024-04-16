@@ -14,7 +14,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
-import { loadRule, loadRuleType } from './services/alert_api';
+import { loadRule, loadRuleType } from './services/rule_api';
 import { ENABLE_MAINTENANCE_WINDOWS, Rule, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {

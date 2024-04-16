@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -47,11 +46,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
-   */
-  assistantStreamingEnabled: false,
-
-  /**
    * Enables the SOC trends timerange and stats on D&R page
    */
   socTrendsEnabled: false,
@@ -74,12 +68,22 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Automated Endpoint Process actions
    */
-  automatedProcessActionsEnabled: false,
+  automatedProcessActionsEnabled: true,
 
   /**
-   * Enables the ability to send Response actions to SentinelOne
+   * Enables the ability to send Response actions to SentinelOne and persist the results
+   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
+   * response actions in Response Console.
+   *
+   * Release: v8.13.0
    */
-  responseActionsSentinelOneV1Enabled: false,
+  responseActionsSentinelOneV1Enabled: true,
+
+  /**
+   * Enables use of SentinelOne response actions that complete asynchronously as well as support
+   * for more response actions.
+   */
+  responseActionsSentinelOneV2Enabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -102,9 +106,20 @@ export const allowedExperimentalValues = Object.freeze({
   expandableEventFlyoutEnabled: false,
 
   /**
+   * Enables expandable flyout in timeline
+   */
+  expandableTimelineFlyoutEnabled: false,
+  /*
+
+  /**
    * Enables new Set of filters on the Alerts page.
    */
   alertsPageFiltersEnabled: true,
+
+  /**
+   * Enables the Assistant Alerts Insights feature and API endpoint
+   */
+  assistantAlertsInsights: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -160,14 +175,14 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables alerts suppression for indicator match rules
+   * Enables alerts suppression for new terms rules
    */
-  alertSuppressionForIndicatorMatchRuleEnabled: false,
+  alertSuppressionForNewTermsRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
-  sentinelOneDataInAnalyzerEnabled: false,
+  sentinelOneDataInAnalyzerEnabled: true,
 
   /**
    * Enables SentinelOne manual host manipulation actions
@@ -191,6 +206,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Feb 20, 2024
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
+  /*
+   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   */
+  unifiedComponentsInTimelineEnabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
 
   /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
@@ -204,14 +234,19 @@ export const allowedExperimentalValues = Object.freeze({
   perFieldPrebuiltRulesDiffingEnabled: true,
 
   /**
-   * Disables discover esql tab within timeline
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  timelineEsqlTabDisabled: false,
+  malwareOnWriteScanOptionAvailable: false,
 
   /**
-   * Disables date pickers and sourcerer in analyzer if needed.
+   *  Enables Security AI Assistant's Flyout mode
    */
-  analyzerDatePickersAndSourcererDisabled: false,
+  aiAssistantFlyoutMode: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

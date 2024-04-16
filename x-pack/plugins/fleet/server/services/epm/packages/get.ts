@@ -542,7 +542,11 @@ export async function getPackageFromSource(options: {
   let res: GetPackageResponse;
 
   // If the package is installed
-  if (installedPkg && installedPkg.version === pkgVersion) {
+  if (
+    installedPkg &&
+    installedPkg.install_status === 'installed' &&
+    installedPkg.version === pkgVersion
+  ) {
     const { install_source: pkgInstallSource } = installedPkg;
     if (!res && installedPkg.package_assets) {
       res = await getEsPackage(

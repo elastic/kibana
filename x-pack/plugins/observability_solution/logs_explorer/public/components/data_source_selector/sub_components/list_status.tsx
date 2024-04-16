@@ -60,7 +60,11 @@ export const ListStatus = ({
             }}
           />
         }
-        actions={[<EuiButton onClick={onRetry}>{noDataRetryLabel}</EuiButton>]}
+        actions={[
+          <EuiButton data-test-subj="logsExplorerListStatusButton" onClick={onRetry}>
+            {noDataRetryLabel}
+          </EuiButton>,
+        ]}
       />
     );
   }
