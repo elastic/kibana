@@ -13,8 +13,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import { ShareContext, ShareMenuItem, ShareMenuItemV2 } from '@kbn/share-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { ShareContext, ShareMenuItem } from '@kbn/share-plugin/public';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
@@ -82,7 +82,7 @@ export const reportingCsvShareProvider = ({
       capabilityHasCsvReporting = true; // deprecated
     }
 
-    const generateReportingJobCSV: ShareMenuItemV2['generateExport'] = ({ intl }) => {
+    const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
       return apiClient
         .createReportingJob(reportType, decoratedJobParams)
@@ -164,14 +164,14 @@ export const reportingCsvShareProvider = ({
           dataTestSubj: 'shareReportingCopyURL',
           label: 'Post URL',
         },
-        generateExportButtonLabel: (
+        generateReportButton: (
           <FormattedMessage
             id="reporting.share.generateButtonLabelCSV"
             data-test-subj="generateReportButton"
             defaultMessage="Generate CSV"
           />
         ),
-        generateExport: generateReportingJobCSV,
+        generateReport: generateReportingJobCSV,
         generateCopyUrl: reportingUrl,
         absoluteUrl,
         renderCopyURLButton: true,

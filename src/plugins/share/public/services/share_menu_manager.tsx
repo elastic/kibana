@@ -180,6 +180,7 @@ export class ShareMenuManager {
                 },
                 theme,
                 i18n,
+                toasts,
               }}
             />,
             { i18n, theme }
