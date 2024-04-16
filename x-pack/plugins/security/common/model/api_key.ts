@@ -41,7 +41,7 @@ export interface CrossClusterApiKey extends BaseApiKey {
  *
  * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */
-interface BaseApiKey extends estypes.SecurityApiKey {
+export interface BaseApiKey extends estypes.SecurityApiKey {
   username: Required<estypes.SecurityApiKey>['username'];
   realm: Required<estypes.SecurityApiKey>['realm'];
   creation: Required<estypes.SecurityApiKey>['creation'];

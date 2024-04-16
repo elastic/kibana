@@ -8,6 +8,7 @@
 export type {
   ApiKey,
   RestApiKey,
+  BaseApiKey,
   CrossClusterApiKey,
   ApiKeyToInvalidate,
   ApiKeyRoleDescriptors,

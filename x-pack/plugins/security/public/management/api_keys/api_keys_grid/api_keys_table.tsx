@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
 import type { AuthenticatedUser } from '../../../../common';
-import type { ApiKey, ApiKeyAggregations, RestApiKey } from '../../../../common/model';
+import type { ApiKey, ApiKeyAggregations, BaseApiKey } from '../../../../common/model';
 import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
 
 export interface ApiKeysTableProps {
@@ -619,7 +619,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
 /**
  * Interface representing a REST API key that is managed by Kibana.
  */
-export interface ManagedApiKey extends Omit<RestApiKey, 'type'> {
+export interface ManagedApiKey extends BaseApiKey {
   type: 'managed';
 }
 
