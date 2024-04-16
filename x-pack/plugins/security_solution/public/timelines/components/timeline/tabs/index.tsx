@@ -112,6 +112,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
     const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
+    const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -215,7 +216,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        {hasAssistantPrivilege ? getAssistantTab() : null}
+        {hasAssistantPrivilege && !aiAssistantFlyoutMode ? getAssistantTab() : null}
       </>
     );
   }
@@ -268,6 +269,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   timelineDescription,
 }) => {
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
+  const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
@@ -464,7 +466,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               </div>
             )}
           </StyledEuiTab>
-          {hasAssistantPrivilege && (
+          {hasAssistantPrivilege && !aiAssistantFlyoutMode && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
               onClick={setSecurityAssistantAsActiveTab}

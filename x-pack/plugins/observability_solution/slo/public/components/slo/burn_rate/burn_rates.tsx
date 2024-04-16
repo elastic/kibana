@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBetaBadge,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
@@ -20,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { useFetchSloBurnRates } from '../../../hooks/use_fetch_slo_burn_rates';
 import { ErrorRateChart } from '../error_rate_chart';
 import { BurnRate } from './burn_rate';
+import { TechnicalPreviewBadge } from '../../technical_preview_badge';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -83,20 +77,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.slo.burnRate.technicalPreviewBadgeTitle', {
-                  defaultMessage: 'Technical Preview',
-                })}
-                size="s"
-                tooltipPosition="bottom"
-                tooltipContent={i18n.translate(
-                  'xpack.slo.burnRate.technicalPreviewBadgeDescription',
-                  {
-                    defaultMessage:
-                      'This functionality is in technical preview and is subject to change or may be removed in future versions. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Technical preview features are not subject to the support service level agreement of official generally available features.',
-                  }
-                )}
-              />
+              <TechnicalPreviewBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>

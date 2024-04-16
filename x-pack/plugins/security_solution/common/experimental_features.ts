@@ -117,6 +117,11 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
+   * Enables the Assistant Alerts Insights feature and API endpoint
+   */
+  assistantAlertsInsights: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -232,6 +237,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: false,
+
+  /**
+   *  Enables Security AI Assistant's Flyout mode
+   */
+  aiAssistantFlyoutMode: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

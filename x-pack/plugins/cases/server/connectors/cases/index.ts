@@ -80,7 +80,7 @@ export const getCasesConnectorAdapter = (): ConnectorAdapter<
     buildActionParams: ({ alerts, rule, params, spaceId, ruleUrl }) => {
       const caseAlerts = [...alerts.new.data, ...alerts.ongoing.data];
 
-      const owner = getOwnerFromRuleConsumer(rule.consumer);
+      const owner = getOwnerFromRuleConsumerProducer(rule.consumer, rule.producer);
 
       const subActionParams = {
         alerts: caseAlerts,
@@ -94,17 +94,17 @@ export const getCasesConnectorAdapter = (): ConnectorAdapter<
 
       return { subAction: 'run', subActionParams };
     },
-    getKibanaPrivileges: ({ consumer }) => {
-      const owner = getOwnerFromRuleConsumer(consumer);
+    getKibanaPrivileges: ({ consumer, producer }) => {
+      const owner = getOwnerFromRuleConsumerProducer(consumer, producer);
       return constructRequiredKibanaPrivileges(owner);
     },
   };
 };
 
-const getOwnerFromRuleConsumer = (consumer: string): Owner => {
+const getOwnerFromRuleConsumerProducer = (consumer: string, producer: string): Owner => {
   for (const value of Object.values(OWNER_INFO)) {
     const foundedConsumer = value.validRuleConsumers?.find(
-      (validConsumer) => validConsumer === consumer
+      (validConsumer) => validConsumer === consumer || validConsumer === producer
     );
 
     if (foundedConsumer) {
