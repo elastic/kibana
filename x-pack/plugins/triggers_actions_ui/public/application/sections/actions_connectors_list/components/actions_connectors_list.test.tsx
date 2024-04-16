@@ -29,6 +29,15 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mocks = coreMock.createSetup();
 const { loadAllActions, loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
+const mockGetParams = jest.fn().mockReturnValue({});
+const mockGetLocation = jest.fn().mockReturnValue({ search: '' });
+const mockGetHistory = jest.fn().mockReturnValue({ push: jest.fn(), createHref: jest.fn() });
+
+jest.mock('react-router-dom', () => ({
+  useParams: () => mockGetParams(),
+  useLocation: () => mockGetLocation(),
+  useHistory: () => mockGetHistory(),
+}));
 
 describe('actions_connectors_list', () => {
   describe('component empty', () => {

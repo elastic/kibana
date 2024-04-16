@@ -11,6 +11,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID } from '@kbn/monaco';
 import { useSetInitialValue } from './use_set_initial_value';
+import { useSetupAutosave } from './use_setup_autosave';
 import { useServicesContext, useEditorReadContext } from '../../../contexts';
 
 export interface EditorProps {
@@ -28,6 +29,8 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const [value, setValue] = useState(initialTextValue);
 
   useSetInitialValue({ initialTextValue, setValue, toasts });
+
+  useSetupAutosave({ value });
 
   return (
     <div

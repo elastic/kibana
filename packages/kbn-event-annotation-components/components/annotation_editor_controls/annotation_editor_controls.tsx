@@ -245,15 +245,13 @@ const AnnotationEditorControls = ({
                   <>
                     <EuiSpacer size="xs" />
                     <FieldPicker
-                      selectedOptions={
+                      activeField={
                         selectedField
-                          ? [
-                              {
-                                label: selectedField,
-                                value: { type: 'field', field: selectedField },
-                              },
-                            ]
-                          : []
+                          ? {
+                              label: selectedField,
+                              value: { type: 'field', field: selectedField },
+                            }
+                          : undefined
                       }
                       options={options}
                       onChoose={function (choice: FieldOptionValue | undefined): void {

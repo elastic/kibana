@@ -113,7 +113,7 @@ export const getRenderCellValue = ({
         return (
           <EuiLink
             data-test-subj="o11yGetRenderCellValueLink"
-            css={{ display: 'contents' }}
+            css={{ ':hover': { textDecoration: 'none' } }}
             onClick={() => setFlyoutAlert && setFlyoutAlert(alert.fields[ALERT_UUID])}
           >
             {alert.reason}

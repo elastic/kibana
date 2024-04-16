@@ -11,13 +11,12 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
-  Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -36,7 +35,6 @@ import type {
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { SuggestionSelector } from './suggestion_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
@@ -120,7 +118,6 @@ export function Chart({
     lensVisService.currentSuggestionContext$
   );
   const visContext = useObservable(lensVisService.visContext$);
-  const allSuggestions = useObservable(lensVisService.allSuggestions$);
   const currentSuggestion = lensVisServiceCurrentSuggestionContext?.suggestion;
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
@@ -179,17 +176,6 @@ export function Chart({
       });
     },
     [lensVisService]
-  );
-
-  const onSuggestionSelectorChange = useCallback(
-    (suggestion: Suggestion | undefined) => {
-      setIsFlyoutVisible(false);
-      onSuggestionContextEdit({
-        suggestion,
-        type: UnifiedHistogramSuggestionType.lensSuggestion,
-      });
-    },
-    [onSuggestionContextEdit, setIsFlyoutVisible]
   );
 
   useEffect(() => {
@@ -327,16 +313,6 @@ export function Chart({
                       onBreakdownFieldChange={onBreakdownFieldChange}
                     />
                   )}
-                  {chartVisible &&
-                    currentSuggestion &&
-                    allSuggestions &&
-                    allSuggestions?.length > 1 && (
-                      <SuggestionSelector
-                        suggestions={allSuggestions}
-                        activeSuggestion={currentSuggestion}
-                        onSuggestionChange={onSuggestionSelectorChange}
-                      />
-                    )}
                 </div>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -366,12 +342,15 @@ export function Chart({
             data-test-subj="unifiedHistogramRendered"
           >
             {isChartLoading && (
-              <EuiProgress
-                size="xs"
-                color="accent"
-                position="absolute"
-                data-test-subj="unifiedHistogramProgressBar"
-              />
+              /*
+                There are 2 different loaders which can appear above the chart. One is from the embeddable and one is from the UnifiedHistogram.
+                The idea is to show UnifiedHistogram loader until we get a new query params which would trigger the embeddable loader.
+                Updates to the time range can come earlier than the query updates which we delay on purpose for text based mode,
+                this is why it might get both loaders. We should find a way to resolve that better.
+              */
+              <EuiDelayRender delay={500} data-test-subj="unifiedHistogramProgressBar">
+                <EuiProgress size="xs" color="accent" position="absolute" />
+              </EuiDelayRender>
             )}
             <HistogramMemoized
               abortController={abortController}
@@ -419,7 +398,7 @@ export function Chart({
             isPlainRecord,
             query,
             currentSuggestionContext: lensVisServiceCurrentSuggestionContext,
-            onSuggestionContextChange: onSuggestionContextEdit,
+            onSuggestionContextEdit,
           }}
         />
       )}

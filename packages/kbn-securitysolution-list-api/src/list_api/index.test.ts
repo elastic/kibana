@@ -12,7 +12,7 @@ import {
   ExportListParams,
   FindListsParams,
   ImportListParams,
-} from './types';
+} from '../types';
 
 import { HttpFetchOptions } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
