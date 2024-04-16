@@ -149,6 +149,6 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
 
 export const assistantRouteRepository = {
   ...getApmTimeSeriesRoute,
-  ...getApmAlertDetailsContextRoute,
+  ...getObservabilityAlertDetailsContextRoute,
   ...getDownstreamDependenciesRoute,
 };
