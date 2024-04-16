@@ -37,7 +37,8 @@
     "@kbn/shared-ux-router",
     "@kbn/ui-theme",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/index-management"
+    "@kbn/index-management",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",
