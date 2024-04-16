@@ -10,7 +10,6 @@ import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
 
 export { SecurityPageName } from '@kbn/security-solution-navigation';
-
 /**
  * as const
  *
@@ -105,6 +104,10 @@ export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
+export const INVESTIGATIONS_PATH = '/investigations' as const;
+export const MACHINE_LEARNING_PATH = '/ml' as const;
+export const ASSETS_PATH = '/assets' as const;
+export const CLOUD_DEFEND_PATH = '/cloud_defend' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
@@ -115,6 +118,8 @@ export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_HISTORY_PATH = `${MANAGEMENT_PATH}/response_actions_history` as const;
 export const ENTITY_ANALYTICS_PATH = '/entity_analytics' as const;
 export const ENTITY_ANALYTICS_MANAGEMENT_PATH = `/entity_analytics_management` as const;
+export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
+  `/entity_analytics_asset_criticality` as const;
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
 export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
@@ -241,43 +246,7 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-/**
- * Internal Risk Score routes
- */
-export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
-export const DEV_TOOL_PREBUILT_CONTENT =
-  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/{console_id}` as const;
-export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
-  `/s/${spaceId}${INTERNAL_RISK_SCORE_URL}/prebuilt_content/dev_tool/${consoleId}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
-export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
-  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_DELETE = `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/{template_name}`;
-export const prebuiltSavedObjectsBulkDeleteUrl = (templateName: string) =>
-  `${INTERNAL_RISK_SCORE_URL}/prebuilt_content/saved_objects/_bulk_delete/${templateName}` as const;
-export const RISK_SCORE_CREATE_INDEX = `${INTERNAL_RISK_SCORE_URL}/indices/create`;
-export const RISK_SCORE_DELETE_INDICES = `${INTERNAL_RISK_SCORE_URL}/indices/delete`;
-export const RISK_SCORE_CREATE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/create`;
-export const RISK_SCORE_DELETE_STORED_SCRIPT = `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete`;
-export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview`;
-
-export const RISK_ENGINE_URL = `${INTERNAL_RISK_SCORE_URL}/engine`;
-export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
-export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
-export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
-export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
-export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
-export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
-
-export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
-export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
-export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
-
-/**
- * Public Risk Score routes
- */
-export const RISK_ENGINE_PUBLIC_PREFIX = '/api/risk_scores' as const;
-export const RISK_SCORE_CALCULATION_URL = `${RISK_ENGINE_PUBLIC_PREFIX}/calculation` as const;
+export * from './entity_analytics/constants';
 
 export const INTERNAL_DASHBOARDS_URL = `/internal/dashboards` as const;
 export const INTERNAL_TAGS_URL = `/internal/tags`;
@@ -457,6 +426,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+  FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

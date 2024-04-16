@@ -34,6 +34,15 @@ export {
   createInternalServerError,
   isTokenLimitReachedError,
   isChatCompletionError,
+  createFunctionNotFoundError,
 } from './conversation_complete';
+
+export {
+  aiAssistantResponseLanguage,
+  aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
+} from './ui_settings/settings_keys';
+
+export { DEFAULT_LANGUAGE_OPTION, LANGUAGE_OPTIONS } from './ui_settings/language_options';
 
 export { isSupportedConnectorType } from './connectors';
