@@ -152,6 +152,16 @@ function getFunctionSignaturesByReturnType(
     });
 }
 
+// Note, this could lead to some CI failures
+// if we're close to the hour change by few seconds
+function getNowString() {
+  const nowDate = new Date();
+  nowDate.setMilliseconds(0);
+  nowDate.setSeconds(0);
+  nowDate.setMinutes(0);
+  return `"${nowDate.toISOString().replace('.000Z', 'Z')}"`;
+}
+
 function getFieldNamesByType(_requestedType: string | string[]) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
@@ -1069,26 +1079,23 @@ describe('autocomplete', () => {
       26 /* b column in abs */
     );
 
+    testSuggestions(
+      'from a | eval bucket(dateField, ',
+      ['10', '30', '50'].map((l) => `${l},`)
+    );
+
     // suggest both signature types as third argument
-    testSuggestions('from a | eval auto_bucket(dateField, numberField, ', [
-      ...getFieldNamesByType(['string', 'number']),
-      ...getFunctionSignaturesByReturnType(
-        'eval',
-        ['string', 'number'],
-        { evalMath: true },
-        undefined,
-        ['auto_bucket']
-      ),
-    ]);
+    testSuggestions(
+      'from a | eval bucket(dateField, 10, ',
+      [getNowString(), `to_datetime(${getNowString()})`, '10', '30', '50'].map((l) => `${l},`)
+    );
 
     // but fourth argument should only suggest type conditionally on the third argument
     for (const type of ['string', 'number']) {
-      testSuggestions(`from a | eval auto_bucket(dateField, numberField, ${type}Field, `, [
-        ...getFieldNamesByType(type),
-        ...getFunctionSignaturesByReturnType('eval', type, { evalMath: true }, undefined, [
-          'auto_bucket',
-        ]),
-      ]);
+      testSuggestions(
+        `from a | eval bucket(dateField, 10, ${type === 'number' ? '10' : getNowString()}, `,
+        type === 'string' ? [getNowString(), `to_datetime(${getNowString()})`] : ['10', '30', '50']
+      );
     }
 
     // Test suggestions for each possible param, within each signature variation, for each function
