@@ -18,7 +18,7 @@ This means you can get slightly different results using the same data.
 Example
 ```esql
 FROM employees
-| STATS median_salary = MEDIAN(salary), median_abs_dev_salary = MEDIAN_ABSOLUTE_DEVIATION(salary)
+| STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
 The expression can use inline functions. For example, to calculate the the
