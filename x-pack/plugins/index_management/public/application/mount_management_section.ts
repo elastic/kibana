@@ -12,7 +12,6 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { Observable } from 'rxjs';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { AppDependencies } from './app_context';
