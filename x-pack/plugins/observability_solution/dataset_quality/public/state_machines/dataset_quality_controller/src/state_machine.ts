@@ -194,6 +194,9 @@ export const createPureDatasetQualityControllerStateMachine = (
                 UPDATE_INSIGHTS_TIME_RANGE: {
                   actions: ['storeFlyoutOptions'],
                 },
+                BREAKDOWN_FIELD_CHANGE: {
+                  actions: ['storeFlyoutOptions'],
+                },
               },
             },
             closed: {
@@ -302,6 +305,13 @@ export const createPureDatasetQualityControllerStateMachine = (
                 flyout: {
                   ...context.flyout,
                   insightsTimeRange: event.timeRange,
+                },
+              }
+            : 'breakdownField' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  breakdownField: event.breakdownField ?? undefined,
                 },
               }
             : {};
