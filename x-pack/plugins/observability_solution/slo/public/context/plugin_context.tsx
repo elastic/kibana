@@ -19,4 +19,10 @@ export interface PluginContextValue {
   experimentalFeatures?: ExperimentalFeatures;
 }
 
-export const PluginContext = createContext({} as PluginContextValue);
+export interface OverviewEmbeddableContextValue {
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+}
+
+export const PluginContext = createContext(
+  {} as PluginContextValue | OverviewEmbeddableContextValue
+);
