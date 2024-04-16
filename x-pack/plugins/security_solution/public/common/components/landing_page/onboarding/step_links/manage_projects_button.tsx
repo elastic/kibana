@@ -5,24 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiIcon, EuiButton } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiIcon } from '@elastic/eui';
 import { MANAGE_PROJECTS } from './translations';
 import { useProjectsUrl } from '../hooks/use_projects_url';
+import { LinkButton } from '../../../links';
+import { useStepContext } from '../context/step_context';
+import { CreateProjectSteps } from '../types';
+import { ManageProjectsStepLinkId } from './types';
 
 const ManageProjectsButtonComponent = () => {
   const projectsUrl = useProjectsUrl();
+  const { onStepLinkClicked } = useStepContext();
+  const onClick = useCallback(() => {
+    onStepLinkClicked({
+      originStepId: CreateProjectSteps.createFirstProject,
+      stepLinkId: ManageProjectsStepLinkId,
+    });
+  }, [onStepLinkClicked]);
+
   return projectsUrl ? (
-    <EuiButton
+    <LinkButton
       aria-label={MANAGE_PROJECTS}
       className="step-paragraph"
       fill
       href={projectsUrl}
       target="_blank"
+      onClick={onClick}
     >
       {MANAGE_PROJECTS}
       <EuiIcon type="popout" />
-    </EuiButton>
+    </LinkButton>
   ) : null;
 };
 
