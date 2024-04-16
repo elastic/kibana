@@ -23,7 +23,6 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 });
 
 const requestMock = request as jest.Mock;
-const now = Date.now;
 const TIMESTAMP = 1589391874472;
 const apiUrl = 'https://resilient.elastic.co/';
 const orgId = '201';

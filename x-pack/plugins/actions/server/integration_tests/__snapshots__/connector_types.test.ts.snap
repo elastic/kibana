@@ -6209,59 +6209,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
-    "id": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "rules": Array [
-        Object {
-          "args": Object {
-            "method": [Function],
-          },
-          "name": "custom",
-        },
-      ],
-      "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
-  "type": "object",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .resilient 6`] = `
-Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
-  "type": "object",
-}
-`;
-
-exports[`Connector type config checks detect connector type changes for: .resilient 7`] = `
-Object {
-  "flags": Object {
-    "default": Object {
-      "special": "deep",
-    },
-    "error": [Function],
-    "presence": "optional",
-  },
-  "keys": Object {
     "apiUrl": Object {
       "flags": Object {
         "error": [Function],
@@ -6300,7 +6247,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 8`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient 6`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -6348,7 +6295,7 @@ Object {
 }
 `;
 
-exports[`Connector type config checks detect connector type changes for: .resilient 9`] = `
+exports[`Connector type config checks detect connector type changes for: .resilient 7`] = `
 Object {
   "flags": Object {
     "default": Object {
