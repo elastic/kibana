@@ -324,6 +324,7 @@ describe('AiInsights', () => {
       hasAssistantPrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
+      hasUpdateAIAssistantAnonymization: false,
       isAssistantEnabled: false, // <-- non-Enterprise license
     };
 

@@ -22,7 +22,6 @@ import { useLocalStorage, useSessionStorage } from 'react-use';
 import * as uuid from 'uuid';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
-import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { useKibana } from '../../common/lib/kibana';
 import { replaceNewlineLiterals } from '../helpers';
 import {
@@ -60,12 +59,10 @@ export const useInsights = ({
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
 
-  const { isAssistantEnabled } = useAssistantAvailability();
-
   // get alerts index pattern and allow lists from the assistant context:
   const { alertsIndexPattern, knowledgeBase } = useAssistantContext();
 
-  const { data: anonymizationFields } = useFetchAnonymizationFields({ http, isAssistantEnabled });
+  const { data: anonymizationFields } = useFetchAnonymizationFields();
 
   // get cached insights from session storage:
   const [sessionStorageCachedInsights, setSessionStorageCachedInsights] = useSessionStorage<string>(
