@@ -101,8 +101,9 @@ export const InferenceInputFormIndexControls: FC<Props> = ({
                     text: dataView.getIndexPattern(),
                     value: dataView.id!,
                   },
-                ];
+                ].sort((a, b) => a.text.localeCompare(b.text));
               });
+              setSelectedDataViewId(dataView.id!);
             }}
           />
         </EuiFlexItem>
