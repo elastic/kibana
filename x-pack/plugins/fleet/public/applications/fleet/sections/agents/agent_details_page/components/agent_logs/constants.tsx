@@ -48,12 +48,3 @@ export const DEFAULT_LOGS_STATE: AgentLogsState = {
 
 export const STATE_STORAGE_KEY = '_q';
 export const STATE_DATASET_FIELD = 'datasets';
-
-export const AGENT_LOG_LEVELS = {
-  ERROR: 'error',
-  WARNING: 'warning',
-  INFO: 'info',
-  DEBUG: 'debug',
-};
-
-export const DEFAULT_LOG_LEVEL = AGENT_LOG_LEVELS.INFO;

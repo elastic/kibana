@@ -19,14 +19,14 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
-import { EmbeddableSloProps } from './types';
+import { SingleSloProps } from './types';
 
 export function SloOverview({
   sloId,
   sloInstanceId,
   onRenderComplete,
   reloadSubject,
-}: EmbeddableSloProps) {
+}: SingleSloProps) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
