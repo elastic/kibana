@@ -37,7 +37,7 @@ interface Props {
    */
   selectedCategory?: string;
   showSearchBar?: boolean;
-  searchBarRef?: React.Ref<HTMLInputElement>;
+  packageListRef?: React.Ref<HTMLDivElement>;
   searchQuery?: string;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -52,7 +52,7 @@ const PackageListGridWrapper = ({
   selectedCategory = 'observability',
   useAvailablePackages,
   showSearchBar = false,
-  searchBarRef,
+  packageListRef,
   searchQuery,
   setSearchQuery,
   customCards,
@@ -82,7 +82,7 @@ const PackageListGridWrapper = ({
 
   return (
     <Suspense fallback={<Loading />}>
-      <div css={customMargin}>
+      <div css={customMargin} ref={packageListRef}>
         {showSearchBar && (
           <div
             css={css`
@@ -92,11 +92,6 @@ const PackageListGridWrapper = ({
             <EuiSearchBar
               box={{
                 incremental: true,
-                inputRef: (ref: any) => {
-                  (
-                    searchBarRef as React.MutableRefObject<HTMLInputElement>
-                  ).current = ref;
-                },
               }}
               onChange={(arg) => {
                 if (setSearchQuery) {
@@ -130,7 +125,7 @@ const PackageListGridWrapper = ({
 };
 
 const WithAvailablePackages = React.forwardRef(
-  (props: Props, searchBarRef?: React.Ref<HTMLInputElement>) => {
+  (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
 
     const {
@@ -181,7 +176,7 @@ const WithAvailablePackages = React.forwardRef(
       <PackageListGridWrapper
         {...props}
         useAvailablePackages={ref.current}
-        searchBarRef={searchBarRef}
+        packageListRef={packageListRef}
       />
     );
   }

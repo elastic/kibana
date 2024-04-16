@@ -83,17 +83,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
+  const packageListRef = React.useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState('');
 
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
       setIntegrationSearch(query);
-      if (packageListSearchBarRef.current) {
-        packageListSearchBarRef.current.focus();
-        packageListSearchBarRef.current.scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
+      if (packageListRef.current) {
+        packageListRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
         });
       }
     },
@@ -169,7 +168,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             showSearchBar={true}
             searchQuery={integrationSearch}
             setSearchQuery={setIntegrationSearch}
-            ref={packageListSearchBarRef}
+            ref={packageListRef}
           />
         </>
       )}
