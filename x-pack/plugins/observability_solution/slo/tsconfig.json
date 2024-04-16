@@ -85,6 +85,9 @@
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
+    "@kbn/aiops-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/aiops-log-rate-analysis",
     "@kbn/test-jest-helpers",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-i18n-browser-mocks",
@@ -94,6 +97,5 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/presentation-publishing"
   ]
 }

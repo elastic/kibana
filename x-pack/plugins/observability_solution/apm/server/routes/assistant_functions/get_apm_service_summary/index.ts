@@ -136,17 +136,15 @@ export async function getApmServiceSummary({
     apmAlertsClient.search({
       size: 100,
       track_total_hits: false,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
-              ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-              ...rangeQuery(start, end),
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...environmentQuery(environment),
-            ],
-          },
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+            ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+            ...rangeQuery(start, end),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...environmentQuery(environment),
+          ],
         },
       },
     }),
