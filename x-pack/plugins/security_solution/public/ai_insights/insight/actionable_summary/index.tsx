@@ -48,11 +48,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant
-            compact={true}
-            conversationTitle={insight.title}
-            promptContextId={promptContextId}
-          />
+          <ViewInAiAssistant compact={true} promptContextId={promptContextId} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

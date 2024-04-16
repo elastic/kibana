@@ -11,18 +11,17 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import React, { useCallback } from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
+import { ALERT_SUMMARY_CONVERSATION_ID } from '../../../common/components/event_details/translations';
 import * as i18n from './translations';
 
 interface Props {
   compact?: boolean;
-  conversationTitle?: string;
   promptContextId: string | undefined;
   replacements?: Replacements;
 }
 
 const ViewInAiAssistantComponent: React.FC<Props> = ({
   compact = false,
-  conversationTitle,
   promptContextId,
   replacements,
 }) => {
@@ -32,11 +31,11 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showOverlay = useCallback(() => {
     showAssistantOverlay({
-      conversationTitle,
+      conversationTitle: ALERT_SUMMARY_CONVERSATION_ID, // a known conversation ID is required to auto-select the insight as context
       promptContextId,
       showOverlay: true,
     });
-  }, [conversationTitle, promptContextId, showAssistantOverlay]);
+  }, [promptContextId, showAssistantOverlay]);
 
   const disabled = !hasAssistantPrivilege || promptContextId == null;
 

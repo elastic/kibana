@@ -14,10 +14,10 @@ export const ERROR_GENERATING_INSIGHTS = i18n.translate(
   }
 );
 
-export const HIDE_ANONYMIZED_LABEL = i18n.translate(
-  'xpack.securitySolution.aiInsights.hideAnonymizedLabel',
+export const SHOW_REAL_VALUES = i18n.translate(
+  'xpack.securitySolution.aiInsights.showRealValuesLabel',
   {
-    defaultMessage: 'Hide anonymized',
+    defaultMessage: 'Show real values',
   }
 );
 

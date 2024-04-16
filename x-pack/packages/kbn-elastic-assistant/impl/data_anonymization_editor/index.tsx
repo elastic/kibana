@@ -68,7 +68,14 @@ const DataAnonymizationEditorComponent: React.FC<Props> = ({
       <EditorContainer data-test-subj="dataAnonymizationEditor">
         <EuiPanel hasShadow={false} paddingSize="m">
           {typeof selectedPromptContext.rawData === 'string' ? (
-            <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+            selectedPromptContext.replacements != null ? (
+              <ReplacementsContextViewer
+                markdown={selectedPromptContext.rawData}
+                replacements={selectedPromptContext.replacements}
+              />
+            ) : (
+              <ReadOnlyContextViewer rawData={selectedPromptContext.rawData} />
+            )
           ) : (
             <ContextEditorFlyout
               selectedPromptContext={selectedPromptContext}

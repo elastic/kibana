@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 
 import { SummaryCount } from '../summary_count';
-import { HIDE_ANONYMIZED_LABEL, SHOW_ANONYMIZED_LABEL } from '../translations';
+import { SHOW_REAL_VALUES, SHOW_ANONYMIZED_LABEL } from '../translations';
 
 interface Props {
   alertsCount: number;
@@ -38,11 +38,11 @@ const SummaryComponent: React.FC<Props> = ({
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiToolTip
-        content={showAnonymized ? HIDE_ANONYMIZED_LABEL : SHOW_ANONYMIZED_LABEL}
+        content={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
         data-test-subj="toggleAnonymizedToolTip"
       >
         <EuiButtonIcon
-          aria-label={showAnonymized ? HIDE_ANONYMIZED_LABEL : SHOW_ANONYMIZED_LABEL}
+          aria-label={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
           css={css`
             border-radius: 50%;
           `}

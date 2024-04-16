@@ -99,7 +99,7 @@ const AiInsightsComponent: React.FC<Props> = ({
 
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <ViewInAiAssistant conversationTitle={insight.title} promptContextId={promptContextId} />
+          <ViewInAiAssistant promptContextId={promptContextId} />
         </EuiFlexItem>
         <EuiFlexItem
           css={css`
