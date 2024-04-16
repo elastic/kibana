@@ -62,10 +62,19 @@ export type SentinelOneDownloadAgentFileParams = TypeOf<
   typeof SentinelOneDownloadAgentFileParamsSchema
 >;
 
+export type SentinelOneActivityRecord<TData = unknown> = Omit<
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>['data'][number],
+  'data'
+> & {
+  data: TData;
+};
+
 export type SentinelOneGetActivitiesParams = TypeOf<typeof SentinelOneGetActivitiesParamsSchema>;
-export type SentinelOneGetActivitiesResponse = TypeOf<
-  typeof SentinelOneGetActivitiesResponseSchema
->;
+
+export type SentinelOneGetActivitiesResponse<TData = unknown> = Omit<
+  TypeOf<typeof SentinelOneGetActivitiesResponseSchema>,
+  'data'
+> & { data: Array<SentinelOneActivityRecord<TData>> };
 
 export type SentinelOneIsolateHostParams = TypeOf<typeof SentinelOneIsolateHostParamsSchema>;
 
