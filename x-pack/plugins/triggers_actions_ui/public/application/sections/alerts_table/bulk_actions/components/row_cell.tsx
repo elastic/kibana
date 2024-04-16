@@ -6,7 +6,7 @@
  */
 
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useCallback } from 'react';
 import { useContext } from 'react';
 import { AlertsTableContext } from '../../contexts/alerts_table_context';
 import { BulkActionsVerbs } from '../../../../../types';
@@ -17,7 +17,16 @@ const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
   } = useContext(AlertsTableContext);
   const isChecked = rowSelection.has(rowIndex);
   const isLoading = isChecked && rowSelection.get(rowIndex)?.isLoading;
-
+  const onChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (e.target.checked) {
+        updateSelectedRows({ action: BulkActionsVerbs.add, rowIndex });
+      } else {
+        updateSelectedRows({ action: BulkActionsVerbs.delete, rowIndex });
+      }
+    },
+    [rowIndex, updateSelectedRows]
+  );
   if (isLoading) {
     return <EuiLoadingSpinner size="m" data-test-subj="row-loader" />;
   }
@@ -29,13 +38,7 @@ const BulkActionsRowCellComponent = ({ rowIndex }: { rowIndex: number }) => {
     <EuiCheckbox
       id={`bulk-actions-row-cell-${rowIndex}`}
       checked={isChecked}
-      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.checked) {
-          updateSelectedRows({ action: BulkActionsVerbs.add, rowIndex });
-        } else {
-          updateSelectedRows({ action: BulkActionsVerbs.delete, rowIndex });
-        }
-      }}
+      onChange={onChange}
       data-test-subj="bulk-actions-row-cell"
     />
   );

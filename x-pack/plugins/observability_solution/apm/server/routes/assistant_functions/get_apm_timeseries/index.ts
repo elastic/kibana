@@ -221,7 +221,9 @@ export async function getApmTimeseries({
         end,
         unit: statResult.unit,
         changes: [
-          ...(changePointType && changePointType !== 'indeterminable'
+          ...(changePointType &&
+          changePointType !== 'indeterminable' &&
+          changePointType !== 'stationary'
             ? [
                 {
                   date: statResult.change_point.bucket?.key,
