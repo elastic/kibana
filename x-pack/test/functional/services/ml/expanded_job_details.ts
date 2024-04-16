@@ -115,10 +115,6 @@ export function MachineLearningExpandedJobDetailsProvider(
       });
     },
 
-    async selectAllJobs(): Promise<void> {
-      await testSubjects.click('checkboxSelectAll');
-    },
-
     async assertJobListMultiSelectionText(expectedMsg: string): Promise<void> {
       const visibleText = await testSubjects.getVisibleText('~mlADJobListMultiSelectActionsArea');
       expect(visibleText).to.be(expectedMsg);
