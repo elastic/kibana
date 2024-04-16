@@ -30,7 +30,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     return new ChainTool({
       name: 'ESQLKnowledgeBaseTool',
       description:
-        'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
+        'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text.',
       chain,
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });
