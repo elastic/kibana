@@ -18,7 +18,7 @@ export function parseNextURL(
 ) {
   const { query, hash } = parse(href, true);
 
-  let next = query[NEXT_URL_QUERY_STRING_PARAMETER];
+  let next = query[nextUrlQueryParam];
   if (!next) {
     return `${basePath}/`;
   }
