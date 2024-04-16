@@ -41,6 +41,14 @@ export const LOW_PRIORITY_ACTION = {
   }),
 };
 
+export const SUPPRESSED_PRIORITY_ACTION_ID = 'slo.burnRate.suppressed';
+export const SUPPRESSED_PRIORITY_ACTION = {
+  id: SUPPRESSED_PRIORITY_ACTION_ID,
+  name: i18n.translate('xpack.slo.alerting.burnRate.suppressedPriorityAction', {
+    defaultMessage: 'Suppressed',
+  }),
+};
+
 export const SLO_MODEL_VERSION = 2;
 export const SLO_RESOURCES_VERSION = 3.2;
 export const SLO_RESOURCES_VERSION_MAJOR = 3;

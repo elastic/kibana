@@ -18,6 +18,9 @@ export const API_VERSIONS = {
 export const PUBLIC_API_ACCESS = 'public';
 export const INTERNAL_API_ACCESS = 'internal';
 
+// Alerts Insights Schemas
+export * from './insights/alerts/post_alerts_insights_route.gen';
+
 // Evaluation Schemas
 export * from './evaluation/post_evaluate_route.gen';
 export * from './evaluation/get_evaluate_route.gen';
