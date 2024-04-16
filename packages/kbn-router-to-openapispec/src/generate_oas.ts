@@ -13,6 +13,7 @@ import type {
   CoreVersionedRouter,
   Router,
   VersionedRouterRoute,
+  ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION,
 } from '@kbn/core-http-router-server-internal';
 import {
   getPathParameters,
@@ -21,8 +22,6 @@ import {
   getVersionedHeaderParam,
   getVersionedContentString,
 } from './util';
-
-const LATEST_SERVERLESS_VERSION = '2023-10-31';
 
 import { OasConverter } from './oas_converter';
 import { createOperationIdCounter, OperationIdCounter } from './operation_id_counter';
