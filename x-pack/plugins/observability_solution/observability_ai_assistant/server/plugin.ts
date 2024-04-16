@@ -8,7 +8,6 @@
 import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
-  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -24,10 +23,7 @@ import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
-import {
-  ObservabilityAIAssistantRequestHandlerContext,
-  ObservabilityAIAssistantRouteHandlerResources,
-} from './routes/types';
+import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
 import {
   ObservabilityAIAssistantServerSetup,
@@ -157,52 +153,6 @@ export class ObservabilityAIAssistantPlugin
     service.register(registerFunctions);
 
     addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
-
-    const initResources = async (
-      request: KibanaRequest
-    ): Promise<ObservabilityAIAssistantRouteHandlerResources> => {
-      const [coreStart, pluginsStart] = await core.getStartServices();
-      const license = await firstValueFrom(pluginsStart.licensing.license$);
-      const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-
-      const context: ObservabilityAIAssistantRequestHandlerContext = {
-        rac: routeHandlerPlugins.ruleRegistry.start().then((startContract) => {
-          return {
-            getAlertsClient() {
-              return startContract.getRacClientWithRequest(request);
-            },
-          };
-        }),
-        alerting: routeHandlerPlugins.alerting.start().then((startContract) => {
-          return {
-            getRulesClient() {
-              return startContract.getRulesClientWithRequest(request);
-            },
-          };
-        }),
-        core: Promise.resolve({
-          coreStart,
-          elasticsearch: {
-            client: coreStart.elasticsearch.client.asScoped(request),
-          },
-          uiSettings: {
-            client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
-          },
-          savedObjects: {
-            client: savedObjectsClient,
-          },
-        }),
-        licensing: Promise.resolve({ license, featureUsage: pluginsStart.licensing.featureUsage }),
-      };
-
-      return {
-        request,
-        service,
-        context,
-        logger: this.logger.get('connector'),
-        plugins: routeHandlerPlugins,
-      };
-    };
 
     registerServerRoutes({
       core,
