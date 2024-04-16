@@ -30,8 +30,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
   actions,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
+  anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
@@ -96,8 +95,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
-    allow,
-    allowReplacement,
+    anonymizationFields,
     alertsIndexPattern,
     isEnabledKnowledgeBase,
     chain,

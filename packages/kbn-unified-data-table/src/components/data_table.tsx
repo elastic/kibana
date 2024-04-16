@@ -786,24 +786,21 @@ export const UnifiedDataTable = ({
     [sort, visibleColumns]
   );
 
-  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
   const onTableSort = useCallback(
     (sortingColumnsData) => {
       if (isSortEnabled) {
-        if (isPlainRecord) {
-          setInmemorySortingColumns(sortingColumnsData);
-        } else if (onSort) {
+        if (onSort) {
           onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
         }
       }
     },
-    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
+    [onSort, isSortEnabled]
   );
 
   const sorting = useMemo(() => {
     if (isSortEnabled) {
       return {
-        columns: isPlainRecord ? inmemorySortingColumns : sortingColumns,
+        columns: sortingColumns,
         onSort: onTableSort,
       };
     }
@@ -811,7 +808,7 @@ export const UnifiedDataTable = ({
       columns: sortingColumns,
       onSort: () => {},
     };
-  }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
+  }, [isSortEnabled, sortingColumns, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 

@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPanel,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiTablePagination,
   EuiText,
@@ -35,13 +35,13 @@ import { SLOView } from '../toggle_slo_view';
 
 interface Props {
   group: string;
-  kqlQuery: string;
+  kqlQuery?: string;
   sloView: SLOView;
-  sort: string;
-  direction: SortDirection;
+  sort?: string;
+  direction?: SortDirection;
   groupBy: string;
-  summary: GroupSummary;
-  filters: Filter[];
+  summary?: GroupSummary;
+  filters?: Filter[];
 }
 
 export function GroupListView({
@@ -93,121 +93,119 @@ export function GroupListView({
     setPage(pageNumber);
   };
 
-  const worstSLI = useSloFormattedSLIValue(summary.worst.sliValue);
+  const worstSLI = useSloFormattedSLIValue(summary?.worst.sliValue);
 
   return (
     <>
-      <EuiPanel hasBorder={true} data-test-subj="sloGroupViewPanel">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <MemoEuiAccordion
-              forceState={accordionState}
-              onToggle={onToggle}
-              buttonContent={
-                <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup data-test-subj="sloGroupViewPanel">
+        <EuiFlexItem>
+          <MemoEuiAccordion
+            forceState={accordionState}
+            onToggle={onToggle}
+            buttonContent={
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>{groupName}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">({summary?.total})</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            extraAction={
+              <EuiFlexGroup responsive={false} alignItems="center">
+                {summary!.violated > 0 && (
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h3>{groupName}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText color="subdued">({summary.total})</EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              extraAction={
-                <EuiFlexGroup alignItems="center">
-                  {summary.violated > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="danger">
-                        {i18n.translate('xpack.slo.group.totalViolated', {
-                          defaultMessage: '{total} Violated',
-                          values: {
-                            total: summary.violated,
-                          },
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={'success'}>
-                      {i18n.translate('xpack.slo.group.totalHealthy', {
-                        defaultMessage: '{total} Healthy',
+                    <EuiBadge color="danger">
+                      {i18n.translate('xpack.slo.group.totalViolated', {
+                        defaultMessage: '{total} Violated',
                         values: {
-                          total: summary.healthy,
+                          total: summary?.violated,
                         },
                       })}
                     </EuiBadge>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiToolTip
-                      content={
-                        <>
-                          <EuiText size="s">
-                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
-                              defaultMessage: 'SLO: {name}',
-                              values: {
-                                name: summary.worst.slo?.name,
-                              },
-                            })}
-                          </EuiText>
-                          <EuiText size="s">
-                            {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
-                              defaultMessage: 'Instance: {instance}',
-                              values: {
-                                instance: summary.worst.slo?.instanceId,
-                              },
-                            })}
-                          </EuiText>
-                        </>
-                      }
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={'success'}>
+                    {i18n.translate('xpack.slo.group.totalHealthy', {
+                      defaultMessage: '{total} Healthy',
+                      values: {
+                        total: summary?.healthy,
+                      },
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiToolTip
+                    content={
+                      <>
+                        <EuiText size="s">
+                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
+                            defaultMessage: 'SLO: {name}',
+                            values: {
+                              name: summary?.worst.slo?.name,
+                            },
+                          })}
+                        </EuiText>
+                        <EuiText size="s">
+                          {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
+                            defaultMessage: 'Instance: {instance}',
+                            values: {
+                              instance: summary?.worst.slo?.instanceId,
+                            },
+                          })}
+                        </EuiText>
+                      </>
+                    }
+                  >
+                    <EuiLink
+                      data-test-subj="o11yGroupListViewLink"
+                      href={basePath.prepend(
+                        paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
+                      )}
                     >
-                      <EuiLink
-                        data-test-subj="o11yGroupListViewLink"
-                        href={basePath.prepend(
-                          paths.sloDetails(summary.worst.slo?.id, summary.worst.slo?.instanceId)
-                        )}
+                      {i18n.translate('xpack.slo.group.worstPerforming', {
+                        defaultMessage: 'Worst performing: ',
+                      })}
+                      <EuiTextColor
+                        color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
                       >
-                        {i18n.translate('xpack.slo.group.worstPerforming', {
-                          defaultMessage: 'Worst performing: ',
-                        })}
-                        <EuiTextColor
-                          color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}
-                        >
-                          <strong>{worstSLI}</strong>
-                        </EuiTextColor>
-                      </EuiLink>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              id={group}
-              initialIsOpen={false}
-            >
-              {isAccordionOpen && (
-                <>
-                  <EuiSpacer size="m" />
-                  <SlosView
-                    sloList={results}
-                    loading={isLoading || isRefetching}
-                    error={isError}
-                    sloView={sloView}
-                  />
-                  <EuiSpacer size="m" />
-                  <EuiTablePagination
-                    pageCount={Math.ceil(total / itemsPerPage)}
-                    activePage={page}
-                    onChangePage={handlePageClick}
-                    itemsPerPage={itemsPerPage}
-                    onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
-                  />
-                </>
-              )}
-            </MemoEuiAccordion>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer size="m" />
+                        <strong>{worstSLI}</strong>
+                      </EuiTextColor>
+                    </EuiLink>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            id={group}
+            initialIsOpen={false}
+          >
+            {isAccordionOpen && (
+              <>
+                <EuiSpacer size="m" />
+                <SlosView
+                  sloList={results}
+                  loading={isLoading || isRefetching}
+                  error={isError}
+                  sloView={sloView}
+                />
+                <EuiSpacer size="m" />
+                <EuiTablePagination
+                  pageCount={Math.ceil(total / itemsPerPage)}
+                  activePage={page}
+                  onChangePage={handlePageClick}
+                  itemsPerPage={itemsPerPage}
+                  onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
+                />
+              </>
+            )}
+          </MemoEuiAccordion>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="xs" />
     </>
   );
 }

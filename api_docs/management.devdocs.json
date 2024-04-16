@@ -679,10 +679,6 @@
                 "path": "x-pack/plugins/ingest_pipelines/public/application/mount_management_section.ts"
               },
               {
-                "plugin": "logstash",
-                "path": "x-pack/plugins/logstash/public/application/index.tsx"
-              },
-              {
                 "plugin": "rollup",
                 "path": "x-pack/plugins/rollup/public/application.tsx"
               },
@@ -697,10 +693,6 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/public/plugin.ts"
-              },
-              {
-                "plugin": "cloudDataMigration",
-                "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
               }
             ]
           }

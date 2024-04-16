@@ -12,8 +12,9 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
-import { last, merge, noop, omit, pick, take } from 'lodash';
+import { findLastIndex, last, merge, noop, omit, pick, take } from 'lodash';
 import {
+  catchError,
   filter,
   isObservable,
   last as lastOperator,
@@ -32,7 +33,9 @@ import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
   createConversationNotFoundError,
+  createFunctionLimitExceededError,
   createTokenLimitReachedError,
+  isFunctionNotFoundError,
   MessageAddEvent,
   StreamingChatResponseEventType,
   TokenCountEvent,
@@ -67,6 +70,7 @@ import { rejectTokenCountEvents } from '../util/reject_token_count_events';
 import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
+import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -79,7 +83,7 @@ export class ObservabilityAIAssistantClient {
       };
       resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
-      user: {
+      user?: {
         id?: string;
         name: string;
       };
@@ -152,16 +156,38 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
+    isPublic?: boolean;
+    kibanaPublicUrl?: string;
     instructions?: Array<string | UserInstruction>;
+    simulateFunctionCalling?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
-        const { messages, connectorId, signal, functionClient, persist } = params;
+        const {
+          messages,
+          connectorId,
+          signal,
+          functionClient,
+          persist,
+          kibanaPublicUrl,
+          simulateFunctionCalling,
+          isPublic = false,
+        } = params;
 
-        const conversationId = params.conversationId || '';
+        const isConversationUpdate = persist && !!params.conversationId;
+        const conversationId = persist ? params.conversationId || v4() : '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
         const requestInstructions = params.instructions || [];
+
+        if (persist && !isConversationUpdate && kibanaPublicUrl) {
+          const systemMessage = messages.find(
+            (message) => message.message.role === MessageRole.System
+          );
+          systemMessage!.message.content += `This conversation will be persisted in Kibana and available at this url: ${
+            kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+          }.`;
+        }
 
         const tokenCountResult = {
           prompt: 0,
@@ -169,8 +195,11 @@ export class ObservabilityAIAssistantClient {
           total: 0,
         };
 
-        const chatWithTokenCountIncrement: ChatFn = async (...chatArgs) => {
-          const response$ = await this.chat(...chatArgs);
+        const chatWithTokenCountIncrement: ChatFn = async (name, options) => {
+          const response$ = await this.chat(name, {
+            ...options,
+            simulateFunctionCalling,
+          });
 
           const incrementTokenCount = () => {
             return <T extends ChatCompletionChunkEvent | TokenCountEvent>(
@@ -193,7 +222,7 @@ export class ObservabilityAIAssistantClient {
 
         let numFunctionsCalled: number = 0;
 
-        const MAX_FUNCTION_CALLS = 5;
+        const MAX_FUNCTION_CALLS = 8;
         const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
         const allFunctions = functionClient
@@ -211,20 +240,24 @@ export class ObservabilityAIAssistantClient {
 
         const next = async (nextMessages: Message[]): Promise<void> => {
           const lastMessage = last(nextMessages);
-
           const isUserMessage = lastMessage?.message.role === MessageRole.User;
 
-          const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
+          const indexOfLastUserMessage = findLastIndex(
+            nextMessages,
+            ({ message }) => message.role === MessageRole.User && !message.name
+          );
 
-          const contextFirst =
-            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('context');
+          const hasNoContextRequestAfterLastUserMessage =
+            indexOfLastUserMessage !== -1 &&
+            nextMessages
+              .slice(indexOfLastUserMessage)
+              .every(({ message }) => message.function_call?.name !== 'context');
 
-          const isAssistantMessageWithFunctionRequest =
-            lastMessage?.message.role === MessageRole.Assistant &&
-            !!lastMessage?.message.function_call?.name;
+          const shouldInjectContext =
+            functionClient.hasFunction('context') && hasNoContextRequestAfterLastUserMessage;
 
-          if (contextFirst) {
-            const addedMessage = {
+          if (shouldInjectContext) {
+            const contextFunctionRequest = {
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.Assistant,
@@ -243,27 +276,36 @@ export class ObservabilityAIAssistantClient {
             subscriber.next({
               type: StreamingChatResponseEventType.MessageAdd,
               id: v4(),
-              message: addedMessage,
+              message: contextFunctionRequest,
             });
 
-            return await next(nextMessages.concat(addedMessage));
+            return await next(nextMessages.concat(contextFunctionRequest));
           } else if (isUserMessage) {
             const functions =
-              numFunctionsCalled === MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+
+            const spanName =
+              lastMessage.message.name && lastMessage.message.name !== 'context'
+                ? 'function_response'
+                : 'user_message';
 
             const response$ = (
-              await chatWithTokenCountIncrement(
-                lastMessage.message.name && lastMessage.message.name !== 'context'
-                  ? 'function_response'
-                  : 'user_message',
-                {
-                  messages: nextMessages,
-                  connectorId,
-                  signal,
-                  functions,
+              await chatWithTokenCountIncrement(spanName, {
+                messages: nextMessages,
+                connectorId,
+                signal,
+                functions,
+              })
+            ).pipe(
+              emitWithConcatenatedMessage(),
+              shareReplay(),
+              catchError((error) => {
+                if (isFunctionNotFoundError(error) && functions.length === 0) {
+                  throw createFunctionLimitExceededError();
                 }
-              )
-            ).pipe(emitWithConcatenatedMessage(), shareReplay());
+                throw error;
+              })
+            );
 
             response$.subscribe({
               next: (val) => subscriber.next(val),
@@ -286,9 +328,10 @@ export class ObservabilityAIAssistantClient {
             );
           }
 
-          if (isAssistantMessageWithFunctionRequest) {
-            const functionCallName = lastMessage.message.function_call!.name;
+          const functionCallName = lastMessage?.message.function_call?.name;
+          const isAssistantMessage = lastMessage?.message.role === MessageRole.Assistant;
 
+          if (isAssistantMessage && functionCallName) {
             if (functionClient.hasAction(functionCallName)) {
               this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
 
@@ -448,7 +491,7 @@ export class ObservabilityAIAssistantClient {
           });
 
           // store the updated conversation and close the stream
-          if (conversationId) {
+          if (isConversationUpdate) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
             if (!conversation) {
               throw createConversationNotFoundError();
@@ -500,11 +543,12 @@ export class ObservabilityAIAssistantClient {
               conversation: {
                 title: generatedTitle || title || 'New conversation',
                 token_count: tokenCountResult,
+                id: conversationId,
               },
               messages: nextMessages,
               labels: {},
               numeric_labels: {},
-              public: false,
+              public: isPublic,
             });
 
             subscriber.next({
@@ -533,7 +577,7 @@ export class ObservabilityAIAssistantClient {
           });
 
         const titlePromise =
-          !conversationId && !title && persist
+          !isConversationUpdate && !title && persist
             ? this.getGeneratedTitle({
                 chat: chatWithTokenCountIncrement,
                 messages,
@@ -560,12 +604,14 @@ export class ObservabilityAIAssistantClient {
       functions,
       functionCall,
       signal,
+      simulateFunctionCalling,
     }: {
       messages: Message[];
       connectorId: string;
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
+      simulateFunctionCalling?: boolean;
     }
   ): Promise<Observable<ChatCompletionChunkEvent | TokenCountEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
@@ -590,6 +636,7 @@ export class ObservabilityAIAssistantClient {
             functions,
             functionCall,
             logger: this.dependencies.logger,
+            simulateFunctionCalling,
           });
           break;
 
@@ -645,7 +692,19 @@ export class ObservabilityAIAssistantClient {
 
       signal.addEventListener('abort', () => response.destroy());
 
-      const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+      const response$ = adapter.streamIntoObservable(response).pipe(
+        shareReplay(),
+        failOnNonExistingFunctionCall({ functions }),
+        tap((event) => {
+          if (event.type === StreamingChatResponseEventType.TokenCount) {
+            span?.addLabels({
+              tokenCountPrompt: event.tokens.prompt,
+              tokenCountCompletion: event.tokens.completion,
+              tokenCountTotal: event.tokens.total,
+            });
+          }
+        })
+      );
 
       response$
         .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
@@ -664,19 +723,6 @@ export class ObservabilityAIAssistantClient {
             span?.end();
           },
         });
-
-      response$.subscribe({
-        next: (event) => {
-          if (event.type === StreamingChatResponseEventType.TokenCount) {
-            span?.addLabels({
-              tokenCountPrompt: event.tokens.prompt,
-              tokenCountCompletion: event.tokens.completion,
-              tokenCountTotal: event.tokens.total,
-            });
-          }
-        },
-        error: () => {},
-      });
 
       return response$;
     } catch (error) {
@@ -847,7 +893,7 @@ export class ObservabilityAIAssistantClient {
       conversation,
       {
         '@timestamp': now,
-        conversation: { id: v4() },
+        conversation: { id: conversation.conversation.id || v4() },
       },
       this.getConversationUpdateValues(now)
     );
@@ -928,8 +974,8 @@ export class ObservabilityAIAssistantClient {
 
   private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
     const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
-      this.dependencies.user,
-      this.dependencies.namespace
+      this.dependencies.namespace,
+      this.dependencies.user
     );
 
     if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
