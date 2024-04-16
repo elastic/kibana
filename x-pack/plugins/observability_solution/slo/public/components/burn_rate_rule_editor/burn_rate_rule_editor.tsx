@@ -12,17 +12,18 @@ import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
-import { BurnRateRuleParams, WindowSchema } from '../../typings';
+import { BurnRateRuleParams, WindowSchema, Dependency } from '../../typings';
 import { SloSelector } from './slo_selector';
 import { ValidationBurnRateRuleResult } from './validation';
 import { createNewWindow, Windows } from './windows';
 import { BURN_RATE_DEFAULTS } from './constants';
 import { AlertTimeTable } from './alert_time_table';
 import { getGroupKeysProse } from '../../utils/slo/groupings';
+import { Dependencies } from './dependencies';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
-  'ruleParams' | 'setRuleParams'
+  'ruleParams' | 'setRuleParams' | 'id'
 > &
   ValidationBurnRateRuleResult;
 
@@ -34,6 +35,7 @@ export function BurnRateRuleEditor(props: Props) {
 
   const [selectedSlo, setSelectedSlo] = useState<SLODefinitionResponse | undefined>(undefined);
   const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
+  const [dependencies, setDependencies] = useState<Dependency[]>(ruleParams?.dependencies || []);
 
   useEffect(() => {
     setSelectedSlo(initialSlo);
@@ -56,6 +58,10 @@ export function BurnRateRuleEditor(props: Props) {
   useEffect(() => {
     setRuleParams('windows', windowDefs);
   }, [windowDefs, setRuleParams]);
+
+  useEffect(() => {
+    setRuleParams('dependencies', dependencies);
+  }, [dependencies, setRuleParams]);
 
   return (
     <>
@@ -93,6 +99,13 @@ export function BurnRateRuleEditor(props: Props) {
           />
           <AlertTimeTable slo={selectedSlo} windows={windowDefs} />
         </>
+      )}
+      {selectedSlo && (
+        <Dependencies
+          currentRuleId={props.id}
+          dependencies={dependencies}
+          onChange={setDependencies}
+        />
       )}
     </>
   );

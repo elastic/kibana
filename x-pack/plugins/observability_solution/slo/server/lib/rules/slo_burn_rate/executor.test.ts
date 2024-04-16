@@ -13,6 +13,7 @@ import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import {
   IBasePath,
   IUiSettingsClient,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
@@ -26,11 +27,7 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { sloDefinitionSchema } from '@kbn/slo-schema';
@@ -40,12 +37,19 @@ import {
   ALERT_ACTION,
   ALERT_ACTION_ID,
   HIGH_PRIORITY_ACTION_ID,
+  SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { SLODefinition, StoredSLODefinition } from '../../../domain/models';
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
@@ -96,6 +100,41 @@ function createFindResponse(
       references: [],
       score: 1,
     })),
+  };
+}
+
+function createGetRuleResponse(
+  ruleId: string,
+  ruleParams: BurnRateRuleParams
+): SavedObject<Rule<BurnRateRuleParams>> {
+  return {
+    id: ruleId,
+    type: 'alert',
+    references: [],
+    attributes: {
+      id: ruleId,
+      enabled: true,
+      name: 'Fake Parent Rule for SLO Burn Rate',
+      alertTypeId: SLO_BURN_RATE_RULE_TYPE_ID,
+      consumer: 'observability',
+      schedule: { interval: '1m' },
+      params: ruleParams,
+      tags: [],
+      actions: [],
+      createdBy: 'nobody',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      updatedBy: 'nobody',
+      apiKey: 'some-fake-key',
+      apiKeyOwner: 'some-user',
+      muteAll: false,
+      mutedInstanceIds: [],
+      revision: 1,
+      executionStatus: {
+        status: 'ok',
+        lastExecutionDate: new Date(),
+      },
+    },
   };
 }
 
@@ -393,6 +432,139 @@ describe('BurnRateRuleExecutor', () => {
           burnRateThreshold: 2,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
+          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        }),
+      });
+
+      expect(alertsLocatorMock.getLocation).toBeCalledWith({
+        baseUrl: 'https://kibana.dev',
+        kuery: 'kibana.alert.uuid: "uuid-foo"',
+        rangeFrom: expect.stringMatching(ISO_DATE_REGEX),
+        spaceId: 'irrelevant',
+      });
+    });
+
+    it('schedules a suppressed alert when both windows of first window definition burn rate have reached the threshold but the dependency matches', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      const ruleParams = someRuleParamsWithWindows({
+        sloId: slo.id,
+        dependencies: [{ ruleId: `partent-rule`, actionGroupsToSuppressOn: [ALERT_ACTION.id] }],
+      });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const buckets = [
+        {
+          instanceId: 'foo',
+          windows: [
+            { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
+            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
+          ],
+        },
+        {
+          instanceId: 'bar',
+          windows: [
+            { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
+            { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
+          ],
+        },
+      ];
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
+      );
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
+      );
+
+      // evaluateDependendes mocks
+      soClientMock.get.mockResolvedValueOnce(
+        createGetRuleResponse('parent-rule', dependencyRuleParams)
+      );
+
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, buckets, { instanceId: 'bar' })
+      );
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: 'bar' })
+      );
+
+      // @ts-ignore
+      servicesMock.alertsClient!.report.mockImplementation(({ id }: { id: string }) => ({
+        uuid: `uuid-${id}`,
+        start: new Date().toISOString(),
+      }));
+
+      const executor = getRuleExecutor({
+        basePath: basePathMock,
+        alertsLocator: alertsLocatorMock,
+      });
+
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+      });
+
+      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+        id: 'foo',
+        actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
+          [ALERT_REASON]:
+            'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 2,
+          [ALERT_EVALUATION_VALUE]: 2.1,
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_INSTANCE_ID_FIELD]: 'foo',
+        },
+      });
+      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+        id: 'bar',
+        actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
+        state: {
+          alertState: AlertStates.ALERT,
+        },
+        payload: {
+          [ALERT_REASON]:
+            'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
+          [ALERT_EVALUATION_THRESHOLD]: 2,
+          [ALERT_EVALUATION_VALUE]: 2.2,
+          [SLO_ID_FIELD]: slo.id,
+          [SLO_REVISION_FIELD]: slo.revision,
+          [SLO_INSTANCE_ID_FIELD]: 'bar',
+        },
+      });
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
+        id: 'foo',
+        context: expect.objectContaining({
+          longWindow: { burnRate: 2.3, duration: '1h' },
+          shortWindow: { burnRate: 2.1, duration: '5m' },
+          burnRateThreshold: 2,
+          reason:
+            'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
+          alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+        }),
+      });
+      expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
+        id: 'bar',
+        context: expect.objectContaining({
+          longWindow: { burnRate: 2.5, duration: '1h' },
+          shortWindow: { burnRate: 2.2, duration: '5m' },
+          burnRateThreshold: 2,
+          reason:
+            'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
           alertDetailsUrl: 'mockedAlertsLocator > getLocation',
         }),
       });
