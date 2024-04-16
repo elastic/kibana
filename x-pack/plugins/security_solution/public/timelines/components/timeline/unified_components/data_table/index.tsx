@@ -13,7 +13,8 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
-import { RowRendererId } from '../../../../../../common/api/timeline';
+import { selectTimelineById } from '../../../../store/selectors';
+import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
@@ -34,10 +35,8 @@ import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
 import { getFormattedFields } from '../../body/renderers/formatted_field_udt';
-import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
-import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
 import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
@@ -127,8 +126,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
-    const { timeline: { rowHeight, sampleSize, excludedRowRendererIds } = timelineDefaults } =
-      useSelector((state: State) => timelineBodySelector(state, timelineId));
+    const { rowHeight, sampleSize, excludedRowRendererIds } = useSelector((state: State) =>
+      selectTimelineById(state, timelineId)
+    );
 
     const tableRows = useMemo(
       () => transformTimelineItemToUnifiedRows({ events, dataView }),
@@ -277,11 +277,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     ]);
 
     const enabledRowRenderers = useMemo(() => {
-      if (
-        excludedRowRendererIds &&
-        excludedRowRendererIds.length === Object.keys(RowRendererId).length
-      )
-        return [];
+      if (excludedRowRendererIds && excludedRowRendererIds.length === RowRendererCount) return [];
 
       if (!excludedRowRendererIds) return rowRenderers;
 

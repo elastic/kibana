@@ -19,8 +19,13 @@ export function useStatefulRowRenderer(args: UseStatefulRowRendererArgs) {
   const { data, rowRenderers } = args;
   const rowRenderer = useMemo(() => getRowRenderer({ data, rowRenderers }), [data, rowRenderers]);
 
-  return {
-    canShowRowRenderer: rowRenderer != null,
-    rowRenderer,
-  };
+  const result = useMemo(
+    () => ({
+      canShowRowRenderer: rowRenderer != null,
+      rowRenderer,
+    }),
+    [rowRenderer]
+  );
+
+  return result;
 }
