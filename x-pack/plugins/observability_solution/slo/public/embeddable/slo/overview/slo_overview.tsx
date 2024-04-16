@@ -19,14 +19,15 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
-import { EmbeddableSloProps } from './types';
+import { SingleSloProps } from './types';
 
 export function SloOverview({
   sloId,
   sloInstanceId,
+  remoteName,
   onRenderComplete,
   reloadSubject,
-}: EmbeddableSloProps) {
+}: SingleSloProps) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export function SloOverview({
     isRefetching,
   } = useFetchSloDetails({
     sloId,
+    remoteName,
     instanceId: sloInstanceId,
   });
 
@@ -57,7 +59,7 @@ export function SloOverview({
   });
 
   const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
-    list: slo ? [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }] : [],
+    sloList: slo ? [slo] : [],
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
