@@ -100,8 +100,6 @@ describe('helpers', () => {
     it('returns true if the request has valid anonymization params', () => {
       const request = {
         body: {
-          allow: ['a', 'b', 'c'],
-          allowReplacement: ['b', 'c'],
           replacements: { key: 'value' },
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -109,83 +107,11 @@ describe('helpers', () => {
       const result = requestHasRequiredAnonymizationParams(request);
 
       expect(result).toBe(true);
-    });
-
-    it('returns false if allow is undefined', () => {
-      const request = {
-        body: {
-          // allow is undefined
-          allowReplacement: ['b', 'c'],
-          replacements: { key: 'value' },
-        },
-      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-
-      const result = requestHasRequiredAnonymizationParams(request);
-
-      expect(result).toBe(false);
-    });
-
-    it('returns false if allow is empty', () => {
-      const request = {
-        body: {
-          allow: [], // <-- empty
-          allowReplacement: ['b', 'c'],
-          replacements: { key: 'value' },
-        },
-      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-
-      const result = requestHasRequiredAnonymizationParams(request);
-
-      expect(result).toBe(false);
-    });
-
-    it('returns false if allow has non-string values', () => {
-      const request = {
-        body: {
-          allow: ['a', 9876, 'c'], // <-- non-string value
-          allowReplacement: ['b', 'c'],
-          replacements: { key: 'value' },
-        },
-      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-
-      const result = requestHasRequiredAnonymizationParams(request);
-
-      expect(result).toBe(false);
-    });
-
-    it('returns true if allowReplacement is empty', () => {
-      const request = {
-        body: {
-          allow: ['a', 'b', 'c'],
-          allowReplacement: [],
-          replacements: { key: 'value' },
-        },
-      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-
-      const result = requestHasRequiredAnonymizationParams(request);
-
-      expect(result).toBe(true);
-    });
-
-    it('returns false if allowReplacement has non-string values', () => {
-      const request = {
-        body: {
-          allow: ['a', 'b', 'c'],
-          allowReplacement: ['b', 12345], // <-- non-string value
-          replacements: { key: 'value' },
-        },
-      } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
-
-      const result = requestHasRequiredAnonymizationParams(request);
-
-      expect(result).toBe(false);
     });
 
     it('returns true if replacements is empty', () => {
       const request = {
         body: {
-          allow: ['a', 'b', 'c'],
-          allowReplacement: ['b', 'c'],
           replacements: {},
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
@@ -198,8 +124,6 @@ describe('helpers', () => {
     it('returns false if replacements has non-string values', () => {
       const request = {
         body: {
-          allow: ['a', 'b', 'c'],
-          allowReplacement: ['b', 'c'],
           replacements: { key: 76543 }, // <-- non-string value
         },
       } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;

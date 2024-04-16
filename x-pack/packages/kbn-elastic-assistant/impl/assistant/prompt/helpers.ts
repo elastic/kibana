@@ -47,7 +47,7 @@ export function getCombinedMessage({
     currentReplacements,
     rawValue,
   }: {
-    currentReplacements: Record<string, string> | undefined;
+    currentReplacements: Replacements | undefined;
     rawValue: string;
   }) => string;
   isNewChat: boolean;
@@ -64,9 +64,8 @@ export function getCombinedMessage({
     .sort()
     .map((id) => {
       const promptContextData = transformRawData({
-        allow: selectedPromptContexts[id].allow,
-        allowReplacement: selectedPromptContexts[id].allowReplacement,
-        currentReplacements,
+        anonymizationFields: selectedPromptContexts[id].contextAnonymizationFields?.data ?? [],
+        currentReplacements: { ...currentReplacements, ...selectedPromptContexts[id].replacements },
         getAnonymizedValue,
         onNewReplacements,
         rawData: selectedPromptContexts[id].rawData,

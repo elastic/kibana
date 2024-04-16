@@ -42,7 +42,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await transform.api.stopTransform(transformId);
         await transform.api.cleanTransformIndices();
         await transform.api.deleteIndices(destinationIndex);
       });
@@ -98,11 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/180495
-    // FLAKY: https://github.com/elastic/kibana/issues/180496
-    // FLAKY: https://github.com/elastic/kibana/issues/180497
-    // FLAKY: https://github.com/elastic/kibana/issues/180504
-    describe.skip('bulk schedule', function () {
+    describe('bulk schedule', function () {
       const reqBody: ScheduleNowTransformsRequestSchema = [
         { id: 'bulk_schedule_now_test_1' },
         { id: 'bulk_schedule_now_test_2' },
@@ -117,9 +112,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await asyncForEach(reqBody, async ({ id }: { id: string }, idx: number) => {
-          await transform.api.stopTransform(id);
-        });
         await transform.api.cleanTransformIndices();
         await asyncForEach(destinationIndices, async (destinationIndex: string) => {
           await transform.api.deleteIndices(destinationIndex);

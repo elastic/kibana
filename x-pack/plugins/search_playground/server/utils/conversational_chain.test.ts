@@ -44,7 +44,9 @@ describe('conversational chain', () => {
     });
 
     const mockElasticsearchClient = {
-      search: searchMock,
+      transport: {
+        request: searchMock,
+      },
     };
 
     const llm = new FakeListLLM({
@@ -126,9 +128,9 @@ describe('conversational chain', () => {
       ],
       [
         {
-          index: 'index,website',
-          query: { match: { field: 'what is the work from home policy?' } },
-          size: 3,
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
         },
       ]
     );
@@ -166,9 +168,9 @@ describe('conversational chain', () => {
       ],
       [
         {
-          index: 'index,website',
-          query: { match: { field: 'rewrite the question' } },
-          size: 3,
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'rewrite the question' } }, size: 3 },
         },
       ]
     );
@@ -206,9 +208,9 @@ describe('conversational chain', () => {
       ],
       [
         {
-          index: 'index,website',
-          query: { match: { field: 'rewrite "the" question' } },
-          size: 3,
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
         },
       ]
     );
