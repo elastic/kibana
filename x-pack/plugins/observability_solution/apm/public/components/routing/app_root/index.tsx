@@ -6,7 +6,6 @@
  */
 
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
