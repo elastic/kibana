@@ -157,7 +157,7 @@ describe('ScheduleNotificationResponseActions', () => {
         agentType: 'endpoint',
         username: 'unknown',
       });
-      expect(mockedResponseActionsClient.isolate).toHaveBeenCalledTimes(2);
+      expect(mockedResponseActionsClient.isolate).toHaveBeenCalledTimes(signals.length);
       expect(mockedResponseActionsClient.isolate).toHaveBeenNthCalledWith(
         1,
         {
