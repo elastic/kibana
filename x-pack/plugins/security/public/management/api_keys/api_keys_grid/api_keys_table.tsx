@@ -646,12 +646,12 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
     });
     const { namePrefixBased, metadataBased } = managed?.buckets || {};
     if (
-      (namePrefixBased?.doc_count && namePrefixBased?.doc_count > 0) ||
-      (metadataBased?.doc_count && metadataBased?.doc_count > 0)
+      (namePrefixBased?.doc_count && namePrefixBased.doc_count > 0) ||
+      (metadataBased?.doc_count && metadataBased.doc_count > 0)
     ) {
       typeFilters.add('managed');
     }
-    expiredCount = expired?.doc_count || 0;
+    expiredCount = expired?.doc_count ?? 0;
   }
 
   return {
