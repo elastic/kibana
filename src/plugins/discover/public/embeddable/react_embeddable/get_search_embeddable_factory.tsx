@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { APPLY_FILTER_TRIGGER, generateFilters } from '@kbn/data-plugin/public';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_EMBEDDABLE_TYPE,
@@ -18,11 +19,12 @@ import {
 } from '@kbn/discover-utils';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { SortOrder } from '@kbn/saved-search-plugin/public';
 
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
@@ -36,8 +38,6 @@ import { SavedSearchEmbeddableComponent } from '../saved_search_embeddable_compo
 import { SearchEmbeddableApi, SearchEmbeddableSerializedState, SearchProps } from '../types';
 import { initializeFetch } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import { columnActions } from '@kbn/unified-data-table';
-import { SortOrder } from '@kbn/saved-search-plugin/public';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -162,10 +162,6 @@ export const getSearchEmbeddableFactory = ({
             };
           }, []);
 
-          // useEffect(() => {
-          //   console.log({ savedSearch, rows, searchSessionId });
-          // }, [savedSearch, rows, searchSessionId]);
-
           const { dataView, columns, query, filters, viewMode } = useMemo(() => {
             const searchSourceQuery = savedSearch.searchSource.getField('query');
             return {
@@ -179,6 +175,30 @@ export const getSearchEmbeddableFactory = ({
               }),
             };
           }, [savedSearch]);
+
+          const onAddFilter = useCallback(
+            async (field, value, operator) => {
+              if (!dataView) return;
+
+              let newFilters = generateFilters(
+                discoverServices.filterManager,
+                field,
+                value,
+                operator,
+                dataView
+              );
+              newFilters = newFilters.map((filter) => ({
+                ...filter,
+                $state: { store: FilterStateStore.APP_STATE },
+              }));
+
+              await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+                embeddable: api,
+                filters: newFilters,
+              });
+            },
+            [dataView]
+          );
 
           const searchProps: SearchProps | undefined = useMemo(() => {
             if (!dataView) return;
@@ -209,26 +229,7 @@ export const getSearchEmbeddableFactory = ({
                 });
                 searchEmbeddableApi.savedSearch$.next({ ...savedSearch, sort: sortOrderArr });
               },
-              onFilter: async (field, value, operator) => {
-                console.log('onFilter');
-                // let filters = generateFilters(
-                //   this.services.filterManager,
-                //   // @ts-expect-error
-                //   field,
-                //   value,
-                //   operator,
-                //   dataView
-                // );
-                // filters = filters.map((filter) => ({
-                //   ...filter,
-                //   $state: { store: FilterStateStore.APP_STATE },
-                // }));
-
-                // await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-                //   embeddable: this,
-                //   filters,
-                // });
-              },
+              onFilter: onAddFilter,
               useNewFieldsApi: !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
               showTimeCol: !discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
               ariaLabelledBy: 'documentsAriaLabel',
@@ -250,7 +251,7 @@ export const getSearchEmbeddableFactory = ({
               },
               cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
             };
-          }, [savedSearch, dataView, columns, filters, rows]);
+          }, [savedSearch, dataView, columns, filters, rows, onAddFilter]);
 
           if (
             discoverServices.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
@@ -266,9 +267,7 @@ export const getSearchEmbeddableFactory = ({
                   savedSearch={savedSearch}
                   filters={filters}
                   query={query}
-                  onAddFilter={() => {
-                    console.log('on add filter');
-                  }}
+                  onAddFilter={onAddFilter}
                   searchSessionId={searchSessionId}
                 />
               </KibanaContextProvider>
