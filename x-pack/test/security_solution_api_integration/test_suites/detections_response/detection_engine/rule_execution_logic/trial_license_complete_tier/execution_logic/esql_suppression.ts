@@ -23,13 +23,12 @@ import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/comm
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
   getPreviewAlerts,
   previewRule,
-  getAlerts,
   getOpenAlerts,
   dataGeneratorFactory,
   previewRuleWithExceptionEntries,
@@ -1108,6 +1107,592 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_START]: firstTimestamp,
         [ALERT_SUPPRESSION_END]: secondTimestamp,
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+      });
+    });
+
+    describe('rule execution only', () => {
+      it.skip('should suppress alerts during rule execution only', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+        const laterTimestamp = '2020-10-28T06:50:00.000Z';
+
+        const firstExecutionDocuments = [
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': laterTimestamp,
+          },
+          // does not generate alert
+          {
+            host: { name: 'host-b' },
+            id,
+            '@timestamp': laterTimestamp,
+          },
+        ];
+
+        await indexListOfDocuments(firstExecutionDocuments);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant [metadata _id, _index, _version] ${internalIdPipe(
+            id
+          )} | where host.name=="host-a"`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: ['host-a'],
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_ORIGINAL_TIME]: timestamp,
+          [ALERT_SUPPRESSION_START]: timestamp,
+          [ALERT_SUPPRESSION_END]: laterTimestamp, // suppression ends with later timestamp
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+        });
+      });
+
+      it.skip('should suppress alerts per rule execution for array field', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+
+        const firstExecutionDocuments = [
+          {
+            host: { name: ['host-a', 'host-b'] },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: ['host-a', 'host-b'] },
+            id,
+            '@timestamp': timestamp,
+          },
+        ];
+
+        await indexListOfDocuments([...firstExecutionDocuments]);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: getNonAggRuleQueryWithMetadata(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: [ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: ['host-a', 'host-b'],
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+          [ALERT_ORIGINAL_TIME]: timestamp,
+          [ALERT_SUPPRESSION_START]: timestamp,
+          [ALERT_SUPPRESSION_END]: timestamp,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it.skip('should suppress alerts with missing fields during rule execution only for multiple suppress by fields', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+
+        const firstExecutionDocuments = [
+          // no missing fields
+          {
+            host: { name: 'host-a', ip: '127.0.0.11' },
+            agent: { name: 'agent-a', version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.12' },
+            agent: { name: 'agent-a', version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          // missing agent.name
+          {
+            host: { name: 'host-a', ip: '127.0.0.21' },
+            agent: { version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.22' },
+            agent: { version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          // missing agent.version
+          {
+            host: { name: 'host-a', ip: '127.0.0.31' },
+            agent: { name: 'agent-a' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.32' },
+            agent: { name: 'agent-a' },
+            id,
+            '@timestamp': timestamp,
+          },
+          // missing both agent.*
+          {
+            host: { name: 'host-a', ip: '127.0.0.41' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.42' },
+            id,
+            '@timestamp': timestamp,
+          },
+        ];
+
+        await indexListOfDocuments(firstExecutionDocuments);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: getNonAggRuleQueryWithMetadata(id),
+          alert_suppression: {
+            group_by: ['agent.name', 'agent.version'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name', 'agent.version', ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(4);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: ['agent-a'],
+            },
+            {
+              field: 'agent.version',
+              value: ['10'],
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+
+        expect(previewAlerts[1]._source).toEqual({
+          ...previewAlerts[1]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: ['agent-a'],
+            },
+            {
+              field: 'agent.version',
+              value: null,
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+
+        expect(previewAlerts[2]._source).toEqual({
+          ...previewAlerts[2]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: null,
+            },
+            {
+              field: 'agent.version',
+              value: ['10'],
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+
+        expect(previewAlerts[3]._source).toEqual({
+          ...previewAlerts[3]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: null,
+            },
+            {
+              field: 'agent.version',
+              value: null,
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+      });
+
+      it.skip('should not suppress alerts with missing fields during rule execution only if configured so for multiple suppress by fields', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:45:00.000Z';
+
+        const firstExecutionDocuments = [
+          // no missing fields
+          {
+            host: { name: 'host-a', ip: '127.0.0.11' },
+            agent: { name: 'agent-a', version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.12' },
+            agent: { name: 'agent-a', version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          // missing agent.name
+          {
+            host: { name: 'host-a', ip: '127.0.0.21' },
+            agent: { version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.22' },
+            agent: { version: 10 },
+            id,
+            '@timestamp': timestamp,
+          },
+          // missing agent.version
+          {
+            host: { name: 'host-a', ip: '127.0.0.31' },
+            agent: { name: 'agent-a' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.32' },
+            agent: { name: 'agent-a' },
+            id,
+            '@timestamp': timestamp,
+          },
+          // missing both agent.*
+          {
+            host: { name: 'host-a', ip: '127.0.0.41' },
+            id,
+            '@timestamp': timestamp,
+          },
+          {
+            host: { name: 'host-a', ip: '127.0.0.42' },
+            id,
+            '@timestamp': timestamp,
+          },
+        ];
+
+        await indexListOfDocuments(firstExecutionDocuments);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: getNonAggRuleQueryWithMetadata(id),
+          alert_suppression: {
+            group_by: ['agent.name', 'agent.version'],
+            missing_fields_strategy: 'doNotSuppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name', 'agent.version', ALERT_ORIGINAL_TIME],
+        });
+        // from 8 injected, only one should be suppressed
+        expect(previewAlerts.length).toEqual(7);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: ['agent-a'],
+            },
+            {
+              field: 'agent.version',
+              value: ['10'],
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+
+        // rest of alerts are not suppressed and do not have suppress properties
+        previewAlerts.slice(1).forEach((previewAlert) => {
+          const source = previewAlert._source;
+          expect(source).toHaveProperty('id', id);
+          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+          expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+        });
+      });
+
+      it.skip('should deduplicate alerts while suppressing new ones on rule execution', async () => {
+        const id = uuidv4();
+        const firstTimestamp = '2020-10-28T05:45:00.000Z';
+        const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+        const firstExecutionDocuments = [
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': firstTimestamp,
+          },
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': firstTimestamp,
+          },
+        ];
+        const secondExecutionDocuments = [
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': secondTimestamp,
+          },
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': secondTimestamp,
+          },
+          {
+            host: { name: 'host-a' },
+            id,
+            '@timestamp': secondTimestamp,
+          },
+        ];
+
+        await indexListOfDocuments([...firstExecutionDocuments, ...secondExecutionDocuments]);
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: getNonAggRuleQueryWithMetadata(id),
+          alert_suppression: {
+            group_by: ['host.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          // large look-back time covers all docs
+          from: 'now-1h',
+          interval: '30m',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['host.name', ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(2);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: ['host-a'],
+            },
+          ],
+          [ALERT_ORIGINAL_TIME]: firstTimestamp,
+          [ALERT_SUPPRESSION_START]: firstTimestamp,
+          [ALERT_SUPPRESSION_END]: firstTimestamp,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        });
+        expect(previewAlerts[1]._source).toEqual({
+          ...previewAlerts[1]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'host.name',
+              value: ['host-a'],
+            },
+          ],
+          [ALERT_ORIGINAL_TIME]: secondTimestamp,
+          [ALERT_SUPPRESSION_START]: secondTimestamp,
+          [ALERT_SUPPRESSION_END]: secondTimestamp,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+        });
+      });
+
+      it.skip('should not suppress more than limited number of alerts (max_signals * 2)', async () => {
+        const id = uuidv4();
+
+        await indexGeneratedDocuments({
+          docsCount: 12000,
+          seed: (index) => ({
+            id,
+            '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+            host: {
+              name: `host-${index}`,
+            },
+            agent: { name: 'agent-a' },
+          }),
+        });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: getNonAggRuleQueryWithMetadata(id),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+          invocationCount: 1,
+        });
+
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+        );
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          size: 1000,
+        });
+        expect(previewAlerts.length).toEqual(1);
+        expect(previewAlerts[0]._source).toEqual({
+          ...previewAlerts[0]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: ['agent-a'],
+            },
+          ],
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 199,
+        });
+      });
+
+      it.skip('should generate up to max_signals alerts for single new terms field', async () => {
+        const id = uuidv4();
+        const firstTimestamp = '2020-10-28T06:05:00.000Z';
+        const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+        await Promise.all(
+          [firstTimestamp, secondTimestamp].map((t) =>
+            indexGeneratedDocuments({
+              docsCount: 20000,
+              seed: (index) => ({
+                id,
+                '@timestamp': t,
+                host: {
+                  name: `host-${index}`,
+                },
+                'agent.name': `agent-${index % 10000}`,
+              }),
+            })
+          )
+        );
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: getNonAggRuleQueryWithMetadata(id),
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+            missing_fields_strategy: 'suppress',
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 1,
+        });
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+        );
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 1000,
+          sort: ['agent.name', ALERT_ORIGINAL_TIME],
+        });
+        expect(previewAlerts.length).toEqual(100);
       });
     });
 
