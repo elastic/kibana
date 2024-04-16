@@ -30,10 +30,14 @@ import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMCore, TelemetryUsageCounter } from '../typings';
+import type {
+  APMCore,
+  MinimalApmPluginRequestHandlerContext,
+  TelemetryUsageCounter,
+} from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-import { APMConfig } from '../..';
-import {
+import type { APMConfig } from '../..';
+import type {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from '../../types';
@@ -254,6 +258,13 @@ type Plugins = {
     setup: Required<APMPluginSetupDependencies>[key];
     start: () => Promise<Required<APMPluginStartDependencies>[key]>;
   };
+};
+
+export type MinimalAPMRouteHandlerResources = Omit<
+  APMRouteHandlerResources,
+  'context'
+> & {
+  context: MinimalApmPluginRequestHandlerContext;
 };
 
 export interface APMRouteHandlerResources {
