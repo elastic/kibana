@@ -12,18 +12,18 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToApmServicesProps {
-  assetName: string;
+  assetId: string;
   apmField: string;
 }
 
-export const LinkToApmServices = ({ assetName, apmField }: LinkToApmServicesProps) => {
+export const LinkToApmServices = ({ assetId, apmField }: LinkToApmServicesProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const queryString = new URLSearchParams(
     encode(
       stringify({
-        kuery: `${apmField}:"${assetName}"`,
+        kuery: `${apmField}:"${assetId}"`,
       })
     )
   );
