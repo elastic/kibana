@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { Replacements } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
@@ -97,7 +98,17 @@ export const useChatSend = ({
         selectedSystemPrompt: systemPrompt,
       });
 
-      const replacements = userMessage.replacements ?? currentConversation.replacements;
+      const baseReplacements: Replacements =
+        userMessage.replacements ?? currentConversation.replacements;
+
+      const selectedPromptContextsReplacements = Object.values(
+        selectedPromptContexts
+      ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
+
+      const replacements: Replacements = {
+        ...baseReplacements,
+        ...selectedPromptContextsReplacements,
+      };
       const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
         ...m,
         content: m.content ?? '',
