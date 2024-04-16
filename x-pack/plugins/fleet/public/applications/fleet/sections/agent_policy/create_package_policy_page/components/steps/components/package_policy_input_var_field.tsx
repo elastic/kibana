@@ -29,9 +29,7 @@ import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import { useStartServices } from '../../../../../../../../hooks';
-
-import { ExperimentalFeaturesService } from '../../../../../../services';
+import { useFleetStatus, useStartServices } from '../../../../../../../../hooks';
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
@@ -89,6 +87,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     datastreams = [],
     isEditPage = false,
   }) => {
+    const fleetStatus = useFleetStatus();
+
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const { required, type, title, name, description } = varDef;
     const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
@@ -98,11 +98,12 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
-    const { secretsStorage: secretsStorageEnabled } = ExperimentalFeaturesService.get();
+    const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
+    const useSecretsUi = secretsStorageEnabled && varDef.secret;
 
     let field: JSX.Element;
 
-    if (secretsStorageEnabled && varDef.secret) {
+    if (useSecretsUi) {
       field = (
         <SecretInputField
           varDef={varDef}
@@ -142,7 +143,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       <FormRow
         isInvalid={isInvalid}
         error={errors}
-        label={varDef.secret ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
+        label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
         labelAppend={
           isOptional ? (
             <EuiText size="xs" color="subdued">
@@ -160,7 +161,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       </FormRow>
     );
 
-    return varDef.secret ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
+    return useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
   }
 );
 

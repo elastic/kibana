@@ -48,11 +48,14 @@ const getVersionedRoute = (router: MockServer['router']): Route => {
   const route: RegisteredVersionedRoute = router.versioned.getRoute(method, routePath);
   const firstVersion = Object.values(route.versions)[0];
 
+  const validation = firstVersion.config.validate
+    ? typeof firstVersion.config.validate === 'function'
+      ? firstVersion.config.validate().request
+      : firstVersion.config.validate.request
+    : undefined;
+
   return {
-    validate:
-      firstVersion.config.validate === false
-        ? false
-        : firstVersion.config.validate.request || false,
+    validate: validation ?? false,
     handler: firstVersion.handler,
   };
 };

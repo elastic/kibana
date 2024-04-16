@@ -36,6 +36,7 @@ describe('ChartConfigPanel', () => {
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
           onSuggestionContextChange: jest.fn(),
+          onSuggestionContextEdit: jest.fn(),
           isPlainRecord: true,
           lensAdapters: lensAdaptersMock,
           query: {
@@ -68,6 +69,7 @@ describe('ChartConfigPanel', () => {
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
           onSuggestionContextChange: jest.fn(),
+          onSuggestionContextEdit: jest.fn(),
           isPlainRecord: false,
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
