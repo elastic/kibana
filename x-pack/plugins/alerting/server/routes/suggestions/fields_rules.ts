@@ -57,7 +57,7 @@ export function registerFieldsRoute(
 
         const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(
           elasticsearch.client.asInternalUser,
-          uiSettings.client
+          { uiSettingsClient: uiSettings.client }
         );
         const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
           pattern: indices,

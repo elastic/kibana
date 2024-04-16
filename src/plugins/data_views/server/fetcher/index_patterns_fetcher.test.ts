@@ -40,10 +40,10 @@ describe('Index Pattern Fetcher - server', () => {
     jest.clearAllMocks();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.fieldCaps.mockResponse(response as unknown as estypes.FieldCapsResponse);
-    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, false, true);
+    indexPatterns = new IndexPatternsFetcher(esClient);
   });
   it('calls fieldcaps once', async () => {
-    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
+    indexPatterns = new IndexPatternsFetcher(esClient);
     await indexPatterns.getFieldsForWildcard({ pattern: patternList });
     expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
   });
@@ -52,7 +52,7 @@ describe('Index Pattern Fetcher - server', () => {
     esClient.rollup.getRollupIndexCaps.mockResponse(
       rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
     );
-    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
+    indexPatterns = new IndexPatternsFetcher(esClient, { uiSettingsClient, rollupsEnabled: true });
     await indexPatterns.getFieldsForWildcard({
       pattern: patternList,
       type: DataViewType.ROLLUP,
@@ -65,7 +65,7 @@ describe('Index Pattern Fetcher - server', () => {
     esClient.rollup.getRollupIndexCaps.mockResponse(
       rollupResponse as unknown as estypes.RollupGetRollupIndexCapsResponse
     );
-    indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, false);
+    indexPatterns = new IndexPatternsFetcher(esClient);
     await indexPatterns.getFieldsForWildcard({
       pattern: patternList,
       type: DataViewType.ROLLUP,
@@ -76,7 +76,7 @@ describe('Index Pattern Fetcher - server', () => {
 
   describe('getExistingIndices', () => {
     test('getExistingIndices returns the valid matched indices', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
+      indexPatterns = new IndexPatternsFetcher(esClient);
       indexPatterns.getFieldsForWildcard = jest
         .fn()
         .mockResolvedValueOnce({ indices: ['length'] })
@@ -87,7 +87,7 @@ describe('Index Pattern Fetcher - server', () => {
     });
 
     test('getExistingIndices checks the positive pattern if provided with a negative pattern', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
+      indexPatterns = new IndexPatternsFetcher(esClient);
       const mockFn = jest.fn().mockResolvedValue({ indices: ['length'] });
       indexPatterns.getFieldsForWildcard = mockFn;
       const result = await indexPatterns.getExistingIndices(['-filebeat-*', 'filebeat-*']);
@@ -97,7 +97,7 @@ describe('Index Pattern Fetcher - server', () => {
     });
 
     test('getExistingIndices handles an error', async () => {
-      indexPatterns = new IndexPatternsFetcher(esClient, uiSettingsClient, true, true);
+      indexPatterns = new IndexPatternsFetcher(esClient);
       indexPatterns.getFieldsForWildcard = jest
         .fn()
         .mockImplementationOnce(async () => {

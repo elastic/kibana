@@ -41,13 +41,25 @@ interface FieldSubType {
   nested?: { path: string };
 }
 
+interface IndexPatternsFetcherOptionalParams {
+  uiSettingsClient: IUiSettingsClient;
+  allowNoIndices?: boolean;
+  rollupsEnabled?: boolean;
+}
+
 export class IndexPatternsFetcher {
+  private readonly uiSettingsClient?: IUiSettingsClient;
+  private readonly allowNoIndices: boolean;
+  private readonly rollupsEnabled: boolean;
+
   constructor(
     private readonly elasticsearchClient: ElasticsearchClient,
-    private readonly uiSettingsClient: IUiSettingsClient,
-    private readonly allowNoIndices: boolean = false,
-    private readonly rollupsEnabled: boolean = false
-  ) {}
+    optionalParams?: IndexPatternsFetcherOptionalParams
+  ) {
+    this.uiSettingsClient = optionalParams?.uiSettingsClient;
+    this.allowNoIndices = optionalParams?.allowNoIndices || false;
+    this.rollupsEnabled = optionalParams?.rollupsEnabled || false;
+  }
 
   /**
    *  Get a list of field objects for an index pattern that may contain wildcards

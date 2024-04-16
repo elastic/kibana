@@ -20,7 +20,7 @@ import { getIndexFilterDsl } from '../../../utils';
 
 interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;
-  uiSettingsClient: IUiSettingsClient;
+  uiSettingsClient?: IUiSettingsClient;
   indices: string | string[];
   metaFields: string[];
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
@@ -55,7 +55,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     includeEmptyFields,
   } = params;
 
-  const excludedTiers = await uiSettingsClient.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
+  const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
     indices,
