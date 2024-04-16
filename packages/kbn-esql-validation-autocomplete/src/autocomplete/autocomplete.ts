@@ -1073,15 +1073,31 @@ async function getFunctionArgsSuggestions(
   if (!shouldGetNextArgument && argIndex) {
     argIndex -= 1;
   }
-  const types = fnDefinition.signatures.flatMap((signature) => {
-    if (signature.params.length > argIndex) {
-      return signature.params[argIndex].type;
-    }
-    if (signature.minParams) {
-      return signature.params[signature.params.length - 1].type;
-    }
-    return [];
-  });
+
+  const existingTypes = node.args.map((arg) =>
+    extractFinalTypeFromArg(arg, {
+      fields: fieldsMap,
+      variables: variablesExcludingCurrentCommandOnes,
+    })
+  );
+
+  const types = fnDefinition.signatures
+    // if existing arguments are preset already, use them to filter out incompatible signatures
+    .filter((signature) => {
+      if (existingTypes.length) {
+        return existingTypes.every((type, index) => signature.params[index].type === type);
+      }
+      return true;
+    })
+    .flatMap((signature) => {
+      if (signature.params.length > argIndex) {
+        return signature.params[argIndex].type;
+      }
+      if (signature.minParams) {
+        return signature.params[signature.params.length - 1].type;
+      }
+      return [];
+    });
 
   const literalOptions = fnDefinition.signatures.reduce<string[]>((acc, signature) => {
     const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
