@@ -87,6 +87,9 @@ interface ExceptionsFlyoutConditionsComponentProps {
   /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
   onSetErrorExists: (errorExists: boolean) => void;
 
+  /* Exception item builder takes a callback used when there are updates to show if form warnings exist */
+  onSetWarningExists: (warningExists: boolean) => void;
+
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
@@ -103,6 +106,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onOsChange,
   onExceptionItemAdd,
   onSetErrorExists,
+  onSetWarningExists,
   getExtendedFields,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
@@ -146,16 +150,19 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
     ({
       exceptionItems,
       errorExists,
+      warningExists,
     }: {
       exceptionItems: Array<
         ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
       >;
       errorExists: boolean;
+      warningExists: boolean;
     }) => {
       onExceptionItemAdd(exceptionItems);
       onSetErrorExists(errorExists);
+      onSetWarningExists(warningExists);
     },
-    [onSetErrorExists, onExceptionItemAdd]
+    [onSetErrorExists, onExceptionItemAdd, onSetWarningExists]
   );
 
   const handleOSSelectionChange = useCallback(

@@ -152,6 +152,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
 
       handleSpacesWarning(newValue);
       handleError(undefined);
+      handleWarning(undefined);
       onChange(newValue ?? '');
     },
     [handleError, handleSpacesWarning, labels, onChange, optionsMemo]

@@ -34,6 +34,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
@@ -164,6 +165,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       errorSubmitting,
       expireTime,
       expireErrorExists,
+      wildcardWarningExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -345,6 +347,17 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       dispatch({
         type: 'setExpireError',
         errorExists,
+      });
+    },
+    [dispatch]
+  );
+
+  const setHasWildcardWithWrongOperator = useCallback(
+    (warningExists: boolean): void => {
+      console.log('wildcard callback', warningExists);
+      dispatch({
+        type: 'setWildcardWithWrongOperator',
+        warningExists,
       });
     },
     [dispatch]
@@ -557,9 +570,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           onOsChange={setSelectedOs}
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
+          onSetWarningExists={setHasWildcardWithWrongOperator}
           getExtendedFields={getExtendedFields}
         />
-
+        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>
             <EuiHorizontalRule />

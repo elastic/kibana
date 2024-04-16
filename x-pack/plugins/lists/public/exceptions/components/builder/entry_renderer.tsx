@@ -420,7 +420,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const value = typeof entry.value === 'string' ? entry.value : undefined;
         const fieldMatchWarning = /[*?]/.test(value ?? '')
           ? getWildcardWithIsOperatorWarning()
-          : '';
+          : undefined;
         return (
           <AutocompleteFieldMatchComponent
             autocompleteService={autocompleteService}
