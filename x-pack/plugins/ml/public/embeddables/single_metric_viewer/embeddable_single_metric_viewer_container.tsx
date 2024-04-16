@@ -179,7 +179,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
         title={
           <FormattedMessage
             id="xpack.ml.singleMetricViewerEmbeddable.errorMessage"
-            defaultMessage="Unable to load the ML single metric viewer data"
+            defaultMessage="Unable to load the data for the single metric viewer"
           />
         }
         color="danger"
