@@ -85,7 +85,7 @@ export const getIncompleteConnectorsTooltip = (incompleteCount: number, isCrawle
     ) : (
       <FormattedMessage
         id="xpack.enterpriseSearch.connectorStats.incompleteCrawlerTooltip"
-        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of crawlers that are not ready to crawl (i.e. the crawler is not completely configured)."
+        defaultMessage="{incompleteCount} {incompleteConnectorsText} - Number of crawlers whose configuration is incomplete. These crawlers are not ready to crawl.
         values={{
           incompleteConnectorsText: (
             <b>
