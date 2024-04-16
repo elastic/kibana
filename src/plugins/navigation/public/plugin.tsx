@@ -10,6 +10,7 @@ import {
   combineLatest,
   debounceTime,
   distinctUntilChanged,
+  firstValueFrom,
   from,
   map,
   Observable,
@@ -145,9 +146,11 @@ export class NavigationPublicPlugin
       isSolutionNavExperiementEnabled$ =
         !onCloud || isServerless
           ? of(false)
-          : from(cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)).pipe(
-              shareReplay(1)
-            );
+          : from(
+              cloudExperiments
+                .getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
+                .catch(() => false)
+            ).pipe(shareReplay(1));
 
       this.isSolutionNavEnabled$ = isSolutionNavExperiementEnabled$.pipe(
         switchMap((isFeatureEnabled) => {
@@ -177,22 +180,14 @@ export class NavigationPublicPlugin
       });
 
     // Initialize the solution navigation if it is enabled
-    isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isFeatureEnabled) => {
-      if (!isFeatureEnabled) return;
+    isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isEnabled) => {
+      if (!isEnabled) return;
 
       chrome.project.setCloudUrls(cloud!);
       chrome.project.setAddSolutionIdToUrlPath(this.addSolutionIdToUrlPath.bind(this));
       this.addDefaultSolutionNavigation({ chrome });
       this.susbcribeToSolutionNavUiSettings({ core, security, defaultSolution });
     });
-
-    // Keep track of the solution navigation enabled state
-    let isSolutionNavEnabled = false;
-    isSolutionNavExperiementEnabled$
-      .pipe(takeUntil(this.stop$))
-      .subscribe((_isSolutionNavEnabled) => {
-        isSolutionNavEnabled = _isSolutionNavEnabled;
-      });
 
     return {
       ui: {
@@ -201,8 +196,10 @@ export class NavigationPublicPlugin
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {
-        if (!isSolutionNavEnabled) return;
-        return this.addSolutionNavigation(solutionNavigation);
+        firstValueFrom(isSolutionNavExperiementEnabled$).then((isEnabled) => {
+          if (!isEnabled) return;
+          this.addSolutionNavigation(solutionNavigation);
+        });
       },
       isSolutionNavEnabled$: this.isSolutionNavEnabled$,
     };
