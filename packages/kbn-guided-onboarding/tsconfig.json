@@ -24,7 +24,6 @@
     "@kbn/cloud-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/analytics",
-    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
     "target/**/*",

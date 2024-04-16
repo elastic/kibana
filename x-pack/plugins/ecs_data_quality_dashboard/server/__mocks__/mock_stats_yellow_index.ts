@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * In a deployment where indices have a `yellow` health status, the
- * [`_stats`](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-stats.html)
- * API returns, (for an arbitrary index), results where the index's
+	@@ -14,555 +14,17 @@ import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
  * `primaries.docs.count` and `total.docs.count` have the same value, per this
  * mock `_stats` API output
  */
