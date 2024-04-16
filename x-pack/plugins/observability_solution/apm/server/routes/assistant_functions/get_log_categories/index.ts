@@ -14,11 +14,11 @@ import {
   CONTAINER_ID,
   HOST_NAME,
 } from '../../../../common/es_fields/apm';
-import { getTypedSearch } from '../../diagnostics/create_typed_es_client';
+import { getTypedSearch } from '../../../utils/create_typed_es_client';
 
 export type LogCategories =
   | Array<{
-      key: string;
+      errorCategory: string;
       docCount: number;
       sampleMessage: string;
     }>
@@ -79,7 +79,9 @@ export async function getLogCategories({
     query,
   });
   const totalDocCount = hitCountRes.hits.total.value;
-  const samplingProbability = Math.min(100_000 / totalDocCount, 1);
+  const rawSamplingProbability = Math.min(100_000 / totalDocCount, 1);
+  const samplingProbability =
+    rawSamplingProbability < 0.5 ? rawSamplingProbability : 1;
 
   const categorizedLogsRes = await search({
     index,
@@ -116,7 +118,7 @@ export async function getLogCategories({
     ({ doc_count: docCount, key, sample }) => {
       const sampleMessage = (sample.hits.hits[0]._source as { message: string })
         .message;
-      return { key: key as string, docCount, sampleMessage };
+      return { errorCategory: key as string, docCount, sampleMessage };
     }
   );
 }
