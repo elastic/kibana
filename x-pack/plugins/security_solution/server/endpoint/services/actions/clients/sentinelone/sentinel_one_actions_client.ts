@@ -225,7 +225,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       s1ApiResponse = response.data;
     } catch (err) {
       throw new ResponseActionsClientError(
-        `Error while attempting to retrieve SentinelOne host with agent id [${agentUUID}]`,
+        `Error while attempting to retrieve SentinelOne host with agent id [${agentUUID}]: ${err.message}`,
         500,
         err
       );
