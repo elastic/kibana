@@ -20,7 +20,7 @@ export const LESS_THAN_WARNING = (maxNumber: number) =>
     {
       values: { maxNumber },
       defaultMessage:
-        'Rule will only generate a maximum of {maxNumber} {maxNumber, plural, =1 {alert} other {alerts}}',
+        'Kibana alerting only allows a maximum of {maxNumber} {maxNumber, plural, =1 {alert} other {alerts}} per rule run.',
     }
   );
 

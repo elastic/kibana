@@ -441,7 +441,7 @@ export const getRuleRangeTuples = ({
   if (maxSignals > maxAlertsAllowed) {
     maxSignalsToUse = maxAlertsAllowed;
     ruleExecutionLogger.warn(
-      `max_signals value set above limit set in xpack.rule.run.alerts.max, will only write a maximum of ${maxAlertsAllowed} per rule execution`
+      `The rule's max_signals value (${maxSignals}) is greater than the Kibana alerting limit set in xpack.alerting.rules.run.alerts.max. The rule will only write a maximum of ${maxAlertsAllowed} per rule run.`
     );
   }
 
