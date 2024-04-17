@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { ChainTool } from 'langchain/tools/chain';
+import { DynamicTool } from 'langchain/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import { getEsqlPrompt } from './esql_prompt';
 import { APP_UI_ID } from '../../../../common';
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
-const ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION =
-  'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text.';
-
-export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
+const toolDetails = {
+  description:
+    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text.',
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
-  description: ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION,
+};
+export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
+  ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
     const { chain, isEnabledKnowledgeBase, modelExists } = params;
@@ -29,11 +31,24 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     const { chain } = params as EsqlKnowledgeBaseToolParams;
     if (chain == null) return null;
 
-    return new ChainTool({
-      name: 'ESQLKnowledgeBaseTool',
-      description: ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION,
-      chain,
+    return new DynamicTool({
+      name: toolDetails.name,
+      description: toolDetails.description,
+      func: async (xxx) => {
+          query: getEsqlPrompt(xxx),
+        });
+        console.log('xxx:::', xxx);
+        console.log('ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION:::', result);
+        return result.text;
+      },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });
+
+    // return new ChainTool({
+    //   name: 'ESQLKnowledgeBaseTool',
+    //   description: ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION,
+    //   chain,
+    //   tags: ['esql', 'query-generation', 'knowledge-base'],
+    // });
   },
 };
