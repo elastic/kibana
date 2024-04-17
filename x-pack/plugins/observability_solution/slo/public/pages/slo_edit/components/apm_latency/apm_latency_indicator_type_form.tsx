@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
-import { RunTimeFieldUsed } from '../common/runtime_field_used';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useFetchApmIndex } from '../../../../hooks/use_fetch_apm_indices';
@@ -164,8 +163,6 @@ export function ApmLatencyIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <RunTimeFieldUsed dataView={dataView} />
 
       <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 

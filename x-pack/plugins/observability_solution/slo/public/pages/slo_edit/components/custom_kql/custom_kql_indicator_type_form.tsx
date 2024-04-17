@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { RunTimeFieldUsed } from '../common/runtime_field_used';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
@@ -120,8 +119,6 @@ export function CustomKqlIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
-
-      <RunTimeFieldUsed dataView={dataView} />
 
       <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 

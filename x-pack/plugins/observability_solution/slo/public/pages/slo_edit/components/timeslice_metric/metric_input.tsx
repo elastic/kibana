@@ -16,11 +16,9 @@ import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
-import { QueryBuilder } from '../common/query_builder';
 
 const fieldLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.fieldLabel', {
   defaultMessage: 'Field',
@@ -30,10 +28,6 @@ const aggregationLabel = i18n.translate(
   'xpack.slo.sloEdit.sliType.timesliceMetric.aggregationLabel',
   { defaultMessage: 'Aggregation' }
 );
-
-const filterLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.filterLabel', {
-  defaultMessage: 'Filter',
-});
 
 const fieldTooltip = (
   <EuiIconTip
@@ -69,9 +63,7 @@ export function MetricInput({
   );
   const [aggregationOptions, setAggregationOptions] = useState(AGGREGATION_OPTIONS);
   const [fieldOptions, setFieldOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
-  const { dataView } = useCreateDataView({
-    indexPatternString: watch('indicator.params.index'),
-  });
+
   useEffect(() => {
     setMetricFields(
       indexFields.filter((field) =>
@@ -260,30 +252,6 @@ export function MetricInput({
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <QueryBuilder
-          dataTestSubj="timesliceMetricIndicatorFormMetricQueryInput"
-          dataView={dataView}
-          label={`${filterLabel} ${metric.name}`}
-          name={`indicator.params.metric.metrics.${index}.filter`}
-          placeholder={i18n.translate(
-            'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.placeholder',
-            { defaultMessage: 'KQL filter' }
-          )}
-          required={false}
-          tooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.tooltip',
-                {
-                  defaultMessage: 'This KQL query should return a subset of events.',
-                }
-              )}
-              position="top"
-            />
-          }
-        />
-      </EuiFlexItem>
     </>
   );
 }

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
-import { RunTimeFieldUsed } from '../common/runtime_field_used';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { GroupByField } from '../common/group_by_field';
 import { useFetchApmIndex } from '../../../../hooks/use_fetch_apm_indices';
@@ -129,8 +128,6 @@ export function ApmAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <RunTimeFieldUsed dataView={dataView} />
 
       <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 

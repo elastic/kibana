@@ -15,11 +15,10 @@ import {
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
@@ -28,6 +27,7 @@ interface HistogramIndicatorProps {
   type: 'good' | 'total';
   histogramFields: FieldSpec[];
   isLoadingIndex: boolean;
+  dataView?: DataView;
 }
 
 const AGGREGATIONS = {
@@ -51,7 +51,7 @@ const aggregationTooltip = (
   <EuiIconTip
     content={i18n.translate('xpack.slo.sloEdit.sliType.histogram.aggregationTooltip', {
       defaultMessage:
-        'The "value count" aggreation will return the total count for the histogram field. Range will return the count from the histogram field that is within the range defined below.',
+        'The "value count" aggregation will return the total count for the histogram field. Range will return the count from the histogram field that is within the range defined below.',
     })}
     position="top"
   />
@@ -95,6 +95,7 @@ export function HistogramIndicator({
   type,
   histogramFields,
   isLoadingIndex,
+  dataView,
 }: HistogramIndicatorProps) {
   const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(histogramFields));
@@ -105,10 +106,6 @@ export function HistogramIndicator({
 
   const indexPattern = watch('indicator.params.index');
   const aggregation = watch(`indicator.params.${type}.aggregation`);
-
-  const { dataView } = useCreateDataView({
-    indexPatternString: indexPattern,
-  });
 
   return (
     <Fragment>
