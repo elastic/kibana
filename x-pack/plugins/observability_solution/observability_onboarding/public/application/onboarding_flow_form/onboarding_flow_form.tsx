@@ -26,7 +26,6 @@ import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
-import { isQuickstart } from '../packages_list/utils';
 
 interface UseCaseOption {
   id: Category;
@@ -172,7 +171,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             setSearchQuery={setIntegrationSearch}
             ref={packageListSearchBarRef}
             customCards={customCards?.filter(
-              ({ name, type }) => type === 'generated' && isQuickstart(name)
+              ({ name, type }) => type === 'generated'
             )}
             joinCardLists
           />
