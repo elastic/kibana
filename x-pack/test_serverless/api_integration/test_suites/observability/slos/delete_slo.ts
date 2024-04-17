@@ -80,7 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ esClient, logger });
     });
 
-    describe('non partition by SLO', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/180982
+    describe.skip('non partition by SLO', () => {
       it('deletes the SLO definition, transforms, ingest pipeline and data', async () => {
         const createdSlo = await sloApi.create({
           name: 'my custom name',
