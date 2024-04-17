@@ -147,7 +147,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
       setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(stateFromUrl.wp)]
+    []
   );
 
   const onWindowParametersHandler = (wp?: WindowParameters, replace = false) => {
