@@ -44,10 +44,7 @@ export async function getServiceTransactionTypes({
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-          ],
+          filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)],
         },
       },
       aggs: {
@@ -58,10 +55,7 @@ export async function getServiceTransactionTypes({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(
-    'get_service_transaction_types',
-    params
-  );
+  const { aggregations } = await apmEventClient.search('get_service_transaction_types', params);
   const transactionTypes =
     aggregations?.types.buckets
       .map((bucket) => bucket.key as string)
