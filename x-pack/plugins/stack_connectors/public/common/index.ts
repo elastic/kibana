@@ -26,4 +26,3 @@ export { CrowdstrikeLogo };
 
 export { BEDROCK_CONNECTOR_ID } from '../../common/bedrock/constants';
 export { BedrockLogo };
-
