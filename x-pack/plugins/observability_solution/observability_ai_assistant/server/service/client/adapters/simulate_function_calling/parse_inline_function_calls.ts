@@ -109,11 +109,13 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
             if (functionCallBuffer.includes(TOOL_USE_END)) {
               const [beforeEndSignal, afterEndSignal] = functionCallBuffer.split(TOOL_USE_END);
 
-              parseFunctionCall(id, beforeEndSignal + TOOL_USE_END);
-
-              functionCallBuffer = '';
-
-              next(afterEndSignal);
+              try {
+                parseFunctionCall(id, beforeEndSignal + TOOL_USE_END);
+                functionCallBuffer = '';
+                next(afterEndSignal);
+              } catch (error) {
+                subscriber.error(error);
+              }
             }
           } else {
             functionCallBuffer = '';

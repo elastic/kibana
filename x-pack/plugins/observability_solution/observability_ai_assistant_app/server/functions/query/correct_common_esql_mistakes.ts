@@ -168,8 +168,8 @@ function escapeExpressionsInSort(sortCommand: string) {
 }
 
 export function correctCommonEsqlMistakes(content: string, log: Logger) {
-  return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
-    const commands = splitIntoCommands(query);
+  return content.replaceAll(/```esql\n{1,}(.*?)\n{1,}```/gms, (_, query: string) => {
+    const commands = splitIntoCommands(query.trim());
 
     const formattedCommands: string[] = commands.map(({ name, command }, index) => {
       let formattedCommand = command;
@@ -209,6 +209,6 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
       log.debug(`Modified query from: ${originalFormattedQuery}\nto:\n${correctedFormattedQuery}`);
     }
 
-    return '```esql\n' + correctedFormattedQuery + '\n```';
+    return '```esql\n' + correctedFormattedQuery.trim() + '\n```';
   });
 }

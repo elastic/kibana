@@ -26,8 +26,6 @@ import {
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
-import { withTokenBudget } from '../../../common/utils/with_token_budget';
-import { extendSystemMessage } from '../../../common/utils/extend_system_message';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
@@ -71,6 +69,8 @@ import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_ad
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
+import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
+import { replaceSystemMessage } from '../util/replace_system_message';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -172,21 +172,32 @@ export class ObservabilityAIAssistantClient {
           kibanaPublicUrl,
           simulateFunctionCalling,
           isPublic = false,
+          instructions: requestInstructions = [],
         } = params;
 
         const isConversationUpdate = persist && !!params.conversationId;
         const conversationId = persist ? params.conversationId || v4() : '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
-        const requestInstructions = params.instructions || [];
+
+        const registeredInstructions = functionClient.getInstructions();
+
+        const knowledgeBaseInstructions: UserInstruction[] = [];
+
+        if (responseLanguage) {
+          requestInstructions.push(
+            `You MUST respond in the users preferred language which is: ${responseLanguage}.`
+          );
+        }
+
+        let storedSystemMessage: string = ''; // will be set as soon as kb instructions are loaded
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          const systemMessage = messages.find(
-            (message) => message.message.role === MessageRole.System
+          registeredInstructions.push(
+            `This conversation will be persisted in Kibana and available at this url: ${
+              kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+            }.`
           );
-          systemMessage!.message.content += `This conversation will be persisted in Kibana and available at this url: ${
-            kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-          }.`;
         }
 
         const tokenCountResult = {
@@ -281,17 +292,24 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages.concat(contextFunctionRequest));
           } else if (isUserMessage) {
-            const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
+            const functionCallsExceeded = numFunctionsCalled >= MAX_FUNCTION_CALLS;
+            const functions = functionCallsExceeded ? [] : allFunctions.concat(allActions);
 
             const spanName =
               lastMessage.message.name && lastMessage.message.name !== 'context'
                 ? 'function_response'
                 : 'user_message';
 
+            const systemMessageForChatRequest = getSystemMessageFromInstructions({
+              registeredInstructions,
+              requestInstructions,
+              knowledgeBaseInstructions,
+              availableFunctionNames: functions.map((fn) => fn.name) || [],
+            });
+
             const response$ = (
               await chatWithTokenCountIncrement(spanName, {
-                messages: nextMessages,
+                messages: replaceSystemMessage(systemMessageForChatRequest, nextMessages),
                 connectorId,
                 signal,
                 functions,
@@ -379,7 +397,7 @@ export class ObservabilityAIAssistantClient {
                       chat: chatWithTokenCountIncrement,
                       connectorId,
                       name: functionCallName,
-                      messages: nextMessages,
+                      messages: replaceSystemMessage(storedSystemMessage, nextMessages),
                       args: lastMessage.message.function_call!.arguments,
                       signal,
                     })
@@ -490,18 +508,24 @@ export class ObservabilityAIAssistantClient {
             tokenCountTotal: tokenCountResult.total,
           });
 
+          this.dependencies.logger.debug('isConversationUpdate: ' + isConversationUpdate);
+
           // store the updated conversation and close the stream
           if (isConversationUpdate) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
+            this.dependencies.logger.debug('fetched existing conversation');
             if (!conversation) {
               throw createConversationNotFoundError();
             }
 
             if (signal.aborted) {
+              this.dependencies.logger.debug('Exiting because aborted');
               return;
             }
 
             const persistedTokenCount = conversation._source?.conversation.token_count;
+
+            this.dependencies.logger.debug('Got persisted token count');
 
             const updatedConversation = await this.update(
               conversationId,
@@ -513,7 +537,7 @@ export class ObservabilityAIAssistantClient {
                 omit(conversation._source, 'messages'),
 
                 // update messages
-                { messages: nextMessages },
+                { messages: replaceSystemMessage(storedSystemMessage, nextMessages) },
 
                 // update token count
                 {
@@ -528,13 +552,18 @@ export class ObservabilityAIAssistantClient {
                 }
               )
             );
+
+            this.dependencies.logger.debug('Updated conversation');
+
             subscriber.next({
               type: StreamingChatResponseEventType.ConversationUpdate,
               conversation: updatedConversation.conversation,
             });
           } else {
+            this.dependencies.logger.debug('Awaiting title');
             const generatedTitle = await titlePromise;
             if (signal.aborted) {
+              this.dependencies.logger.debug('Exiting, aborted');
               return;
             }
 
@@ -545,11 +574,13 @@ export class ObservabilityAIAssistantClient {
                 token_count: tokenCountResult,
                 id: conversationId,
               },
-              messages: nextMessages,
+              messages: replaceSystemMessage(storedSystemMessage, nextMessages),
               labels: {},
               numeric_labels: {},
               public: isPublic,
             });
+
+            this.dependencies.logger.debug('Created conversation');
 
             subscriber.next({
               type: StreamingChatResponseEventType.ConversationCreate,
@@ -557,17 +588,23 @@ export class ObservabilityAIAssistantClient {
             });
           }
 
+          this.dependencies.logger.debug('Completing');
+
           subscriber.complete();
         };
 
-        this.resolveInstructions(requestInstructions)
-          .then((instructions) => {
-            return next(
-              extendSystemMessage(messages, [
-                `You MUST respond in the users preferred language which is: ${responseLanguage}.`,
-                instructions,
-              ])
-            );
+        this.fetchKnowledgeBaseInstructions()
+          .then((loadedKnowledgeBaseInstructions) => {
+            knowledgeBaseInstructions.push(...loadedKnowledgeBaseInstructions);
+
+            storedSystemMessage = getSystemMessageFromInstructions({
+              registeredInstructions,
+              requestInstructions,
+              knowledgeBaseInstructions,
+              availableFunctionNames: allFunctions.map((fn) => fn.name),
+            });
+
+            return next(messages);
           })
           .catch((error) => {
             if (!signal.aborted) {
@@ -972,30 +1009,12 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
+  fetchKnowledgeBaseInstructions = async () => {
     const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
       this.dependencies.namespace,
       this.dependencies.user
     );
 
-    if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
-      return '';
-    }
-
-    const priorityInstructions = requestInstructions.map((instruction) =>
-      typeof instruction === 'string' ? { doc_id: v4(), text: instruction } : instruction
-    );
-    const overrideIds = priorityInstructions.map((instruction) => instruction.doc_id);
-    const instructions = priorityInstructions.concat(
-      knowledgeBaseInstructions.filter((instruction) => !overrideIds.includes(instruction.doc_id))
-    );
-
-    const instructionsWithinBudget = withTokenBudget(instructions, 1000);
-
-    const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
-
-    return `${instructionsPrompt}${instructionsWithinBudget
-      .map((instruction) => instruction.text)
-      .join('\n\n')}`;
+    return knowledgeBaseInstructions;
   };
 }

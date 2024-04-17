@@ -23,7 +23,6 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
   sendAnalyticsEvent: noop,
   chat: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
-  getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
   renderFunction: (name) => (
     <div>

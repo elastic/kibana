@@ -43,6 +43,7 @@ export function registerVisualizeESQLFunction({
       const errorMessages = errors?.map((error) => {
         return 'text' in error ? error.text : error.message;
       });
+
       // With limit 0 I get only the columns, it is much more performant
       const performantQuery = `${query} | limit 0`;
       const coreContext = await resources.context.core;

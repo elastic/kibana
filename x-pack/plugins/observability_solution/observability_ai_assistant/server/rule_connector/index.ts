@@ -171,9 +171,6 @@ async function executor(
     });
   });
 
-  const systemMessage = functionClient
-    .getContexts()
-    .find((def) => def.name === 'core')?.description;
   const backgroundInstruction = getBackgroundProcessInstruction(
     execOptions.params.rule,
     execOptions.params.alerts
@@ -189,13 +186,6 @@ async function executor(
       kibanaPublicUrl: (await resources.context.core).coreStart.http.basePath.publicBaseUrl,
       instructions: [backgroundInstruction],
       messages: [
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.System,
-            content: systemMessage,
-          },
-        },
         {
           '@timestamp': new Date().toISOString(),
           message: {

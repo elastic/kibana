@@ -128,7 +128,7 @@ describe('useConversation', () => {
     });
 
     it('returns only the system message', () => {
-      expect(hookResult.result.current.messages).toEqual([
+      expect(hookResult.result.current.messages.length).toEqual([
         {
           '@timestamp': expect.any(String),
           message: {

@@ -10,12 +10,47 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChatActionClickHandler, ChatActionClickType } from '../chat/types';
+
+const getCodeBlockClassName = (theme: UseEuiTheme) => css`
+  background-color: ${theme.euiTheme.colors.lightestShade};
+  .euiCodeBlock__pre {
+    margin-bottom: 0;
+    padding: ${theme.euiTheme.size.m};
+    min-block-size: 48px;
+  }
+  .euiCodeBlock__controls {
+    inset-block-start: ${theme.euiTheme.size.m};
+    inset-inline-end: ${theme.euiTheme.size.m};
+  }
+`;
+
+export function CodeBlock({ children }: { children: React.ReactNode }) {
+  const theme = useEuiTheme();
+
+  return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      paddingSize="s"
+      className={getCodeBlockClassName(theme)}
+    >
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiCodeBlock isCopyable fontSize="m">
+            {children}
+          </EuiCodeBlock>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
 
 export function EsqlCodeBlock({
   value,
@@ -33,18 +68,7 @@ export function EsqlCodeBlock({
       hasShadow={false}
       hasBorder={false}
       paddingSize="s"
-      className={css`
-        background-color: ${theme.euiTheme.colors.lightestShade};
-        .euiCodeBlock__pre {
-          margin-bottom: 0;
-          padding: ${theme.euiTheme.size.m};
-          min-block-size: 48px;
-        }
-        .euiCodeBlock__controls {
-          inset-block-start: ${theme.euiTheme.size.m};
-          inset-inline-end: ${theme.euiTheme.size.m};
-        }
-      `}
+      className={getCodeBlockClassName(theme)}
     >
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>

@@ -27,7 +27,6 @@ import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from '../../public';
-import { getAssistantSystemMessage } from '../../public/service/get_assistant_system_message';
 import { streamIntoObservable } from '../../server/service/util/stream_into_observable';
 import { EvaluationResult } from './types';
 import { FunctionDefinition } from '../../common/functions/types';
@@ -170,13 +169,13 @@ export class KibanaClient {
 
     async function getFunctions() {
       const {
-        data: { functionDefinitions, contextDefinitions },
+        data: { functionDefinitions },
       }: AxiosResponse<APIReturnType<'GET /internal/observability_ai_assistant/functions'>> =
         await that.axios.get(
           that.getUrl({ pathname: '/internal/observability_ai_assistant/functions' })
         );
 
-      return { functionDefinitions, contextDefinitions };
+      return { functionDefinitions };
     }
 
     let currentTitle: string = '';
@@ -264,9 +263,8 @@ export class KibanaClient {
 
     return {
       chat: async (message) => {
-        const { functionDefinitions, contextDefinitions } = await getFunctions();
+        const { functionDefinitions } = await getFunctions();
         const messages = [
-          getAssistantSystemMessage({ contexts: contextDefinitions }),
           ...getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
@@ -301,9 +299,7 @@ export class KibanaClient {
           options = args[2];
         }
 
-        const { contextDefinitions } = await getFunctions();
         const messages = [
-          getAssistantSystemMessage({ contexts: contextDefinitions }),
           ...getMessages(messagesArg!).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
@@ -437,7 +433,6 @@ export class KibanaClient {
                 },
                 required: ['criteria'],
               },
-              contexts: [],
               description: 'Call this function to return scores for the criteria',
             },
           ],
