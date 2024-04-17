@@ -21,7 +21,7 @@ export const ShowRequestButton: React.FC<ShowRequestButtonProps> = ({ isEdit = f
   return (
     <>
       <EuiButtonEmpty
-        data-test-subj="saveRuleButton"
+        data-test-subj="showApiRequestButton"
         onClick={useCallback(() => setIsModalVisible(true), [])}
       >
         {i18n.translate('alertsUIShared.ruleForm.showRequestButton', {
