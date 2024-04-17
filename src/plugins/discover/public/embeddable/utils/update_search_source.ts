@@ -13,6 +13,27 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../build_services';
 import { getSortForSearchSource } from '../../utils/sorting';
 
+const getTimeRangeFilter = (
+  discoverServices: DiscoverServices,
+  dataView: DataView | undefined,
+  fetchContext: FetchContext
+) => {
+  const timeRange =
+    fetchContext.timeslice !== undefined
+      ? {
+          from: new Date(fetchContext.timeslice[0]).toISOString(),
+          to: new Date(fetchContext.timeslice[1]).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : fetchContext.timeRange;
+  if (!dataView || !timeRange) return undefined;
+  console.log(
+    'discoverServices.timefilter.createFilter(dataView, timeRange)',
+    discoverServices.timefilter.createFilter(dataView, timeRange)
+  );
+  return discoverServices.timefilter.createFilter(dataView, timeRange);
+};
+
 export const updateSearchSource = (
   discoverServices: DiscoverServices,
   searchSource: ISearchSource,
@@ -44,29 +65,17 @@ export const updateSearchSource = (
     searchSource.removeField('fields');
   }
 
-  // TODO: Make this better???
-  // update parent search source
+  // TODO: Make this better??
+  // if the search source has a parent, update that too based on fetch context
   const parentSearchSource = searchSource.getParent();
-  parentSearchSource?.setField('filter', fetchContext.filters);
-  parentSearchSource?.setField('query', fetchContext.query);
+  if (parentSearchSource) {
+    parentSearchSource.setField('filter', fetchContext.filters);
+    parentSearchSource.setField('query', fetchContext.query);
+    const timeRangeFilter = getTimeRangeFilter(discoverServices, dataView, fetchContext);
 
-  const getTimeRangeFilter = () => {
-    const timeRange =
-      fetchContext.timeslice !== undefined
-        ? {
-            from: new Date(fetchContext.timeslice[0]).toISOString(),
-            to: new Date(fetchContext.timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : fetchContext.timeRange;
-
-    if (!dataView || !timeRange) return;
-    return discoverServices.timefilter.createFilter(dataView, timeRange);
-  };
-  const timeRangeFilter = getTimeRangeFilter();
-
-  const filters = timeRangeFilter
-    ? [timeRangeFilter, ...(fetchContext.filters ?? [])]
-    : fetchContext.filters;
-  parentSearchSource?.setField('filter', filters);
+    const filters = timeRangeFilter
+      ? [timeRangeFilter, ...(fetchContext.filters ?? [])]
+      : fetchContext.filters;
+    parentSearchSource.setField('filter', filters);
+  }
 };

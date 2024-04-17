@@ -17,6 +17,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
+import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
