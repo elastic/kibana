@@ -612,17 +612,20 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should create failed response action when calling sentinelone api generated an error (automated mode)', async () => {
+      const subActionsClient = sentinelOneMock.createConnectorActionsClient();
       classConstructorOptions = sentinelOneMock.createConstructorOptions();
       classConstructorOptions.isAutomated = true;
+      classConstructorOptions.connectorActions =
+        responseActionsClientMock.createNormalizedExternalConnectorClient(subActionsClient);
       connectorActionsMock = classConstructorOptions.connectorActions;
       // @ts-expect-error readonly prop assignment
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
       s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
 
-      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+      const executeMockFn = (subActionsClient.execute as jest.Mock).getMockImplementation();
       const err = new Error('oh oh');
-      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+      (subActionsClient.execute as jest.Mock).mockImplementation(async (options) => {
         if (options.params.subAction === SUB_ACTION.FETCH_AGENT_FILES) {
           throw err;
         }
@@ -655,14 +658,15 @@ describe('SentinelOneActionsClient class', () => {
             agent: { id: ['1-2-3'] },
             user: { id: 'foo' },
             error: {
-              message: 'oh oh',
+              // The error message here is "not supported" because `get-file` is not currently supported
+              // for automated response actions. if that changes in the future the message below should
+              // be changed to `err.message` (`err` is defined and used in the mock setup above)
+              message: 'Action [get-file] not supported',
             },
             meta: {
               agentId: '1845174760470303882',
               agentUUID: '1-2-3',
               hostName: 'sentinelone-1460',
-              activityId: '1929937418124016884',
-              commandBatchUuid: '7011777f-77e7-4a01-a674-e5f767808895',
             },
           },
           index: ENDPOINT_ACTIONS_INDEX,
