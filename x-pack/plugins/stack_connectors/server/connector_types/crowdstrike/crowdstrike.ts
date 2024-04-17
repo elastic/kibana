@@ -25,6 +25,7 @@ import {
   CrowdstrikeHostActionsResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
+import { CrowdstrikeError } from './error';
 
 export const API_PATH = 'https://api.crowdstrike.com';
 
@@ -170,7 +171,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
         return this.crowdstrikeApiRequest(req, true);
       }
 
-      throw new Error(error.message);
+      throw new CrowdstrikeError(error.message);
     }
   }
 
