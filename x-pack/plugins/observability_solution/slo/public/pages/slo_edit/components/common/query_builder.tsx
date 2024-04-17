@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode, useState } from 'react';
 import { FieldPath } from 'react-hook-form';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { RunTimeFieldUsed } from './runtime_field_used';
 import { QuerySearchBar } from './query_search_bar';
 import { QueryDocumentsFlyout } from './query_documents_flyout';
 import { CreateSLOForm } from '../../types';
@@ -64,6 +65,7 @@ export function QueryBuilder(props: SearchBarProps) {
           searchBarProps={props}
         />
       )}
+      <RunTimeFieldUsed dataView={dataView} name={name} />
     </>
   );
 }

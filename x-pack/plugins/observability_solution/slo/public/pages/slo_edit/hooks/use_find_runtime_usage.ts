@@ -6,7 +6,9 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { Indicator, QuerySchema, querySchema } from '@kbn/slo-schema';
+import { QuerySchema, querySchema } from '@kbn/slo-schema';
+import { FieldPath, useFormContext } from 'react-hook-form';
+import { CreateSLOForm } from '../types';
 const isFieldBeingUsed = (fieldName: string, query?: QuerySchema) => {
   if (!query) {
     return false;
@@ -29,28 +31,20 @@ const isFieldBeingUsed = (fieldName: string, query?: QuerySchema) => {
   }
 };
 
-export const useRunTimeFieldBeingUsed = (dataView?: DataView, indicator?: Indicator): string[] => {
-  if (!dataView || !indicator || !indicator.params) {
+export const useRunTimeFieldBeingUsed = (
+  name: FieldPath<CreateSLOForm>,
+  dataView?: DataView
+): string[] => {
+  const { watch } = useFormContext<CreateSLOForm>();
+  const value = watch(name);
+
+  if (!dataView || !value) {
     return [];
   }
   const runTimeMappings = dataView.getRuntimeMappings();
-  const filter = indicator.params.filter;
-  const good =
-    'good' in indicator.params && querySchema.is(indicator.params.good)
-      ? indicator.params.good
-      : undefined;
-  const total =
-    'total' in indicator.params && querySchema.is(indicator.params.total)
-      ? indicator.params.total
-      : undefined;
+  const filter = querySchema.is(value) ? value : undefined;
   const fieldNames = Object.keys(runTimeMappings).filter((key) => {
-    if (isFieldBeingUsed(key, filter)) {
-      return true;
-    }
-    if (good && isFieldBeingUsed(key, good)) {
-      return true;
-    }
-    return !!(total && isFieldBeingUsed(key, total));
+    return isFieldBeingUsed(key, filter);
   });
   return fieldNames ?? [];
 };
