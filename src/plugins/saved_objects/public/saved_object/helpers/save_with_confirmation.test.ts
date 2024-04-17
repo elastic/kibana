@@ -67,7 +67,12 @@ describe('saveWithConfirmation', () => {
       expect.any(String),
       expect.any(String),
       expect.any(String),
-      overlays
+      overlays,
+      expect.objectContaining({
+        analytics: expect.any(Object),
+        i18n: expect.any(Object),
+        theme: expect.any(Object),
+      })
     );
   });
 
