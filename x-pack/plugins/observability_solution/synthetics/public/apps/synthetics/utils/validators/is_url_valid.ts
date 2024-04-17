@@ -13,7 +13,9 @@ export const isUrlValid = (url?: string | null) => {
   try {
     const urlParsed = new URL(url);
 
-   return allowedProtocols.includes(urlParsed.protocol) && url.startsWith(`${urlParsed.protocol}//`)
+    return (
+      allowedProtocols.includes(urlParsed.protocol) && url.startsWith(`${urlParsed.protocol}//`)
+    );
   } catch (error) {
     return false;
   }
