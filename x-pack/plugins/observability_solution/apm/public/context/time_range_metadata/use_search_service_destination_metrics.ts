@@ -25,7 +25,6 @@ export function useSearchServiceDestinationMetrics({
 
   return {
     isTimeRangeMetadataLoading: status === FETCH_STATUS.LOADING,
-    searchServiceDestinationMetrics:
-      data?.isUsingServiceDestinationMetrics ?? true,
+    searchServiceDestinationMetrics: data?.isUsingServiceDestinationMetrics ?? true,
   };
 }
