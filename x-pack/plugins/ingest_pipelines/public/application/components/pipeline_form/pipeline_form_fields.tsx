@@ -7,7 +7,16 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiSwitch, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiCodeBlock, useIsWithinBreakpoints, EuiText } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiCodeBlock,
+  useIsWithinBreakpoints,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { Processor } from '../../../../common/types';
@@ -198,7 +207,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
               <>
                 <EuiSpacer size="l" />
 
-
                 <EuiText size="s" color="subdued">
                   <FormattedMessage
                     id="xpack.ingestPipelines.form.metaDescription"
@@ -243,7 +251,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
               {requestExample}
             </EuiCodeBlock>
           </EuiPanel>
-
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
