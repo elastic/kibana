@@ -14,6 +14,8 @@ import {
   getObsAIAssistantConnectorType,
   ObsAIAssistantConnectorTypeExecutorOptions,
 } from '.';
+import { Observable } from 'rxjs';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 
 describe('observabilityAIAssistant rule_connector', () => {
   describe('getObsAIAssistantConnectorAdapter', () => {
@@ -72,6 +74,95 @@ describe('observabilityAIAssistant rule_connector', () => {
       } as unknown as ObsAIAssistantConnectorTypeExecutorOptions);
       expect(result).toEqual({ actionId: 'observability-ai-assistant', status: 'ok' });
       expect(initResources).not.toHaveBeenCalled();
+    });
+
+    it('calls complete api', async () => {
+      const completeMock = jest.fn().mockReturnValue(new Observable());
+      const initResources = jest.fn().mockResolvedValue({
+        service: {
+          getClient: async () => ({ complete: completeMock }),
+          getFunctionClient: async () => ({
+            getContexts: () => [{ name: 'core', description: 'my_system_message' }],
+          }),
+        },
+        context: {
+          core: Promise.resolve({
+            coreStart: { http: { basePath: { publicBaseUrl: 'http://kibana.com' } } },
+          }),
+        },
+        plugins: {
+          actions: {
+            start: async () => {
+              return {
+                getActionsClientWithRequest: jest.fn().mockResolvedValue({
+                  async getAll() {
+                    return [{ id: 'connector_1' }];
+                  },
+                }),
+              };
+            },
+          },
+        },
+      } as unknown as ObservabilityAIAssistantRouteHandlerResources);
+
+      const connectorType = getObsAIAssistantConnectorType(initResources);
+      const result = await connectorType.executor({
+        actionId: 'observability-ai-assistant',
+        request: getFakeKibanaRequest({ id: 'foo', api_key: 'bar' }),
+        params: {
+          message: 'hello',
+          connector: 'azure-open-ai',
+          alerts: { new: [{ _id: 'new_alert' }], recovered: [] },
+        },
+      } as unknown as ObsAIAssistantConnectorTypeExecutorOptions);
+
+      expect(result).toEqual({ actionId: 'observability-ai-assistant', status: 'ok' });
+      expect(initResources).toHaveBeenCalledTimes(1);
+      expect(completeMock).toHaveBeenCalledTimes(1);
+      expect(completeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          persist: true,
+          isPublic: true,
+          connectorId: 'azure-open-ai',
+          kibanaPublicUrl: 'http://kibana.com',
+          messages: [
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.System,
+                content: 'my_system_message',
+              },
+            },
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.User,
+                content: 'hello',
+              },
+            },
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'get_connectors',
+                  arguments: JSON.stringify({}),
+                  trigger: MessageRole.Assistant as const,
+                },
+              },
+            },
+            {
+              '@timestamp': expect.any(String),
+              message: {
+                role: MessageRole.User,
+                name: 'get_connectors',
+                content: JSON.stringify({ connectors: [{ id: 'connector_1' }] }),
+              },
+            },
+          ],
+        })
+      );
     });
   });
 });
