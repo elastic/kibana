@@ -1817,12 +1817,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async ensureShareMenuIsOpen(action: 'export' | 'link') {
       await this.clickShareModal();
 
-      if (!(await testSubjects.exists('shareContextMenu'))) {
+      if (!(await testSubjects.exists('shareContextModal'))) {
         await this.clickShareModal();
       }
       if (!(await this.isShareActionEnabled(action))) {
         throw Error(`${action} sharing feature is disabled`);
       }
+      return await testSubjects.click(action);
     },
 
     async openPermalinkShare() {
