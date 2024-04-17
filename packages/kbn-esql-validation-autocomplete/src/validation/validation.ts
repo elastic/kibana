@@ -204,7 +204,7 @@ function validateFunctionColumnArg(
     if (actualArg.name) {
       const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
       if (!columnCheck) {
-        if (argDef.literalOnly) {
+        if (argDef.constantOnly) {
           messages.push(
             getMessageFromId({
               messageId: 'expectedConstant',
@@ -227,7 +227,7 @@ function validateFunctionColumnArg(
           );
         }
       } else {
-        if (argDef.literalOnly) {
+        if (argDef.constantOnly) {
           messages.push(
             getMessageFromId({
               messageId: 'expectedConstant',
@@ -297,6 +297,7 @@ function validateFunction(
   parentCommand: string,
   parentOption: string | undefined,
   references: ReferenceMaps,
+  forceConstantOnly: boolean = false,
   isNested?: boolean
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
@@ -395,21 +396,58 @@ function validateFunction(
     }
   }
   // now perform the same check on all functions args
-  for (const arg of astFunction.args) {
+  for (let i = 0; i < astFunction.args.length; i++) {
+    const arg = astFunction.args[i];
+
+    const allMatchingArgDefinitionsAreConstantOnly = matchingSignatures.every((signature) => {
+      return signature.params[i]?.constantOnly;
+    });
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
     for (const subArg of wrappedArray) {
       if (isFunctionItem(subArg)) {
-        messages.push(
-          ...validateFunction(
-            subArg,
-            parentCommand,
-            parentOption,
-            references,
-            // use the nesting flag for now just for stats
-            // TODO: revisit this part later on to make it more generic
-            parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
-          )
+        const messagesFromArg = validateFunction(
+          subArg,
+          parentCommand,
+          parentOption,
+          references,
+          /**
+           * The constantOnly constraint needs to be enforced for arguments that
+           * are functions as well, regardless of whether the definition for the
+           * sub function's arguments includes the constantOnly flag.
+           *
+           * Example:
+           * bucket(@timestamp, abs(bytes), "", "")
+           *
+           * In the above example, the abs function is not defined with the
+           * constantOnly flag, but the second parameter in bucket _is_ defined
+           * with the constantOnly flag.
+           *
+           * Because of this, the abs function's arguments inherit the constraint
+           * and each should be validated as if each were constantOnly.
+           */
+          allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
+          // use the nesting flag for now just for stats
+          // TODO: revisit this part later on to make it more generic
+          parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
         );
+
+        if (messagesFromArg.some(({ code }) => code === 'expectedConstant')) {
+          const consolidatedMessage = getMessageFromId({
+            messageId: 'expectedConstant',
+            values: {
+              fn: astFunction.name,
+              given: subArg.text,
+            },
+            locations: subArg.location,
+          });
+
+          messages.push(
+            consolidatedMessage,
+            ...messagesFromArg.filter(({ code }) => code !== 'expectedConstant')
+          );
+        } else {
+          messages.push(...messagesFromArg);
+        }
       }
     }
   }
@@ -445,7 +483,11 @@ function validateFunction(
               return validateFn(
                 astFunction,
                 arg,
-                { ...argDef, type: extractedType },
+                {
+                  ...argDef,
+                  constantOnly: forceConstantOnly || argDef.constantOnly,
+                  type: extractedType,
+                },
                 references,
                 parentCommand
               );
@@ -478,7 +520,13 @@ function validateFunction(
           validateNestedFunctionArg,
           validateFunctionColumnArg,
         ].flatMap((validateFn) => {
-          return validateFn(astFunction, actualArg, argDef, references, parentCommand);
+          return validateFn(
+            astFunction,
+            actualArg,
+            { ...argDef, constantOnly: forceConstantOnly || argDef.constantOnly },
+            references,
+            parentCommand
+          );
         });
         failingSignature.push(...argValidationMessages);
       }

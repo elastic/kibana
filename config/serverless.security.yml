@@ -7,6 +7,7 @@ xpack.infra.enabled: false
 xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
+xpack.search.notebooks.enabled: false
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
@@ -64,7 +65,7 @@ xpack.fleet.packages:
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
-xpack.ml.nlp.enabled: false
+xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
