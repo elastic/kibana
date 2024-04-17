@@ -5,7 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { resolvers as versionHandlerResolvers } from './handler_resolvers';
-export { CoreVersionedRouter } from './core_versioned_router';
-export type { HandlerResolutionStrategy, VersionedRouterRoute } from './types';
-export { ALLOWED_PUBLIC_VERSION } from './route_version_utils';
+
+import type { OpenAPIConverter } from '../type';
+
+export const catchAllConverter: OpenAPIConverter = {
+  convertPathParameters: () => ({
+    params: [],
+    shared: {},
+  }),
+  convertQuery: () => ({
+    query: [],
+    shared: {},
+  }),
+  convert: () => ({
+    schema: {},
+    shared: {},
+  }),
+  is: () => {
+    return true;
+  },
+};
