@@ -116,11 +116,7 @@ const rumPageLoadDistributionRoute = createApmServerRoute({
 const rumPageLoadDistBreakdownRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/rum-client/page-load-distribution/breakdown',
   params: t.type({
-    query: t.intersection([
-      uxQueryRt,
-      percentileRangeRt,
-      t.type({ breakdown: t.string }),
-    ]),
+    query: t.intersection([uxQueryRt, percentileRangeRt, t.type({ breakdown: t.string })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
@@ -322,10 +318,7 @@ const rumHasDataRoute = createApmServerRoute({
   },
 });
 
-function decodeUiFilters(
-  logger: Logger,
-  uiFiltersEncoded?: string
-): UxUIFilters {
+function decodeUiFilters(logger: Logger, uiFiltersEncoded?: string): UxUIFilters {
   if (!uiFiltersEncoded) {
     return {};
   }
@@ -343,10 +336,7 @@ async function setupUXRequest<TParams extends SetupUXRequestParams>(
   const setup = await setupRequest(resources);
   return {
     ...setup,
-    uiFilters: decodeUiFilters(
-      resources.logger,
-      resources.params.query.uiFilters
-    ),
+    uiFilters: decodeUiFilters(resources.logger, resources.params.query.uiFilters),
   };
 }
 

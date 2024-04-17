@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiHeaderLink,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiHeaderLink, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
+import { ENVIRONMENT_ALL, getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
@@ -34,8 +26,7 @@ const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 export function AnomalyDetectionSetupLink() {
   const { query } = useApmParams('/*');
 
-  const environment =
-    ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
+  const environment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
 
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
@@ -55,18 +46,14 @@ export function AnomalyDetectionSetupLink() {
       ) : (
         <EuiIcon size="s" type="inspect" color="text" />
       )}
-      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>
-        {ANOMALY_DETECTION_LINK_LABEL}
-      </span>
+      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
     </EuiHeaderLink>
   );
 }
 
 export function MissingJobsAlert({ environment }: { environment?: string }) {
-  const {
-    anomalyDetectionJobsData = DEFAULT_DATA,
-    anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsContext();
+  const { anomalyDetectionJobsData = DEFAULT_DATA, anomalyDetectionJobsStatus } =
+    useAnomalyDetectionJobsContext();
 
   const defaultIcon = <EuiIcon size="s" type="inspect" color="text" />;
 
@@ -78,8 +65,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
     return defaultIcon;
   }
 
-  const isEnvironmentSelected =
-    environment && environment !== ENVIRONMENT_ALL.value;
+  const isEnvironmentSelected = environment && environment !== ENVIRONMENT_ALL.value;
 
   // there are jobs for at least one environment
   if (!isEnvironmentSelected && anomalyDetectionJobsData.jobs.length > 0) {
@@ -108,16 +94,12 @@ function getTooltipText(environment?: string) {
     });
   }
 
-  return i18n.translate(
-    'xpack.apm.anomalyDetectionSetup.notEnabledForEnvironmentText',
-    {
-      defaultMessage: `Anomaly detection is not yet enabled for the environment "{currentEnvironment}". Click to continue setup.`,
-      values: { currentEnvironment: getEnvironmentLabel(environment) },
-    }
-  );
+  return i18n.translate('xpack.apm.anomalyDetectionSetup.notEnabledForEnvironmentText', {
+    defaultMessage: `Anomaly detection is not yet enabled for the environment "{currentEnvironment}". Click to continue setup.`,
+    values: { currentEnvironment: getEnvironmentLabel(environment) },
+  });
 }
 
-const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
-  'xpack.apm.anomalyDetectionSetup.linkLabel',
-  { defaultMessage: `Anomaly detection` }
-);
+const ANOMALY_DETECTION_LINK_LABEL = i18n.translate('xpack.apm.anomalyDetectionSetup.linkLabel', {
+  defaultMessage: `Anomaly detection`,
+});

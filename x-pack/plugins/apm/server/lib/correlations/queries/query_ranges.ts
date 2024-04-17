@@ -66,14 +66,11 @@ export const fetchTransactionDurationRanges = async (
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error(
-      'fetchTransactionDurationCorrelation failed, did not return aggregations.'
-    );
+    throw new Error('fetchTransactionDurationCorrelation failed, did not return aggregations.');
   }
 
   return (
-    resp.body.aggregations
-      .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
+    resp.body.aggregations.logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
       from: number;
       doc_count: number;
     }>

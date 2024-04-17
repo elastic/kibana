@@ -28,14 +28,7 @@ interface AdvancedSettingRow {
 }
 
 export interface BasicSettingRow {
-  type:
-    | 'text'
-    | 'combo'
-    | 'area'
-    | 'boolean'
-    | 'integer'
-    | 'bytes'
-    | 'duration';
+  type: 'text' | 'combo' | 'area' | 'boolean' | 'integer' | 'bytes' | 'duration';
   key: string;
   rowTitle?: string;
   rowDescription?: string;

@@ -32,12 +32,7 @@ import { Summary } from '../../../shared/Summary';
 import { HttpInfoSummaryItem } from '../../../shared/Summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import {
-  ErrorTab,
-  exceptionStacktraceTab,
-  getTabs,
-  logStacktraceTab,
-} from './ErrorTabs';
+import { ErrorTab, exceptionStacktraceTab, getTabs, logStacktraceTab } from './ErrorTabs';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 const HeaderContainer = euiStyled.div`
@@ -60,10 +55,7 @@ interface Props {
 }
 
 // TODO: Move query-string-based tabs into a re-usable component?
-function getCurrentTab(
-  tabs: ErrorTab[] = [],
-  currentTabKey: string | undefined
-): ErrorTab | {} {
+function getCurrentTab(tabs: ErrorTab[] = [], currentTabKey: string | undefined): ErrorTab | {} {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ? selectedTab : first(tabs) || {};
 }
@@ -89,24 +81,18 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
       <HeaderContainer>
         <EuiTitle size="s">
           <h3>
-            {i18n.translate(
-              'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
-              {
-                defaultMessage: 'Error occurrence',
-              }
-            )}
+            {i18n.translate('xpack.apm.errorGroupDetails.errorOccurrenceTitle', {
+              defaultMessage: 'Error occurrence',
+            })}
           </h3>
         </EuiTitle>
         <DiscoverErrorLink error={error} kuery={kuery}>
           <EuiButtonEmpty iconType="discoverApp">
-            {i18n.translate(
-              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
-              {
-                defaultMessage:
-                  'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
-                values: { occurrencesCount },
-              }
-            )}
+            {i18n.translate('xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel', {
+              defaultMessage:
+                'View {occurrencesCount} {occurrencesCount, plural, one {occurrence} other {occurrences}} in Discover.',
+              values: { occurrencesCount },
+            })}
           </EuiButtonEmpty>
         </DiscoverErrorLink>
       </HeaderContainer>
@@ -115,23 +101,16 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
         items={[
           <TimestampTooltip time={error.timestamp.us / 1000} />,
           errorUrl && method ? (
-            <HttpInfoSummaryItem
-              url={errorUrl}
-              method={method}
-              status={status}
-            />
+            <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
           ) : null,
           transaction && transaction.user_agent ? (
             <UserAgentSummaryItem {...transaction.user_agent} />
           ) : null,
           transaction && (
             <EuiToolTip
-              content={i18n.translate(
-                'xpack.apm.errorGroupDetails.relatedTransactionSample',
-                {
-                  defaultMessage: 'Related transaction sample',
-                }
-              )}
+              content={i18n.translate('xpack.apm.errorGroupDetails.relatedTransactionSample', {
+                defaultMessage: 'Related transaction sample',
+              })}
             >
               <TransactionDetailLink
                 traceId={transaction.trace.id}
@@ -141,9 +120,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
                 serviceName={transaction.service.name}
               >
                 <EuiIcon type="merge" />
-                <TransactionLinkName>
-                  {transaction.transaction.name}
-                </TransactionLinkName>
+                <TransactionLinkName>{transaction.transaction.name}</TransactionLinkName>
               </TransactionDetailLink>
             </EuiToolTip>
           ),
@@ -179,29 +156,16 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   );
 }
 
-function TabContent({
-  error,
-  currentTab,
-}: {
-  error: APMError;
-  currentTab: ErrorTab;
-}) {
+function TabContent({ error, currentTab }: { error: APMError; currentTab: ErrorTab }) {
   const codeLanguage = error.service.language?.name;
   const exceptions = error.error.exception || [];
   const logStackframes = error.error.log?.stacktrace;
 
   switch (currentTab.key) {
     case logStacktraceTab.key:
-      return (
-        <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
-      );
+      return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
     case exceptionStacktraceTab.key:
-      return (
-        <ExceptionStacktrace
-          codeLanguage={codeLanguage}
-          exceptions={exceptions}
-        />
-      );
+      return <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />;
     default:
       return <ErrorMetadata error={error} />;
   }

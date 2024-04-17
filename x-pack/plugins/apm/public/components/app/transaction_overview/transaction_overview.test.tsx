@@ -17,10 +17,7 @@ import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import * as useServiceAgentNameHook from '../../../context/apm_service/use_service_agent_fetcher';
-import {
-  disableConsoleWarning,
-  renderWithTheme,
-} from '../../../utils/testHelpers';
+import { disableConsoleWarning, renderWithTheme } from '../../../utils/testHelpers';
 import { fromQuery } from '../../shared/Links/url_helpers';
 import { TransactionOverview } from './';
 
@@ -51,14 +48,12 @@ function setup({
     .mockReturnValue(serviceTransactionTypes);
 
   // mock agent
-  jest
-    .spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher')
-    .mockReturnValue({
-      agentName: 'nodejs',
-      runtimeName: 'node',
-      error: undefined,
-      status: useFetcherHook.FETCH_STATUS.SUCCESS,
-    });
+  jest.spyOn(useServiceAgentNameHook, 'useServiceAgentFetcher').mockReturnValue({
+    agentName: 'nodejs',
+    runtimeName: 'node',
+    error: undefined,
+    status: useFetcherHook.FETCH_STATUS.SUCCESS,
+  });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 

@@ -13,10 +13,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
+import { ENVIRONMENT_ALL, getEnvironmentLabel } from '../../../common/environment_filter_values';
 import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
@@ -50,12 +47,9 @@ export function ServiceField({
     >
       <SuggestionsSelect
         allOption={allowAll ? allOption : undefined}
-        customOptionText={i18n.translate(
-          'xpack.apm.serviceNamesSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new service name',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.serviceNamesSelectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new service name',
+        })}
         defaultValue={currentValue}
         field={SERVICE_NAME}
         onChange={onChange}
@@ -83,12 +77,9 @@ export function EnvironmentField({
     >
       <SuggestionsSelect
         allOption={environmentAllOption}
-        customOptionText={i18n.translate(
-          'xpack.apm.environmentsSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new environment',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.environmentsSelectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new environment',
+        })}
         defaultValue={getEnvironmentLabel(currentValue)}
         field={SERVICE_ENVIRONMENT}
         onChange={onChange}
@@ -114,21 +105,15 @@ export function TransactionTypeField({
     <PopoverExpression value={currentValue || allOption.value} title={label}>
       <SuggestionsSelect
         allOption={allOption}
-        customOptionText={i18n.translate(
-          'xpack.apm.transactionTypesSelectCustomOptionText',
-          {
-            defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
-          }
-        )}
+        customOptionText={i18n.translate('xpack.apm.transactionTypesSelectCustomOptionText', {
+          defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+        })}
         defaultValue={currentValue}
         field={TRANSACTION_TYPE}
         onChange={onChange}
-        placeholder={i18n.translate(
-          'xpack.apm.transactionTypesSelectPlaceholder',
-          {
-            defaultMessage: 'Select transaction type',
-          }
-        )}
+        placeholder={i18n.translate('xpack.apm.transactionTypesSelectPlaceholder', {
+          defaultMessage: 'Select transaction type',
+        })}
       />
     </PopoverExpression>
   );
@@ -148,10 +133,9 @@ export function IsAboveField({
   return (
     <PopoverExpression
       value={value ? `${value.toString()}${unit}` : ''}
-      title={i18n.translate(
-        'xpack.apm.transactionErrorRateAlertTrigger.isAbove',
-        { defaultMessage: 'is above' }
-      )}
+      title={i18n.translate('xpack.apm.transactionErrorRateAlertTrigger.isAbove', {
+        defaultMessage: 'is above',
+      })}
     >
       <EuiFieldNumber
         value={value ?? ''}

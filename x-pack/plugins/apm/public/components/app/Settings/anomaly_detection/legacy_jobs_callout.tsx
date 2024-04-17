@@ -25,26 +25,21 @@ export function LegacyJobsCallout() {
 
   return (
     <EuiCallOut
-      title={i18n.translate(
-        'xpack.apm.settings.anomaly_detection.legacy_jobs.title',
-        { defaultMessage: 'Legacy ML jobs are no longer used in APM app' }
-      )}
+      title={i18n.translate('xpack.apm.settings.anomaly_detection.legacy_jobs.title', {
+        defaultMessage: 'Legacy ML jobs are no longer used in APM app',
+      })}
       iconType="iInCircle"
     >
       <p>
-        {i18n.translate(
-          'xpack.apm.settings.anomaly_detection.legacy_jobs.body',
-          {
-            defaultMessage:
-              'We have discovered legacy Machine Learning jobs from our previous integration which are no longer being used in the APM app',
-          }
-        )}
+        {i18n.translate('xpack.apm.settings.anomaly_detection.legacy_jobs.body', {
+          defaultMessage:
+            'We have discovered legacy Machine Learning jobs from our previous integration which are no longer being used in the APM app',
+        })}
       </p>
       <EuiButton href={mlADLink}>
-        {i18n.translate(
-          'xpack.apm.settings.anomaly_detection.legacy_jobs.button',
-          { defaultMessage: 'Review jobs' }
-        )}
+        {i18n.translate('xpack.apm.settings.anomaly_detection.legacy_jobs.button', {
+          defaultMessage: 'Review jobs',
+        })}
       </EuiButton>
     </EuiCallOut>
   );

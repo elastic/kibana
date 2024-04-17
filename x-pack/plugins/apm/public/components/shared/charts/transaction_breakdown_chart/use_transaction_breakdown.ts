@@ -38,8 +38,7 @@ export function useTransactionBreakdown({
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
+          endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
           params: {
             path: { serviceName },
             query: {
@@ -54,15 +53,7 @@ export function useTransactionBreakdown({
         });
       }
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-    ]
+    [environment, kuery, serviceName, start, end, transactionType, transactionName]
   );
 
   return {

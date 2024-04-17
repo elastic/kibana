@@ -48,11 +48,7 @@ describe('Dependencies', () => {
 
   describe('service overview page', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
-      cy.visit(
-        `/app/apm/services/opbeans-python/overview?${new URLSearchParams(
-          timeRange
-        )}`
-      );
+      cy.visit(`/app/apm/services/opbeans-python/overview?${new URLSearchParams(timeRange)}`);
 
       cy.contains('postgresql').click({ force: true });
 
@@ -62,11 +58,7 @@ describe('Dependencies', () => {
 
   describe('service dependencies tab', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
-      cy.visit(
-        `/app/apm/services/opbeans-python/overview?${new URLSearchParams(
-          timeRange
-        )}`
-      );
+      cy.visit(`/app/apm/services/opbeans-python/overview?${new URLSearchParams(timeRange)}`);
 
       cy.contains('a[role="tab"]', 'Dependencies').click();
 

@@ -23,10 +23,7 @@ import {
   SectionTitle,
 } from '../../../../../../observability/public';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
-import {
-  CustomLink,
-  Filter,
-} from '../../../../../common/custom_link/custom_link_types';
+import { CustomLink, Filter } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -38,11 +35,7 @@ import { CustomLinkList } from './custom_link_list';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 
-export function CustomLinkMenuSection({
-  transaction,
-}: {
-  transaction: Transaction;
-}) {
+export function CustomLinkMenuSection({ transaction }: { transaction: Transaction }) {
   const [showAllLinks, setShowAllLinks] = useState(false);
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
@@ -94,12 +87,9 @@ export function CustomLinkMenuSection({
         <EuiFlexGroup>
           <EuiFlexItem>
             <SectionTitle>
-              {i18n.translate(
-                'xpack.apm.transactionActionMenu.customLink.section',
-                {
-                  defaultMessage: 'Custom Links',
-                }
-              )}
+              {i18n.translate('xpack.apm.transactionActionMenu.customLink.section', {
+                defaultMessage: 'Custom Links',
+              })}
             </SectionTitle>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -111,19 +101,12 @@ export function CustomLinkMenuSection({
         </EuiFlexGroup>
 
         <SectionSubtitle>
-          {i18n.translate(
-            'xpack.apm.transactionActionMenu.customLink.subtitle',
-            {
-              defaultMessage: 'Links will open in a new window.',
-            }
-          )}
+          {i18n.translate('xpack.apm.transactionActionMenu.customLink.subtitle', {
+            defaultMessage: 'Links will open in a new window.',
+          })}
         </SectionSubtitle>
         <CustomLinkList
-          customLinks={
-            showAllLinks
-              ? customLinks
-              : customLinks.slice(0, DEFAULT_LINKS_TO_SHOW)
-          }
+          customLinks={showAllLinks ? customLinks : customLinks.slice(0, DEFAULT_LINKS_TO_SHOW)}
           transaction={transaction}
         />
         <EuiSpacer size="s" />
@@ -195,20 +178,15 @@ function BottomSection({
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType={showAllLinks ? 'arrowUp' : 'arrowDown'}
-            onClick={toggleShowAll}
-          >
+          <EuiButtonEmpty iconType={showAllLinks ? 'arrowUp' : 'arrowDown'} onClick={toggleShowAll}>
             <EuiText size="s">
               {showAllLinks
-                ? i18n.translate(
-                    'xpack.apm.transactionActionMenu.customLink.showFewer',
-                    { defaultMessage: 'Show fewer' }
-                  )
-                : i18n.translate(
-                    'xpack.apm.transactionActionMenu.customLink.showAll',
-                    { defaultMessage: 'Show all' }
-                  )}
+                ? i18n.translate('xpack.apm.transactionActionMenu.customLink.showFewer', {
+                    defaultMessage: 'Show fewer',
+                  })
+                : i18n.translate('xpack.apm.transactionActionMenu.customLink.showAll', {
+                    defaultMessage: 'Show all',
+                  })}
             </EuiText>
           </EuiButtonEmpty>
         </EuiFlexItem>

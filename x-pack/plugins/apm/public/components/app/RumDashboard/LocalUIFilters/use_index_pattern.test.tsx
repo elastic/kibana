@@ -30,9 +30,7 @@ describe('useIndexPattern', () => {
     const { waitForNextUpdate } = renderHook(() => useIndexPattern(), {
       wrapper: ({ children }) => (
         <MockApmPluginContextWrapper>
-          <KibanaContextProvider services={mockDataService}>
-            {children}
-          </KibanaContextProvider>
+          <KibanaContextProvider services={mockDataService}>{children}</KibanaContextProvider>
         </MockApmPluginContextWrapper>
       ),
     });

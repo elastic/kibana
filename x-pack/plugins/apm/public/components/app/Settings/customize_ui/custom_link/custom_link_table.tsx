@@ -35,32 +35,27 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const columns: Array<ITableColumn<CustomLink>> = [
     {
       field: 'label',
-      name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.table.name',
-        { defaultMessage: 'Name' }
-      ),
+      name: i18n.translate('xpack.apm.settings.customizeUI.customLink.table.name', {
+        defaultMessage: 'Name',
+      }),
       truncateText: true,
     },
     {
       field: 'url',
-      name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.table.url',
-        { defaultMessage: 'URL' }
-      ),
+      name: i18n.translate('xpack.apm.settings.customizeUI.customLink.table.url', {
+        defaultMessage: 'URL',
+      }),
       truncateText: true,
     },
     {
       width: '160px',
       align: RIGHT_ALIGNMENT,
       field: '@timestamp',
-      name: i18n.translate(
-        'xpack.apm.settings.customizeUI.customLink.table.lastUpdated',
-        { defaultMessage: 'Last updated' }
-      ),
+      name: i18n.translate('xpack.apm.settings.customizeUI.customLink.table.lastUpdated', {
+        defaultMessage: 'Last updated',
+      }),
       sortable: true,
-      render: (value: number) => (
-        <TimestampTooltip time={value} timeUnit="minutes" />
-      ),
+      render: (value: number) => <TimestampTooltip time={value} timeUnit="minutes" />,
     },
     {
       width: '48px',
@@ -92,10 +87,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   ];
 
   const filteredItems = items.filter(({ label, url }) => {
-    return (
-      label.toLowerCase().includes(searchTerm) ||
-      url.toLowerCase().includes(searchTerm)
-    );
+    return label.toLowerCase().includes(searchTerm) || url.toLowerCase().includes(searchTerm);
   });
 
   return (
@@ -114,11 +106,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       <EuiSpacer size="s" />
       <ManagedTable
         noItemsMessage={
-          isEmpty(items) ? (
-            <LoadingStatePrompt />
-          ) : (
-            <NoResultFound value={searchTerm} />
-          )
+          isEmpty(items) ? <LoadingStatePrompt /> : <NoResultFound value={searchTerm} />
         }
         items={filteredItems}
         columns={columns}
@@ -135,13 +123,10 @@ function NoResultFound({ value }: { value: string }) {
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.table.noResultFound',
-            {
-              defaultMessage: `No results for "{value}".`,
-              values: { value },
-            }
-          )}
+          {i18n.translate('xpack.apm.settings.customizeUI.customLink.table.noResultFound', {
+            defaultMessage: `No results for "{value}".`,
+            values: { value },
+          })}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

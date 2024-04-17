@@ -28,24 +28,15 @@ const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
-const format = ({
-  pathname,
-  query,
-}: {
-  pathname: string;
-  query: Record<string, any>;
-}): string => {
+const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
   return `${pathname}?${stringify(query)}`;
 };
 
-export function registerApmAlerts(
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
-) {
+export function registerApmAlerts(observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) {
   observabilityRuleTypeRegistry.register({
     id: AlertType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
-      defaultMessage:
-        'Alert when the number of errors in a service exceeds a defined threshold.',
+      defaultMessage: 'Alert when the number of errors in a service exceeds a defined threshold.',
     }),
     format: ({ fields }) => {
       return {
@@ -55,9 +46,7 @@ export function registerApmAlerts(
           serviceName: String(fields[SERVICE_NAME][0]),
         }),
         link: format({
-          pathname: `/app/apm/services/${String(
-            fields[SERVICE_NAME][0]
-          )}/errors`,
+          pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0])}/errors`,
           query: {
             ...(fields[SERVICE_ENVIRONMENT]?.[0]
               ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
@@ -75,28 +64,22 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.errorCount.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+    defaultActionMessage: i18n.translate('xpack.apm.alertTypes.errorCount.defaultActionMessage', {
+      defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
 
 - Service name: \\{\\{context.serviceName\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\} errors
 - Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
-      }
-    ),
+    }),
   });
 
   observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionDuration,
-    description: i18n.translate(
-      'xpack.apm.alertTypes.transactionDuration.description',
-      {
-        defaultMessage:
-          'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
-      }
-    ),
+    description: i18n.translate('xpack.apm.alertTypes.transactionDuration.description', {
+      defaultMessage:
+        'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
+    }),
     format: ({ fields, formatters: { asDuration } }) => ({
       reason: formatTransactionDurationReason({
         threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
@@ -118,9 +101,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
-      () => import('./transaction_duration_alert_trigger')
-    ),
+    alertParamsExpression: lazy(() => import('./transaction_duration_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
@@ -141,13 +122,10 @@ export function registerApmAlerts(
 
   observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionErrorRate,
-    description: i18n.translate(
-      'xpack.apm.alertTypes.transactionErrorRate.description',
-      {
-        defaultMessage:
-          'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
-      }
-    ),
+    description: i18n.translate('xpack.apm.alertTypes.transactionErrorRate.description', {
+      defaultMessage:
+        'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
+    }),
     format: ({ fields, formatters: { asPercent } }) => ({
       reason: formatTransactionErrorRateReason({
         threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
@@ -169,9 +147,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
-      () => import('./transaction_error_rate_alert_trigger')
-    ),
+    alertParamsExpression: lazy(() => import('./transaction_error_rate_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
@@ -192,12 +168,9 @@ export function registerApmAlerts(
 
   observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionDurationAnomaly,
-    description: i18n.translate(
-      'xpack.apm.alertTypes.transactionDurationAnomaly.description',
-      {
-        defaultMessage: 'Alert when the latency of a service is abnormal.',
-      }
-    ),
+    description: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly.description', {
+      defaultMessage: 'Alert when the latency of a service is abnormal.',
+    }),
     format: ({ fields }) => ({
       reason: formatTransactionDurationAnomalyReason({
         serviceName: String(fields[SERVICE_NAME][0]),
@@ -218,9 +191,7 @@ export function registerApmAlerts(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
-      () => import('./transaction_duration_anomaly_alert_trigger')
-    ),
+    alertParamsExpression: lazy(() => import('./transaction_duration_anomaly_alert_trigger')),
     validate: () => ({
       errors: [],
     }),

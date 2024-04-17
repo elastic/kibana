@@ -10,11 +10,7 @@ import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import { rangeQuery, kqlQuery } from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../common/processor_event';
-import {
-  SERVICE_NAME,
-  CONTAINER_ID,
-  HOSTNAME,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, CONTAINER_ID, HOSTNAME } from '../../../common/elasticsearch_fieldnames';
 
 export const getServiceInfrastructure = async ({
   kuery,
@@ -70,12 +66,8 @@ export const getServiceInfrastructure = async ({
 
   return {
     containerIds:
-      response.aggregations?.containerIds?.buckets.map(
-        (bucket) => bucket.key as string
-      ) ?? [],
+      response.aggregations?.containerIds?.buckets.map((bucket) => bucket.key as string) ?? [],
     hostNames:
-      response.aggregations?.hostNames?.buckets.map(
-        (bucket) => bucket.key as string
-      ) ?? [],
+      response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key as string) ?? [],
   };
 };

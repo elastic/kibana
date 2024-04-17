@@ -36,9 +36,7 @@ const environmentsRoute = createApmServerRoute({
       end,
       kuery: '',
     });
-    const size = await context.core.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await context.core.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getEnvironments({
       setup,
       serviceName,
@@ -52,5 +50,4 @@ const environmentsRoute = createApmServerRoute({
   },
 });
 
-export const environmentsRouteRepository =
-  createApmServerRouteRepository().add(environmentsRoute);
+export const environmentsRouteRepository = createApmServerRouteRepository().add(environmentsRoute);

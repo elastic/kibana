@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  TRACE_ID,
-  PARENT_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+import { TRACE_ID, PARENT_ID } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
-export async function getRootTransactionByTraceId(
-  traceId: string,
-  setup: Setup
-) {
+export async function getRootTransactionByTraceId(traceId: string, setup: Setup) {
   const { apmEventClient } = setup;
 
   const params = {
@@ -43,10 +37,7 @@ export async function getRootTransactionByTraceId(
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_root_transaction_by_trace_id',
-    params
-  );
+  const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);
   return {
     transaction: resp.hits.hits[0]?._source,
   };

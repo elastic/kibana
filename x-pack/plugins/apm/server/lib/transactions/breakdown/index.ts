@@ -148,9 +148,7 @@ export async function getTransactionBreakdown({
         return bucket.subtypes.buckets.map((subBucket) => {
           return {
             name: (subBucket.key as string) || type,
-            percentage:
-              (subBucket.total_self_time_per_subtype.value || 0) /
-              sumAllSelfTimes,
+            percentage: (subBucket.total_self_time_per_subtype.value || 0) / sumAllSelfTimes,
           };
         });
       })
@@ -160,10 +158,7 @@ export async function getTransactionBreakdown({
   };
 
   const visibleKpis = resp.aggregations
-    ? orderBy(formatBucket(resp.aggregations), 'percentage', 'desc').slice(
-        0,
-        MAX_KPIS
-      )
+    ? orderBy(formatBucket(resp.aggregations), 'percentage', 'desc').slice(0, MAX_KPIS)
     : [];
 
   const kpis = orderBy(
@@ -189,9 +184,7 @@ export async function getTransactionBreakdown({
     const time = bucket.key;
 
     const updatedSeries = kpiNames.reduce((p, kpiName) => {
-      const { name, percentage } = formattedValues.find(
-        (val) => val.name === kpiName
-      ) || {
+      const { name, percentage } = formattedValues.find((val) => val.name === kpiName) || {
         name: kpiName,
         percentage: null,
       };

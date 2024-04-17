@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+import { TRACE_ID, TRANSACTION_ID } from '../../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../../../observability/server';
 import { Setup } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';

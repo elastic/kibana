@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ANOMALY_SEVERITY } from './ml_constants';
-import {
-  getSeverityType,
-  getSeverityColor as mlGetSeverityColor,
-} from '../../ml/common';
+import { getSeverityType, getSeverityColor as mlGetSeverityColor } from '../../ml/common';
 import { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceAnomalyStats {
@@ -34,12 +31,9 @@ export function getSeverityColor(score: number) {
 }
 
 export const ML_ERRORS = {
-  INVALID_LICENSE: i18n.translate(
-    'xpack.apm.anomaly_detection.error.invalid_license',
-    {
-      defaultMessage: `To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning.`,
-    }
-  ),
+  INVALID_LICENSE: i18n.translate('xpack.apm.anomaly_detection.error.invalid_license', {
+    defaultMessage: `To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning.`,
+  }),
   MISSING_READ_PRIVILEGES: i18n.translate(
     'xpack.apm.anomaly_detection.error.missing_read_privileges',
     {
@@ -54,12 +48,9 @@ export const ML_ERRORS = {
         'You must have "write" privileges to Machine Learning and APM in order to create Anomaly Detection jobs',
     }
   ),
-  ML_NOT_AVAILABLE: i18n.translate(
-    'xpack.apm.anomaly_detection.error.not_available',
-    {
-      defaultMessage: 'Machine learning is not available',
-    }
-  ),
+  ML_NOT_AVAILABLE: i18n.translate('xpack.apm.anomaly_detection.error.not_available', {
+    defaultMessage: 'Machine learning is not available',
+  }),
   ML_NOT_AVAILABLE_IN_SPACE: i18n.translate(
     'xpack.apm.anomaly_detection.error.not_available_in_space',
     {

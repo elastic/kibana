@@ -7,10 +7,7 @@
 
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
-import {
-  getLatencyChartSelector,
-  LatencyChartsResponse,
-} from './latency_chart_selectors';
+import { getLatencyChartSelector, LatencyChartsResponse } from './latency_chart_selectors';
 
 const theme = {
   eui: {

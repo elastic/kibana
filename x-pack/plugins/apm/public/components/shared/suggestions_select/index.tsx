@@ -36,9 +36,7 @@ export function SuggestionsSelect({
   if (defaultValue) {
     defaultOption = { label: defaultValue, value: defaultValue };
   }
-  const [selectedOptions, setSelectedOptions] = useState(
-    defaultOption ? [defaultOption] : []
-  );
+  const [selectedOptions, setSelectedOptions] = useState(defaultOption ? [defaultOption] : []);
 
   const [searchValue, setSearchValue] = useState('');
 
@@ -60,9 +58,7 @@ export function SuggestionsSelect({
       setSelectedOptions(changedOptions);
       if (changedOptions.length === 1) {
         onChange(
-          changedOptions[0].value
-            ? changedOptions[0].value.trim()
-            : changedOptions[0].value
+          changedOptions[0].value ? changedOptions[0].value.trim() : changedOptions[0].value
         );
       }
     },
@@ -80,8 +76,7 @@ export function SuggestionsSelect({
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(allOption &&
-    (searchValue === '' ||
-      searchValue.toLowerCase() === allOption.label.toLowerCase())
+    (searchValue === '' || searchValue.toLowerCase() === allOption.label.toLowerCase())
       ? [allOption]
       : []),
     ...terms.map((name) => {

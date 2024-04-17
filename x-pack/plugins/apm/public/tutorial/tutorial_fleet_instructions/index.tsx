@@ -62,10 +62,7 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
   const hasCloudApmPackagePolicy = !!cloudApmPackagePolicy;
   const hasRequiredRole = !!data?.has_required_role;
   const shouldLinkToMigration =
-    cloudApmMigrationEnabled &&
-    hasCloudAgentPolicy &&
-    !hasCloudApmPackagePolicy &&
-    hasRequiredRole;
+    cloudApmMigrationEnabled && hasCloudAgentPolicy && !hasCloudApmPackagePolicy && hasRequiredRole;
 
   const apmIntegrationHref = shouldLinkToMigration
     ? `${basePath}/app/apm/settings/schema`
@@ -87,12 +84,9 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
         fill
         href={`${basePath}/app/integrations/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/policies`}
       >
-        {i18n.translate(
-          'xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button',
-          {
-            defaultMessage: 'Manage APM integration in Fleet',
-          }
-        )}
+        {i18n.translate('xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button', {
+          defaultMessage: 'Manage APM integration in Fleet',
+        })}
       </EuiButton>
     );
   }
@@ -107,26 +101,16 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme }: Props) {
             title={i18n.translate('xpack.apm.tutorial.apmServer.fleet.title', {
               defaultMessage: 'Elastic APM now available in Fleet!',
             })}
-            description={i18n.translate(
-              'xpack.apm.tutorial.apmServer.fleet.message',
-              {
-                defaultMessage:
-                  'The APM integration installs Elasticsearch templates and ingest pipelines for APM data.',
-              }
-            )}
+            description={i18n.translate('xpack.apm.tutorial.apmServer.fleet.message', {
+              defaultMessage:
+                'The APM integration installs Elasticsearch templates and ingest pipelines for APM data.',
+            })}
             footer={
               <>
-                <EuiButton
-                  iconType="analyzeEvent"
-                  color="secondary"
-                  href={apmIntegrationHref}
-                >
-                  {i18n.translate(
-                    'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
-                    {
-                      defaultMessage: 'APM integration',
-                    }
-                  )}
+                <EuiButton iconType="analyzeEvent" color="secondary" href={apmIntegrationHref}>
+                  {i18n.translate('xpack.apm.tutorial.apmServer.fleet.apmIntegration.button', {
+                    defaultMessage: 'APM integration',
+                  })}
                 </EuiButton>
                 <EuiSpacer size="m" />
                 <EuiText size="s">

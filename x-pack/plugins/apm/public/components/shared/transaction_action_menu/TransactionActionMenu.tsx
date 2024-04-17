@@ -66,9 +66,7 @@ export function TransactionActionMenu({ transaction }: Props) {
         button={
           <ActionMenuButton
             onClick={() =>
-              setIsActionPopoverOpen(
-                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
-              )
+              setIsActionPopoverOpen((prevIsActionPopoverOpen) => !prevIsActionPopoverOpen)
             }
           />
         }
@@ -81,16 +79,10 @@ export function TransactionActionMenu({ transaction }: Props) {
                 {section.map((item) => (
                   <Section key={item.key}>
                     {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                    {item.subtitle && (
-                      <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                    )}
+                    {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
                     <SectionLinks>
                       {item.actions.map((action) => (
-                        <SectionLink
-                          key={action.key}
-                          label={action.label}
-                          href={action.href}
-                        />
+                        <SectionLink key={action.key} label={action.label} href={action.href} />
                       ))}
                     </SectionLinks>
                   </Section>
@@ -100,9 +92,7 @@ export function TransactionActionMenu({ transaction }: Props) {
             );
           })}
 
-          {hasGoldLicense && (
-            <CustomLinkMenuSection transaction={transaction} />
-          )}
+          {hasGoldLicense && <CustomLinkMenuSection transaction={transaction} />}
         </div>
       </ActionMenu>
     </>

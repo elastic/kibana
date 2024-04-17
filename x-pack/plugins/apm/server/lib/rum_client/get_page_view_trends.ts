@@ -80,9 +80,7 @@ export async function getPageViewTrends({
   const { topBreakdowns } = response.aggregations ?? {};
 
   // we are only displaying top 9
-  const topItems: string[] = (topBreakdowns?.buckets ?? []).map(
-    ({ key }) => key as string
-  );
+  const topItems: string[] = (topBreakdowns?.buckets ?? []).map(({ key }) => key as string);
 
   const result = response.aggregations?.pageViews.buckets ?? [];
 

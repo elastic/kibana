@@ -33,55 +33,46 @@ export async function getServicesFromMetricDocuments({
 }) {
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(
-    'get_services_from_metric_documents',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const response = await apmEventClient.search('get_services_from_metric_documents', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...environmentQuery(environment), ...kqlQuery(kuery)],
         },
-        aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size: maxNumServices,
-            },
-            aggs: {
-              environments: {
-                terms: {
-                  field: SERVICE_ENVIRONMENT,
-                },
+      },
+      aggs: {
+        services: {
+          terms: {
+            field: SERVICE_NAME,
+            size: maxNumServices,
+          },
+          aggs: {
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
               },
-              latest: {
-                top_metrics: {
-                  metrics: [{ field: AGENT_NAME } as const],
-                  sort: { '@timestamp': 'desc' },
-                },
+            },
+            latest: {
+              top_metrics: {
+                metrics: [{ field: AGENT_NAME } as const],
+                sort: { '@timestamp': 'desc' },
               },
             },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return (
     response.aggregations?.services.buckets.map((bucket) => {
       return {
         serviceName: bucket.key as string,
-        environments: bucket.environments.buckets.map(
-          (envBucket) => envBucket.key as string
-        ),
+        environments: bucket.environments.buckets.map((envBucket) => envBucket.key as string),
         agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
       };
     }) ?? []

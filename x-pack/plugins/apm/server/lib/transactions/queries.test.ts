@@ -6,10 +6,7 @@
  */
 
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import {
-  inspectSearchParams,
-  SearchParamsMock,
-} from '../../utils/test_helpers';
+import { inspectSearchParams, SearchParamsMock } from '../../utils/test_helpers';
 import { getTransactionBreakdown } from './breakdown';
 import { getTransactionTraceSamples } from './trace_samples';
 import { getTransaction } from './get_transaction';

@@ -14,10 +14,7 @@ import { FILTER_OPTIONS } from '../../../common/custom_link/custom_link_filter_o
 import { notifyFeatureUsage } from '../../feature';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_or_update_custom_link';
-import {
-  filterOptionsRt,
-  payloadRt,
-} from '../../lib/settings/custom_link/custom_link_types';
+import { filterOptionsRt, payloadRt } from '../../lib/settings/custom_link/custom_link_types';
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';

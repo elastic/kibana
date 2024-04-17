@@ -57,10 +57,7 @@ WithErrors.args = {
   waterfall: getWaterfall(traceWithErrors, '975c8d5bfd1dd20b'),
 };
 
-export const ChildStartsBeforeParent: Story<Args> = ({
-  urlParams,
-  waterfall,
-}) => {
+export const ChildStartsBeforeParent: Story<Args> = ({ urlParams, waterfall }) => {
   return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
 };
 ChildStartsBeforeParent.args = {
@@ -76,10 +73,7 @@ InferredSpans.args = {
   waterfall: getWaterfall(inferredSpans, 'f2387d37260d00bd'),
 };
 
-export const ManyChildrenWithSameLength: Story<Args> = ({
-  urlParams,
-  waterfall,
-}) => {
+export const ManyChildrenWithSameLength: Story<Args> = ({ urlParams, waterfall }) => {
   return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
 };
 ManyChildrenWithSameLength.args = {

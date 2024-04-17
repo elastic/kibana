@@ -6,10 +6,7 @@
  */
 
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
-import {
-  ERROR_GROUP_ID,
-  SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeQuery, kqlQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -73,16 +70,11 @@ export async function getBuckets({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_error_distribution_buckets',
-    params
-  );
+  const resp = await apmEventClient.search('get_error_distribution_buckets', params);
 
-  const buckets = (resp.aggregations?.distribution.buckets || []).map(
-    (bucket) => ({
-      x: bucket.key,
-      y: bucket.doc_count,
-    })
-  );
+  const buckets = (resp.aggregations?.distribution.buckets || []).map((bucket) => ({
+    x: bucket.key,
+    y: bucket.doc_count,
+  }));
   return { buckets };
 }

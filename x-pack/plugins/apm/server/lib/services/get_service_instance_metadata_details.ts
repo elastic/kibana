@@ -91,9 +91,7 @@ export async function getServiceInstanceMetadataDetails({
           size: 1,
           query: {
             bool: {
-              filter: filter.concat(
-                getDocumentTypeFilterForAggregatedTransactions(true)
-              ),
+              filter: filter.concat(getDocumentTypeFilterForAggregatedTransactions(true)),
             },
           },
         },
@@ -104,15 +102,12 @@ export async function getServiceInstanceMetadataDetails({
 
   // we can expect the most detail of application metrics,
   // followed by transaction events, and then finally transaction metrics
-  const [
-    applicationMetricSample,
-    transactionEventSample,
-    transactionMetricSample,
-  ] = await Promise.all([
-    getApplicationMetricSample(),
-    getTransactionEventSample(),
-    getTransactionMetricSample(),
-  ]);
+  const [applicationMetricSample, transactionEventSample, transactionMetricSample] =
+    await Promise.all([
+      getApplicationMetricSample(),
+      getTransactionEventSample(),
+      getTransactionMetricSample(),
+    ]);
 
   const sample = merge(
     {},

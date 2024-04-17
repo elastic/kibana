@@ -36,9 +36,7 @@ function FormRow({
     if (row.type === 'advanced_setting') {
       return (
         <AdvancedOptions>
-          {row.settings.map((advancedSetting) =>
-            getSettingFormRow(advancedSetting)
-          )}
+          {row.settings.map((advancedSetting) => getSettingFormRow(advancedSetting))}
         </AdvancedOptions>
       );
     }
@@ -54,10 +52,7 @@ function FormRow({
     const { isValid, message } = validateSettingValue(row, value);
     return (
       <React.Fragment key={key}>
-        <EuiDescribedFormGroup
-          title={<h3>{row.rowTitle}</h3>}
-          description={row.rowDescription}
-        >
+        <EuiDescribedFormGroup title={<h3>{row.rowTitle}</h3>} description={row.rowDescription}>
           <EuiFormRow
             label={row.label}
             isInvalid={!isValid}
@@ -69,12 +64,7 @@ function FormRow({
               </EuiText>
             }
           >
-            <FormRowSetting
-              row={row}
-              onChange={onChange}
-              value={value}
-              isDisabled={frozen}
-            />
+            <FormRowSetting row={row} onChange={onChange} value={value} isDisabled={frozen} />
           </EuiFormRow>
         </EuiDescribedFormGroup>
         {row.settings &&
@@ -145,10 +135,9 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
                   setIsOpen((state) => !state);
                 }}
               >
-                {i18n.translate(
-                  'xpack.apm.fleet_integration.settings.advancedOptionsLavel',
-                  { defaultMessage: 'Advanced options' }
-                )}
+                {i18n.translate('xpack.apm.fleet_integration.settings.advancedOptionsLavel', {
+                  defaultMessage: 'Advanced options',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>

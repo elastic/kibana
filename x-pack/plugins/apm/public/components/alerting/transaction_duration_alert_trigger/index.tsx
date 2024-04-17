@@ -21,12 +21,7 @@ import {
   getResponseTimeTickFormatter,
 } from '../../shared/charts/transaction_charts/helper';
 import { ChartPreview } from '../chart_preview';
-import {
-  EnvironmentField,
-  IsAboveField,
-  ServiceField,
-  TransactionTypeField,
-} from '../fields';
+import { EnvironmentField, IsAboveField, ServiceField, TransactionTypeField } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
@@ -42,24 +37,15 @@ export interface AlertParams {
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES = {
-  avg: i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.avg',
-    {
-      defaultMessage: 'Average',
-    }
-  ),
-  '95th': i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.95th',
-    {
-      defaultMessage: '95th percentile',
-    }
-  ),
-  '99th': i18n.translate(
-    'xpack.apm.transactionDurationAlert.aggregationType.99th',
-    {
-      defaultMessage: '99th percentile',
-    }
-  ),
+  avg: i18n.translate('xpack.apm.transactionDurationAlert.aggregationType.avg', {
+    defaultMessage: 'Average',
+  }),
+  '95th': i18n.translate('xpack.apm.transactionDurationAlert.aggregationType.95th', {
+    defaultMessage: '95th percentile',
+  }),
+  '99th': i18n.translate('xpack.apm.transactionDurationAlert.aggregationType.99th', {
+    defaultMessage: '99th percentile',
+  }),
 };
 
 interface Props {
@@ -99,8 +85,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi({
-          endpoint:
-            'GET /internal/apm/alerts/chart_preview/transaction_duration',
+          endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
           params: {
             query: {
               aggregationType: params.aggregationType,
@@ -183,12 +168,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
       onChange={(value) => setAlertParams('threshold', value || 0)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
-      }
-      onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
-      }
+      onChangeWindowSize={(timeWindowSize) => setAlertParams('windowSize', timeWindowSize || '')}
+      onChangeWindowUnit={(timeWindowUnit) => setAlertParams('windowUnit', timeWindowUnit)}
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{

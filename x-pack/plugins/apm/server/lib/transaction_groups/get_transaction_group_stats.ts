@@ -26,10 +26,7 @@ type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
-  TAggregationMap extends Record<
-    string,
-    estypes.AggregationsAggregationContainer
-  >
+  TAggregationMap extends Record<string, estypes.AggregationsAggregationContainer>
 >(request: TRequestBase, aggs: TAggregationMap) {
   return merge({}, request, {
     body: {
@@ -42,34 +39,25 @@ function mergeRequestWithAggs<
   });
 }
 
-export async function getAverages({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
+export async function getAverages({ request, setup, searchAggregatedTransactions }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getTransactionDurationFieldForAggregatedTransactions(searchAggregatedTransactions),
       },
     },
   });
 
-  const response = await setup.apmEventClient.search(
-    'get_avg_transaction_group_duration',
-    params
-  );
+  const response = await setup.apmEventClient.search('get_avg_transaction_group_duration', params);
 
-  return arrayUnionToCallable(
-    response.aggregations?.transaction_groups.buckets ?? []
-  ).map((bucket) => {
-    return {
-      key: bucket.key as BucketKey,
-      avg: bucket.avg.value,
-    };
-  });
+  return arrayUnionToCallable(response.aggregations?.transaction_groups.buckets ?? []).map(
+    (bucket) => {
+      return {
+        key: bucket.key as BucketKey,
+        avg: bucket.avg.value,
+      };
+    }
+  );
 }
 
 export async function getCounts({ request, setup }: MetricParams) {
@@ -93,45 +81,34 @@ export async function getCounts({ request, setup }: MetricParams) {
     params
   );
 
-  return arrayUnionToCallable(
-    response.aggregations?.transaction_groups.buckets ?? []
-  ).map((bucket) => {
-    return {
-      key: bucket.key as BucketKey,
-      count: bucket.doc_count,
-      transactionType: bucket.transaction_type.top[0].metrics[
-        TRANSACTION_TYPE
-      ] as string,
-    };
-  });
+  return arrayUnionToCallable(response.aggregations?.transaction_groups.buckets ?? []).map(
+    (bucket) => {
+      return {
+        key: bucket.key as BucketKey,
+        count: bucket.doc_count,
+        transactionType: bucket.transaction_type.top[0].metrics[TRANSACTION_TYPE] as string,
+      };
+    }
+  );
 }
 
-export async function getSums({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
+export async function getSums({ request, setup, searchAggregatedTransactions }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        field: getTransactionDurationFieldForAggregatedTransactions(searchAggregatedTransactions),
       },
     },
   });
 
-  const response = await setup.apmEventClient.search(
-    'get_transaction_group_latency_sums',
-    params
-  );
+  const response = await setup.apmEventClient.search('get_transaction_group_latency_sums', params);
 
-  return arrayUnionToCallable(
-    response.aggregations?.transaction_groups.buckets ?? []
-  ).map((bucket) => {
-    return {
-      key: bucket.key as BucketKey,
-      sum: bucket.sum.value,
-    };
-  });
+  return arrayUnionToCallable(response.aggregations?.transaction_groups.buckets ?? []).map(
+    (bucket) => {
+      return {
+        key: bucket.key as BucketKey,
+        sum: bucket.sum.value,
+      };
+    }
+  );
 }

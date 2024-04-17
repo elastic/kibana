@@ -49,9 +49,7 @@ export function getFormattedSelection(selection: Selection): string {
   const from = getDurationFormatter(selection[0])(selection[0]);
   const to = getDurationFormatter(selection[1])(selection[1]);
 
-  return `${from.unit === to.unit ? from.value : from.formatted} - ${
-    to.formatted
-  }`;
+  return `${from.unit === to.unit ? from.value : from.formatted} - ${to.formatted}`;
 }
 
 interface TransactionDistributionProps {
@@ -70,15 +68,11 @@ export function TransactionDistribution({
   const { urlParams } = useUrlParams();
   const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
 
-  const markerCurrentTransaction =
-    waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+  const markerCurrentTransaction = waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
-  const emptySelectionText = i18n.translate(
-    'xpack.apm.transactionDetails.emptySelectionText',
-    {
-      defaultMessage: 'Click and drag to select a range',
-    }
-  );
+  const emptySelectionText = i18n.translate('xpack.apm.transactionDetails.emptySelectionText', {
+    defaultMessage: 'Click and drag to select a range',
+  });
 
   const clearSelectionAriaLabel = i18n.translate(
     'xpack.apm.transactionDetails.clearSelectionAriaLabel',
@@ -113,12 +107,9 @@ export function TransactionDistribution({
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h5 data-test-subj="apmTransactionDistributionChartTitle">
-                {i18n.translate(
-                  'xpack.apm.transactionDetails.distribution.panelTitle',
-                  {
-                    defaultMessage: 'Latency distribution',
-                  }
-                )}
+                {i18n.translate('xpack.apm.transactionDetails.distribution.panelTitle', {
+                  defaultMessage: 'Latency distribution',
+                })}
               </h5>
             </EuiTitle>
           </EuiFlexItem>
@@ -128,11 +119,7 @@ export function TransactionDistribution({
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFlexGroup
-              justifyContent="flexEnd"
-              alignItems="center"
-              gutterSize="xs"
-            >
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs">
               {selection ? (
                 <EuiFlexItem grow={false}>
                   <EuiBadge
@@ -144,25 +131,18 @@ export function TransactionDistribution({
                     iconOnClickAriaLabel={clearSelectionAriaLabel}
                     data-test-sub="apmTransactionDetailsDistributionClearSelectionBadge"
                   >
-                    {i18n.translate(
-                      'xpack.apm.transactionDetails.distribution.selectionText',
-                      {
-                        defaultMessage: `Selection: {formattedSelection}`,
-                        values: {
-                          formattedSelection: getFormattedSelection(selection),
-                        },
-                      }
-                    )}
+                    {i18n.translate('xpack.apm.transactionDetails.distribution.selectionText', {
+                      defaultMessage: `Selection: {formattedSelection}`,
+                      values: {
+                        formattedSelection: getFormattedSelection(selection),
+                      },
+                    })}
                   </EuiBadge>
                 </EuiFlexItem>
               ) : (
                 <>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type="iInCircle"
-                      title={emptySelectionText}
-                      size="s"
-                    />
+                    <EuiIcon type="iInCircle" title={emptySelectionText} size="s" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs">{emptySelectionText}</EuiText>

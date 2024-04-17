@@ -9,10 +9,7 @@ import type { ElasticsearchClient } from 'src/core/server';
 
 import { estypes } from '@elastic/elasticsearch';
 
-import type {
-  FieldValuePair,
-  CorrelationsParams,
-} from '../../../../common/correlations/types';
+import type { FieldValuePair, CorrelationsParams } from '../../../../common/correlations/types';
 import { TERMS_SIZE } from '../../../../common/correlations/constants';
 
 import { splitAllSettledPromises } from '../utils';
@@ -47,14 +44,11 @@ const fetchTransactionDurationFieldTerms = async (
   const resp = await esClient.search(getTermsAggRequest(params, fieldName));
 
   if (resp.body.aggregations === undefined) {
-    throw new Error(
-      'fetchTransactionDurationFieldTerms failed, did not return aggregations.'
-    );
+    throw new Error('fetchTransactionDurationFieldTerms failed, did not return aggregations.');
   }
 
   const buckets = (
-    resp.body.aggregations
-      .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
+    resp.body.aggregations.attribute_terms as estypes.AggregationsMultiBucketAggregate<{
       key: string;
       key_as_string?: string;
     }>

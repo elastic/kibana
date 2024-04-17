@@ -52,9 +52,7 @@ export async function getThroughput({
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...getDocumentTypeFilterForAggregatedTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
@@ -70,11 +68,7 @@ export async function getThroughput({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForAggregatedTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -92,10 +86,7 @@ export async function getThroughput({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_throughput_for_service',
-    params
-  );
+  const response = await apmEventClient.search('get_throughput_for_service', params);
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {

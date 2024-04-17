@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiIconTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
@@ -131,10 +125,9 @@ export function ServiceOverviewThroughputChart({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate(
-                'xpack.apm.serviceOverview.throughtputChartTitle',
-                { defaultMessage: 'Throughput' }
-              )}
+              {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
+                defaultMessage: 'Throughput',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
@@ -142,8 +135,7 @@ export function ServiceOverviewThroughputChart({
         <EuiFlexItem grow={false}>
           <EuiIconTip
             content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-              defaultMessage:
-                'Throughput is measured in transactions per minute (tpm)',
+              defaultMessage: 'Throughput is measured in transactions per minute (tpm)',
             })}
             position="right"
           />

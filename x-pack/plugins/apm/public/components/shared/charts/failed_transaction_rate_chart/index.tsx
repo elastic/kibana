@@ -81,8 +81,7 @@ export function FailedTransactionRateChart({
     (callApmApi) => {
       if (transactionType && serviceName && start && end) {
         return callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
+          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
           params: {
             path: {
               serviceName,
@@ -129,10 +128,9 @@ export function FailedTransactionRateChart({
             data: data.previousPeriod.transactionErrorRate,
             type: 'area',
             color: theme.eui.euiColorMediumShade,
-            title: i18n.translate(
-              'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: i18n.translate('xpack.apm.errorRate.chart.errorRate.previousPeriodLabel', {
+              defaultMessage: 'Previous period',
+            }),
           },
         ]
       : []),
@@ -157,8 +155,7 @@ export function FailedTransactionRateChart({
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartThem}
         alerts={alerts.filter(
-          (alert) =>
-            alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionErrorRate
+          (alert) => alert[ALERT_RULE_TYPE_ID]?.[0] === AlertType.TransactionErrorRate
         )}
       />
     </EuiPanel>

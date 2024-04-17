@@ -19,21 +19,12 @@ import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
-export function ServiceContents({
-  onFocusClick,
-  nodeData,
-  environment,
-  kuery,
-}: ContentsProps) {
+export function ServiceContents({ onFocusClick, nodeData, environment, kuery }: ContentsProps) {
   const apmRouter = useApmRouter();
 
   const { query } = useApmParams('/*');
 
-  if (
-    !('rangeFrom' in query && 'rangeTo' in query) ||
-    !query.rangeFrom ||
-    !query.rangeTo
-  ) {
+  if (!('rangeFrom' in query && 'rangeTo' in query) || !query.rangeFrom || !query.rangeTo) {
     throw new Error('Expected rangeFrom and rangeTo to be set');
   }
 
@@ -80,10 +71,7 @@ export function ServiceContents({
       <EuiFlexItem>
         {serviceAnomalyStats && (
           <>
-            <AnomalyDetection
-              serviceName={serviceName}
-              serviceAnomalyStats={serviceAnomalyStats}
-            />
+            <AnomalyDetection serviceName={serviceName} serviceAnomalyStats={serviceAnomalyStats} />
             <EuiHorizontalRule margin="xs" />
           </>
         )}

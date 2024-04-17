@@ -58,10 +58,7 @@ export function BackendDetailTemplate({ title, children }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SpanIcon
-                type={metadata?.spanType}
-                subtype={metadata?.spanSubtype}
-              />
+              <SpanIcon type={metadata?.spanType} subtype={metadata?.spanSubtype} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),

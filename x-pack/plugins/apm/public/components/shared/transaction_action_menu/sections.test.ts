@@ -27,8 +27,7 @@ describe('Transaction action menu', () => {
   };
 
   const location = {
-    search:
-      '?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+    search: '?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
   } as unknown as Location;
 
   it('shows required sections only', () => {
@@ -97,8 +96,7 @@ describe('Transaction action menu', () => {
         {
           key: 'podDetails',
           title: 'Pod details',
-          subtitle:
-            'View logs and metrics for this pod to get further details.',
+          subtitle: 'View logs and metrics for this pod to get further details.',
           actions: [
             {
               key: 'podLogs',

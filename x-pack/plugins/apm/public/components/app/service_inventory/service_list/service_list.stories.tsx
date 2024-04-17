@@ -37,9 +37,7 @@ const stories: Meta<Args> = {
     (StoryComponent) => {
       return (
         <KibanaReactContext.Provider>
-          <MemoryRouter
-            initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}
-          >
+          <MemoryRouter initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}>
             <MockApmPluginContextWrapper
               value={{ core: coreMock } as unknown as ApmPluginContextValue}
             >

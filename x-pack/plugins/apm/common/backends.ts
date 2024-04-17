@@ -7,18 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from './processor_event';
-import {
-  PROCESSOR_EVENT,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from './elasticsearch_fieldnames';
+import { PROCESSOR_EVENT, SPAN_DESTINATION_SERVICE_RESOURCE } from './elasticsearch_fieldnames';
 import { environmentQuery } from './utils/environment_query';
 
-export const kueryBarPlaceholder = i18n.translate(
-  'xpack.apm.dependencies.kueryBarPlaceholder',
-  {
-    defaultMessage: `Search dependency metrics (e.g. span.destination.service.resource:elasticsearch)`,
-  }
-);
+export const kueryBarPlaceholder = i18n.translate('xpack.apm.dependencies.kueryBarPlaceholder', {
+  defaultMessage: `Search dependency metrics (e.g. span.destination.service.resource:elasticsearch)`,
+});
 
 export const getKueryBarBoolFilter = ({
   backendName,
@@ -30,9 +24,7 @@ export const getKueryBarBoolFilter = ({
   return [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
     { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-    ...(backendName
-      ? [{ term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } }]
-      : []),
+    ...(backendName ? [{ term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } }] : []),
     ...environmentQuery(environment),
   ];
 };

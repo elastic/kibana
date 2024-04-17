@@ -125,18 +125,12 @@ export function ServiceOverviewDependenciesTable({
       dependencies={dependencies}
       fixedHeight={fixedHeight}
       isSingleColumn={isSingleColumn}
-      title={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableTitle',
-        {
-          defaultMessage: 'Dependencies',
-        }
-      )}
-      nameColumnTitle={i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumn',
-        {
-          defaultMessage: 'Dependency',
-        }
-      )}
+      title={i18n.translate('xpack.apm.serviceOverview.dependenciesTableTitle', {
+        defaultMessage: 'Dependencies',
+      })}
+      nameColumnTitle={i18n.translate('xpack.apm.serviceOverview.dependenciesTableColumn', {
+        defaultMessage: 'Dependency',
+      })}
       status={status}
       link={link}
     />

@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useState,
-} from 'react';
+import React, { createContext, Dispatch, ReactNode, SetStateAction, useState } from 'react';
 
 import { PointerEvent } from '@elastic/charts';
 
@@ -20,11 +14,7 @@ export const ChartPointerEventContext = createContext<{
   setPointerEvent: Dispatch<SetStateAction<PointerEvent | null>>;
 } | null>(null);
 
-export function ChartPointerEventContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ChartPointerEventContextProvider({ children }: { children: ReactNode }) {
   const [pointerEvent, setPointerEvent] = useState<PointerEvent | null>(null);
 
   return (

@@ -10,9 +10,7 @@ import React from 'react';
 import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 export function useServiceMapHref(serviceName?: string) {
-  const path = serviceName
-    ? `/services/${serviceName}/service-map`
-    : '/service-map';
+  const path = serviceName ? `/services/${serviceName}/service-map` : '/service-map';
   return useAPMHref({ path });
 }
 

@@ -21,11 +21,7 @@ export const getOutcomeAggregation = () => ({
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
-export const getTimeseriesAggregation = (
-  start: number,
-  end: number,
-  intervalString: string
-) => ({
+export const getTimeseriesAggregation = (start: number, end: number, intervalString: string) => ({
   date_histogram: {
     field: '@timestamp',
     fixed_interval: intervalString,

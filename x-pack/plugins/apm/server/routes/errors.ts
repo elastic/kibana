@@ -11,12 +11,7 @@ import { getErrorDistribution } from '../lib/errors/distribution/get_distributio
 import { getErrorGroupSample } from '../lib/errors/get_error_group_sample';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
-import {
-  environmentRt,
-  kueryRt,
-  rangeRt,
-  comparisonRangeRt,
-} from './default_api_types';
+import { environmentRt, kueryRt, rangeRt, comparisonRangeRt } from './default_api_types';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 
 const errorsRoute = createApmServerRoute({
@@ -40,8 +35,7 @@ const errorsRoute = createApmServerRoute({
     const { params } = resources;
     const setup = await setupRequest(resources);
     const { serviceName } = params.path;
-    const { environment, kuery, sortField, sortDirection, start, end } =
-      params.query;
+    const { environment, kuery, sortField, sortDirection, start, end } = params.query;
 
     const errorGroups = await getErrorGroups({
       environment,
@@ -107,15 +101,8 @@ const errorDistributionRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      groupId,
-      start,
-      end,
-      comparisonStart,
-      comparisonEnd,
-    } = params.query;
+    const { environment, kuery, groupId, start, end, comparisonStart, comparisonEnd } =
+      params.query;
     return getErrorDistribution({
       environment,
       kuery,

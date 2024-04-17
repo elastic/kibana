@@ -30,30 +30,25 @@ export function RumHome() {
 
   const { data: rumHasData, status } = useHasRumData();
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] =
-    !rumHasData?.hasData
-      ? {
-          solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
-            defaultMessage: 'Observability',
-          }),
-          actions: {
-            elasticAgent: {
-              title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
-                defaultMessage: 'Add the APM integration',
-              }),
-              description: i18n.translate(
-                'xpack.apm.ux.overview.beatsCard.description',
-                {
-                  defaultMessage:
-                    'Enable RUM with the APM agent to collect user experience data.',
-                }
-              ),
-              href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
-            },
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !rumHasData?.hasData
+    ? {
+        solution: i18n.translate('xpack.apm.ux.overview.solutionName', {
+          defaultMessage: 'Observability',
+        }),
+        actions: {
+          elasticAgent: {
+            title: i18n.translate('xpack.apm.ux.overview.beatsCard.title', {
+              defaultMessage: 'Add the APM integration',
+            }),
+            description: i18n.translate('xpack.apm.ux.overview.beatsCard.description', {
+              defaultMessage: 'Enable RUM with the APM agent to collect user experience data.',
+            }),
+            href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
           },
-          docsLink: core.docLinks.links.observability.guide,
-        }
-      : undefined;
+        },
+        docsLink: core.docLinks.links.observability.guide,
+      }
+    : undefined;
 
   const isLoading = status === 'loading';
 

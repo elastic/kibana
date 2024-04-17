@@ -56,13 +56,10 @@ export function TopValues({ topValueStats, onAddFilter, fieldValue }: Props) {
     >
       {Array.isArray(topValues) &&
         topValues.map((value) => {
-          const isHighlighted =
-            fieldValue !== undefined && value.key === fieldValue;
+          const isHighlighted = fieldValue !== undefined && value.key === fieldValue;
           const barColor = isHighlighted ? 'accent' : 'primary';
           const valueText =
-            progressBarMax !== undefined
-              ? asPercent(value.doc_count, progressBarMax)
-              : undefined;
+            progressBarMax !== undefined ? asPercent(value.doc_count, progressBarMax) : undefined;
 
           return (
             <>
@@ -94,9 +91,7 @@ export function TopValues({ topValueStats, onAddFilter, fieldValue }: Props) {
                     }
                   />
                 </EuiFlexItem>
-                {fieldName !== undefined &&
-                value.key !== undefined &&
-                onAddFilter !== undefined ? (
+                {fieldName !== undefined && value.key !== undefined && onAddFilter !== undefined ? (
                   <>
                     <EuiButtonIcon
                       iconSize="s"
@@ -105,9 +100,7 @@ export function TopValues({ topValueStats, onAddFilter, fieldValue }: Props) {
                         onAddFilter({
                           fieldName,
                           fieldValue:
-                            typeof value.key === 'number'
-                              ? value.key.toString()
-                              : value.key,
+                            typeof value.key === 'number' ? value.key.toString() : value.key,
                           include: true,
                         });
                       }}
@@ -135,9 +128,7 @@ export function TopValues({ topValueStats, onAddFilter, fieldValue }: Props) {
                         onAddFilter({
                           fieldName,
                           fieldValue:
-                            typeof value.key === 'number'
-                              ? value.key.toString()
-                              : value.key,
+                            typeof value.key === 'number' ? value.key.toString() : value.key,
                           include: false,
                         });
                       }}

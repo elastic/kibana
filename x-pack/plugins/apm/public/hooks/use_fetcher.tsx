@@ -10,10 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
-import {
-  AutoAbortedAPMClient,
-  callApmApi,
-} from '../services/rest/createCallApmApi';
+import { AutoAbortedAPMClient, callApmApi } from '../services/rest/createCallApmApi';
 import { useInspectorContext } from '../../../observability/public';
 
 export enum FETCH_STATUS {
@@ -44,9 +41,7 @@ function getDetailsFromErrorResponse(error: IHttpFetchError) {
   );
 }
 
-const createAutoAbortedAPMClient = (
-  signal: AbortSignal
-): AutoAbortedAPMClient => {
+const createAutoAbortedAPMClient = (signal: AbortSignal): AutoAbortedAPMClient => {
   return ((options: Parameters<AutoAbortedAPMClient>[0]) => {
     return callApmApi({ ...options, signal });
   }) as AutoAbortedAPMClient;
@@ -54,9 +49,7 @@ const createAutoAbortedAPMClient = (
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
-type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
-  infer TResponseType
->
+type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<infer TResponseType>
   ? TResponseType
   : unknown;
 
@@ -70,9 +63,7 @@ export function useFetcher<TReturn>(
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
-  const [result, setResult] = useState<
-    FetcherResult<InferResponseType<TReturn>>
-  >({
+  const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
   });
@@ -121,8 +112,7 @@ export function useFetcher<TReturn>(
         const err = e as Error | IHttpFetchError;
 
         if (!signal.aborted) {
-          const errorDetails =
-            'response' in err ? getDetailsFromErrorResponse(err) : err.message;
+          const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
             notifications.toasts.danger({

@@ -68,10 +68,7 @@ export function JSErrors() {
       field: 'errorMessage',
       name: I18LABELS.errorMessage,
       render: (errorMessage: string, item: JSErrorItem) => (
-        <ErrorDetailLink
-          serviceName={serviceName!}
-          errorGroupId={item.errorGroupId as string}
-        >
+        <ErrorDetailLink serviceName={serviceName!} errorGroupId={item.errorGroupId as string}>
           {errorMessage}
         </ErrorDetailLink>
       ),
@@ -92,11 +89,7 @@ export function JSErrors() {
     },
   ];
 
-  const onTableChange = ({
-    page,
-  }: {
-    page: { size: number; index: number };
-  }) => {
+  const onTableChange = ({ page }: { page: { size: number; index: number } }) => {
     setPagination({
       pageIndex: page.index,
       pageSize: page.size,

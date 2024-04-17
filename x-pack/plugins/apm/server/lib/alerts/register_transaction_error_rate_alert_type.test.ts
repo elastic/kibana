@@ -50,8 +50,7 @@ describe('Transaction error rate alert', () => {
   });
 
   it('sends alerts for services that exceeded the threshold', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionErrorRateAlertType({
       ...dependencies,

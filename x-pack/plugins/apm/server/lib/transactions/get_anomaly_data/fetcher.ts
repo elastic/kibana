@@ -13,10 +13,7 @@ import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
 
-export type ESResponse = Exclude<
-  PromiseReturnType<typeof anomalySeriesFetcher>,
-  undefined
->;
+export type ESResponse = Exclude<PromiseReturnType<typeof anomalySeriesFetcher>, undefined>;
 
 export function anomalySeriesFetcher({
   serviceName,

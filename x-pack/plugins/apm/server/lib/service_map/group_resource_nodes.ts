@@ -8,23 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
 import { ValuesType } from 'utility-types';
-import {
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import {
-  ConnectionElement,
-  isSpanGroupingSupported,
-} from '../../../common/service_map';
+import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/elasticsearch_fieldnames';
+import { ConnectionElement, isSpanGroupingSupported } from '../../../common/service_map';
 
 const MINIMUM_GROUP_SIZE = 4;
 
-export function groupResourceNodes(responseData: {
-  elements: ConnectionElement[];
-}) {
+export function groupResourceNodes(responseData: { elements: ConnectionElement[] }) {
   type ElementDefinition = ValuesType<typeof responseData['elements']>;
-  const isEdge = (el: ElementDefinition) =>
-    Boolean(el.data.source && el.data.target);
+  const isEdge = (el: ElementDefinition) => Boolean(el.data.source && el.data.target);
   const isNode = (el: ElementDefinition) => !isEdge(el);
   const isElligibleGroupNode = (el: ElementDefinition) => {
     if (isNode(el) && 'span.type' in el.data) {
@@ -72,9 +63,7 @@ export function groupResourceNodes(responseData: {
   nodeGroups.forEach(({ sources, targets }) => {
     targets.forEach((target) => {
       // removes grouped nodes from original node set:
-      const groupedNodeIndex = ungroupedNodes.findIndex(
-        ({ data }) => data.id === target
-      );
+      const groupedNodeIndex = ungroupedNodes.findIndex(({ data }) => data.id === target);
       ungroupedNodes.splice(groupedNodeIndex, 1);
       sources.forEach((source) => {
         // removes edges of grouped nodes from original edge set:
@@ -97,9 +86,7 @@ export function groupResourceNodes(responseData: {
       }),
       groupedConnections: targets
         .map((targetId) => {
-          const targetElement = nodes.find(
-            (element) => element.data.id === targetId
-          );
+          const targetElement = nodes.find((element) => element.data.id === targetId);
           if (!targetElement) {
             return;
           }
@@ -131,11 +118,6 @@ export function groupResourceNodes(responseData: {
   });
 
   return {
-    elements: [
-      ...ungroupedNodes,
-      ...groupedNodes,
-      ...ungroupedEdges,
-      ...groupedEdges,
-    ],
+    elements: [...ungroupedNodes, ...groupedNodes, ...ungroupedEdges, ...groupedEdges],
   };
 }

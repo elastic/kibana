@@ -34,16 +34,11 @@ describe('Home page', () => {
   it('Redirects to service page with rangeFrom and rangeTo added to the URL', () => {
     cy.visit('/app/apm');
 
-    cy.url().should(
-      'include',
-      'app/apm/services?rangeFrom=now-15m&rangeTo=now'
-    );
+    cy.url().should('include', 'app/apm/services?rangeFrom=now-15m&rangeTo=now');
   });
 
   it('includes services with only metric documents', () => {
-    cy.visit(
-      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
-    );
+    cy.visit(`${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`);
     cy.contains('opbeans-python');
     cy.contains('opbeans-java');
     cy.contains('opbeans-node');
@@ -62,10 +57,7 @@ describe('Home page', () => {
       cy.get('[data-test-subj="serviceLink_rum-js"]').then((element) => {
         element[0].click();
       });
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-        'have.value',
-        'page-load'
-      );
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'page-load');
     });
   });
 });

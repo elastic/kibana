@@ -16,9 +16,7 @@ export function microToSec(val: number) {
   return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
 }
 
-export function removeZeroesFromTail(
-  distData: Array<{ x: number; y: number }>
-) {
+export function removeZeroesFromTail(distData: Array<{ x: number; y: number }>) {
   if (distData.length > 0) {
     while (distData[distData.length - 1].y === 0) {
       distData.pop();
@@ -152,16 +150,14 @@ export async function getPageLoadDistribution({
   }
 
   // calculate the diff to get actual page load on specific duration value
-  let pageDist = pageDistVals.map(
-    ({ key, value: maybeNullValue }, index: number, arr) => {
-      // FIXME: values from percentile* aggs can be null
-      const value = maybeNullValue!;
-      return {
-        x: microToSec(key),
-        y: index === 0 ? value : value - arr[index - 1].value!,
-      };
-    }
-  );
+  let pageDist = pageDistVals.map(({ key, value: maybeNullValue }, index: number, arr) => {
+    // FIXME: values from percentile* aggs can be null
+    const value = maybeNullValue!;
+    return {
+      x: microToSec(key),
+      y: index === 0 ? value : value - arr[index - 1].value!,
+    };
+  });
 
   pageDist = removeZeroesFromTail(pageDist);
 
@@ -224,10 +220,7 @@ const getPercentilesDistribution = async ({
 
   const { apmEventClient } = setup;
 
-  const { aggregations } = await apmEventClient.search(
-    'get_page_load_distribution',
-    params
-  );
+  const { aggregations } = await apmEventClient.search('get_page_load_distribution', params);
 
   return aggregations?.loadDistribution.values ?? [];
 };

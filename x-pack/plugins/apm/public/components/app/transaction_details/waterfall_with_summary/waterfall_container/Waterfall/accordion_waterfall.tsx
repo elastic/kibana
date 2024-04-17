@@ -11,10 +11,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './waterfall_item';
-import {
-  IWaterfall,
-  IWaterfallSpanOrTransaction,
-} from './waterfall_helpers/waterfall_helpers';
+import { IWaterfall, IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -29,8 +26,7 @@ interface AccordionWaterfallProps {
 }
 
 const StyledAccordion = euiStyled(EuiAccordion).withConfig({
-  shouldForwardProp: (prop) =>
-    !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
+  shouldForwardProp: (prop) => !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
 })<
   EuiAccordionProps & {
     childrenCount: number;

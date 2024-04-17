@@ -15,12 +15,7 @@ import { asPercent } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../services/rest/createCallApmApi';
 import { ChartPreview } from '../chart_preview';
-import {
-  EnvironmentField,
-  IsAboveField,
-  ServiceField,
-  TransactionTypeField,
-} from '../fields';
+import { EnvironmentField, IsAboveField, ServiceField, TransactionTypeField } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
@@ -68,8 +63,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi({
-          endpoint:
-            'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
+          endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
           params: {
             query: {
               environment: params.environment,
@@ -111,12 +105,8 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
       onChange={(value) => setAlertParams('threshold', value || 0)}
     />,
     <ForLastExpression
-      onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
-      }
-      onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
-      }
+      onChangeWindowSize={(timeWindowSize) => setAlertParams('windowSize', timeWindowSize || '')}
+      onChangeWindowUnit={(timeWindowUnit) => setAlertParams('windowUnit', timeWindowUnit)}
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{

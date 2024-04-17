@@ -21,3 +21,4 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/checks/verify_notice.sh
 .buildkite/scripts/steps/checks/test_projects.sh
 .buildkite/scripts/steps/checks/test_hardening.sh
+.buildkite/scripts/steps/checks/prettier_topology.sh

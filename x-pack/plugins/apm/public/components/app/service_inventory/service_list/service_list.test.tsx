@@ -64,9 +64,7 @@ describe('ServiceList', () => {
             isLarge: true,
             isXl: true,
           } as Breakpoints,
-        }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
-        );
+        }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
         expect(renderedColumns.length).toEqual(7);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
           <EnvironmentBadge
@@ -98,9 +96,7 @@ describe('ServiceList', () => {
             isLarge: true,
             isXl: true,
           } as Breakpoints,
-        }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
-        );
+        }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
         expect(renderedColumns.length).toEqual(5);
         expect(renderedColumns[2]).toMatchInlineSnapshot(`
           <ListMetric
@@ -121,9 +117,7 @@ describe('ServiceList', () => {
               isLarge: false,
               isXl: true,
             } as Breakpoints,
-          }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
-          );
+          }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
           expect(renderedColumns.length).toEqual(6);
           expect(renderedColumns[2]).toMatchInlineSnapshot(`
             <EnvironmentBadge
@@ -154,9 +148,7 @@ describe('ServiceList', () => {
               isLarge: false,
               isXl: false,
             } as Breakpoints,
-          }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
-          );
+          }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
           expect(renderedColumns.length).toEqual(7);
           expect(renderedColumns[2]).toMatchInlineSnapshot(`
                       <EnvironmentBadge
@@ -192,9 +184,7 @@ describe('ServiceList', () => {
     it('renders the health column', async () => {
       render(<WithHealthWarnings />);
 
-      expect(
-        await screen.findByRole('button', { name: /Health/ })
-      ).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: /Health/ })).toBeInTheDocument();
     });
   });
 });

@@ -12,21 +12,14 @@ import {
   UxLocalUIFilter,
   UxLocalUIFilterName,
 } from '../../../../../common/ux_ui_filter';
-import {
-  fromQuery,
-  toQuery,
-} from '../../../../components/shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getExcludedName } from '../LocalUIFilters';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
 
-export function useLocalUIFilters({
-  filterNames,
-}: {
-  filterNames: UxLocalUIFilterName[];
-}) {
+export function useLocalUIFilters({ filterNames }: { filterNames: UxLocalUIFilterName[] }) {
   const history = useHistory();
   const { uxUiFilters } = useUrlParams();
 
@@ -44,11 +37,7 @@ export function useLocalUIFilters({
     });
   };
 
-  const invertFilter = (
-    name: UxLocalUIFilterName,
-    value: string,
-    negate: boolean
-  ) => {
+  const invertFilter = (name: UxLocalUIFilterName, value: string, negate: boolean) => {
     if (!negate) {
       setFilterValue(
         name,
@@ -56,25 +45,17 @@ export function useLocalUIFilters({
       );
 
       const excludedName = getExcludedName(name);
-      setFilterValue(excludedName, [
-        ...(uxUiFilters?.[excludedName] ?? []),
-        value,
-      ]);
+      setFilterValue(excludedName, [...(uxUiFilters?.[excludedName] ?? []), value]);
     } else {
       const includeName = name.split('Excluded')[0] as UxLocalUIFilterName;
       const excludedName = name;
 
       setFilterValue(
         excludedName,
-        (uxUiFilters?.[excludedName] as string[]).filter(
-          (valT) => valT !== value
-        )
+        (uxUiFilters?.[excludedName] as string[]).filter((valT) => valT !== value)
       );
 
-      setFilterValue(includeName, [
-        ...(uxUiFilters?.[includeName] ?? []),
-        value,
-      ]);
+      setFilterValue(includeName, [...(uxUiFilters?.[includeName] ?? []), value]);
     }
   };
 

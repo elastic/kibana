@@ -39,13 +39,7 @@ export function ServiceOverview() {
   const { agentName, serviceName, transactionType } = useApmServiceContext();
   const {
     query,
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      transactionType: transactionTypeFromUrl,
-    },
+    query: { environment, kuery, rangeFrom, rangeTo, transactionType: transactionTypeFromUrl },
   } = useApmParams('/services/{serviceName}/overview');
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -65,9 +59,7 @@ export function ServiceOverview() {
   // observe the window width and set the flex directions of rows accordingly
   const { isLarge } = useBreakpoints();
   const isSingleColumn = isLarge;
-  const nonLatencyChartHeight = isSingleColumn
-    ? latencyChartHeight
-    : chartHeight;
+  const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
   const rowDirection = isSingleColumn ? 'column' : 'row';
   const isRumAgent = isRumAgentName(agentName);
   const isIosAgent = isIosAgentName(agentName);
@@ -96,19 +88,11 @@ export function ServiceOverview() {
           )}
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <LatencyChart
-                height={latencyChartHeight}
-                environment={environment}
-                kuery={kuery}
-              />
+              <LatencyChart height={latencyChartHeight} environment={environment} kuery={kuery} />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               <EuiFlexItem grow={3}>
                 <ServiceOverviewThroughputChart
                   height={nonLatencyChartHeight}
@@ -131,11 +115,7 @@ export function ServiceOverview() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               {!isRumAgent && (
                 <EuiFlexItem grow={3}>
                   <FailedTransactionRateChart
@@ -154,11 +134,7 @@ export function ServiceOverview() {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
+            <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
               <EuiFlexItem grow={3}>
                 <TransactionBreakdownChart
                   showAnnotations={false}
@@ -174,10 +150,9 @@ export function ServiceOverview() {
                       isSingleColumn={isSingleColumn}
                       link={
                         <EuiLink href={dependenciesLink}>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.dependenciesTableTabLink',
-                            { defaultMessage: 'View dependencies' }
-                          )}
+                          {i18n.translate('xpack.apm.serviceOverview.dependenciesTableTabLink', {
+                            defaultMessage: 'View dependencies',
+                          })}
                         </EuiLink>
                       }
                     />
@@ -188,11 +163,7 @@ export function ServiceOverview() {
           </EuiFlexItem>
           {!isRumAgent && !isIosAgent && (
             <EuiFlexItem>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="s"
-                responsive={false}
-              >
+              <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
                 <ServiceOverviewInstancesChartAndTable
                   chartHeight={nonLatencyChartHeight}
                   serviceName={serviceName}

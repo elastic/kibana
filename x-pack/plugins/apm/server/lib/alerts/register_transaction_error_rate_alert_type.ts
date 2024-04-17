@@ -98,12 +98,9 @@ export function registerTransactionErrorRateAlertType({
         // to prevent (likely) unnecessary blocking request
         // in rule execution
         const searchAggregatedTransactions =
-          config.searchAggregatedTransactions !==
-          SearchAggregatedTransactionSetting.never;
+          config.searchAggregatedTransactions !== SearchAggregatedTransactionSetting.never;
 
-        const index = searchAggregatedTransactions
-          ? indices.metric
-          : indices.transaction;
+        const index = searchAggregatedTransactions ? indices.metric : indices.transaction;
 
         const searchParams = {
           index,
@@ -119,15 +116,10 @@ export function registerTransactionErrorRateAlertType({
                       },
                     },
                   },
-                  ...getDocumentTypeFilterForAggregatedTransactions(
-                    searchAggregatedTransactions
-                  ),
+                  ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
                   {
                     terms: {
-                      [EVENT_OUTCOME]: [
-                        EventOutcome.failure,
-                        EventOutcome.success,
-                      ],
+                      [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
                     },
                   },
                   ...(alertParams.serviceName
@@ -205,17 +197,11 @@ export function registerTransactionErrorRateAlertType({
         }
 
         results.forEach((result) => {
-          const { serviceName, environment, transactionType, errorRate } =
-            result;
+          const { serviceName, environment, transactionType, errorRate } = result;
 
           services
             .alertWithLifecycle({
-              id: [
-                AlertType.TransactionErrorRate,
-                serviceName,
-                transactionType,
-                environment,
-              ]
+              id: [AlertType.TransactionErrorRate, serviceName, transactionType, environment]
                 .filter((name) => name)
                 .join('_'),
               fields: {

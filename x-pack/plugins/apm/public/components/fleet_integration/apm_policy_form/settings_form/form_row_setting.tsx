@@ -25,14 +25,12 @@ interface Props {
   isDisabled?: boolean;
 }
 
-const ENABLED_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.enabledLabel',
-  { defaultMessage: 'Enabled' }
-);
-const DISABLED_LABEL = i18n.translate(
-  'xpack.apm.fleet_integration.settings.disabledLabel',
-  { defaultMessage: 'Disabled' }
-);
+const ENABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.enabledLabel', {
+  defaultMessage: 'Enabled',
+});
+const DISABLED_LABEL = i18n.translate('xpack.apm.fleet_integration.settings.disabledLabel', {
+  defaultMessage: 'Disabled',
+});
 
 export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
   switch (row.type) {
@@ -85,9 +83,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
       );
     }
     case 'combo': {
-      const comboOptions = Array.isArray(value)
-        ? value.map((label) => ({ label }))
-        : [];
+      const comboOptions = Array.isArray(value) ? value.map((label) => ({ label })) : [];
       return (
         <EuiComboBox
           noSuggestions

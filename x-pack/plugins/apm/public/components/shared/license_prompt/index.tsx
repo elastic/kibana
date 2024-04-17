@@ -15,13 +15,8 @@ export interface LicensePromptProps {
   showBetaBadge?: boolean;
 }
 
-export function LicensePrompt({
-  text,
-  showBetaBadge = false,
-}: LicensePromptProps) {
-  const licensePageUrl = useKibanaUrl(
-    '/app/management/stack/license_management'
-  );
+export function LicensePrompt({ text, showBetaBadge = false }: LicensePromptProps) {
+  const licensePageUrl = useKibanaUrl('/app/management/stack/license_management');
 
   return (
     <EuiCard

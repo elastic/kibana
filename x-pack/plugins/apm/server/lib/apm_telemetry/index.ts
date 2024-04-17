@@ -8,11 +8,7 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  CoreSetup,
-  Logger,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../src/core/server';
+import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { unwrapEsResponse } from '../../../../observability/server';
 import { APMConfig } from '../..';
 import {
@@ -25,10 +21,7 @@ import {
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import {
-  collectDataTelemetry,
-  CollectTelemetryParams,
-} from './collect_data_telemetry';
+import { collectDataTelemetry, CollectTelemetryParams } from './collect_data_telemetry';
 import { APMUsage } from './types';
 import { apmSchema } from './schema';
 
@@ -81,9 +74,8 @@ export async function createApmTelemetry({
     const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
       unwrapEsResponse(esClient.asInternalUser.indices.stats(params));
 
-    const transportRequest: CollectTelemetryParams['transportRequest'] = (
-      params
-    ) => unwrapEsResponse(esClient.asInternalUser.transport.request(params));
+    const transportRequest: CollectTelemetryParams['transportRequest'] = (params) =>
+      unwrapEsResponse(esClient.asInternalUser.transport.request(params));
 
     const dataTelemetry = await collectDataTelemetry({
       search,
@@ -147,10 +139,7 @@ export async function createApmTelemetry({
 
     try {
       const currentData = (
-        await savedObjectsClient.get(
-          APM_TELEMETRY_SAVED_OBJECT_TYPE,
-          APM_TELEMETRY_SAVED_OBJECT_ID
-        )
+        await savedObjectsClient.get(APM_TELEMETRY_SAVED_OBJECT_TYPE, APM_TELEMETRY_SAVED_OBJECT_ID)
       ).attributes as { kibanaVersion?: string };
 
       if (currentData.kibanaVersion !== kibanaVersion) {

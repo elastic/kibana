@@ -59,10 +59,9 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
           {
             data: distribution.previousPeriod,
             color: theme.eui.euiColorMediumShade,
-            title: i18n.translate(
-              'xpack.apm.errorGroup.chart.ocurrences.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences.previousPeriodLabel', {
+              defaultMessage: 'Previous period',
+            }),
           },
         ]
       : []),
@@ -77,9 +76,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { observabilityRuleTypeRegistry } = useApmPluginContext();
   const { alerts } = useApmServiceContext();
   const { getFormatter } = observabilityRuleTypeRegistry;
-  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(undefined);
 
   const timeZone = getTimeZone(core.uiSettings);
 
@@ -108,12 +105,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showOverlappingTicks
             tickFormat={xFormatter}
           />
-          <Axis
-            id="y-axis"
-            position={Position.Left}
-            ticks={2}
-            gridLine={{ visible: true }}
-          />
+          <Axis id="y-axis" position={Position.Left} ticks={2} gridLine={{ visible: true }} />
 
           {timeseries.map((serie) => {
             return (

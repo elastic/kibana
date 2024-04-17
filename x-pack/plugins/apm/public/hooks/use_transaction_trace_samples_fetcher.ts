@@ -50,8 +50,7 @@ export function useTransactionTraceSamplesFetcher({
     async (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         const response = await callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
+          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
           params: {
             path: {
               serviceName,

@@ -19,19 +19,13 @@ interface Index {
 const defaultContext: Index = {
   sharedData: { totalPageViews: 0 },
   setSharedData: (d) => {
-    throw new Error(
-      'setSharedData was not initialized, set it when you invoke the context'
-    );
+    throw new Error('setSharedData was not initialized, set it when you invoke the context');
   },
 };
 
 export const CsmSharedContext = createContext(defaultContext);
 
-export function CsmSharedContextProvider({
-  children,
-}: {
-  children: JSX.Element;
-}) {
+export function CsmSharedContextProvider({ children }: { children: JSX.Element }) {
   const [newData, setNewData] = useState<SharedData>({ totalPageViews: 0 });
 
   const setSharedData = React.useCallback((data: SharedData) => {

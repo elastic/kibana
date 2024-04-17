@@ -70,14 +70,10 @@ export const fetchFailedTransactionsCorrelationPValues = async (
   histogramRangeSteps: number[],
   fieldName: string
 ) => {
-  const resp = await esClient.search(
-    getFailureCorrelationRequest(params, fieldName)
-  );
+  const resp = await esClient.search(getFailureCorrelationRequest(params, fieldName));
 
   if (resp.body.aggregations === undefined) {
-    throw new Error(
-      'fetchErrorCorrelation failed, did not return aggregations.'
-    );
+    throw new Error('fetchErrorCorrelation failed, did not return aggregations.');
   }
 
   const overallResult = resp.body.aggregations
@@ -98,12 +94,9 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
       0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
 
-    const histogram = await fetchTransactionDurationRanges(
-      esClient,
-      params,
-      histogramRangeSteps,
-      [{ fieldName, fieldValue: bucket.key }]
-    );
+    const histogram = await fetchTransactionDurationRanges(esClient, params, histogramRangeSteps, [
+      { fieldName, fieldValue: bucket.key },
+    ]);
 
     result.push({
       fieldName,
@@ -117,8 +110,7 @@ export const fetchFailedTransactionsCorrelationPValues = async (
       failurePercentage: bucket.doc_count / overallResult.doc_count,
       // Percentage of time the term appears in successful transactions
       successPercentage:
-        (bucket.bg_count - bucket.doc_count) /
-        (overallResult.bg_count - overallResult.doc_count),
+        (bucket.bg_count - bucket.doc_count) / (overallResult.bg_count - overallResult.doc_count),
       histogram,
     });
   }

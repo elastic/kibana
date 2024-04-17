@@ -7,10 +7,7 @@
 
 import { getErrorGroupSample } from './get_error_group_sample';
 import { getErrorGroups } from './get_error_groups';
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
+import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('error queries', () => {
