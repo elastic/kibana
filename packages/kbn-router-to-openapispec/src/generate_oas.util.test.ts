@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
+import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 
 /** Intended to cover a wide set of schema configurations */
 export const testSchema = schema.object({
@@ -38,9 +38,7 @@ type RouterMeta = ReturnType<Router['getRoutes']>[number];
 type VersionedRouterMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
 
 export const createRouter = (args: { routes: RouterMeta[] }) => {
-  const router: Router = Object.create(Router);
   return {
-    router,
     getRoutes: () => args.routes,
   } as unknown as Router;
 };

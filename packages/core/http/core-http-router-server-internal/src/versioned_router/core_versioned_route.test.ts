@@ -9,12 +9,12 @@
 import type { ApiVersion } from '@kbn/core-http-common';
 import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core-http-server';
 import { Router } from '../router';
-import { createFooValidation } from '../router.test.util';
+import { createFooValidation } from '../router.util.test';
 import { createRouter } from './mocks';
 import { CoreVersionedRouter } from '.';
 import { passThroughValidation } from './core_versioned_route';
 import { Method } from './types';
-import { createRequest } from './core_versioned_route.test.utils';
+import { createRequest } from './core_versioned_route.util.test';
 
 describe('Versioned route', () => {
   let router: Router;

@@ -9,7 +9,7 @@
 import { Router, type RouterOptions } from './router';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { schema } from '@kbn/config-schema';
-import { createFooValidation } from './router.test.util';
+import { createFooValidation } from './router.util.test';
 import { createRequestMock } from '@kbn/hapi-mocks/src/request';
 
 const mockResponse: any = {
