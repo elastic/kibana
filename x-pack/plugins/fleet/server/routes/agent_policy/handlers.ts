@@ -19,6 +19,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
+import { sanitizePackagePolicyForLimitedAccess } from '../../services/package_policies';
 import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
 import { AGENTS_PREFIX } from '../../constants';
 import type {
@@ -69,7 +70,7 @@ export async function populateAssignedAgentsCount(
   );
 }
 
-function sanitizeItemForLimitedPackagePolicyAccess(item: AgentPolicy): AgentPolicy {
+function sanitizeAgentPolicyForLimitedAccess(item: AgentPolicy): AgentPolicy {
   return {
     id: item.id,
     name: item.name,
@@ -83,39 +84,7 @@ function sanitizeItemForLimitedPackagePolicyAccess(item: AgentPolicy): AgentPoli
     updated_by: item.updated_by,
     has_fleet_server: item.has_fleet_server,
     monitoring_enabled: item.monitoring_enabled,
-    package_policies: (item.package_policies || []).map((packagePolicy) => {
-      const {
-        id,
-        name,
-        package: pkg,
-        enabled,
-        policy_id: policyId,
-        revision,
-        updated_at: updatedAt,
-        updated_by: updatedBy,
-        created_at: createdAt,
-        created_by: createdBy,
-      } = packagePolicy;
-      return {
-        id,
-        name,
-        package: pkg
-          ? {
-              name: pkg.name,
-              title: pkg.title,
-              version: pkg.version,
-            }
-          : undefined,
-        inputs: [],
-        enabled,
-        policy_id: policyId,
-        revision,
-        updated_at: updatedAt,
-        updated_by: updatedBy,
-        created_at: createdAt,
-        created_by: createdBy,
-      };
-    }),
+    package_policies: (item.package_policies || []).map(sanitizePackagePolicyForLimitedAccess),
   };
 }
 
@@ -142,7 +111,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 
     const body: GetAgentPoliciesResponse = {
       items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForLimitedPackagePolicyAccess)
+        ? items.map(sanitizeAgentPolicyForLimitedAccess)
         : items,
       total,
       page,
@@ -170,7 +139,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
     });
     const body: BulkGetAgentPoliciesResponse = {
       items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForLimitedPackagePolicyAccess)
+        ? items.map(sanitizeAgentPolicyForLimitedAccess)
         : items,
     };
 
@@ -203,7 +172,7 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
       await populateAssignedAgentsCount(esClient, soClient, [agentPolicy]);
       const body: GetOneAgentPolicyResponse = {
         item: !fleetContext.authz.fleet.readAgentPolicies
-          ? sanitizeItemForLimitedPackagePolicyAccess(agentPolicy)
+          ? sanitizeAgentPolicyForLimitedAccess(agentPolicy)
           : agentPolicy,
       };
       return response.ok({

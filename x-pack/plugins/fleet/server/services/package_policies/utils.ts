@@ -57,3 +57,39 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
     created_by,
   };
 };
+
+export const sanitizePackagePolicyForLimitedAccess = (
+  packagePolicy: PackagePolicy
+): PackagePolicy => {
+  const {
+    id,
+    name,
+    package: pkg,
+    enabled,
+    policy_id: policyId,
+    revision,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    created_by: createdBy,
+  } = packagePolicy;
+  return {
+    id,
+    name,
+    package: pkg
+      ? {
+          name: pkg.name,
+          title: pkg.title,
+          version: pkg.version,
+        }
+      : undefined,
+    inputs: [],
+    enabled,
+    policy_id: policyId,
+    revision,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    created_by: createdBy,
+  };
+};

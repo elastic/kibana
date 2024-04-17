@@ -14,7 +14,10 @@ import { groupBy, keyBy } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
-import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
+import {
+  populatePackagePolicyAssignedAgentsCount,
+  sanitizePackagePolicyForLimitedAccess,
+} from '../../services/package_policies';
 
 import {
   agentPolicyService,
@@ -54,7 +57,10 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import type {
+  SimplifiedPackagePolicy,
+  FormattedPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -79,13 +85,21 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       await populatePackagePolicyAssignedAgentsCount(esClient, items);
     }
 
+    const responseItems = items.map((item) => {
+      let responseItem: PackagePolicy | FormattedPackagePolicy = item;
+      if (!fleetContext.authz.fleet.readAgentPolicies) {
+        responseItem = sanitizePackagePolicyForLimitedAccess(item);
+      }
+      if (request.query.format === inputsFormat.Simplified) {
+        responseItem = packagePolicyToSimplifiedPackagePolicy(item);
+      }
+      return responseItem;
+    });
+
     // agnostic to package-level RBAC
     return response.ok({
       body: {
-        items:
-          request.query.format === inputsFormat.Simplified
-            ? items.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
-            : items,
+        items: responseItems,
         total,
         page,
         perPage,

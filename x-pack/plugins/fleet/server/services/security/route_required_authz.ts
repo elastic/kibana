@@ -102,6 +102,11 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
   // Package Policy List API
   [`get:${PACKAGE_POLICY_API_ROUTES.LIST_PATTERN}`]: {
     any: {
+      fleet: {
+        addAgents: true,
+        addFleetServers: true,
+        readAgentPolicies: true,
+      },
       integrations: {
         readIntegrationPolicies: true,
       },
