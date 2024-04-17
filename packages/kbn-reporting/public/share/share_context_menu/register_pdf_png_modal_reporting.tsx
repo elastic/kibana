@@ -275,9 +275,13 @@ export const reportingExportModalProvider = ({
     );
 
     const generateReportPDF = ({ intl }: { intl: InjectedIntl }) => {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      const dimensions = { height, width };
+      const { layout: outerLayout } = getJobParams(jobProviderOptions, 'printablePdfV2')();
+      let dimensions = outerLayout?.dimensions;
+      if (!dimensions) {
+        const el = document.querySelector('[data-shared-items-container]');
+        const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+        dimensions = { height, width };
+      }
 
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'printablePdfV2')(),
@@ -332,10 +336,13 @@ export const reportingExportModalProvider = ({
     };
 
     const generateReportPDFForPrinting = ({ intl }: { intl: InjectedIntl }) => {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      const dimensions = { height, width };
-
+      const { layout: outerLayout } = getJobParams(jobProviderOptions, 'printablePdfV2')();
+      let dimensions = outerLayout?.dimensions;
+      if (!dimensions) {
+        const el = document.querySelector('[data-shared-items-container]');
+        const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+        dimensions = { height, width };
+      }
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'printablePdfV2')(),
         layout: { id: 'print', dimensions },
@@ -388,10 +395,13 @@ export const reportingExportModalProvider = ({
     };
 
     const generateReportPNG = ({ intl }: { intl: InjectedIntl }) => {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      const dimensions = { height, width };
-
+      const { layout: outerLayout } = getJobParams(jobProviderOptions, 'printablePdfV2')();
+      let dimensions = outerLayout?.dimensions;
+      if (!dimensions) {
+        const el = document.querySelector('[data-shared-items-container]');
+        const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+        dimensions = { height, width };
+      }
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'pngV2')(),
         layout: { id: 'preserve_layout', dimensions },
