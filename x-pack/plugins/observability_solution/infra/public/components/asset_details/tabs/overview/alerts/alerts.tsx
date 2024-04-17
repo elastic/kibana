@@ -69,8 +69,7 @@ export const AlertsSummaryContent = ({
             )}
             <EuiFlexItem grow={false}>
               <LinkToAlertsPage
-                assetId={assetId}
-                queryField={assetIdField}
+                kuery={`${assetIdField}:"${assetId}"`}
                 dateRange={dateRange}
                 dataTestSubj="nfraAssetDetailsAlertsTabAlertsShowAllButton"
               />
