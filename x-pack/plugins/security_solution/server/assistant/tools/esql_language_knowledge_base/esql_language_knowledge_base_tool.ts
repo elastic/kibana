@@ -45,12 +45,5 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });
-
-    // return new ChainTool({
-    //   name: 'ESQLKnowledgeBaseTool',
-    //   description: ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION,
-    //   chain,
-    //   tags: ['esql', 'query-generation', 'knowledge-base'],
-    // });
   },
 };
