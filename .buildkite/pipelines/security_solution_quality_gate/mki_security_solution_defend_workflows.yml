@@ -30,7 +30,13 @@ steps:
         - exit_status: "*"
           limit: 1
 
-  - command: "echo 'Running the defend worklows tests in this step"
-    depends_on: build_image
-    key: test_defend_workflows
-    label: 'Serverless MKI QA Defend Workflows - Security Solution Cypress Tests'
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
+    label: 'Defend Workflows Cypress Tests on Serverless'
+    agents:
+     queue: n2-4-virt
+    timeout_in_minutes: 300
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
