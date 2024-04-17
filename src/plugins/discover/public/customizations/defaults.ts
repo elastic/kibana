@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './customization_types';
-export * from './customization_provider';
-export * from './defaults';
-export * from './types';
-export type { DiscoverCustomization, DiscoverCustomizationService } from './customization_service';
+import { DiscoverCustomizationContext } from './types';
+
+export const defaultCustomizationContext: DiscoverCustomizationContext = {
+  displayMode: 'standalone',
+  inlineTopNav: {
+    enabled: false,
+    showLogsExplorerTabs: false,
+  },
+};

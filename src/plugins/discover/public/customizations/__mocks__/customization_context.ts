@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import type { DiscoverCustomizationContext } from '../types';
 
 export const mockCustomizationContext: DiscoverCustomizationContext = {
@@ -15,3 +16,5 @@ export const mockCustomizationContext: DiscoverCustomizationContext = {
     showLogsExplorerTabs: false,
   },
 };
+
+export const mockCustomizationContext$ = of(mockCustomizationContext);

@@ -12,6 +12,8 @@ import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import { ExperimentalFeatures } from '../../common/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
@@ -95,12 +97,13 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
 export interface DiscoverRouterProps {
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
-  customizationContext: DiscoverCustomizationContext;
+  customizationContext$: Observable<DiscoverCustomizationContext>;
   experimentalFeatures: ExperimentalFeatures;
   history: History;
 }
 
 export const DiscoverRouter = ({
+  customizationContext$,
   services,
   history,
   profileRegistry,
@@ -111,16 +114,32 @@ export const DiscoverRouter = ({
     [profileRegistry]
   );
 
+  const customizationContext = useObservable(customizationContext$);
+
+  // The Discover state is not reactive, so we must avoid initialization before
+  // the first value is emitted
+  if (customizationContext == null) {
+    return null;
+  }
+
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
           <Routes>
             <Route path={addProfile('', ':profile')}>
-              <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
+              <CustomDiscoverRoutes
+                customizationContext={customizationContext}
+                profileRegistry={profileRegistry}
+                {...routeProps}
+              />
             </Route>
             <Route path="/">
-              <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
+              <DiscoverRoutes
+                customizationContext={customizationContext}
+                customizationCallbacks={customizationCallbacks}
+                {...routeProps}
+              />
             </Route>
           </Routes>
         </Router>

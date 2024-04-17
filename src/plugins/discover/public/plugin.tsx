@@ -7,7 +7,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -66,7 +66,11 @@ import {
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
-import type { DiscoverCustomizationContext, RegisterCustomizationProfile } from './customizations';
+import {
+  defaultCustomizationContext,
+  DiscoverCustomizationContext,
+  RegisterCustomizationProfile,
+} from './customizations';
 import {
   createRegisterCustomizationProfile,
   createProfileRegistry,
@@ -117,6 +121,13 @@ export interface DiscoverSetup {
   readonly locator: undefined | DiscoverAppLocator;
   readonly showInlineTopNav: (
     options?: Partial<Omit<DiscoverCustomizationContext['inlineTopNav'], 'enabled'>>
+  ) => void;
+  readonly configureTopNav: (
+    projectNavId: string,
+    options: {
+      showInline: boolean;
+      showLogsExplorerTabs: boolean;
+    }
   ) => void;
 }
 
@@ -222,10 +233,9 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private inlineTopNav: DiscoverCustomizationContext['inlineTopNav'] = {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  };
+  private inlineTopNav: Map<string | null, DiscoverCustomizationContext['inlineTopNav']> = new Map([
+    [null, defaultCustomizationContext.inlineTopNav],
+  ]);
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2Enabled: false,
   };
@@ -353,15 +363,25 @@ export class DiscoverPlugin
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
 
+        const customizationContext$: Observable<DiscoverCustomizationContext> = services.chrome
+          .getActiveSolutionNavId$()
+          .pipe(
+            map((navId) => ({
+              displayMode: 'standalone',
+              // TODO: make this conditional on the chrome nav id
+              inlineTopNav:
+                this.inlineTopNav.get(navId) ??
+                this.inlineTopNav.get(null) ??
+                defaultCustomizationContext.inlineTopNav,
+            }))
+          );
+
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
           services,
           profileRegistry: this.profileRegistry,
-          customizationContext: {
-            displayMode: 'standalone',
-            inlineTopNav: this.inlineTopNav,
-          },
+          customizationContext$,
           experimentalFeatures: this.experimentalFeatures,
         });
 
@@ -404,8 +424,16 @@ export class DiscoverPlugin
     return {
       locator: this.locator,
       showInlineTopNav: ({ showLogsExplorerTabs } = {}) => {
-        this.inlineTopNav.enabled = true;
-        this.inlineTopNav.showLogsExplorerTabs = showLogsExplorerTabs ?? false;
+        this.inlineTopNav.set(null, {
+          enabled: true,
+          showLogsExplorerTabs: showLogsExplorerTabs ?? false,
+        });
+      },
+      configureTopNav: (projectNavId, { showInline: enabled, showLogsExplorerTabs }) => {
+        this.inlineTopNav.set(projectNavId, {
+          enabled,
+          showLogsExplorerTabs,
+        });
       },
     };
   }

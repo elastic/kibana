@@ -23,7 +23,10 @@ import { ContextAppRoute } from './context';
 import { createProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
 import { NotFoundRoute } from './not_found';
-import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
+import {
+  mockCustomizationContext,
+  mockCustomizationContext$,
+} from '../customizations/__mocks__/customization_context';
 
 let mockProfile: string | undefined;
 
@@ -196,7 +199,7 @@ describe('DiscoverRouter', () => {
         services={mockDiscoverServices}
         history={history}
         profileRegistry={profileRegistry}
-        customizationContext={mockCustomizationContext}
+        customizationContext$={mockCustomizationContext$}
         experimentalFeatures={mockExperimentalFeatures}
       />
     );
