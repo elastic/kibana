@@ -135,19 +135,19 @@ export interface RouterOptions {
 }
 
 /** @internal */
-interface InternalRegistrarOptions {
+export interface InternalRegistrarOptions {
   isVersioned: boolean;
 }
 
 /** @internal */
-type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
+export type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
   route: RouteConfig<P, Q, B, M>,
   handler: RequestHandler<P, Q, B, C, M>,
   internalOpts?: InternalRegistrarOptions
 ) => ReturnType<RouteRegistrar<M, C>>;
 
 /** @internal */
-interface InternalRouterRoute extends RouterRoute {
+export interface InternalRouterRoute extends RouterRoute {
   readonly isVersioned: boolean;
 }
 

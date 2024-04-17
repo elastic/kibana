@@ -8,7 +8,7 @@
 
 import { generateOpenApiDocument } from './generate_oas';
 import { schema } from '@kbn/config-schema';
-import { createTestRouters, createRouter } from './generate_oas.util.test';
+import { createTestRouters, createRouter } from './generate_oas.test.util';
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {

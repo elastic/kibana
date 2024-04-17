@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { ApiVersion, ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { CoreKibanaRequest } from '../request';
