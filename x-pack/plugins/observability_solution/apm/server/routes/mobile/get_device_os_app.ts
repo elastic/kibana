@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
