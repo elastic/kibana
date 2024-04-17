@@ -59,9 +59,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   return (
     <DashboardRenderer
-      getCreationOptions={() =>
-        getCreationOptions(dashboardProps, notifications, dataView)
-      }
+      getCreationOptions={() => getCreationOptions(dashboardProps, notifications, dataView)}
       ref={setDashboard}
     />
   );
@@ -83,10 +81,7 @@ async function getCreationOptions(
       width: 'medium',
       grow: true,
     });
-    const panels = await convertSavedDashboardToPanels(
-      dashboardProps,
-      dataView
-    );
+    const panels = await convertSavedDashboardToPanels(dashboardProps, dataView);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');
@@ -101,46 +96,28 @@ async function getCreationOptions(
       }),
     };
   } catch (error) {
-    notifications.toasts.addDanger(
-      getLoadFailureToastLabels(dashboardProps, error)
-    );
+    notifications.toasts.addDanger(getLoadFailureToastLabels(dashboardProps, error));
     return {};
   }
 }
 
-export function getFilters(
-  serviceName: string,
-  environment: string,
-  dataView: DataView
-): Filter[] {
+export function getFilters(serviceName: string, environment: string, dataView: DataView): Filter[] {
   const filters: Filter[] = [];
 
   const serviceNameField = dataView.getFieldByName('service.name');
   if (serviceNameField) {
-    const serviceNameFilter = buildPhraseFilter(
-      serviceNameField,
-      serviceName,
-      dataView
-    );
+    const serviceNameFilter = buildPhraseFilter(serviceNameField, serviceName, dataView);
     filters.push(serviceNameFilter);
   }
 
   const environmentField = dataView.getFieldByName('service.environment');
-  if (
-    environmentField &&
-    environment &&
-    environment !== ENVIRONMENT_ALL.value
-  ) {
+  if (environmentField && environment && environment !== ENVIRONMENT_ALL.value) {
     if (environment === ENVIRONMENT_NOT_DEFINED.value) {
       const envExistsFilter = buildExistsFilter(environmentField, dataView);
       envExistsFilter.meta.negate = true;
       filters.push(envExistsFilter);
     } else {
-      const environmentFilter = buildPhraseFilter(
-        environmentField,
-        environment,
-        dataView
-      );
+      const environmentFilter = buildPhraseFilter(environmentField, environment, dataView);
       filters.push(environmentFilter);
     }
   }
@@ -150,17 +127,14 @@ export function getFilters(
 
 function getLoadFailureToastLabels(props: MetricsDashboardProps, error: Error) {
   return {
-    title: i18n.translate(
-      'xpack.apm.runtimeMetricsJsonDashboards.loadFailure.toast.title',
-      {
-        defaultMessage:
-          'Error while loading dashboard for agent "{agentName}" on runtime "{runtimeName}".',
-        values: {
-          agentName: props.agentName ?? 'unknown',
-          runtimeName: props.runtimeName ?? 'unknown',
-        },
-      }
-    ),
+    title: i18n.translate('xpack.apm.runtimeMetricsJsonDashboards.loadFailure.toast.title', {
+      defaultMessage:
+        'Error while loading dashboard for agent "{agentName}" on runtime "{runtimeName}".',
+      values: {
+        agentName: props.agentName ?? 'unknown',
+        runtimeName: props.runtimeName ?? 'unknown',
+      },
+    }),
     text: error.message,
   };
 }
