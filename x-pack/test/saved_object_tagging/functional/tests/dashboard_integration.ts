@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardSettings = getService('dashboardSettings');
   const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common']);
 
-  describe('dashboard integration', () => {
+  describe.only('dashboard integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
