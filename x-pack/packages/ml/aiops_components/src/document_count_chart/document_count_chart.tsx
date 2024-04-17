@@ -90,6 +90,11 @@ export type BrushSelectionUpdateHandler = (
 ) => void;
 
 /**
+ * Callback to set the autoRunAnalysis flag
+ */
+type SetAutoRunAnalysisFn = (isAutoRun: boolean) => void;
+
+/**
  * Props for document count chart
  */
 export interface DocumentCountChartProps {
@@ -121,7 +126,7 @@ export interface DocumentCountChartProps {
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
   /** Callback to set the autoRunAnalysis flag */
-  setAutoRunAnalysis?: (isAutoRun: boolean) => void;
+  setAutoRunAnalysis?: SetAutoRunAnalysisFn;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
   /** Optional style to override bar chart */
@@ -553,6 +558,15 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   );
 };
 
+/**
+ * Functional component that renders a `DocumentCountChart` with additional properties
+ * managed by the log rate analysis state. It leverages the `useLogRateAnalysisStateContext`
+ * to acquire state variables like `initialAnalysisStart` and functions such as
+ * `setAutoRunAnalysis`. These values are then passed as props to the `DocumentCountChart`.
+ *
+ * @param props - The properties passed to the DocumentCountChart component.
+ * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
+ */
 export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
   const { initialAnalysisStart, setAutoRunAnalysis } = useLogRateAnalysisStateContext();
 

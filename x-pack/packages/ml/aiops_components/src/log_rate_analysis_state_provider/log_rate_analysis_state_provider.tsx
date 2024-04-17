@@ -44,14 +44,30 @@ interface LogRateAnalysisState {
 
 const LogRateAnalysisStateContext = createContext<LogRateAnalysisState | undefined>(undefined);
 
+/**
+ * Props for LogRateAnalysisStateProvider.
+ */
 interface LogRateAnalysisStateProviderProps {
+  /** The parameters to be used to trigger an analysis. */
   initialAnalysisStart?: InitialAnalysisStart;
 }
 
-export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps> = ({
-  children,
-  initialAnalysisStart: incomingInitialAnalysisStart,
-}) => {
+/**
+ * Context provider component that manages and provides global state for Log Rate Analysis.
+ * This provider handles several pieces of state important for controlling and displaying
+ * log rate analysis data, such as the control of automatic analysis runs, and the management
+ * of both pinned and selected significant items and groups.
+ *
+ * The state includes mechanisms for setting initial analysis parameters, toggling analysis,
+ * and managing the current selection and pinned state of significant items and groups.
+ *
+ * @param props - Props object containing initial settings for the analysis,
+ * including children components to be wrapped by the Provider.
+ * @returns A context provider wrapping children with access to log rate analysis state.
+ */
+export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps> = (props) => {
+  const { children, initialAnalysisStart: incomingInitialAnalysisStart } = props;
+
   const [autoRunAnalysis, setAutoRunAnalysis] = useState(true);
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
@@ -131,6 +147,13 @@ export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps>
   );
 };
 
+/**
+ * Custom hook for accessing the state of log rate analysis from the LogRateAnalysisStateContext.
+ * This hook must be used within a component that is a descendant of the LogRateAnalysisStateContext provider.
+ *
+ * @returns The current state of the log rate analysis.
+ * @throws Throws an error if the hook is used outside of its Provider context.
+ */
 export const useLogRateAnalysisStateContext = () => {
   const logRateAnalysisState = useContext(LogRateAnalysisStateContext);
 
