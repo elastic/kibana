@@ -569,7 +569,7 @@ describe('estimateCapacity', () => {
       value: expect.any(Object),
     });
     expect(logger.debug).toHaveBeenCalledWith(
-      'the assumedRequiredThroughputPerMinutePerKibana (190) < capacityPerMinutePerKibana (200)'
+      'Task Manager is healthy, the assumedRequiredThroughputPerMinutePerKibana (190) < capacityPerMinutePerKibana (200)'
     );
   });
 
@@ -634,7 +634,7 @@ describe('estimateCapacity', () => {
       value: expect.any(Object),
     });
     expect(logger.warn).toHaveBeenCalledWith(
-      'the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (175) < capacityPerMinutePerKibana (200)'
+      'Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (175) < capacityPerMinutePerKibana (200)'
     );
   });
 
@@ -699,7 +699,7 @@ describe('estimateCapacity', () => {
       value: expect.any(Object),
     });
     expect(logger.warn).toHaveBeenCalledWith(
-      'the assumedRequiredThroughputPerMinutePerKibana (250) >= capacityPerMinutePerKibana (200) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) >= capacityPerMinutePerKibana (200)'
+      'Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (250) >= capacityPerMinutePerKibana (200) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) >= capacityPerMinutePerKibana (200)'
     );
   });
 
@@ -758,7 +758,7 @@ describe('estimateCapacity', () => {
         )
       )
     ).toMatchObject({
-      status: 'warn',
+      status: 'OK',
       timestamp: expect.any(String),
       value: {
         observed: {
@@ -834,7 +834,7 @@ describe('estimateCapacity', () => {
         )
       )
     ).toMatchObject({
-      status: 'error',
+      status: 'OK',
       timestamp: expect.any(String),
       value: {
         observed: {
