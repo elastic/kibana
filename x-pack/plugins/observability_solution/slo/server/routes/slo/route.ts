@@ -24,6 +24,7 @@ import {
   resetSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
+import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -445,6 +446,21 @@ const findSLOGroupsRoute = createSloServerRoute({
   },
 });
 
+const getSLOSuggestionsRoute = createSloServerRoute({
+  endpoint: 'GET /internal/api/observability/slos/suggestions',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  handler: async ({ context }) => {
+    await assertPlatinumLicense(context);
+
+    const soClient = (await context.core).savedObjects.client;
+    const findSLOGroups = new GetSLOSuggestions(soClient);
+    return await findSLOGroups.execute();
+  },
+});
+
 const deleteSloInstancesRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
   options: {
@@ -642,4 +658,5 @@ export const sloRouteRepository = {
   ...getSLOInstancesRoute,
   ...resetSLORoute,
   ...findSLOGroupsRoute,
+  ...getSLOSuggestionsRoute,
 };
