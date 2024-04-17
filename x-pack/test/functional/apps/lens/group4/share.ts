@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     afterEach(async () => {
       retry.waitFor('close share modal', async () => {
-        await PageObjects.lens.closeShareModal();
+        if (await testSubjects.exists('shareContextModal')) {
+          await PageObjects.lens.closeShareModal();
+        }
         return await testSubjects.exists('lnsApp_shareButton');
       });
     });
