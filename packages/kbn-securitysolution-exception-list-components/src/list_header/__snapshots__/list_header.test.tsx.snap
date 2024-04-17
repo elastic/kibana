@@ -26,7 +26,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -411,7 +411,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -690,7 +690,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -912,7 +912,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -1191,7 +1191,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -1386,7 +1386,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -1638,7 +1638,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -1903,7 +1903,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"

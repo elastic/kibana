@@ -1474,7 +1474,7 @@ describe('OnPreResponse', () => {
 });
 
 describe('runs with default preResponse handlers', () => {
-  it('does not allow overwriting of the "kbn-name" and "Content-Security-Policy" headers', async () => {
+  it('does not allow overwriting of the "kbn-name", "Content-Security-Policy" and  "Content-Security-Policy-Report-Only" headers', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -1484,6 +1484,7 @@ describe('runs with default preResponse handlers', () => {
           foo: 'bar',
           'kbn-name': 'hijacked!',
           'Content-Security-Policy': 'hijacked!',
+          'Content-Security-Policy-Report-Only': 'hijacked!',
         },
       })
     );
@@ -1495,6 +1496,9 @@ describe('runs with default preResponse handlers', () => {
     expect(response.header['kbn-name']).toBe('kibana');
     expect(response.header['content-security-policy']).toBe(
       `script-src 'report-sample' 'self' 'unsafe-eval'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
+    );
+    expect(response.header['content-security-policy-report-only']).toBe(
+      `form-action 'report-sample' 'self'`
     );
   });
 });

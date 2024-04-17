@@ -384,7 +384,7 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
-export interface CheckTargetMappingsState extends PostInitState {
+export interface CheckTargetTypesMappingsState extends PostInitState {
   readonly controlState: 'CHECK_TARGET_MAPPINGS';
 }
 
@@ -549,7 +549,7 @@ export interface LegacyDeleteState extends LegacyBaseState {
 
 export type State = Readonly<
   | CalculateExcludeFiltersState
-  | CheckTargetMappingsState
+  | CheckTargetTypesMappingsState
   | CheckUnknownDocumentsState
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded

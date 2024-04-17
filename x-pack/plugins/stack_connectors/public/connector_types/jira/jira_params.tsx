@@ -417,7 +417,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                     'xpack.stackConnectors.components.jira.otherFieldsHelpText',
                     {
                       defaultMessage:
-                        'When adding custom fields, please note that the system does not validate inputs or enforce required fields. To avoid failed actions, ensure compliance with Jira policies.',
+                        'Custom fields are not validated by the connector. To avoid failed actions, ensure compliance with your Jira policies.',
                     }
                   )}
                 />

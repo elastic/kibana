@@ -97,8 +97,9 @@ components:
       type: string
       enum:
         - 'created_at'
-        - 'is_default'
-        - 'title'
+        - 'anonymized'
+        - 'allowed'
+        - 'field'
         - 'updated_at'
 
     SortOrder:

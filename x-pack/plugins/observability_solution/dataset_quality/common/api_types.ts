@@ -62,6 +62,12 @@ export const integrationRt = rt.intersection([
 
 export type Integration = rt.TypeOf<typeof integrationRt>;
 
+export const getIntegrationsResponseRt = rt.exact(
+  rt.type({
+    integrations: rt.array(integrationRt),
+  })
+);
+
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
   percentage: rt.number,
@@ -78,14 +84,9 @@ export const dataStreamDetailsRt = rt.partial({
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
 
 export const getDataStreamsStatsResponseRt = rt.exact(
-  rt.intersection([
-    rt.type({
-      dataStreamsStats: rt.array(dataStreamStatRt),
-    }),
-    rt.type({
-      integrations: rt.array(integrationRt),
-    }),
-  ])
+  rt.type({
+    dataStreamsStats: rt.array(dataStreamStatRt),
+  })
 );
 
 export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
@@ -97,7 +98,7 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
-  estimatedDataInBytes: rt.number,
+  estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
 });
 
 export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstimatedDataInBytesRT>;

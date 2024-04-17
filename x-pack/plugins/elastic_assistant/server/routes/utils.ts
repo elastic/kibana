@@ -162,3 +162,14 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
     return { ...acc, [newKey]: obj[item] };
   }, {});
 };
+
+/**
+ * Returns the LangChain `llmType` for the given actionTypeId
+ */
+export const getLlmType = (actionTypeId: string): string | undefined => {
+  const llmTypeDictionary: Record<string, string> = {
+    [`.gen-ai`]: `openai`,
+    [`.bedrock`]: `bedrock`,
+  };
+  return llmTypeDictionary[actionTypeId];
+};

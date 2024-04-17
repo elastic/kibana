@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 import { recurse } from 'cypress-recurse';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
-import type { FilterItemObj } from '@kbn/security-solution-plugin/public/common/components/filter_group/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
@@ -319,8 +319,8 @@ export const openAlertsFieldBrowser = () => {
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   for (let i = 0; i < numberOfAlerts; i++) {
     waitForAlerts();
-    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
-    cy.get('@checkbox').should('have.attr', 'checked');
+    cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
+    cy.get('@checkbox').should('be.checked');
   }
 };
 
@@ -474,7 +474,7 @@ export const selectAllAlerts = () => {
   cy.get(SELECT_ALL_ALERTS).click();
 };
 
-export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) => {
+export const visitAlertsPageWithCustomFilters = (pageFilters: FilterControlConfig[]) => {
   const pageFilterUrlVal = encode(formatPageFilterSearchParam(pageFilters));
   const newURL = `${ALERTS_URL}?pageFilters=${pageFilterUrlVal}`;
   visitWithTimeRange(newURL);

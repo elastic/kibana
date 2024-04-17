@@ -34,7 +34,7 @@ export interface GroupByExpressionProps {
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
   onChangeSelectedTermField: (selectedTermField?: string | string[]) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
-  fields: FieldOption[];
+  fields?: FieldOption[];
   termSize?: number;
   termField?: string | string[];
   customGroupByTypes?: {
@@ -78,7 +78,7 @@ export const GroupByExpression = ({
 
   const availableFieldOptions: GroupByOverFieldOption[] = useMemo(
     () =>
-      fields.reduce((options: GroupByOverFieldOption[], field: FieldOption) => {
+      (fields ?? []).reduce((options: GroupByOverFieldOption[], field: FieldOption) => {
         if (groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)) {
           options.push({ label: field.name });
         }
@@ -109,13 +109,15 @@ export const GroupByExpression = ({
   }, [selectedTermsFieldsOptions, groupBy, onChangeSelectedTermField]);
 
   useEffect(() => {
-    // if current field set doesn't contain selected field, clear selection
-    const hasUnknownField = selectedTermsFieldsOptions.some(
-      (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
-    );
-    if (hasUnknownField) {
-      setSelectedTermsFieldsOptions([]);
-      onChangeSelectedTermField(undefined);
+    if (fields) {
+      // if current field set doesn't contain selected field, clear selection
+      const hasUnknownField = selectedTermsFieldsOptions.some(
+        (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
+      );
+      if (hasUnknownField) {
+        setSelectedTermsFieldsOptions([]);
+        onChangeSelectedTermField(undefined);
+      }
     }
   }, [selectedTermsFieldsOptions, fields, onChangeSelectedTermField]);
 

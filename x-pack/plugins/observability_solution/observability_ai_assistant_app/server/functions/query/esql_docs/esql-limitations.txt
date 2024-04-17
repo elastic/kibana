@@ -5,11 +5,11 @@ current release documentation.
 Elastic Docs
 ›Elasticsearch Guide [master]
 ›ES|QL
-« ES|QL task management
+« ES|QL language versions
 ES|QL examples »
 ES|QL limitationsedit
 Result set size limitedit
-By default, an ES|QL query returns up to 500 rows. You can increase the number
+By default, an ES|QL query returns up to 1000 rows. You can increase the number
 of rows up to 10,000 using the `LIMIT` command.
 Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s
 value.
@@ -37,20 +37,21 @@ ES|QL currently supports the following field types:
 `long`
 `null`
 `text`
+[preview]
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 `unsigned_long`
 `version`
 Spatial types
 `geo_point`
+`geo_shape`
 `point`
+`shape`
 Unsupported typesedit
 ES|QL does not yet support the following field types:
 TSDB metrics
 `counter`
 `position`
 `aggregate_metric_double`
-Spatial types
-`geo_shape`
-`shape`
 Date/time
 `date_nanos`
 `date_range`
@@ -73,6 +74,21 @@ Querying a column with an unsupported type returns an error. If a column with an
 unsupported type is not explicitly used in a query, it is returned with `null`
 values, with the exception of nested fields. Nested fields are not returned at
 all.
+Limitations on supported typesedit
+Some field types are not supported in all contexts:
+Spatial types are not supported in the SORT processing command.
+Specifying a column of one of these types as a sort parameter will result in an error:
+`geo_point`
+`geo_shape`
+`cartesian_point`
+`cartesian_shape`
+_source availabilityedit
+ES|QL does not support configurations where the
+_source field is disabled.
+[preview]
+This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+ES|QL’s support for synthetic `_source`
+is currently experimental.
 Full-text search is not supportededit
 Because of the way ES|QL treats `text` values,
 full-text search is not yet supported. Queries on `text` fields are like queries
@@ -104,8 +120,6 @@ To avoid these issues, a best practice is to be explicit about the field that
 you query, and query `keyword` sub-fields instead of `text` fields.
 Time series data streams are not supportededit
 ES|QL does not support querying time series data streams (TSDS).
-Cross-cluster search is not supportededit
-ES|QL does not support cross-cluster search.
 Date math limitationsedit
 Date math expressions work well when the leftmost expression is a datetime, for
 example:
@@ -142,7 +156,10 @@ of rows that are retrieved by the query and displayed in Discover. Queries and
 aggregations run on the full data set.
 Discover shows no more than 50 columns. If a query returns
 more than 50 columns, Discover only shows the first 50.
-Querying many many indices at once without any filters can cause an error in
+CSV export from Discover shows no more than 10,000 rows. This limit only applies to the number
+of rows that are retrieved by the query and displayed in Discover. Queries and
+aggregations run on the full data set.
+Querying many indices at once without any filters can cause an error in
 kibana which looks like `[esql] > Unexpected error from Elasticsearch: The
 content length (536885793) is bigger than the maximum allowed string
 (536870888)`. The response from ES|QL is too long. Use `DROP` or

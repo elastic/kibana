@@ -23,7 +23,22 @@ export interface FunctionDefinition {
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
-      literalOnly?: boolean;
+      /**
+       * If set, this parameter does not accept a field. It only accepts a constant,
+       * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
+       */
+      constantOnly?: boolean;
+      /**
+       * if provided this means that the value must be one
+       * of the options in the array iff the value is a literal.
+       *
+       * String values are case insensitive.
+       *
+       * If the value is not a literal, this field is ignored because
+       * we can't check the return value of a function to see if it
+       * matches one of the options prior to runtime.
+       */
+      literalOptions?: string[];
     }>;
     minParams?: number;
     returnType: string;
@@ -47,7 +62,7 @@ export interface CommandBaseDefinition {
       innerType?: string;
       values?: string[];
       valueDescriptions?: string[];
-      literalOnly?: boolean;
+      constantOnly?: boolean;
       wildcards?: boolean;
     }>;
   };
@@ -87,3 +102,5 @@ export type SignatureType =
   | FunctionDefinition['signatures'][number]
   | CommandOptionsDefinition['signature'];
 export type SignatureArgType = SignatureType['params'][number];
+
+export type FunctionArgSignature = FunctionDefinition['signatures'][number]['params'][number];

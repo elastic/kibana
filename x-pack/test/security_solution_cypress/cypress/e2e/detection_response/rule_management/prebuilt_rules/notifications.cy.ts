@@ -57,7 +57,7 @@ describe(
       // https://github.com/elastic/kibana/issues/179967
       it(
         'should NOT display install or update notifications when latest rules are installed',
-        { tags: ['@brokenInServerlessQA'] },
+        { tags: ['@skipInServerless'] },
         () => {
           visitRulesManagementTable();
           createAndInstallMockedPrebuiltRules([RULE_1]);
@@ -72,7 +72,7 @@ describe(
     });
 
     // https://github.com/elastic/kibana/issues/179968
-    describe('Notifications', { tags: ['@brokenInServerlessQA'] }, () => {
+    describe('Notifications', { tags: ['@skipInServerless'] }, () => {
       beforeEach(() => {
         installPrebuiltRuleAssets([RULE_1]);
       });
