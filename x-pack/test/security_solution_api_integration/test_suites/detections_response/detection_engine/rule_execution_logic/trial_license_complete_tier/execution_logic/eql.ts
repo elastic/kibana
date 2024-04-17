@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless EQL type rules', () => {
+  describe('@ess @serverles @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',

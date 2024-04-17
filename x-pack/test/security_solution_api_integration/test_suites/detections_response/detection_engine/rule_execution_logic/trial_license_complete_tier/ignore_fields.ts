@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_ignored.ts
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_eql_bug_77152.ts
    */
-  describe('@ess @serverless ignore_fields', () => {
+  describe('@ess @serverless @serverlessQA ignore_fields', () => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');
     const log = getService('log');

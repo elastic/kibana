@@ -147,6 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body?.execution_summary?.last_execution?.status).toBe('succeeded');
       });
 
+      // Broken in MKI environment, needs triage
       it('@skipInServerless expects an updated rule with a webhook action and meta field runs successfully', async () => {
         const webhookAction = await createWebHookRuleAction(supertest);
 
@@ -187,6 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body?.execution_summary?.last_execution?.status).toBe('succeeded');
       });
 
+      // Broken in MKI environment, needs triage
       it('@skipInServerless adds a webhook to an immutable rule', async () => {
         const immutableRule = await getImmutableRule();
         const webhookAction = await createWebHookRuleAction(supertest);
