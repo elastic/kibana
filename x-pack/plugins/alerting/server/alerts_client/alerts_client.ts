@@ -412,7 +412,7 @@ export class AlertsClient<
     const { alertsToReturn, recoveredAlertsToReturn } =
       this.legacyAlertsClient.getAlertsToSerialize(false);
 
-    const currentActiveAlerts = this.legacyAlertsClient.getProcessedAlerts('activeCurrent');
+    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
     const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
@@ -422,7 +422,7 @@ export class AlertsClient<
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(alertsToReturn)) {
       // See if there's an existing active alert document
-      if (!!currentActiveAlerts[id]) {
+      if (!!activeAlerts[id]) {
         if (
           this.fetchedAlerts.data.hasOwnProperty(id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
@@ -436,7 +436,7 @@ export class AlertsClient<
               RecoveryActionGroupId
             >({
               alert: this.fetchedAlerts.data[id],
-              legacyAlert: currentActiveAlerts[id],
+              legacyAlert: activeAlerts[id],
               rule: this.rule,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
@@ -446,7 +446,7 @@ export class AlertsClient<
         } else {
           // skip writing the alert document if the number of consecutive
           // active alerts is less than the rule alertDelay threshold
-          if (currentActiveAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
             continue;
           }
           activeAlertsToIndex.push(
@@ -457,7 +457,7 @@ export class AlertsClient<
               ActionGroupIds,
               RecoveryActionGroupId
             >({
-              legacyAlert: currentActiveAlerts[id],
+              legacyAlert: activeAlerts[id],
               rule: this.rule,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
