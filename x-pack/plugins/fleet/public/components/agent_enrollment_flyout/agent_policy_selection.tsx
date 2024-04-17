@@ -98,18 +98,18 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
       <AgentPolicyFormRow
         fullWidth={true}
         label={
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiLink disabled={!authz.fleet.all} onClick={onClickCreatePolicy}>
+          authz.fleet.allAgentPolicies && (
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={onClickCreatePolicy}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
                     defaultMessage="Create new agent policy"
                   />
                 </EuiLink>
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )
         }
       >
         <EuiSelect
