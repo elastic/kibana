@@ -23,11 +23,10 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
-import type { I18nStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
@@ -44,14 +43,12 @@ import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { ActionsEuiTableFormatting } from '../../table_utils';
 import type { RolesAPIClient } from '../roles_api_client';
 
-interface Props {
+export interface Props extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   history: ScopedHistory;
   readOnly?: boolean;
   buildFlavor: BuildFlavor;
-  theme: ThemeServiceStart;
-  i18nStart: I18nStart;
   cloudOrgUrl?: string;
 }
 
@@ -180,12 +177,8 @@ export class RolesGridPage extends Component<Props, State> {
             onCancel={this.onCancelDelete}
             rolesToDelete={this.state.selection.map((role) => role.name)}
             callback={this.handleDelete}
-            notifications={this.props.notifications}
-            rolesAPIClient={this.props.rolesAPIClient}
-            buildFlavor={this.props.buildFlavor}
-            theme={this.props.theme}
-            i18nStart={this.props.i18nStart}
             cloudOrgUrl={this.props.cloudOrgUrl}
+            {...this.props}
           />
         ) : null}
 
@@ -237,7 +230,7 @@ export class RolesGridPage extends Component<Props, State> {
                 direction: 'asc',
               },
             }}
-            rowProps={(role: Role) => {
+            rowProps={(_role: Role) => {
               return {
                 'data-test-subj': `roleRow`,
               };
@@ -257,7 +250,7 @@ export class RolesGridPage extends Component<Props, State> {
           defaultMessage: 'Role',
         }),
         sortable: true,
-        render: (name: string, record: Role) => {
+        render: (name: string, _record: Role) => {
           return (
             <EuiText color="subdued" size="s">
               <EuiLink
@@ -278,7 +271,7 @@ export class RolesGridPage extends Component<Props, State> {
           defaultMessage: 'Status',
         }),
         sortable: (role: Role) => isRoleEnabled(role) && !isRoleDeprecated(role),
-        render: (metadata: Role['metadata'], record: Role) => {
+        render: (_metadata: Role['metadata'], record: Role) => {
           return this.getRoleStatusBadges(record);
         },
       });

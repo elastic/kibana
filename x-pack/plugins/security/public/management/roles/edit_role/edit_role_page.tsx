@@ -27,13 +27,12 @@ import useAsync from 'react-use/lib/useAsync';
 import type { BuildFlavor } from '@kbn/config';
 import type {
   Capabilities,
+  CoreStart,
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
-  I18nStart,
   NotificationsStart,
   ScopedHistory,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -76,7 +75,7 @@ import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 
-interface Props {
+export interface Props extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
   action: 'edit' | 'clone';
   roleName?: string;
   dataViews?: DataViewsContract;
@@ -94,8 +93,6 @@ interface Props {
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
   buildFlavor: BuildFlavor;
-  i18n: I18nStart;
-  theme: ThemeServiceStart;
   cloudOrgUrl?: string;
 }
 
