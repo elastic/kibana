@@ -8,7 +8,9 @@
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import type { SuggestUsersPopoverProps } from './suggest_users_popover';
 import { SuggestUsersPopover } from './suggest_users_popover';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
@@ -18,16 +20,15 @@ import type { AssigneeWithProfile } from '../../user_profiles/types';
 
 jest.mock('../../../containers/user_profiles/api');
 
-// FLAKY: https://github.com/elastic/kibana/issues/171600
-// FLAKY: https://github.com/elastic/kibana/issues/171601
-describe.skip('SuggestUsersPopover', () => {
-  let appMockRender: AppMockRenderer;
-  let defaultProps: SuggestUsersPopoverProps;
+const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
+  uid: profile.uid,
+  profile,
+});
 
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-
-    defaultProps = {
+for (let i = 0; i <= 300; i = i + 1) {
+  describe('SuggestUsersPopover', () => {
+    let appMockRender: AppMockRenderer;
+    const defaultProps: SuggestUsersPopoverProps = {
       isLoading: false,
       assignedUsersWithProfiles: [],
       isPopoverOpen: true,
@@ -36,24 +37,22 @@ describe.skip('SuggestUsersPopover', () => {
       onClosePopover: jest.fn(),
       currentUserProfile: undefined,
     };
-  });
 
-  it('calls onUsersChange when 1 user is selected', async () => {
-    const onUsersChange = jest.fn();
-    const props = { ...defaultProps, onUsersChange };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
-
-    await waitForEuiPopoverOpen();
-
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
+    beforeEach(() => {
+      appMockRender = createAppMockRenderer();
     });
 
-    fireEvent.click(screen.getByText('WD'));
+    it('calls onUsersChange when 1 user is selected', async () => {
+      const onUsersChange = jest.fn();
+      const props = { ...defaultProps, onUsersChange };
+      appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
+      await waitForEuiPopoverOpen();
+
+      userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
+      userEvent.click(await screen.findByText('WD'));
+
+      expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {},
@@ -67,26 +66,20 @@ describe.skip('SuggestUsersPopover', () => {
         },
       ]
     `);
-  });
-
-  it('calls onUsersChange when multiple users are selected', async () => {
-    const onUsersChange = jest.fn();
-    const props = { ...defaultProps, onUsersChange };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
-
-    await waitForEuiPopoverOpen();
-
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
-      expect(screen.getByText('DR')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('WD'));
-    fireEvent.click(screen.getByText('DR'));
+    it('calls onUsersChange when multiple users are selected', async () => {
+      const onUsersChange = jest.fn();
+      const props = { ...defaultProps, onUsersChange };
+      appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    expect(onUsersChange.mock.calls[1][0]).toMatchInlineSnapshot(`
+      await waitForEuiPopoverOpen();
+
+      userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
+      userEvent.click(await screen.findByText('WD'));
+      userEvent.click(await screen.findByText('DR'));
+
+      expect(onUsersChange.mock.calls[1][0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {},
@@ -110,29 +103,24 @@ describe.skip('SuggestUsersPopover', () => {
         },
       ]
     `);
-  });
-
-  it('calls onUsersChange with the current user (Physical Dinosaur) at the beginning', async () => {
-    const onUsersChange = jest.fn();
-    const props = {
-      ...defaultProps,
-      assignedUsersWithProfiles: [asAssignee(userProfiles[1]), asAssignee(userProfiles[0])],
-      currentUserProfile: userProfiles[1],
-      onUsersChange,
-    };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
-
-    await waitForEuiPopoverOpen();
-
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('WD'));
+    it('calls onUsersChange with the current user (Physical Dinosaur) at the beginning', async () => {
+      const onUsersChange = jest.fn();
+      const props = {
+        ...defaultProps,
+        assignedUsersWithProfiles: [asAssignee(userProfiles[1]), asAssignee(userProfiles[0])],
+        currentUserProfile: userProfiles[1],
+        onUsersChange,
+      };
+      appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
+      await waitForEuiPopoverOpen();
+
+      userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
+      userEvent.click(await screen.findByText('WD'));
+
+      expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "data": Object {},
@@ -166,77 +154,70 @@ describe.skip('SuggestUsersPopover', () => {
         },
       ]
     `);
-  });
-
-  it('does not show the assigned users total if there are no assigned users', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
-
-    await waitForEuiPopoverOpen();
-
-    expect(screen.queryByText('assigned')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-
-    await waitFor(() => {
-      expect(screen.getByText('WD')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('WD'));
-    expect(screen.getByText('1 assigned')).toBeInTheDocument();
-  });
+    it('does not show the assigned users total if there are no assigned users', async () => {
+      appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
-  it('shows the 1 assigned total after clicking on a user', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+      await waitForEuiPopoverOpen();
 
-    await waitForEuiPopoverOpen();
+      expect(screen.queryByText('assigned')).not.toBeInTheDocument();
 
-    expect(screen.queryByText('assigned')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    fireEvent.click(screen.getByText('WD'));
-    expect(screen.getByText('1 assigned')).toBeInTheDocument();
-  });
+      userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
+      userEvent.click(await screen.findByText('WD'));
 
-  it('shows the 1 assigned total when the users are passed in', async () => {
-    const props = {
-      ...defaultProps,
-      assignedUsersWithProfiles: [{ uid: userProfiles[0].uid, profile: userProfiles[0] }],
-    };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
-
-    await waitForEuiPopoverOpen();
-
-    expect(screen.getByText('1 assigned')).toBeInTheDocument();
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-  });
-
-  it('calls onTogglePopover when clicking the edit button after the popover is already open', async () => {
-    const togglePopover = jest.fn();
-    const props = {
-      ...defaultProps,
-      togglePopover,
-    };
-    appMockRender.render(<SuggestUsersPopover {...props} />);
-
-    await waitForEuiPopoverOpen();
-
-    await waitFor(() => {
-      expect(screen.getByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
+      expect(await screen.findByText('1 assigned')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
+    it('shows the 1 assigned total after clicking on a user', async () => {
+      appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
-    expect(togglePopover).toBeCalled();
+      await waitForEuiPopoverOpen();
+
+      expect(screen.queryByText('assigned')).not.toBeInTheDocument();
+
+      userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
+      userEvent.click(await screen.findByText('WD'));
+
+      expect(await screen.findByText('1 assigned')).toBeInTheDocument();
+    });
+
+    it('shows the 1 assigned total when the users are passed in', async () => {
+      const props = {
+        ...defaultProps,
+        assignedUsersWithProfiles: [{ uid: userProfiles[0].uid, profile: userProfiles[0] }],
+      };
+      appMockRender.render(<SuggestUsersPopover {...props} />);
+
+      await waitForEuiPopoverOpen();
+
+      expect(await screen.findByText('1 assigned')).toBeInTheDocument();
+      expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+    });
+
+    it('calls onTogglePopover when clicking the edit button after the popover is already open', async () => {
+      const togglePopover = jest.fn();
+      const props = {
+        ...defaultProps,
+        togglePopover,
+      };
+      appMockRender.render(<SuggestUsersPopover {...props} />);
+
+      await waitForEuiPopoverOpen();
+
+      expect(await screen.findByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
+
+      userEvent.click(await screen.findByTestId('case-view-assignees-edit-button'));
+
+      expect(togglePopover).toBeCalled();
+    });
+
+    it('shows results initially', async () => {
+      appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+
+      await waitForEuiPopoverOpen();
+
+      expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+    });
   });
-
-  it('shows results initially', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
-
-    await waitForEuiPopoverOpen();
-
-    await waitFor(() => expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument());
-  });
-});
-
-const asAssignee = (profile: UserProfileWithAvatar): AssigneeWithProfile => ({
-  uid: profile.uid,
-  profile,
-});
+}
