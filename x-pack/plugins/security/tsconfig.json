@@ -79,6 +79,9 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-security-common",
+    "@kbn/react-kibana-context-common",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
