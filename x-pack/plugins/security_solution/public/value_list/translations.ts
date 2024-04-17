@@ -124,7 +124,7 @@ export const FAILED_TO_UPLOAD_LIST_ITEM_TITLE = i18n.translate(
 );
 
 export const UPLOAD_TOOLTIP = i18n.translate('xpack.securitySolution.listItems.uploadTooltip', {
-  defaultMessage: 'All items will be added to the value list',
+  defaultMessage: 'All items will be added to the value list.',
 });
 
 export const UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT = i18n.translate(
