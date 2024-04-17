@@ -27,7 +27,6 @@ import useAsync from 'react-use/lib/useAsync';
 import type { BuildFlavor } from '@kbn/config';
 import type {
   Capabilities,
-  CoreStart,
   DocLinksStart,
   FatalErrorsSetup,
   HttpStart,
@@ -52,6 +51,7 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
 import { RoleValidator } from './validate_role';
+import type { StartServices } from '../../..';
 import type {
   BuiltinESPrivileges,
   RawKibanaPrivileges,
@@ -75,7 +75,7 @@ import { KibanaPrivileges } from '../model';
 import type { PrivilegesAPIClient } from '../privileges_api_client';
 import type { RolesAPIClient } from '../roles_api_client';
 
-export interface Props extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
+export interface Props extends StartServices {
   action: 'edit' | 'clone';
   roleName?: string;
   dataViews?: DataViewsContract;

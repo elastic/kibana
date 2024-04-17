@@ -23,7 +23,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
-import type { CoreStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -31,6 +31,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
+import type { StartServices } from '../../..';
 import type { Role } from '../../../../common';
 import {
   getExtendedRoleDeprecationNotice,
@@ -43,7 +44,7 @@ import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { ActionsEuiTableFormatting } from '../../table_utils';
 import type { RolesAPIClient } from '../roles_api_client';
 
-export interface Props extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
+export interface Props extends StartServices {
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   history: ScopedHistory;

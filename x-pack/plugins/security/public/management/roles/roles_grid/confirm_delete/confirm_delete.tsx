@@ -20,15 +20,16 @@ import {
 import React, { Component, Fragment } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
-import type { CoreStart, NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { StartServices } from '../../../..';
 import type { RolesAPIClient } from '../../roles_api_client';
 
-interface Props extends Pick<CoreStart, 'analytics' | 'i18n' | 'theme'> {
+interface Props extends StartServices {
   rolesToDelete: string[];
   callback: (rolesToDelete: string[], errors: string[]) => void;
   onCancel: () => void;
