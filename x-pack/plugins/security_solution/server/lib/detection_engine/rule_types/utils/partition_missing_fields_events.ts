@@ -28,7 +28,7 @@ export const partitionMissingFieldsEvents = <
     if (suppressedBy.length === 0) {
       return true;
     }
-    const eventFields = get(event, fieldsPath);
+    const eventFields = fieldsPath.length ? get(event, fieldsPath) : event;
     const hasMissingFields =
       Object.keys(pick(eventFields, suppressedBy)).length < suppressedBy.length;
 
