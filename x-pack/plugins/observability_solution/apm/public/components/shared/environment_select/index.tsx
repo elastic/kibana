@@ -29,9 +29,7 @@ function getEnvironmentOptions(environments: Environment[]) {
 
   return [
     ENVIRONMENT_ALL,
-    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
-      ? [ENVIRONMENT_NOT_DEFINED]
-      : []),
+    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value) ? [ENVIRONMENT_NOT_DEFINED] : []),
     ...environmentOptions,
   ];
 }
@@ -117,9 +115,7 @@ export function EnvironmentSelect({
       selectedOptions={selectedOptions}
       onChange={(changedOptions) => onSelect(changedOptions)}
       onSearchChange={onSearch}
-      isLoading={
-        status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING
-      }
+      isLoading={status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING}
     />
   );
 }

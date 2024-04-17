@@ -9,10 +9,7 @@ import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
-import {
-  apmRouter as apmRouterBase,
-  ApmRouter,
-} from '../../routing/apm_route_config';
+import { apmRouter as apmRouterBase, ApmRouter } from '../../routing/apm_route_config';
 import {
   logsLocatorsMock,
   observabilityLogsExplorerLocatorsMock,
@@ -20,8 +17,7 @@ import {
 
 const apmRouter = {
   ...apmRouterBase,
-  link: (...args: [any]) =>
-    `some-basepath/app/apm${apmRouterBase.link(...args)}`,
+  link: (...args: [any]) => `some-basepath/app/apm${apmRouterBase.link(...args)}`,
 } as ApmRouter;
 
 const { allDatasetsLocator } = observabilityLogsExplorerLocatorsMock;
@@ -144,8 +140,7 @@ describe('Transaction action menu', () => {
         {
           key: 'podDetails',
           title: 'Pod details',
-          subtitle:
-            'View logs and metrics for this pod to get further details.',
+          subtitle: 'View logs and metrics for this pod to get further details.',
           actions: [
             {
               key: 'podLogs',
