@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink } from '@elastic/eu
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
@@ -40,9 +41,15 @@ export function SloErrorBudget({
     };
   }, [reloadSubject]);
 
+  const kqlQuery = `slo.id:"${sloId}" and slo.instanceId:"${sloInstanceId}"`;
+
+  const { data: sloList } = useFetchSloList({
+    kqlQuery,
+  });
+
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
-      list: [{ sloId: sloId!, instanceId: sloInstanceId ?? ALL_VALUE }],
+      sloList: sloList?.results ?? [],
       shouldRefetch: false,
     });
 

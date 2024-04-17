@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiNotificationBadge } from '@elastic/eui';
+import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
@@ -18,8 +18,8 @@ export const useSloDetailsTabs = ({
   selectedTabId,
   setSelectedTabId,
 }: {
-  isAutoRefreshing: boolean;
   slo?: SLOWithSummaryResponse | null;
+  isAutoRefreshing: boolean;
   selectedTabId: SloTabId;
   setSelectedTabId: (val: SloTabId) => void;
 }) => {
@@ -27,6 +27,8 @@ export const useSloDetailsTabs = ({
     sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE]] : [],
     shouldRefetch: isAutoRefreshing,
   });
+
+  const isRemote = !!slo?.remote;
 
   const tabs = [
     {
@@ -40,19 +42,34 @@ export const useSloDetailsTabs = ({
     },
     {
       id: ALERTS_TAB_ID,
-      label: i18n.translate('xpack.slo.sloDetails.tab.alertsLabel', {
-        defaultMessage: 'Alerts',
-      }),
+      label: isRemote ? (
+        <EuiToolTip
+          content={i18n.translate('xpack.slo.sloDetails.tab.alertsDisabledTooltip', {
+            defaultMessage: 'Alerts are not available for remote SLOs',
+          })}
+          position="right"
+        >
+          <>{ALERTS_LABEL}</>
+        </EuiToolTip>
+      ) : (
+        ALERTS_LABEL
+      ),
       'data-test-subj': 'alertsTab',
+      disabled: Boolean(isRemote),
       isSelected: selectedTabId === ALERTS_TAB_ID,
-      append: slo ? (
-        <EuiNotificationBadge className="eui-alignCenter" size="m">
-          {(activeAlerts && activeAlerts.get(slo)) ?? 0}
-        </EuiNotificationBadge>
-      ) : null,
+      append:
+        slo && !isRemote ? (
+          <EuiNotificationBadge className="eui-alignCenter" size="m">
+            {(activeAlerts && activeAlerts.get(slo)) ?? 0}
+          </EuiNotificationBadge>
+        ) : null,
       onClick: () => setSelectedTabId(ALERTS_TAB_ID),
     },
   ];
 
   return { tabs };
 };
+
+const ALERTS_LABEL = i18n.translate('xpack.slo.sloDetails.tab.alertsLabel', {
+  defaultMessage: 'Alerts',
+});

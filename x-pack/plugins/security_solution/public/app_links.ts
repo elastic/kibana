@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
+
+import { links as aiInsightsLinks } from './ai_insights/links';
 import type { AppLinkItems } from './common/links/types';
 import { indicatorsLinks } from './threat_intelligence/links';
 import { links as alertsLinks } from './detections/links';
@@ -24,6 +26,7 @@ export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_li
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
   alertsLinks,
+  aiInsightsLinks,
   findingsLinks,
   casesLinks,
   timelinesLinks,
@@ -43,6 +46,7 @@ export const getFilteredLinks = async (
   return Object.freeze([
     dashboardsLinks,
     alertsLinks,
+    aiInsightsLinks,
     findingsLinks,
     casesLinks,
     timelinesLinks,
