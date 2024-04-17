@@ -25,14 +25,10 @@ export interface FancySelectProps {
   onChange: (value: string) => void;
 }
 
-export const FancySelect: React.FC<FancySelectProps> = ({
-  value,
-  options,
-  onChange,
-}) => {
+export const FancySelect: React.FC<FancySelectProps> = ({ value, options, onChange }) => {
   const [open, setOpen] = React.useState(false);
 
-  let  selected: undefined | FancySelectOption;
+  let selected: undefined | FancySelectOption;
 
   if (value) {
     selected = options.find((option) => option.id === value);
@@ -73,11 +69,7 @@ export const FancySelect: React.FC<FancySelectProps> = ({
     <EuiInputPopover
       input={
         <EuiFormControlLayout icon={selected?.icon} isDropdown>
-          <EuiFieldText
-            readOnly
-            type="search"
-            value={'      ' + selected?.title}
-          />
+          <EuiFieldText readOnly type="search" value={'      ' + selected?.title} />
         </EuiFormControlLayout>
       }
       isOpen={true}
@@ -89,12 +81,7 @@ export const FancySelect: React.FC<FancySelectProps> = ({
       }}
       closePopover={() => setOpen(false)}
     >
-      {open && (
-        <EuiContextMenuPanel
-          initialFocusedItemIndex={0}
-          items={items}
-        />
-      )}
+      {open && <EuiContextMenuPanel initialFocusedItemIndex={0} items={items} />}
     </EuiInputPopover>
   );
 };

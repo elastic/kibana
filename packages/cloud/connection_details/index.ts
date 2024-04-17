@@ -8,5 +8,5 @@
 
 export * from './types';
 export { ConnectionDetailsOptsProvider } from './context';
-export * from './connection_details';
-export * from './connection_details_flyout_content';
+export { ConnectionDetails } from './connection_details';
+export { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';

@@ -7,9 +7,13 @@
  */
 
 import React from 'react';
-import { StoriesProvider, StoriesProviderKeyCreationError, StoriesProviderNoKeyPermissions } from './stories';
-import { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';
 import { EuiFlyout } from '@elastic/eui';
+import {
+  StoriesProvider,
+  StoriesProviderKeyCreationError,
+  StoriesProviderNoKeyPermissions,
+} from './stories';
+import { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';
 
 export default {
   title: 'Connection Details/Flyout',
@@ -17,7 +21,7 @@ export default {
 
 export const Default = () => {
   return (
-    <EuiFlyout size="l"  onClose={() => {}}>
+    <EuiFlyout size="l" onClose={() => {}}>
       <StoriesProvider>
         <ConnectionDetailsFlyoutContent />
       </StoriesProvider>
@@ -27,7 +31,7 @@ export const Default = () => {
 
 export const CreationError = () => {
   return (
-    <EuiFlyout size="l"  onClose={() => {}}>
+    <EuiFlyout size="l" onClose={() => {}}>
       <StoriesProviderKeyCreationError>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderKeyCreationError>
@@ -37,7 +41,7 @@ export const CreationError = () => {
 
 export const MissingPermissions = () => {
   return (
-    <EuiFlyout size="l"  onClose={() => {}}>
+    <EuiFlyout size="l" onClose={() => {}}>
       <StoriesProviderNoKeyPermissions>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderNoKeyPermissions>

@@ -11,15 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { useConnectionDetailsService } from '../../../context';
 import { SpaNoRouterLink } from '../../../components/spa_no_router_link';
 
-export interface KeySetupFormProps {
-  loading?: boolean;
-}
-
-export const ManageKeysLink: React.FC<KeySetupFormProps> = ({loading}) => {
+export const ManageKeysLink: React.FC = () => {
   const service = useConnectionDetailsService();
 
   const link = service.opts.apiKeys?.manageKeysLink;
-  
+
   if (!link) return null;
 
   return (

@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import {StoriesProvider} from '../../stories';
-import {ApiKeysTab} from './api_keys_tab';
+import { StoriesProvider } from '../../stories';
+import { ApiKeysTab } from './api_keys_tab';
 
 export default {
   title: 'Connection Details/Tabs/API Keys',

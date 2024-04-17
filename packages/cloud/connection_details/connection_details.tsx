@@ -15,17 +15,13 @@ import { ApiKeysTab } from './tabs/api_keys_tab';
 
 export const ConnectionDetails: React.FC = () => {
   type TabID = 'endpoints' | 'apiKeys';
-  type Tab = [
-    id: TabID,
-    name: string,
-    content: React.ReactNode,
-  ];
+  type Tab = [id: TabID, name: string, content: React.ReactNode];
 
   const ctx = useConnectionDetailsOpts();
   const [tab, setTab] = React.useState<TabID>('endpoints');
 
   const tabs: Tab[] = [];
-  
+
   if (ctx.endpoints) {
     tabs.push([
       'endpoints',
@@ -54,11 +50,9 @@ export const ConnectionDetails: React.FC = () => {
     <>
       <EuiTabs>
         {tabs.map(([id, name]) => (
-          <EuiTab
-            key={id}
-            onClick={() => setTab(id)}
-            isSelected={tab === id}
-          >{name}</EuiTab>  
+          <EuiTab key={id} onClick={() => setTab(id)} isSelected={tab === id}>
+            {name}
+          </EuiTab>
         ))}
       </EuiTabs>
       <EuiSpacer />

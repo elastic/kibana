@@ -7,8 +7,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 import { i18n } from '@kbn/i18n';
+import { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
 import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
 import type { ConnectionDetailsOpts } from './types';
 
@@ -21,12 +21,16 @@ export class ConnectionDetailsService {
   public readonly apiKeyFormat$ = new BehaviorSubject<Format>('encoded');
   public readonly apiKeyHasAccess$ = new BehaviorSubject<null | boolean>(null);
 
-  constructor (public readonly opts: ConnectionDetailsOpts) {
-    opts.apiKeys?.hasPermission().then((hasAccess) => {
-      this.apiKeyHasAccess$.next(hasAccess);
-    }).catch((error) => {
-      console.error('Error checking API key creation permissions', error);
-    });
+  constructor(public readonly opts: ConnectionDetailsOpts) {
+    opts.apiKeys
+      ?.hasPermission()
+      .then((hasAccess) => {
+        this.apiKeyHasAccess$.next(hasAccess);
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Error checking API key creation permissions', error);
+      });
   }
 
   public readonly toggleShowCloudId = () => {
@@ -56,7 +60,7 @@ export class ConnectionDetailsService {
   private readonly createKeyAsync = async () => {
     const createKey = this.opts.apiKeys?.createKey;
 
-    if (!createKey)  {
+    if (!createKey) {
       throw new Error('createKey() is not implemented');
     }
 

@@ -26,7 +26,7 @@ export const Default = () => {
           { id: '2', title: 'Option 2', description: 'Description 2', icon: 'search' },
           { id: '3', title: 'Option 3', description: 'Description 3', icon: 'empty' },
         ]}
-        onChange={(value) => setValue(value)} 
+        onChange={(newValue) => setValue(newValue)}
       />
     </StoriesProvider>
   );

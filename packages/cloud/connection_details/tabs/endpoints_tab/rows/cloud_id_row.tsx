@@ -17,9 +17,7 @@ export interface CloudIdRowProps {
   value: string;
 }
 
-export const CloudIdRow: React.FC<CloudIdRowProps> = ({
-  value,
-}) => {
+export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
   const service = useConnectionDetailsService();
   const showCloudId = useBehaviorSubject(service.showCloudId$);
 
@@ -43,7 +41,8 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({
             defaultMessage: 'Cloud ID',
           })}
           helpText={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.helpText', {
-            defaultMessage: 'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
+            defaultMessage:
+              'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
           })}
           fullWidth
           data-test-subj="connectionDetailsEsEndpoint"

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {EuiForm} from '@elastic/eui';
+import { EuiForm } from '@elastic/eui';
 import * as React from 'react';
 import { useConnectionDetailsOpts } from '../../context';
 import { CloudIdRow } from './rows/cloud_id_row';

@@ -13,14 +13,15 @@ import { context as serviceContext } from './service';
 
 export const context = React.createContext<ConnectionDetailsOpts>({});
 
-export const ConnectionDetailsOptsProvider: React.FC<ConnectionDetailsOpts> = ({children, ...opts}) => {
-  const service = React.useMemo(() => new ConnectionDetailsService(opts), []);
+export const ConnectionDetailsOptsProvider: React.FC<ConnectionDetailsOpts> = ({
+  children,
+  ...opts
+}) => {
+  const service = React.useMemo(() => new ConnectionDetailsService(opts), [opts]);
 
   return (
     <context.Provider value={opts}>
-      <serviceContext.Provider value={service}>
-        {children}
-      </serviceContext.Provider>
+      <serviceContext.Provider value={service}>{children}</serviceContext.Provider>
     </context.Provider>
   );
 };

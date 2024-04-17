@@ -9,15 +9,13 @@
 import * as React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {CopyInput} from '../../../components/copy_input';
+import { CopyInput } from '../../../components/copy_input';
 
 export interface EndpointUrlProps {
   url: string;
 }
 
-export const EndpointUrlRow: React.FC<EndpointUrlProps> = ({
-  url,
-}) => {
+export const EndpointUrlRow: React.FC<EndpointUrlProps> = ({ url }) => {
   return (
     <EuiFormRow
       label={i18n.translate('cloud.connectionDetails.tab.endpoints.endpointField.label', {

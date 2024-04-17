@@ -20,9 +20,12 @@ export interface SuccessFormControlledProps {
   onFormatChange: (format: Format) => void;
 }
 
-export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({ apiKey, format, onFormatChange }) => {
-  const keyValue = format === 'encoded'
-    ? apiKey.encoded : `${apiKey.id}:${apiKey.key}`;
+export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
+  apiKey,
+  format,
+  onFormatChange,
+}) => {
+  const keyValue = format === 'encoded' ? apiKey.encoded : `${apiKey.id}:${apiKey.key}`;
 
   return (
     <>
@@ -50,7 +53,7 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({ ap
         >
           <FormatSelect value={format} onChange={onFormatChange} />
         </EuiFormRow>
-        
+
         <EuiFormRow
           label={i18n.translate('cloud.connectionDetails.apiKeys.successForm.keyValueTitle', {
             defaultMessage: 'API key value',

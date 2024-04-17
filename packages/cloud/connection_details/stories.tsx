@@ -40,15 +40,11 @@ const defaultOpts: ConnectionDetailsOpts = {
   },
 };
 
-export const StoriesProvider: React.FC = ({children}) => {
-  return (
-    <ConnectionDetailsOptsProvider {...defaultOpts}>
-      {children}
-    </ConnectionDetailsOptsProvider>
-  );
+export const StoriesProvider: React.FC = ({ children }) => {
+  return <ConnectionDetailsOptsProvider {...defaultOpts}>{children}</ConnectionDetailsOptsProvider>;
 };
 
-export const StoriesProviderKeyCreationError: React.FC = ({children}) => {
+export const StoriesProviderKeyCreationError: React.FC = ({ children }) => {
   const opts: ConnectionDetailsOpts = {
     ...defaultOpts,
     apiKeys: {
@@ -60,14 +56,10 @@ export const StoriesProviderKeyCreationError: React.FC = ({children}) => {
     },
   };
 
-  return (
-    <ConnectionDetailsOptsProvider {...opts}>
-      {children}
-    </ConnectionDetailsOptsProvider>
-  );
+  return <ConnectionDetailsOptsProvider {...opts}>{children}</ConnectionDetailsOptsProvider>;
 };
 
-export const StoriesProviderNoKeyPermissions: React.FC = ({children}) => {
+export const StoriesProviderNoKeyPermissions: React.FC = ({ children }) => {
   const opts: ConnectionDetailsOpts = {
     ...defaultOpts,
     apiKeys: {
@@ -80,9 +72,5 @@ export const StoriesProviderNoKeyPermissions: React.FC = ({children}) => {
     },
   };
 
-  return (
-    <ConnectionDetailsOptsProvider {...opts}>
-      {children}
-    </ConnectionDetailsOptsProvider>
-  );
+  return <ConnectionDetailsOptsProvider {...opts}>{children}</ConnectionDetailsOptsProvider>;
 };

@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ManageKeysLink } from '../../components/manage_keys_link';
@@ -19,7 +28,13 @@ export interface ConfigurationFormControlledProps {
   onSubmit: React.FormEventHandler<HTMLFormElement>;
 }
 
-export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledProps> = ({ name, loading, error, onNameChange, onSubmit }) => {
+export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledProps> = ({
+  name,
+  loading,
+  error,
+  onNameChange,
+  onSubmit,
+}) => {
   const body = (
     <>
       {!!error && (
@@ -36,7 +51,7 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
           <EuiSpacer />
         </>
       )}
-      
+
       <EuiFormRow
         label={i18n.translate('cloud.connectionDetails.tab.apiKeys.nameField.label', {
           defaultMessage: 'API key name',
@@ -65,11 +80,7 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
         <ManageKeysLink />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          type="submit"
-          data-test-subj="createKeySubmitBtn"
-        >
+        <EuiButton fill type="submit" data-test-subj="createKeySubmitBtn">
           {i18n.translate('cloud.connectionDetails.tab.apiKeys.nameField.createButton.label', {
             defaultMessage: 'Create API key',
           })}

@@ -7,37 +7,23 @@
  */
 
 import * as React from 'react';
-import {
-  EuiCopy,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCopy, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 
 export interface EndpointUrlProps {
   value: string;
 }
 
-export const CopyInput: React.FC<EndpointUrlProps> = ({
-  value,
-}) => {
+export const CopyInput: React.FC<EndpointUrlProps> = ({ value }) => {
   const textRef = React.useRef<HTMLSpanElement>(null);
 
   return (
-    <EuiPanel
-      borderRadius="none"
-      hasShadow={false}
-      color={'subdued'}
-      grow={false}
-    >
+    <EuiPanel borderRadius="none" hasShadow={false} color={'subdued'} grow={false}>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiText
             size={'s'}
             color={'subdued'}
-            style={{wordBreak: 'break-all'}}
+            style={{ wordBreak: 'break-all' }}
             data-test-subj="copyInputValue"
           >
             <span

@@ -7,8 +7,8 @@
  */
 
 import * as React from 'react';
-import { FancySelect } from '../../../../components/fancy_select';
 import { i18n } from '@kbn/i18n';
+import { FancySelect } from '../../../../components/fancy_select';
 
 export type Format = 'encoded' | 'beats' | 'logstash';
 
@@ -17,7 +17,7 @@ export interface FormatSelectProps {
   onChange: (value: Format) => void;
 }
 
-export const FormatSelect: React.FC<FormatSelectProps> = ({ value, onChange}) => {
+export const FormatSelect: React.FC<FormatSelectProps> = ({ value, onChange }) => {
   return (
     <FancySelect
       value={value}
@@ -30,7 +30,7 @@ export const FormatSelect: React.FC<FormatSelectProps> = ({ value, onChange}) =>
           }),
           description: i18n.translate('cloud.connectionDetails.apiKeyFormat.encoded.description', {
             defaultMessage: 'Use to make requests to Elasticsearch REST API',
-          })
+          }),
         },
         {
           id: 'beats',
@@ -40,7 +40,7 @@ export const FormatSelect: React.FC<FormatSelectProps> = ({ value, onChange}) =>
           }),
           description: i18n.translate('cloud.connectionDetails.apiKeyFormat.beats.description', {
             defaultMessage: 'Use to configure Beats',
-          })
+          }),
         },
         {
           id: 'logstash',
@@ -50,7 +50,7 @@ export const FormatSelect: React.FC<FormatSelectProps> = ({ value, onChange}) =>
           }),
           description: i18n.translate('cloud.connectionDetails.apiKeyFormat.logstash.description', {
             defaultMessage: 'Use to configure Logstash',
-          })
+          }),
         },
       ]}
       onChange={(value) => onChange(value as Format)}

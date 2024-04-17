@@ -20,8 +20,8 @@ export interface SpaNoRouterLinkProps {
 }
 
 export const SpaNoRouterLink: React.FC<SpaNoRouterLinkProps> = ({ url, go, onClick, children }) => {
-  /* eslint-disable-next-line @elastic/eui/href-or-on-click */
   return (
+    /* eslint-disable-next-line @elastic/eui/href-or-on-click */
     <EuiLink
       href={url}
       onClick={(e: React.MouseEvent) => {
@@ -31,7 +31,7 @@ export const SpaNoRouterLink: React.FC<SpaNoRouterLinkProps> = ({ url, go, onCli
           e.preventDefault();
           go(url);
         }
-        
+
         onClick?.(e);
       }}
     >
