@@ -33,7 +33,7 @@ export const GetFileActionResult = memo<
 
     return endpointId
       ? {
-          agentType: isSentineloneOneGetFileEnabled ? agentType : 'endpoint',
+          agent_type: isSentineloneOneGetFileEnabled ? agentType : 'endpoint',
           endpoint_ids: [endpointId],
           comment: comment?.[0],
           parameters: {

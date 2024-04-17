@@ -510,18 +510,19 @@ const adjustCommandsForSentinelOne = ({
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
   return commandList.map((command) => {
-    const isCommandSupported = isActionSupportedByAgentType(
-      'sentinel_one',
-      RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
-      'manual'
-    );
-
-    // If command is not supported by Sentinelone - disable it
-    if (command.name === 'status' || !isCommandSupported) {
+    // If command is not supported by SentinelOne - disable it
+    if (
+      command.name === 'status' ||
+      !isActionSupportedByAgentType(
+        'sentinel_one',
+        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+        'manual'
+      )
+    ) {
       command.helpDisabled = true;
       command.helpHidden = true;
     } else {
-      // Command is valid for Sentinelone. Adjust a few things so that it is not endpoint specific
+      // Command is valid for SentinelOne. Adjust a few things so that it is not endpoint specific
       command.validate = undefined;
     }
 
