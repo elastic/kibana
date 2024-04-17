@@ -103,7 +103,7 @@ export class ReportingPageObject extends FtrService {
 
   async openExportTab() {
     this.log.debug('open export modal');
-    await this.share.clickTab('export');
+    await this.share.clickTab('Export');
   }
 
   async getQueueReportError() {

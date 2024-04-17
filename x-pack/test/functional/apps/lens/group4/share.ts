@@ -66,23 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.isShareActionEnabled('link'));
     });
 
-    it('should basically work for snapshot', async () => {
-      const url = await PageObjects.lens.getUrl();
-      await PageObjects.lens.closeShareModal();
-      await browser.openNewTab();
-
-      const [lensWindowHandler] = await browser.getAllWindowHandles();
-
-      await browser.navigateTo(url);
-      // check that it's the same configuration in the new URL when ready
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Average of bytes'
-      );
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(lensWindowHandler);
-    });
-
     it('should preserve filter and query when sharing', async () => {
       await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
