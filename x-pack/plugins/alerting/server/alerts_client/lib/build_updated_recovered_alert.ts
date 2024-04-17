@@ -75,6 +75,8 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     arrayMerge: (_, sourceArray) => sourceArray,
   });
 
-  // execution.uuid should not be removed, se we can fetch the alerts of current execution with execution.uuid
+  // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
+  // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
+  // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
   return omit(mergedAlerts, ALERT_RULE_EXECUTION_UUID) as Alert & AlertData;
 };

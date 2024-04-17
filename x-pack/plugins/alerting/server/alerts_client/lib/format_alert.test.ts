@@ -259,12 +259,14 @@ describe('compactObject', () => {
     expect(
       compactObject({
         'kibana.alert.rule.execution': 1,
-        'kibana.alert.bool_field': true,
+        'kibana.alert.rule.zero': 0,
+        'kibana.alert.bool_field': false,
         'kibana.alert.null_field': null,
       })
     ).toEqual({
       'kibana.alert.rule.execution': 1,
-      'kibana.alert.bool_field': true,
+      'kibana.alert.rule.zero': 0,
+      'kibana.alert.bool_field': false,
       'kibana.alert.null_field': null,
     });
   });
