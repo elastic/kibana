@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable } from 'rxjs';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { CoreStart, ScopedHistory, CoreTheme } from '@kbn/core/public';
+import { CoreStart, ScopedHistory } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -57,5 +56,4 @@ export interface AppDependencies {
     history: ScopedHistory;
     api: ApiService;
   };
-  theme$: Observable<CoreTheme>;
 }

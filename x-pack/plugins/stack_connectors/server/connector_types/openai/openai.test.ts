@@ -336,6 +336,25 @@ describe('OpenAIConnector', () => {
         });
       });
 
+      it('signal is properly passed to streamApi', async () => {
+        const signal = jest.fn();
+        await connector.invokeStream({ ...sampleOpenAiBody, signal });
+
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          responseType: 'stream',
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
+          },
+          signal,
+        });
+      });
+
       it('errors during API calls are properly handled', async () => {
         // @ts-ignore
         connector.request = mockError;
@@ -369,6 +388,25 @@ describe('OpenAIConnector', () => {
         });
         expect(response.message).toEqual(mockResponseString);
         expect(response.usage.total_tokens).toEqual(9);
+      });
+
+      it('signal is properly passed to runApi', async () => {
+        const signal = jest.fn();
+        await connector.invokeAI({ ...sampleOpenAiBody, signal });
+
+        expect(mockRequest).toHaveBeenCalledWith({
+          timeout: 120000,
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: RunActionResponseSchema,
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: false, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'X-My-Custom-Header': 'foo',
+            'content-type': 'application/json',
+          },
+          signal,
+        });
       });
 
       it('errors during API calls are properly handled', async () => {

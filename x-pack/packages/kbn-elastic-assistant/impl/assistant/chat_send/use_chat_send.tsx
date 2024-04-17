@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { Replacements } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
@@ -19,7 +20,7 @@ import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
   allSystemPrompts: Prompt[];
-  currentConversation: Conversation;
+  currentConversation?: Conversation;
   editingSystemPromptId: string | undefined;
   http: HttpSetup;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
@@ -29,7 +30,7 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
-  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
 
 export interface UseChatSend {
@@ -76,7 +77,7 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      if (!currentConversation.apiConfig) {
+      if (!currentConversation?.apiConfig) {
         toasts?.addError(
           new Error('The conversation needs a connector configured in order to send a message.'),
           {
@@ -97,7 +98,17 @@ export const useChatSend = ({
         selectedSystemPrompt: systemPrompt,
       });
 
-      const replacements = userMessage.replacements ?? currentConversation.replacements;
+      const baseReplacements: Replacements =
+        userMessage.replacements ?? currentConversation.replacements;
+
+      const selectedPromptContextsReplacements = Object.values(
+        selectedPromptContexts
+      ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
+
+      const replacements: Replacements = {
+        ...baseReplacements,
+        ...selectedPromptContextsReplacements,
+      };
       const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
         ...m,
         content: m.content ?? '',
@@ -165,7 +176,7 @@ export const useChatSend = ({
   );
 
   const handleRegenerateResponse = useCallback(async () => {
-    if (!currentConversation.apiConfig) {
+    if (!currentConversation?.apiConfig) {
       toasts?.addError(
         new Error('The conversation needs a connector configured in order to send a message.'),
         {
@@ -215,9 +226,11 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    const updatedConversation = await clearConversation(currentConversation);
-    if (updatedConversation) {
-      setCurrentConversation(updatedConversation);
+    if (currentConversation) {
+      const updatedConversation = await clearConversation(currentConversation);
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
     }
     setEditingSystemPromptId(defaultSystemPromptId);
   }, [

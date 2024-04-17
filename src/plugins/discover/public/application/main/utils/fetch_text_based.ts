@@ -7,6 +7,7 @@
  */
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -41,6 +42,12 @@ export function fetchTextBased(
     time: timeRange,
     dataView,
     inputQuery,
+    titleForInspector: i18n.translate('discover.inspectorTextBasedRequestTitle', {
+      defaultMessage: 'Table',
+    }),
+    descriptionForInspector: i18n.translate('discover.inspectorTextBasedRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+    }),
   })
     .then((ast) => {
       if (ast) {

@@ -49,17 +49,21 @@ export interface ServiceSummary {
   'language.name'?: string;
   'service.framework'?: string;
   instances: number;
-  anomalies: Array<{
-    '@timestamp': string;
-    metricName: string;
-    'service.name': string;
-    'service.environment': Environment;
-    'transaction.type': string;
-    anomalyScore: string | number | null;
-    actualValue: number;
-    expectedBoundsLower: number;
-    expectedBoundsUpper: number;
-  }>;
+  anomalies:
+    | Array<{
+        '@timestamp': string;
+        metricName: string;
+        'service.name': string;
+        'service.environment': Environment;
+        'transaction.type': string;
+        anomalyScore: string | number | null;
+        actualValue: number;
+        expectedBoundsLower: number;
+        expectedBoundsUpper: number;
+      }>
+    | {
+        error: unknown;
+      };
   alerts: Array<{ type?: string; started: string }>;
   deployments: Array<{ '@timestamp': string }>;
 }
@@ -115,6 +119,12 @@ export async function getApmServiceSummary({
         mlClient,
         logger,
         transactionType,
+      }).catch((error) => {
+        logger.error('Failed to get anomalies');
+        logger.error(error);
+        return {
+          error,
+        };
       }),
       getServiceAnnotations({
         apmEventClient,
@@ -130,17 +140,15 @@ export async function getApmServiceSummary({
       apmAlertsClient.search({
         size: 100,
         track_total_hits: false,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
-                ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-                ...rangeQuery(start, end),
-                ...termQuery(SERVICE_NAME, serviceName),
-                ...environmentQuery(environment),
-              ],
-            },
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+              ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+              ...rangeQuery(start, end),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...environmentQuery(environment),
+            ],
           },
         },
       }),

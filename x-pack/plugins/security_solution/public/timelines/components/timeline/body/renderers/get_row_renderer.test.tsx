@@ -54,7 +54,7 @@ describe('get_column_renderer', () => {
     return wrapper;
   };
   beforeEach(() => {
-    nonSuricata = cloneDeep(mockTimelineData[0].ecs);
+    nonSuricata = cloneDeep(mockTimelineData[1].ecs);
     suricata = cloneDeep(mockTimelineData[2].ecs);
     zeek = cloneDeep(mockTimelineData[13].ecs);
     system = cloneDeep(mockTimelineData[28].ecs);
