@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { ActionParamsProps, TextAreaWithMessageVariables, TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { ActionParamsProps, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow, EuiSelect, } from '@elastic/eui';
+import { eventActionOptions } from './constants';
 import { SUB_ACTION } from '../../../common/thehive/constants';
-import { eventActionOptions, severityOptions, tlpOptions } from './constants';
-import { ExecutorParams, ExecutorSubActionPushParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
+import { ExecutorParams } from '../../../common/thehive/types';
+import { TheHiveParamsAlertFields } from './params_alert';
+import { TheHiveParamsCaseFields } from './params_case';
 import * as translations from './translations';
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-  EuiComboBox,
-} from '@elastic/eui';
 
 const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParams>> = ({
   actionConnector,
@@ -24,14 +21,12 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
   editAction,
   index,
   errors,
-  messageVariables
+  messageVariables,
+  executionMode
 }) => {
   const [eventAction, setEventAction] = useState(actionParams.subAction ?? SUB_ACTION.PUSH_TO_SERVICE);
-  const [selectedOptions, setSelected] = useState<Array<{ label: string }>>([]);
-  const [isInvalid, setInvalid] = useState(false);
-  const [severity, setSeverity] = useState(severityOptions[1].value);
-  const [tlp, setTlp] = useState(tlpOptions[2].value);
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
+  const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
   useEffect(() => {
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
@@ -75,10 +70,6 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
 
   useEffect(() => {
     editAction('subAction', eventAction, index);
-    setSelected([]);
-    setInvalid(false);
-    setSeverity(severityOptions[1].value);
-    setTlp(tlpOptions[2].value);
   }, [eventAction]);
 
   const setEventActionType = (eventActionType: SUB_ACTION) => {
@@ -88,6 +79,7 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
           tlp: 2,
           severity: 2,
           tags: [],
+          sourceRef: isTest ? undefined : '{{alert.uuid}}',
         }
         : {
           incident: {
@@ -101,78 +93,6 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
     setEventAction(eventActionType);
     editAction('subActionParams', subActionParams, index);
   };
-
-  const { incident, comments } = useMemo(
-    () =>
-      actionParams.subActionParams as ExecutorSubActionPushParams ??
-      ({
-        incident: {
-          tlp: 2,
-          severity: 2,
-          tags: []
-        },
-        comments: [],
-      } as unknown as ExecutorSubActionPushParams),
-    [actionParams.subActionParams]
-  );
-
-  const alert = useMemo(
-    () =>
-      actionParams.subActionParams as ExecutorSubActionCreateAlertParams ??
-      ({
-        tlp: 2,
-        severity: 2,
-        tags: [],
-      } as unknown as ExecutorSubActionCreateAlertParams),
-    [actionParams.subActionParams]
-  );
-
-  const editSubActionProperty = useCallback(
-    (key: string, value: any) => {
-      const newProps =
-        key !== 'comments'
-          ? {
-            incident: { ...incident, [key]: value },
-            comments,
-          }
-          : { incident, [key]: value };
-      editAction('subActionParams', newProps, index);
-    },
-    [comments, editAction, incident, index]
-  );
-
-  const editComment = useCallback(
-    (key, value) => {
-      editSubActionProperty(key, [{ commentId: '1', comment: value }]);
-    },
-    [editSubActionProperty]
-  );
-
-  const onCreateOption = (searchValue: string) => {
-    setSelected([...selectedOptions, { label: searchValue }]);
-
-    if (eventAction === SUB_ACTION.PUSH_TO_SERVICE) {
-      editSubActionProperty('tags', [...incident.tags ?? [], searchValue])
-    } else {
-      editAction('subActionParams', { ...alert, tags: [...alert.tags ?? [], searchValue] }, index);
-    }
-  };
-
-  const onSearchChange = (searchValue: string) => {
-    if (!searchValue) {
-      setInvalid(false);
-      return;
-    }
-  };
-
-  const onChange = (selectedOptions: Array<{ label: string }>) => {
-    setSelected(selectedOptions);
-    if (eventAction === SUB_ACTION.PUSH_TO_SERVICE) {
-      editSubActionProperty('tags', selectedOptions.map((option) => option.label));
-    } else {
-      editAction('subActionParams', { ...alert, tags: selectedOptions.map((option) => option.label) }, index);
-    }
-  }
 
   return (
     <>
@@ -189,291 +109,21 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
         />
       </EuiFormRow>
       {eventAction === SUB_ACTION.PUSH_TO_SERVICE ?
-        <>
-          <EuiFormRow
-            data-test-subj="title-row"
-            fullWidth
-            error={errors['pushToServiceParam.incident.title']}
-            isInvalid={
-              errors['pushToServiceParam.incident.title'] !== undefined &&
-              errors['pushToServiceParam.incident.title'].length > 0 &&
-              incident.title !== undefined
-            }
-            label={translations.TITLE_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                Required
-              </EuiText>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editSubActionProperty}
-              paramsProperty={'title'}
-              inputTargetValue={incident.title ?? undefined}
-              errors={errors['pushToServiceParam.incident.title'] as string[]}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            data-test-subj="description-row"
-            fullWidth
-            error={errors['pushToServiceParam.incident.description']}
-            isInvalid={
-              errors['pushToServiceParam.incident.description'] !== undefined &&
-              errors['pushToServiceParam.incident.description'].length > 0 &&
-              incident.description !== undefined
-            }
-            label={translations.DESCRIPTION_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                Required
-              </EuiText>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editSubActionProperty}
-              paramsProperty={'description'}
-              inputTargetValue={incident.description ?? undefined}
-              errors={errors['pushToServiceParam.incident.description'] as string[]}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            error={errors.severity}
-            label={translations.SEVERITY_LABEL}
-          >
-            <EuiSelect
-              fullWidth
-              data-test-subj="eventSeveritySelect"
-              value={severity}
-              options={severityOptions}
-              onChange={(e) => {
-                editSubActionProperty('severity', parseInt(e.target.value))
-                setSeverity(parseInt(e.target.value));
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            error={errors.tlp}
-            label={translations.TLP_LABEL}>
-            <EuiSelect
-              fullWidth
-              value={tlp}
-              data-test-subj="eventTlpSelect"
-              options={tlpOptions}
-              onChange={(e) => {
-                editSubActionProperty('tlp', parseInt(e.target.value));
-                setTlp(parseInt(e.target.value));
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            label={translations.TAGS_LABEL}
-          >
-            <EuiComboBox
-              data-test-subj="eventTags"
-              fullWidth
-              options={[]}
-              placeholder="Tags"
-              selectedOptions={selectedOptions}
-              onCreateOption={onCreateOption}
-              onChange={onChange}
-              onSearchChange={onSearchChange}
-              isInvalid={isInvalid}
-            />
-          </EuiFormRow>
-          <TextAreaWithMessageVariables
-            data-test-subj="comment"
-            index={index}
-            editAction={editComment}
-            messageVariables={messageVariables}
-            paramsProperty={'comments'}
-            inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-            label={translations.COMMENTS_LABEL}
-          />
-        </>
+        <TheHiveParamsCaseFields
+          actionParams={actionParams}
+          editAction={editAction}
+          index={index}
+          errors={errors}
+          messageVariables={messageVariables}
+        />
         :
-        <>
-          <EuiFormRow
-            data-test-subj="alert-title-row"
-            fullWidth
-            error={errors['createAlertParam.title']}
-            isInvalid={
-              errors['createAlertParam.title'] !== undefined &&
-              errors['createAlertParam.title'].length > 0 &&
-              alert.title !== undefined
-            }
-            label={translations.TITLE_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                Required
-              </EuiText>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={(key, value) => {
-                editAction('subActionParams', { ...alert, [key]: value }, index);
-              }}
-              paramsProperty={'title'}
-              inputTargetValue={alert.title ?? undefined}
-              errors={errors['createAlertParam.title'] as string[]}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            data-test-subj="alert-description-row"
-            fullWidth
-            error={errors['createAlertParam.description']}
-            isInvalid={
-              errors['createAlertParam.description'] !== undefined &&
-              errors['createAlertParam.description'].length > 0 &&
-              alert.description !== undefined
-            }
-            label={translations.DESCRIPTION_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                Required
-              </EuiText>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={(key, value) => {
-                editAction('subActionParams', { ...alert, [key]: value }, index);
-              }}
-              paramsProperty={'description'}
-              inputTargetValue={alert.description ?? undefined}
-              errors={errors['createAlertParam.description'] as string[]}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            data-test-subj="alert-type-row"
-            fullWidth
-            error={errors['createAlertParam.type']}
-            isInvalid={
-              errors['createAlertParam.type'] !== undefined &&
-              errors['createAlertParam.type'].length > 0 &&
-              alert.type !== undefined
-            }
-            label={translations.TYPE_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                Required
-              </EuiText>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={(key, value) => {
-                editAction('subActionParams', { ...alert, [key]: value }, index);
-              }}
-              paramsProperty={'type'}
-              inputTargetValue={alert.type ?? undefined}
-              errors={(errors['createAlertParam.type'] ?? []) as string[]}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            data-test-subj="alert-source-row"
-            fullWidth
-            error={errors['createAlertParam.source']}
-            isInvalid={
-              errors['createAlertParam.source'] !== undefined &&
-              errors['createAlertParam.source'].length > 0 &&
-              alert.source !== undefined
-            }
-            label={translations.SOURCE_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                Required
-              </EuiText>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={(key, value) => {
-                editAction('subActionParams', { ...alert, [key]: value }, index);
-              }}
-              paramsProperty={'source'}
-              inputTargetValue={alert.source ?? undefined}
-              errors={(errors['createAlertParam.source'] ?? []) as string[]}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            data-test-subj="alert-sourceRef-row"
-            fullWidth
-            error={errors['createAlertParam.sourceRef']}
-            isInvalid={
-              errors['createAlertParam.sourceRef'] !== undefined &&
-              errors['createAlertParam.sourceRef'].length > 0 &&
-              alert.sourceRef !== undefined
-            }
-            label={translations.SOURCE_REF_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                Required
-              </EuiText>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={(key, value) => {
-                editAction('subActionParams', { ...alert, [key]: value }, index);
-              }}
-              messageVariables={messageVariables}
-              paramsProperty={'sourceRef'}
-              inputTargetValue={alert.sourceRef ?? undefined}
-              errors={(errors['createAlertParam.sourceRef'] ?? []) as string[]}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            label={translations.SEVERITY_LABEL}
-          >
-            <EuiSelect
-              fullWidth
-              data-test-subj="alert-eventSeveritySelect"
-              value={severity}
-              options={severityOptions}
-              onChange={(e) => {
-                editAction('subActionParams', { ...alert, severity: parseInt(e.target.value) }, index);
-                setSeverity(parseInt(e.target.value));
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            label={translations.TLP_LABEL}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="alert-eventTlpSelect"
-              value={tlp}
-              options={tlpOptions}
-              onChange={(e) => {
-                editAction('subActionParams', { ...alert, tlp: parseInt(e.target.value) }, index);
-                setTlp(parseInt(e.target.value));
-              }}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
-            label={translations.TAGS_LABEL}
-          >
-            <EuiComboBox
-              data-test-subj="alert-eventTags"
-              fullWidth
-              options={[]}
-              placeholder="Tags"
-              selectedOptions={selectedOptions}
-              onCreateOption={onCreateOption}
-              onChange={onChange}
-              onSearchChange={onSearchChange}
-              isInvalid={isInvalid}
-            />
-          </EuiFormRow>
-        </>
+        <TheHiveParamsAlertFields
+          actionParams={actionParams}
+          editAction={editAction}
+          index={index}
+          errors={errors}
+          messageVariables={messageVariables}
+        />
       }
     </>
   );

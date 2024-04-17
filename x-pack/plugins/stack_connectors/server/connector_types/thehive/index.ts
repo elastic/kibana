@@ -12,7 +12,6 @@ import {
 import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
-  CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
@@ -29,7 +28,7 @@ export function getConnectorType(): TheHiveConnectorType {
     minimumLicenseRequired: 'gold',
     name: THEHIVE_TITLE,
     getService: (params) => new TheHiveConnector(params),
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId, CasesConnectorFeatureId, UptimeConnectorFeatureId],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId, UptimeConnectorFeatureId],
     schema: {
       config: TheHiveConfigSchema,
       secrets: TheHiveSecretsSchema,

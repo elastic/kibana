@@ -5,20 +5,7 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { TheHiveConnectorType, getConnectorType } from '.';
-
-jest.mock('axios');
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
-  return {
-    ...originalUtils,
-    request: jest.fn(),
-    patch: jest.fn(),
-  };
-});
-
-axios.create = jest.fn(() => axios);
 
 let connectorType: TheHiveConnectorType;
 

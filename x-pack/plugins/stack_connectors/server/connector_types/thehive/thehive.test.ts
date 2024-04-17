@@ -26,7 +26,7 @@ describe('TheHiveConnector', () => {
     configurationUtilities: actionsConfigMock.create(),
     connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
     config: { url: 'https://example.com', organisation: null },
-    secrets: { api_key: 'test123' },
+    secrets: { apiKey: 'test123' },
     logger: loggingSystemMock.createLogger(),
     services: actionsMock.createServices(),
   });

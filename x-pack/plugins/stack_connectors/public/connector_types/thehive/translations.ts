@@ -21,6 +21,13 @@ export const ORGANISATION_LABEL = i18n.translate(
   }
 );
 
+export const ORGANISATION_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.thehive.organisationFieldHelpText',
+  {
+    defaultMessage: `By default, the user's default organization will be considered.`,
+  }
+);
+
 export const API_KEY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.apiKeyFieldLabel',
   {

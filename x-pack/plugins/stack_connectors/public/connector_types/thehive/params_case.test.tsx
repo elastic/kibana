@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import TheHiveParamsFields from './params';
 import { SUB_ACTION } from '../../../common/thehive/constants';
@@ -56,52 +56,14 @@ describe('TheHiveParamsFields renders', () => {
   it('all Params fields is rendered', () => {
     const { getByTestId } = render(<TheHiveParamsFields {...defaultProps} />);
 
-    expect(getByTestId('eventActionSelect')).toBeInTheDocument();
-    expect(getByTestId('eventActionSelect')).toHaveValue(SUB_ACTION.PUSH_TO_SERVICE);
-  });
+    expect(getByTestId('title-row')).toBeInTheDocument();
+    expect(getByTestId('description-row')).toBeInTheDocument();
+    expect(getByTestId('eventTags')).toBeInTheDocument();
+    expect(getByTestId('eventSeveritySelect')).toBeInTheDocument();
+    expect(getByTestId('eventTlpSelect')).toBeInTheDocument();
+    expect(getByTestId('commentsTextArea')).toBeInTheDocument();
 
-  it('calls editAction function with the correct arguments', () => {
-    const { getByTestId } = render(<TheHiveParamsFields {...defaultProps} />);
-    const eventActionEl = getByTestId('eventActionSelect');
-
-    fireEvent.change(eventActionEl, { target: { value: SUB_ACTION.CREATE_ALERT } });
-    expect(editAction).toHaveBeenCalledWith(
-      'subActionParams',
-      {
-        tlp: 2,
-        severity: 2,
-        tags: [],
-        sourceRef: '{{alert.uuid}}',
-      },
-      0
-    );
-
-    fireEvent.change(eventActionEl, { target: { value: SUB_ACTION.PUSH_TO_SERVICE } });
-    expect(editAction).toHaveBeenCalledWith(
-      'subActionParams',
-      {
-        incident: {
-          tlp: 2,
-          severity: 2,
-          tags: [],
-        },
-        comments: [],
-      },
-      0
-    );
-  });
-
-  it('handles the case when subAction is undefined', () => {
-    const newProps = {
-      ...defaultProps,
-      actionParams: {
-        ...actionParams,
-        subAction: undefined,
-      },
-    };
-    render(
-      <TheHiveParamsFields {...newProps} />
-    );
-    expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.PUSH_TO_SERVICE, 0);
+    expect(getByTestId('eventSeveritySelect')).toHaveValue('2');
+    expect(getByTestId('eventTlpSelect')).toHaveValue('2');
   });
 })

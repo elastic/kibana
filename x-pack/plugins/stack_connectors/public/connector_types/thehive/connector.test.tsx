@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import TheHiveConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
@@ -15,20 +14,20 @@ import userEvent from '@testing-library/user-event';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('TheHiveActionConnectorFields renders', () => {
-  test('TheHive connector fields are rendered', () => {
-    const actionConnector = {
-      actionTypeId: '.thehive',
-      name: 'thehive',
-      config: {
-        url: 'https://test.com',
-      },
-      secrets: {
-        api_key: 'api_key',
-      },
-      isDeprecated: false,
-    };
+  const actionConnector = {
+    actionTypeId: '.thehive',
+    name: 'thehive',
+    config: {
+      url: 'https://test.com',
+    },
+    secrets: {
+      apiKey: 'apiKey',
+    },
+    isDeprecated: false,
+  };
 
-    const wrapper = mountWithIntl(
+  it('TheHive connector fields are rendered', () => {
+    const { getByTestId } = render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <TheHiveConnectorFields
           readOnly={false}
@@ -38,8 +37,8 @@ describe('TheHiveActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="config.url-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.api_key-input"]').length > 0).toBeTruthy();
+    expect(getByTestId('config.url-input')).toBeInTheDocument();
+    expect(getByTestId('secrets.apiKey-input')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -51,22 +50,10 @@ describe('TheHiveActionConnectorFields renders', () => {
 
     const tests: Array<[string, string]> = [
       ['config.url-input', 'not-valid'],
-      ['secrets.api_key-input', ''],
+      ['secrets.apiKey-input', ''],
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const actionConnector = {
-        actionTypeId: '.thehive',
-        name: 'thehive',
-        config: {
-          url: 'https://test.com',
-        },
-        secrets: {
-          api_key: 'api_key',
-        },
-        isDeprecated: false,
-      };
-
       const { getByTestId } = render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TheHiveConnectorFields
@@ -90,7 +77,7 @@ describe('TheHiveActionConnectorFields renders', () => {
               url: 'https://test.com',
             },
             secrets: {
-              api_key: 'api_key',
+              apiKey: 'apiKey',
             },
             isDeprecated: false,
           },
@@ -100,18 +87,6 @@ describe('TheHiveActionConnectorFields renders', () => {
     });
 
     it.each(tests)('validates correctly %p', async (field, value) => {
-      const actionConnector = {
-        actionTypeId: '.thehive',
-        name: 'thehive',
-        config: {
-          url: 'https://test.com',
-        },
-        secrets: {
-          api_key: 'api_key',
-        },
-        isDeprecated: false,
-      };
-
       const res = render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <TheHiveConnectorFields

@@ -14,7 +14,7 @@ export const TheHiveConfigSchema = schema.object({
 });
 
 export const TheHiveSecretsSchema = schema.object({
-  api_key: schema.string()
+  apiKey: schema.string()
 });
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
@@ -62,7 +62,6 @@ export const ExecutorParamsSchema = schema.oneOf([
   }),
 ]);
 
-
 export const TheHiveIncidentResponseSchema = schema.object(
   {
     _id: schema.string(),
@@ -89,7 +88,7 @@ export const TheHiveIncidentResponseSchema = schema.object(
     summary: schema.nullable(schema.string()),
     impactStatus: schema.nullable(schema.string()),
     assignee: schema.nullable(schema.string()),
-    customFields: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    customFields: schema.nullable(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
     userPermissions: schema.nullable(schema.arrayOf(schema.string())),
     extraData: schema.object({}, { unknowns: 'allow' }),
     newDate: schema.number(),
@@ -109,7 +108,7 @@ export const TheHiveIncidentResponseSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
-export const TheHiveUpdateIncidentResponseSchema = schema.any();
+export const TheHiveUpdateIncidentResponseSchema = schema.never();
 
 export const TheHiveAddCommentResponseSchema = schema.object(
   {
@@ -175,5 +174,5 @@ export const TheHiveFailureResponseSchema = schema.object(
     type: schema.number(),
     message: schema.string(),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'ignore' }
 );

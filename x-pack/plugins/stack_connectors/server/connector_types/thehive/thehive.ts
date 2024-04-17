@@ -29,7 +29,7 @@ export const API_VERSION = 'v1';
 
 export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecrets> {
   private url: string;
-  private api_key: string;
+  private apiKey: string;
   private organisation: string | null;
   private urlWithoutTrailingSlash: string;
 
@@ -44,8 +44,12 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
 
     this.url = this.config.url;
     this.organisation = this.config.organisation;
-    this.api_key = this.secrets.api_key;
+    this.apiKey = this.secrets.apiKey;
     this.urlWithoutTrailingSlash = this.url.endsWith('/') ? this.url.slice(0, -1) : this.url;
+  }
+
+  private getAuthHeaders() {
+    return { Authorization: `Bearer ${this.apiKey}`, 'X-Organisation': this.organisation };
   }
 
   protected getResponseErrorMessage(error: AxiosError<TheHiveFailureResponse>): string {
@@ -60,7 +64,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
       method: 'post',
       url: `${this.url}/api/${API_VERSION}/case`,
       data: incident,
-      headers: { Authorization: `Bearer ${this.api_key}`, 'X-Organisation': this.organisation },
+      headers: this.getAuthHeaders(),
       responseSchema: TheHiveIncidentResponseSchema,
     });
 
@@ -83,7 +87,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
       method: 'post',
       url: `${this.url}/api/${API_VERSION}/case/${incidentId}/comment`,
       data: { message: comment },
-      headers: { Authorization: `Bearer ${this.api_key}`, 'X-Organisation': this.organisation },
+      headers: this.getAuthHeaders(),
       responseSchema: TheHiveAddCommentResponseSchema,
     });
 
@@ -105,7 +109,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
       method: 'patch',
       url: `${this.url}/api/${API_VERSION}/case/${incidentId}`,
       data: incident,
-      headers: { Authorization: `Bearer ${this.api_key}`, 'X-Organisation': this.organisation },
+      headers: this.getAuthHeaders(),
       responseSchema: TheHiveUpdateIncidentResponseSchema,
     });
 
@@ -120,7 +124,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
   public async getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse> {
     const res = await this.request({
       url: `${this.url}/api/${API_VERSION}/case/${id}`,
-      headers: { Authorization: `Bearer ${this.api_key}`, 'X-Organisation': this.organisation },
+      headers: this.getAuthHeaders(),
       responseSchema: TheHiveIncidentResponseSchema,
     });
 
@@ -137,7 +141,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
       method: 'post',
       url: `${this.url}/api/${API_VERSION}/alert`,
       data: alert,
-      headers: { Authorization: `Bearer ${this.api_key}`, 'X-Organisation': this.organisation },
+      headers: this.getAuthHeaders(),
       responseSchema: TheHiveCreateAlertResponseSchema,
     });
   }
