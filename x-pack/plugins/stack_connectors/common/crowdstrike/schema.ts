@@ -17,7 +17,6 @@ export const CrowdstrikeSecretsSchema = schema.object({
   clientSecret: schema.string(),
 });
 
-// TODO TC: Response Schemas - most is commented out, because we are not able to test it against a real endpoint just yet.
 export const CrowdstrikeBaseApiResponseSchema = schema.object(
   {
     resources: schema.arrayOf(schema.any()),
@@ -71,15 +70,18 @@ export const CrowdstrikeGetAgentsResponseSchema = schema.object(
             platform_name: schema.maybe(schema.string()),
             policies: schema.maybe(
               schema.arrayOf(
-                schema.object({
-                  policy_type: schema.maybe(schema.string()),
-                  policy_id: schema.maybe(schema.string()),
-                  applied: schema.maybe(schema.boolean()),
-                  settings_hash: schema.maybe(schema.string()),
-                  assigned_date: schema.maybe(schema.string()),
-                  applied_date: schema.maybe(schema.string()),
-                  rule_groups: schema.maybe(schema.any()),
-                })
+                schema.object(
+                  {
+                    policy_type: schema.maybe(schema.string()),
+                    policy_id: schema.maybe(schema.string()),
+                    applied: schema.maybe(schema.boolean()),
+                    settings_hash: schema.maybe(schema.string()),
+                    assigned_date: schema.maybe(schema.string()),
+                    applied_date: schema.maybe(schema.string()),
+                    rule_groups: schema.maybe(schema.any()),
+                  },
+                  { unknowns: 'allow' }
+                )
               )
             ),
             reduced_functionality_mode: schema.maybe(schema.string()),
