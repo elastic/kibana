@@ -44,7 +44,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { share } = _pluginsSetup;
+    const { discover, share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -69,6 +69,12 @@ export class ObservabilityLogsExplorerPlugin
           appMountParams
         );
       },
+    });
+
+    // ensure the tabs are shown when in the observability nav mode
+    discover.configureTopNav('oblt', {
+      showInline: true,
+      showLogsExplorerTabs: true,
     });
 
     // App used solely to redirect from "/app/observability-log-explorer" to "/app/observability-logs-explorer"
