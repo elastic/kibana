@@ -185,7 +185,6 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
         const indexId = getIndexId({ indexName, stats });
 
         if (
-          indexId != null &&
           stats &&
           results &&
           ilmExplain &&
