@@ -25,7 +25,6 @@ import {
   VERSION,
   ALERT_TIME_RANGE,
   ALERT_END,
-  ALERT_RULE_EXECUTION_UUID,
   ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 import {
@@ -79,7 +78,6 @@ describe('buildUpdatedRecoveredAlert', () => {
       [VERSION]: '8.8.1',
       [TAGS]: ['rule-', '-tags'],
       [ALERT_CONSECUTIVE_MATCHES]: 0,
-      [ALERT_RULE_EXECUTION_UUID]: undefined,
     });
   });
 
@@ -140,7 +138,6 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_WORKFLOW_STATUS]: 'open',
       [SPACE_IDS]: ['default'],
       [TAGS]: ['rule-', '-tags'],
-      [ALERT_RULE_EXECUTION_UUID]: undefined,
     });
   });
 });
