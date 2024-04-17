@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
@@ -16,7 +17,10 @@ import type {
   EndpointCapabilities,
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { GetFileActionResult } from '../command_render_components/get_file_action';
 import type { Command, CommandDefinition } from '../../console';
 import { IsolateActionResult } from '../command_render_components/isolate_action';
@@ -143,11 +147,17 @@ export const getEndpointConsoleCommands = ({
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
+    if (agentType !== 'endpoint') {
+      return true;
+    }
+
     const responderCapability =
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }
+
     return false;
   };
 
@@ -484,5 +494,37 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
-  return consoleCommands;
+  switch (agentType) {
+    case 'sentinel_one':
+      return adjustCommandsForSentinelOne({ commandList: consoleCommands });
+    default:
+      // agentType === endpoint: just returns the defined command list
+      return consoleCommands;
+  }
+};
+
+/** @private */
+const adjustCommandsForSentinelOne = ({
+  commandList,
+}: {
+  commandList: CommandDefinition[];
+}): CommandDefinition[] => {
+  return commandList.map((command) => {
+    const isCommandSupported = isActionSupportedByAgentType(
+      'sentinel_one',
+      RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
+      'manual'
+    );
+
+    // If command is not supported by Sentinelone - disable it
+    if (command.name === 'status' || !isCommandSupported) {
+      command.helpDisabled = true;
+      command.helpHidden = true;
+    } else {
+      // Command is valid for Sentinelone. Adjust a few things so that it is not endpoint specific
+      command.validate = undefined;
+    }
+
+    return command;
+  });
 };

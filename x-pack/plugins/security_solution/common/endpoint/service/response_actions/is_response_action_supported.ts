@@ -50,7 +50,7 @@ const getResponseActionsSupportMap = ({
                 commandName,
                 privileges,
               })
-            : actionName === 'isolate' || actionName === 'unisolate',
+            : actionName === 'isolate' || actionName === 'unisolate' || actionName === 'get-file',
       },
     },
   } as SupportMap;
