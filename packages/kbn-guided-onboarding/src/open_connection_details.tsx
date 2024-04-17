@@ -16,7 +16,7 @@ import type { BrowserUrlService } from '@kbn/share-plugin/public';
 export interface OpenConnectionDetailsParams {
   options: {
     endpoints?: conn.ConnectionDetailsOpts['endpoints'];
-  },
+  };
   dependencies: {
     i18n: CoreStart['i18n'];
     docLinks: CoreStart['docLinks'];
@@ -28,21 +28,24 @@ export interface OpenConnectionDetailsParams {
   };
 }
 
-export const openConnectionDetails = async ({options, dependencies}: OpenConnectionDetailsParams) => {
+export const openConnectionDetails = async ({
+  options,
+  dependencies,
+}: OpenConnectionDetailsParams) => {
   const { http, docLinks, url } = dependencies;
   const locator = url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
   const opts: conn.ConnectionDetailsOpts = {
-    navigateToUrl: (url: string) => {
+    navigateToUrl: (link: string) => {
       if (flyoutRef) flyoutRef.close();
-      dependencies.navigateToUrl?.(url);
+      dependencies.navigateToUrl?.(link);
     },
     links: {
       learnMore: docLinks.links.fleet.apiKeysLearnMore,
     },
     endpoints: options.endpoints,
     apiKeys: {
-      manageKeysLink: manageKeysLink,
+      manageKeysLink,
       createKey: async ({ name }) => {
         if (!http) {
           throw new Error('HTTP service is not available');
@@ -59,9 +62,9 @@ export const openConnectionDetails = async ({options, dependencies}: OpenConnect
         const response = await http.post<KeyResponse>('/internal/security/api_key', {
           body: JSON.stringify({
             name,
-            expiration: "90d",
-            metadata: "{}",
-            role_descriptors: "{}",
+            expiration: '90d',
+            metadata: '{}',
+            role_descriptors: '{}',
           }),
         });
 
@@ -79,10 +82,7 @@ export const openConnectionDetails = async ({options, dependencies}: OpenConnect
   };
   const mount = (element: HTMLElement) => {
     const reactElement = (
-      <KibanaRenderContextProvider
-        i18n={dependencies.i18n}
-        theme={dependencies.theme}
-      >
+      <KibanaRenderContextProvider i18n={dependencies.i18n} theme={dependencies.theme}>
         <conn.ConnectionDetailsOptsProvider {...opts}>
           <conn.ConnectionDetailsFlyoutContent />
         </conn.ConnectionDetailsOptsProvider>
@@ -92,7 +92,7 @@ export const openConnectionDetails = async ({options, dependencies}: OpenConnect
 
     return () => ReactDOM.unmountComponentAtNode(element);
   };
-  const flyoutRef = dependencies.overlays.openFlyout(mount, {size: 's'});
+  const flyoutRef = dependencies.overlays.openFlyout(mount, { size: 's' });
 
   return flyoutRef;
 };

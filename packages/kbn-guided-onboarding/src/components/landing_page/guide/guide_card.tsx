@@ -11,9 +11,7 @@ import React, { useCallback, useState } from 'react';
 import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { openConnectionDetails } from '@kbn/guided-onboarding/src/open_connection_details';
-import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/deployment_details';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { openConnectionDetails } from '../../../open_connection_details';
 import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
@@ -94,6 +92,15 @@ export const GuideCard = ({
     guideState,
     navigateToApp,
     card.openEndpointModal,
+    overlays,
+    theme,
+    i18nStart,
+    http,
+    cloud.cloudId,
+    cloud.elasticsearchUrl,
+    docLinks,
+    url,
+    navigateToUrl,
   ]);
 
   const isHighlighted = activeFilter === card.solution;
