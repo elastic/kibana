@@ -72,10 +72,12 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNativeEnum, (settingsConfi
           value={fieldValue}
           fullWidth
           onChange={handleChange}
-          options={Object.keys(coercedSchema.enum).map((level) => ({
-            text: level,
-            value: coercedSchema.enum[level],
-          }))}
+          options={Object.entries(settingsConfig.schema._def.innerType._def.values).map(
+            ([key, value]) => ({
+              text: key,
+              value: value as string,
+            })
+          )}
         />
       )}
     />
