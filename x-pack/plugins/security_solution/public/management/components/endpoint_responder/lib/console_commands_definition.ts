@@ -509,6 +509,17 @@ const adjustCommandsForSentinelOne = ({
 }: {
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
+  const featureFlags = ExperimentalFeaturesService.get();
+  const isGetFileFeatureEnabled = featureFlags.responseActionsSentinelOneGetFileEnabled;
+
+  const disableCommand = (command: CommandDefinition) => {
+    command.helpDisabled = true;
+    command.helpHidden = true;
+  };
+  const enableCommand = (command: CommandDefinition) => {
+    command.validate = undefined;
+  };
+
   return commandList.map((command) => {
     // If command is not supported by SentinelOne - disable it
     if (
@@ -519,11 +530,13 @@ const adjustCommandsForSentinelOne = ({
         'manual'
       )
     ) {
-      command.helpDisabled = true;
-      command.helpHidden = true;
+      disableCommand(command);
     } else {
-      // Command is valid for SentinelOne. Adjust a few things so that it is not endpoint specific
-      command.validate = undefined;
+      if (command.name === 'get-file' && !isGetFileFeatureEnabled) {
+        disableCommand(command);
+      } else {
+        enableCommand(command);
+      }
     }
 
     return command;
