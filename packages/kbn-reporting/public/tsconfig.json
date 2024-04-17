@@ -27,6 +27,7 @@
     "@kbn/home-plugin",
     "@kbn/management-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/saved-search-plugin"
+    "@kbn/saved-search-plugin",
+    "@kbn/presentation-publishing"
   ]
 }
