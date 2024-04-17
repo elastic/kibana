@@ -9,17 +9,16 @@
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, skip } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { LinksInput } from '../embeddable/types';
-import { getLinksAttributeService, LinksDocument } from '../services/attribute_service';
+import { LinksDocument } from '../services/attribute_service';
 import { LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
+import { loadFromLibrary } from '../content_management/load_from_library';
 
 export async function initializeLinks(state: LinksSerializedState, parentApi: unknown) {
   const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
-  const linksInput = state as unknown as LinksInput;
-  const attributeService = getLinksAttributeService();
-  const { attributes } = await attributeService.unwrapAttributes(linksInput);
+
+  const { attributes } = state.savedObjectId ? await loadFromLibrary(state.savedObjectId) : state;
 
   const resolvedLinks$ = new BehaviorSubject<ResolvedLink[]>(await resolveLinks(attributes.links));
   const error$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -30,7 +29,6 @@ export async function initializeLinks(state: LinksSerializedState, parentApi: un
   // title and description are not persisted
   resolvedLinks$.pipe(skip(1)).subscribe({
     next: (resolvedLinks) => {
-      console.log('resolvedLinks', resolvedLinks);
       return {
         ...attributes$.value,
         links: resolvedLinks.map(({ title, description, ...link }) => link),
@@ -42,7 +40,7 @@ export async function initializeLinks(state: LinksSerializedState, parentApi: un
   const onEdit = async () => {
     try {
       await openEditorFlyout({
-        state,
+        initialState: state,
         parentDashboard: parentApi,
         resolvedLinks$,
         attributes$,

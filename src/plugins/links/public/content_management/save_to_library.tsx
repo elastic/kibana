@@ -15,11 +15,13 @@ import {
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
 
+import { extractReferences } from '../../common/persistable_state';
 import { CONTENT_ID } from '../../common';
 import { LinksAttributes } from '../../common/content_management';
-import { LinksByReferenceInput, LinksInput } from '../embeddable/types';
+import { LinksByReferenceInput } from '../embeddable/types';
 import { checkForDuplicateTitle } from './duplicate_title_check';
-import { getLinksAttributeService } from '../services/attribute_service';
+import { LinksSerializedState } from '../react_embeddable/types';
+import { linksClient } from './links_content_management_client';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,
@@ -30,9 +32,9 @@ const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
 
 export const runSaveToLibrary = async (
   newAttributes: LinksAttributes,
-  initialInput: LinksInput
+  initialState?: LinksSerializedState
 ): Promise<LinksByReferenceInput | undefined> => {
-  return new Promise<LinksByReferenceInput | undefined>((resolve) => {
+  return new Promise<LinksByReferenceInput | undefined>((resolve, reject) => {
     const onSave = async ({
       newTitle,
       newDescription,
@@ -47,7 +49,7 @@ export const runSaveToLibrary = async (
       if (
         !(await checkForDuplicateTitle({
           title: newTitle,
-          lastSavedTitle: newAttributes.title,
+          lastSavedTitle: newAttributes.title ?? '',
           copyOnSave: false,
           onTitleDuplicate,
           isTitleDuplicateConfirmed,
@@ -61,14 +63,37 @@ export const runSaveToLibrary = async (
         ...stateFromSaveModal,
       };
 
-      const updatedInput = (await getLinksAttributeService().wrapAttributes(
-        stateToSave,
-        true,
-        initialInput
-      )) as unknown as LinksByReferenceInput;
+      const savedObjectId = initialState?.savedObjectId;
 
-      resolve(updatedInput);
-      return { id: updatedInput.savedObjectId };
+      const { attributes, references } = extractReferences({
+        attributes: stateToSave,
+      });
+
+      try {
+        const {
+          item: { id },
+        } = await (savedObjectId
+          ? linksClient.update({
+              id: savedObjectId,
+              data: attributes,
+              options: { references },
+            })
+          : linksClient.create({ data: attributes, options: { references } }));
+        resolve({ ...initialState, savedObjectId: id });
+        return { id };
+      } catch (error) {
+        reject(error);
+        return { error };
+      }
+
+      // const updatedInput = (await getLinksAttributeService().wrapAttributes(
+      //   stateToSave,
+      //   true,
+      //   initialInput
+      // )) as unknown as LinksByReferenceInput;
+
+      // resolve(updatedInput);
+      // return { id: updatedInput.savedObjectId };
     };
 
     const saveModal = (

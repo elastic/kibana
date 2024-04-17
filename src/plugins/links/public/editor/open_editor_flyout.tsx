@@ -23,8 +23,8 @@ import { runSaveToLibrary } from '../content_management/save_to_library';
 import { LinksEditorFlyoutReturn } from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
 import { LinksSerializedState, ResolvedLink } from '../react_embeddable/types';
-import { getLinksAttributeService } from '../services/attribute_service';
 import { resolveLinks } from '../react_embeddable/utils';
+import { loadFromLibrary } from '../content_management/load_from_library';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
 
@@ -48,7 +48,7 @@ export async function openEditorFlyout({
   initialState?: LinksSerializedState;
   parentDashboard?: unknown;
   resolvedLinks$?: BehaviorSubject<ResolvedLink[]>;
-  attributes$?: BehaviorSubject<LinksAttributes>;
+  attributes$?: BehaviorSubject<LinksAttributes | undefined>;
   savedObjectId$?: BehaviorSubject<string | undefined>;
 }): Promise<LinksEditorFlyoutReturn> {
   if (!initialState) {
@@ -70,11 +70,13 @@ export async function openEditorFlyout({
     parentDashboard && apiPublishesSavedObjectId(parentDashboard)
       ? parentDashboard.savedObjectId.value
       : undefined;
-  const attributeService = getLinksAttributeService();
-  const { attributes } = initialState ? await attributeService.unwrapAttributes(initialState) : {};
+  const state = initialState?.savedObjectId
+    ? await loadFromLibrary(initialState.savedObjectId)
+    : initialState;
   const isByReference = Boolean(initialState?.savedObjectId);
 
-  const resolvedLinks = resolvedLinks$?.getValue() ?? (await resolveLinks(attributes?.links));
+  const resolvedLinks =
+    resolvedLinks$?.getValue() ?? (await resolveLinks(state?.attributes?.links));
 
   return new Promise((resolve, reject) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
@@ -99,13 +101,11 @@ export async function openEditorFlyout({
       // remove the title and description state from the resolved links before saving
       const links = newLinks.map(({ title, description, ...linkToSave }) => linkToSave);
       const newAttributes = {
-        ...attributes,
+        ...state?.attributes,
         links,
         layout: newLayout,
       };
-      const savedAttributes = initialState?.savedObjectId
-        ? await attributeService.wrapAttributes(newAttributes, true)
-        : await runSaveToLibrary(newAttributes, initialState);
+      const savedAttributes = await runSaveToLibrary(newAttributes, initialState);
       savedObjectId$?.next(savedAttributes?.savedObjectId);
       resolvedLinks$?.next(newLinks);
       attributes$?.next(newAttributes);
@@ -144,7 +144,7 @@ export async function openEditorFlyout({
         <LinksEditor
           flyoutId={flyoutId}
           initialLinks={resolvedLinks}
-          initialLayout={attributes?.layout}
+          initialLayout={state?.attributes?.layout}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
           onAddToDashboard={onAddToDashboard}
