@@ -16,6 +16,7 @@ import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
 } from '@kbn/securitysolution-utils';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
@@ -34,6 +35,8 @@ import {
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 /**
  * ES|QL returns results as a single page. max size of 10,000
@@ -59,12 +62,16 @@ export const esqlExecutor = async ({
   services,
   state,
   spaceId,
+  experimentalFeatures,
+  licensing,
 }: {
   runOpts: RunOpts<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   state: object;
   spaceId: string;
   version: string;
+  experimentalFeatures: ExperimentalFeatures;
+  licensing: LicensingPluginSetup;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -118,6 +125,12 @@ export const esqlExecutor = async ({
         results,
         index,
         isRuleAggregating,
+      });
+
+      const isAlertSuppressionActive = await getIsAlertSuppressionActive({
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+        licensing,
+        isFeatureDisabled: !experimentalFeatures?.alertSuppressionForEsqlRuleEnabled,
       });
 
       const wrappedAlerts = wrapEsqlAlerts({
