@@ -33,7 +33,8 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/cases-plugin",
     "@kbn/triggers-actions-ui-plugin",
-    "@kbn/elastic-assistant-common"
+    "@kbn/elastic-assistant-common",
+    "@kbn/logging"
   ],
   "exclude": [
     "target/**/*",
