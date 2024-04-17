@@ -66,7 +66,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNativeEnum, (settingsConfi
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
       typeName={ZodFirstPartyTypeKind.ZodString}
-      renderItem={({ fieldKey, fieldValue, handleChange, coercedSchema }: any) => (
+      renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
         <EuiSelect
           data-test-subj={fieldKey}
           value={fieldValue}
