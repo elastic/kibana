@@ -21,7 +21,7 @@ export const SourcesPanelForStartChat: React.FC = () => {
     removeIndex,
     addIndex,
     loading: fieldIndicesLoading,
-    error,
+    noFieldsIndicesWarning,
   } = useSourceIndicesFields();
   const { indices, isLoading } = useQueryIndices();
 
@@ -41,13 +41,13 @@ export const SourcesPanelForStartChat: React.FC = () => {
         </EuiFlexItem>
       )}
 
-      {error && (
-        <EuiCallOut color="warning" iconType="warning" data-test-subj='NoIndicesFieldsMessage'>
+      {noFieldsIndicesWarning && (
+        <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
           <p>
             {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
-              defaultMessage: 'No source fields found for {errorMessage}',
+              defaultMessage: 'No fields found for {errorMessage}. Try adding data to these indices.',
               values: {
-                errorMessage: error,
+                errorMessage: noFieldsIndicesWarning,
               },
             })}
           </p>

@@ -17,7 +17,7 @@ jest.mock('./use_kibana', () => ({
 
 let formHookSpy: jest.SpyInstance;
 
-import { useSourceIndicesFields } from './use_source_indices_field';
+import { getIndicesWithNoSourceFields, useSourceIndicesFields } from './use_source_indices_field';
 import { IndicesQuerySourceFields } from '../types';
 
 describe('useSourceIndicesFields Hook', () => {
@@ -36,6 +36,7 @@ describe('useSourceIndicesFields Hook', () => {
             field: 'field1',
             model_id: 'model1',
             nested: false,
+            indices: ['newIndex'],
           },
         ],
         dense_vector_query_fields: [],
@@ -52,6 +53,28 @@ describe('useSourceIndicesFields Hook', () => {
         },
       },
     }));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('getIndicesWithNoSourceFields', () => {
+    it('should return undefined if all indices have source fields', () => {
+      const defaultSourceFields = {
+        index1: ['field1'],
+        index2: ['field2'],
+      };
+      expect(getIndicesWithNoSourceFields(defaultSourceFields)).toBeUndefined();
+    });
+
+    it('should return indices with no source fields', () => {
+      const defaultSourceFields = {
+        index1: ['field1'],
+        index2: [],
+      };
+      expect(getIndicesWithNoSourceFields(defaultSourceFields)).toBe('index2');
+    });
   });
 
   it('should handle addIndex correctly changing indices and updating loading state', async () => {
@@ -86,19 +109,16 @@ describe('useSourceIndicesFields Hook', () => {
         Object {
           "doc_size": 5,
           "elasticsearch_query": Object {
-            "query": Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "text_expansion": Object {
-                      "field1": Object {
-                        "model_id": "model1",
-                        "model_text": "{query}",
-                      },
+            "retriever": Object {
+              "standard": Object {
+                "query": Object {
+                  "text_expansion": Object {
+                    "field1": Object {
+                      "model_id": "model1",
+                      "model_text": "{query}",
                     },
                   },
-                ],
+                },
               },
             },
           },
@@ -114,5 +134,58 @@ describe('useSourceIndicesFields Hook', () => {
         }
       `);
     });
+  });
+
+  it('should provide warning message for adding an index without any fields', async () => {
+    const querySourceFields: IndicesQuerySourceFields = {
+      missing_fields_index: {
+        elser_query_fields: [],
+        dense_vector_query_fields: [],
+        bm25_query_fields: [],
+        source_fields: [],
+      },
+    };
+
+    postMock.mockResolvedValue(querySourceFields);
+
+    const { result, waitForNextUpdate } = renderHook(() => useSourceIndicesFields(), { wrapper });
+    const { getValues } = formHookSpy.mock.results[0].value;
+
+    await act(async () => {
+      result.current.addIndex('missing_fields_index');
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    expect(postMock).toHaveBeenCalled();
+
+    await act(async () => {
+      expect(result.current.noFieldsIndicesWarning).toEqual('missing_fields_index');
+      expect(result.current.loading).toBe(false);
+      expect(getValues()).toMatchInlineSnapshot(`
+        Object {
+          "doc_size": 5,
+          "elasticsearch_query": Object {
+            "retriever": Object {
+              "standard": Object {
+                "query": Object {
+                  "match_all": Object {},
+                },
+              },
+            },
+          },
+          "indices": Array [
+            "missing_fields_index",
+          ],
+          "prompt": "You are an assistant for question-answering tasks.",
+          "source_fields": Object {
+            "missing_fields_index": Array [],
+          },
+        }
+      `);
+    });
+
   });
 });

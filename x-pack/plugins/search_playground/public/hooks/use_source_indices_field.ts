@@ -35,7 +35,7 @@ export const getIndicesWithNoSourceFields = (
 export const useSourceIndicesFields = () => {
   const { services } = useKibana();
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [noFieldsIndicesWarning, setNoFieldsIndicesWarning] = useState<string | null>(null);
   const { resetField } = useFormContext<ChatForm>();
 
   const {
@@ -74,8 +74,18 @@ export const useSourceIndicesFields = () => {
   useEffect(() => {
     if (fields) {
       resetField(ChatFormFields.queryFields);
+
       const defaultFields = getDefaultQueryFields(fields);
       const defaultSourceFields = getDefaultSourceFields(fields);
+
+      const indicesWithNoSourceFields = getIndicesWithNoSourceFields(defaultSourceFields);
+
+      if (indicesWithNoSourceFields) {
+        setNoFieldsIndicesWarning(indicesWithNoSourceFields);
+      } else {
+        setNoFieldsIndicesWarning(null);
+      }
+
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
       onSourceFieldsChange(defaultSourceFields);
     }
@@ -101,6 +111,6 @@ export const useSourceIndicesFields = () => {
     loading,
     addIndex,
     removeIndex,
-    error,
+    noFieldsIndicesWarning,
   };
 };

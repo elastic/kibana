@@ -53,7 +53,7 @@ describe('ViewQueryFlyout component tests', () => {
   it('should see the view elasticsearch query', async () => {
     expect(screen.getByTestId('ViewElasticsearchQueryResult')).toBeInTheDocument();
     expect(screen.getByTestId('ViewElasticsearchQueryResult')).toHaveTextContent(
-      `{ "query": { "bool": { "should": [ { "multi_match": { "query": "{query}", "fields": [ "field1" ] } } ], "minimum_should_match": 1 } } }`
+      `{ "retriever": { "standard": { "query": { "multi_match": { "query": "{query}", "fields": [ "field1" ] } } } } }`
     );
   });
 });

@@ -222,6 +222,14 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
+      // if there are no source fields, we don't need to suggest anything
+      if (indexFieldDescriptors.source_fields.length === 0) {
+        return {
+          ...acc,
+          [index]: [],
+        };
+      }
+
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>
         SUGGESTED_SOURCE_FIELDS.includes(x)
       );

@@ -98,13 +98,11 @@ describe('SourcesPanelForStartChat component', () => {
       removeIndex: jest.fn(),
       addIndex: jest.fn(),
       loading: false,
-      error: {
-        type: 'indices_no_fields_found',
-        indices: ['index1'],
-      },
+      noFieldsIndicesWarning: 'index1',
     });
 
     render(<SourcesPanelForStartChat />);
     expect(screen.getByTestId('NoIndicesFieldsMessage')).toBeInTheDocument();
+    expect(screen.getByTestId('NoIndicesFieldsMessage')).toHaveTextContent('index1');
   });
 });
