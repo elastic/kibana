@@ -61,24 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('permalink', function () {
-        it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/app/r/s/.+$');
-          await PageObjects.share.checkShortenUrl();
-          await retry.try(async () => {
-            const actualUrl = await PageObjects.share.getSharedUrl();
-            expect(actualUrl).to.match(re);
-          });
-        });
-
-        it('should allow for copying the saved object URL', async function () {
-          const expectedUrl =
-            baseUrl + '/app/discover#' + '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' + '?_g=()';
-          await PageObjects.discover.loadSavedSearch('A Saved Search');
-          await PageObjects.share.clickShareTopNavButton();
-          const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.be(expectedUrl);
-        });
-
         it('should load snapshot URL with empty sort param correctly', async function () {
           const expectedUrl =
             baseUrl +

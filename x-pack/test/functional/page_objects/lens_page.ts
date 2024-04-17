@@ -1837,9 +1837,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getUrl() {
-      if (!(await testSubjects.exists('shareUrlForm'))) {
-        await this.openPermalinkShare();
-      }
       const copyButton = await testSubjects.find('copyShareUrlButton');
       const url = await copyButton.getAttribute('data-share-url');
       if (!url) {

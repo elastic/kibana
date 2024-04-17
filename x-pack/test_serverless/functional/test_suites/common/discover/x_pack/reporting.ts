@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
 
@@ -138,10 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openExportTab();
-        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-        await advOpt.click();
-        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
-        await postUrl.click();
+        await PageObjects.reporting.getReportURL(25000);
 
         // get clipboard value using field search input, since
         // 'browser.getClipboardValue()' doesn't work, due to permissions

@@ -86,18 +86,4 @@ export class SharePageObject extends FtrService {
   async getSharedUrl() {
     return (await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url')) ?? '';
   }
-
-  async createShortUrlExistOrFail() {
-    await this.testSubjects.existOrFail('createShortUrl');
-  }
-
-  async createShortUrlMissingOrFail() {
-    await this.testSubjects.missingOrFail('createShortUrl');
-  }
-
-  async checkShortenUrl() {
-    const shareForm = await this.testSubjects.find('shareUrlForm');
-    await this.testSubjects.setCheckbox('useShortUrl', 'check');
-    await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
-  }
 }

@@ -44,9 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         body: { query: { match_all: {} } },
       });
     });
-    afterEach(async () => {
-      await PageObjects.share.closeShareModal();
-    });
     describe('Print PDF button', () => {
       const ecommerceSOPath =
         'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
