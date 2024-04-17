@@ -60,6 +60,9 @@ export const normalizeThresholdField = (
       [thresholdField!];
 };
 
+export const isEqlSequenceQuery = (ruleQuery: string | undefined): boolean =>
+  ruleQuery?.trim().startsWith('sequence') ?? false;
+
 export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
   return {
     ...threshold,
