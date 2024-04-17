@@ -55,7 +55,7 @@ export function GroupListView({
   filters,
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
-  const query = kqlQuery ? `"${groupQuery}) and ${kqlQuery}` : groupQuery;
+  const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {
     groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
