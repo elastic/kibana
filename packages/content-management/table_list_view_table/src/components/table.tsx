@@ -36,7 +36,11 @@ import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
-import { UserFilterPanel, UserFilterContextProvider } from './user_filter_panel';
+import {
+  UserFilterPanel,
+  UserFilterContextProvider,
+  NULL_USER as USER_FILTER_NULL_USER,
+} from './user_filter_panel';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -246,9 +250,10 @@ export function Table<T extends UserContentCommonSchema>({
 
   const visibleItems = React.useMemo(() => {
     if (tableFilter?.createdBy?.length > 0) {
-      return items.filter(
-        (item) => item.createdBy && tableFilter.createdBy?.includes(item.createdBy)
-      );
+      return items.filter((item) => {
+        if (item.createdBy) return tableFilter.createdBy.includes(item.createdBy);
+        else return tableFilter.createdBy.includes(USER_FILTER_NULL_USER);
+      });
     }
 
     return items;

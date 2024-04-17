@@ -117,6 +117,11 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
   nullOptionLabel?: string;
 
   /**
+   * Additional props for "no users" option.
+   */
+  nullOptionProps?: NullOptionProps;
+
+  /**
    * Label for default options group separator.
    */
   defaultOptionsLabel?: string;
@@ -144,6 +149,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   selectedStatusMessage,
   limitReachedMessage,
   nullOptionLabel,
+  nullOptionProps,
   defaultOptionsLabel,
   clearButtonLabel,
 }: UserProfilesSelectableProps<Option>) => {
@@ -156,7 +162,9 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   // Resets all displayed options
   const resetDisplayedOptions = () => {
     if (options) {
-      setDisplayedOptions(options.map((option) => toSelectableOption(option, nullOptionLabel)));
+      setDisplayedOptions(
+        options.map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
+      );
       return;
     }
 
@@ -194,7 +202,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       const selectedOptionsToAdd: SelectableOption[] = selectedOptions
         ? selectedOptions
             .filter((profile) => !nextOptions.find((option) => isMatchingOption(option, profile)))
-            .map((option) => toSelectableOption(option, nullOptionLabel))
+            .map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
         : [];
 
       // Get any newly added default options
@@ -205,7 +213,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
                 !nextOptions.find((option) => isMatchingOption(option, profile)) &&
                 !selectedOptionsToAdd.find((option) => isMatchingOption(option, profile))
             )
-            .map((option) => toSelectableOption(option, nullOptionLabel))
+            .map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
         : [];
 
       // Merge in any new options and add group separator if necessary
@@ -425,10 +433,12 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
 };
 
 type SelectableOption = EuiSelectableOption<Partial<UserProfileWithAvatar>>;
+export type NullOptionProps = Partial<Pick<EuiSelectableOption, 'append'>>;
 
 function toSelectableOption(
   userProfile: UserProfileWithAvatar | null,
-  nullOptionLabel?: string
+  nullOptionLabel?: string,
+  nullOptionProps?: NullOptionProps
 ): SelectableOption {
   if (userProfile) {
     return {
@@ -444,6 +454,7 @@ function toSelectableOption(
       i18n.translate('userProfileComponents.userProfilesSelectable.nullOptionLabel', {
         defaultMessage: 'No users',
       }),
+    ...nullOptionProps,
   };
 }
 

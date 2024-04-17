@@ -12,6 +12,7 @@ import { EuiFilterButton, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
 import { useQuery, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 
 interface Context {
   onSelectedUsersChange: (users: string[]) => void;
@@ -31,6 +32,8 @@ export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) =
     </QueryClientProvider>
   );
 };
+
+export const NULL_USER = 'no-user';
 
 export const UserFilterPanel: FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -58,9 +61,24 @@ export const UserFilterPanel: FC<{}> = () => {
   }, [query.data]);
 
   const visibleOptions = React.useMemo(() => {
-    if (!searchTerm) return query.data;
-    return query.data?.filter((user) => {
+    if (!query.data || query.data.length === 0) return [];
+    // attach null to the end of the list to represent the "no owner" option
+    const users = [...query.data, null];
+
+    if (!searchTerm) {
+      return users;
+    }
+
+    return users.filter((user) => {
+      // keep the "no owner" option if it's selected
+      if (!user) {
+        return selectedUsers.includes(NULL_USER);
+      }
+
+      // keep the user if it's selected
       if (selectedUsers.includes(user.uid)) return true;
+
+      // filter only users that match the search term
       const searchString = (
         user.uid +
         user.user.username +
@@ -70,6 +88,22 @@ export const UserFilterPanel: FC<{}> = () => {
       return searchString.includes(searchTerm.toLowerCase());
     });
   }, [query.data, searchTerm, selectedUsers]);
+
+  const noUsersTip = (
+    <EuiIconTip
+      aria-label="Additional information"
+      position="bottom"
+      type="questionInCircle"
+      color="inherit"
+      iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
+      content={
+        <FormattedMessage
+          id="contentManagement.tableList.listing.userFilter.emptyMessageTooltip"
+          defaultMessage="Owner is assigned when dashboards are created, (for all dashboards created after version 8.14)."
+        />
+      }
+    />
+  );
 
   return (
     <>
@@ -86,7 +120,7 @@ export const UserFilterPanel: FC<{}> = () => {
           >
             <FormattedMessage
               id="contentManagement.tableList.listing.userFilter.filterLabel"
-              defaultMessage="Created  by"
+              defaultMessage="Created by"
             />
           </EuiFilterButton>
         }
@@ -107,26 +141,23 @@ export const UserFilterPanel: FC<{}> = () => {
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have an owner"
               />
-              <EuiIconTip
-                aria-label="Additional information"
-                position="bottom"
-                type="questionInCircle"
-                color="inherit"
-                iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
-                content={
-                  <FormattedMessage
-                    id="contentManagement.tableList.listing.userFilter.emptyMessageTooltip"
-                    defaultMessage="Owner is assigned when dashboards are created, (for all dashboards created after version 8.14)."
-                  />
-                }
-              />
+              {noUsersTip}
             </p>
           ),
-          selectedOptions: selectedUsers.map(
-            (uid) => usersMap[uid] ?? { uid, user: { username: uid } }
+          nullOptionLabel: i18n.translate(
+            'contentManagement.tableList.listing.userFilter.noOwner',
+            {
+              defaultMessage: 'No owner',
+            }
+          ),
+          nullOptionProps: {
+            append: noUsersTip,
+          },
+          selectedOptions: selectedUsers.map((uid) =>
+            uid === NULL_USER ? null : usersMap[uid] ?? { uid, user: { username: uid } }
           ),
           onChange: (options) => {
-            onSelectedUsersChange(options.map((option) => option.uid));
+            onSelectedUsersChange(options.map((option) => (option ? option.uid : NULL_USER)));
           },
           onSearchChange: setSearchTerm,
         }}
