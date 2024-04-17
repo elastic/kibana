@@ -29,6 +29,7 @@ const mockUser1 = {
 export const getCreateConversationMock = (): ConversationCreateProps => ({
   title: 'test',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
@@ -45,6 +46,7 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   id: 'test',
   title: 'test',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
@@ -92,6 +94,7 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
           is_default: true,
           exclude_from_last_conversation_storage: false,
           api_config: {
+            action_type_id: '.gen-ai',
             connector_id: 'c1',
             default_system_prompt_id: 'prompt-1',
             model: 'test',

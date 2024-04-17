@@ -75,7 +75,6 @@ export const SearchIndex: React.FC = () => {
   const {
     config,
     guidedOnboarding,
-    productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
@@ -232,7 +231,7 @@ export const SearchIndex: React.FC = () => {
         rightSideGroupProps: {
           responsive: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideItems: getHeaderActions(index),
       }}
     >
       {isCrawlerIndex(index) && !index.connector ? (

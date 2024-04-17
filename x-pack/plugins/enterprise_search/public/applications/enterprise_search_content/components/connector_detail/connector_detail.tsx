@@ -58,7 +58,6 @@ export const ConnectorDetail: React.FC = () => {
   }>();
 
   const {
-    productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
@@ -239,7 +238,7 @@ export const ConnectorDetail: React.FC = () => {
           responsive: false,
           wrap: false,
         },
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess, connector),
+        rightSideItems: getHeaderActions(index, connector),
         tabs,
       }}
     >

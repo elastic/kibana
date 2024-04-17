@@ -15,7 +15,7 @@ import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   previewRule,
   dataGeneratorFactory,
@@ -80,7 +80,8 @@ export default ({ getService }: FtrProviderContext) => {
     return testId;
   };
 
-  describe('@ess @serverless New terms type rules', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/180236
+  describe.skip('@ess @serverless New terms type rules', () => {
     before(async () => {
       await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
@@ -107,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
 
       expect(alerts.hits.hits.length).eql(1);
       expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).eql({

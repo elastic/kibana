@@ -43,7 +43,7 @@ export interface OpenFlyoutAddDrilldownParams {
 }
 
 export type FlyoutCreateDrilldownActionApi = CanAccessViewMode &
-  HasDynamicActions &
+  Required<HasDynamicActions> &
   HasParentApi<HasType & Partial<PresentationContainer & TracksOverlays>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;

@@ -10,8 +10,10 @@ import type { FieldMap } from '@kbn/data-stream-adapter';
 export const resultsFieldMap: FieldMap = {
   batchId: { type: 'keyword', required: true },
   indexName: { type: 'keyword', required: true },
+  indexPattern: { type: 'keyword', required: true },
   isCheckAll: { type: 'boolean', required: true },
   checkedAt: { type: 'date', required: true },
+  checkedBy: { type: 'keyword', required: true },
   docsCount: { type: 'long', required: true },
   totalFieldCount: { type: 'long', required: true },
   ecsFieldCount: { type: 'long', required: true },

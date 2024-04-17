@@ -17,6 +17,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { loggerMock } from '@kbn/logging-mocks';
+import { handleStreamStorage } from './parse_stream';
 const request = {
   body: {
     subAction: 'invokeAI',
@@ -37,6 +38,9 @@ const testProps: Omit<Props, 'actions'> = {
   onLlmResponse,
   logger: mockLogger,
 };
+jest.mock('./parse_stream');
+
+const mockHandleStreamStorage = handleStreamStorage as jest.Mock;
 
 describe('executeAction', () => {
   beforeEach(() => {
@@ -78,6 +82,13 @@ describe('executeAction', () => {
     expect(JSON.stringify(result)).toStrictEqual(
       JSON.stringify(readableStream.pipe(new PassThrough()))
     );
+
+    expect(mockHandleStreamStorage).toHaveBeenCalledWith({
+      actionTypeId: '.bedrock',
+      onMessageSent: onLlmResponse,
+      logger: mockLogger,
+      responseStream: readableStream,
+    });
   });
 
   it('should throw an error if the actions plugin fails to retrieve the actions client', async () => {

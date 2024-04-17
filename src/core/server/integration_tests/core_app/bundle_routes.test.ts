@@ -154,7 +154,7 @@ describe('bundle routes', () => {
         .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
-      expect(response.get('cache-control')).toEqual('max-age=31536000');
+      expect(response.get('cache-control')).toEqual('public, max-age=31536000, immutable');
       expect(response.get('etag')).toBeUndefined();
     });
   });

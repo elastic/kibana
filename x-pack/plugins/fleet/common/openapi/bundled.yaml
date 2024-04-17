@@ -3970,6 +3970,28 @@ components:
                     type: string
                   stack:
                     type: string
+        latest_executed_state:
+          description: Latest successfully executed state in package install state machine
+          type: object
+          properties:
+            name:
+              type: string
+              enum:
+                - create_restart_installation
+                - install_kibana_assets
+                - install_ilm_policies
+                - install_ml_model
+                - install_index_template_pipelines
+                - remove_legacy_templates
+                - update_current_write_indices
+                - install_transforms
+                - delete_previous_pipelines
+                - save_archive_entries_from_assets_map
+                - update_so
+            started_at:
+              type: string
+            error:
+              type: string
         verification_status:
           type: string
           enum:
@@ -4711,6 +4733,12 @@ components:
             Override settings that are defined in the agent policy. Input
             settings cannot be overridden. The override option should be used
             only in unusual circumstances and not as a routine procedure.
+          nullable: true
+        advanced_settings:
+          type: object
+          description: >-
+            Advanced settings stored in the agent policy, e.g.
+            agent_limits_go_max_procs
           nullable: true
       required:
         - id

@@ -39,7 +39,7 @@ def get_elasticsearch_results(query):
   es_query = ${getESQuery(formValues.elasticsearch_query.query)}
 
   result = es.search(index="${formValues.indices.join(',')}", query=es_query, size=${
-      formValues.docSize
+      formValues.doc_size
     })
   return result["hits"]["hits"]
 

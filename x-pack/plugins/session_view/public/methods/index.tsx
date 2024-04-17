@@ -10,6 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { SessionViewIndex } from '../../common/types/v1';
 import { SessionViewDeps, SessionViewTelemetryKey } from '../types';
 import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
 
@@ -18,7 +19,15 @@ const queryClient = new QueryClient();
 
 const SessionViewLazy = lazy(() => import('../components/session_view'));
 
-const SUPPORTED_PACKAGES = ['endpoint', 'cloud_defend'];
+export const ELASTIC_DEFEND_DATA_SOURCE = 'endpoint';
+export const CLOUD_DEFEND_DATA_SOURCE = 'cloud_defend';
+export const AUDITBEAT_DATA_SOURCE = 'auditbeat';
+
+const SUPPORTED_PACKAGES = [
+  ELASTIC_DEFEND_DATA_SOURCE,
+  CLOUD_DEFEND_DATA_SOURCE,
+  AUDITBEAT_DATA_SOURCE,
+];
 const INDEX_REGEX = new RegExp(
   `([a-z0-9_-]+\:)?[a-z0-9\-.]*(${SUPPORTED_PACKAGES.join('|')})`,
   'i'
@@ -27,6 +36,13 @@ const INDEX_REGEX = new RegExp(
 export const DEFAULT_INDEX = 'logs-*';
 export const CLOUD_DEFEND_INDEX = 'logs-cloud_defend.*';
 export const ENDPOINT_INDEX = 'logs-endpoint.events.process*';
+export const AUDITBEAT_INDEX = 'auditbeat-*';
+
+const sessionViewIntegrationIndices: Record<string, SessionViewIndex> = {
+  endpoint: ENDPOINT_INDEX,
+  cloud_defend: CLOUD_DEFEND_INDEX,
+  auditbeat: AUDITBEAT_INDEX,
+};
 
 // Currently both logs-endpoint.events.process* and logs-cloud_defend.process* are valid sources for session data.
 // To avoid cross cluster searches, the original index of the event is used to infer the index to find data for the
@@ -38,15 +54,12 @@ export const getIndexPattern = (eventIndex?: string | null) => {
 
   const match = eventIndex.match(INDEX_REGEX);
   const cluster = match?.[1];
+
   const clusterStr = cluster ? `${cluster}` : '';
+
   const service = match?.[2];
 
-  let index = DEFAULT_INDEX;
-  if (service === 'endpoint') {
-    index = ENDPOINT_INDEX;
-  } else if (service === 'cloud_defend') {
-    index = CLOUD_DEFEND_INDEX;
-  }
+  const index: SessionViewIndex = service ? sessionViewIntegrationIndices[service] : DEFAULT_INDEX;
 
   return clusterStr + index;
 };
