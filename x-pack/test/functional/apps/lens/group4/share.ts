@@ -13,10 +13,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
+  const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('lens share tests', () => {
     before(async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
+    });
+
+    afterEach(async () => {
+      retry.waitFor('close share modal', async () => {
+        await PageObjects.lens.closeShareModal();
+        return await testSubjects.exists('lnsApp_shareButton');
+      });
     });
 
     after(async () => {
@@ -53,19 +62,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should enable both download and URL sharing for valid configuration', async () => {
       await PageObjects.lens.clickShareMenu();
 
-      expect(await PageObjects.lens.isShareActionEnabled('Export'));
-      expect(await PageObjects.lens.isShareActionEnabled('Links'));
-    });
-
-    it('should provide only snapshot url sharing if visualization is not saved yet', async () => {
-      await PageObjects.lens.openPermalinkShare();
-
-      const options = await PageObjects.lens.getAvailableUrlSharingOptions();
-      expect(options).eql(['snapshot']);
+      expect(await PageObjects.lens.isShareActionEnabled('export'));
+      expect(await PageObjects.lens.isShareActionEnabled('link'));
     });
 
     it('should basically work for snapshot', async () => {
-      const url = await PageObjects.lens.getUrl('snapshot');
+      const url = await PageObjects.lens.getUrl();
+      await PageObjects.lens.closeShareModal();
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();
@@ -80,21 +83,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(lensWindowHandler);
     });
 
-    it('should provide also saved object url sharing if the visualization is shared', async () => {
-      await PageObjects.lens.save('ASavedVisualizationToShare');
-      await PageObjects.lens.openPermalinkShare();
-
-      const options = await PageObjects.lens.getAvailableUrlSharingOptions();
-      expect(options).eql(['snapshot', 'savedObject']);
-    });
-
     it('should preserve filter and query when sharing', async () => {
       await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
-      const url = await PageObjects.lens.getUrl('snapshot');
+      const url = await PageObjects.lens.getUrl();
+      await PageObjects.lens.closeShareModal();
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();

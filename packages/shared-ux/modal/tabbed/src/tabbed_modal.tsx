@@ -91,6 +91,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWid
           disabled={tab.disabled}
           prepend={tab.prepend}
           append={tab.append}
+          data-test-subj={tab.id}
         >
           {tab.name}
         </EuiTab>
