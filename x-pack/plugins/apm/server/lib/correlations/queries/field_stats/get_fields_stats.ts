@@ -8,10 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { chunk } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  FieldValuePair,
-  CorrelationsParams,
-} from '../../../../../common/correlations/types';
+import { FieldValuePair, CorrelationsParams } from '../../../../../common/correlations/types';
 import {
   FieldStats,
   FieldStatsCommonRequestParams,
@@ -50,12 +47,7 @@ export const fetchFieldsStats = async (
         switch (ft) {
           case ES_FIELD_TYPES.KEYWORD:
           case ES_FIELD_TYPES.IP:
-            return fetchKeywordFieldStats(
-              esClient,
-              fieldStatsParams,
-              field,
-              termFilters
-            );
+            return fetchKeywordFieldStats(esClient, fieldStatsParams, field, termFilters);
             break;
 
           case 'numeric':
@@ -69,21 +61,11 @@ export const fetchFieldsStats = async (
           case ES_FIELD_TYPES.SHORT:
           case ES_FIELD_TYPES.UNSIGNED_LONG:
           case ES_FIELD_TYPES.BYTE:
-            return fetchNumericFieldStats(
-              esClient,
-              fieldStatsParams,
-              field,
-              termFilters
-            );
+            return fetchNumericFieldStats(esClient, fieldStatsParams, field, termFilters);
 
             break;
           case ES_FIELD_TYPES.BOOLEAN:
-            return fetchBooleanFieldStats(
-              esClient,
-              fieldStatsParams,
-              field,
-              termFilters
-            );
+            return fetchBooleanFieldStats(esClient, fieldStatsParams, field, termFilters);
 
           default:
             return;

@@ -43,12 +43,9 @@ export interface ProfileNode {
 const config = {
   [ProfilingValueType.wallTime]: {
     unit: ProfilingValueTypeUnit.us,
-    label: i18n.translate(
-      'xpack.apm.serviceProfiling.valueTypeLabel.wallTime',
-      {
-        defaultMessage: 'Wall',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceProfiling.valueTypeLabel.wallTime', {
+      defaultMessage: 'Wall',
+    }),
     field: PROFILE_WALL_US,
   },
   [ProfilingValueType.cpuTime]: {
@@ -67,42 +64,30 @@ const config = {
   },
   [ProfilingValueType.allocObjects]: {
     unit: ProfilingValueTypeUnit.count,
-    label: i18n.translate(
-      'xpack.apm.serviceProfiling.valueTypeLabel.allocObjects',
-      {
-        defaultMessage: 'Alloc. objects',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceProfiling.valueTypeLabel.allocObjects', {
+      defaultMessage: 'Alloc. objects',
+    }),
     field: PROFILE_ALLOC_OBJECTS,
   },
   [ProfilingValueType.allocSpace]: {
     unit: ProfilingValueTypeUnit.bytes,
-    label: i18n.translate(
-      'xpack.apm.serviceProfiling.valueTypeLabel.allocSpace',
-      {
-        defaultMessage: 'Alloc. space',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceProfiling.valueTypeLabel.allocSpace', {
+      defaultMessage: 'Alloc. space',
+    }),
     field: PROFILE_ALLOC_SPACE,
   },
   [ProfilingValueType.inuseObjects]: {
     unit: ProfilingValueTypeUnit.count,
-    label: i18n.translate(
-      'xpack.apm.serviceProfiling.valueTypeLabel.inuseObjects',
-      {
-        defaultMessage: 'In-use objects',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceProfiling.valueTypeLabel.inuseObjects', {
+      defaultMessage: 'In-use objects',
+    }),
     field: PROFILE_INUSE_OBJECTS,
   },
   [ProfilingValueType.inuseSpace]: {
     unit: ProfilingValueTypeUnit.bytes,
-    label: i18n.translate(
-      'xpack.apm.serviceProfiling.valueTypeLabel.inuseSpace',
-      {
-        defaultMessage: 'In-use space',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceProfiling.valueTypeLabel.inuseSpace', {
+      defaultMessage: 'In-use space',
+    }),
     field: PROFILE_INUSE_SPACE,
   },
 };

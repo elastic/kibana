@@ -11,9 +11,7 @@ import { ILicense } from '../../../../licensing/public';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { InvalidLicenseNotification } from './Invalid_license_notification';
 
-export const LicenseContext = React.createContext<ILicense | undefined>(
-  undefined
-);
+export const LicenseContext = React.createContext<ILicense | undefined>(undefined);
 
 export function LicenseProvider({ children }: { children: React.ReactChild }) {
   const { license$ } = useApmPluginContext().plugins.licensing;

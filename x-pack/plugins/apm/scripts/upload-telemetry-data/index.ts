@@ -108,10 +108,7 @@ async function uploadData() {
   await chunks.reduce<Promise<any>>((prev, documents) => {
     return prev.then(async () => {
       const body = flatten(
-        documents.map((doc) => [
-          { index: { _index: xpackTelemetryIndexName } },
-          doc,
-        ])
+        documents.map((doc) => [{ index: { _index: xpackTelemetryIndexName } }, doc])
       );
 
       return client
@@ -121,12 +118,9 @@ async function uploadData() {
         })
         .then((response: any) => {
           if (response.errors) {
-            const firstError = response.items.filter(
-              (item: any) => item.index.status >= 400
-            )[0].index.error;
-            throw new Error(
-              `Failed to upload documents: ${firstError.reason} `
-            );
+            const firstError = response.items.filter((item: any) => item.index.status >= 400)[0]
+              .index.error;
+            throw new Error(`Failed to upload documents: ${firstError.reason} `);
           }
         });
     });
@@ -141,13 +135,7 @@ uploadData()
         console.log(e.response);
       } else {
         // eslint-disable-next-line no-console
-        console.log(
-          JSON.stringify(
-            e.response,
-            ['status', 'statusText', 'headers', 'data'],
-            2
-          )
-        );
+        console.log(JSON.stringify(e.response, ['status', 'statusText', 'headers', 'data'], 2));
       }
     } else {
       // eslint-disable-next-line no-console

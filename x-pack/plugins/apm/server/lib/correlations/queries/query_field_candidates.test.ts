@@ -135,10 +135,7 @@ describe('query_field_candidates', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationFieldCandidates(
-        esClientMock,
-        params
-      );
+      const resp = await fetchTransactionDurationFieldCandidates(esClientMock, params);
 
       expect(resp).toEqual({
         fieldCandidates: [

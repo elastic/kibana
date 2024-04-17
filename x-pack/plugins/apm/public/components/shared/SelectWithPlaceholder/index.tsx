@@ -26,10 +26,7 @@ export const SelectWithPlaceholder: typeof EuiSelect = (props) => {
   return (
     <EuiSelect
       {...props}
-      options={[
-        { text: placeholder, value: NO_SELECTION },
-        ...(props.options || []),
-      ]}
+      options={[{ text: placeholder, value: NO_SELECTION }, ...(props.options || [])]}
       value={isEmpty(props.value) ? NO_SELECTION : props.value}
       onChange={(e) => {
         if (props.onChange) {

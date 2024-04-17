@@ -25,8 +25,7 @@ export function ErrorCountSummaryItemBadge({ count }: Props) {
   return (
     <Badge color={theme.eui.euiColorDanger}>
       {i18n.translate('xpack.apm.transactionDetails.errorCount', {
-        defaultMessage:
-          '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
+        defaultMessage: '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
         values: { errorCount: count },
       })}
     </Badge>

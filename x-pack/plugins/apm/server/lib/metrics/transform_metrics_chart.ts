@@ -11,9 +11,7 @@ import { getVizColorForIndex } from '../../../common/viz_colors';
 import { GenericMetricsRequest } from './fetch_and_transform_metrics';
 import { ChartBase } from './types';
 
-export type GenericMetricsChart = ReturnType<
-  typeof transformDataToMetricsChart
->;
+export type GenericMetricsChart = ReturnType<typeof transformDataToMetricsChart>;
 
 export function transformDataToMetricsChart(
   result: ESSearchResponse<unknown, GenericMetricsRequest>,
@@ -36,9 +34,7 @@ export function transformDataToMetricsChart(
               title: chartBase.series[seriesKey].title,
               key: seriesKey,
               type: chartBase.type,
-              color:
-                chartBase.series[seriesKey].color ||
-                getVizColorForIndex(i, theme),
+              color: chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
               overallValue,
               data:
                 timeseriesData?.buckets.map((bucket) => {

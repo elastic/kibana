@@ -20,8 +20,7 @@ export const mockLayerList = [
           term: 'client.geo.country_iso_code',
           whereQuery: {
             language: 'kuery',
-            query:
-              'transaction.type : "page-load" and service.name : "undefined"',
+            query: 'transaction.type : "page-load" and service.name : "undefined"',
           },
           metrics: [
             {
@@ -95,8 +94,7 @@ export const mockLayerList = [
           term: 'client.geo.region_iso_code',
           whereQuery: {
             language: 'kuery',
-            query:
-              'transaction.type : "page-load" and service.name : "undefined"',
+            query: 'transaction.type : "page-load" and service.name : "undefined"',
           },
           metrics: [{ type: 'avg', field: 'transaction.duration.us' }],
           indexPatternId: 'apm_static_index_pattern_id',

@@ -9,11 +9,7 @@ import { Logger } from 'kibana/server';
 import util from 'util';
 import { maybe } from '../../../../common/utils/maybe';
 import { ProfileStackFrame } from '../../../../typings/es_schemas/ui/profile';
-import {
-  ProfilingValueType,
-  ProfileNode,
-  getValueTypeConfig,
-} from '../../../../common/profiling';
+import { ProfilingValueType, ProfileNode, getValueTypeConfig } from '../../../../common/profiling';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
@@ -98,34 +94,28 @@ function getProfilesWithStacks({
   filter: ESFilter[];
 }) {
   return withApmSpan('get_profiles_with_stacks', async () => {
-    const cardinalityResponse = await apmEventClient.search(
-      'get_top_cardinality',
-      {
-        apm: {
-          events: [ProcessorEvent.profile],
+    const cardinalityResponse = await apmEventClient.search('get_top_cardinality', {
+      apm: {
+        events: [ProcessorEvent.profile],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: { filter },
         },
-        body: {
-          size: 0,
-          query: {
-            bool: { filter },
-          },
-          aggs: {
-            top: {
-              cardinality: {
-                field: PROFILE_TOP_ID,
-              },
+        aggs: {
+          top: {
+            cardinality: {
+              field: PROFILE_TOP_ID,
             },
           },
         },
-      }
-    );
+      },
+    });
 
     const cardinality = cardinalityResponse.aggregations?.top.value ?? 0;
 
-    const numStacksToFetch = Math.min(
-      Math.ceil(cardinality * 1.1),
-      MAX_STACK_IDS
-    );
+    const numStacksToFetch = Math.min(Math.ceil(cardinality * 1.1), MAX_STACK_IDS);
 
     const partitions = Math.ceil(numStacksToFetch / MAX_STACKS_PER_REQUEST);
 

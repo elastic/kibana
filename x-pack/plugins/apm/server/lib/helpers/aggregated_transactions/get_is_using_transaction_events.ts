@@ -25,15 +25,10 @@ export async function getIsUsingTransactionEvents({
 }): Promise<boolean> {
   const searchAggregatedTransactions = config.searchAggregatedTransactions;
 
-  if (
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.never
-  ) {
+  if (searchAggregatedTransactions === SearchAggregatedTransactionSetting.never) {
     return false;
   }
-  if (
-    !kuery &&
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.always
-  ) {
+  if (!kuery && searchAggregatedTransactions === SearchAggregatedTransactionSetting.always) {
     return false;
   }
 
@@ -76,10 +71,7 @@ async function getHasTransactions({
     body: {
       query: {
         bool: {
-          filter: [
-            ...(start && end ? rangeQuery(start, end) : []),
-            ...kqlQuery(kuery),
-          ],
+          filter: [...(start && end ? rangeQuery(start, end) : []), ...kqlQuery(kuery)],
         },
       },
     },

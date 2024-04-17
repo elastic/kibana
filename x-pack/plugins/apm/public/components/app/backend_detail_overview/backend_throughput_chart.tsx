@@ -68,10 +68,9 @@ export function BackendThroughputChart({ height }: { height: number }) {
         data: data.comparisonTimeseries,
         type: 'area',
         color: theme.eui.euiColorMediumShade,
-        title: i18n.translate(
-          'xpack.apm.backendThroughputChart.previousPeriodLabel',
-          { defaultMessage: 'Previous period' }
-        ),
+        title: i18n.translate('xpack.apm.backendThroughputChart.previousPeriodLabel', {
+          defaultMessage: 'Previous period',
+        }),
       });
     }
 

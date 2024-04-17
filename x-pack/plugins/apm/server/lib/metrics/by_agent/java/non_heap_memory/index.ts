@@ -20,21 +20,15 @@ import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 const series = {
   nonHeapMemoryUsed: {
-    title: i18n.translate(
-      'xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed',
-      {
-        defaultMessage: 'Avg. used',
-      }
-    ),
+    title: i18n.translate('xpack.apm.agentMetrics.java.nonHeapMemorySeriesUsed', {
+      defaultMessage: 'Avg. used',
+    }),
     color: theme.euiColorVis0,
   },
   nonHeapMemoryCommitted: {
-    title: i18n.translate(
-      'xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted',
-      {
-        defaultMessage: 'Avg. committed',
-      }
-    ),
+    title: i18n.translate('xpack.apm.agentMetrics.java.nonHeapMemorySeriesCommitted', {
+      defaultMessage: 'Avg. committed',
+    }),
     color: theme.euiColorVis1,
   },
 };

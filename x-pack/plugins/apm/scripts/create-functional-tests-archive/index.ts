@@ -143,9 +143,7 @@ async function run() {
   // for performance reasons, by looking at the search
   // profile
   const indicesWithDocs =
-    response.body.aggregations?.index.buckets.map(
-      (bucket) => bucket.key as string
-    ) ?? [];
+    response.body.aggregations?.index.buckets.map((bucket) => bucket.key as string) ?? [];
 
   const indicesToArchive = indicesWithDocs.join(',');
 

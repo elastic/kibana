@@ -23,9 +23,7 @@ import type {
   OverallLatencyDistributionResponse,
 } from './types';
 
-export async function getOverallLatencyDistribution(
-  options: OverallLatencyDistributionOptions
-) {
+export async function getOverallLatencyDistribution(options: OverallLatencyDistributionOptions) {
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
@@ -39,8 +37,9 @@ export async function getOverallLatencyDistribution(
     };
 
     // #1: get 95th percentile to be displayed as a marker in the log log chart
-    overallLatencyDistribution.percentileThresholdValue =
-      await getPercentileThresholdValue(options);
+    overallLatencyDistribution.percentileThresholdValue = await getPercentileThresholdValue(
+      options
+    );
 
     // finish early if we weren't able to identify the percentileThresholdValue.
     if (!overallLatencyDistribution.percentileThresholdValue) {
@@ -50,17 +49,13 @@ export async function getOverallLatencyDistribution(
     // #2: get histogram range steps
     const steps = 100;
 
-    const { body: histogramIntervalRequestBody } =
-      getHistogramIntervalRequest(params);
+    const { body: histogramIntervalRequestBody } = getHistogramIntervalRequest(params);
 
-    const histogramIntervalResponse = (await apmEventClient.search(
-      'get_histogram_interval',
-      {
-        // TODO: add support for metrics
-        apm: { events: [ProcessorEvent.transaction] },
-        body: histogramIntervalRequestBody,
-      }
-    )) as {
+    const histogramIntervalResponse = (await apmEventClient.search('get_histogram_interval', {
+      // TODO: add support for metrics
+      apm: { events: [ProcessorEvent.transaction] },
+      body: histogramIntervalRequestBody,
+    })) as {
       aggregations?: {
         transaction_duration_min: estypes.AggregationsValueAggregate;
         transaction_duration_max: estypes.AggregationsValueAggregate;
@@ -75,20 +70,17 @@ export async function getOverallLatencyDistribution(
       return overallLatencyDistribution;
     }
 
-    const min =
-      histogramIntervalResponse.aggregations.transaction_duration_min.value;
-    const max =
-      histogramIntervalResponse.aggregations.transaction_duration_max.value * 2;
+    const min = histogramIntervalResponse.aggregations.transaction_duration_min.value;
+    const max = histogramIntervalResponse.aggregations.transaction_duration_max.value * 2;
 
     const histogramRangeSteps = getHistogramRangeSteps(min, max, steps);
 
     // #3: get histogram chart data
-    const { body: transactionDurationRangesRequestBody } =
-      getTransactionDurationRangesRequest(
-        params,
-        histogramRangeSteps,
-        termFilters
-      );
+    const { body: transactionDurationRangesRequestBody } = getTransactionDurationRangesRequest(
+      params,
+      histogramRangeSteps,
+      termFilters
+    );
 
     const transactionDurationRangesResponse = (await apmEventClient.search(
       'get_transaction_duration_ranges',

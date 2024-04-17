@@ -10,10 +10,7 @@ import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { APMRouteHandlerResources } from '../../routes/typings';
-import {
-  ApmIndicesConfig,
-  getApmIndices,
-} from '../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig, getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import {
   APMInternalClient,
@@ -69,11 +66,7 @@ export async function setupRequest({
       }),
       ml:
         plugins.ml && isActivePlatinumLicense(context.licensing.license)
-          ? getMlSetup(
-              plugins.ml.setup,
-              context.core.savedObjects.client,
-              request
-            )
+          ? getMlSetup(plugins.ml.setup, context.core.savedObjects.client, request)
           : undefined,
       config,
     };

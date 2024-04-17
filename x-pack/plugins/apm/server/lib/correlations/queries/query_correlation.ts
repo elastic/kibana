@@ -110,19 +110,14 @@ export const fetchTransactionDurationCorrelation = async (
   );
 
   if (resp.body.aggregations === undefined) {
-    throw new Error(
-      'fetchTransactionDurationCorrelation failed, did not return aggregations.'
-    );
+    throw new Error('fetchTransactionDurationCorrelation failed, did not return aggregations.');
   }
 
   const result = {
-    ranges: (
-      resp.body.aggregations
-        .latency_ranges as estypes.AggregationsMultiBucketAggregate
-    ).buckets,
+    ranges: (resp.body.aggregations.latency_ranges as estypes.AggregationsMultiBucketAggregate)
+      .buckets,
     correlation: (
-      resp.body.aggregations
-        .transaction_duration_correlation as estypes.AggregationsValueAggregate
+      resp.body.aggregations.transaction_duration_correlation as estypes.AggregationsValueAggregate
     ).value,
     // @ts-ignore
     ksTest: resp.body.aggregations.ks_test.less,

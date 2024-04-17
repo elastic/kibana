@@ -24,10 +24,9 @@ export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
         isDisabled={!canSave}
         data-test-subj="createButton"
       >
-        {i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.createCustomLink',
-          { defaultMessage: 'Create custom link' }
-        )}
+        {i18n.translate('xpack.apm.settings.customizeUI.customLink.createCustomLink', {
+          defaultMessage: 'Create custom link',
+        })}
       </EuiButton>
     </EuiToolTip>
   );

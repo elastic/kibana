@@ -16,10 +16,7 @@ import {
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import {
-  HomeServerPluginSetup,
-  HomeServerPluginStart,
-} from '../../../../src/plugins/home/server';
+import { HomeServerPluginSetup, HomeServerPluginStart } from '../../../../src/plugins/home/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { ActionsPlugin } from '../../actions/server';
 import { AlertingPlugin } from '../../alerting/server';
@@ -28,20 +25,11 @@ import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-} from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { MlPluginSetup, MlPluginStart } from '../../ml/server';
 import { ObservabilityPluginSetup } from '../../observability/server';
-import {
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '../../security/server';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../task_manager/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,

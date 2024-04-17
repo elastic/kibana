@@ -6,10 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  FieldValuePair,
-  CorrelationsParams,
-} from '../../../../common/correlations/types';
+import type { FieldValuePair, CorrelationsParams } from '../../../../common/correlations/types';
 import { getCorrelationsFilters } from './get_filters';
 
 export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
@@ -21,15 +18,7 @@ interface QueryParams {
   termFilters?: FieldValuePair[];
 }
 export const getQueryWithParams = ({ params, termFilters }: QueryParams) => {
-  const {
-    environment,
-    kuery,
-    serviceName,
-    start,
-    end,
-    transactionType,
-    transactionName,
-  } = params;
+  const { environment, kuery, serviceName, start, end, transactionType, transactionName } = params;
 
   const correlationFilters = getCorrelationsFilters({
     environment,

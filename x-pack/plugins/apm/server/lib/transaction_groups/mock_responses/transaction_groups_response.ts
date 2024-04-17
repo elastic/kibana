@@ -102,8 +102,7 @@ export const transactionGroupsResponse = {
                       tags: {
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                       },
@@ -217,8 +216,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 5176 },
@@ -305,8 +303,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 408 },
@@ -413,8 +410,7 @@ export const transactionGroupsResponse = {
                       tags: {
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                       },
@@ -570,8 +566,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                       },
                       custom: { containerId: 207 },
                       request: {
@@ -665,8 +660,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                       },
                       custom: { containerId: 4877 },
                       request: {
@@ -763,8 +757,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 2531 },
@@ -953,8 +946,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 5113 },
@@ -1007,8 +999,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                       },
                       custom: { containerId: 2927 },
                       request: {
@@ -1133,8 +1124,7 @@ export const transactionGroupsResponse = {
                       tags: {
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                       },
@@ -1265,8 +1255,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 5345 },
@@ -1428,8 +1417,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                     },
@@ -1535,8 +1523,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 2193 },
@@ -1579,8 +1566,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 5999 },
@@ -1725,8 +1711,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                       },
                       custom: { containerId: 7184 },
                       request: {
@@ -1867,8 +1852,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                       },
                       custom: { containerId: 8225 },
                       request: {
@@ -1968,8 +1952,7 @@ export const transactionGroupsResponse = {
                         username: 'kimchy',
                       },
                       tags: {
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                         lorem:
@@ -2096,8 +2079,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 8593 },
@@ -2196,8 +2178,7 @@ export const transactionGroupsResponse = {
                       tags: {
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                       },
@@ -2376,8 +2357,7 @@ export const transactionGroupsResponse = {
                         foo: 'bar',
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                       },
                       custom: { containerId: 6446 },
                     },
@@ -2435,8 +2415,7 @@ export const transactionGroupsResponse = {
                         email: 'kimchy@elastic.co',
                       },
                       tags: {
-                        'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test',
+                        'this-is-a-very-long-tag-name-without-any-spaces': 'test',
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                         lorem:

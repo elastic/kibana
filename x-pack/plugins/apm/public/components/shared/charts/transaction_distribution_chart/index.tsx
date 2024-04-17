@@ -90,8 +90,7 @@ export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
 // Create and call a duration formatter for every value since the durations for the
 // x axis might have a wide range of values e.g. from low milliseconds to large seconds.
 // This way we can get different suitable units across ticks.
-const xAxisTickFormat: TickFormatter<number> = (d) =>
-  getDurationFormatter(d, 0.9999)(d).formatted;
+const xAxisTickFormat: TickFormatter<number> = (d) => getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
   data,
@@ -109,23 +108,17 @@ export function TransactionDistributionChart({
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
       dataValue: markerValue,
-      details: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.percentileMarkerLabel',
-        {
-          defaultMessage: '{markerPercentile}th percentile',
-          values: {
-            markerPercentile,
-          },
-        }
-      ),
+      details: i18n.translate('xpack.apm.transactionDistribution.chart.percentileMarkerLabel', {
+        defaultMessage: '{markerPercentile}th percentile',
+        values: {
+          markerPercentile,
+        },
+      }),
     },
   ];
 
   // This will create y axis ticks for 1, 10, 100, 1000 ...
-  const yMax =
-    Math.max(
-      ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
-    ) ?? 0;
+  const yMax = Math.max(...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)) ?? 0;
   // A minimum of 2 ticks avoids that Elastic Charts 38.0.3 falls back to more defeault ticks.
   const yTicks = Math.max(2, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
@@ -231,10 +224,9 @@ export function TransactionDistributionChart({
           />
           <Axis
             id="x-axis"
-            title={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.latencyLabel',
-              { defaultMessage: 'Latency' }
-            )}
+            title={i18n.translate('xpack.apm.transactionDistribution.chart.latencyLabel', {
+              defaultMessage: 'Latency',
+            })}
             position={Position.Bottom}
             tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}

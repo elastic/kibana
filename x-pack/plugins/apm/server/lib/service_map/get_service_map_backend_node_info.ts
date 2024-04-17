@@ -37,45 +37,41 @@ export function getServiceMapBackendNodeInfo({
   return withApmSpan('get_service_map_backend_node_stats', async () => {
     const { apmEventClient } = setup;
 
-    const response = await apmEventClient.search(
-      'get_service_map_backend_node_stats',
-      {
-        apm: {
-          events: [ProcessorEvent.metric],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-              ],
-            },
-          },
-          aggs: {
-            latency_sum: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-              },
-            },
-            count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-            [EVENT_OUTCOME]: {
-              terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
-            },
+    const response = await apmEventClient.search('get_service_map_backend_node_stats', {
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ],
           },
         },
-      }
-    );
+        aggs: {
+          latency_sum: {
+            sum: {
+              field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+            },
+          },
+          count: {
+            sum: {
+              field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+            },
+          },
+          [EVENT_OUTCOME]: {
+            terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
+          },
+        },
+      },
+    });
 
     const count = response.aggregations?.count.value ?? 0;
-    const errorCount =
-      response.aggregations?.[EVENT_OUTCOME].buckets[0]?.doc_count ?? 0;
+    const errorCount = response.aggregations?.[EVENT_OUTCOME].buckets[0]?.doc_count ?? 0;
     const latencySum = response.aggregations?.latency_sum.value ?? 0;
 
     const avgErrorRate = errorCount / count;

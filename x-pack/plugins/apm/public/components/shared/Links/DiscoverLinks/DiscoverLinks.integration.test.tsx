@@ -29,8 +29,7 @@ describe('DiscoverLinks', () => {
     const href = await getRenderedHref(
       () => <DiscoverTransactionLink transaction={transaction} />,
       {
-        search:
-          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
+        search: '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 
@@ -47,8 +46,7 @@ describe('DiscoverLinks', () => {
     } as Span;
 
     const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
-      search:
-        '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
+      search: '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
     } as Location);
 
     expect(href).toMatchInlineSnapshot(
@@ -65,13 +63,9 @@ describe('DiscoverLinks', () => {
         grouping_key: 'grouping-key',
       },
     } as APMError;
-    const href = await getRenderedHref(
-      () => <DiscoverErrorLink error={error} />,
-      {
-        search:
-          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
-      } as Location
-    );
+    const href = await getRenderedHref(() => <DiscoverErrorLink error={error} />, {
+      search: '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
+    } as Location);
 
     expect(href).toMatchInlineSnapshot(
       `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'service.name:\\"service-name\\" AND error.grouping_key:\\"grouping-key\\"'),sort:('@timestamp':desc))"`
@@ -91,8 +85,7 @@ describe('DiscoverLinks', () => {
     const href = await getRenderedHref(
       () => <DiscoverErrorLink error={error} kuery="some:kuery-string" />,
       {
-        search:
-          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
+        search: '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 

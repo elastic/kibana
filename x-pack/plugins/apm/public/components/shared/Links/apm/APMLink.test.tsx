@@ -15,8 +15,7 @@ describe('APMLink', () => {
     const href = await getRenderedHref(
       () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
       {
-        search:
-          '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
+        search: '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 
@@ -41,12 +40,7 @@ describe('APMLink', () => {
 
   test('APMLink should overwrite current kuery value if new kuery value is provided', async () => {
     const href = await getRenderedHref(
-      () => (
-        <APMLink
-          path="/some/path"
-          query={{ kuery: 'host.os~20~3A~20~22linux~22' }}
-        />
-      ),
+      () => <APMLink path="/some/path" query={{ kuery: 'host.os~20~3A~20~22linux~22' }} />,
       {
         search:
           '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',

@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type {
-  TermsEnumRequest,
-  TermsEnumResponse,
-} from '@elastic/elasticsearch/api/types';
+import type { TermsEnumRequest, TermsEnumResponse } from '@elastic/elasticsearch/api/types';
 import { ValuesType } from 'utility-types';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { Profile } from '../../../../../typings/es_schemas/ui/profile';
-import {
-  ElasticsearchClient,
-  KibanaRequest,
-} from '../../../../../../../../src/core/server';
+import { ElasticsearchClient, KibanaRequest } from '../../../../../../../../src/core/server';
 import {
   ESSearchRequest,
   InferSearchResponseOf,
@@ -27,11 +21,7 @@ import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
-import {
-  callAsyncWithDebug,
-  getDebugBody,
-  getDebugTitle,
-} from '../call_async_with_debug';
+import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
 import { unpackProcessorEvents } from './unpack_processor_events';
@@ -57,11 +47,10 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   profile: Profile;
 }[T];
 
-type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
-  InferSearchResponseOf<
-    TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
-    TParams
-  >;
+type TypedSearchResponse<TParams extends APMEventESSearchRequest> = InferSearchResponseOf<
+  TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
+  TParams
+>;
 
 export interface APMEventClientConfig {
   esClient: ElasticsearchClient;
@@ -92,10 +81,7 @@ export class APMEventClient {
     operationName: string,
     params: TParams
   ): Promise<TypedSearchResponse<TParams>> {
-    const withProcessorEventFilter = unpackProcessorEvents(
-      params,
-      this.indices
-    );
+    const withProcessorEventFilter = unpackProcessorEvents(params, this.indices);
 
     const { includeLegacyData = false } = params.apm;
 
@@ -116,10 +102,7 @@ export class APMEventClient {
     return callAsyncWithDebug({
       cb: () => {
         const searchPromise = withApmSpan(operationName, () => {
-          return cancelEsRequestOnAbort(
-            this.esClient.search(searchParams),
-            this.request
-          );
+          return cancelEsRequestOnAbort(this.esClient.search(searchParams), this.request);
         });
 
         return unwrapEsResponse(searchPromise);

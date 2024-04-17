@@ -30,9 +30,7 @@ export function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
 
     const response = await getMlJobsWithAPMGroup(ml.anomalyDetectors);
     return response.jobs
-      .filter(
-        (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
-      )
+      .filter((job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2)
       .map((job) => {
         const environment = job.custom_settings?.job_tags?.environment ?? '';
         return {

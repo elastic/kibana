@@ -7,10 +7,7 @@
 
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../helpers/setup_request';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
@@ -38,16 +35,12 @@ export async function getAllEnvironments({
   const { apmEventClient } = setup;
 
   // omit filter for service.name if "All" option is selected
-  const serviceNameFilter = serviceName
-    ? [{ term: { [SERVICE_NAME]: serviceName } }]
-    : [];
+  const serviceNameFilter = serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : [];
 
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
+        getProcessorEventForAggregatedTransactions(searchAggregatedTransactions),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],
@@ -78,8 +71,6 @@ export async function getAllEnvironments({
   const resp = await apmEventClient.search(operationName, params);
 
   const environments =
-    resp.aggregations?.environments.buckets.map(
-      (bucket) => bucket.key as string
-    ) || [];
+    resp.aggregations?.environments.buckets.map((bucket) => bucket.key as string) || [];
   return environments;
 }

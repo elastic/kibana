@@ -37,11 +37,7 @@ import {
   ProfilingValueType,
   ProfilingValueTypeUnit,
 } from '../../../../common/profiling';
-import {
-  asDuration,
-  asDynamicBytes,
-  asInteger,
-} from '../../../../common/utils/formatters';
+import { asDuration, asDynamicBytes, asInteger } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
@@ -62,10 +58,7 @@ const TooltipContainer = euiStyled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.s};
 `;
 
-const formatValue = (
-  value: number,
-  valueUnit: ProfilingValueTypeUnit
-): string => {
+const formatValue = (value: number, valueUnit: ProfilingValueTypeUnit): string => {
   switch (valueUnit) {
     case ProfilingValueTypeUnit.ns:
       return asDuration(value / 1000);
@@ -98,12 +91,7 @@ function CustomTooltip({
 
   return (
     <TooltipContainer>
-      <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        alignItems="center"
-        justifyContent="flexStart"
-      >
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiIcon type="dot" color={first.color} />
         </EuiFlexItem>
@@ -147,8 +135,7 @@ export function ServiceProfilingFlamegraph({
       }
 
       return callApmApi({
-        endpoint:
-          'GET /internal/apm/services/{serviceName}/profiling/statistics',
+        endpoint: 'GET /internal/apm/services/{serviceName}/profiling/statistics',
         params: {
           path: {
             serviceName,
@@ -173,10 +160,7 @@ export function ServiceProfilingFlamegraph({
 
     const { rootNodes, nodes } = data;
 
-    const getDataPoints = (
-      node: ProfileNode,
-      depth: number
-    ): ProfileDataPoint[] => {
+    const getDataPoints = (node: ProfileNode, depth: number): ProfileDataPoint[] => {
       const { children } = node;
 
       if (!children.length) {
@@ -275,8 +259,7 @@ export function ServiceProfilingFlamegraph({
               return rgba(0, 0, 0, 0.25);
             }
 
-            const integer =
-              Math.abs(seedrandom(d.dataName).int32()) % colors.length;
+            const integer = Math.abs(seedrandom(d.dataName).int32()) % colors.length;
             return colors[integer];
           },
         },
@@ -295,9 +278,7 @@ export function ServiceProfilingFlamegraph({
     highlightFilter ? node.fqn.includes(highlightFilter) : true
   );
 
-  const valueUnit = valueType
-    ? getValueTypeConfig(valueType).unit
-    : ProfilingValueTypeUnit.count;
+  const valueUnit = valueType ? getValueTypeConfig(valueType).unit : ProfilingValueTypeUnit.count;
 
   return (
     <EuiFlexGroup direction="row">
@@ -307,11 +288,7 @@ export function ServiceProfilingFlamegraph({
             theme={chartTheme}
             tooltip={{
               customTooltip: (info) => (
-                <CustomTooltip
-                  {...info}
-                  valueUnit={valueUnit}
-                  nodes={data?.nodes ?? {}}
-                />
+                <CustomTooltip {...info} valueUnit={valueUnit} nodes={data?.nodes ?? {}} />
               ),
             }}
           />
@@ -345,20 +322,16 @@ export function ServiceProfilingFlamegraph({
               onChange={() => {
                 setCollapseSimilarFrames((state) => !state);
               }}
-              label={i18n.translate(
-                'xpack.apm.profiling.collapseSimilarFrames',
-                {
-                  defaultMessage: 'Collapse similar',
-                }
-              )}
+              label={i18n.translate('xpack.apm.profiling.collapseSimilarFrames', {
+                defaultMessage: 'Collapse similar',
+              })}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFieldText
-              placeholder={i18n.translate(
-                'xpack.apm.profiling.highlightFrames',
-                { defaultMessage: 'Search' }
-              )}
+              placeholder={i18n.translate('xpack.apm.profiling.highlightFrames', {
+                defaultMessage: 'Search',
+              })}
               onChange={(e) => {
                 if (!e.target.value) {
                   setHighlightFilter('');

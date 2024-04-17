@@ -16,11 +16,7 @@ export enum ServiceHealthStatus {
   unknown = 'unknown',
 }
 
-export function getServiceHealthStatus({
-  severity,
-}: {
-  severity: ANOMALY_SEVERITY;
-}) {
+export function getServiceHealthStatus({ severity }: { severity: ANOMALY_SEVERITY }) {
   switch (severity) {
     case ANOMALY_SEVERITY.CRITICAL:
     case ANOMALY_SEVERITY.MAJOR:
@@ -38,10 +34,7 @@ export function getServiceHealthStatus({
   }
 }
 
-export function getServiceHealthStatusColor(
-  theme: EuiTheme,
-  status: ServiceHealthStatus
-) {
+export function getServiceHealthStatusColor(theme: EuiTheme, status: ServiceHealthStatus) {
   switch (status) {
     case ServiceHealthStatus.healthy:
       return theme.eui.euiColorVis0;
@@ -54,10 +47,7 @@ export function getServiceHealthStatusColor(
   }
 }
 
-export function getServiceHealthStatusBadgeColor(
-  theme: EuiTheme,
-  status: ServiceHealthStatus
-) {
+export function getServiceHealthStatusBadgeColor(theme: EuiTheme, status: ServiceHealthStatus) {
   switch (status) {
     case ServiceHealthStatus.healthy:
       return theme.eui.euiColorVis0_behindText;

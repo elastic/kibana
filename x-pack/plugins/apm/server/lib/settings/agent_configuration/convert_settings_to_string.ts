@@ -10,19 +10,15 @@ import { AgentConfiguration } from '../../../../common/agent_configuration/confi
 
 // needed for backwards compatability
 // All settings except `transaction_sample_rate` and `transaction_max_spans` are stored as strings (they are stored as float and integer respectively)
-export function convertConfigSettingsToString(
-  hit: SearchHit<AgentConfiguration>
-) {
+export function convertConfigSettingsToString(hit: SearchHit<AgentConfiguration>) {
   const config = hit._source;
 
   if (config.settings?.transaction_sample_rate) {
-    config.settings.transaction_sample_rate =
-      config.settings.transaction_sample_rate.toString();
+    config.settings.transaction_sample_rate = config.settings.transaction_sample_rate.toString();
   }
 
   if (config.settings?.transaction_max_spans) {
-    config.settings.transaction_max_spans =
-      config.settings.transaction_max_spans.toString();
+    config.settings.transaction_max_spans = config.settings.transaction_max_spans.toString();
   }
 
   return hit;

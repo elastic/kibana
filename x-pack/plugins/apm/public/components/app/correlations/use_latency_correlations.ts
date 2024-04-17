@@ -49,10 +49,7 @@ export function useLatencyCorrelations() {
     getReducer<LatencyCorrelationsResponse & CorrelationsProgress>(),
     getInitialResponse()
   );
-  const setResponse = useMemo(
-    () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
-    []
-  );
+  const setResponse = useMemo(() => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL), []);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -151,8 +148,7 @@ export function useLatencyCorrelations() {
         setResponse({
           loaded:
             LOADED_FIELD_CANDIDATES +
-            (chunkLoadCounter / fieldCandidateChunks.length) *
-              PROGRESS_STEP_FIELD_VALUE_PAIRS,
+            (chunkLoadCounter / fieldCandidateChunks.length) * PROGRESS_STEP_FIELD_VALUE_PAIRS,
         });
       }
 
@@ -166,10 +162,7 @@ export function useLatencyCorrelations() {
 
       const fieldsToSample = new Set<string>();
       const latencyCorrelations: LatencyCorrelation[] = [];
-      const fieldValuePairChunks = chunk(
-        getPrioritizedFieldValuePairs(fieldValuePairs),
-        chunkSize
-      );
+      const fieldValuePairChunks = chunk(getPrioritizedFieldValuePairs(fieldValuePairs), chunkSize);
 
       for (const fieldValuePairChunk of fieldValuePairChunks) {
         const significantCorrelations = await callApmApi({
@@ -184,11 +177,10 @@ export function useLatencyCorrelations() {
           significantCorrelations.latencyCorrelations.forEach((d) => {
             fieldsToSample.add(d.fieldName);
           });
-          latencyCorrelations.push(
-            ...significantCorrelations.latencyCorrelations
-          );
-          responseUpdate.latencyCorrelations =
-            getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
+          latencyCorrelations.push(...significantCorrelations.latencyCorrelations);
+          responseUpdate.latencyCorrelations = getLatencyCorrelationsSortedByCorrelation([
+            ...latencyCorrelations,
+          ]);
         }
 
         chunkLoadCounter++;
@@ -196,8 +188,7 @@ export function useLatencyCorrelations() {
           ...responseUpdate,
           loaded:
             LOADED_FIELD_VALUE_PAIRS +
-            (chunkLoadCounter / fieldValuePairChunks.length) *
-              PROGRESS_STEP_CORRELATIONS,
+            (chunkLoadCounter / fieldValuePairChunks.length) * PROGRESS_STEP_CORRELATIONS,
         });
 
         if (abortCtrl.current.signal.aborted) {
@@ -229,10 +220,7 @@ export function useLatencyCorrelations() {
       if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError;
         setResponse({
-          error:
-            'response' in err
-              ? err.body?.message ?? err.response?.statusText
-              : err.message,
+          error: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
           isRunning: false,
         });
         setResponse.flush();

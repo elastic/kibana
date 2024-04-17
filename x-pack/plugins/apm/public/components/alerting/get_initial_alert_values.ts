@@ -11,9 +11,7 @@ export function getInitialAlertValues(
   alertType: AlertType | null,
   serviceName: string | undefined
 ) {
-  const alertTypeName = alertType
-    ? ALERT_TYPES_CONFIG[alertType].name
-    : undefined;
+  const alertTypeName = alertType ? ALERT_TYPES_CONFIG[alertType].name : undefined;
   const alertName = alertTypeName
     ? serviceName
       ? `${alertTypeName} | ${serviceName}`

@@ -14,13 +14,7 @@ export const readOnlyUserRole: RoleType = {
     indices: [
       // apm
       {
-        names: [
-          'apm-*',
-          'logs-apm*',
-          'metrics-apm*',
-          'traces-apm*',
-          'observability-annotations',
-        ],
+        names: ['apm-*', 'logs-apm*', 'metrics-apm*', 'traces-apm*', 'observability-annotations'],
         privileges: ['read', 'view_index_metadata'],
       },
       // logs

@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import type {
-  FieldValuePair,
-  HistogramItem,
-} from '../../../../common/correlations/types';
+import type { FieldValuePair, HistogramItem } from '../../../../common/correlations/types';
 import { TransactionDistributionChartData } from '../../shared/charts/transaction_distribution_chart';
 
 export function getTransactionDistributionChartData({
@@ -24,15 +21,13 @@ export function getTransactionDistributionChartData({
   failedTransactionsHistogram?: HistogramItem[];
   selectedTerm?: FieldValuePair & { histogram: HistogramItem[] };
 }) {
-  const transactionDistributionChartData: TransactionDistributionChartData[] =
-    [];
+  const transactionDistributionChartData: TransactionDistributionChartData[] = [];
 
   if (Array.isArray(allTransactionsHistogram)) {
     transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-        { defaultMessage: 'All transactions' }
-      ),
+      id: i18n.translate('xpack.apm.transactionDistribution.chart.allTransactionsLabel', {
+        defaultMessage: 'All transactions',
+      }),
       histogram: allTransactionsHistogram,
       areaSeriesColor: euiTheme.eui.euiColorVis1,
     });
@@ -40,10 +35,9 @@ export function getTransactionDistributionChartData({
 
   if (Array.isArray(failedTransactionsHistogram)) {
     transactionDistributionChartData.push({
-      id: i18n.translate(
-        'xpack.apm.transactionDistribution.chart.failedTransactionsLabel',
-        { defaultMessage: 'Failed transactions' }
-      ),
+      id: i18n.translate('xpack.apm.transactionDistribution.chart.failedTransactionsLabel', {
+        defaultMessage: 'Failed transactions',
+      }),
       histogram: failedTransactionsHistogram,
       areaSeriesColor: euiTheme.eui.euiColorVis7,
     });

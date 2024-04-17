@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -88,10 +82,7 @@ export function ErrorGroupOverview() {
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <FailedTransactionRateChart
-                kuery={kuery}
-                environment={environment}
-              />
+              <FailedTransactionRateChart kuery={kuery} environment={environment} />
             </EuiFlexItem>
           </ChartPointerEventContextProvider>
         </EuiFlexGroup>
@@ -101,18 +92,14 @@ export function ErrorGroupOverview() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Errors' }
-              )}
+              {i18n.translate('xpack.apm.serviceDetails.metrics.errorsList.title', {
+                defaultMessage: 'Errors',
+              })}
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          <ErrorGroupList
-            items={errorGroupListData.errorGroups}
-            serviceName={serviceName}
-          />
+          <ErrorGroupList items={errorGroupListData.errorGroups} serviceName={serviceName} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -36,10 +36,9 @@ function updateEnvironmentUrl(
 }
 
 const SEPARATOR_OPTION = {
-  text: `- ${i18n.translate(
-    'xpack.apm.filter.environment.selectEnvironmentLabel',
-    { defaultMessage: 'Select environment' }
-  )} -`,
+  text: `- ${i18n.translate('xpack.apm.filter.environment.selectEnvironmentLabel', {
+    defaultMessage: 'Select environment',
+  })} -`,
   disabled: true,
 };
 
@@ -53,9 +52,7 @@ function getOptions(environments: string[]) {
 
   return [
     ENVIRONMENT_ALL,
-    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value)
-      ? [ENVIRONMENT_NOT_DEFINED]
-      : []),
+    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value) ? [ENVIRONMENT_NOT_DEFINED] : []),
     ...(environmentOptions.length > 0 ? [SEPARATOR_OPTION] : []),
     ...environmentOptions,
   ];
@@ -65,8 +62,7 @@ export function ApmEnvironmentFilter() {
   const { path, query } = useApmParams('/*');
 
   const serviceName = 'serviceName' in path ? path.serviceName : undefined;
-  const environment =
-    ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
+  const environment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
 
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
   const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;

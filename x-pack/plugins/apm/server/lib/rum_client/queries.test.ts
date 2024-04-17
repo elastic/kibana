@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  SearchParamsMock,
-  inspectSearchParams,
-} from '../../utils/test_helpers';
+import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
 import { getClientMetrics } from './get_client_metrics';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';

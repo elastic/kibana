@@ -98,10 +98,7 @@ const getServiceNodes = async ({
       name: bucket.key as string,
       cpu: bucket.cpu.value,
       heapMemory: bucket.heapMemory.value,
-      hostName: bucket.latest.top?.[0]?.metrics?.['host.hostname'] as
-        | string
-        | null
-        | undefined,
+      hostName: bucket.latest.top?.[0]?.metrics?.['host.hostname'] as string | null | undefined,
       nonHeapMemory: bucket.nonHeapMemory.value,
       threadCount: bucket.threadCount.value,
     }))

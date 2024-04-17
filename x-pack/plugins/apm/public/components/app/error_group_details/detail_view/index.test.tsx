@@ -17,9 +17,7 @@ describe('DetailView', () => {
   });
 
   it('should render empty state', () => {
-    const wrapper = shallow(
-      <DetailView errorGroup={{} as any} urlParams={{}} kuery="" />
-    );
+    const wrapper = shallow(<DetailView errorGroup={{} as any} urlParams={{}} kuery="" />);
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
@@ -40,9 +38,9 @@ describe('DetailView', () => {
       } as any,
     };
 
-    const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('DiscoverErrorLink');
+    const wrapper = shallow(<DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />).find(
+      'DiscoverErrorLink'
+    );
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
@@ -59,9 +57,9 @@ describe('DetailView', () => {
       } as any,
       transaction: undefined,
     };
-    const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('Summary');
+    const wrapper = shallow(<DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />).find(
+      'Summary'
+    );
 
     expect(wrapper.exists()).toBe(true);
   });
@@ -79,9 +77,9 @@ describe('DetailView', () => {
         user: {},
       } as any,
     };
-    const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('EuiTabs');
+    const wrapper = shallow(<DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />).find(
+      'EuiTabs'
+    );
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
@@ -99,9 +97,9 @@ describe('DetailView', () => {
         context: {},
       } as any,
     };
-    const wrapper = shallow(
-      <DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />
-    ).find('TabContent');
+    const wrapper = shallow(<DetailView errorGroup={errorGroup} urlParams={{}} kuery="" />).find(
+      'TabContent'
+    );
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();

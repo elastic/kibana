@@ -50,10 +50,7 @@ export async function getTransactionErrorCountChartPreview({
     body: { size: 0, query, aggs },
   };
 
-  const resp = await apmEventClient.search(
-    'get_transaction_error_count_chart_preview',
-    params
-  );
+  const resp = await apmEventClient.search('get_transaction_error_count_chart_preview', params);
 
   if (!resp.aggregations) {
     return [];

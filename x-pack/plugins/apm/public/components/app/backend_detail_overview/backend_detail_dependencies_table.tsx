@@ -96,12 +96,9 @@ export function BackendDetailDependenciesTable() {
       title={i18n.translate('xpack.apm.backendDetail.dependenciesTableTitle', {
         defaultMessage: 'Upstream services',
       })}
-      nameColumnTitle={i18n.translate(
-        'xpack.apm.backendDetail.dependenciesTableColumnBackend',
-        {
-          defaultMessage: 'Service',
-        }
-      )}
+      nameColumnTitle={i18n.translate('xpack.apm.backendDetail.dependenciesTableColumnBackend', {
+        defaultMessage: 'Service',
+      })}
       status={status}
       compact={false}
     />

@@ -192,15 +192,11 @@ describe('RumDatePicker', () => {
 
     it('updates the url with the default `rangeFrom` ', async () => {
       expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
-      expect(mockHistoryReplace.mock.calls[0][0].search).toContain(
-        'rangeFrom=now-15m'
-      );
+      expect(mockHistoryReplace.mock.calls[0][0].search).toContain('rangeFrom=now-15m');
     });
 
     it('preserves `rangeTo`', () => {
-      expect(mockHistoryReplace.mock.calls[0][0].search).toContain(
-        'rangeTo=now-5m'
-      );
+      expect(mockHistoryReplace.mock.calls[0][0].search).toContain('rangeTo=now-5m');
     });
   });
 });

@@ -32,27 +32,22 @@ type Jobs = AnomalyDetectionApiResponse['jobs'];
 const columns: Array<ITableColumn<Jobs[0]>> = [
   {
     field: 'environment',
-    name: i18n.translate(
-      'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
-      { defaultMessage: 'Environment' }
-    ),
+    name: i18n.translate('xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel', {
+      defaultMessage: 'Environment',
+    }),
     render: getEnvironmentLabel,
   },
   {
     field: 'job_id',
     align: RIGHT_ALIGNMENT,
-    name: i18n.translate(
-      'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
-      { defaultMessage: 'Action' }
-    ),
+    name: i18n.translate('xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel', {
+      defaultMessage: 'Action',
+    }),
     render: (_, { job_id: jobId }) => (
       <MLExplorerLink jobId={jobId}>
-        {i18n.translate(
-          'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
-          {
-            defaultMessage: 'View job in ML',
-          }
-        )}
+        {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText', {
+          defaultMessage: 'View job in ML',
+        })}
       </MLExplorerLink>
     ),
   },
@@ -94,34 +89,24 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.anomalyDetection.jobList.environments',
-                {
-                  defaultMessage: 'Environments',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.environments', {
+                defaultMessage: 'Environments',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton fill iconType="plusInCircle" onClick={onAddEnvironments}>
-            {i18n.translate(
-              'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
-              {
-                defaultMessage: 'Create ML Job',
-              }
-            )}
+            {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.addEnvironments', {
+              defaultMessage: 'Create ML Job',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      <ManagedTable
-        noItemsMessage={getNoItemsMessage({ status })}
-        columns={columns}
-        items={jobs}
-      />
+      <ManagedTable noItemsMessage={getNoItemsMessage({ status })} columns={columns} items={jobs} />
       <EuiSpacer size="l" />
 
       {hasLegacyJobs && <LegacyJobsCallout />}
@@ -138,15 +123,13 @@ function getNoItemsMessage({ status }: { status: FETCH_STATUS }) {
 
   // An unexpected error occurred. Show default error message
   if (status === FETCH_STATUS.FAILURE) {
-    return i18n.translate(
-      'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
-      { defaultMessage: 'Unable to fetch anomaly detection jobs.' }
-    );
+    return i18n.translate('xpack.apm.settings.anomalyDetection.jobList.failedFetchText', {
+      defaultMessage: 'Unable to fetch anomaly detection jobs.',
+    });
   }
 
   // no errors occurred
-  return i18n.translate(
-    'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
-    { defaultMessage: 'No anomaly detection jobs.' }
-  );
+  return i18n.translate('xpack.apm.settings.anomalyDetection.jobList.emptyListText', {
+    defaultMessage: 'No anomaly detection jobs.',
+  });
 }

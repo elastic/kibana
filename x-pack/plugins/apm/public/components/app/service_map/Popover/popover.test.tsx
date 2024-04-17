@@ -18,9 +18,7 @@ describe('Popover', () => {
       render(<Backend />);
 
       await waitFor(() => {
-        expect(
-          screen.getByRole('link', { name: /Dependency Details/i })
-        ).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Dependency Details/i })).toBeInTheDocument();
       });
     });
   });
@@ -30,9 +28,7 @@ describe('Popover', () => {
       render(<ExternalsList />);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/813-mam-392.mktoresp.com:443/)
-        ).toBeInTheDocument();
+        expect(screen.getByText(/813-mam-392.mktoresp.com:443/)).toBeInTheDocument();
       });
     });
   });
@@ -52,9 +48,7 @@ describe('Popover', () => {
       render(<Service />);
 
       await waitFor(() => {
-        expect(
-          screen.getByRole('link', { name: /service details/i })
-        ).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /service details/i })).toBeInTheDocument();
       });
     });
   });

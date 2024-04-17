@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
@@ -31,9 +26,7 @@ import { getLatencyColumnLabel } from './get_latency_column_label';
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-type ServiceTransactionGroupItem = ValuesType<
-  TransactionGroupMainStatistics['transactionGroups']
->;
+type ServiceTransactionGroupItem = ValuesType<TransactionGroupMainStatistics['transactionGroups']>;
 type TransactionGroupDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
 
@@ -56,10 +49,9 @@ export function getColumns({
     {
       field: 'name',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnName',
-        { defaultMessage: 'Name' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnName', {
+        defaultMessage: 'Name',
+      }),
       render: (_, { name, transactionType: type }) => {
         return (
           <TruncateWithTooltip
@@ -96,9 +88,7 @@ export function getColumns({
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
-            comparisonSeries={
-              comparisonEnabled ? previousTimeseries : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousTimeseries : undefined}
             valueLabel={asMillisecondDuration(latency)}
           />
         );
@@ -107,26 +97,22 @@ export function getColumns({
     {
       field: 'throughput',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnThroughput', {
+        defaultMessage: 'Throughput',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
         const currentTimeseries =
           transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
         const previousTimeseries =
-          transactionGroupDetailedStatistics?.previousPeriod?.[name]
-            ?.throughput;
+          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.throughput;
         return (
           <ListMetric
             color="euiColorVis0"
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
-            comparisonSeries={
-              comparisonEnabled ? previousTimeseries : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousTimeseries : undefined}
             valueLabel={asTransactionRate(throughput)}
           />
         );
@@ -135,10 +121,9 @@ export function getColumns({
     {
       field: 'errorRate',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnErrorRate', {
+        defaultMessage: 'Failed transaction rate',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
         const currentTimeseries =
@@ -151,9 +136,7 @@ export function getColumns({
             compact
             hideSeries={!shouldShowSparkPlots}
             series={currentTimeseries}
-            comparisonSeries={
-              comparisonEnabled ? previousTimeseries : undefined
-            }
+            comparisonSeries={comparisonEnabled ? previousTimeseries : undefined}
             valueLabel={asPercent(errorRate, 1)}
           />
         );
@@ -162,17 +145,14 @@ export function getColumns({
     {
       field: 'impact',
       sortable: true,
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnImpact',
-        { defaultMessage: 'Impact' }
-      ),
+      name: i18n.translate('xpack.apm.serviceOverview.transactionsTableColumnImpact', {
+        defaultMessage: 'Impact',
+      }),
       align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {
         const currentImpact =
-          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ??
-          0;
-        const previousImpact =
-          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.impact;
+          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ?? 0;
+        const previousImpact = transactionGroupDetailedStatistics?.previousPeriod?.[name]?.impact;
         return (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
             <EuiFlexItem>

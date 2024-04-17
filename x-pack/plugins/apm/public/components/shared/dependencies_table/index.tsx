@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
@@ -28,10 +23,7 @@ import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 
-export type DependenciesItem = Omit<
-  ConnectionStatsItemWithComparisonData,
-  'location'
-> & {
+export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'location'> & {
   name: string;
   link: React.ReactElement;
 };
@@ -147,11 +139,7 @@ export function DependenciesTable(props: Props) {
             </EuiFlexItem>
             {previousStats?.impact !== undefined && (
               <EuiFlexItem>
-                <ImpactBar
-                  value={previousStats?.impact}
-                  size="s"
-                  color="subdued"
-                />
+                <ImpactBar value={previousStats?.impact} size="s" color="subdued" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -198,9 +186,7 @@ export function DependenciesTable(props: Props) {
       <EuiFlexItem>
         <OverviewTableContainer
           fixedHeight={fixedHeight}
-          isEmptyAndNotInitiated={
-            items.length === 0 && status === FETCH_STATUS.NOT_INITIATED
-          }
+          isEmptyAndNotInitiated={items.length === 0 && status === FETCH_STATUS.NOT_INITIATED}
         >
           <ManagedTable
             isLoading={status === FETCH_STATUS.LOADING}

@@ -100,11 +100,7 @@ describe('query_histogram', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const resp = await fetchTransactionDurationHistogram(
-        esClientMock,
-        params,
-        interval
-      );
+      const resp = await fetchTransactionDurationHistogram(esClientMock, params, interval);
 
       expect(resp).toEqual(histogramBucket);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);

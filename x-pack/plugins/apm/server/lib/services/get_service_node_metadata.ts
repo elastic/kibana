@@ -6,10 +6,7 @@
  */
 
 import { Setup } from '../helpers/setup_request';
-import {
-  HOST_NAME,
-  CONTAINER_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { HOST_NAME, CONTAINER_ID } from '../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
@@ -63,14 +60,10 @@ export async function getServiceNodeMetadata({
     }
   );
 
-  const response = await apmEventClient.search(
-    'get_service_node_metadata',
-    query
-  );
+  const response = await apmEventClient.search('get_service_node_metadata', query);
 
   return {
     host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
-    containerId:
-      response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
+    containerId: response.aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
   };
 }

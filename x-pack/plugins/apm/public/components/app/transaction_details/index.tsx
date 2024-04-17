@@ -21,15 +21,8 @@ import { replace } from '../../shared/Links/url_helpers';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
 
 export function TransactionDetails() {
-  const { path, query } = useApmParams(
-    '/services/{serviceName}/transactions/view'
-  );
-  const {
-    transactionName,
-    rangeFrom,
-    rangeTo,
-    transactionType: transactionTypeFromUrl,
-  } = query;
+  const { path, query } = useApmParams('/services/{serviceName}/transactions/view');
+  const { transactionName, rangeFrom, rangeTo, transactionType: transactionTypeFromUrl } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
   const { transactionType } = useApmServiceContext();

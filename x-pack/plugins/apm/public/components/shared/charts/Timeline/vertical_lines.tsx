@@ -17,16 +17,10 @@ interface VerticalLinesProps {
   topTraceDuration: number;
 }
 
-export function VerticalLines({
-  topTraceDuration,
-  plotValues,
-  marks = [],
-}: VerticalLinesProps) {
+export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: VerticalLinesProps) {
   const { width, height, margins, tickValues, xScale } = plotValues;
 
-  const markTimes = marks
-    .filter((mark) => mark.verticalLine)
-    .map(({ offset }) => offset);
+  const markTimes = marks.filter((mark) => mark.verticalLine).map(({ offset }) => offset);
 
   const theme = useTheme();
 
@@ -40,8 +34,7 @@ export function VerticalLines({
     return isFiniteNumber(position) ? [...positions, position] : positions;
   }, []);
 
-  const topTraceDurationPosition =
-    topTraceDuration > 0 ? xScale(topTraceDuration) : NaN;
+  const topTraceDurationPosition = topTraceDuration > 0 ? xScale(topTraceDuration) : NaN;
 
   return (
     <svg

@@ -53,10 +53,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>
-          <MockApmPluginContextWrapper
-            history={history}
-            value={mockPluginContext}
-          >
+          <MockApmPluginContextWrapper history={history} value={mockPluginContext}>
             <MockUrlParamsContextProvider
               params={{
                 rangeFrom: 'now-15m',
@@ -81,9 +78,7 @@ describe('transaction_details/distribution', () => {
     });
 
     it('displays two units when from and to have different units', () => {
-      expect(getFormattedSelection([100000, 1000000000])).toEqual(
-        '100 ms - 17 min'
-      );
+      expect(getFormattedSelection([100000, 1000000000])).toEqual('100 ms - 17 min');
     });
   });
 

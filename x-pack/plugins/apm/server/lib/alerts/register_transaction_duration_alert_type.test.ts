@@ -12,8 +12,7 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 
 describe('registerTransactionDurationAlertType', () => {
   it('sends alert when value is greater than threashold', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionDurationAlertType(dependencies);
 

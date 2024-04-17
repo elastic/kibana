@@ -41,12 +41,9 @@ export function MaybeViewTraceLink({
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
-            {
-              defaultMessage: 'The trace parent cannot be found',
-            }
-          )}
+          content={i18n.translate('xpack.apm.transactionDetails.noTraceParentButtonTooltip', {
+            defaultMessage: 'The trace parent cannot be found',
+          })}
         >
           <EuiButton fill iconType="apmTrace" disabled={true}>
             {viewFullTraceButtonLabel}
@@ -63,12 +60,9 @@ export function MaybeViewTraceLink({
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
-            {
-              defaultMessage: 'Currently viewing the full trace',
-            }
-          )}
+          content={i18n.translate('xpack.apm.transactionDetails.viewingFullTraceButtonTooltip', {
+            defaultMessage: 'Currently viewing the full trace',
+          })}
         >
           <EuiButton fill iconType="apmTrace" disabled={true}>
             {viewFullTraceButtonLabel}

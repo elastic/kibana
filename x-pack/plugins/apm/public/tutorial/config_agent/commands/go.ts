@@ -14,45 +14,27 @@ export const go = `# ${i18n.translate(
   }
 )}
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.setServiceNameComment',
-  {
-    defaultMessage:
-      'Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.',
-  }
-)}
-# ${i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment',
-  {
-    defaultMessage:
-      'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.goClient.configure.commands.setServiceNameComment', {
+  defaultMessage: 'Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.',
+})}
+# ${i18n.translate('xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment', {
+  defaultMessage: 'If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.',
+})}
 export ELASTIC_APM_SERVICE_NAME=
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.setCustomApmServerUrlComment',
-  {
-    defaultMessage:
-      'Set custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.goClient.configure.commands.setCustomApmServerUrlComment', {
+  defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+  values: { defaultApmServerUrl: 'http://localhost:8200' },
+})}
 export ELASTIC_APM_SERVER_URL={{{apmServerUrl}}}
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment',
-  {
-    defaultMessage: 'Use if APM Server requires a secret token',
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment', {
+  defaultMessage: 'Use if APM Server requires a secret token',
+})}
 export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.goClient.configure.commands.setServiceEnvironment',
-  {
-    defaultMessage: 'Set the service environment',
-  }
-)}
+# ${i18n.translate('xpack.apm.tutorial.goClient.configure.commands.setServiceEnvironment', {
+  defaultMessage: 'Set the service environment',
+})}
 export ELASTIC_APM_ENVIRONMENT=
 `;

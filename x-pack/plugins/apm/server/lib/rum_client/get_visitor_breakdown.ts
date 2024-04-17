@@ -8,10 +8,7 @@
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { SetupUX } from '../../routes/rum_client';
-import {
-  USER_AGENT_NAME,
-  USER_AGENT_OS,
-} from '../../../common/elasticsearch_fieldnames';
+import { USER_AGENT_NAME, USER_AGENT_OS } from '../../../common/elasticsearch_fieldnames';
 
 export async function getVisitorBreakdown({
   setup,
@@ -62,15 +59,9 @@ export async function getVisitorBreakdown({
 
   const totalItems = response.hits.total.value;
 
-  const browserTotal = browsers.buckets.reduce(
-    (prevVal, item) => prevVal + item.doc_count,
-    0
-  );
+  const browserTotal = browsers.buckets.reduce((prevVal, item) => prevVal + item.doc_count, 0);
 
-  const osTotal = os.buckets.reduce(
-    (prevVal, item) => prevVal + item.doc_count,
-    0
-  );
+  const osTotal = os.buckets.reduce((prevVal, item) => prevVal + item.doc_count, 0);
 
   const browserItems = browsers.buckets.map((bucket) => ({
     count: bucket.doc_count,

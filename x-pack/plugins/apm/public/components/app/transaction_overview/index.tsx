@@ -19,13 +19,7 @@ import { TransactionsTable } from '../../shared/transactions_table';
 
 export function TransactionOverview() {
   const {
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      transactionType: transactionTypeFromUrl,
-    },
+    query: { environment, kuery, rangeFrom, rangeTo, transactionType: transactionTypeFromUrl },
   } = useApmParams('/services/{serviceName}/transactions');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -60,12 +54,7 @@ export function TransactionOverview() {
           <EuiSpacer size="s" />
         </>
       )}
-      <TransactionCharts
-        kuery={kuery}
-        environment={environment}
-        start={start}
-        end={end}
-      />
+      <TransactionCharts kuery={kuery} environment={environment} start={start} end={end} />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable

@@ -23,9 +23,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getErrorName } from '../../helpers/get_error_name';
 import { Setup } from '../../helpers/setup_request';
 
-export type ServiceErrorGroupItem = ValuesType<
-  PromiseReturnType<typeof getServiceErrorGroups>
->;
+export type ServiceErrorGroupItem = ValuesType<PromiseReturnType<typeof getServiceErrorGroups>>;
 
 export async function getServiceErrorGroups({
   environment,
@@ -59,62 +57,53 @@ export async function getServiceErrorGroups({
 
     const { intervalString } = getBucketSize({ start, end, numBuckets });
 
-    const response = await apmEventClient.search(
-      'get_top_service_error_groups',
-      {
-        apm: {
-          events: [ProcessorEvent.error],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { [SERVICE_NAME]: serviceName } },
-                { term: { [TRANSACTION_TYPE]: transactionType } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-              ],
-            },
+    const response = await apmEventClient.search('get_top_service_error_groups', {
+      apm: {
+        events: [ProcessorEvent.error],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
           },
-          aggs: {
-            error_groups: {
-              terms: {
-                field: ERROR_GROUP_ID,
-                size: 500,
-                order: {
-                  _count: 'desc',
-                },
+        },
+        aggs: {
+          error_groups: {
+            terms: {
+              field: ERROR_GROUP_ID,
+              size: 500,
+              order: {
+                _count: 'desc',
               },
-              aggs: {
-                sample: {
-                  top_hits: {
-                    size: 1,
-                    _source: [
-                      ERROR_LOG_MESSAGE,
-                      ERROR_EXC_MESSAGE,
-                      '@timestamp',
-                    ] as any as string,
-                    sort: {
-                      '@timestamp': 'desc',
-                    },
+            },
+            aggs: {
+              sample: {
+                top_hits: {
+                  size: 1,
+                  _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, '@timestamp'] as any as string,
+                  sort: {
+                    '@timestamp': 'desc',
                   },
                 },
               },
             },
           },
         },
-      }
-    );
+      },
+    });
 
     const errorGroups =
       response.aggregations?.error_groups.buckets.map((bucket) => ({
         group_id: bucket.key as string,
         name: getErrorName(bucket.sample.hits.hits[0]._source),
-        lastSeen: new Date(
-          bucket.sample.hits.hits[0]?._source['@timestamp']
-        ).getTime(),
+        lastSeen: new Date(bucket.sample.hits.hits[0]?._source['@timestamp']).getTime(),
         occurrences: {
           value: bucket.doc_count,
         },
@@ -134,59 +123,53 @@ export async function getServiceErrorGroups({
       [sortDirection]
     ).slice(pageIndex * size, pageIndex * size + size);
 
-    const sortedErrorGroupIds = sortedAndSlicedErrorGroups.map(
-      (group) => group.group_id
-    );
+    const sortedErrorGroupIds = sortedAndSlicedErrorGroups.map((group) => group.group_id);
 
-    const timeseriesResponse = await apmEventClient.search(
-      'get_service_error_groups_timeseries',
-      {
-        apm: {
-          events: [ProcessorEvent.error],
-        },
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
-                { term: { [SERVICE_NAME]: serviceName } },
-                { term: { [TRANSACTION_TYPE]: transactionType } },
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-              ],
-            },
+    const timeseriesResponse = await apmEventClient.search('get_service_error_groups_timeseries', {
+      apm: {
+        events: [ProcessorEvent.error],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+            ],
           },
-          aggs: {
-            error_groups: {
-              terms: {
-                field: ERROR_GROUP_ID,
-                size,
-              },
-              aggs: {
-                timeseries: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: intervalString,
-                    min_doc_count: 0,
-                    extended_bounds: {
-                      min: start,
-                      max: end,
-                    },
+        },
+        aggs: {
+          error_groups: {
+            terms: {
+              field: ERROR_GROUP_ID,
+              size,
+            },
+            aggs: {
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: start,
+                    max: end,
                   },
                 },
               },
             },
           },
         },
-      }
-    );
+      },
+    });
 
     return {
       total_error_groups: errorGroups.length,
-      is_aggregation_accurate:
-        (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
+      is_aggregation_accurate: (response.aggregations?.error_groups.sum_other_doc_count ?? 0) === 0,
       error_groups: sortedAndSlicedErrorGroups.map((errorGroup) => ({
         ...errorGroup,
         occurrences: {

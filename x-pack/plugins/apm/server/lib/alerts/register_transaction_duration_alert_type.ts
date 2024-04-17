@@ -103,12 +103,9 @@ export function registerTransactionDurationAlertType({
       // to prevent (likely) unnecessary blocking request
       // in rule execution
       const searchAggregatedTransactions =
-        config.searchAggregatedTransactions !==
-        SearchAggregatedTransactionSetting.never;
+        config.searchAggregatedTransactions !== SearchAggregatedTransactionSetting.never;
 
-      const index = searchAggregatedTransactions
-        ? indices.metric
-        : indices.transaction;
+      const index = searchAggregatedTransactions ? indices.metric : indices.transaction;
 
       const field = getTransactionDurationFieldForAggregatedTransactions(
         searchAggregatedTransactions
@@ -128,9 +125,7 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                ...getDocumentTypeFilterForAggregatedTransactions(
-                  searchAggregatedTransactions
-                ),
+                ...getDocumentTypeFilterForAggregatedTransactions(searchAggregatedTransactions),
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 {
                   term: {
@@ -148,9 +143,7 @@ export function registerTransactionDurationAlertType({
                 : {
                     percentiles: {
                       field,
-                      percents: [
-                        alertParams.aggregationType === '95th' ? 95 : 99,
-                      ],
+                      percents: [alertParams.aggregationType === '95th' ? 95 : 99],
                     },
                   },
           },
@@ -176,14 +169,11 @@ export function registerTransactionDurationAlertType({
 
       if (transactionDuration && transactionDuration > thresholdMicroseconds) {
         const durationFormatter = getDurationFormatter(transactionDuration);
-        const transactionDurationFormatted =
-          durationFormatter(transactionDuration).formatted;
+        const transactionDurationFormatted = durationFormatter(transactionDuration).formatted;
 
         services
           .alertWithLifecycle({
-            id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
-              alertParams.environment
-            )}`,
+            id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(alertParams.environment)}`,
             fields: {
               [SERVICE_NAME]: alertParams.serviceName,
               ...getEnvironmentEsField(alertParams.environment),

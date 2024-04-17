@@ -48,9 +48,7 @@ const stories: Meta<{}> = {
       };
 
       return (
-        <MemoryRouter
-          initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}
-        >
+        <MemoryRouter initialEntries={['/services?rangeFrom=now-15m&rangeTo=now']}>
           <KibanaReactContext.Provider>
             <MockUrlParamsContextProvider
               params={{
@@ -58,12 +56,8 @@ const stories: Meta<{}> = {
                 comparisonType: TimeRangeComparisonEnum.DayBefore,
               }}
             >
-              <MockApmPluginContextWrapper
-                value={{ core: coreMock } as ApmPluginContextValue}
-              >
-                <AnomalyDetectionJobsContext.Provider
-                  value={anomlyDetectionJobsContextValue}
-                >
+              <MockApmPluginContextWrapper value={{ core: coreMock } as ApmPluginContextValue}>
+                <AnomalyDetectionJobsContext.Provider value={anomlyDetectionJobsContextValue}>
                   <StoryComponent />
                 </AnomalyDetectionJobsContext.Provider>
               </MockApmPluginContextWrapper>

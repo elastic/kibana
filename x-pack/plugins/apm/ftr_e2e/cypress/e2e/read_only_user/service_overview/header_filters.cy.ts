@@ -16,8 +16,7 @@ const serviceOverviewHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
     name: 'latencyChartRequest',
   },
   {
@@ -25,13 +24,11 @@ const apisToIntercept = [
     name: 'throughputChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
     name: 'errorRateChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
     name: 'transactionGroupsDetailedRequest',
   },
   {
@@ -40,23 +37,19 @@ const apisToIntercept = [
     name: 'instancesDetailedRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
     name: 'instancesMainStatisticsRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/error_groups/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/error_groups/main_statistics?*',
     name: 'errorGroupsMainStatisticsRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
+    endpoint: '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
     name: 'transactonBreakdownRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
     name: 'transactionsGroupsMainStatisticsRequest',
   },
 ];
@@ -71,16 +64,10 @@ describe('Service overview - header filters', () => {
       cy.visit(serviceOverviewHref);
       cy.contains('opbeans-node');
       cy.url().should('not.include', 'transactionType');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-        'have.value',
-        'request'
-      );
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'request');
       cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
       cy.url().should('include', 'transactionType=Worker');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-        'have.value',
-        'Worker'
-      );
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'Worker');
     });
 
     it('calls APIs with correct transaction type', () => {
@@ -89,10 +76,7 @@ describe('Service overview - header filters', () => {
       });
       cy.visit(serviceOverviewHref);
       cy.contains('opbeans-node');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-        'have.value',
-        'request'
-      );
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'request');
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: apisToIntercept.map(({ name }) => `@${name}`),
@@ -101,10 +85,7 @@ describe('Service overview - header filters', () => {
 
       cy.get('[data-test-subj="headerFilterTransactionType"]').select('Worker');
       cy.url().should('include', 'transactionType=Worker');
-      cy.get('[data-test-subj="headerFilterTransactionType"]').should(
-        'have.value',
-        'Worker'
-      );
+      cy.get('[data-test-subj="headerFilterTransactionType"]').should('have.value', 'Worker');
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: apisToIntercept.map(({ name }) => `@${name}`),
         value: 'transactionType=Worker',
@@ -123,15 +104,9 @@ describe('Service overview - header filters', () => {
       cy.contains('opbeans-java');
       cy.get('[data-test-subj="headerFilterKuerybar"]').type('transaction.n');
       cy.contains('transaction.name');
-      cy.get('[data-test-subj="suggestionContainer"]')
-        .find('li')
-        .first()
-        .click();
+      cy.get('[data-test-subj="suggestionContainer"]').find('li').first().click();
       cy.get('[data-test-subj="headerFilterKuerybar"]').type(':');
-      cy.get('[data-test-subj="suggestionContainer"]')
-        .find('li')
-        .first()
-        .click();
+      cy.get('[data-test-subj="suggestionContainer"]').find('li').first().click();
       cy.get('[data-test-subj="suggestionContainer"]').realPress('{enter}');
       cy.url().should('include', '&kuery=transaction.name');
     });

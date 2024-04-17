@@ -24,11 +24,7 @@ import { failedTransactionsCorrelationsTab } from './failed_transactions_correla
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 
-const tabs = [
-  traceSamplesTab,
-  latencyCorrelationsTab,
-  failedTransactionsCorrelationsTab,
-];
+const tabs = [traceSamplesTab, latencyCorrelationsTab, failedTransactionsCorrelationsTab];
 
 export function TransactionDetailsTabs() {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
@@ -37,8 +33,7 @@ export function TransactionDetailsTabs() {
   const history = useHistory();
 
   const [currentTab, setCurrentTab] = useState(traceSamplesTab.key);
-  const { component: TabContent } =
-    tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
+  const { component: TabContent } = tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
   const { environment, kuery, transactionName } = query;
   const { traceSamplesData } = useTransactionTraceSamplesFetcher({
@@ -92,8 +87,7 @@ export function TransactionDetailsTabs() {
 
   useEffect(() => {
     const selectedSample = traceSamples.find(
-      (sample) =>
-        sample.transactionId === transactionId && sample.traceId === traceId
+      (sample) => sample.transactionId === transactionId && sample.traceId === traceId
     );
 
     if (!selectedSample) {
@@ -103,10 +97,7 @@ export function TransactionDetailsTabs() {
       history.replace({
         ...history.location,
         search: fromQuery({
-          ...omit(toQuery(history.location.search), [
-            'traceId',
-            'transactionId',
-          ]),
+          ...omit(toQuery(history.location.search), ['traceId', 'transactionId']),
           ...preferredSample,
         }),
       });

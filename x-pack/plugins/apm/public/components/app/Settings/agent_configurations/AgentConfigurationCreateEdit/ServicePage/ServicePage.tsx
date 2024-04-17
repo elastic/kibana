@@ -82,32 +82,27 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     text: getOptionLabel(name),
     value: name,
   }));
-  const environmentOptions = environments.map(
-    ({ name, alreadyConfigured }) => ({
-      disabled: alreadyConfigured,
-      text: `${getOptionLabel(name)} ${
-        alreadyConfigured ? `(${ALREADY_CONFIGURED_TRANSLATED})` : ''
-      }`,
-      value: name,
-    })
-  );
+  const environmentOptions = environments.map(({ name, alreadyConfigured }) => ({
+    disabled: alreadyConfigured,
+    text: `${getOptionLabel(name)} ${
+      alreadyConfigured ? `(${ALREADY_CONFIGURED_TRANSLATED})` : ''
+    }`,
+    value: name,
+  }));
 
   return (
     <>
       {/* Service name options */}
       <FormRowSelect
-        title={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.service.title',
-          { defaultMessage: 'Service' }
-        )}
-        description={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.service.description',
-          { defaultMessage: 'Choose the service you want to configure.' }
-        )}
-        fieldLabel={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.service.fieldLabel',
-          { defaultMessage: 'Service name' }
-        )}
+        title={i18n.translate('xpack.apm.agentConfig.servicePage.service.title', {
+          defaultMessage: 'Service',
+        })}
+        description={i18n.translate('xpack.apm.agentConfig.servicePage.service.description', {
+          defaultMessage: 'Choose the service you want to configure.',
+        })}
+        fieldLabel={i18n.translate('xpack.apm.agentConfig.servicePage.service.fieldLabel', {
+          defaultMessage: 'Service name',
+        })}
         isLoading={serviceNamesStatus === FETCH_STATUS.LOADING}
         options={serviceNameOptions}
         value={newConfig.service.name}
@@ -124,27 +119,19 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
 
       {/* Environment options */}
       <FormRowSelect
-        title={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.environment.title',
-          { defaultMessage: 'Environment' }
-        )}
-        description={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.environment.description',
-          {
-            defaultMessage:
-              'Only a single environment per configuration is supported.',
-          }
-        )}
-        fieldLabel={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.environment.fieldLabel',
-          { defaultMessage: 'Service environment' }
-        )}
+        title={i18n.translate('xpack.apm.agentConfig.servicePage.environment.title', {
+          defaultMessage: 'Environment',
+        })}
+        description={i18n.translate('xpack.apm.agentConfig.servicePage.environment.description', {
+          defaultMessage: 'Only a single environment per configuration is supported.',
+        })}
+        fieldLabel={i18n.translate('xpack.apm.agentConfig.servicePage.environment.fieldLabel', {
+          defaultMessage: 'Service environment',
+        })}
         isLoading={environmentsStatus === FETCH_STATUS.LOADING}
         options={environmentOptions}
         value={newConfig.service.environment}
-        disabled={
-          !newConfig.service.name || environmentsStatus === FETCH_STATUS.LOADING
-        }
+        disabled={!newConfig.service.name || environmentsStatus === FETCH_STATUS.LOADING}
         onChange={(e) => {
           e.preventDefault();
           const environment = e.target.value;
@@ -162,10 +149,9 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         <EuiFlexItem grow={false}>
           <APMLink path="/settings/agent-configuration">
             <EuiButtonEmpty color="primary">
-              {i18n.translate(
-                'xpack.apm.agentConfig.servicePage.cancelButton',
-                { defaultMessage: 'Cancel' }
-              )}
+              {i18n.translate('xpack.apm.agentConfig.servicePage.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </APMLink>
         </EuiFlexItem>
@@ -183,10 +169,9 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
               agentNameStatus === FETCH_STATUS.LOADING
             }
           >
-            {i18n.translate(
-              'xpack.apm.agentConfig.saveConfigurationButtonLabel',
-              { defaultMessage: 'Next step' }
-            )}
+            {i18n.translate('xpack.apm.agentConfig.saveConfigurationButtonLabel', {
+              defaultMessage: 'Next step',
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

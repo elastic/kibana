@@ -817,13 +817,9 @@ export const manyChildrenWithSameLength = {
           headers: {
             Connection: ['close'],
             'User-Agent': ['http.rb/5.0.2'],
-            'Elastic-Apm-Traceparent': [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-4eeaa6dfbfd047cd-01',
-            ],
+            'Elastic-Apm-Traceparent': ['00-d5e80ae688f1fef91533f02dd2bdc769-4eeaa6dfbfd047cd-01'],
             Tracestate: ['es=s:1.0'],
-            Traceparent: [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-4eeaa6dfbfd047cd-01',
-            ],
+            Traceparent: ['00-d5e80ae688f1fef91533f02dd2bdc769-4eeaa6dfbfd047cd-01'],
           },
           method: 'GET',
         },
@@ -978,13 +974,9 @@ export const manyChildrenWithSameLength = {
             'User-Agent': ['http.rb/5.0.2'],
             'X-Forwarded-For': ['10.12.0.22'],
             'Accept-Encoding': ['gzip'],
-            'Elastic-Apm-Traceparent': [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-8d099ab4fcec4ab9-01',
-            ],
+            'Elastic-Apm-Traceparent': ['00-d5e80ae688f1fef91533f02dd2bdc769-8d099ab4fcec4ab9-01'],
             Tracestate: ['es=s:1.0'],
-            Traceparent: [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-8d099ab4fcec4ab9-01',
-            ],
+            Traceparent: ['00-d5e80ae688f1fef91533f02dd2bdc769-8d099ab4fcec4ab9-01'],
           },
           method: 'GET',
         },
@@ -1132,13 +1124,9 @@ export const manyChildrenWithSameLength = {
             'X-Forwarded-For': ['10.12.0.22, 10.12.0.14'],
             Host: ['opbeans:3000'],
             'Accept-Encoding': ['gzip'],
-            'Elastic-Apm-Traceparent': [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01',
-            ],
+            'Elastic-Apm-Traceparent': ['00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01'],
             Tracestate: ['es=s:1.0'],
-            Traceparent: [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01',
-            ],
+            Traceparent: ['00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01'],
           },
           method: 'GET',
         },
@@ -1244,8 +1232,7 @@ export const manyChildrenWithSameLength = {
             exclude_from_grouping: false,
             library_frame: true,
             filename: 'elastic_apm.rb',
-            abs_path:
-              '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm.rb',
+            abs_path: '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm.rb',
             line: {
               number: 235,
             },
@@ -1255,8 +1242,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'elastic_apm.rb',
-            abs_path:
-              '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm.rb',
+            abs_path: '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm.rb',
             line: {
               number: 235,
             },
@@ -1266,8 +1252,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'elastic_apm.rb',
-            abs_path:
-              '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm.rb',
+            abs_path: '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm.rb',
             line: {
               number: 287,
             },
@@ -1277,8 +1262,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'elastic_apm/spies/http.rb',
-            abs_path:
-              '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm/spies/http.rb',
+            abs_path: '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm/spies/http.rb',
             line: {
               number: 45,
             },
@@ -1389,18 +1373,14 @@ export const manyChildrenWithSameLength = {
             function: 'call',
             context: {
               pre: ['      end\n', '\n'],
-              post: [
-                '        resp = HTTP.get("#{lucky_winner}#{path}")\n',
-                '\n',
-              ],
+              post: ['        resp = HTTP.get("#{lucky_winner}#{path}")\n', '\n'],
             },
           },
           {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'elastic_apm/middleware.rb',
-            abs_path:
-              '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm/middleware.rb',
+            abs_path: '/usr/local/bundle/gems/elastic-apm-4.3.0/lib/elastic_apm/middleware.rb',
             line: {
               number: 36,
             },
@@ -1410,8 +1390,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'rails/engine.rb',
-            abs_path:
-              '/usr/local/bundle/gems/railties-6.1.4.1/lib/rails/engine.rb',
+            abs_path: '/usr/local/bundle/gems/railties-6.1.4.1/lib/rails/engine.rb',
             line: {
               number: 539,
             },
@@ -1421,8 +1400,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'puma/configuration.rb',
-            abs_path:
-              '/usr/local/bundle/gems/puma-5.5.0/lib/puma/configuration.rb',
+            abs_path: '/usr/local/bundle/gems/puma-5.5.0/lib/puma/configuration.rb',
             line: {
               number: 249,
             },
@@ -1442,8 +1420,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'puma/thread_pool.rb',
-            abs_path:
-              '/usr/local/bundle/gems/puma-5.5.0/lib/puma/thread_pool.rb',
+            abs_path: '/usr/local/bundle/gems/puma-5.5.0/lib/puma/thread_pool.rb',
             line: {
               number: 340,
             },
@@ -1473,8 +1450,7 @@ export const manyChildrenWithSameLength = {
             exclude_from_grouping: false,
             library_frame: true,
             filename: 'puma/thread_pool.rb',
-            abs_path:
-              '/usr/local/bundle/gems/puma-5.5.0/lib/puma/thread_pool.rb',
+            abs_path: '/usr/local/bundle/gems/puma-5.5.0/lib/puma/thread_pool.rb',
             line: {
               number: 147,
             },
@@ -1589,8 +1565,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'client.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
             line: {
               number: 198,
             },
@@ -1601,8 +1576,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'client.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
             line: {
               number: 187,
             },
@@ -1709,8 +1683,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'middleware.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
             line: {
               number: 98,
             },
@@ -1732,8 +1705,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'cache.go',
-            abs_path:
-              '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
+            abs_path: '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
             line: {
               number: 128,
             },
@@ -1899,8 +1871,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'clienttrace.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/clienttrace.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/clienttrace.go',
             line: {
               number: 130,
             },
@@ -2039,8 +2010,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'client.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
             line: {
               number: 198,
             },
@@ -2051,8 +2021,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'client.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/client.go',
             line: {
               number: 187,
             },
@@ -2159,8 +2128,7 @@ export const manyChildrenWithSameLength = {
             library_frame: true,
             exclude_from_grouping: false,
             filename: 'middleware.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
             line: {
               number: 98,
             },
@@ -2181,8 +2149,7 @@ export const manyChildrenWithSameLength = {
           {
             library_frame: true,
             exclude_from_grouping: false,
-            abs_path:
-              '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
+            abs_path: '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
             filename: 'cache.go',
             line: {
               number: 128,
@@ -2349,8 +2316,7 @@ export const manyChildrenWithSameLength = {
             exclude_from_grouping: false,
             library_frame: true,
             filename: 'clienttrace.go',
-            abs_path:
-              '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/clienttrace.go',
+            abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmhttp@v1.14.0/clienttrace.go',
             line: {
               number: 130,
             },
@@ -3023,8 +2989,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'RequestContextFilter.java',
-                classname:
-                  'org.springframework.web.filter.RequestContextFilter',
+                classname: 'org.springframework.web.filter.RequestContextFilter',
                 line: {
                   number: 99,
                 },
@@ -3035,8 +3000,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'OncePerRequestFilter.java',
-                classname:
-                  'org.springframework.web.filter.OncePerRequestFilter',
+                classname: 'org.springframework.web.filter.OncePerRequestFilter',
                 line: {
                   number: 107,
                 },
@@ -3069,8 +3033,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'HttpPutFormContentFilter.java',
-                classname:
-                  'org.springframework.web.filter.HttpPutFormContentFilter',
+                classname: 'org.springframework.web.filter.HttpPutFormContentFilter',
                 line: {
                   number: 109,
                 },
@@ -3081,8 +3044,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'OncePerRequestFilter.java',
-                classname:
-                  'org.springframework.web.filter.OncePerRequestFilter',
+                classname: 'org.springframework.web.filter.OncePerRequestFilter',
                 line: {
                   number: 107,
                 },
@@ -3115,8 +3077,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'HiddenHttpMethodFilter.java',
-                classname:
-                  'org.springframework.web.filter.HiddenHttpMethodFilter',
+                classname: 'org.springframework.web.filter.HiddenHttpMethodFilter',
                 line: {
                   number: 81,
                 },
@@ -3127,8 +3088,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'OncePerRequestFilter.java',
-                classname:
-                  'org.springframework.web.filter.OncePerRequestFilter',
+                classname: 'org.springframework.web.filter.OncePerRequestFilter',
                 line: {
                   number: 107,
                 },
@@ -3161,8 +3121,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'CharacterEncodingFilter.java',
-                classname:
-                  'org.springframework.web.filter.CharacterEncodingFilter',
+                classname: 'org.springframework.web.filter.CharacterEncodingFilter',
                 line: {
                   number: 200,
                 },
@@ -3173,8 +3132,7 @@ export const manyChildrenWithSameLength = {
                 exclude_from_grouping: false,
                 library_frame: true,
                 filename: 'OncePerRequestFilter.java',
-                classname:
-                  'org.springframework.web.filter.OncePerRequestFilter',
+                classname: 'org.springframework.web.filter.OncePerRequestFilter',
                 line: {
                   number: 107,
                 },
@@ -3229,8 +3187,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'AuthenticatorBase.java',
-                classname:
-                  'org.apache.catalina.authenticator.AuthenticatorBase',
+                classname: 'org.apache.catalina.authenticator.AuthenticatorBase',
                 line: {
                   number: 496,
                 },
@@ -3307,8 +3264,7 @@ export const manyChildrenWithSameLength = {
                 exclude_from_grouping: false,
                 library_frame: true,
                 filename: 'AbstractProtocol.java',
-                classname:
-                  'org.apache.coyote.AbstractProtocol$ConnectionHandler',
+                classname: 'org.apache.coyote.AbstractProtocol$ConnectionHandler',
                 line: {
                   number: 790,
                 },
@@ -3319,8 +3275,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'NioEndpoint.java',
-                classname:
-                  'org.apache.tomcat.util.net.NioEndpoint$SocketProcessor',
+                classname: 'org.apache.tomcat.util.net.NioEndpoint$SocketProcessor',
                 line: {
                   number: 1468,
                 },
@@ -3342,8 +3297,7 @@ export const manyChildrenWithSameLength = {
                 library_frame: true,
                 exclude_from_grouping: false,
                 filename: 'TaskThread.java',
-                classname:
-                  'org.apache.tomcat.util.threads.TaskThread$WrappingRunnable',
+                classname: 'org.apache.tomcat.util.threads.TaskThread$WrappingRunnable',
                 line: {
                   number: 61,
                 },
@@ -3351,15 +3305,13 @@ export const manyChildrenWithSameLength = {
                 function: 'run',
               },
             ],
-            message:
-              'No converter found for return value of type: class com.sun.proxy.$Proxy158',
+            message: 'No converter found for return value of type: class com.sun.proxy.$Proxy158',
             type: 'org.springframework.http.converter.HttpMessageNotWritableException',
           },
         ],
         id: '128f8ecf47bc8a800269ee6e5ac90008',
         grouping_key: 'cc9272d7511c88a533ac41cc3e2ce54b',
-        grouping_name:
-          'No converter found for return value of type: class com.sun.proxy.$Proxy158',
+        grouping_name: 'No converter found for return value of type: class com.sun.proxy.$Proxy158',
       },
       cloud: {
         availability_zone: 'us-central1-c',
@@ -3420,8 +3372,7 @@ export const manyChildrenWithSameLength = {
         title: '/opt/java/openjdk/bin/java',
         ppid: 1,
       },
-      message:
-        'No converter found for return value of type: class com.sun.proxy.$Proxy158',
+      message: 'No converter found for return value of type: class com.sun.proxy.$Proxy158',
       processor: {
         name: 'error',
         event: 'error',
@@ -3457,13 +3408,9 @@ export const manyChildrenWithSameLength = {
             'X-Forwarded-For': ['10.12.0.22, 10.12.0.14'],
             Host: ['opbeans:3000'],
             'Accept-Encoding': ['gzip'],
-            'Elastic-Apm-Traceparent': [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01',
-            ],
+            'Elastic-Apm-Traceparent': ['00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01'],
             Tracestate: ['es=s:1.0'],
-            Traceparent: [
-              '00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01',
-            ],
+            Traceparent: ['00-d5e80ae688f1fef91533f02dd2bdc769-35e3637e26919055-01'],
           },
           method: 'GET',
         },
@@ -3519,8 +3466,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'hook.go',
-              abs_path:
-                '/go/pkg/mod/go.elastic.co/apm/module/apmlogrus@v1.14.0/hook.go',
+              abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmlogrus@v1.14.0/hook.go',
               line: {
                 number: 102,
               },
@@ -3531,8 +3477,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'hooks.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/hooks.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/hooks.go',
               line: {
                 number: 28,
               },
@@ -3542,8 +3487,7 @@ export const manyChildrenWithSameLength = {
             {
               library_frame: true,
               exclude_from_grouping: false,
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               filename: 'entry.go',
               line: {
                 number: 272,
@@ -3555,8 +3499,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 241,
               },
@@ -3567,8 +3510,7 @@ export const manyChildrenWithSameLength = {
               exclude_from_grouping: false,
               library_frame: true,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 293,
               },
@@ -3579,8 +3521,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 338,
               },
@@ -3591,8 +3532,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 367,
               },
@@ -3612,8 +3552,7 @@ export const manyChildrenWithSameLength = {
             {
               library_frame: true,
               exclude_from_grouping: false,
-              abs_path:
-                '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
+              abs_path: '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
               filename: 'context.go',
               line: {
                 number: 165,
@@ -3624,8 +3563,7 @@ export const manyChildrenWithSameLength = {
             {
               library_frame: true,
               exclude_from_grouping: false,
-              abs_path:
-                '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
+              abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
               filename: 'middleware.go',
               line: {
                 number: 98,
@@ -3637,8 +3575,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'context.go',
-              abs_path:
-                '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
+              abs_path: '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
               line: {
                 number: 165,
               },
@@ -3649,8 +3586,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'cache.go',
-              abs_path:
-                '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
+              abs_path: '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
               line: {
                 number: 128,
               },
@@ -3661,8 +3597,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'context.go',
-              abs_path:
-                '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
+              abs_path: '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
               line: {
                 number: 165,
               },
@@ -3841,8 +3776,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'hook.go',
-              abs_path:
-                '/go/pkg/mod/go.elastic.co/apm/module/apmlogrus@v1.14.0/hook.go',
+              abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmlogrus@v1.14.0/hook.go',
               line: {
                 number: 102,
               },
@@ -3853,8 +3787,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'hooks.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/hooks.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/hooks.go',
               line: {
                 number: 28,
               },
@@ -3865,8 +3798,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 272,
               },
@@ -3877,8 +3809,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 241,
               },
@@ -3889,8 +3820,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 293,
               },
@@ -3901,8 +3831,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 338,
               },
@@ -3913,8 +3842,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'entry.go',
-              abs_path:
-                '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
+              abs_path: '/go/pkg/mod/github.com/sirupsen/logrus@v1.8.1/entry.go',
               line: {
                 number: 367,
               },
@@ -3935,8 +3863,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'context.go',
-              abs_path:
-                '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
+              abs_path: '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
               line: {
                 number: 165,
               },
@@ -3947,8 +3874,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'middleware.go',
-              abs_path:
-                '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
+              abs_path: '/go/pkg/mod/go.elastic.co/apm/module/apmgin@v1.14.0/middleware.go',
               line: {
                 number: 98,
               },
@@ -3959,8 +3885,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'context.go',
-              abs_path:
-                '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
+              abs_path: '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
               line: {
                 number: 165,
               },
@@ -3971,8 +3896,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'cache.go',
-              abs_path:
-                '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
+              abs_path: '/go/pkg/mod/github.com/gin-contrib/cache@v1.1.0/cache.go',
               line: {
                 number: 128,
               },
@@ -3983,8 +3907,7 @@ export const manyChildrenWithSameLength = {
               library_frame: true,
               exclude_from_grouping: false,
               filename: 'context.go',
-              abs_path:
-                '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
+              abs_path: '/go/pkg/mod/github.com/gin-gonic/gin@v1.7.4/context.go',
               line: {
                 number: 165,
               },

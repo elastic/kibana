@@ -28,10 +28,7 @@ export const core = {
   },
 } as unknown as CoreStart;
 
-export const render = (
-  component: React.ReactNode,
-  options: { customHistory: MemoryHistory }
-) => {
+export const render = (component: React.ReactNode, options: { customHistory: MemoryHistory }) => {
   const history = options?.customHistory ?? createMemoryHistory();
 
   history.location.key = 'TestKeyForTesting';

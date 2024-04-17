@@ -8,9 +8,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 require('@kbn/babel-register').registerNodeAutoTranspilation();
 
-const {
-  aggregateLatencyMetrics,
-} = require('./aggregate-latency-metrics/index.ts');
+const { aggregateLatencyMetrics } = require('./aggregate-latency-metrics/index.ts');
 
 aggregateLatencyMetrics().catch((err) => {
   if (err.meta && err.meta.body) {

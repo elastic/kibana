@@ -30,18 +30,12 @@ export function useServiceNodeMetricOverviewHref({
   serviceNodeName: string;
 }) {
   return useAPMHref({
-    path: `/services/${serviceName}/nodes/${encodeURIComponent(
-      serviceNodeName
-    )}/metrics`,
+    path: `/services/${serviceName}/nodes/${encodeURIComponent(serviceNodeName)}/metrics`,
     persistedFilters,
   });
 }
 
-export function ServiceNodeMetricOverviewLink({
-  serviceName,
-  serviceNodeName,
-  ...rest
-}: Props) {
+export function ServiceNodeMetricOverviewLink({ serviceName, serviceNodeName, ...rest }: Props) {
   const href = useServiceNodeMetricOverviewHref({
     serviceName,
     serviceNodeName,

@@ -52,11 +52,7 @@ function page<TPath extends string>({
   return {
     path,
     element: (
-      <ApmServiceTemplate
-        title={title}
-        selectedTab={tab}
-        searchBarOptions={searchBarOptions}
-      >
+      <ApmServiceTemplate title={title} selectedTab={tab} searchBarOptions={searchBarOptions}>
         {element}
       </ApmServiceTemplate>
     ),

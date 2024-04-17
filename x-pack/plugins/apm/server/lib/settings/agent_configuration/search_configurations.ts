@@ -6,10 +6,7 @@
  */
 
 import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';

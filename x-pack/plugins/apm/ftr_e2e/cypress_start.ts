@@ -19,8 +19,7 @@ export function cypressRunTests(spec?: string) {
     const result = await cypressStart(getService, cypress.run, spec);
 
     if (
-      (result as CypressCommandLine.CypressFailedRunResult)?.status ===
-        'failed' ||
+      (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
       (result as CypressCommandLine.CypressRunResult)?.totalFailed
     ) {
       throw new Error(`APM Cypress tests failed`);

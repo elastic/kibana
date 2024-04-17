@@ -70,12 +70,9 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
     <>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.previewSectionTitle',
-            {
-              defaultMessage: 'Preview',
-            }
-          )}
+          {i18n.translate('xpack.apm.settings.customizeUI.customLink.previewSectionTitle', {
+            defaultMessage: 'Preview',
+          })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -88,10 +85,9 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
         >
           {label
             ? label
-            : i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.default.label',
-                { defaultMessage: 'Elastic.co' }
-              )}
+            : i18n.translate('xpack.apm.settings.customizeUI.customLink.default.label', {
+                defaultMessage: 'Elastic.co',
+              })}
         </EuiText>
 
         <EuiText
@@ -101,42 +97,30 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
           data-test-subj="preview-url"
         >
           {url ? (
-            <EuiLink
-              href={formattedUrl}
-              target="_blank"
-              data-test-subj="preview-link"
-            >
+            <EuiLink href={formattedUrl} target="_blank" data-test-subj="preview-link">
               {formattedUrl}
             </EuiLink>
           ) : (
-            i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.default.url',
-              { defaultMessage: 'https://www.elastic.co' }
-            )
+            i18n.translate('xpack.apm.settings.customizeUI.customLink.default.url', {
+              defaultMessage: 'https://www.elastic.co',
+            })
           )}
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.apm.settings.customizeUI.customLink.linkPreview.descrition',
-                {
-                  defaultMessage:
-                    'Test your link with values from an example transaction document based on the filters above.',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.customizeUI.customLink.linkPreview.descrition', {
+                defaultMessage:
+                  'Test your link with values from an example transaction document based on the filters above.',
+              })}
             </EuiText>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             {error && (
               <EuiToolTip position="top" content={error}>
-                <EuiIcon
-                  type="alert"
-                  color="warning"
-                  data-test-subj="preview-warning"
-                />
+                <EuiIcon type="alert" color="warning" data-test-subj="preview-warning" />
               </EuiToolTip>
             )}
           </EuiFlexItem>

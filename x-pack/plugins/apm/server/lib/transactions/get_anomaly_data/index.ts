@@ -81,51 +81,43 @@ export async function getAnomalySeries({
       getMLJobIds(ml.anomalyDetectors, environment),
     ]);
 
-    const scoreSeriesCollection =
-      anomaliesResponse?.aggregations?.job_id.buckets
-        .filter((bucket) => jobIds.includes(bucket.key as string))
-        .map((bucket) => {
-          const dateBuckets = bucket.ml_avg_response_times.buckets;
+    const scoreSeriesCollection = anomaliesResponse?.aggregations?.job_id.buckets
+      .filter((bucket) => jobIds.includes(bucket.key as string))
+      .map((bucket) => {
+        const dateBuckets = bucket.ml_avg_response_times.buckets;
 
-          return {
-            jobId: bucket.key as string,
-            anomalyScore: compact(
-              dateBuckets.map((dateBucket) => {
-                const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
-                const score = metrics?.record_score;
+        return {
+          jobId: bucket.key as string,
+          anomalyScore: compact(
+            dateBuckets.map((dateBucket) => {
+              const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
+              const score = metrics?.record_score;
 
-                if (
-                  !metrics ||
-                  !isFiniteNumber(score) ||
-                  score < ANOMALY_THRESHOLD.CRITICAL
-                ) {
-                  return null;
-                }
+              if (!metrics || !isFiniteNumber(score) || score < ANOMALY_THRESHOLD.CRITICAL) {
+                return null;
+              }
 
-                const anomalyStart = Date.parse(metrics.timestamp as string);
-                const anomalyEnd =
-                  anomalyStart + (metrics.bucket_span as number) * 1000;
+              const anomalyStart = Date.parse(metrics.timestamp as string);
+              const anomalyEnd = anomalyStart + (metrics.bucket_span as number) * 1000;
 
-                return {
-                  x0: anomalyStart,
-                  x: anomalyEnd,
-                  y: score,
-                };
-              })
-            ),
-            anomalyBoundaries: dateBuckets
-              .filter(
-                (dateBucket) =>
-                  dateBucket.lower.value !== null &&
-                  dateBucket.upper.value !== null
-              )
-              .map((dateBucket) => ({
-                x: dateBucket.key,
-                y0: dateBucket.lower.value as number,
-                y: dateBucket.upper.value as number,
-              })),
-          };
-        });
+              return {
+                x0: anomalyStart,
+                x: anomalyEnd,
+                y: score,
+              };
+            })
+          ),
+          anomalyBoundaries: dateBuckets
+            .filter(
+              (dateBucket) => dateBucket.lower.value !== null && dateBucket.upper.value !== null
+            )
+            .map((dateBucket) => ({
+              x: dateBucket.key,
+              y0: dateBucket.lower.value as number,
+              y: dateBucket.upper.value as number,
+            })),
+        };
+      });
 
     if ((scoreSeriesCollection?.length ?? 0) > 1) {
       logger.warn(

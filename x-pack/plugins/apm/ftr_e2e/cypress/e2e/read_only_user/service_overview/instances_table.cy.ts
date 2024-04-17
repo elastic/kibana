@@ -17,8 +17,7 @@ const serviceOverviewHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/service_overview_instances/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-java/service_overview_instances/main_statistics?*',
     name: 'instancesMainRequest',
   },
   {
@@ -49,8 +48,7 @@ describe('Instances table', () => {
   // });
 
   describe('when data is loaded', () => {
-    const serviceNodeName =
-      '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad';
+    const serviceNodeName = '31651f3c624b81c55dd4633df0b5b9f9ab06b151121b0404ae796632cd1f87ad';
 
     it('has data in the table', () => {
       cy.visit(serviceOverviewHref);
@@ -69,9 +67,7 @@ describe('Instances table', () => {
       cy.contains(serviceNodeName);
 
       cy.wait('@instancesDetailsRequest');
-      cy.get(
-        `[data-test-subj="instanceDetailsButton_${serviceNodeName}"]`
-      ).realClick();
+      cy.get(`[data-test-subj="instanceDetailsButton_${serviceNodeName}"]`).realClick();
       cy.get('[data-test-subj="loadingSpinner"]').should('be.visible');
       cy.wait('@instanceDetailsRequest').then(() => {
         cy.contains('Service');
@@ -89,9 +85,7 @@ describe('Instances table', () => {
       cy.contains(serviceNodeName);
 
       cy.wait('@instancesDetailsRequest');
-      cy.get(
-        `[data-test-subj="instanceActionsButton_${serviceNodeName}"]`
-      ).realClick();
+      cy.get(`[data-test-subj="instanceActionsButton_${serviceNodeName}"]`).realClick();
       cy.contains('Pod logs');
       cy.contains('Pod metrics');
       cy.contains('Container logs');

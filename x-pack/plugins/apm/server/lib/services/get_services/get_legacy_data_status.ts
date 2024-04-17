@@ -11,11 +11,7 @@ import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldna
 import { Setup } from '../../helpers/setup_request';
 
 // returns true if 6.x data is found
-export async function getLegacyDataStatus(
-  setup: Setup,
-  start: number,
-  end: number
-) {
+export async function getLegacyDataStatus(setup: Setup, start: number, end: number) {
   const { apmEventClient } = setup;
 
   const params = {
@@ -28,10 +24,7 @@ export async function getLegacyDataStatus(
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } },
-            ...rangeQuery(start, end),
-          ],
+          filter: [{ range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } }, ...rangeQuery(start, end)],
         },
       },
     },

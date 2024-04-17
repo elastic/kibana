@@ -52,20 +52,13 @@ import { ESClient, getEsClient } from '../shared/get_es_client';
 export async function aggregateLatencyMetrics() {
   const interval = parseInt(String(argv.interval), 10) || 1;
   const concurrency = parseInt(String(argv.concurrency), 10) || 3;
-  const numSigFigures = (parseInt(String(argv.sigfig), 10) || 2) as
-    | 1
-    | 2
-    | 3
-    | 4
-    | 5;
+  const numSigFigures = (parseInt(String(argv.sigfig), 10) || 2) as 1 | 2 | 3 | 4 | 5;
 
   const from = new Date(String(argv.from)).getTime();
   const to = new Date(String(argv.to)).getTime();
 
   if (isNaN(from) || isNaN(to)) {
-    throw new Error(
-      `from and to are not valid dates - please supply valid ISO timestamps`
-    );
+    throw new Error(`from and to are not valid dates - please supply valid ISO timestamps`);
   }
 
   if (to <= from) {
@@ -169,9 +162,7 @@ export async function aggregateLatencyMetrics() {
     });
   } else {
     // eslint-disable-next-line no-console
-    console.log(
-      'No destination was defined, not uploading aggregated documents'
-    );
+    console.log('No destination was defined, not uploading aggregated documents');
   }
 
   let at = to;
@@ -206,10 +197,7 @@ export async function aggregateLatencyMetrics() {
               ...(globalFilter?.query ?? {}),
               bool: {
                 ...(globalFilter?.query?.bool ?? {}),
-                filter: [
-                  ...Object.values(globalFilter?.query?.bool?.filter ?? {}),
-                  ...filter,
-                ],
+                filter: [...Object.values(globalFilter?.query?.bool?.filter ?? {}), ...filter],
               },
             },
           };
@@ -316,15 +304,11 @@ export async function aggregateLatencyMetrics() {
             getNumberOfTransactionDocuments(),
           ]);
 
-          const rangeLabel = `${new Date(start).toISOString()}-${new Date(
-            end
-          ).toISOString()}`;
+          const rangeLabel = `${new Date(start).toISOString()}-${new Date(end).toISOString()}`;
 
           // eslint-disable-next-line no-console
           console.log(
-            `${rangeLabel}: Compression: ${
-              buckets.length
-            }/${numberOfTransactionDocuments} (${(
+            `${rangeLabel}: Compression: ${buckets.length}/${numberOfTransactionDocuments} (${(
               (buckets.length / numberOfTransactionDocuments) *
               100
             ).toPrecision(2)}%)`
@@ -389,23 +373,14 @@ export async function aggregateLatencyMetrics() {
 
             const response = await (destClient as any)?.bulk({
               refresh: 'wait_for',
-              body: flatten(
-                docs.map((doc) => [
-                  { index: { _index: destOptions?.index } },
-                  doc,
-                ])
-              ),
+              body: flatten(docs.map((doc) => [{ index: { _index: destOptions?.index } }, doc])),
             });
 
             if (response?.body.errors) {
-              throw new Error(
-                `${rangeLabel}: Could not upload all metric documents`
-              );
+              throw new Error(`${rangeLabel}: Could not upload all metric documents`);
             }
             // eslint-disable-next-line no-console
-            console.log(
-              `${rangeLabel}: Uploaded ${docs.length} metric documents`
-            );
+            console.log(`${rangeLabel}: Uploaded ${docs.length} metric documents`);
           }
         })
       )
