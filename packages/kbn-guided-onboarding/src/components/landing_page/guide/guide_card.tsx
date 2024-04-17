@@ -7,13 +7,16 @@
  */
 
 import React, { useCallback, useState } from 'react';
+
 import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { openConnectionDetails } from '@kbn/guided-onboarding/src/open_connection_details';
+import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/deployment_details';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
-import { openConnectionDetails } from '@kbn/guided-onboarding/src/open_connection_details';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {

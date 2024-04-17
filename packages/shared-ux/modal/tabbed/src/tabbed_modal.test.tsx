@@ -67,7 +67,7 @@ describe('TabbedModal', () => {
 
       expect(screen.queryByText(tabDefinition.name)).toBeInTheDocument();
 
-      userEvent.click(await screen.findByTestId(tabDefinition.modalActionBtn.dataTestSubj));
+      userEvent.click(await screen.findByTestId(tabDefinition.modalActionBtn!.dataTestSubj));
 
       expect(mockedHandlerFn).toHaveBeenCalled();
     });

@@ -45,7 +45,7 @@ describe('getSystemActionKibanaPrivileges', () => {
     const privileges = getSystemActionKibanaPrivileges({
       connectorAdapterRegistry: registry,
       systemActions: [],
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(privileges).toEqual([]);
@@ -54,7 +54,7 @@ describe('getSystemActionKibanaPrivileges', () => {
   it('should return an empty array if systemActions are not defined', () => {
     const privileges = getSystemActionKibanaPrivileges({
       connectorAdapterRegistry: registry,
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(privileges).toEqual([]);
@@ -64,7 +64,7 @@ describe('getSystemActionKibanaPrivileges', () => {
     const privileges = getSystemActionKibanaPrivileges({
       connectorAdapterRegistry: registry,
       systemActions,
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(privileges).toEqual(['my-priv:stackAlerts', 'my-priv-2:stackAlerts']);
@@ -74,7 +74,7 @@ describe('getSystemActionKibanaPrivileges', () => {
     const privileges = getSystemActionKibanaPrivileges({
       connectorAdapterRegistry: registry,
       systemActions: [...systemActions, { id: 'my-id-2', actionTypeId: '.not-valid', params: {} }],
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(privileges).toEqual(['my-priv:stackAlerts', 'my-priv-2:stackAlerts']);
@@ -84,7 +84,7 @@ describe('getSystemActionKibanaPrivileges', () => {
     const privileges = getSystemActionKibanaPrivileges({
       connectorAdapterRegistry: registry,
       systemActions: [...systemActions, { id: 'my-id-2', actionTypeId: '.no-priv', params: {} }],
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(privileges).toEqual(['my-priv:stackAlerts', 'my-priv-2:stackAlerts']);
@@ -94,7 +94,7 @@ describe('getSystemActionKibanaPrivileges', () => {
     const privileges = getSystemActionKibanaPrivileges({
       connectorAdapterRegistry: registry,
       systemActions: [systemActions[0], systemActions[0]],
-      rule: { consumer: 'stackAlerts' },
+      rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
     expect(privileges).toEqual(['my-priv:stackAlerts']);
