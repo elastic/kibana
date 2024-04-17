@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // doesn't work because it relies on `SecurityService.testUserSupertest`
     const res: { status: number; contentType: string | null; text: string } =
       await browser.executeAsync(async (downloadUrl, resolve) => {
-        const response = await fetch(downloadUrl);
+        const response = await fetch(downloadUrl ?? '');
         resolve({
           status: response.status,
           contentType: response.headers.get('content-type'),
