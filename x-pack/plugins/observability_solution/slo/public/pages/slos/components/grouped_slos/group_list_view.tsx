@@ -71,7 +71,7 @@ export function GroupListView({
         },
       });
     } else {
-      groupName = i18n.translate('xpack.slo.group.remoteCluster', {
+      groupName = i18n.translate('xpack.slo.group.remoteCluster.localKibana', {
         defaultMessage: 'Local Kibana',
       });
     }
