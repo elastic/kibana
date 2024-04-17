@@ -45,7 +45,7 @@ describe('LinkToAlertsPage component', () => {
   it('renders correctly with optional props', () => {
     const props: LinkToAlertsPageProps = {
       dateRange: { from: '2024-04-01', to: '2024-04-15' },
-      kuery: 'boo:bar',
+      kuery: 'foo:bar',
       dataTestSubj: 'test-link',
     };
     const { container } = render(

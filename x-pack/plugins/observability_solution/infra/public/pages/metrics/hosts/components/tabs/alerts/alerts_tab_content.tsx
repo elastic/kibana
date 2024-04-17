@@ -90,7 +90,7 @@ export const AlertsTabContent = () => {
       </EuiFlexGroup>
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
         <AlertFlyout
-          nodeType={'host'}
+          nodeType="host"
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
         />
