@@ -268,6 +268,8 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
           defaultMessage="Export a CSV of this visualization."
         />
       );
+    } else {
+      return helpText;
     }
   };
 

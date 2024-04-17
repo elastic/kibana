@@ -403,7 +403,7 @@ export const reportingExportModalProvider = ({
       helpText: (
         <FormattedMessage
           id="reporting.printablePdfV2.helpText"
-          defaultMessage="Exports can take a few minutes to generate."
+          defaultMessage="Select the file type you would like to export for this visualization."
         />
       ),
       generateReportButton: (
@@ -436,7 +436,7 @@ export const reportingExportModalProvider = ({
       helpText: (
         <FormattedMessage
           id="reporting.pngV2.helpText"
-          defaultMessage="Exports can take a few minutes to generate."
+          defaultMessage="Select the file type you would like to export for this visualization."
         />
       ),
       generateReportButton: (
