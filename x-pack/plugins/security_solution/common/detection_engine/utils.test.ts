@@ -17,6 +17,7 @@ import {
   isSuppressionRuleConfiguredWithDuration,
   isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithMissingFields,
+  isEqlSequenceQuery,
 } from './utils';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -233,9 +234,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressibleAlertRule('query')).toBe(true);
       expect(isSuppressibleAlertRule('threat_match')).toBe(true);
       expect(isSuppressibleAlertRule('new_terms')).toBe(true);
+      expect(isSuppressibleAlertRule('eql')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressibleAlertRule('eql')).toBe(false);
       expect(isSuppressibleAlertRule('machine_learning')).toBe(false);
     });
 
@@ -255,9 +256,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithDuration('query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithDuration('new_terms')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithDuration('eql')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithDuration('eql')).toBe(false);
       expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(false);
     });
 
@@ -276,9 +277,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithGroupBy('query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithGroupBy('new_terms')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithGroupBy('eql')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithGroupBy('eql')).toBe(false);
       expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(false);
     });
 
@@ -302,9 +303,9 @@ describe('Alert Suppression Rules', () => {
       expect(isSuppressionRuleConfiguredWithMissingFields('query')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('threat_match')).toBe(true);
       expect(isSuppressionRuleConfiguredWithMissingFields('new_terms')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithMissingFields('eql')).toBe(true);
 
       // Rule types that don't support alert suppression:
-      expect(isSuppressionRuleConfiguredWithMissingFields('eql')).toBe(false);
       expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(false);
     });
 
@@ -317,6 +318,33 @@ describe('Alert Suppression Rules', () => {
       const ruleType = '123' as Type;
       const result = isSuppressionRuleConfiguredWithMissingFields(ruleType);
       expect(result).toBe(false);
+    });
+  });
+
+  describe('isEqlSequenceQuery', () => {
+    it('is false if query is undefined', () => {
+      const result = isEqlSequenceQuery(undefined);
+      expect(result).toBe(false);
+    });
+
+    it('is false if query is an empty string', () => {
+      const result = isEqlSequenceQuery('');
+      expect(result).toBe(false);
+    });
+
+    it('is false if query is an nonempty string', () => {
+      const result = isEqlSequenceQuery('any where true');
+      expect(result).toBe(false);
+    });
+
+    it('is true if query begins with "sequence"', () => {
+      const query = 'sequence where true';
+      expect(isEqlSequenceQuery(query)).toBe(true);
+    });
+
+    it('is true if query begins with some whitespace and then "sequence"', () => {
+      const query = '   sequence where true';
+      expect(isEqlSequenceQuery(query)).toBe(true);
     });
   });
 });
