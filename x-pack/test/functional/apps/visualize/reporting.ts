@@ -137,6 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug('open png reporting panel');
         await PageObjects.reporting.openExportTab();
+        await testSubjects.click('pngV2-radioOption');
         log.debug('click generate report button');
         await PageObjects.reporting.clickGenerateReportButton();
 
