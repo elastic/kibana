@@ -32,6 +32,7 @@ export function initSolutionOnRequestInterceptor({
     toolkit: OnPreRoutingToolkit
   ) {
     const serverBasePath = http.basePath.serverBasePath;
+    const requestBasePath = http.basePath.get(request);
     let path = request.url.pathname;
     let redirectUrl: string | null = null;
     const isRequestingApplication = path.includes('/app/');
@@ -61,7 +62,7 @@ export function initSolutionOnRequestInterceptor({
         solutionId = null;
         path = stripSolutionIdFromPath(path);
         pathHasExplicitSolutionIdentifier = false;
-        redirectUrl = `${serverBasePath}${path}`;
+        redirectUrl = `${requestBasePath}${path}`;
       }
     }
 

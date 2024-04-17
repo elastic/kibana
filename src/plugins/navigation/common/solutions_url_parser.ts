@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-const solutionContextRegexString = '/n/([a-z0-9_\\-]+)';
-const solutionContextRegex = new RegExp(solutionContextRegexString);
+// Other base path contains the following:
+// - the base path for the space (e.g. `/s/myspace`)
+const otherBasePathRegexStr = '/s/[a-z0-9_-]+';
+const solutionRegexStr = '/n/([a-z0-9_-]+)';
+const solutionContextRegex = new RegExp(`^(${otherBasePathRegexStr})?${solutionRegexStr}`);
 
 /**
  * Given a server base path, solution id, and requested resource, this will construct a space-aware path
@@ -28,7 +31,8 @@ export function addSolutionIdToPath(
   }
 
   const normalizedBasePath = stripSolutionIdFromPath(
-    basePath.endsWith('/') ? basePath.slice(0, -1) : basePath
+    basePath.endsWith('/') ? basePath.slice(0, -1) : basePath,
+    true
   );
 
   if (solutionId) {
@@ -55,8 +59,8 @@ export function getSolutionIdFromPath(
     };
   }
 
-  // Ignoring first result, we only want the capture group result at index 1
-  const [, solutionId] = matchResult;
+  // Ignoring first result and other known base paths, we only want the capture group result at index 1
+  const [, , solutionId] = matchResult;
 
   if (!solutionId) {
     throw new Error(`Unable to determine Solution ID from request path: ${requestBasePath}`);
@@ -68,9 +72,11 @@ export function getSolutionIdFromPath(
   };
 }
 
-export function stripSolutionIdFromPath(path: string): string {
-  const regex = new RegExp(solutionContextRegexString, 'g');
-  return path.replaceAll(regex, '');
+export function stripSolutionIdFromPath(path: string, anywhere = false): string {
+  if (anywhere) {
+    return path.replace(new RegExp(solutionRegexStr), '');
+  }
+  return path.replace(solutionContextRegex, (match, p1, p2) => p1 || '');
 }
 
 function stripServerBasePath(requestBasePath: string, serverBasePath: string) {
