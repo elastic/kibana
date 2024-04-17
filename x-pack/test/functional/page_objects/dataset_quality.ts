@@ -40,7 +40,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   const euiSelectable = getService('selectable');
   const retry = getService('retry');
   const find = getService('find');
-  const browser = getService('browser');
 
   const selectors = {
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
@@ -49,6 +48,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetSearchInput: '[placeholder="Filter datasets"]',
     showFullDatasetNamesSwitch: 'button[aria-label="Show full dataset names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive datasets"]',
+    superDatePickerApplyButton: '.euiQuickSelect__applyButton',
   };
 
   const testSubjectSelectors = {
@@ -300,10 +300,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await timeUnitSelect.focus();
       await timeUnitSelect.type(unit);
 
-      await browser.pressKeys(browser.keys.ENTER);
+      (await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)).click();
 
-      // Close the date picker quick menu
-      return testSubjects.click(testSubjectSelectors.superDatePickerToggleQuickMenuButton);
+      return testSubjects.missingOrFail(testSubjectSelectors.superDatePickerQuickMenu);
     },
 
     /**

@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/reporting-csv-share-panel",
+  "owner": "@elastic/appex-sharedux"
+}
