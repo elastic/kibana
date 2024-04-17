@@ -13,11 +13,9 @@ export default defineCypressConfig(
   getCypressBaseConfig({
     env: {
       IS_SERVERLESS: true,
-
       // Uncomment to enable logging
       // TOOLING_LOG_LEVEL: 'verbose',
-
-      grepTags: '@cloudServerless --@brokenInServerless',
+      grepTags: '@serverless --@skipInServerless',
     },
   })
 );

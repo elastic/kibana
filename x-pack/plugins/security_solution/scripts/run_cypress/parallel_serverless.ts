@@ -25,7 +25,7 @@ import pRetry from 'p-retry';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
-import { catchAxiosErrorFormatAndThrow } from '../endpoint/common/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
@@ -585,7 +585,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ? getProductTypes(tier, endpointAddon, cloudAddon)
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
-              log.info(`Running spec file: ${filePath}`);if (!API_KEY) {
+              log.info(`Running spec file: ${filePath}`);
+              if (!API_KEY) {
                 log.error('API KEY to create project could not be retrieved.');
                 // eslint-disable-next-line no-process-exit
                 return process.exit(1);
