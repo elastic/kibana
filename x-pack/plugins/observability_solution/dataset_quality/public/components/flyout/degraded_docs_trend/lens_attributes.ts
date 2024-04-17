@@ -32,12 +32,19 @@ enum DatasetQualityLensColumn {
 
 const MAX_BREAKDOWN_SERIES = 5;
 
-export function getLensAttributes(
-  color: string,
-  dataView: DataView = defaultDataView,
-  query: string = '',
-  breakdownFieldName?: string
-) {
+interface GetLensAttributesParams {
+  color: string;
+  dataView: DataView;
+  query: string;
+  breakdownFieldName?: string;
+}
+
+export function getLensAttributes({
+  color,
+  dataView = defaultDataView,
+  query = '',
+  breakdownFieldName,
+}: GetLensAttributesParams) {
   const columnOrder = [
     DatasetQualityLensColumn.Date,
     DatasetQualityLensColumn.CountIgnored,

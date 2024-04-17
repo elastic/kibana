@@ -67,12 +67,12 @@ export const useDegradedDocsChart = ({
 
   useEffect(() => {
     if (dataView) {
-      const lensAttributes = getLensAttributes(
-        euiTheme.colors.danger,
+      const lensAttributes = getLensAttributes({
+        color: euiTheme.colors.danger,
         dataView,
-        filterQuery,
-        breakdownDataViewField?.name
-      );
+        query: filterQuery,
+        breakdownFieldName: breakdownDataViewField?.name,
+      });
       setAttributes(lensAttributes);
     }
   }, [breakdownDataViewField?.name, dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
