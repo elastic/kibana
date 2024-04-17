@@ -677,16 +677,16 @@ export function MachineLearningJobWizardCommonProvider(
         });
     },
 
-    async assertCalloutText(testSubj: string, text: RegExp) {
-      const allOfTestSubj = await testSubjects.getVisibleTextAll(testSubj);
+    async assertCalloutText(calloutStatusTestSubj: string, expectedText: RegExp) {
+      const allCalloutStatusTexts = await testSubjects.getVisibleTextAll(calloutStatusTestSubj);
 
-      const oneOfVisibleTextMatches = allOfTestSubj.some(
-        (visibleText) => !!visibleText.match(text)
+      const oneCalloutMatches = allCalloutStatusTexts.some(
+        (visibleText) => !!visibleText.match(expectedText)
       );
-      expect(oneOfVisibleTextMatches).to.eql(
+      expect(oneCalloutMatches).to.eql(
         true,
-        `Expect one of the visible text entries to match [${text}], instead found ${JSON.stringify(
-          allOfTestSubj,
+        `Expect one of the callouts [${calloutStatusTestSubj}] to match [${expectedText}], instead found ${JSON.stringify(
+          allCalloutStatusTexts,
           null,
           2
         )}`
