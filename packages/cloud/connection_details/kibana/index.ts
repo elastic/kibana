@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export { ConnectionDetailsOptsProvider } from './context';
-export { ConnectionDetails } from './connection_details';
-export { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';
-export * from './kibana';
+export {
+  KibanaConnectionDetailsProvider,
+  type KibanaConnectionDetailsProviderProps,
+} from './kibana_connection_details_provider';
+export { openConnectionDetails, type OpenConnectionDetailsParams } from './open_connection_details';

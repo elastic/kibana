@@ -9,9 +9,9 @@
 import * as React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { ConnectionDetailsOptsProvider } from './context';
-import { ConnectionDetailsOpts } from './types';
-import { useAsyncMemo } from './hooks/use_async_memo';
+import { ConnectionDetailsOptsProvider } from '../context';
+import { ConnectionDetailsOpts } from '../types';
+import { useAsyncMemo } from '../hooks/use_async_memo';
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;

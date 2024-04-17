@@ -8,8 +8,8 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import * as conn from '@kbn/cloud/connection_details';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import * as conn from '..';
 
 export interface OpenConnectionDetailsParams {
   props: conn.KibanaConnectionDetailsProviderProps;

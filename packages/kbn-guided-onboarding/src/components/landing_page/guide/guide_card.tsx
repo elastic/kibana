@@ -11,7 +11,7 @@ import React, { useCallback, useState } from 'react';
 import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { openConnectionDetails } from '../../../open_connection_details';
+import { openConnectionDetails } from '@kbn/cloud/connection_details';
 import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
