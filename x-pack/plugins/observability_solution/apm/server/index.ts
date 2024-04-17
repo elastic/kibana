@@ -53,7 +53,8 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  forceSyntheticSource: schema.boolean({ defaultValue: false }),
+
+  forceSyntheticSource: schema.boolean({ defaultValue: false }), // deprecated
   latestAgentVersionsUrl: schema.string({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
@@ -97,6 +98,9 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     deprecateFromRoot,
     unusedFromRoot,
   }) => [
+    unused('forceSyntheticSource', {
+      level: 'warning',
+    }),
     unused('ui.transactionGroupBucketSize', {
       level: 'warning',
     }),

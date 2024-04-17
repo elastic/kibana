@@ -38,7 +38,6 @@ export async function getApmEventClient({
       indices,
       options: {
         includeFrozen,
-        forceSyntheticSource: config.forceSyntheticSource,
       },
     });
   });
