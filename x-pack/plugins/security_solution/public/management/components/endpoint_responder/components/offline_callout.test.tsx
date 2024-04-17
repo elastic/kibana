@@ -29,9 +29,7 @@ const getAgentStatus = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
 describe('Responder offline callout', () => {
-  // TODO:
-  // remove the sentinelOneAgentStatus hook when
-  // agentStatusClientEnabled is enabled and removed
+  // TODO: 8.14 remove the sentinelOneAgentStatus hook when `agentStatusClientEnabled` is enabled and removed
   describe.each([
     [useGetSentinelOneAgentStatus, getSentinelOneAgentStatus],
     [useGetAgentStatus, getAgentStatus],

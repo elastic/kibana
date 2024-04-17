@@ -107,8 +107,7 @@ describe('<HighlightedFieldsCell />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  // TODO:
-  // simplify when agentStatusClient FF is enabled/removed
+  // TODO: 8.14 simplify when `agentStatusClient` FF is enabled/removed
   it.each(Object.keys(hooksToMock))(
     'should render SentinelOne agent status cell if field is agent.status and `origialField` is `observer.serial_number` with %s hook',
     (hookName) => {
