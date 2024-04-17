@@ -16,6 +16,10 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/elastic-assistant-common/impl/language_models';
+import {
+  DEFAULT_OPEN_AI_MODEL,
+  getDefaultArguments,
+} from '@kbn/elastic-assistant-common/impl/language_models/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
@@ -56,13 +60,22 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
+  console.log('whatismodelfromrequest', {
+    body: request.body.model,
+    model: request.body.model ?? DEFAULT_OPEN_AI_MODEL,
+  });
   const llm = new llmClass({
     actions,
     connectorId,
     request,
     llmType,
     logger,
+    // possible client model override,
+    // let this be undefined otherwise so the connector handles the model
     model: request.body.model,
+    // ensure this is defined because we default to it in the language_models
+    // This is where the LangSmith logs (Metadata > Invocation Params) are set
+    temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure
@@ -174,6 +187,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
           input: latestMessage[0].content,
           chat_history: [],
           signal: abortSignal,
+          model: request.body.model ?? 'gpt-4',
+          // temperature: 0.3,
         },
         {
           callbacks: [

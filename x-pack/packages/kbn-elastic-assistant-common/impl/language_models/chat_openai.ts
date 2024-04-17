@@ -18,9 +18,10 @@ import {
   ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
+import { DEFAULT_OPEN_AI_MODEL } from './constants';
 import { InvokeAIActionParamsSchema } from './types';
 
-const LLM_TYPE = 'ActionsClientChatOpenAI';
+const LLM_TYPE = 'openai';
 
 interface ActionsClientChatOpenAIParams {
   actions: ActionsPluginStart;
@@ -32,6 +33,7 @@ interface ActionsClientChatOpenAIParams {
   traceId?: string;
   maxRetries?: number;
   model?: string;
+  temperature?: number;
   signal?: AbortSignal;
 }
 
@@ -53,6 +55,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   azureOpenAIApiKey = '';
   openAIApiKey = '';
   model?: string;
+  #temperature?: number;
 
   // Kibana variables
   #actions: ActionsPluginStart;
@@ -72,10 +75,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     maxRetries,
     model,
     signal,
+    temperature,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
       streaming: true,
+      // matters only for the LangSmith logs (Metadata > Invocation Params), which are misleading if this is not set
+      modelName: model ?? DEFAULT_OPEN_AI_MODEL,
       // these have to be initialized, but are not actually used since we override the openai client with the actions client
       azureOpenAIApiKey: 'nothing',
       azureOpenAIApiDeploymentName: 'nothing',
@@ -94,6 +100,11 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.streaming = true;
     this.#signal = signal;
     this.model = model;
+    // to be passed to the actions client
+    this.#temperature = temperature;
+    // matters only for LangSmith logs (Metadata > Invocation Params)
+    // the connector can be passed an undefined temperature through #temperature
+    this.temperature = temperature ?? this.temperature;
   }
 
   getActionResultData(): string {
@@ -172,13 +183,15 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         // langchain expects stream to be of type AsyncIterator<ChatCompletionChunk>
         subAction: 'invokeAsyncIterator',
         subActionParams: {
+          temperature: this.#temperature,
+          // possible client model override
+          // security sends this from connectors, it is only missing from preconfigured connectors
+          // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
+          model: this.model,
+          // ensure we take the messages from the completion request, not the client request
           n: completionRequest.n,
           stop: completionRequest.stop,
-          temperature: completionRequest.temperature,
           functions: completionRequest.functions,
-          // possible client model override
-          model: this.model ?? completionRequest.model,
-          // ensure we take the messages from the completion request, not the client request
           messages: completionRequest.messages.map((message) => ({
             role: message.role,
             content: message.content ?? '',
