@@ -2,8 +2,8 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from "react";
 import { getEventType, isEvenEqlSequence, isEventBuildingBlockType } from "../../body/helpers";
 
-export const useEventTypeRowStyling = (ecsData: TimelineItem['ecs']) => {
-    const eventType = useMemo(() => getEventType(ecsData), []);
+export const useGetEventTypeRowClassName = (ecsData: TimelineItem['ecs']) => {
+    const eventType = useMemo(() => getEventType(ecsData), [ecsData]);
     const eventTypeClassName = useMemo(
       () =>
         eventType === 'raw'
@@ -20,5 +20,5 @@ export const useEventTypeRowStyling = (ecsData: TimelineItem['ecs']) => {
       [ecsData]
     );
 
-    return useMemo(() => `${eventTypeClassName} ${buildingBlockTypeClassName}`, []);
+    return useMemo(() => `${eventTypeClassName} ${buildingBlockTypeClassName}`.trim(), [eventTypeClassName, buildingBlockTypeClassName]);
 }

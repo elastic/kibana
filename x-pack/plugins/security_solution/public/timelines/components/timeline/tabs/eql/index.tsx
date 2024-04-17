@@ -199,7 +199,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const header = useMemo(
     () => (
-      <EuiFlexGroup gutterSize="s" direction="column" grow={false}>
+      <>
         <EuiFlexItem grow={false}>
           <StyledEuiFlyoutHeader
             data-test-subj={`${activeTab}-tab-flyout-header`}
@@ -241,10 +241,16 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         <EuiFlexItem grow={false}>
           <EqlQueryBarTimeline timelineId={timelineId} />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </>
     ),
     []
   );
+
+  const unifiedHeader = useMemo(() => (
+    <EuiFlexGroup gutterSize="s" direction="column">
+      {header}
+    </EuiFlexGroup>
+  ), []);
 
   return (
     <>
@@ -253,27 +259,31 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           <InPortal node={eqlEventsCountPortalNode}>
             {totalCount >= 0 ? <EventsCountBadge>{totalCount}</EventsCountBadge> : null}
           </InPortal>
-          <UnifiedTimelineBody
-            header={header}
-            columns={augumentedColumnHeaders}
-            rowRenderers={rowRenderers}
-            timelineId={timelineId}
-            itemsPerPage={itemsPerPage}
-            itemsPerPageOptions={itemsPerPageOptions}
-            sort={NO_SORTING}
-            events={events}
-            refetch={refetch}
-            dataLoadingState={dataLoadingState}
-            totalCount={isBlankTimeline ? 0 : totalCount}
-            onEventClosed={onEventClosed}
-            expandedDetail={expandedDetail}
-            showExpandedDetails={showExpandedDetails}
-            onChangePage={loadPage}
-            activeTab={activeTab}
-            updatedAt={refreshedAt}
-            isTextBasedQuery={false}
-            pageInfo={pageInfo}
-          />
+          <FullWidthFlexGroup>
+            <ScrollableFlexItem grow={2}>
+              <UnifiedTimelineBody
+                header={unifiedHeader}
+                columns={augumentedColumnHeaders}
+                rowRenderers={rowRenderers}
+                timelineId={timelineId}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                sort={NO_SORTING}
+                events={events}
+                refetch={refetch}
+                dataLoadingState={dataLoadingState}
+                totalCount={isBlankTimeline ? 0 : totalCount}
+                onEventClosed={onEventClosed}
+                expandedDetail={expandedDetail}
+                showExpandedDetails={showExpandedDetails}
+                onChangePage={loadPage}
+                activeTab={activeTab}
+                updatedAt={refreshedAt}
+                isTextBasedQuery={false}
+                pageInfo={pageInfo}
+              />
+            </ScrollableFlexItem>
+          </FullWidthFlexGroup>
         </>
       ) : (
         <>
@@ -341,21 +351,21 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </ScrollableFlexItem>
+            {showExpandedDetails && (
+              <>
+                <VerticalRule />
+                <ScrollableFlexItem grow={1}>
+                  <DetailsPanel
+                    browserFields={browserFields}
+                    runtimeMappings={runtimeMappings}
+                    tabType={TimelineTabs.eql}
+                    scopeId={timelineId}
+                    handleOnPanelClosed={handleOnPanelClosed}
+                  />
+                </ScrollableFlexItem>
+              </>
+            )}
           </FullWidthFlexGroup>
-        </>
-      )}
-      {showExpandedDetails && (
-        <>
-          <VerticalRule />
-          <ScrollableFlexItem grow={1}>
-            <DetailsPanel
-              browserFields={browserFields}
-              runtimeMappings={runtimeMappings}
-              tabType={TimelineTabs.eql}
-              scopeId={timelineId}
-              handleOnPanelClosed={handleOnPanelClosed}
-            />
-          </ScrollableFlexItem>
         </>
       )}
     </>
