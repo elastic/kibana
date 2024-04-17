@@ -10,8 +10,7 @@ import {
   ObservabilityOnboardingRouteHandlerResources,
 } from './types';
 
-export const createObservabilityOnboardingServerRoute =
-  createServerRouteFactory<
-    ObservabilityOnboardingRouteHandlerResources,
-    ObservabilityOnboardingRouteCreateOptions
-  >();
+export const createObservabilityOnboardingServerRoute = createServerRouteFactory<
+  ObservabilityOnboardingRouteHandlerResources,
+  ObservabilityOnboardingRouteCreateOptions
+>();

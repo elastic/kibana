@@ -75,13 +75,12 @@ async function getMobileLocationStats({
     offset,
   };
 
-  const [mostSessions, mostRequests, mostCrashes, mostLaunches] =
-    await Promise.all([
-      getSessionsByLocation({ ...commonProps }),
-      getHttpRequestsByLocation({ ...commonProps }),
-      getCrashesByLocation({ ...commonProps }),
-      getLaunchesByLocation({ ...commonProps }),
-    ]);
+  const [mostSessions, mostRequests, mostCrashes, mostLaunches] = await Promise.all([
+    getSessionsByLocation({ ...commonProps }),
+    getHttpRequestsByLocation({ ...commonProps }),
+    getCrashesByLocation({ ...commonProps }),
+    getLaunchesByLocation({ ...commonProps }),
+  ]);
 
   return {
     mostSessions,

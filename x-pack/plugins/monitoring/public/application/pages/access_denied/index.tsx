@@ -13,12 +13,12 @@ import useInterval from 'react-use/lib/useInterval';
 import { Redirect } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
-import { MonitoringStartPluginDependencies } from '../../../types';
+import { MonitoringStartServices } from '../../../types';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 
 export const AccessDeniedPage: React.FC<ComponentProps> = () => {
   const { isCcsEnabled } = useContext(ExternalConfigContext);
-  const { services } = useKibana<MonitoringStartPluginDependencies>();
+  const { services } = useKibana<MonitoringStartServices>();
   const [hasAccess, setHasAccess] = useState<boolean>(false);
 
   useInterval(() => {
