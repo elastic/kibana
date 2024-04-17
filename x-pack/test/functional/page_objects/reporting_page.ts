@@ -74,7 +74,7 @@ export class ReportingPageObject extends FtrService {
     });
     const urlWithoutBase = fullUrl.replace(baseURL, '');
     const res = await this.security.testUserSupertest.get(urlWithoutBase);
-    return res;
+    return res ?? '';
   }
 
   async getRawPdfReportData(url: string): Promise<Buffer> {
@@ -82,6 +82,23 @@ export class ReportingPageObject extends FtrService {
     const response = await this.getResponse(url);
     expect(response.body).to.be.a(Buffer);
     return response.body as Buffer;
+  }
+
+  async openShareMenuItem(itemTitle: string) {
+    this.log.debug(`openShareMenuItem title:${itemTitle}`);
+    const isShareMenuOpen = await this.testSubjects.exists('shareContextMenu');
+    if (!isShareMenuOpen) {
+      await this.testSubjects.click('shareTopNavButton');
+    } else {
+      // there is no easy way to ensure the menu is at the top level
+      // so just close the existing menu
+      await this.testSubjects.click('shareTopNavButton');
+      // and then re-open the menu
+      await this.testSubjects.click('shareTopNavButton');
+    }
+    const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
+    await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
+    await this.testSubjects.waitForDeleted(menuPanel);
   }
 
   async openExportTab() {

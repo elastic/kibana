@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.reporting.clickGenerateReportButton();
 
     const url = await PageObjects.reporting.getReportURL(60000);
-    const res = await PageObjects.reporting.getResponse(url);
+    const res = await PageObjects.reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
-          decodeURIComponent(reportURL).split(
+          decodeURIComponent(reportURL ?? '').split(
             'query:(range:(order_date:(format:strict_date_optional_time'
           ).length - 1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(timeFiltersNumberInReportURL).to.be(1);
         expect(
-          decodeURIComponent(reportURL).includes(
+          decodeURIComponent(reportURL ?? '').includes(
             'query:(range:(order_date:(format:strict_date_optional_time'
           )
         ).to.be(true);

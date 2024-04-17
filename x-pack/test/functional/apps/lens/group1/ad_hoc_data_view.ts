@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to share a URL of a visualization with adhoc dataViews', async () => {
-      const url = await PageObjects.lens.getUrl('snapshot');
+      const url = await PageObjects.lens.getUrl();
       await browser.openNewTab();
 
       const [lensWindowHandler] = await browser.getAllWindowHandles();

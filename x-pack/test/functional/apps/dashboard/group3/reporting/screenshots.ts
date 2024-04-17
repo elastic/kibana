@@ -124,7 +124,7 @@ export default function ({
         await PageObjects.reporting.clickGenerateReportButton();
 
         const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+        const res = await PageObjects.reporting.getResponse(url ?? '');
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
@@ -183,7 +183,7 @@ export default function ({
         await PageObjects.reporting.clickGenerateReportButton();
 
         const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+        const res = await PageObjects.reporting.getResponse(url ?? '');
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
@@ -215,7 +215,7 @@ export default function ({
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
         const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        const reportData = await PageObjects.reporting.getRawPdfReportData(url ?? '');
         sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
           'png',
