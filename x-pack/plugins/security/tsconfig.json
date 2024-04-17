@@ -79,7 +79,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-common",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-theme-browser-mocks",
   ],
