@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItem, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingAPIClient, checkLicense } from '../..';
@@ -113,7 +113,7 @@ export const reportingScreenshotShareProvider = ({
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions = [];
+    const shareActions: ShareMenuItem[] = [];
 
     const pngPanelTitle = i18n.translate('reporting.share.contextMenu.pngReportsButtonLabel', {
       defaultMessage: 'PNG Reports',

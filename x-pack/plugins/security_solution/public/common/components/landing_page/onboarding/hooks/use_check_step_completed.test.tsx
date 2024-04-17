@@ -52,6 +52,7 @@ describe('useCheckStepCompleted', () => {
         stepId: EnablePrebuiltRulesSteps.enablePrebuiltRules,
         cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
         undo: false,
+        trigger: 'auto_check',
       });
     });
   });

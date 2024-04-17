@@ -9,7 +9,6 @@ import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
@@ -29,7 +28,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { UsersTabs } from './users_tabs';
@@ -44,7 +42,6 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
@@ -66,7 +63,6 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const UsersComponent = () => {
-  const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -159,23 +155,6 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const updateDateRange = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        })
-      );
-    },
-    [dispatch]
-  );
-
   const capabilities = useMlCapabilities();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const navTabs = useMemo(
@@ -201,15 +180,7 @@ const UsersComponent = () => {
               title={i18n.PAGE_TITLE}
             />
 
-            <UsersKpiComponent
-              filterQuery={globalFiltersQuery}
-              indexNames={selectedPatterns}
-              from={from}
-              setQuery={setQuery}
-              to={to}
-              skip={isInitializing || !!kqlError}
-              updateDateRange={updateDateRange}
-            />
+            <UsersKpiComponent from={from} to={to} />
 
             <EuiSpacer />
 
