@@ -67,8 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: true,
         hasTimeField: true,
       });
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await queryBar.setQuery('bytes > 100');
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();

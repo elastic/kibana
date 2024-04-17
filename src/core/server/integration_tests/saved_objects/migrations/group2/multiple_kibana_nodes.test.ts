@@ -162,7 +162,11 @@ describe('migration v2', () => {
   });
 
   afterEach(async () => {
-    await Promise.all([rootA.shutdown(), rootB.shutdown(), rootC.shutdown()]);
+    try {
+      await Promise.all([rootA.shutdown(), rootB.shutdown(), rootC.shutdown()]);
+    } catch (e) {
+      /* trap */
+    }
 
     if (esServer) {
       await esServer.stop();

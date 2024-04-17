@@ -263,6 +263,8 @@ export enum RowRendererId {
   zeek = 'zeek',
 }
 
+export const RowRendererCount = Object.keys(RowRendererId).length;
+
 const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 
 /**
