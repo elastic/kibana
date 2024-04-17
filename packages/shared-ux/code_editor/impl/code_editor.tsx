@@ -209,6 +209,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
+  const editorSizeObserver = useRef<ResizeObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
 
@@ -397,7 +398,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       remeasureFonts();
 
-      const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
+      const editorNode = editor.getDomNode();
+      if (editorNode) {
+        editorSizeObserver.current = new ResizeObserver(() => {
+          // Fixes https://github.com/elastic/kibana/issues/180570
+          // Sometimes a resize seems to happen in the middle of a Monaco
+          // render, leading to undefined being painted over line numbers.
+          editor.layout();
+        });
+        editorSizeObserver.current.observe(editorNode);
+      }
+
+      const textbox = editorNode?.getElementsByTagName('textarea')[0];
       if (textbox) {
         // Make sure the textarea is not directly accessible with TAB
         textbox.tabIndex = -1;
@@ -454,6 +466,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   useEffect(() => {
     return () => {
+      editorSizeObserver.current?.disconnect();
       textboxMutationObserver.current?.disconnect();
     };
   }, []);
