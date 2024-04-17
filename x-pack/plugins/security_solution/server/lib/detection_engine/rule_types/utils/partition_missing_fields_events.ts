@@ -22,15 +22,20 @@ export const partitionMissingFieldsEvents = <
   events: T[],
   suppressedBy: string[] = [],
   // path to fields property within event object. At this point, it can be in root of event object or within event key
-  fieldsPath: ['event', 'fields'] | ['fields'] | [] = []
+  fieldsPath: ['event', 'fields'] | ['fields'] | [] = [],
+  mergeSourceAndFields: boolean = false
 ): T[][] => {
   return partition(events, (event) => {
     if (suppressedBy.length === 0) {
       return true;
     }
     const eventFields = fieldsPath.length ? get(event, fieldsPath) : event;
-    const hasMissingFields =
-      Object.keys(pick(eventFields, suppressedBy)).length < suppressedBy.length;
+    const sourceFields =
+      (event as SignalSourceHit)?._source || (event as { event: SignalSourceHit })?.event?._source;
+
+    const fields = mergeSourceAndFields ? { ...sourceFields, ...eventFields } : eventFields;
+
+    const hasMissingFields = Object.keys(pick(fields, suppressedBy)).length < suppressedBy.length;
 
     return !hasMissingFields;
   });

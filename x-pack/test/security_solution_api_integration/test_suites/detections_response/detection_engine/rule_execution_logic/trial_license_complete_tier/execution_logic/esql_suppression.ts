@@ -866,7 +866,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('should suppress alerts for aggregating queries', async () => {
+    it('should suppress alerts for aggregating queries', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -940,14 +940,14 @@ export default ({ getService }: FtrProviderContext) => {
             value: 'host-a',
           },
         ],
-        [ALERT_ORIGINAL_TIME]: firstTimestamp,
-        [ALERT_SUPPRESSION_START]: firstTimestamp,
-        [ALERT_SUPPRESSION_END]: secondTimestamp,
-        [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // only one suppressed alert, since aggregation query produces one alert per rule execution
+        [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z', // since aggregation query results do not have timestamp properties suppression boundary start set as a first execution time
+        [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z', // since aggregation query results do not have timestamp properties suppression boundary end set as a second execution time
+        [ALERT_SUPPRESSION_DOCS_COUNT]: 1, // only one suppressed alert, since aggregation query produces one alert per rule execution, no matter how many events aggregated
       });
+      expect(previewAlerts[0]._source).not.toHaveProperty(ALERT_ORIGINAL_TIME);
     });
 
-    it.skip('should suppress alerts ES|QL custom created in query field', async () => {
+    it('should suppress alerts ES|QL custom created in query field', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1016,7 +1016,7 @@ export default ({ getService }: FtrProviderContext) => {
       const sortedAlerts = sortBy(previewAlerts, 'custom_field');
       expect(previewAlerts.length).toEqual(2);
 
-      expect(sortedAlerts[0]._source).toContain({
+      expect(sortedAlerts[0]._source).toEqual({
         ...sortedAlerts[0]._source,
         [ALERT_SUPPRESSION_TERMS]: [
           {
@@ -1030,7 +1030,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
       });
 
-      expect(sortedAlerts[1]._source).toContain({
+      expect(sortedAlerts[1]._source).toEqual({
         ...sortedAlerts[1]._source,
         [ALERT_SUPPRESSION_TERMS]: [
           {
@@ -1038,14 +1038,112 @@ export default ({ getService }: FtrProviderContext) => {
             value: 'prefix_test',
           },
         ],
-        [ALERT_ORIGINAL_TIME]: firstTimestamp,
-        [ALERT_SUPPRESSION_START]: firstTimestamp,
+        [ALERT_ORIGINAL_TIME]: secondTimestamp,
+        [ALERT_SUPPRESSION_START]: secondTimestamp,
         [ALERT_SUPPRESSION_END]: secondTimestamp,
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
       });
     });
 
-    it.skip('should suppress by field dropped in ES|QL query but returned from source index', async () => {
+    it('should suppress alerts ES|QL custom created in query field when do not suppress missing fields configured', async () => {
+      const id = uuidv4();
+      const firstTimestamp = '2020-10-28T05:45:00.000Z';
+      const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+      const firstExecutionDocuments = [
+        {
+          id,
+          '@timestamp': firstTimestamp,
+          host: { name: 'host-a' },
+        },
+        {
+          id,
+          '@timestamp': firstTimestamp,
+          host: { name: 'host-b' },
+        },
+      ];
+      const secondExecutionDocuments = [
+        {
+          host: { name: 'test-c' },
+          id,
+          '@timestamp': secondTimestamp,
+        },
+        {
+          host: { name: 'host-d' },
+          id,
+          '@timestamp': secondTimestamp,
+        },
+        {
+          host: { name: 'test-s' },
+          id,
+          '@timestamp': secondTimestamp,
+        },
+      ];
+
+      await indexListOfDocuments([...firstExecutionDocuments, ...secondExecutionDocuments]);
+
+      const rule: EsqlRuleCreateProps = {
+        ...getCreateEsqlRulesSchemaMock('rule-1', true),
+        // ES|QL query creates new field custom_field - prefix_host, prefix_test
+        query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+          id
+        )} | eval custom_field=concat("prefix_", left(host.name, 4))`,
+        from: 'now-35m',
+        interval: '30m',
+        alert_suppression: {
+          group_by: ['custom_field'],
+          duration: {
+            value: 60,
+            unit: 'm',
+          },
+          missing_fields_strategy: 'doNotSuppress',
+        },
+      };
+
+      const { previewId } = await previewRule({
+        supertest,
+        rule,
+        timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        invocationCount: 2,
+      });
+      const previewAlerts = await getPreviewAlerts({
+        es,
+        previewId,
+      });
+      // lodash sortBy is used here because custom_field is non ECS and not mapped in alerts index, so can't be sorted by
+      const sortedAlerts = sortBy(previewAlerts, 'custom_field');
+      expect(previewAlerts.length).toEqual(2);
+
+      expect(sortedAlerts[0]._source).toEqual({
+        ...sortedAlerts[0]._source,
+        [ALERT_SUPPRESSION_TERMS]: [
+          {
+            field: 'custom_field',
+            value: 'prefix_host',
+          },
+        ],
+        [ALERT_ORIGINAL_TIME]: firstTimestamp,
+        [ALERT_SUPPRESSION_START]: firstTimestamp,
+        [ALERT_SUPPRESSION_END]: secondTimestamp,
+        [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+      });
+
+      expect(sortedAlerts[1]._source).toEqual({
+        ...sortedAlerts[1]._source,
+        [ALERT_SUPPRESSION_TERMS]: [
+          {
+            field: 'custom_field',
+            value: 'prefix_test',
+          },
+        ],
+        [ALERT_ORIGINAL_TIME]: secondTimestamp,
+        [ALERT_SUPPRESSION_START]: secondTimestamp,
+        [ALERT_SUPPRESSION_END]: secondTimestamp,
+        [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+      });
+    });
+
+    it('should suppress by field dropped in ES|QL query but returned from source index', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1095,18 +1193,102 @@ export default ({ getService }: FtrProviderContext) => {
       });
       expect(previewAlerts.length).toEqual(1);
 
-      expect(previewAlerts[0]._source).toContain({
+      expect(previewAlerts[0]._source).toEqual({
         ...previewAlerts[0]._source,
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: 'host-a',
+            value: ['host-a'],
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
         [ALERT_SUPPRESSION_START]: firstTimestamp,
         [ALERT_SUPPRESSION_END]: secondTimestamp,
         [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+      });
+    });
+
+    // even when field is dropped in ES"QL query it is returned from source document
+    it('should not suppress field dropped in ES|QL alerts with missing fields if configured so', async () => {
+      const id = uuidv4();
+      const firstTimestamp = '2020-10-28T05:45:00.000Z';
+      const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+      const firstExecutionDocuments = [
+        {
+          id,
+          '@timestamp': firstTimestamp,
+          host: { name: 'host-a' },
+        },
+        {
+          id,
+          '@timestamp': firstTimestamp,
+        },
+      ];
+      const secondExecutionDocuments = [
+        {
+          host: { name: 'host-a' },
+          id,
+          '@timestamp': secondTimestamp,
+        },
+        {
+          id,
+          '@timestamp': firstTimestamp,
+        },
+      ];
+
+      await indexListOfDocuments([...firstExecutionDocuments, ...secondExecutionDocuments]);
+
+      const rule: EsqlRuleCreateProps = {
+        ...getCreateEsqlRulesSchemaMock('rule-1', true),
+        query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | drop host.name`,
+        from: 'now-35m',
+        interval: '30m',
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: {
+            value: 60,
+            unit: 'm',
+          },
+          missing_fields_strategy: 'doNotSuppress',
+        },
+      };
+
+      const { previewId } = await previewRule({
+        supertest,
+        rule,
+        timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        invocationCount: 2,
+      });
+      const previewAlerts = await getPreviewAlerts({
+        es,
+        previewId,
+        sort: ['host.name', ALERT_ORIGINAL_TIME],
+      });
+      expect(previewAlerts.length).toEqual(3);
+
+      expect(previewAlerts[0]._source).toEqual({
+        ...previewAlerts[0]._source,
+        [ALERT_SUPPRESSION_TERMS]: [
+          {
+            field: 'host.name',
+            value: ['host-a'],
+          },
+        ],
+        [ALERT_ORIGINAL_TIME]: firstTimestamp,
+        [ALERT_SUPPRESSION_START]: firstTimestamp,
+        [ALERT_SUPPRESSION_END]: secondTimestamp,
+        [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+      });
+
+      // rest of alerts are not suppressed and do not have suppress properties
+      previewAlerts.slice(1).forEach((previewAlert) => {
+        const source = previewAlert._source;
+        expect(source).toHaveProperty('id', id);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+        expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
       });
     });
 

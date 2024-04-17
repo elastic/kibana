@@ -11,6 +11,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import {
   computeIsESQLQueryAggregating,
@@ -21,12 +22,13 @@ import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
-import { bulkCreateSuppressedEsqlAlertsInMemory } from './bulk_create_suppressed_esql_alerts_in_memory';
+import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
+import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 
-import type { RunOpts } from '../types';
+import type { RunOpts, SignalSource } from '../types';
 
 import {
   addToSearchAfterReturn,
@@ -136,28 +138,37 @@ export const esqlExecutor = async ({
         isFeatureDisabled: !experimentalFeatures?.alertSuppressionForEsqlRuleEnabled,
       });
 
-      if (isAlertSuppressionActive) {
-        const wrapHits = (esqlResults: Array<Record<string, string | null>>) =>
-          wrapEsqlAlerts({
-            results: esqlResults,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            sourceDocuments,
-            isRuleAggregating,
-            alertTimestampOverride,
-            ruleExecutionLogger,
-            publicBaseUrl,
-            tuple,
-          });
+      const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
+        wrapEsqlAlerts({
+          events,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          isRuleAggregating,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          tuple,
+        });
 
-        const wrapSuppressedHits = (esqlResults: Array<Record<string, string | null>>) =>
+      const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
+        const { _id, _version, _index, ...source } = document;
+
+        return {
+          _source: source as SignalSource,
+          fields: _id ? sourceDocuments[_id]?.fields : {},
+          _id: _id ?? '',
+          _index: _index ?? '',
+        };
+      });
+
+      if (isAlertSuppressionActive) {
+        const wrapSuppressedHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
           wrapSuppressedEsqlAlerts({
-            results: esqlResults,
+            events,
             spaceId,
             completeRule,
             mergeStrategy,
-            sourceDocuments,
             isRuleAggregating,
             alertTimestampOverride,
             ruleExecutionLogger,
@@ -167,8 +178,8 @@ export const esqlExecutor = async ({
             tuple,
           });
 
-        const bulkCreateResult = await bulkCreateSuppressedEsqlAlertsInMemory({
-          results,
+        const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
+          enrichedEvents: syntheticHits,
           toReturn: result,
           wrapHits,
           bulkCreate,
@@ -180,6 +191,8 @@ export const esqlExecutor = async ({
           alertTimestampOverride,
           alertWithSuppression,
           experimentalFeatures,
+          buildReasonMessage: buildReasonMessageForEsqlAlert,
+          mergeSourceAndFields: true,
         });
 
         addToSearchAfterReturn({ current: result, next: bulkCreateResult });
@@ -190,18 +203,7 @@ export const esqlExecutor = async ({
           break;
         }
       } else {
-        const wrappedAlerts = wrapEsqlAlerts({
-          sourceDocuments,
-          isRuleAggregating,
-          results,
-          spaceId,
-          completeRule,
-          mergeStrategy,
-          alertTimestampOverride,
-          ruleExecutionLogger,
-          publicBaseUrl,
-          tuple,
-        });
+        const wrappedAlerts = wrapHits(syntheticHits);
 
         const enrichAlerts = createEnrichEventsFunction({
           services,

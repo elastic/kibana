@@ -51,6 +51,7 @@ export interface BulkCreateSuppressedAlertsParams
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
+  mergeSourceAndFields?: boolean;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -70,6 +71,7 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   alertWithSuppression,
   alertTimestampOverride,
   experimentalFeatures,
+  mergeSourceAndFields = false,
 }: BulkCreateSuppressedAlertsParams) => {
   const suppressOnMissingFields =
     (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
@@ -82,7 +84,8 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
     const partitionedEvents = partitionMissingFieldsEvents(
       enrichedEvents,
       alertSuppression?.groupBy || [],
-      ['fields']
+      ['fields'],
+      mergeSourceAndFields
     );
 
     unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);

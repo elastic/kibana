@@ -24,7 +24,7 @@ import type { SignalSource } from '../types';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
 
 export const wrapSuppressedEsqlAlerts = ({
-  results,
+  events,
   spaceId,
   completeRule,
   mergeStrategy,
@@ -32,14 +32,12 @@ export const wrapSuppressedEsqlAlerts = ({
   ruleExecutionLogger,
   publicBaseUrl,
   tuple,
-  sourceDocuments,
   isRuleAggregating,
   primaryTimestamp,
   secondaryTimestamp,
 }: {
   isRuleAggregating: boolean;
-  sourceDocuments: Record<string, { fields: estypes.SearchHit['fields'] }>;
-  results: Array<Record<string, string | null>>;
+  events: Array<estypes.SearchHit<SignalSource>>;
   spaceId: string | null | undefined;
   completeRule: CompleteRule<EsqlRuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -54,22 +52,24 @@ export const wrapSuppressedEsqlAlerts = ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  const wrapped = results.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
-    (document, i) => {
+  const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
+    (event, i) => {
+      const combinedFields = { ...event?.fields, ...event._source };
+
       const suppressionTerms = getSuppressionTerms({
         alertSuppression: completeRule?.ruleParams?.alertSuppression,
-        fields: document,
+        fields: combinedFields,
       });
 
       const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
 
       // for aggregating rules when metadata _id is present, generate alert based on ES document event id
       const id =
-        !isRuleAggregating && document._id
+        !isRuleAggregating && event._id
           ? objectHash([
-              document._id,
-              document._version,
-              document._index,
+              event._id,
+              event._version,
+              event._index,
               `${spaceId}:${completeRule.alertId}`,
             ])
           : objectHash([
@@ -81,18 +81,10 @@ export const wrapSuppressedEsqlAlerts = ({
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
-      // metadata fields need to be excluded from source, otherwise alerts creation fails
-      const { _id, _version, _index, ...source } = document;
-
       const baseAlert: BaseFieldsLatest = buildBulkBody(
         spaceId,
         completeRule,
-        {
-          _source: source as SignalSource,
-          fields: _id ? sourceDocuments[_id]?.fields : undefined,
-          _id: _id ?? '',
-          _index: _index ?? '',
-        },
+        event,
         mergeStrategy,
         [],
         true,
@@ -106,13 +98,13 @@ export const wrapSuppressedEsqlAlerts = ({
 
       return {
         _id: id,
-        _index: _index ?? '',
+        _index: event._index ?? '',
         _source: {
           ...baseAlert,
           ...getSuppressionAlertFields({
             primaryTimestamp,
             secondaryTimestamp,
-            fields: document,
+            fields: combinedFields,
             suppressionTerms,
             fallbackTimestamp: baseAlert[TIMESTAMP],
             instanceId,
