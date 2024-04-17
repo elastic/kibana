@@ -88,65 +88,77 @@ export function defineRoutes({
     errorHandler(async (context, request, response) => {
       const [, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
+      const aiClient = Assist({
+        es_client: client.asCurrentUser,
+      } as AssistClientOptionsWithClient);
+      const { messages, data } = await request.body;
+      const { chatModel, chatPrompt } = await getChatParams(
+        {
+          connectorId: data.connector_id,
+          model: data.summarization_model,
+          citations: data.citations,
+          prompt: data.prompt,
+        },
+        { actions, logger, request }
+      );
+
+      let sourceFields = {};
+
       try {
-        const aiClient = Assist({
-          es_client: client.asCurrentUser,
-        } as AssistClientOptionsWithClient);
-        const { messages, data } = await request.body;
-        const { chatModel, chatPrompt } = await getChatParams(
-          {
-            connectorId: data.connector_id,
-            model: data.summarization_model,
-            citations: data.citations,
-            prompt: data.prompt,
-          },
-          { actions, logger, request }
-        );
+        sourceFields = JSON.parse(data.source_fields);
+      } catch (e) {
+        log.error('Failed to parse the source fields', e);
+        throw Error(e);
+      }
 
-        let sourceFields;
+      const chain = ConversationalChain({
+        model: chatModel,
+        rag: {
+          index: data.indices,
+          retriever: createRetriever(data.elasticsearch_query),
+          content_field: sourceFields,
+          size: Number(data.doc_size),
+        },
+        prompt: chatPrompt,
+      });
 
-        try {
-          sourceFields = JSON.parse(data.source_fields);
-        } catch (e) {
-          logger.error('Failed to parse the source fields', e);
-          throw Error(e);
-        }
+      let stream: ReadableStream<Uint8Array>;
 
-        const chain = ConversationalChain({
-          model: chatModel,
-          prompt: chatPrompt,
-          rag: {
-            index: data.indices,
-            retriever: createRetriever(data.elasticsearch_query),
-            content_field: sourceFields,
-            size: Number(data.doc_size),
-          },
-        });
-
-        const stream = await chain.stream(aiClient, messages);
-        const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
-        const reader = (stream as ReadableStream).getReader();
-        const textDecoder = new TextDecoder();
-
-        async function pushStreamUpdate() {
-          reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-            if (done) {
-              end();
-              return;
-            }
-            push(textDecoder.decode(value));
-            pushStreamUpdate();
-          });
-        }
-
-        pushStreamUpdate();
-
-        return response.ok(responseWithHeaders);
+      try {
+        stream = await chain.stream(aiClient, messages);
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
-        throw Error(e);
+        if (typeof e === 'string') {
+          return response.badRequest({
+            body: {
+              message: e,
+            },
+          });
+        }
+
+        throw e;
       }
+
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+
+      const reader = (stream as ReadableStream).getReader();
+      const textDecoder = new TextDecoder();
+
+      async function pushStreamUpdate() {
+        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          if (done) {
+            end();
+            return;
+          }
+          push(textDecoder.decode(value));
+          pushStreamUpdate();
+        });
+      }
+
+      pushStreamUpdate();
+
+      return response.ok(responseWithHeaders);
     })
   );
 
