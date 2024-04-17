@@ -53,15 +53,15 @@ export const registerUpdateRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { attributes, version, references, upsert } = req.body;
+      const { type, id } = request.params;
+      const { attributes, version, references, upsert } = request.body;
       const options: SavedObjectsUpdateOptions = {
         version,
         references,
@@ -70,13 +70,13 @@ export const registerUpdateRoute = (
       };
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsUpdate({ request, types: [type] }).catch(() => {});
       const { savedObjects } = await context.core;
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       }
       const result = await savedObjects.client.update(type, id, attributes, options);
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };
