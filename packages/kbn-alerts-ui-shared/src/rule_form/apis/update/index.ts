@@ -7,3 +7,4 @@
  */
 
 export * from './use_update_rule_api';
+export { rewriteBodyRequest as rewriteUpdateBodyRequest, UPDATE_FIELDS } from './update_rule';

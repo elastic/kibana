@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './use_create_rule_api';
-export { rewriteBodyRequest as rewriteCreateBodyRequest } from './create_rule';
+export * from './show_request_button';

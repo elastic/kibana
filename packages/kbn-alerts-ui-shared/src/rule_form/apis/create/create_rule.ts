@@ -13,7 +13,7 @@ import { BASE_ALERTING_API_PATH } from '../../common/constants';
 import { transformRule } from '../common_transformations';
 
 export type RuleCreateBody = Omit<RuleFormRule, 'id'>;
-const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
+export const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
   actions,
   alertDelay,

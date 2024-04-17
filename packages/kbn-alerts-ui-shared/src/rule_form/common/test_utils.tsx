@@ -8,6 +8,8 @@
 
 import { omit } from 'lodash';
 import React from 'react';
+import { useStore } from 'react-redux';
+import { type Store } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor, screen } from '@testing-library/react';
 import type { RenderOptions } from '@testing-library/react';
@@ -33,9 +35,10 @@ import { IncompleteError, InvalidError } from './validation_error';
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'queries'> {
   registeredRuleTypeModel?: RuleTypeModelFromRegistry;
   isEdit?: boolean;
-  ruleId?: string;
   authorizedConsumers?: RuleCreationValidConsumer[];
   appContext?: RuleFormAppContext;
+  existingRuleMock?: RuleFormRule;
+  onInitStore?: (store: Store) => void;
 }
 
 interface MockRuleTypeParams extends RuleTypeParams {
@@ -50,7 +53,7 @@ export const mockRuleType: RuleTypeModel<MockRuleTypeParams> = {
   documentationUrl: 'https://test.com',
   validate: (params) => ({
     errors: {
-      owo: params.owo.length > 0 ? [] : [IncompleteError('owo is required')],
+      owo: params.owo?.length > 0 ? [] : [IncompleteError('owo is required')],
       uwu: params.uwu > 0 ? [] : [InvalidError('uwu must be greater than 0')],
     },
   }),
@@ -97,32 +100,33 @@ export const mockExistingRule: RuleFormRule = {
   actions: [],
 };
 
-const mockHttp = {
-  get: jest.fn((url) => {
-    if (url === `${BASE_ALERTING_API_PATH}/rule_types`) {
-      return Promise.resolve([
-        {
-          id: mockRuleType.id,
-          name: mockRuleType.name,
-          authorized_consumers: mockRuleType.authorizedConsumers,
-        },
-        {
-          id: ES_QUERY_ID,
-          name: 'ES Query type mock',
-          authorized_consumers: mockRuleType.authorizedConsumers,
-        },
-      ]);
-    }
-    if (
-      url ===
-      `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(
-        'test-existing-rule-id'
-      )}/_resolve`
-    ) {
-      return Promise.resolve(mockExistingRule);
-    }
-  }),
-} as unknown as HttpStart;
+const mockHttp = (existingRuleMock: RuleFormRule) =>
+  ({
+    get: jest.fn((url) => {
+      if (url === `${BASE_ALERTING_API_PATH}/rule_types`) {
+        return Promise.resolve([
+          {
+            id: mockRuleType.id,
+            name: mockRuleType.name,
+            authorized_consumers: mockRuleType.authorizedConsumers,
+          },
+          {
+            id: ES_QUERY_ID,
+            name: 'ES Query type mock',
+            authorized_consumers: mockRuleType.authorizedConsumers,
+          },
+        ]);
+      }
+      if (
+        url ===
+        `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(
+          existingRuleMock.id
+        )}/_resolve`
+      ) {
+        return Promise.resolve(existingRuleMock);
+      }
+    }),
+  } as unknown as HttpStart);
 
 const mockToasts = {
   addSuccess: jest.fn(),
@@ -142,27 +146,37 @@ export function renderWithProviders(
       'authorizedConsumers'
     ) as RuleTypeModelFromRegistry,
     isEdit = false,
-    ruleId = '',
     authorizedConsumers = DEFAULT_VALID_CONSUMERS,
     appContext = {},
+    existingRuleMock = mockExistingRule,
+    onInitStore,
     ...renderOptions
   } = extendedRenderOptions;
 
   const queryClient = new QueryClient();
+
+  const StoreBroadcaster: React.FC = () => {
+    const store = useStore();
+    if (onInitStore) {
+      onInitStore(store);
+    }
+    return null;
+  };
 
   const Wrapper: React.FC = ({ children }) => (
     <QueryClientProvider client={queryClient}>
       <ContextsProvider
         registeredRuleTypeModel={registeredRuleTypeModel}
         isEdit={isEdit}
-        ruleId={ruleId}
-        http={mockHttp}
+        ruleId={existingRuleMock.id}
+        http={mockHttp(existingRuleMock)}
         toasts={mockToasts}
         isRuleTypeModelPending={false}
         appContext={appContext}
         onLoadRuleSuccess={jest.fn()}
       >
         {children}
+        <StoreBroadcaster />
       </ContextsProvider>
     </QueryClientProvider>
   );

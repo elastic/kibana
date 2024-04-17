@@ -12,6 +12,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elas
 import { useCreateRuleApi, useUpdateRuleApi } from '../apis';
 import { useValidation } from '../contexts';
 import { flattenErrorObject } from '../common/validation_error';
+import { ShowRequestButton } from './show_request';
 
 const createRuleButtonLabel = i18n.translate('alertsUIShared.ruleForm.createRuleButtonLabel', {
   defaultMessage: 'Create rule',
@@ -59,6 +60,7 @@ export const SaveRuleButton: React.FC<SaveRuleButtonProps> = ({
           </EuiToolTip>
         </EuiFlexItem>
       )}
+      <ShowRequestButton isEdit={isEdit} />
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="saveRuleButton"

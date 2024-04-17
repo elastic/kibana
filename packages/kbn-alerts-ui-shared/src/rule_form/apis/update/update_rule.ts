@@ -17,7 +17,15 @@ export type RuleUpdatesBody = Pick<
   RuleFormRule,
   'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'alertDelay'
 >;
-const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
+export const UPDATE_FIELDS: Array<keyof RuleUpdatesBody> = [
+  'name',
+  'tags',
+  'schedule',
+  'params',
+  'actions',
+  'alertDelay',
+];
+export const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
   actions,
   alertDelay,
   ...res

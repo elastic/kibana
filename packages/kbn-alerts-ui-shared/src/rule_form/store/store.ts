@@ -7,7 +7,6 @@
  */
 
 import { useRef } from 'react';
-import { omit } from 'lodash';
 import { combineReducers, configureStore, type Store } from '@reduxjs/toolkit';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ruleDetailsSlice, ruleDefinitionSlice, initializeAndValidateConsumer } from '../features';

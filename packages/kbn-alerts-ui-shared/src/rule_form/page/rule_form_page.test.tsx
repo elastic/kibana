@@ -220,7 +220,6 @@ describe('Edit rule form full page', () => {
         isEdit
       />,
       {
-        ruleId: 'test-existing-rule-id',
         isEdit: true,
         appContext: {
           canShowConsumerSelection: false,
