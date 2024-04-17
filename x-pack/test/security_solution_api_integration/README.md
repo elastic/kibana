@@ -15,9 +15,18 @@ we have introduced the `detection_response` directory to consolidate all the int
 
 - In this directory, Mocha tagging is utilized to assign tags to specific test suites and individual test cases. This tagging system enables the ability to selectively apply tags to test suites and test cases, facilitating the exclusion of specific test cases within a test suite as needed.
 
-- There are three primary tags that have been defined: @ess, @serverless, and @skipInServerless
-
 - Test suites and cases are prefixed with specific tags to determine their execution in particular environments or to exclude them from specific environments. 
+
+- We are using the following tags:
+   * `@ess`: Runs in an ESS environment (on-prem installation) as part of the CI validation on PRs.
+
+   * `@serverless`: Runs in the first quality gate and in the periodic pipeline.
+
+   * `@serverlessQA`: Runs in the second quality gate.
+
+   * `@skipInEss`: Skipped for ESS environment.
+
+   * `@skipInServerless`: Skipped for all quality gates and periodic pipeline.
 
 ex:
 ```
