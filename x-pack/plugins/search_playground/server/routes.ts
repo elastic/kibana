@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/ml-response-stream/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
