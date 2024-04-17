@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, memo } from 'react';
+import React, { ElementType, FC, memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -23,10 +23,11 @@ interface EntryContentProps {
   index: number;
   isNestedEntry?: boolean;
   dataTestSubj?: string;
+  showValueListModal: ElementType;
 }
 
 export const EntryContent: FC<EntryContentProps> = memo(
-  ({ entry, index, isNestedEntry = false, dataTestSubj }) => {
+  ({ entry, index, isNestedEntry = false, dataTestSubj, showValueListModal }) => {
     const { field, type } = entry;
     const value = getValue(entry);
     const operator = 'operator' in entry ? entry.operator : '';
@@ -48,7 +49,12 @@ export const EntryContent: FC<EntryContentProps> = memo(
 
               <div css={valueContainerCss}>
                 <EuiExpression description="" value={field} color="subdued" />
-                {getValueExpression(type as ListOperatorTypeEnum, operator, value)}
+                {getValueExpression(
+                  type as ListOperatorTypeEnum,
+                  operator,
+                  value,
+                  showValueListModal
+                )}
               </div>
             </EuiFlexGroup>
           ) : (
@@ -60,7 +66,12 @@ export const EntryContent: FC<EntryContentProps> = memo(
                 data-test-subj={`${dataTestSubj || ''}SingleEntry`}
               />
 
-              {getValueExpression(type as ListOperatorTypeEnum, operator, value)}
+              {getValueExpression(
+                type as ListOperatorTypeEnum,
+                operator,
+                value,
+                showValueListModal
+              )}
             </>
           )}
         </div>

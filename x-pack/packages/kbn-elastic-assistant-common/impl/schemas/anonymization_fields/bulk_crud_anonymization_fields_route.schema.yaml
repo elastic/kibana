@@ -108,9 +108,9 @@ components:
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         field:
           type: string
-        defaultAllow:
+        allowed:
           type: boolean
-        defaultAllowReplacement:
+        anonymized:
           type: boolean
         updatedAt:
           type: string
@@ -120,10 +120,6 @@ components:
           type: string
         createdBy:
           type: string
-        users:
-          type: array
-          items:
-            $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/User'
         namespace:
           type: string
           description: Kibana space
@@ -220,9 +216,9 @@ components:
       properties:
         field:
           type: string
-        defaultAllow:
+        allowed:
           type: boolean
-        defaultAllowReplacement:
+        anonymized:
           type: boolean
 
     AnonymizationFieldUpdateProps:
@@ -232,8 +228,8 @@ components:
       properties:
         id:
           type: string
-        defaultAllow:
+        allowed:
           type: boolean
-        defaultAllowReplacement:
+        anonymized:
           type: boolean
     

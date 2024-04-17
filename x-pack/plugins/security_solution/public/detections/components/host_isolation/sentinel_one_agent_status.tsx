@@ -8,6 +8,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getAgentStatusText } from '../../../common/components/endpoint/agent_status_text';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../management/pages/endpoint_hosts/view/host_constants';
 import { useGetSentinelOneAgentStatus } from './use_sentinelone_host_isolation';
@@ -32,7 +33,13 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 
 export const SentinelOneAgentStatus = React.memo(
   ({ agentId, 'data-test-subj': dataTestSubj }: { agentId: string; 'data-test-subj'?: string }) => {
-    const { data, isLoading, isFetched } = useGetSentinelOneAgentStatus([agentId]);
+    const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+      'sentinelOneManualHostActionsEnabled'
+    );
+
+    const { data, isLoading, isFetched } = useGetSentinelOneAgentStatus([agentId], {
+      enabled: sentinelOneManualHostActionsEnabled,
+    });
     const agentStatus = data?.[`${agentId}`];
 
     const label = useMemo(() => {
