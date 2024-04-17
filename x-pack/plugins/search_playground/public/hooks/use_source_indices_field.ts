@@ -12,11 +12,30 @@ import { useEffect, useState } from 'react';
 import { useKibana } from './use_kibana';
 import { APIRoutes, IndicesQuerySourceFields } from '../types';
 import { ChatForm, ChatFormFields } from '../types';
-import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
+import {
+  createQuery,
+  getDefaultQueryFields,
+  getDefaultSourceFields,
+  IndexFields,
+} from '../utils/create_query';
+
+export const getIndicesWithNoSourceFields = (
+  defaultSourceFields: IndexFields
+): string | undefined => {
+  const indices: string[] = [];
+  Object.keys(defaultSourceFields).forEach((index: string) => {
+    if (defaultSourceFields[index].length === 0) {
+      indices.push(index);
+    }
+  });
+
+  return indices.length === 0 ? undefined : indices.join();
+};
 
 export const useSourceIndicesFields = () => {
   const { services } = useKibana();
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const { resetField } = useFormContext<ChatForm>();
 
   const {
@@ -82,5 +101,6 @@ export const useSourceIndicesFields = () => {
     loading,
     addIndex,
     removeIndex,
+    error,
   };
 };
