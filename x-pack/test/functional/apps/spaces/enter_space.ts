@@ -83,7 +83,7 @@ export default function enterSpaceFunctionalTests({
       await PageObjects.spaceSelector.expectHomePage(newSpaceId);
     });
 
-    it('allows user to navigate to different spaces with provided next route', async () => {
+    it('allows user to navigate to different space with provided next route', async () => {
       const spaceId = 'another-space';
 
       await PageObjects.security.login(undefined, undefined, {
@@ -94,6 +94,25 @@ export default function enterSpaceFunctionalTests({
       const path = await anchorElement.getAttribute('href');
 
       const pathWithNextRoute = `${path}?next=/app/management/kibana/objects`;
+
+      await browser.navigateTo(pathWithNextRoute);
+
+      await PageObjects.spaceSelector.expectRoute(spaceId, '/app/management/kibana/objects');
+    });
+
+    it('allows user to navigate to different space with provided next route, route is normalized', async () => {
+      const spaceId = 'another-space';
+
+      await PageObjects.security.login(undefined, undefined, {
+        expectSpaceSelector: true,
+      });
+
+      const anchorElement = await PageObjects.spaceSelector.getSpaceCardAnchor(spaceId);
+      const path = await anchorElement.getAttribute('href');
+
+      const pathWithNextRoute = `${path}?next=${encodeURIComponent(
+        '/../../../app/management/kibana/objects'
+      )}`;
 
       await browser.navigateTo(pathWithNextRoute);
 
