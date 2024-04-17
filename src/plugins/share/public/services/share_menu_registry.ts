@@ -22,7 +22,9 @@ export class ShareMenuRegistry {
        */
       register: (shareMenuProvider: ShareMenuProvider) => {
         if (this.shareMenuProviders.has(shareMenuProvider.id)) {
-          throw new Error('Registry with id has already been registered.');
+          throw new Error(
+            `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
+          );
         }
         this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
       },

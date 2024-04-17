@@ -83,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
+
     afterEach(async () => {
       retry.waitFor('close share modal', async () => {
         await PageObjects.share.closeShareModal(); // close modal
@@ -201,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
-      await PageObjects.share.clickShareTopNavButton();
+      await PageObjects.share.closeShareModal();
       log.debug(`sharedUrl: ${sharedUrl}`);
       return sharedUrl;
     };
