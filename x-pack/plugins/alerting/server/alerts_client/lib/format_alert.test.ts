@@ -254,4 +254,18 @@ describe('compactObject', () => {
   expect(
     compactObject({ 'kibana.alert.rule.execution': {}, 'kibana.alert.nested_field': ['a', 'b'] })
   ).toEqual({ 'kibana.alert.nested_field': ['a', 'b'] });
+
+  test('should not filter out the fileds with primitive values', () => {
+    expect(
+      compactObject({
+        'kibana.alert.rule.execution': 1,
+        'kibana.alert.bool_field': true,
+        'kibana.alert.null_field': null,
+      })
+    ).toEqual({
+      'kibana.alert.rule.execution': 1,
+      'kibana.alert.bool_field': true,
+      'kibana.alert.null_field': null,
+    });
+  });
 });

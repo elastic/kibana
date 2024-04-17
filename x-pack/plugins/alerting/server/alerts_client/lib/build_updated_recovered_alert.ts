@@ -75,5 +75,6 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     arrayMerge: (_, sourceArray) => sourceArray,
   });
 
+  // execution.uuid should not be removed, se we can fetch the alerts of current execution with execution.uuid
   return omit(mergedAlerts, ALERT_RULE_EXECUTION_UUID) as Alert & AlertData;
 };
