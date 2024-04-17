@@ -25,7 +25,20 @@ export interface InvalidateApiKeysResponse {
 }
 
 export interface QueryApiKeySortOptions {
-  field: 'id' | 'type' | 'name' | 'username' | 'realm' | 'creation' | 'expiration';
+  field:
+    | 'id'
+    | 'type'
+    | 'name'
+    | 'username'
+    | 'realm'
+    | 'creation'
+    | 'metadata'
+    | 'role_descriptors'
+    | 'expiration'
+    | 'invalidated'
+    | 'limited_by'
+    | '_sort'
+    | 'expired';
   direction: 'asc' | 'desc';
 }
 

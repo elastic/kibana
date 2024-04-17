@@ -156,16 +156,24 @@ export const APIKeysGridPage: FunctionComponent = () => {
       canManageOwnApiKeys,
       canManageCrossClusterApiKeys,
       aggregationTotal: totalKeys,
+      total: queryTotal,
     },
     currentUser,
   ] = state.value && state.value;
 
   const categorizedApiKeys = apiKeys.map((apiKey) => apiKey as CategorizedApiKey);
 
+  const displayedPageCount =
+    totalKeys > MAX_PAGINATED_ITEMS && queryTotal > MAX_PAGINATED_ITEMS
+      ? MAX_PAGINATED_ITEMS
+      : totalKeys <= MAX_PAGINATED_ITEMS || totalKeys === queryTotal
+      ? totalKeys
+      : queryTotal;
+
   const pagination = {
     pageIndex: from / pageSize,
     pageSize,
-    totalItemCount: totalKeys < MAX_PAGINATED_ITEMS ? totalKeys : MAX_PAGINATED_ITEMS,
+    totalItemCount: displayedPageCount,
     pageSizeOptions: [25, 50, 100],
   };
 
