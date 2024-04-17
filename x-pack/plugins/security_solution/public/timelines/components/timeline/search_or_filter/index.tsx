@@ -11,7 +11,6 @@ import type { ConnectedProps } from 'react-redux';
 import { useDispatch, connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
-import { Subscription } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
