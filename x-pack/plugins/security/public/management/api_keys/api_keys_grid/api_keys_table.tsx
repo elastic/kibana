@@ -99,7 +99,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       name: (
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.nameColumnName"
-          defaultMessage="Type"
+          defaultMessage="Name"
         />
       ),
       sortable: true,
