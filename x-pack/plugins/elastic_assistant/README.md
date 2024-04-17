@@ -6,7 +6,7 @@ This plugin does NOT contain UI components. See `x-pack/packages/kbn-elastic-ass
 
 ## Maintainers
 
-Maintained by the Security Solution team
+Maintained by the Security Solution team and the GenAI team
 
 
 ### Testing
