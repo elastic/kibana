@@ -96,7 +96,7 @@ export default function createCrowdstrikeTests({ getService }: FtrProviderContex
           .send({
             name: 'My sub connector',
             connector_type_id: CROWDSTRIKE_CONNECTOR_ID,
-            config: {},
+            config: { url: 'https://some.non.existent.com' },
             secrets: { clientId: 'abc-123', clientSecret: 'test-secret' },
           })
           .expect(200);
