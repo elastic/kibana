@@ -805,6 +805,20 @@
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-public.TopNavMenuData.intl",
+            "type": "Object",
+            "tags": [],
+            "label": "intl",
+            "description": [],
+            "signature": [
+              "ReactIntl.InjectedIntl | undefined"
+            ],
+            "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
