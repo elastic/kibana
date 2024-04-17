@@ -13,7 +13,7 @@ export interface LinkToAlertsRuleProps {
   dataTestSubj?: string;
 }
 
-export const LinkToAlertsRule = ({ onClick, dataTestSubj }: LinkToAlertsRuleProps) => {
+export const CreateAlertRuleButton = ({ onClick, dataTestSubj }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
       data-test-subj={dataTestSubj}

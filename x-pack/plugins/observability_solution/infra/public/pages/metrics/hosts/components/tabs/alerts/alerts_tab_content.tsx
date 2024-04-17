@@ -21,7 +21,7 @@ import {
   infraAlertFeatureIds,
 } from '../../../../../../components/shared/alerts/constants';
 import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
-import { LinkToAlertsRule } from '../../../../../../components/shared/alerts/links/link_to_alerts';
+import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
 import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
 import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
 import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
@@ -52,7 +52,7 @@ export const AlertsTabContent = () => {
           <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
               <EuiFlexItem grow={false}>
-                <LinkToAlertsRule
+                <CreateAlertRuleButton
                   onClick={toggleAlertFlyout}
                   dataTestSubj="infraHostAlertsTabCreateAlertsRuleButton"
                 />

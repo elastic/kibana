@@ -19,7 +19,7 @@ import { Section } from '../../../components/section';
 import { AlertsClosedContent } from './alerts_closed_content';
 import { type AlertsCount } from '../../../../../hooks/use_alerts_count';
 import { AlertsOverview } from '../../../../shared/alerts/alerts_overview';
-import { LinkToAlertsRule } from '../../../../shared/alerts/links/link_to_alerts';
+import { CreateAlertRuleButton } from '../../../../shared/alerts/links/create_alert_rule_button';
 import { LinkToAlertsPage } from '../../../../shared/alerts/links/link_to_alerts_page';
 
 export const AlertsSummaryContent = ({
@@ -61,7 +61,7 @@ export const AlertsSummaryContent = ({
           <EuiFlexGroup alignItems="center" responsive={false}>
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
               <EuiFlexItem grow={false}>
-                <LinkToAlertsRule
+                <CreateAlertRuleButton
                   onClick={toggleAlertFlyout}
                   dataTestSubj="infraAssetDetailsAlertsTabCreateAlertsRuleButton"
                 />
