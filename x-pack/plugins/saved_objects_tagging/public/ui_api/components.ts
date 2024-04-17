@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../common';
 import { ITagInternalClient, ITagsCache } from '../services';
@@ -15,25 +14,21 @@ import {
   getConnectedSavedObjectModalTagSelectorComponent,
 } from '../components/connected';
 import { getCreateModalOpener } from '../components/edition_modal';
+import { StartServices } from '../types';
 
-export interface GetComponentsOptions {
+export interface GetComponentsOptions extends StartServices {
   capabilities: TagsCapabilities;
   cache: ITagsCache;
-  overlays: OverlayStart;
-  theme: ThemeServiceStart;
   tagClient: ITagInternalClient;
-  notifications: NotificationsStart;
 }
 
 export const getComponents = ({
   capabilities,
   cache,
-  overlays,
-  theme,
   tagClient,
-  notifications,
+  ...startServices
 }: GetComponentsOptions): SavedObjectsTaggingApiUiComponent => {
-  const openCreateModal = getCreateModalOpener({ overlays, theme, tagClient, notifications });
+  const openCreateModal = getCreateModalOpener({ ...startServices, tagClient });
   return {
     TagList: getConnectedTagListComponent({ cache }),
     TagSelector: getConnectedTagSelectorComponent({ cache, capabilities, openCreateModal }),
