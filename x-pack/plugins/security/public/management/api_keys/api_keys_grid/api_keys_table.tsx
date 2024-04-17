@@ -27,7 +27,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
-import type { FunctionComponent } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -87,7 +87,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
   const initialQuery = EuiSearchBar.Query.parse('');
-
+  const [load, setLoad] = useState(false);
   const { typeFilters, usernameFilters, expired } = categorizeAggregations(aggregations);
 
   const deletable = (item: CategorizedApiKey) =>
@@ -133,7 +133,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     }
   );
 
-  if (canManageApiKeys || usernameFilters.size > 1) {
+  if (canManageApiKeys || usernameFilters.length > 1) {
     columns.push({
       field: 'username',
       name: (
@@ -213,11 +213,11 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 
   const filters: SearchFilterConfig[] = [];
 
-  if (typeFilters.size > 1) {
+  if (typeFilters.length > 1) {
     filters.push({
       type: 'custom_component',
       component: ({ query, onChange }) => (
-        <TypesFilterButton types={[...typeFilters]} query={query} onChange={onChange} />
+        <TypesFilterButton types={typeFilters} query={query} onChange={onChange} />
       ),
     });
   }
@@ -243,16 +243,22 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     });
   }
 
-  if (usernameFilters.size > 1) {
+  if (usernameFilters.length > 1) {
     filters.push({
       type: 'custom_component',
       component: ({ query, onChange }) => (
-        <UsersFilterButton usernames={[...usernameFilters]} query={query} onChange={onChange} />
+        <UsersFilterButton usernames={usernameFilters} query={query} onChange={onChange} />
       ),
     });
   }
 
   const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEMS;
+
+  useEffect(() => {
+    setInterval(() => {
+      setLoad((prev) => !prev);
+    }, 1000);
+  }, []);
 
   return (
     <>
@@ -319,7 +325,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         items={apiKeys}
         itemId="id"
         columns={columns}
-        loading={loading}
+        loading={load}
         pagination={pagination}
         onChange={onTableChange}
         selection={
@@ -361,6 +367,7 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
     <>
       {types.includes('rest') ? (
         <EuiFilterButton
+          key="personalkey"
           iconType="user"
           iconSide="left"
           hasActiveFilters={query.hasSimpleFieldClause('type', 'rest')}
@@ -645,8 +652,8 @@ export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
 };
 
 export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations) => {
-  const typeFilters: Set<CategorizedApiKey['type']> = new Set();
-  const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
+  const typeFilters: Array<CategorizedApiKey['type']> = [];
+  const usernameFilters: Array<CategorizedApiKey['username']> = [];
   let expiredCount = 0;
 
   if (aggregationResponse && Object.keys(aggregationResponse).length > 0) {
@@ -660,17 +667,17 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
       : [];
 
     typeBuckets.forEach((type) => {
-      typeFilters.add(type.key);
+      typeFilters.push(type.key);
     });
     usernameBuckets.forEach((username) => {
-      usernameFilters.add(username.key);
+      usernameFilters.push(username.key);
     });
     const { namePrefixBased, metadataBased } = managed?.buckets || {};
     if (
       (namePrefixBased?.doc_count && namePrefixBased.doc_count > 0) ||
       (metadataBased?.doc_count && metadataBased.doc_count > 0)
     ) {
-      typeFilters.add('managed');
+      typeFilters.push('managed');
     }
     expiredCount = expired?.doc_count ?? 0;
   }
