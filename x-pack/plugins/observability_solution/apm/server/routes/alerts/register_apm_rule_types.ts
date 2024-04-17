@@ -15,10 +15,7 @@ import {
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import {
-  legacyExperimentalFieldMap,
-  ObservabilityApmAlert,
-} from '@kbn/alerts-as-data-utils';
+import { legacyExperimentalFieldMap, ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
@@ -95,13 +92,12 @@ export const apmRuleTypeAlertFieldMap = {
 };
 
 // Defines which alerts-as-data index alerts will use
-export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityApmAlert> =
-  {
-    context: APM_RULE_TYPE_ALERT_CONTEXT,
-    mappings: { fieldMap: apmRuleTypeAlertFieldMap },
-    useLegacyAlerts: true,
-    shouldWrite: true,
-  };
+export const ApmRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityApmAlert> = {
+  context: APM_RULE_TYPE_ALERT_CONTEXT,
+  mappings: { fieldMap: apmRuleTypeAlertFieldMap },
+  useLegacyAlerts: true,
+  shouldWrite: true,
+};
 
 export interface RegisterRuleDependencies {
   alerting: AlertingPluginSetupContract;
