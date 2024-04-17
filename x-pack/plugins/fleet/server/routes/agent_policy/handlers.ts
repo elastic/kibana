@@ -48,7 +48,11 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import {
+  defaultFleetErrorHandler,
+  AgentPolicyNotFoundError,
+  FleetUnauthorizedError,
+} from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
 export async function populateAssignedAgentsCount(
@@ -69,7 +73,7 @@ export async function populateAssignedAgentsCount(
   );
 }
 
-function sanitizeItemForLimitedPackagePolicyAccess(item: AgentPolicy): AgentPolicy {
+function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
   return {
     id: item.id,
     name: item.name,
@@ -83,12 +87,7 @@ function sanitizeItemForLimitedPackagePolicyAccess(item: AgentPolicy): AgentPoli
     updated_by: item.updated_by,
     has_fleet_server: item.has_fleet_server,
     monitoring_enabled: item.monitoring_enabled,
-    package_policies: (item.package_policies || []).map((packagePolicy) => {
-      return {
-        name: packagePolicy.name,
-        ...(packagePolicy.package ? { package: { name: packagePolicy.package.name } } : {}),
-      };
-    }),
+    package_policies: [],
   };
 }
 
@@ -105,7 +104,11 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       noAgentCount = false,
       ...restOfQuery
     } = request.query;
-
+    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+      throw new FleetUnauthorizedError(
+        'full query parameter require agent policies read permissions'
+      );
+    }
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       esClient,
@@ -115,7 +118,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 
     const body: GetAgentPoliciesResponse = {
       items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForLimitedPackagePolicyAccess)
+        ? items.map(sanitizeItemForReadAgentOnly)
         : items,
       total,
       page,
@@ -143,7 +146,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
     });
     const body: BulkGetAgentPoliciesResponse = {
       items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForLimitedPackagePolicyAccess)
+        ? items.map(sanitizeItemForReadAgentOnly)
         : items,
     };
 
@@ -176,7 +179,7 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
       await populateAssignedAgentsCount(esClient, soClient, [agentPolicy]);
       const body: GetOneAgentPolicyResponse = {
         item: !fleetContext.authz.fleet.readAgentPolicies
-          ? sanitizeItemForLimitedPackagePolicyAccess(agentPolicy)
+          ? sanitizeItemForReadAgentOnly(agentPolicy)
           : agentPolicy,
       };
       return response.ok({

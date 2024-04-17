@@ -106,10 +106,6 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   created_by: string;
 }
 
-export interface LimitedPackagePolicy extends Pick<PackagePolicy, 'name'> {
-  package?: Pick<PackagePolicyPackage, 'name'>;
-}
-
 export type DryRunPackagePolicy = NewPackagePolicy & {
   errors?: Array<{ key: string | undefined; message: string }>;
   missingVars?: string[];
