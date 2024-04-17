@@ -9,7 +9,8 @@ import React, { useCallback } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 import { useLicense } from '../../common/hooks/use_license';
-import type { ImmutableArray } from '../../../common/endpoint/types';
+import type { MaybeImmutable } from '../../../common/endpoint/types';
+import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
 import { type ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
 import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
 
@@ -30,16 +31,16 @@ type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 export interface BasicConsoleProps {
   agentId: string;
   hostName: string;
+  /** Required for Endpoint agents. */
+  capabilities: MaybeImmutable<EndpointCapabilities[]>;
 }
 
 type ResponderInfoProps =
   | (BasicConsoleProps & {
       agentType: Extract<ResponseActionAgentType, 'endpoint'>;
-      capabilities: ImmutableArray<string>;
     })
   | (BasicConsoleProps & {
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
-      capabilities: ImmutableArray<string>;
       platform: string;
     });
 
@@ -102,6 +103,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             meta: {
               agentId,
               hostName,
+              capabilities,
             },
             consoleProps,
             PageTitleComponent: () => {
