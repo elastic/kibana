@@ -6,21 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-const sampleDashboard = {
-  contentTypeId: 'dashboard',
-  data: {
-    kibanaSavedObjectMeta: {},
-    title: 'Sample dashboard',
-  },
-  options: {
-    references: [],
-    overwrite: true,
-  },
-  version: 2,
-};
+import { loginAsInteractiveUser, sampleDashboard } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('created_by', function () {
@@ -40,24 +27,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('for interactive user', function () {
       const supertest = getService('supertestWithoutAuth');
-      const config = getService('config');
       let sessionHeaders: { [key: string]: string } = {};
 
       before(async () => {
-        const username = config.get('servers.kibana.username');
-        const password = config.get('servers.kibana.password');
-        const response = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'basic',
-            providerName: 'basic',
-            currentURL: '/',
-            params: { username, password },
-          })
-          .expect(200);
-        const cookie = parseCookie(response.header['set-cookie'][0])!.cookieString();
-        sessionHeaders = { Cookie: cookie };
+        sessionHeaders = await loginAsInteractiveUser({ getService });
       });
 
       it('created_by is with profile_id', async () => {

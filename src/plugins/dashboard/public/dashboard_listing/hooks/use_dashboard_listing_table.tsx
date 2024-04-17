@@ -266,8 +266,8 @@ export const useDashboardListingTable = ({
   );
 
   const suggestUsers = useCallback<() => Promise<UserProfile[]>>(async () => {
-    const users = await http.get<UserProfile[]>(`/internal/dashboard/suggest_users`);
-    return users;
+    const response = await http.get<{ users: UserProfile[] }>(`/internal/dashboard/suggest_users`);
+    return response.users;
   }, [http]);
 
   const onFetchSuccess = useCallback(() => {

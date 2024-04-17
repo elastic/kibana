@@ -88,7 +88,9 @@ export const registerSuggestUsersRoute = ({
         );
 
         return res.ok({
-          body: sanitizedProfiles,
+          body: {
+            users: sanitizedProfiles,
+          },
         });
       } catch (e) {
         logger.error(`Failed to suggest users: ${e.message}`, { error: e });
