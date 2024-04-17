@@ -50,12 +50,6 @@ export const ruleDefinitionSlice = createSlice({
       state.params = payload;
     },
     setIntervalNumber(state, { payload }: PayloadAction<number | string>) {
-      console.log(
-        'setIntervalNumber',
-        payload,
-        state.schedule.interval,
-        `${payload}${getDurationUnitValue(state.schedule.interval)}`
-      );
       state.schedule.interval = `${payload}${getDurationUnitValue(state.schedule.interval)}`;
     },
     setIntervalUnit(state, { payload }: PayloadAction<string>) {
