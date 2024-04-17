@@ -172,6 +172,7 @@ describe('EndpointActionsClient', () => {
     );
   });
   it('should create an action with error when agents are invalid', async () => {
+    // @ts-expect-error mocking this for testing purposes
     endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
       isValid: false,
       valid: [],
