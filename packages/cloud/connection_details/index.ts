@@ -8,5 +8,9 @@
 
 export * from './types';
 export { ConnectionDetailsOptsProvider } from './context';
+export {
+  KibanaConnectionDetailsProvider,
+  type KibanaConnectionDetailsProviderProps,
+} from './kibana_connection_details_provider';
 export { ConnectionDetails } from './connection_details';
 export { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';
