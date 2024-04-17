@@ -220,7 +220,6 @@ export class ReportingPublicPlugin
               usesUiCapabilities,
               theme: core.theme,
               i18n: i18nStart,
-              intl: setupDeps.intl,
             })
           );
         }
