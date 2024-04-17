@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
@@ -30,7 +31,11 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
       learnMore: docLinks.links.fleet.apiKeysLearnMore,
       ...options?.links,
     },
-    endpoints: options?.endpoints,
+    endpoints: {
+      id: start.plugins?.cloud?.cloudId,
+      url: start.plugins?.cloud?.elasticsearchUrl,
+      ...options?.endpoints,
+    },
     apiKeys: {
       manageKeysLink,
       createKey: async ({ name }) => {
@@ -84,6 +89,7 @@ export interface KibanaConnectionDetailsProviderProps {
       application?: CoreStart['application'];
     };
     plugins?: {
+      cloud?: CloudStart;
       share?: SharePluginStart;
     };
   };

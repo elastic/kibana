@@ -60,6 +60,7 @@ export const GettingStarted = () => {
     chrome,
     guidedOnboardingService,
     cloud,
+    cloudStart,
     overlays,
     theme,
     http,
@@ -254,6 +255,7 @@ export const GettingStarted = () => {
       docLinks={docLinks}
       http={http}
       cloud={cloud!}
+      cloudStart={cloudStart!}
       url={share.url}
       navigateToUrl={application.navigateToUrl}
       share={shareStart}

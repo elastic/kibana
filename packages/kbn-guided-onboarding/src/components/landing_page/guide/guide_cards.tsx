@@ -16,7 +16,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { BrowserUrlService } from '@kbn/share-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { GuideId, GuideState } from '../../../types';
@@ -37,6 +37,7 @@ export interface GuideCardsProps {
   i18nStart: I18nStart;
   url: BrowserUrlService;
   cloud: CloudSetup;
+  cloudStart: CloudStart;
   docLinks: CoreStart['docLinks'];
   application: CoreStart['application'];
   http: CoreStart['http'];

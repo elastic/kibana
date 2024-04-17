@@ -83,7 +83,13 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding, share: shareStart },
+          {
+            dataViews,
+            urlForwarding: urlForwardingStart,
+            guidedOnboarding,
+            share: shareStart,
+            cloud: cloudStart,
+          },
         ] = await core.getStartServices();
 
         setServices({
@@ -110,6 +116,7 @@ export class HomePublicPlugin
           welcomeService: this.welcomeService,
           guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
+          cloudStart,
           overlays: coreStart.overlays,
           theme: core.theme,
           i18nStart: coreStart.i18n,

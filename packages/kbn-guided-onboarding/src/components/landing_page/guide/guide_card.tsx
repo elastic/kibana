@@ -46,7 +46,7 @@ export const GuideCard = ({
   theme,
   application,
   http,
-  cloud,
+  cloudStart,
   docLinks,
   share,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
@@ -68,12 +68,6 @@ export const GuideCard = ({
     } else if (card.openEndpointModal) {
       openConnectionDetails({
         props: {
-          options: {
-            endpoints: {
-              id: cloud.cloudId,
-              url: cloud.elasticsearchUrl,
-            },
-          },
           start: {
             core: {
               i18n: i18nStart,
@@ -83,6 +77,7 @@ export const GuideCard = ({
               application,
             },
             plugins: {
+              cloud: cloudStart,
               share,
             },
           },
@@ -99,6 +94,7 @@ export const GuideCard = ({
     application,
     activateGuide,
     card.guideId,
+    cloudStart,
     card.navigateTo,
     guideState,
     navigateToApp,
@@ -107,8 +103,6 @@ export const GuideCard = ({
     theme,
     i18nStart,
     http,
-    cloud.cloudId,
-    cloud.elasticsearchUrl,
     docLinks,
     share,
   ]);
