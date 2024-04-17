@@ -623,7 +623,7 @@ export const LensTopNavMenu = ({
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
-              allowShortUrl: false, // we'll manage this implicitly via the new service
+              allowShortUrl: true, // default is short url
               shareableUrl: shareableUrl || '',
               shareableUrlForSavedObject: savedObjectURL.href,
               objectId: currentDoc?.savedObjectId,

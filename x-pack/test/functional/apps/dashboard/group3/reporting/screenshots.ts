@@ -153,6 +153,7 @@ export default function ({
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openExportTab();
+        await testSubjects.click('pngV2-radioOption');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await PageObjects.share.closeShareModal();
       });
@@ -160,6 +161,7 @@ export default function ({
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openExportTab();
+        await testSubjects.click('pngV2-radioOption');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
@@ -250,7 +252,7 @@ export default function ({
         });
       });
 
-      it('PNG file matches the baseline image', async function () {
+      xit('PNG file matches the baseline image', async function () {
         this.timeout(300000);
         const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,

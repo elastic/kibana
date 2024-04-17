@@ -42,7 +42,7 @@ export interface ShareContextMenuProps {
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
 }
-
+// Needed for Canvas
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();

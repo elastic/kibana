@@ -152,7 +152,6 @@ export const LinkContent = ({
 
   const copyUrlHelper = useCallback(async () => {
     let urlToCopy = url;
-
     if (!urlToCopy) {
       let tempUrl = '';
 
@@ -163,6 +162,7 @@ export const LinkContent = ({
       }
 
       urlToCopy = allowShortUrl ? await createShortUrl() : tempUrl;
+      setUrl(urlToCopy);
     }
 
     setUrl(() => {

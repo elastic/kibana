@@ -34,7 +34,7 @@ type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | '
   intl: InjectedIntl;
 };
 
-type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'lens_csv';
+type AllowedExports = 'pngV2' | 'printablePdfV2' | 'csv_v2' | 'csv_searchsource' | 'csv';
 
 const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: ExportProps) => {
   // needed for CSV in Discover
@@ -69,6 +69,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
 
   const {
     generateReportButton,
+    generateReportForPrinting,
     helpText,
     renderCopyURLButton,
     generateReport,
@@ -202,15 +203,21 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     if (!generateReport && !downloadCSVLens) {
       throw new Error('Report cannot be run due to no generate report method registered');
     }
-    if (objectType === 'lens' && selectedRadio === 'lens_csv') {
+    if (objectType === 'lens' && selectedRadio === 'csv') {
       return downloadCSVLens!();
     } else if (usePrintLayout && selectedRadio === 'pngV2') {
       return generateReport!({ intl });
     }
-    return usePrintLayout
-      ? generateReport!({ intl, optimizeForPrinting: true })
-      : generateReport!({ intl });
-  }, [downloadCSVLens, generateReport, objectType, selectedRadio, usePrintLayout, intl]);
+    return usePrintLayout ? generateReportForPrinting!({ intl }) : generateReport!({ intl });
+  }, [
+    downloadCSVLens,
+    generateReport,
+    objectType,
+    selectedRadio,
+    usePrintLayout,
+    intl,
+    generateReportForPrinting,
+  ]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (

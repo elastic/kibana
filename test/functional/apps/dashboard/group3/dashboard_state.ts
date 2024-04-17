@@ -232,6 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             };
           }
         );
+        await PageObjects.share.closeShareModal();
         await hardRefresh(newUrl);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
