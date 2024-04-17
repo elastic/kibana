@@ -12,6 +12,7 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
   PackageInfo,
+  PackagePolicyInput,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
@@ -57,25 +58,7 @@ export const storedPackagePolicyToAgentInputs = (
       },
       use_output: outputId,
       package_policy_id: packagePolicy.id,
-      ...(input.compiled_input || {}),
-      ...(input.streams.length
-        ? {
-            streams: input.streams
-              .filter((stream) => stream.enabled)
-              .map((stream) => {
-                const fullStream: FullAgentPolicyInputStream = {
-                  id: stream.id,
-                  data_stream: stream.data_stream,
-                  ...stream.compiled_stream,
-                  ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                    acc[key] = value;
-                    return acc;
-                  }, {} as { [k: string]: any }),
-                };
-                return fullStream;
-              }),
-          }
-        : {}),
+      ...getFullInputs(input),
     };
 
     // deeply merge the input.config values with the full policy input
@@ -99,6 +82,30 @@ export const storedPackagePolicyToAgentInputs = (
     fullInputs.push(fullInput);
   });
   return fullInputs;
+};
+
+export const getFullInputs = (input: PackagePolicyInput, allStreamEnabled: boolean = false) => {
+  return {
+    ...(input.compiled_input || {}),
+    ...(input.streams.length
+      ? {
+          streams: input.streams
+            .filter((stream) => stream.enabled || allStreamEnabled)
+            .map((stream) => {
+              const fullStream: FullAgentPolicyInputStream = {
+                id: stream.id,
+                data_stream: stream.data_stream,
+                ...stream.compiled_stream,
+                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
+                  acc[key] = value;
+                  return acc;
+                }, {} as { [k: string]: any }),
+              };
+              return fullStream;
+            }),
+        }
+      : {}),
+  };
 };
 
 export const storedPackagePoliciesToAgentInputs = async (

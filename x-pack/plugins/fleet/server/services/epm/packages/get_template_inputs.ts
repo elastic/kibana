@@ -17,9 +17,10 @@ import type {
   NewPackagePolicy,
   PackagePolicyInput,
   FullAgentPolicyInput,
-  FullAgentPolicyInputStream,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
+
+import { getFullInputs } from '../../agent_policies/package_policies_to_agent_inputs';
 
 import { getPackageInfo } from '.';
 import { getPackageAssetsMap } from './get';
@@ -35,26 +36,7 @@ export const templatePackagePolicyToFullInputs = (
   if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputs;
 
   packagePolicyInputs.forEach((input) => {
-    const fullInput = {
-      ...(input.compiled_input || {}),
-      ...(input.streams.length
-        ? {
-            streams: input.streams.map((stream) => {
-              const fullStream: FullAgentPolicyInputStream = {
-                id: stream.id,
-                type: input.type,
-                data_stream: stream.data_stream,
-                ...stream.compiled_stream,
-                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                  acc[key] = value;
-                  return acc;
-                }, {} as { [k: string]: any }),
-              };
-              return fullStream;
-            }),
-          }
-        : {}),
-    };
+    const fullInput = getFullInputs(input, true);
 
     // deeply merge the input.config values with the full policy input
     merge(
