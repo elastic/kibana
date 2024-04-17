@@ -26,10 +26,15 @@ export const registerSuggestUsersRoute = ({
   core: CoreSetup<{ security?: SecurityPluginStart }>;
 }) => {
   router.get(
-    { path: '/internal/dashboard/suggest_users', validate: false },
+    {
+      path: '/internal/dashboard/suggest_users',
+      validate: false,
+      options: { tags: ['access:bulkGetUserProfiles'] },
+    },
     async (context, req, res) => {
       const [coreStart, { security }] = await core.getStartServices();
       if (!security) {
+        // should never happen, but just to keep types happy
         return res.notFound({ body: 'Security is not available' });
       }
 

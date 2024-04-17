@@ -93,6 +93,7 @@ export class DashboardPlugin
     core.uiSettings.register(getUISettings());
 
     if (plugins.security) {
+      // else should never happen, but just to keep types happy
       const router = core.http.createRouter();
       registerSuggestUsersRoute({
         router,
