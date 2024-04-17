@@ -9,8 +9,8 @@ import { encode } from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { ALERTS_PATH } from '../../shared/alerts/constants';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { ALERTS_PATH } from '../constants';
 
 export interface LinkToAlertsPageProps {
   assetId: string;
