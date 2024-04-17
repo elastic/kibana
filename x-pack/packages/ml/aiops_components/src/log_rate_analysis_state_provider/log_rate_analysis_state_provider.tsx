@@ -42,9 +42,7 @@ interface LogRateAnalysisState {
   clearAllRowState: () => void;
 }
 
-export const logRateAnalysisStateContext = createContext<LogRateAnalysisState | undefined>(
-  undefined
-);
+const LogRateAnalysisStateContext = createContext<LogRateAnalysisState | undefined>(undefined);
 
 interface LogRateAnalysisStateProviderProps {
   initialAnalysisStart?: InitialAnalysisStart;
@@ -127,14 +125,14 @@ export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps>
 
   return (
     // Provider managing the state
-    <logRateAnalysisStateContext.Provider value={contextValue}>
+    <LogRateAnalysisStateContext.Provider value={contextValue}>
       {children}
-    </logRateAnalysisStateContext.Provider>
+    </LogRateAnalysisStateContext.Provider>
   );
 };
 
 export const useLogRateAnalysisStateContext = () => {
-  const logRateAnalysisState = useContext(logRateAnalysisStateContext);
+  const logRateAnalysisState = useContext(LogRateAnalysisStateContext);
 
   // If `undefined`, throw an error.
   if (logRateAnalysisState === undefined) {

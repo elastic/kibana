@@ -121,7 +121,7 @@ export interface DocumentCountChartProps {
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
   /** Callback to set the autoRunAnalysis flag */
-  setAutoRunAnalysis?: (d: boolean) => void;
+  setAutoRunAnalysis?: (isAutoRun: boolean) => void;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
   /** Optional style to override bar chart */
