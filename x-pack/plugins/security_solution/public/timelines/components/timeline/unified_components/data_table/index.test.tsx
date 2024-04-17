@@ -31,6 +31,8 @@ const initialEnrichedColumns = getColumnHeaders(
   mockSourcererScope.browserFields
 );
 
+const initialEnrichedColumnsIds = initialEnrichedColumns.map((c) => c.id);
+
 type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
   store?: ReturnType<typeof createMockStore>;
 };
@@ -46,6 +48,7 @@ const TestComponent = (props: TestComponentProps) => {
     <TestProviders store={store}>
       <TimelineDataTable
         columns={initialEnrichedColumns}
+        columnIds={initialEnrichedColumnsIds}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
         itemsPerPage={50}

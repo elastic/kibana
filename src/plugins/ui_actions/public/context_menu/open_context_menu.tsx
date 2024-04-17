@@ -11,8 +11,8 @@ import React from 'react';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { getTheme } from '../services';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getAnalytics, getI18n, getTheme } from '../services';
 
 let activeSession: ContextMenuSession | null = null;
 
@@ -170,7 +170,7 @@ export function openContextMenu(
   };
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={getTheme().theme$}>
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <EuiPopover
         className="embPanel__optionsMenuPopover"
         button={container}
@@ -185,7 +185,7 @@ export function openContextMenu(
           data-test-subj={props['data-test-subj']}
         />
       </EuiPopover>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     container
   );
 
