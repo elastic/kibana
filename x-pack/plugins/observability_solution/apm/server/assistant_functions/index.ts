@@ -16,7 +16,10 @@ import type { APMConfig } from '..';
 import type { ApmFeatureFlags } from '../../common/apm_feature_flags';
 import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
 import { getApmEventClient } from '../lib/helpers/get_apm_event_client';
-import type { APMRouteHandlerResources } from '../routes/apm_routes/register_apm_server_routes';
+import type {
+  APMRouteHandlerResources,
+  MinimalAPMRouteHandlerResources,
+} from '../routes/apm_routes/register_apm_server_routes';
 import { hasHistoricalAgentData } from '../routes/historical_data/has_historical_agent_data';
 import { registerGetApmDatasetInfoFunction } from './get_apm_dataset_info';
 import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
@@ -25,7 +28,7 @@ import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 export interface FunctionRegistrationParameters {
   apmEventClient: APMEventClient;
   registerFunction: RegisterFunction;
-  resources: APMRouteHandlerResources;
+  resources: MinimalAPMRouteHandlerResources;
 }
 
 export function registerAssistantFunctions({
@@ -45,17 +48,13 @@ export function registerAssistantFunctions({
   ruleDataClient: IRuleDataClient;
   plugins: APMRouteHandlerResources['plugins'];
 }): RegistrationCallback {
-  return async ({
-    resources,
-    functions: { registerContext, registerFunction },
-  }) => {
-    const apmRouteHandlerResources: APMRouteHandlerResources = {
+  return async ({ resources, functions: { registerContext, registerFunction } }) => {
+    const apmRouteHandlerResources: MinimalAPMRouteHandlerResources = {
       context: resources.context,
       request: resources.request,
       core: {
         setup: coreSetup,
-        start: () =>
-          coreSetup.getStartServices().then(([coreStart]) => coreStart),
+        start: () => coreSetup.getStartServices().then(([coreStart]) => coreStart),
       },
       params: {
         query: {

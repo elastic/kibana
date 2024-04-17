@@ -265,6 +265,7 @@ describe('split .kibana index into multiple system indices', () => {
             "siem-ui-timeline-note",
             "siem-ui-timeline-pinned-event",
             "slo",
+            "slo-settings",
             "space",
             "spaces-usage-stats",
             "synthetics-monitor",
