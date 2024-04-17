@@ -8,23 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { openConnectionDetails } from '@kbn/cloud/connection_details';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 
 export const createHelpMenuLinks = ({
   docLinks,
   helpSupportUrl,
-  core,
-  cloud,
-  share,
 }: {
   docLinks: DocLinksStart;
-  core: CoreStart;
-  cloud: CloudStart;
-  share: SharePluginStart;
   helpSupportUrl: string;
 }) => {
   const helpMenuLinks: ChromeHelpMenuLink[] = [
@@ -52,20 +43,7 @@ export const createHelpMenuLinks = ({
       }),
       dataTestSubj: 'connectionDetailsHelpLink',
       onClick: () => {
-        openConnectionDetails({
-          props: {
-            start: {
-              core,
-              plugins: {
-                share,
-                cloud,
-              },
-            },
-          },
-          start: {
-            core,
-          },
-        });
+        openWiredConnectionDetails();
       },
     },
   ];

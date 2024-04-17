@@ -54,21 +54,7 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const {
-    application,
-    trackUiMetric,
-    chrome,
-    guidedOnboardingService,
-    cloud,
-    cloudStart,
-    overlays,
-    theme,
-    http,
-    i18nStart,
-    docLinks,
-    share,
-    shareStart,
-  } = getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -248,17 +234,6 @@ export const GettingStarted = () => {
       activeFilter={filter as GuideFilterValues}
       guidesState={guidesState}
       filteredCards={filteredCards}
-      overlays={overlays}
-      i18nStart={i18nStart}
-      theme={theme}
-      application={application}
-      docLinks={docLinks}
-      http={http}
-      cloud={cloud!}
-      cloudStart={cloudStart!}
-      url={share.url}
-      navigateToUrl={application.navigateToUrl}
-      share={shareStart}
     />
   );
 

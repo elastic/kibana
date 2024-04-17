@@ -11,7 +11,7 @@ import React, { useCallback, useState } from 'react';
 import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { openConnectionDetails } from '@kbn/cloud/connection_details';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
@@ -41,14 +41,6 @@ export const GuideCard = ({
   activateGuide,
   navigateToApp,
   activeFilter,
-  overlays,
-  i18nStart,
-  theme,
-  application,
-  http,
-  cloudStart,
-  docLinks,
-  share,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -66,45 +58,16 @@ export const GuideCard = ({
         path: card.navigateTo.path,
       });
     } else if (card.openEndpointModal) {
-      openConnectionDetails({
-        props: {
-          start: {
-            core: {
-              i18n: i18nStart,
-              theme,
-              docLinks,
-              http,
-              application,
-            },
-            plugins: {
-              cloud: cloudStart,
-              share,
-            },
-          },
-        },
-        start: {
-          core: {
-            overlays,
-          },
-        },
-      });
+      openWiredConnectionDetails();
     }
     setIsLoading(false);
   }, [
-    application,
     activateGuide,
     card.guideId,
-    cloudStart,
     card.navigateTo,
     guideState,
     navigateToApp,
     card.openEndpointModal,
-    overlays,
-    theme,
-    i18nStart,
-    http,
-    docLinks,
-    share,
   ]);
 
   const isHighlighted = activeFilter === card.solution;

@@ -12,13 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { BrowserUrlService } from '@kbn/share-plugin/public';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { GuideId, GuideState } from '../../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
@@ -32,17 +25,6 @@ export interface GuideCardsProps {
   activeFilter: GuideFilterValues;
   guidesState: GuideState[];
   filteredCards?: GuideCardConstants[];
-  overlays: OverlayStart;
-  theme: ThemeServiceStart;
-  i18nStart: I18nStart;
-  url: BrowserUrlService;
-  cloud: CloudSetup;
-  cloudStart: CloudStart;
-  docLinks: CoreStart['docLinks'];
-  application: CoreStart['application'];
-  http: CoreStart['http'];
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  share: SharePluginStart;
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;
