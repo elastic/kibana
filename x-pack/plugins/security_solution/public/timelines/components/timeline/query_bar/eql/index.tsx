@@ -8,7 +8,7 @@
 import { isEmpty, isEqual } from 'lodash';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 
 import type {
   EqlOptionsSelected,
@@ -64,7 +64,7 @@ const schema: FormSchema<TimelineEqlQueryBar> = {
   },
 };
 
-const HiddenUseField = styled(UseField)`
+const hiddenUseFieldClassName = css`
   display: none;
 `;
 
@@ -188,8 +188,8 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   return (
     <Form form={form} data-test-subj="EqlQueryBarTimeline">
-      <HiddenUseField key="Index" path="index" />
-      <HiddenUseField key="EqlOptions" path="eqlOptions" />
+      <UseField key="Index" path="index" className={hiddenUseFieldClassName} />
+      <UseField key="EqlOptions" path="eqlOptions" className={hiddenUseFieldClassName} />
       <UseField
         key="EqlQueryBar"
         path="eqlQueryBar"
