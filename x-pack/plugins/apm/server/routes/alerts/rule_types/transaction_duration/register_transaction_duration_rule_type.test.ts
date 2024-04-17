@@ -10,8 +10,7 @@ import { createRuleTypeMocks } from '../../test_utils';
 
 describe('registerTransactionDurationRuleType', () => {
   it('sends alert when value is greater than threshold', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionDurationRuleType(dependencies);
 
@@ -75,8 +74,7 @@ describe('registerTransactionDurationRuleType', () => {
   });
 
   it('sends alert when rule is configured with group by on transaction.name', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionDurationRuleType(dependencies);
 
@@ -117,12 +115,7 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       aggregationType: 'avg',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
@@ -145,8 +138,7 @@ describe('registerTransactionDurationRuleType', () => {
   });
 
   it('sends alert when rule is configured with preselected group by', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionDurationRuleType(dependencies);
 
@@ -210,8 +202,7 @@ describe('registerTransactionDurationRuleType', () => {
   });
 
   it('sends alert when service.environment field does not exist in the source', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionDurationRuleType(dependencies);
 
@@ -227,12 +218,7 @@ describe('registerTransactionDurationRuleType', () => {
         series: {
           buckets: [
             {
-              key: [
-                'opbeans-java',
-                'ENVIRONMENT_NOT_DEFINED',
-                'request',
-                'tx-java',
-              ],
+              key: ['opbeans-java', 'ENVIRONMENT_NOT_DEFINED', 'request', 'tx-java'],
               avgLatency: {
                 value: 5500000,
               },
@@ -257,12 +243,7 @@ describe('registerTransactionDurationRuleType', () => {
       transactionType: 'request',
       serviceName: 'opbeans-java',
       aggregationType: 'avg',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
@@ -285,8 +266,7 @@ describe('registerTransactionDurationRuleType', () => {
   });
 
   it('sends alert when rule is configured with a filter query', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionDurationRuleType(dependencies);
 

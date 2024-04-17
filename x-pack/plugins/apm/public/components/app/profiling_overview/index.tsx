@@ -53,13 +53,12 @@ export function ProfilingOverview() {
     numBuckets: 20,
   });
 
-  const [
-    apmUniversalProfilingShowCallout,
-    setAPMUniversalProfilingShowCallout,
-  ] = useLocalStorage('apmUniversalProfilingShowCallout', true);
+  const [apmUniversalProfilingShowCallout, setAPMUniversalProfilingShowCallout] = useLocalStorage(
+    'apmUniversalProfilingShowCallout',
+    true
+  );
 
-  const baseUrl =
-    services.docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
+  const baseUrl = services.docLinks?.ELASTIC_WEBSITE_URL || 'https://www.elastic.co/';
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     return [
@@ -108,16 +107,7 @@ export function ProfilingOverview() {
         ),
       },
     ];
-  }, [
-    end,
-    environment,
-    kuery,
-    preferred?.source,
-    rangeFrom,
-    rangeTo,
-    serviceName,
-    start,
-  ]);
+  }, [end, environment, kuery, preferred?.source, rangeFrom, rangeTo, serviceName, start]);
 
   if (isLoading) {
     return (
@@ -201,11 +191,7 @@ export function ProfilingOverview() {
         onRefresh={refreshTimeRange}
       />
       <EuiSpacer />
-      <EuiTabbedContent
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-      />
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </>
   );
 }

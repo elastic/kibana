@@ -16,10 +16,7 @@ import {
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import {
-  getParsedFilterQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -59,14 +56,8 @@ import {
   ApmRuleTypeAlertDefinition,
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
-import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
-import {
-  averageOrPercentileAgg,
-  getMultiTermsSortOrder,
-} from './average_or_percentile_agg';
+import { getServiceGroupFields, getServiceGroupFieldsAgg } from '../get_service_group_fields';
+import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
@@ -117,19 +108,13 @@ export function registerTransactionDurationRuleType({
     producer: APM_SERVER_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: async ({
-      params: ruleParams,
-      services,
-      spaceId,
-      getTimeRange,
-    }) => {
+    executor: async ({ params: ruleParams, services, spaceId, getTimeRange }) => {
       const allGroupByFields = getAllGroupByFields(
         ApmRuleType.TransactionDuration,
         ruleParams.groupBy
       );
 
-      const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
-        services;
+      const { getAlertUuid, savedObjectsClient, scopedClusterClient } = services;
 
       const indices = await getApmIndices(savedObjectsClient);
 
@@ -137,16 +122,11 @@ export function registerTransactionDurationRuleType({
       // to prevent (likely) unnecessary blocking request
       // in rule execution
       const searchAggregatedTransactions =
-        apmConfig.searchAggregatedTransactions !==
-        SearchAggregatedTransactionSetting.never;
+        apmConfig.searchAggregatedTransactions !== SearchAggregatedTransactionSetting.never;
 
-      const index = searchAggregatedTransactions
-        ? indices.metric
-        : indices.transaction;
+      const index = searchAggregatedTransactions ? indices.metric : indices.transaction;
 
-      const field = getDurationFieldForTransactions(
-        searchAggregatedTransactions
-      );
+      const field = getDurationFieldForTransactions(searchAggregatedTransactions);
 
       const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
         ? [
@@ -163,9 +143,7 @@ export function registerTransactionDurationRuleType({
           ]
         : [];
 
-      const { dateStart } = getTimeRange(
-        `${ruleParams.windowSize}${ruleParams.windowUnit}`
-      );
+      const { dateStart } = getTimeRange(`${ruleParams.windowSize}${ruleParams.windowUnit}`);
 
       const searchParams = {
         index,
@@ -182,13 +160,9 @@ export function registerTransactionDurationRuleType({
                     },
                   },
                 },
-                ...getBackwardCompatibleDocumentTypeFilter(
-                  searchAggregatedTransactions
-                ),
+                ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
                 ...termFilterQuery,
-                ...getParsedFilterQuery(
-                  ruleParams.searchConfiguration?.query?.query as string
-                ),
+                ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
               ] as QueryDslQueryContainer[],
             },
           },
@@ -226,13 +200,10 @@ export function registerTransactionDurationRuleType({
       const triggeredBuckets = [];
 
       for (const bucket of response.aggregations.series.buckets) {
-        const groupByFields = bucket.key.reduce(
-          (obj, bucketKey, bucketIndex) => {
-            obj[allGroupByFields[bucketIndex]] = bucketKey;
-            return obj;
-          },
-          {} as Record<string, string>
-        );
+        const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
+          obj[allGroupByFields[bucketIndex]] = bucketKey;
+          return obj;
+        }, {} as Record<string, string>);
 
         const bucketKey = bucket.key;
 
@@ -241,10 +212,7 @@ export function registerTransactionDurationRuleType({
             ? bucket.avgLatency.value
             : bucket.pctLatency.values[0].value;
 
-        if (
-          transactionDuration !== null &&
-          transactionDuration > thresholdMicroseconds
-        ) {
+        if (transactionDuration !== null && transactionDuration > thresholdMicroseconds) {
           triggeredBuckets.push({
             sourceFields: getServiceGroupFields(bucket),
             transactionDuration,
@@ -261,8 +229,7 @@ export function registerTransactionDurationRuleType({
         bucketKey,
       } of triggeredBuckets) {
         const durationFormatter = getDurationFormatter(transactionDuration);
-        const transactionDurationFormatted =
-          durationFormatter(transactionDuration).formatted;
+        const transactionDurationFormatted = durationFormatter(transactionDuration).formatted;
 
         const reason = formatTransactionDurationReason({
           aggregationType: String(ruleParams.aggregationType),
@@ -289,19 +256,13 @@ export function registerTransactionDurationRuleType({
         });
 
         const alertUuid = getAlertUuid(alertId);
-        const alertDetailsUrl = getAlertDetailsUrl(
-          basePath,
-          spaceId,
-          alertUuid
-        );
+        const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
           spaceId,
           getAlertUrlTransaction(
             groupByFields[SERVICE_NAME],
-            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
-              SERVICE_ENVIRONMENT
-            ],
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[SERVICE_ENVIRONMENT],
             groupByFields[TRANSACTION_TYPE]
           )
         );

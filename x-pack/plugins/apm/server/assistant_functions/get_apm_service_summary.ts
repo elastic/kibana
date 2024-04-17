@@ -48,13 +48,11 @@ alerts and anomalies.`,
           },
           start: {
             ...NON_EMPTY_STRING,
-            description:
-              'The start of the time range, in Elasticsearch date math, like `now`.',
+            description: 'The start of the time range, in Elasticsearch date math, like `now`.',
           },
           end: {
             ...NON_EMPTY_STRING,
-            description:
-              'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+            description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
         required: ['service.name', 'start', 'end'],
@@ -63,19 +61,14 @@ alerts and anomalies.`,
     async ({ arguments: args }, signal) => {
       const { context, request, plugins, logger } = resources;
 
-      const [annotationsClient, esClient, apmAlertsClient, mlClient] =
-        await Promise.all([
-          plugins.observability.setup.getScopedAnnotationsClient(
-            context,
-            request
-          ),
-          context.core.then(
-            (coreContext): ElasticsearchClient =>
-              coreContext.elasticsearch.client.asCurrentUser
-          ),
-          getApmAlertsClient(resources),
-          getMlClient(resources),
-        ]);
+      const [annotationsClient, esClient, apmAlertsClient, mlClient] = await Promise.all([
+        plugins.observability.setup.getScopedAnnotationsClient(context, request),
+        context.core.then(
+          (coreContext): ElasticsearchClient => coreContext.elasticsearch.client.asCurrentUser
+        ),
+        getApmAlertsClient(resources),
+        getMlClient(resources),
+      ]);
 
       return {
         content: await getApmServiceSummary({

@@ -7,15 +7,10 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SERVICE_ENVIRONMENT, SERVICE_NODE_NAME } from '../es_fields/apm';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
 
-export function environmentQuery(
-  environment: string | undefined
-): QueryDslQueryContainer[] {
+export function environmentQuery(environment: string | undefined): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }
@@ -27,9 +22,7 @@ export function environmentQuery(
   return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
 }
 
-export function serviceNodeNameQuery(
-  serviceNodeName?: string
-): QueryDslQueryContainer[] {
+export function serviceNodeNameQuery(serviceNodeName?: string): QueryDslQueryContainer[] {
   if (!serviceNodeName) {
     return [];
   }

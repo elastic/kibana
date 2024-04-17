@@ -6,18 +6,13 @@
  */
 
 import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
-import {
-  LABELS,
-  SERVICE_GROUP_SUPPORTED_FIELDS,
-} from '../../../../common/service_groups';
+import { LABELS, SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../../common/service_groups';
 
 export interface SourceDoc {
   [key: string]: string | string[] | SourceDoc;
 }
 
-export function getServiceGroupFieldsAgg(
-  topHitsOpts: AggregationsTopHitsAggregation = {}
-) {
+export function getServiceGroupFieldsAgg(topHitsOpts: AggregationsTopHitsAggregation = {}) {
   return {
     source_fields: {
       top_hits: {
@@ -43,8 +38,7 @@ export function getServiceGroupFields(bucket?: AggResultBucket) {
   if (!bucket) {
     return {};
   }
-  const sourceDoc: SourceDoc =
-    bucket?.source_fields?.hits.hits[0]?._source ?? {};
+  const sourceDoc: SourceDoc = bucket?.source_fields?.hits.hits[0]?._source ?? {};
   return flattenSourceDoc(sourceDoc);
 }
 
@@ -56,10 +50,7 @@ export function flattenSourceDoc(
     return { [path.join('.')]: val };
   }
   return Object.keys(val).reduce((acc, key) => {
-    const fieldMap = flattenSourceDoc(val[key] as SourceDoc | string, [
-      ...path,
-      key,
-    ]);
+    const fieldMap = flattenSourceDoc(val[key] as SourceDoc | string, [...path, key]);
     return Object.assign(acc, fieldMap);
   }, {});
 }

@@ -50,8 +50,7 @@ export async function getTransactionFailureRate({
               successful_or_failed: 'successful_or_failed>_count',
               successful: 'successful>_count',
             },
-            script:
-              '100 * (1 - (params.successful / params.successful_or_failed))',
+            script: '100 * (1 - (params.successful / params.successful_or_failed))',
           },
         },
       },

@@ -14,11 +14,7 @@ import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
-import {
-  AppMountParameters,
-  CoreStart,
-  APP_WRAPPER_CLASS,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import {
   KibanaContextProvider,
@@ -29,15 +25,9 @@ import {
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
-import {
-  InspectorContextProvider,
-  useBreadcrumbs,
-} from '@kbn/observability-shared-plugin/public';
+import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
-import {
-  DASHBOARD_LABEL,
-  RumHome,
-} from '../components/app/rum_dashboard/rum_home';
+import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
@@ -47,10 +37,7 @@ import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { PluginContext } from '../context/plugin_context';
 
-export type BreadcrumbTitle<T = {}> =
-  | string
-  | ((props: RouteComponentProps<T>) => string)
-  | null;
+export type BreadcrumbTitle<T = {}> = string | ((props: RouteComponentProps<T>) => string) | null;
 
 export interface RouteDefinition<T = any> extends RouteProps {
   breadcrumb: BreadcrumbTitle<T>;
@@ -182,10 +169,7 @@ export function UXAppRoot({
                             <UxApp />
                           </CsmSharedContextProvider>
                         </EuiErrorBoundary>
-                        <UXActionMenu
-                          appMountParameters={appMountParameters}
-                          isDev={isDev}
-                        />
+                        <UXActionMenu appMountParameters={appMountParameters} isDev={isDev} />
                       </UrlParamsProvider>
                     </InspectorContextProvider>
                   </DatePickerContextProvider>

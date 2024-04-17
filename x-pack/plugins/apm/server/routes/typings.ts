@@ -37,9 +37,7 @@ export interface APMRouteCreateOptions {
   } & RouteConfigOptions<any>;
 }
 
-export type TelemetryUsageCounter = ReturnType<
-  UsageCollectionSetup['createUsageCounter']
->;
+export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
 
 export interface APMCore {
   setup: CoreSetup;

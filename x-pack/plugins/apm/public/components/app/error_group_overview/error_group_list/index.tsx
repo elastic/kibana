@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiIconTip,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo, useState } from 'react';
@@ -19,24 +14,14 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { truncate, unit } from '../../../../utils/style';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import {
-  ITableColumn,
-  ManagedTable,
-  TableOptions,
-} from '../../../shared/managed_table';
+import { ITableColumn, ManagedTable, TableOptions } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import {
-  ErrorGroupItem,
-  useErrorGroupListData,
-} from './use_error_group_list_data';
+import { ErrorGroupItem, useErrorGroupListData } from './use_error_group_list_data';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -89,8 +74,7 @@ export function ErrorGroupList({
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
 
-  const [sorting, setSorting] =
-    useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
+  const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
 
   const {
     setDebouncedSearchQuery,
@@ -117,13 +101,10 @@ export function ErrorGroupList({
             iconProps={{
               className: 'eui-alignTop',
             }}
-            content={i18n.translate(
-              'xpack.apm.errorsTable.groupIdColumnDescription',
-              {
-                defaultMessage:
-                  'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
-              }
-            )}
+            content={i18n.translate('xpack.apm.errorsTable.groupIdColumnDescription', {
+              defaultMessage:
+                'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+            })}
           />
         </>
       ),
@@ -168,26 +149,17 @@ export function ErrorGroupList({
         },
       },
       {
-        name: i18n.translate(
-          'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
-          {
-            defaultMessage: 'Error message and culprit',
-          }
-        ),
+        name: i18n.translate('xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel', {
+          defaultMessage: 'Error message and culprit',
+        }),
         field: 'message',
         sortable: false,
         width: '60%',
         render: (_, item) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip
-                id="error-message-tooltip"
-                content={item.name || NOT_AVAILABLE_LABEL}
-              >
-                <MessageLink
-                  serviceName={serviceName}
-                  errorGroupId={item.groupId}
-                >
+              <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
+                <MessageLink serviceName={serviceName} errorGroupId={item.groupId}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
@@ -233,11 +205,7 @@ export function ErrorGroupList({
         width: `${unit * 6}px`,
         align: RIGHT_ALIGNMENT,
         render: (_, { lastSeen }) =>
-          lastSeen ? (
-            <TimestampTooltip time={lastSeen} timeUnit="minutes" />
-          ) : (
-            NOT_AVAILABLE_LABEL
-          ),
+          lastSeen ? <TimestampTooltip time={lastSeen} timeUnit="minutes" /> : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'occurrences',
@@ -249,12 +217,12 @@ export function ErrorGroupList({
         align: RIGHT_ALIGNMENT,
         width: `${unit * 12}px`,
         render: (_, { occurrences, groupId }) => {
-          const currentPeriodTimeseries =
-            detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
+          const currentPeriodTimeseries = detailedStatistics?.currentPeriod?.[groupId]?.timeseries;
           const previousPeriodTimeseries =
             detailedStatistics?.previousPeriod?.[groupId]?.timeseries;
-          const { currentPeriodColor, previousPeriodColor } =
-            getTimeSeriesColor(ChartType.ERROR_OCCURRENCES);
+          const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+            ChartType.ERROR_OCCURRENCES
+          );
 
           return (
             <SparkPlot
@@ -262,19 +230,14 @@ export function ErrorGroupList({
               color={currentPeriodColor}
               isLoading={isDetailedStatsLoading}
               series={currentPeriodTimeseries}
-              valueLabel={i18n.translate(
-                'xpack.apm.serviceOveriew.errorsTableOccurrences',
-                {
-                  defaultMessage: `{occurrences} occ.`,
-                  values: {
-                    occurrences: asBigNumber(occurrences),
-                  },
-                }
-              )}
+              valueLabel={i18n.translate('xpack.apm.serviceOveriew.errorsTableOccurrences', {
+                defaultMessage: `{occurrences} occ.`,
+                values: {
+                  occurrences: asBigNumber(occurrences),
+                },
+              })}
               comparisonSeries={
-                comparisonEnabled && isTimeComparison(offset)
-                  ? previousPeriodTimeseries
-                  : undefined
+                comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimeseries : undefined
               }
               comparisonSeriesColor={previousPeriodColor}
             />
@@ -295,15 +258,12 @@ export function ErrorGroupList({
 
   const tableSearchBar = useMemo(() => {
     return {
-      fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as Array<
-        keyof ErrorGroupItem
-      >,
+      fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as Array<keyof ErrorGroupItem>,
       maxCountExceeded: mainStatistics.maxCountExceeded,
       onChangeSearchQuery: setDebouncedSearchQuery,
-      placeholder: i18n.translate(
-        'xpack.apm.errorsTable.filterErrorsPlaceholder',
-        { defaultMessage: 'Search errors by message, type or culprit' }
-      ),
+      placeholder: i18n.translate('xpack.apm.errorsTable.filterErrorsPlaceholder', {
+        defaultMessage: 'Search errors by message, type or culprit',
+      }),
     };
   }, [mainStatistics.maxCountExceeded, setDebouncedSearchQuery]);
 

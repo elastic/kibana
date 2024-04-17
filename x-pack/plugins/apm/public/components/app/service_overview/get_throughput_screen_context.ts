@@ -39,12 +39,8 @@ export function getThroughputScreenContext({
     `${PROCESSOR_EVENT} == "transaction"`,
     getEsqlDateRangeFilter(start, end),
     serviceName ? `${SERVICE_NAME} == ${string`${serviceName}`}` : '',
-    transactionName
-      ? `${TRANSACTION_NAME} == ${string`${transactionName}`}`
-      : '',
-    transactionType
-      ? `${TRANSACTION_TYPE} == ${string`${transactionType}`}`
-      : '',
+    transactionName ? `${TRANSACTION_NAME} == ${string`${transactionName}`}` : '',
+    transactionType ? `${TRANSACTION_TYPE} == ${string`${transactionType}`}` : '',
     environment ? getEsqlEnvironmentFilter(environment) : '',
   ].filter(Boolean);
 
