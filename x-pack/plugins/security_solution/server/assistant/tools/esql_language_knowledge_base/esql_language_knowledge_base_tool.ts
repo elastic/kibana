@@ -35,6 +35,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
       name: toolDetails.name,
       description: toolDetails.description,
       func: async (xxx) => {
+        const result = await chain.invoke({
           query: getEsqlPrompt(xxx),
         });
         console.log('xxx:::', xxx);
