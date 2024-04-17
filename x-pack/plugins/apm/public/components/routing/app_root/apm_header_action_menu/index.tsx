@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiHeaderLink,
-  EuiHeaderLinks,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -31,8 +26,10 @@ export function ApmHeaderActionMenu() {
   const { featureFlags } = config;
   const canReadMlJobs = !!capabilities.ml?.canGetJobs;
   const canCreateMlJobs = !!capabilities.ml?.canCreateJob;
-  const { isAlertingAvailable, canReadAlerts, canSaveAlerts } =
-    getAlertingCapabilities(plugins, capabilities);
+  const { isAlertingAvailable, canReadAlerts, canSaveAlerts } = getAlertingCapabilities(
+    plugins,
+    capabilities
+  );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
@@ -43,10 +40,7 @@ export function ApmHeaderActionMenu() {
     return basePath.prepend(path);
   }
 
-  const isLabsButtonEnabled = core.uiSettings.get<boolean>(
-    apmLabsButton,
-    false
-  );
+  const isLabsButtonEnabled = core.uiSettings.get<boolean>(apmLabsButton, false);
 
   return (
     <EuiHeaderLinks gutterSize="xs">

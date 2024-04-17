@@ -10,13 +10,10 @@ export const getFilename = (path?: string) => {
     return '';
   }
 
-  const filenameWithExt = path
-    .replace(/^.*[\\\/](?!\d*$)/, '')
-    .replace(/[\\\/]/, '');
+  const filenameWithExt = path.replace(/^.*[\\\/](?!\d*$)/, '').replace(/[\\\/]/, '');
   const filenameParts = filenameWithExt.split('.');
 
   return replaceSpecialChars(filenameParts[0]);
 };
 
-export const replaceSpecialChars = (filename: string) =>
-  filename.replaceAll(/[^a-zA-Z0-9_]/g, '_');
+export const replaceSpecialChars = (filename: string) => filename.replaceAll(/[^a-zA-Z0-9_]/g, '_');

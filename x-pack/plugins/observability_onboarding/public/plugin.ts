@@ -19,10 +19,7 @@ import {
   PluginInitializerContext,
   AppNavLinkStatus,
 } from '@kbn/core/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
@@ -54,20 +51,13 @@ export interface ObservabilityOnboardingPluginContextValue {
 }
 
 export class ObservabilityOnboardingPlugin
-  implements
-    Plugin<
-      ObservabilityOnboardingPluginSetup,
-      ObservabilityOnboardingPluginStart
-    >
+  implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
 {
   private locators?: ObservabilityOnboardingPluginLocators;
 
   constructor(private ctx: PluginInitializerContext) {}
 
-  public setup(
-    core: CoreSetup,
-    plugins: ObservabilityOnboardingPluginSetupDeps
-  ) {
+  public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
@@ -80,9 +70,7 @@ export class ObservabilityOnboardingPlugin
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
       core.application.register({
-        navLinkStatus: isServerlessEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus: isServerlessEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         id: PLUGIN_ID,
         title: 'Observability Onboarding',
         order: 8500,
@@ -96,9 +84,7 @@ export class ObservabilityOnboardingPlugin
             core.getStartServices(),
           ]);
 
-          const { createCallApi } = await import(
-            './services/rest/create_call_api'
-          );
+          const { createCallApi } = await import('./services/rest/create_call_api');
 
           createCallApi(core);
 
@@ -114,19 +100,14 @@ export class ObservabilityOnboardingPlugin
     }
 
     this.locators = {
-      onboarding: plugins.share.url.locators.create(
-        new ObservabilityOnboardingLocatorDefinition()
-      ),
+      onboarding: plugins.share.url.locators.create(new ObservabilityOnboardingLocatorDefinition()),
     };
 
     return {
       locators: this.locators,
     };
   }
-  public start(
-    core: CoreStart,
-    plugins: ObservabilityOnboardingPluginStartDeps
-  ) {
+  public start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
     return {
       locators: this.locators,
     };

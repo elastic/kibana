@@ -26,11 +26,7 @@ import {
   serviceSummaryRouteRt,
   type ServiceSummary,
 } from './get_apm_service_summary';
-import {
-  getApmTimeseries,
-  getApmTimeseriesRt,
-  type ApmTimeseries,
-} from './get_apm_timeseries';
+import { getApmTimeseries, getApmTimeseriesRt, type ApmTimeseries } from './get_apm_timeseries';
 
 const getApmTimeSeriesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/assistant/get_apm_timeseries',
@@ -56,9 +52,7 @@ const getApmTimeSeriesRoute = createApmServerRoute({
     });
 
     return {
-      content: timeseries.map(
-        (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')
-      ),
+      content: timeseries.map((series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')),
       data: timeseries,
     };
   },
@@ -81,22 +75,16 @@ const getApmServiceSummaryRoute = createApmServerRoute({
 
     const { context, request, plugins, logger } = resources;
 
-    const [
-      apmEventClient,
-      annotationsClient,
-      esClient,
-      apmAlertsClient,
-      mlClient,
-    ] = await Promise.all([
-      getApmEventClient(resources),
-      plugins.observability.setup.getScopedAnnotationsClient(context, request),
-      context.core.then(
-        (coreContext): ElasticsearchClient =>
-          coreContext.elasticsearch.client.asCurrentUser
-      ),
-      getApmAlertsClient(resources),
-      getMlClient(resources),
-    ]);
+    const [apmEventClient, annotationsClient, esClient, apmAlertsClient, mlClient] =
+      await Promise.all([
+        getApmEventClient(resources),
+        plugins.observability.setup.getScopedAnnotationsClient(context, request),
+        context.core.then(
+          (coreContext): ElasticsearchClient => coreContext.elasticsearch.client.asCurrentUser
+        ),
+        getApmAlertsClient(resources),
+        getMlClient(resources),
+      ]);
 
     return {
       content: await getApmServiceSummary({
@@ -120,9 +108,7 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ content: APMDownstreamDependency[] }> => {
+  handler: async (resources): Promise<{ content: APMDownstreamDependency[] }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { query } = params;

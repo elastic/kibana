@@ -10,11 +10,7 @@ import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import {
-  getAlertUrl,
-  observabilityPaths,
-  ProcessorEvent,
-} from '@kbn/observability-plugin/common';
+import { getAlertUrl, observabilityPaths, ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -104,41 +100,22 @@ export function registerAnomalyRuleType({
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({
-        params,
-        services,
-        spaceId,
-        startedAt,
-        getTimeRange,
-      }) => {
+      executor: async ({ params, services, spaceId, startedAt, getTimeRange }) => {
         if (!ml) {
           return { state: {} };
         }
 
-        const {
-          getAlertUuid,
-          getAlertStartedDate,
-          savedObjectsClient,
-          scopedClusterClient,
-        } = services;
+        const { getAlertUuid, getAlertStartedDate, savedObjectsClient, scopedClusterClient } =
+          services;
 
         const apmIndices = await getApmIndices(savedObjectsClient);
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
-        const { mlAnomalySearch } = ml.mlSystemProvider(
-          request,
-          savedObjectsClient
-        );
-        const anomalyDetectors = ml.anomalyDetectorsProvider(
-          request,
-          savedObjectsClient
-        );
+        const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
+        const anomalyDetectors = ml.anomalyDetectorsProvider(request, savedObjectsClient);
 
-        const mlJobs = await getMLJobs(
-          anomalyDetectors,
-          ruleParams.environment
-        );
+        const mlJobs = await getMLJobs(anomalyDetectors, ruleParams.environment);
 
         const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
           (option) => option.type === ruleParams.anomalySeverityType
@@ -186,11 +163,9 @@ export function registerAnomalyRuleType({
                       },
                     },
                   },
-                  ...termQuery(
-                    'partition_field_value',
-                    ruleParams.serviceName,
-                    { queryEmptyString: false }
-                  ),
+                  ...termQuery('partition_field_value', ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
@@ -249,9 +224,7 @@ export function registerAnomalyRuleType({
               const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
               if (!job) {
-                logger.warn(
-                  `Could not find matching job for job id ${latest.job_id}`
-                );
+                logger.warn(`Could not find matching job for job id ${latest.job_id}`);
                 return undefined;
               }
 
@@ -260,17 +233,13 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
-                detectorType: getAnomalyDetectorType(
-                  latest.detector_index as number
-                ),
+                detectorType: getAnomalyDetectorType(latest.detector_index as number),
                 timestamp: Date.parse(latest.timestamp as string),
                 bucketSpan: latest.bucket_span as number,
                 bucketKey: bucket.key,
               };
             })
-            .filter((anomaly) =>
-              anomaly ? anomaly.score >= threshold : false
-            ) ?? [];
+            .filter((anomaly) => (anomaly ? anomaly.score >= threshold : false)) ?? [];
 
         await asyncForEach(compact(anomalies), async (anomaly) => {
           const {
@@ -332,8 +301,7 @@ export function registerAnomalyRuleType({
             spaceId,
             relativeViewInAppUrl
           );
-          const indexedStartedAt =
-            getAlertStartedDate(alertId) ?? startedAt.toISOString();
+          const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,

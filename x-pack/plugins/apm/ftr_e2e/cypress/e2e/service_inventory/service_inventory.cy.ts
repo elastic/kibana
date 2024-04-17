@@ -32,9 +32,7 @@ const mainApiRequestsToIntercept = [
   },
 ];
 
-const mainAliasNames = mainApiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
-);
+const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
 describe('Service inventory', () => {
   before(() => {
@@ -166,47 +164,21 @@ describe('Service inventory', () => {
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
         'detailedStatisticsRequest'
       );
-      cy.intercept('GET', '/internal/apm/services?*').as(
-        'mainStatisticsRequest'
-      );
+      cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
-      cy.visitKibana(
-        `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
-      );
+      cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
       cy.wait('@mainStatisticsRequest');
       cy.contains('Services');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
-          JSON.stringify([
-            '0',
-            '1',
-            '10',
-            '11',
-            '12',
-            '13',
-            '14',
-            '15',
-            '16',
-            '17',
-          ])
+          JSON.stringify(['0', '1', '10', '11', '12', '13', '14', '15', '16', '17'])
         );
       });
       cy.getByTestSubj('pagination-button-1').click();
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
-          JSON.stringify([
-            '18',
-            '19',
-            '2',
-            '20',
-            '21',
-            '22',
-            '23',
-            '24',
-            '25',
-            '26',
-          ])
+          JSON.stringify(['18', '19', '2', '20', '21', '22', '23', '24', '25', '26'])
         );
       });
     });

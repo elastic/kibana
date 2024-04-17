@@ -14,10 +14,7 @@ import * as createCallApmApi from './create_call_apm_api';
 import type { CallApmApiSpy } from './call_apm_api_spy';
 
 describe('Observability dashboard data', () => {
-  const callApmApiMock = jest.spyOn(
-    createCallApmApi,
-    'callApmApi'
-  ) as unknown as CallApmApiSpy;
+  const callApmApiMock = jest.spyOn(createCallApmApi, 'callApmApi') as unknown as CallApmApiSpy;
   const params = {
     absoluteTime: {
       start: moment('2020-07-02T13:25:11.629Z').valueOf(),

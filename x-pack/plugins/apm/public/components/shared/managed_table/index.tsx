@@ -8,13 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -55,19 +49,11 @@ export interface TableSearchBar<T> {
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-function defaultSortFn<T>(
-  items: T[],
-  sortField: keyof T,
-  sortDirection: SortDirection
-) {
+function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {
   return orderBy(items, sortField, sortDirection) as T[];
 }
 
-export type SortFunction<T> = (
-  items: T[],
-  sortField: keyof T,
-  sortDirection: SortDirection
-) => T[];
+export type SortFunction<T> = (items: T[], sortField: keyof T, sortDirection: SortDirection) => T[];
 
 export const shouldfetchServer = ({
   maxCountExceeded,
@@ -109,10 +95,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
   const { core } = useApmPluginContext();
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
-    apmEnableTableSearchBar,
-    true
-  );
+  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
 
   const {
     items,
@@ -177,9 +160,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when `onTableChange` is invoked and persist to url
   const onTableChange = useCallback(
     (newTableOptions: Partial<TableOptions<T>>) => {
-      setTableOptions((oldTableOptions) =>
-        merge({}, oldTableOptions, newTableOptions)
-      );
+      setTableOptions((oldTableOptions) => merge({}, oldTableOptions, newTableOptions));
 
       if (saveTableOptionsToUrl) {
         history.push({
@@ -209,11 +190,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
 
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
-      ? sortFn(
-          filteredItems,
-          tableOptions.sort.field as keyof T,
-          tableOptions.sort.direction
-        )
+      ? sortFn(filteredItems, tableOptions.sort.field as keyof T, tableOptions.sort.direction)
       : filteredItems;
 
     return sortedItems.slice(
@@ -276,8 +253,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
     [searchQuery, tableSearchBar]
   );
 
-  const isSearchBarEnabled =
-    isTableSearchBarEnabled && (tableSearchBar.isEnabled ?? true);
+  const isSearchBarEnabled = isTableSearchBarEnabled && (tableSearchBar.isEnabled ?? true);
 
   return (
     <>
@@ -316,8 +292,6 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 }
 
-const ManagedTable = React.memo(
-  UnoptimizedManagedTable
-) as typeof UnoptimizedManagedTable;
+const ManagedTable = React.memo(UnoptimizedManagedTable) as typeof UnoptimizedManagedTable;
 
 export { ManagedTable, UnoptimizedManagedTable };

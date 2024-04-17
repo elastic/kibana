@@ -32,10 +32,7 @@ export async function saveServiceDashbord({
         customDashboardId,
         serviceDashboard
       )
-    : savedObjectsClient.create(
-        APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-        serviceDashboard
-      ));
+    : savedObjectsClient.create(APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE, serviceDashboard));
   return {
     id,
     ...(attributes as ApmCustomDashboard),

@@ -41,13 +41,11 @@ export function registerGetApmErrorDocumentFunction({
           },
           start: {
             type: 'string',
-            description:
-              'The start of the time range, in Elasticsearch date math, like `now`.',
+            description: 'The start of the time range, in Elasticsearch date math, like `now`.',
           },
           end: {
             type: 'string',
-            description:
-              'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+            description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
         required: ['start', 'end'],

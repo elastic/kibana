@@ -12,10 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  ServiceInventoryFieldName,
-  ServiceListItem,
-} from '../../../../common/service_inventory';
+import { ServiceInventoryFieldName, ServiceListItem } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
@@ -121,14 +118,7 @@ function useServicesDetailedStatisticsFetcher({
   renderedItems: ServiceListItem[];
 }) {
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      offset,
-      comparisonEnabled,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -161,10 +151,7 @@ function useServicesDetailedStatisticsFetcher({
               kuery,
               start,
               end,
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               documentType: dataSourceOptions.source.documentType,
               rollupInterval: dataSourceOptions.source.rollupInterval,
               bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
@@ -191,13 +178,10 @@ export function ServiceInventory() {
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
 
-  const mainStatisticsFetch =
-    useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
-  const displayHealthStatus = mainStatisticsData.items.some(
-    (item) => 'healthStatus' in item
-  );
+  const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -226,8 +210,7 @@ export function ServiceInventory() {
   );
 
   const displayMlCallout =
-    !userHasDismissedCallout &&
-    shouldDisplayMlCallout(anomalyDetectionSetupState);
+    !userHasDismissedCallout && shouldDisplayMlCallout(anomalyDetectionSetupState);
 
   const noItemsMessage = useMemo(() => {
     return (
@@ -266,8 +249,7 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const { setScreenContext } = useApmPluginContext().observabilityAIAssistant.service;
 
   useEffect(() => {
     if (isFailure(mainStatisticsStatus)) {
@@ -302,9 +284,7 @@ export function ServiceInventory() {
           <ServiceList
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}
-            comparisonDataLoading={
-              comparisonFetch.status === FETCH_STATUS.LOADING
-            }
+            comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
             displayHealthStatus={displayHealthStatus}
             displayAlerts={displayAlerts}
             initialSortField={initialSortField}

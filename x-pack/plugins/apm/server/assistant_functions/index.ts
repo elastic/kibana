@@ -54,8 +54,7 @@ export function registerAssistantFunctions({
       request: resources.request,
       core: {
         setup: coreSetup,
-        start: () =>
-          coreSetup.getStartServices().then(([coreStart]) => coreStart),
+        start: () => coreSetup.getStartServices().then(([coreStart]) => coreStart),
       },
       params: {
         query: {

@@ -37,34 +37,23 @@ export function ProfilingTopNFunctions({
       if (!transactionType) {
         return;
       }
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/transactions/functions',
-        {
-          params: {
-            path: { serviceName },
-            query: {
-              start,
-              end,
-              kuery,
-              transactionName,
-              startIndex: 0,
-              endIndex: 10,
-              transactionType,
-              environment,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/transactions/functions', {
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            kuery,
+            transactionName,
+            startIndex: 0,
+            endIndex: 10,
+            transactionType,
+            environment,
           },
-        }
-      );
+        },
+      });
     },
-    [
-      serviceName,
-      start,
-      end,
-      kuery,
-      transactionName,
-      transactionType,
-      environment,
-    ]
+    [serviceName, start, end, kuery, transactionName, transactionType, environment]
   );
 
   return (

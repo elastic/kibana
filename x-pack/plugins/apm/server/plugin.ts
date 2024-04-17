@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
@@ -34,11 +28,7 @@ import {
   apmServiceGroups,
   apmCustomDashboards,
 } from './saved_objects';
-import {
-  APMPluginSetup,
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from './types';
+import { APMPluginSetup, APMPluginSetupDependencies, APMPluginStartDependencies } from './types';
 import {
   APMRouteHandlerResources,
   registerRoutes,
@@ -52,13 +42,7 @@ import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 import { registerAssistantFunctions } from './assistant_functions';
 
 export class APMPlugin
-  implements
-    Plugin<
-      APMPluginSetup,
-      void,
-      APMPluginSetupDependencies,
-      APMPluginStartDependencies
-    >
+  implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
 {
   private currentConfig?: APMConfig;
   private logger?: Logger;
@@ -67,10 +51,7 @@ export class APMPlugin
     this.initContext = initContext;
   }
 
-  public setup(
-    core: CoreSetup<APMPluginStartDependencies>,
-    plugins: APMPluginSetupDependencies
-  ) {
+  public setup(core: CoreSetup<APMPluginStartDependencies>, plugins: APMPluginSetupDependencies) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMConfig>();
 
@@ -102,8 +83,7 @@ export class APMPlugin
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    const getCoreStart = () =>
-      core.getStartServices().then(([coreStart]) => coreStart);
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const getPluginStart = () =>
       core.getStartServices().then(([coreStart, pluginStart]) => pluginStart);
@@ -128,9 +108,7 @@ export class APMPlugin
         start: () =>
           core.getStartServices().then((services) => {
             const [, pluginsStartContracts] = services;
-            return pluginsStartContracts[
-              key as keyof APMPluginStartDependencies
-            ];
+            return pluginsStartContracts[key as keyof APMPluginStartDependencies];
           }),
       };
     }) as APMRouteHandlerResources['plugins'];
@@ -147,9 +125,7 @@ export class APMPlugin
     // for cloud, onPrem and Serverless so that the actual component can take
     // care of rendering
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
-      plugins.customIntegrations?.registerCustomIntegration(
-        apmTutorialCustomIntegration
-      );
+      plugins.customIntegrations?.registerCustomIntegration(apmTutorialCustomIntegration);
     } else {
       apmIndicesPromise.then((apmIndices) => {
         plugins.home?.tutorials.registerTutorial(
@@ -164,9 +140,7 @@ export class APMPlugin
     }
 
     const telemetryUsageCounter =
-      resourcePlugins.usageCollection?.setup.createUsageCounter(
-        APM_SERVER_FEATURE_ID
-      );
+      resourcePlugins.usageCollection?.setup.createUsageCounter(APM_SERVER_FEATURE_ID);
 
     const kibanaVersion = this.initContext.env.packageInfo.version;
 

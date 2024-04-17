@@ -65,10 +65,7 @@ export function AlertDetailsAppSection({
             defaultMessage="Actual value"
           />
         ),
-        value: formatAlertEvaluationValue(
-          alertRuleTypeId,
-          alertEvaluationValue
-        ),
+        value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationValue),
       },
       {
         label: (
@@ -77,10 +74,7 @@ export function AlertDetailsAppSection({
             defaultMessage="Expected value"
           />
         ),
-        value: formatAlertEvaluationValue(
-          alertRuleTypeId,
-          alertEvaluationThreshold
-        ),
+        value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationThreshold),
       },
       {
         label: (
@@ -113,10 +107,7 @@ export function AlertDetailsAppSection({
 
   const params = rule.params;
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
-  const timeRange = getPaddedAlertTimeRange(
-    alert.fields[ALERT_START]!,
-    alert.fields[ALERT_END]
-  );
+  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
   const historicalRange = useMemo(() => {
     return {

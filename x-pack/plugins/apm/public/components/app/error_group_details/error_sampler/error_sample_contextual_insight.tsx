@@ -6,10 +6,7 @@
  */
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  type Message,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -78,10 +75,9 @@ ${exceptionStacktrace}`
       <EuiFlexItem>
         <ObservabilityAIAssistantContextualInsight
           messages={messages}
-          title={i18n.translate(
-            'xpack.apm.errorGroupContextualInsight.explainErrorTitle',
-            { defaultMessage: "What's this error?" }
-          )}
+          title={i18n.translate('xpack.apm.errorGroupContextualInsight.explainErrorTitle', {
+            defaultMessage: "What's this error?",
+          })}
         />
       </EuiFlexItem>
       <EuiSpacer size="s" />
@@ -92,10 +88,7 @@ ${exceptionStacktrace}`
         style={{ display: 'none' }}
       >
         {error.error.log?.message && (
-          <ErrorSampleDetailTabContent
-            error={error}
-            currentTab={logStacktraceTab}
-          />
+          <ErrorSampleDetailTabContent error={error} currentTab={logStacktraceTab} />
         )}
       </div>
       <div
@@ -105,10 +98,7 @@ ${exceptionStacktrace}`
         style={{ display: 'none' }}
       >
         {error.error.exception?.length && (
-          <ErrorSampleDetailTabContent
-            error={error}
-            currentTab={exceptionStacktraceTab}
-          />
+          <ErrorSampleDetailTabContent error={error} currentTab={exceptionStacktraceTab} />
         )}
       </div>
     </>
