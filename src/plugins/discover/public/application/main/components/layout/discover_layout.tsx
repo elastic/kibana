@@ -133,6 +133,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sort,
   });
 
+  // The assistant is getting the state from the url correctly
+  // expect from the index pattern where we have only the dataview id
   useEffect(() => {
     return observabilityAIAssistant?.service.setScreenContext({
       screenDescription: `The user is looking at the Discover view on the ${
