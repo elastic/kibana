@@ -5,7 +5,13 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type { Criteria, EuiBasicTableColumn, Query, SearchFilterConfig } from '@elastic/eui';
+import type {
+  Criteria,
+  EuiBasicTableColumn,
+  EuiSearchBarOnChangeArgs,
+  Query,
+  SearchFilterConfig,
+} from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -32,6 +38,14 @@ import type { AuthenticatedUser } from '../../../../common';
 import type { ApiKey, ApiKeyAggregations, BaseApiKey } from '../../../../common/model';
 import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
 
+export interface TablePagination {
+  pageIndex: number;
+  pageSize?: number;
+  totalItemCount: number;
+  pageSizeOptions?: number[];
+  showPerPageOptions?: boolean;
+}
+
 export interface ApiKeysTableProps {
   apiKeys: CategorizedApiKey[];
   currentUser: AuthenticatedUser;
@@ -45,8 +59,8 @@ export interface ApiKeysTableProps {
   onDelete(apiKeys: CategorizedApiKey[]): void;
   totalItemCount?: number;
   onTableChange: ({ page, sort }: Criteria<CategorizedApiKey>) => void;
-  pagination: any;
-  onSearchChange: any;
+  pagination: TablePagination;
+  onSearchChange: (args: EuiSearchBarOnChangeArgs) => boolean | void;
   aggregations?: ApiKeyAggregations;
   sortingOptions: QueryApiKeySortOptions;
 }
