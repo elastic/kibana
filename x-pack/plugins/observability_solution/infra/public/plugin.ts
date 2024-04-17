@@ -249,7 +249,7 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
-      const visibleIn: AppDeepLinkLocations[] = this.isServerlessEnv ? ['globalSearch'] : [];
+      const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
       return [
         {
