@@ -200,6 +200,21 @@ describe('BedrockConnector', () => {
         });
       });
 
+      it('signal is properly passed to streamApi', async () => {
+        const signal = jest.fn();
+        await connector.invokeStream({ ...aiAssistantBody, signal });
+
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          responseType: 'stream',
+          data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
+          signal,
+        });
+      });
+
       it('ensureMessageFormat - formats messages from user, assistant, and system', async () => {
         await connector.invokeStream({
           messages: [
@@ -502,7 +517,25 @@ describe('BedrockConnector', () => {
         });
         expect(response.message).toEqual(mockResponseString);
       });
+      it('signal is properly passed to runApi', async () => {
+        const signal = jest.fn();
+        await connector.invokeAI({ ...aiAssistantBody, signal });
 
+        expect(mockRequest).toHaveBeenCalledWith({
+          signed: true,
+          timeout: 120000,
+          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+          method: 'post',
+          responseSchema: RunApiLatestResponseSchema,
+          data: JSON.stringify({
+            ...JSON.parse(DEFAULT_BODY),
+            messages: [{ content: 'Hello world', role: 'user' }],
+            max_tokens: DEFAULT_TOKEN_LIMIT,
+            temperature: 0,
+          }),
+          signal,
+        });
+      });
       it('errors during API calls are properly handled', async () => {
         // @ts-ignore
         connector.request = mockError;

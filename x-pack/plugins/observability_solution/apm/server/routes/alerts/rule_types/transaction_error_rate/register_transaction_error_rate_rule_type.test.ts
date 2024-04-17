@@ -224,12 +224,7 @@ describe('Transaction error rate alert', () => {
       threshold: 10,
       windowSize: 5,
       windowUnit: 'm',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
 
     await executor({ params });

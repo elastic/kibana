@@ -40,12 +40,9 @@ export const storageExplorer = {
                 href={getStorageExplorerFeedbackHref()}
                 target="_blank"
               >
-                {i18n.translate(
-                  'xpack.apm.views.storageExplorer.giveFeedback',
-                  {
-                    defaultMessage: 'Give feedback',
-                  }
-                )}
+                {i18n.translate('xpack.apm.views.storageExplorer.giveFeedback', {
+                  defaultMessage: 'Give feedback',
+                })}
               </EuiLink>,
             ],
           }}

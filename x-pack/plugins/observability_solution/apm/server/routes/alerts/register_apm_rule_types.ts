@@ -7,11 +7,7 @@
 
 import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import {
-  IBasePath,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { IBasePath, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   PluginSetupContract as AlertingPluginSetupContract,
   type IRuleTypeAlerts,
