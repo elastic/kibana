@@ -13,8 +13,8 @@ import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { EnterpriseSearchContentPageTemplate } from '../../../enterprise_search_content/components/layout/page_template';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 export const Playground: React.FC = () => {
   const [searchParams] = useSearchParams();

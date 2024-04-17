@@ -55,12 +55,11 @@ import {
 import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
-import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
+import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
   SEARCH_INDICES_PATH,
   CRAWLERS_PATH,
-  PLAYGROUND_PATH,
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
@@ -122,6 +121,9 @@ const contentLinks: AppDeepLink[] = [
       defaultMessage: 'Web crawlers',
     }),
   },
+];
+
+const applicationsLinks: AppDeepLink[] = [
   {
     id: 'playground',
     path: `/${PLAYGROUND_PATH}`,
@@ -129,9 +131,6 @@ const contentLinks: AppDeepLink[] = [
       defaultMessage: 'Playground',
     }),
   },
-];
-
-const applicationsLinks: AppDeepLink[] = [
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
