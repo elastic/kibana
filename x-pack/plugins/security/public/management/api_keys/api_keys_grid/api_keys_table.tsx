@@ -9,7 +9,6 @@ import type {
   Criteria,
   EuiBasicTableColumn,
   EuiSearchBarOnChangeArgs,
-  Query,
   SearchFilterConfig,
 } from '@elastic/eui';
 import {
@@ -26,9 +25,10 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import type { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
 import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
-import React, { useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -66,6 +66,7 @@ export interface ApiKeysTableProps {
 }
 
 export const MAX_PAGINATED_ITEMS = 10000;
+const FiltersContext = createContext<Record<string, string[]>>({ types: [], usernames: [] });
 
 export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   apiKeys,
@@ -216,9 +217,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   if (typeFilters.size > 1) {
     filters.push({
       type: 'custom_component',
-      component: ({ query, onChange }) => (
-        <TypesFilterButton types={[...typeFilters]} query={query} onChange={onChange} />
-      ),
+      component: TypesFilterButton,
     });
   }
 
@@ -246,9 +245,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   if (usernameFilters.size > 1) {
     filters.push({
       type: 'custom_component',
-      component: ({ query, onChange }) => (
-        <UsersFilterButton usernames={[...usernameFilters]} query={query} onChange={onChange} />
-      ),
+      component: UsersFilterButton,
     });
   }
 
@@ -256,52 +253,54 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 
   return (
     <>
-      <EuiSearchBar
-        defaultQuery={initialQuery}
-        box={{
-          incremental: true,
-          schema: {
-            strict: true,
-            fields: {
-              name: {
-                type: 'string',
-              },
-              type: {
-                type: 'string',
-              },
-              username: {
-                type: 'string',
-              },
-              owner: {
-                type: 'string',
-              },
-              expired: {
-                type: 'boolean',
+      <FiltersContext.Provider value={{ types: [...typeFilters], usernames: [...usernameFilters] }}>
+        <EuiSearchBar
+          defaultQuery={initialQuery}
+          box={{
+            incremental: true,
+            schema: {
+              strict: true,
+              fields: {
+                name: {
+                  type: 'string',
+                },
+                type: {
+                  type: 'string',
+                },
+                username: {
+                  type: 'string',
+                },
+                owner: {
+                  type: 'string',
+                },
+                expired: {
+                  type: 'boolean',
+                },
               },
             },
-          },
-        }}
-        filters={filters}
-        onChange={onSearchChange}
-        toolsLeft={
-          selectedItems.length ? (
-            <EuiButton
-              onClick={() => onDelete(selectedItems)}
-              color="danger"
-              iconType="trash"
-              data-test-subj="bulkInvalidateActionButton"
-            >
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
-                defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
-                values={{
-                  count: selectedItems.length,
-                }}
-              />
-            </EuiButton>
-          ) : undefined
-        }
-      />
+          }}
+          filters={filters}
+          onChange={onSearchChange}
+          toolsLeft={
+            selectedItems.length ? (
+              <EuiButton
+                onClick={() => onDelete(selectedItems)}
+                color="danger"
+                iconType="trash"
+                data-test-subj="bulkInvalidateActionButton"
+              >
+                <FormattedMessage
+                  id="xpack.security.management.apiKeys.table.invalidateApiKeyButton"
+                  defaultMessage="Delete {count, plural, one {API key} other {# API keys}}"
+                  values={{
+                    count: selectedItems.length,
+                  }}
+                />
+              </EuiButton>
+            ) : undefined
+          }
+        />
+      </FiltersContext.Provider>
       <EuiSpacer size="s" />
       {exceededResultCount && (
         <>
@@ -342,17 +341,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   );
 };
 
-export interface TypesFilterButtonProps {
-  query: Query;
-  onChange?: (query: Query) => void;
-  types: string[];
-}
+export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ query, onChange }) => {
+  const { types } = useContext(FiltersContext);
 
-export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
-  query,
-  onChange,
-  types,
-}) => {
   if (!onChange) {
     return null;
   }
@@ -424,17 +415,9 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
   );
 };
 
-export interface UsersFilterButtonProps {
-  query: Query;
-  onChange?: (query: Query) => void;
-  usernames: string[];
-}
+export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ query, onChange }) => {
+  const { usernames } = useContext(FiltersContext);
 
-export const UsersFilterButton: FunctionComponent<UsersFilterButtonProps> = ({
-  query,
-  onChange,
-  usernames,
-}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
