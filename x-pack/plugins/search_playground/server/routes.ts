@@ -7,20 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/ml-response-stream/server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
-import { ActionsClientChatOpenAI } from '@kbn/elastic-assistant-common/impl/llm';
 import { fetchFields } from './utils/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './utils/conversational_chain';
-import { Prompt } from '../common/prompt';
 import { errorHandler } from './utils/error_handler';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
+import { getChatParams } from './utils/get_chat_params';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -35,11 +33,11 @@ export function createRetriever(esQuery: string) {
 }
 
 export function defineRoutes({
-  log,
+  logger,
   router,
   getStartServices,
 }: {
-  log: Logger;
+  logger: Logger;
   router: IRouter;
   getStartServices: StartServicesAccessor<
     SearchPlaygroundPluginStartDependencies,
@@ -94,43 +92,34 @@ export function defineRoutes({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
       const { messages, data } = await request.body;
-      const abortController = new AbortController();
-      const abortSignal = abortController.signal;
-      const model = new ActionsClientChatOpenAI({
-        actions,
-        logger: log,
-        request,
-        connectorId: data.connector_id,
-        model: data.summarization_model,
-        traceId: uuidv4(),
-        signal: abortSignal,
-        // prevents the agent from retrying on failure
-        // failure could be due to bad connector, we should deliver that result to the client asap
-        maxRetries: 0,
-      });
+      const { chatModel, chatPrompt } = await getChatParams(
+        {
+          connectorId: data.connector_id,
+          model: data.summarization_model,
+          citations: data.citations,
+          prompt: data.prompt,
+        },
+        { actions, logger, request }
+      );
 
       let sourceFields = {};
 
       try {
         sourceFields = JSON.parse(data.source_fields);
       } catch (e) {
-        log.error('Failed to parse the source fields', e);
+        logger.error('Failed to parse the source fields', e);
         throw Error(e);
       }
 
       const chain = ConversationalChain({
-        model,
+        model: chatModel,
         rag: {
           index: data.indices,
           retriever: createRetriever(data.elasticsearch_query),
           content_field: sourceFields,
           size: Number(data.doc_size),
         },
-        prompt: Prompt(data.prompt, {
-          citations: data.citations,
-          context: true,
-          type: 'openai',
-        }),
+        prompt: chatPrompt,
       });
 
       let stream: ReadableStream<Uint8Array>;
@@ -138,7 +127,7 @@ export function defineRoutes({
       try {
         stream = await chain.stream(aiClient, messages);
       } catch (e) {
-        log.error('Failed to create the chat stream', e);
+        logger.error('Failed to create the chat stream', e);
 
         if (typeof e === 'string') {
           return response.badRequest({
@@ -151,7 +140,7 @@ export function defineRoutes({
         throw e;
       }
 
-      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
 
       const reader = (stream as ReadableStream).getReader();
       const textDecoder = new TextDecoder();
