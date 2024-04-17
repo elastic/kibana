@@ -172,7 +172,6 @@ export async function installKibanaAssetsAndReferences({
   pkgName,
   pkgTitle,
   packageInstallContext,
-  paths,
   installedPkg,
   spaceId,
   assetTags,
@@ -185,7 +184,6 @@ export async function installKibanaAssetsAndReferences({
   pkgName: string;
   pkgTitle: string;
   packageInstallContext: PackageInstallContext;
-  paths: string[];
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];

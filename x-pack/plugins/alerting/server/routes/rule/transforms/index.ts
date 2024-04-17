@@ -7,3 +7,5 @@
 
 export { transformRuleToRuleResponse } from './transform_rule_to_rule_response/latest';
 export { transformRuleToRuleResponse as transformRuleToRuleResponseV1 } from './transform_rule_to_rule_response/v1';
+export { transformRuleActions } from './transform_rule_to_rule_response/latest';
+export { transformRuleActions as transformRuleActionsV1 } from './transform_rule_to_rule_response/v1';

@@ -33,10 +33,6 @@ import {
   defaultColumnHeaderType,
   defaultHeaders,
 } from '../timeline/body/column_headers/default_headers';
-import {
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-} from '../timeline/body/constants';
 
 import type { OpenTimelineResult, TimelineErrorCallback } from './types';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
@@ -47,6 +43,7 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 import { timelineActions } from '../../store';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
@@ -88,7 +85,7 @@ const parseString = (params: string) => {
   }
 };
 
-const setTimelineColumn = (col: ColumnHeaderResult) =>
+const setTimelineColumn = (col: ColumnHeaderResult, defaultHeadersValue: ColumnHeaderOptions[]) =>
   Object.entries(col).reduce<ColumnHeaderOptions>(
     (acc, [key, value]) => {
       if (key !== 'id' && value != null) {
@@ -99,8 +96,8 @@ const setTimelineColumn = (col: ColumnHeaderResult) =>
     {
       columnHeaderType: defaultColumnHeaderType,
       id: col.id != null ? col.id : 'unknown',
-      initialWidth:
-        col.id === '@timestamp' ? DEFAULT_DATE_COLUMN_MIN_WIDTH : DEFAULT_COLUMN_MIN_WIDTH,
+      initialWidth: defaultHeadersValue.find((defaultCol) => col.id === defaultCol.id)
+        ?.initialWidth,
     }
   );
 
@@ -235,13 +232,21 @@ export const getTimelineStatus = (
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
-  timelineType?: TimelineType
+  timelineType?: TimelineType,
+  unifiedComponentsInTimelineEnabled?: boolean
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineType.template;
+  const defaultHeadersValue = unifiedComponentsInTimelineEnabled
+    ? defaultUdtHeaders
+    : defaultHeaders;
+
   const timelineEntries = {
     ...timeline,
-    columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
-    defaultColumns: defaultHeaders,
+    columns:
+      timeline.columns != null
+        ? timeline.columns.map((col) => setTimelineColumn(col, defaultHeadersValue))
+        : defaultHeadersValue,
+    defaultColumns: defaultHeadersValue,
     dateRange:
       timeline.status === TimelineStatus.immutable &&
       timeline.timelineType === TimelineType.template
@@ -282,12 +287,18 @@ export const defaultTimelineToTimelineModel = (
 export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
-  timelineType?: TimelineType
+  timelineType?: TimelineType,
+  unifiedComponentsInTimelineEnabled?: boolean
 ): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate, timelineType),
+    timeline: defaultTimelineToTimelineModel(
+      timelineModel,
+      duplicate,
+      timelineType,
+      unifiedComponentsInTimelineEnabled
+    ),
   };
 };
 
@@ -301,6 +312,11 @@ export interface QueryTimelineById {
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   savedSearchId?: string;
+  /*
+   * Below feature flag will be removed once
+   * unified components have been fully migrated
+   * */
+  unifiedComponentsInTimelineEnabled?: boolean;
 }
 
 export const useQueryTimelineById = () => {
@@ -324,6 +340,7 @@ export const useQueryTimelineById = () => {
     onOpenTimeline,
     openTimeline = true,
     savedSearchId,
+    unifiedComponentsInTimelineEnabled = false,
   }: QueryTimelineById) => {
     updateIsLoading({ id: TimelineId.active, isLoading: true });
     if (timelineId == null) {
@@ -335,6 +352,7 @@ export const useQueryTimelineById = () => {
         to: DEFAULT_TO_MOMENT.toISOString(),
         timeline: {
           ...timelineDefaults,
+          columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           id: TimelineId.active,
           activeTab: activeTimelineTab,
           show: openTimeline,
@@ -355,7 +373,8 @@ export const useQueryTimelineById = () => {
           const { timeline, notes } = formatTimelineResultToModel(
             timelineToOpen,
             duplicate,
-            timelineType
+            timelineType,
+            unifiedComponentsInTimelineEnabled
           );
 
           if (onOpenTimeline != null) {

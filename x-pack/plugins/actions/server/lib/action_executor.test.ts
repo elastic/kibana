@@ -1182,11 +1182,14 @@ describe('Action Executor', () => {
       );
       connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
 
+      let executorResult;
       if (executeUnsecure) {
-        await actionExecutor.executeUnsecured(executeUnsecuredParams);
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
       } else {
-        await actionExecutor.execute(executeParams);
+        executorResult = await actionExecutor.execute(executeParams);
       }
+
+      expect(executorResult?.errorSource).toBe(TaskErrorSource.FRAMEWORK);
       expect(loggerMock.warn).toBeCalledWith(
         'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
       );

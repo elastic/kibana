@@ -18,6 +18,8 @@ import {
   FilterInContextMenu,
 } from './filter_in';
 
+import { TestProvidersComponent } from '../../../mocks/test_providers';
+
 jest.mock('../../indicators/hooks/use_filters_context');
 
 const mockIndicator: Indicator = generateMockIndicator();
@@ -33,20 +35,27 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
   });
 
   it('should render null (wrong data input)', () => {
-    const { container } = render(<FilterInButtonIcon data={''} field={mockField} />);
+    const { container } = render(<FilterInButtonIcon data={''} field={mockField} />, {
+      wrapper: TestProvidersComponent,
+    });
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render null (wrong field input)', () => {
-    const { container } = render(<FilterInButtonIcon data={mockIndicator} field={''} />);
+    const { container } = render(<FilterInButtonIcon data={mockIndicator} field={''} />, {
+      wrapper: TestProvidersComponent,
+    });
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render one EuiButtonIcon', () => {
     const { getByTestId } = render(
-      <FilterInButtonIcon data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
+      <FilterInButtonIcon data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toHaveClass('euiButtonIcon');
@@ -54,7 +63,10 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
 
   it('should render one EuiButtonEmpty', () => {
     const { getByTestId } = render(
-      <FilterInButtonEmpty data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
+      <FilterInButtonEmpty data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toHaveClass('euiButtonEmpty');
@@ -62,7 +74,10 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
 
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
     const { getByTestId } = render(
-      <FilterInContextMenu data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />
+      <FilterInContextMenu data={mockIndicator} field={mockField} data-test-subj={TEST_ID} />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toHaveClass('euiContextMenuItem');
@@ -83,7 +98,10 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
         field={mockField}
         Component={mockComponent}
         data-test-subj={TEST_ID}
-      />
+      />,
+      {
+        wrapper: TestProvidersComponent,
+      }
     );
 
     expect(getByTestId(TEST_ID)).toBeInTheDocument();

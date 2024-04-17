@@ -268,10 +268,14 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext =
+    useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
+    if (!setScreenContext) {
+      return;
+    }
+
     if (isFailure(mainStatisticsStatus)) {
       return setScreenContext({
         screenDescription: 'The services have failed to load',
@@ -295,7 +299,7 @@ export function ServiceInventory() {
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
-  const { fields, isSaving, saveSingleSetting } = useEditableSettings('apm', [
+  const { fields, isSaving, saveSingleSetting } = useEditableSettings([
     apmEnableServiceInventoryTableSearchBar,
   ]);
 

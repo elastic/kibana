@@ -7,7 +7,7 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
@@ -19,6 +19,7 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
+import type { UnifiedHistogramSuggestionContext } from '../../types';
 
 /**
  * The current state of the container
@@ -31,7 +32,7 @@ export interface UnifiedHistogramState {
   /**
    * The current Lens suggestion
    */
-  currentSuggestion: Suggestion | undefined;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -99,7 +100,9 @@ export interface UnifiedHistogramStateService {
   /**
    * Sets current Lens suggestion
    */
-  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
+  setCurrentSuggestionContext: (
+    suggestionContext: UnifiedHistogramSuggestionContext | undefined
+  ) => void;
   /**
    * Sets the current top panel height
    */
@@ -150,7 +153,7 @@ export const createStateService = (
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
-    currentSuggestion: undefined,
+    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
     topPanelHeight: initialTopPanelHeight,
@@ -193,9 +196,12 @@ export const createStateService = (
       updateState({ breakdownField });
     },
 
-    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
-      updateState({ currentSuggestion: suggestion });
+    setCurrentSuggestionContext: (
+      suggestionContext: UnifiedHistogramSuggestionContext | undefined
+    ) => {
+      updateState({ currentSuggestionContext: suggestionContext });
     },
+
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },

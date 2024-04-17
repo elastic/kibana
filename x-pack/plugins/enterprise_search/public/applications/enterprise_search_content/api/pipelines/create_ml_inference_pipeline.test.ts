@@ -34,7 +34,6 @@ describe('CreateMlInferencePipelineApiLogic', () => {
         indexName: 'my-index',
         modelId: 'my-model-id',
         pipelineName: 'my-pipeline',
-        // @ts-expect-error pipeline._meta defined as mandatory
         pipelineDefinition: { processors: [], version: 1 },
       };
       const result = await createMlInferencePipeline(args);

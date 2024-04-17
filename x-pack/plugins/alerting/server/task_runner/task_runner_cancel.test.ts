@@ -57,6 +57,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { TaskRunnerContext } from './types';
 
@@ -111,6 +112,7 @@ describe('Task Runner Cancel', () => {
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const dataPlugin = dataPluginMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
+  const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -151,6 +153,7 @@ describe('Task Runner Cancel', () => {
     getMaintenanceWindowClientWithRequest: jest
       .fn()
       .mockReturnValue(maintenanceWindowClientMock.create()),
+    connectorAdapterRegistry,
   };
 
   beforeEach(() => {

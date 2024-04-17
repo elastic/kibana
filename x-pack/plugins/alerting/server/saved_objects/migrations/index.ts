@@ -16,6 +16,7 @@ import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-p
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Serializable } from '@kbn/utility-types';
 import { RawRule } from '../../types';
 import { getMigrations7100 } from './7.10';
 import { getMigrations7110, getMigrations7112 } from './7.11';
@@ -111,8 +112,7 @@ function mapSearchSourceMigrationFunc(
   migrateSerializedSearchSourceFields: MigrateFunction<SerializedSearchSourceFields>
 ): MigrateFunction {
   return (doc) => {
-    const _doc = doc as { attributes: RawRule };
-
+    const _doc = doc as { attributes: { params: { searchConfiguration: Serializable } } };
     const serializedSearchSource = _doc.attributes.params.searchConfiguration;
 
     if (isSerializedSearchSource(serializedSearchSource)) {

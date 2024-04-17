@@ -25,6 +25,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 
 jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
@@ -70,6 +71,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
@@ -258,6 +261,10 @@ function mockSavedObjectUpdateConflictErrorTimes(times: number) {
     attributes: {
       actions: [],
       scheduledTaskId: 'scheduled-task-id',
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending',
+      },
     },
     references: [],
   };
@@ -296,6 +303,12 @@ function setupRawRuleMocks(
       actions: [],
       muteAll: false,
       mutedInstanceIds: [],
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      executionStatus: {
+        lastExecutionDate: '2019-02-12T21:01:22.479Z',
+        status: 'pending',
+      },
       ...attributeOverrides,
     },
     references: [],

@@ -208,20 +208,20 @@ export const getXyVisualization = ({
     return state;
   },
 
-  appendLayer(state, layerId, layerType, indexPatternId, extraArg) {
+  appendLayer(state, layerId, layerType, indexPatternId, extraArg, seriesType) {
     if (layerType === 'metricTrendline') {
       return state;
     }
 
-    const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
       layers: [
         ...state.layers,
         newLayerState({
-          seriesType: firstUsedSeriesType || state.preferredSeriesType,
           layerId,
           layerType,
+          seriesType:
+            seriesType || getDataLayers(state.layers)?.[0]?.seriesType || state.preferredSeriesType,
           indexPatternId,
           extraArg,
         }),
@@ -734,7 +734,7 @@ export const getXyVisualization = ({
       <AddLayerButton
         {...props}
         eventAnnotationService={eventAnnotationService}
-        addLayer={async (type, loadedGroupInfo) => {
+        addLayer={async (type, loadedGroupInfo, _, seriesType) => {
           if (type === LayerTypes.ANNOTATIONS && loadedGroupInfo) {
             await props.ensureIndexPattern(
               loadedGroupInfo.dataViewSpec ?? loadedGroupInfo.indexPatternId
@@ -745,8 +745,7 @@ export const getXyVisualization = ({
               group: loadedGroupInfo,
             });
           }
-
-          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo);
+          props.addLayer(type, loadedGroupInfo, !!loadedGroupInfo, seriesType);
         }}
       />
     );
@@ -826,7 +825,6 @@ export const getXyVisualization = ({
     const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
       accessors == null || accessors.length === 0;
 
-    const dataLayers = getDataLayers(state.layers);
     const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYDataLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
 
@@ -838,13 +836,8 @@ export const getXyVisualization = ({
         ['Break down', hasNoSplitAccessor],
       ];
 
-      // filter out those layers with no accessors at all
-      const filteredLayers = dataLayers.filter(
-        ({ accessors, xAccessor, splitAccessor, layerType }) =>
-          accessors.length > 0 || xAccessor != null || splitAccessor != null
-      );
       for (const [dimension, criteria] of checks) {
-        const result = validateLayersForDimension(dimension, filteredLayers, criteria);
+        const result = validateLayersForDimension(dimension, state.layers, criteria);
         if (!result.valid) {
           errors.push({
             severity: 'error',

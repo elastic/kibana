@@ -20,6 +20,7 @@ import {
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 
 import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
@@ -42,6 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   const {
     indexListOfDocuments: indexListOfSourceDocuments,
@@ -334,8 +336,8 @@ export default ({ getService }: FtrProviderContext) => {
           const secondDocument = {
             id,
             '@timestamp': secondTimestamp,
-            agent: {
-              name: 'agent-1',
+            host: {
+              name: 'host-a',
             },
           };
           // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
@@ -2386,6 +2388,145 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
+          });
+        });
+
+        describe('alerts should be enriched', () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+          });
+
+          it('should be enriched with host risk score', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const laterTimestamp = '2020-10-28T06:50:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'zeek-sensor-amsterdam' },
+              user: { name: 'root' },
+            };
+            const doc1WithLaterTimestamp = {
+              ...doc1,
+              '@timestamp': laterTimestamp,
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'zeek-sensor-amsterdam',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+
+            expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
+            expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(70);
+            expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
+            expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
+          });
+        });
+
+        describe('with asset criticality', async () => {
+          before(async () => {
+            await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+            await kibanaServer.uiSettings.update({
+              [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+            });
+          });
+
+          after(async () => {
+            await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+          });
+
+          it('should be enriched alert with criticality_level', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const laterTimestamp = '2020-10-28T06:50:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'zeek-sensor-amsterdam' },
+              user: { name: 'root' },
+            };
+            const doc1WithLaterTimestamp = {
+              ...doc1,
+              '@timestamp': laterTimestamp,
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'zeek-sensor-amsterdam',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+
+            expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('low_impact');
+            expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
           });
         });
       });

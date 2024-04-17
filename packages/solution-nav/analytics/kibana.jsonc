@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/solution-nav-analytics",
+  "owner": [
+    "@elastic/appex-sharedux",
+    "@elastic/kibana-data-discovery",
+    "@elastic/kibana-presentation",
+    "@elastic/kibana-visualizations"
+  ]
+}

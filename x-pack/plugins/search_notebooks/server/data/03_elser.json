@@ -1,0 +1,552 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "s49gpkvZ7q53"
+   },
+   "source": [
+    "# Semantic Search using ELSER v2 text expansion\n",
+    "\n",
+    "[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/elastic/elasticsearch-labs/blob/main/notebooks/search/03-ELSER.ipynb)\n",
+    "\n",
+    "\n",
+    "Learn how to use the [ELSER](https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html) for text expansion-powered semantic search.\n",
+    "\n",
+    "**`Note:`** This notebook demonstrates how to use ELSER model `.elser_model_2` model which offers an improved retrieval accuracy. \n",
+    "\n",
+    "If you have set up an index with ELSER model `.elser_model_1`, and would like to upgrade to ELSER v2 model - `.elser_model_2`, Please follow instructions from the notebook on [how to upgrade an index to use elser model](../model-upgrades/upgrading-index-to-use-elser.ipynb)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "gaTFHLJC-Mgi"
+   },
+   "source": [
+    "# Install and Connect\n",
+    "\n",
+    "To get started, we'll need to connect to our Elastic deployment using the Python client.\n",
+    "Because we're using an Elastic Cloud deployment, we'll use the **Cloud ID** to identify our deployment.\n",
+    "\n",
+    "First we need to `pip` install the following packages:\n",
+    "\n",
+    "- `elasticsearch`\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "K9Q1p2C9-wce",
+    "outputId": "204d5aee-571e-4363-be6e-f87d058f2d29"
+   },
+   "outputs": [],
+   "source": [
+    "!pip install -qU elasticsearch"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "gEzq2Z1wBs3M"
+   },
+   "source": [
+    "Next, we need to import the modules we need.\n",
+    "🔐 NOTE: `getpass` enables us to securely prompt the user for credentials without echoing them to the terminal, or storing it in memory."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "id": "uP_GTVRi-d96"
+   },
+   "outputs": [],
+   "source": [
+    "from elasticsearch import Elasticsearch, helpers, exceptions\n",
+    "from urllib.request import urlopen\n",
+    "from getpass import getpass\n",
+    "import json\n",
+    "import time"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "AMSePFiZCRqX"
+   },
+   "source": [
+    "Now we can instantiate the Python Elasticsearch client.\n",
+    "\n",
+    "First we prompt the user for their password and Cloud ID.\n",
+    "Then we create a `client` object that instantiates an instance of the `Elasticsearch` class."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "h0MdAZ53CdKL",
+    "outputId": "96ea6f81-f935-4d51-c4a7-af5a896180f1"
+   },
+   "outputs": [],
+   "source": [
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#finding-your-cloud-id\n",
+    "ELASTIC_CLOUD_ID = getpass(\"Elastic Cloud ID: \")\n",
+    "\n",
+    "# https://www.elastic.co/search-labs/tutorials/install-elasticsearch/elastic-cloud#creating-an-api-key\n",
+    "ELASTIC_API_KEY = getpass(\"Elastic Api Key: \")\n",
+    "\n",
+    "# Create the client instance\n",
+    "client = Elasticsearch(\n",
+    "    # For local development\n",
+    "    # hosts=[\"http://localhost:9200\"]\n",
+    "    cloud_id=ELASTIC_CLOUD_ID,\n",
+    "    api_key=ELASTIC_API_KEY,\n",
+    ")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "bRHbecNeEDL3"
+   },
+   "source": [
+    "Confirm that the client has connected with this test"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "rdiUKqZbEKfF",
+    "outputId": "43b6f1cd-a43e-4dbe-caa5-7fd170464881"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{'name': 'instance-0000000011', 'cluster_name': 'd1bd36862ce54c7b903e2aacd4cd7f0a', 'cluster_uuid': 'tIkh0X_UQKmMFQKSfUw-VQ', 'version': {'number': '8.11.1', 'build_flavor': 'default', 'build_type': 'docker', 'build_hash': '6f9ff581fbcde658e6f69d6ce03050f060d1fd0c', 'build_date': '2023-11-11T10:05:59.421038163Z', 'build_snapshot': False, 'lucene_version': '9.8.0', 'minimum_wire_compatibility_version': '7.17.0', 'minimum_index_compatibility_version': '7.0.0'}, 'tagline': 'You Know, for Search'}\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(client.info())"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "enHQuT57DhD1"
+   },
+   "source": [
+    "Refer to https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#connect-self-managed-new to learn how to connect to a self-managed deployment.\n",
+    "\n",
+    "Read https://www.elastic.co/guide/en/elasticsearch/client/python-api/current/connecting.html#connect-self-managed-new to learn how to connect using API keys.\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Download and Deploy ELSER Model\n",
+    "\n",
+    "In this example, we are going to download and deploy the ELSER model in our ML node. Make sure you have an ML node in order to run the ELSER model."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# delete model if already downloaded and deployed\n",
+    "try:\n",
+    "    client.ml.delete_trained_model(model_id=\".elser_model_2\", force=True)\n",
+    "    print(\"Model deleted successfully, We will proceed with creating one\")\n",
+    "except exceptions.NotFoundError:\n",
+    "    print(\"Model doesn't exist, but We will proceed with creating one\")\n",
+    "\n",
+    "# Creates the ELSER model configuration. Automatically downloads the model if it doesn't exist.\n",
+    "client.ml.put_trained_model(\n",
+    "    model_id=\".elser_model_2\", input={\"field_names\": [\"text_field\"]}\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The above command will download the ELSER model. This will take a few minutes to complete. Use the following command to check the status of the model download."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "while True:\n",
+    "    status = client.ml.get_trained_models(\n",
+    "        model_id=\".elser_model_2\", include=\"definition_status\"\n",
+    "    )\n",
+    "\n",
+    "    if status[\"trained_model_configs\"][0][\"fully_defined\"]:\n",
+    "        print(\"ELSER Model is downloaded and ready to be deployed.\")\n",
+    "        break\n",
+    "    else:\n",
+    "        print(\"ELSER Model is downloaded but not ready to be deployed.\")\n",
+    "    time.sleep(5)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Once the model is downloaded, we can deploy the model in our ML node. Use the following command to deploy the model."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Start trained model deployment if not already deployed\n",
+    "client.ml.start_trained_model_deployment(\n",
+    "    model_id=\".elser_model_2\", number_of_allocations=1, wait_for=\"starting\"\n",
+    ")\n",
+    "\n",
+    "while True:\n",
+    "    status = client.ml.get_trained_models_stats(\n",
+    "        model_id=\".elser_model_2\",\n",
+    "    )\n",
+    "    if status[\"trained_model_stats\"][0][\"deployment_stats\"][\"state\"] == \"started\":\n",
+    "        print(\"ELSER Model has been successfully deployed.\")\n",
+    "        break\n",
+    "    else:\n",
+    "        print(\"ELSER Model is currently being deployed.\")\n",
+    "    time.sleep(5)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "This also will take a few minutes to complete."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "EmELvr_JK_22"
+   },
+   "source": [
+    "# Indexing Documents with ELSER\n",
+    "\n",
+    "In order to use ELSER on our Elastic Cloud deployment we'll need to create an ingest pipeline that contains an inference processor that runs the ELSER model.\n",
+    "Let's add that pipeline using the [`put_pipeline`](https://www.elastic.co/guide/en/elasticsearch/reference/master/put-pipeline-api.html) method."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "XhRng99KLQsd",
+    "outputId": "00ea73b5-45a4-472b-f4bc-2c2c790ab94d"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ObjectApiResponse({'acknowledged': True})"
+      ]
+     },
+     "execution_count": 42,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "client.ingest.put_pipeline(\n",
+    "    id=\"elser-ingest-pipeline\",\n",
+    "    description=\"Ingest pipeline for ELSER\",\n",
+    "    processors=[\n",
+    "        {\n",
+    "            \"inference\": {\n",
+    "                \"model_id\": \".elser_model_2\",\n",
+    "                \"input_output\": [\n",
+    "                    {\"input_field\": \"plot\", \"output_field\": \"plot_embedding\"}\n",
+    "                ],\n",
+    "            }\n",
+    "        }\n",
+    "    ],\n",
+    ")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "0wCH7YHLNW3i"
+   },
+   "source": [
+    "Let's note a few important parameters from that API call:\n",
+    "\n",
+    "- `inference`: A processor that performs inference using a machine learning model.\n",
+    "- `model_id`: Specifies the ID of the machine learning model to be used. In this example, the model ID is set to `.elser_model_2`.\n",
+    "- `input_output`: Specifies input and output fields\n",
+    "- `input_field`: Field name from which the `sparse_vector` representation are created.\n",
+    "- `output_field`:  Field name which contains inference results. "
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "TF_wxIAhD07a"
+   },
+   "source": [
+    "## Create index\n",
+    "\n",
+    "To use the ELSER model at index time, we'll need to create an index mapping that supports a [`text_expansion`](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-text-expansion-query.html) query.\n",
+    "The mapping includes a field of type [`sparse_vector`](https://www.elastic.co/guide/en/elasticsearch/reference/master/sparse-vector.html)  to work with our feature vectors of interest.\n",
+    "This field contains the token-weight pairs the ELSER model created based on the input text.\n",
+    "\n",
+    "Let's create an index named `elser-example-movies` with the mappings we need.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "cvYECABJJs_2",
+    "outputId": "18fb51e4-c4f6-4d1b-cb2d-bc6f8ec1aa84"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "ObjectApiResponse({'acknowledged': True, 'shards_acknowledged': True, 'index': 'elser-example-movies'})"
+      ]
+     },
+     "execution_count": 46,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "client.indices.delete(index=\"elser-example-movies\", ignore_unavailable=True)\n",
+    "client.indices.create(\n",
+    "    index=\"elser-example-movies\",\n",
+    "    settings={\"index\": {\"default_pipeline\": \"elser-ingest-pipeline\"}},\n",
+    "    mappings={\n",
+    "        \"properties\": {\n",
+    "            \"plot\": {\n",
+    "                \"type\": \"text\",\n",
+    "                \"fields\": {\"keyword\": {\"type\": \"keyword\", \"ignore_above\": 256}},\n",
+    "            },\n",
+    "            \"plot_embedding\": {\"type\": \"sparse_vector\"},\n",
+    "        }\n",
+    "    },\n",
+    ")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "lFHgRUYVpNKP"
+   },
+   "source": [
+    "## Insert Documents\n",
+    "Let's insert our example dataset of 12 movies.\n",
+    "\n",
+    "If you get an error, check the model has been deployed and is available in the ML node. In newer versions of Elastic Cloud, ML node is autoscaled and the ML node may not be ready yet. Wait for a few minutes and try again."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "IBfqgdAcuKRG",
+    "outputId": "3b86daa1-ade1-4ff3-da81-4207fa814d30"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Done indexing documents into `elser-example-movies` index!\n"
+     ]
+    }
+   ],
+   "source": [
+    "url = \"https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/movies.json\"\n",
+    "response = urlopen(url)\n",
+    "\n",
+    "# Load the response data into a JSON object\n",
+    "data_json = json.loads(response.read())\n",
+    "\n",
+    "# Prepare the documents to be indexed\n",
+    "documents = []\n",
+    "for doc in data_json:\n",
+    "    documents.append(\n",
+    "        {\n",
+    "            \"_index\": \"elser-example-movies\",\n",
+    "            \"_source\": doc,\n",
+    "        }\n",
+    "    )\n",
+    "\n",
+    "# Use helpers.bulk to index\n",
+    "helpers.bulk(client, documents)\n",
+    "\n",
+    "print(\"Done indexing documents into `elser-example-movies` index!\")\n",
+    "time.sleep(3)"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "oCj3jHHML4Tn"
+   },
+   "source": [
+    "Inspect a new document to confirm that it now has an `plot_embedding` field that contains a list of new, additional terms.\n",
+    "These terms are the **text expansion** of the field(s) you targeted for ELSER inference in `input_field` while creating the pipeline. \n",
+    "ELSER essentially creates a tree of expanded terms to improve the semantic searchability of your documents.\n",
+    "We'll be able to search these documents using a `text_expansion` query.\n",
+    "\n",
+    "But first let's start with a simple keyword search, to see how ELSER delivers semantically relevant results out of the box."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "Zy5GT2xb38oz"
+   },
+   "source": [
+    "# Searching Documents\n",
+    "\n",
+    "Let's test out semantic search using ELSER."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "bAZRxja-5Q6X",
+    "outputId": "37a26a2c-4284-4e51-c34e-9a55edf77cb8"
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Score: 12.763346\n",
+      "Title: Fight Club\n",
+      "Plot: An insomniac office worker and a devil-may-care soapmaker form an underground fight club that evolves into something much, much more.\n",
+      "\n",
+      "Score: 9.930427\n",
+      "Title: Pulp Fiction\n",
+      "Plot: The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.\n",
+      "\n",
+      "Score: 9.4883375\n",
+      "Title: The Matrix\n",
+      "Plot: A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "response = client.search(\n",
+    "    index=\"elser-example-movies\",\n",
+    "    size=3,\n",
+    "    query={\n",
+    "        \"text_expansion\": {\n",
+    "            \"plot_embedding\": {\n",
+    "                \"model_id\": \".elser_model_2\",\n",
+    "                \"model_text\": \"fighting movie\",\n",
+    "            }\n",
+    "        }\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "for hit in response[\"hits\"][\"hits\"]:\n",
+    "    doc_id = hit[\"_id\"]\n",
+    "    score = hit[\"_score\"]\n",
+    "    title = hit[\"_source\"][\"title\"]\n",
+    "    plot = hit[\"_source\"][\"plot\"]\n",
+    "    print(f\"Score: {score}\\nTitle: {title}\\nPlot: {plot}\\n\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Next Steps\n",
+    "Now that we have a working example of semantic search using ELSER, you can try it out on your own data. Don't forget to scale down the ML node when you are done. "
+   ]
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.6"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "b0fa6594d8f4cbf19f97940f81e996739fb7646882a419484c72d19e05852a7e"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

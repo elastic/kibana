@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
 import { AddIndicesField } from './add_indices_field';
@@ -17,12 +17,29 @@ import { useSourceIndicesField } from '../../hooks/use_source_indices_field';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
-import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
+import {
+  createQuery,
+  getDefaultQueryFields,
+  getDefaultSourceFields,
+  IndexFields,
+} from '../../utils/create_query';
+
+const transformToErrorMessage = (defaultSourceFields: IndexFields): string | undefined => {
+  const indices: string[] = [];
+  Object.keys(defaultSourceFields).forEach((index: string) => {
+    if (defaultSourceFields[index][0] === undefined) {
+      indices.push(index);
+    }
+  });
+
+  return indices.length === 0 ? undefined : indices.join();
+};
 
 export const SourcesPanelForStartChat: React.FC = () => {
   const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();
   const { indices, isLoading } = useQueryIndices();
   const { fields } = useIndicesFields(selectedIndices || []);
+  const [sourceFieldErrorMessage, setSourceFieldErrorMessage] = useState<string>();
 
   const {
     field: { onChange: elasticsearchQueryOnChange },
@@ -31,12 +48,22 @@ export const SourcesPanelForStartChat: React.FC = () => {
     defaultValue: {},
   });
 
+  const {
+    field: { onChange: sourceFieldsOnChange },
+  } = useController({
+    name: ChatFormFields.sourceFields,
+    defaultValue: {},
+  });
+
   useEffect(() => {
     if (fields) {
       const defaultFields = getDefaultQueryFields(fields);
       elasticsearchQueryOnChange(createQuery(defaultFields, fields));
+      const defaultSourceFields = getDefaultSourceFields(fields);
+      sourceFieldsOnChange(defaultSourceFields);
+      setSourceFieldErrorMessage(transformToErrorMessage(defaultSourceFields));
     }
-  }, [fields, elasticsearchQueryOnChange]);
+  }, [fields, elasticsearchQueryOnChange, sourceFieldsOnChange]);
 
   return (
     <StartChatPanel
@@ -52,6 +79,19 @@ export const SourcesPanelForStartChat: React.FC = () => {
         <EuiFlexItem>
           <IndicesTable indices={selectedIndices} onRemoveClick={removeIndex} />
         </EuiFlexItem>
+      )}
+
+      {sourceFieldErrorMessage && (
+        <EuiCallOut color="warning" iconType="warning">
+          <p>
+            {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
+              defaultMessage: 'No source fields found for {errorMessage}',
+              values: {
+                errorMessage: sourceFieldErrorMessage,
+              },
+            })}
+          </p>
+        </EuiCallOut>
       )}
 
       {isLoading && (

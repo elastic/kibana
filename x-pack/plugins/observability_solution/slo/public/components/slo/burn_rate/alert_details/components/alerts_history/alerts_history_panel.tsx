@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import rison from '@kbn/rison';
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
@@ -52,6 +52,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
       to: 'now',
     },
     http,
+    instanceId: alert.fields[ALERT_INSTANCE_ID],
   });
 
   const actionGroup = getActionGroupFromReason(alert.reason);
