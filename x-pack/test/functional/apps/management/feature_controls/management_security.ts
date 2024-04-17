@@ -65,6 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
           sectionLinks: [
+            'triggersActionsAlerts',
             'triggersActions',
             'cases',
             'triggersActionsConnectors',
