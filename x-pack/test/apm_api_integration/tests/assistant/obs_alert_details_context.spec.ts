@@ -91,10 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns log categories', () => {
-          const logCategory = response.body.logCategories?.[0];
-          expect(logCategory?.sampleMessage).to.match(/Error message #\d{16} from Backend/);
-          expect(logCategory?.docCount).to.be.greaterThan(0);
-          expect(logCategory?.errorCategory).to.be('Error message from Backend');
+          expectSingleLogCategory(response);
         });
       });
 
@@ -127,10 +124,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns log categories', () => {
-          const logCategory = response.body.logCategories?.[0];
-          expect(logCategory?.sampleMessage).to.match(/Error message #\d{16} from Backend/);
-          expect(logCategory?.docCount).to.be.greaterThan(0);
-          expect(logCategory?.errorCategory).to.be('Error message from Backend');
+          expectSingleLogCategory(response);
         });
       });
 
@@ -238,6 +232,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
         return logSynthtraceClient.index(events);
+      }
+
+      function expectSingleLogCategory(
+        response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>
+      ) {
+        expect(response.body.logCategories).to.have.length(1);
+
+        const logCategory = response.body.logCategories?.[0];
+        expect(logCategory?.sampleMessage).to.match(/Error message #\d{16} from Backend/);
+        expect(logCategory?.docCount).to.be.greaterThan(0);
+        expect(logCategory?.errorCategory).to.be('Error message from Backend');
       }
 
       async function cleanup() {
