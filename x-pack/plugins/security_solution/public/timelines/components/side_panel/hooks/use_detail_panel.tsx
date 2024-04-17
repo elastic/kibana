@@ -9,6 +9,11 @@ import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { UserPanelKey } from '../../../../flyout/entity_details/user_right';
+import { HostPanelKey } from '../../../../flyout/entity_details/host_right';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { ExpandedDetailType } from '../../../../../common/types';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
@@ -19,6 +24,8 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;
@@ -48,8 +55,13 @@ export const useDetailPanel = ({
   scopeId,
   tabType = TimelineTabs.query,
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
+  const { telemetry } = useKibana().services;
   const { browserFields, selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScope);
   const dispatch = useDispatch();
+
+  const { openFlyout } = useExpandableFlyoutApi();
+  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
       return timelineSelectors.getTimelineByIdSelector();
@@ -97,23 +109,50 @@ export const useDetailPanel = ({
 
   const openEventDetailsPanel = useCallback(
     (eventId?: string, onClose?: () => void) => {
-      if (eventId) {
+      if (isSecurityFlyoutEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName: eventDetailsIndex,
+              scopeId,
+            },
+          },
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: scopeId,
+          panel: 'right',
+        });
+      } else if (eventId) {
         loadDetailsPanel({
           panelView: 'eventDetail',
           params: { eventId, indexName: eventDetailsIndex },
         });
+        onPanelClose.current = onClose ?? noopPanelClose;
       }
-      onPanelClose.current = onClose ?? noopPanelClose;
     },
-    [loadDetailsPanel, eventDetailsIndex]
+    [isSecurityFlyoutEnabled, openFlyout, eventDetailsIndex, scopeId, telemetry, loadDetailsPanel]
   );
 
   const openHostDetailsPanel = useCallback(
     (hostName: string, onClose?: () => void) => {
-      loadDetailsPanel({ panelView: 'hostDetail', params: { hostName } });
-      onPanelClose.current = onClose ?? noopPanelClose;
+      if (isSecurityFlyoutEnabled) {
+        openFlyout({
+          right: {
+            id: HostPanelKey,
+            params: {
+              hostName,
+              scopeId,
+            },
+          },
+        });
+      } else {
+        loadDetailsPanel({ panelView: 'hostDetail', params: { hostName } });
+        onPanelClose.current = onClose ?? noopPanelClose;
+      }
     },
-    [loadDetailsPanel]
+    [isSecurityFlyoutEnabled, loadDetailsPanel, openFlyout, scopeId]
   );
 
   const openNetworkDetailsPanel = useCallback(
@@ -126,18 +165,32 @@ export const useDetailPanel = ({
 
   const openUserDetailsPanel = useCallback(
     (userName: string, onClose?: () => void) => {
-      loadDetailsPanel({ panelView: 'userDetail', params: { userName } });
-      onPanelClose.current = onClose ?? noopPanelClose;
+      if (isSecurityFlyoutEnabled) {
+        openFlyout({
+          right: {
+            id: UserPanelKey,
+            params: {
+              userName,
+              scopeId,
+            },
+          },
+        });
+      } else {
+        loadDetailsPanel({ panelView: 'userDetail', params: { userName } });
+        onPanelClose.current = onClose ?? noopPanelClose;
+      }
     },
-    [loadDetailsPanel]
+    [isSecurityFlyoutEnabled, loadDetailsPanel, openFlyout, scopeId]
   );
 
   const handleOnDetailsPanelClosed = useCallback(() => {
+    if (isSecurityFlyoutEnabled) return;
+
     if (onPanelClose.current) onPanelClose.current();
     if (scopedActions) {
       dispatch(scopedActions.toggleDetailPanel({ tabType, id: scopeId }));
     }
-  }, [scopedActions, tabType, scopeId, dispatch]);
+  }, [isSecurityFlyoutEnabled, scopedActions, dispatch, tabType, scopeId]);
 
   const DetailsPanel = useMemo(
     () =>

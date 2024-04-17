@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { renderHook, act } from '@testing-library/react-hooks';
+import React from 'react';
 import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
 import { timelineActions } from '../../../store';
@@ -12,6 +13,8 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { TestProviders } from '../../../../common/mock';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../common/lib/kibana');
@@ -52,11 +55,17 @@ describe('useDetailPanel', () => {
     (useDeepEqualSelector as jest.Mock).mockClear();
   });
 
+  const wrapper = ({ children }: { children: React.ReactChild }) => (
+    <TestProviders>
+      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+    </TestProviders>
+  );
+  const renderUseDetailPanel = (props = defaultProps) =>
+    renderHook(() => useDetailPanel(props), { wrapper });
+
   test('should return open fns (event, host, network, user), handleOnDetailsPanelClosed fn, shouldShowDetailsPanel, and the DetailsPanel component', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
-        return useDetailPanel(defaultProps);
-      });
+      const { result, waitForNextUpdate } = renderUseDetailPanel();
       await waitForNextUpdate();
 
       expect(result.current.openEventDetailsPanel).toBeDefined();
@@ -73,9 +82,7 @@ describe('useDetailPanel', () => {
     const testEventId = '123';
     test('should fire redux action to open event details panel', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         result.current?.openEventDetailsPanel(testEventId);
@@ -87,9 +94,7 @@ describe('useDetailPanel', () => {
 
     test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -103,9 +108,7 @@ describe('useDetailPanel', () => {
     test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
       // Test that the onClose ref is properly updated
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -127,9 +130,7 @@ describe('useDetailPanel', () => {
     const hostName = 'my-host';
     test('should fire redux action to open host details panel', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         result.current?.openHostDetailsPanel(hostName);
@@ -141,9 +142,7 @@ describe('useDetailPanel', () => {
 
     test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -157,9 +156,7 @@ describe('useDetailPanel', () => {
     test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
       // Test that the onClose ref is properly updated
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -182,9 +179,7 @@ describe('useDetailPanel', () => {
     const flowTarget = FlowTargetSourceDest.source;
     test('should fire redux action to open host details panel', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         result.current?.openNetworkDetailsPanel(ip, flowTarget);
@@ -196,9 +191,7 @@ describe('useDetailPanel', () => {
 
     test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -212,9 +205,7 @@ describe('useDetailPanel', () => {
     test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
       // Test that the onClose ref is properly updated
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -236,9 +227,7 @@ describe('useDetailPanel', () => {
     const userName = 'IAmBatman';
     test('should fire redux action to open host details panel', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         result.current?.openUserDetailsPanel(userName);
@@ -250,9 +239,7 @@ describe('useDetailPanel', () => {
 
     test('should call provided onClose callback provided to openEventDetailsPanel fn', async () => {
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -266,9 +253,7 @@ describe('useDetailPanel', () => {
     test('should call the last onClose callback provided to openEventDetailsPanel fn', async () => {
       // Test that the onClose ref is properly updated
       await act(async () => {
-        const { result, waitForNextUpdate } = renderHook(() => {
-          return useDetailPanel(defaultProps);
-        });
+        const { result, waitForNextUpdate } = renderUseDetailPanel();
         await waitForNextUpdate();
 
         const mockOnClose = jest.fn();
@@ -298,9 +283,7 @@ describe('useDetailPanel', () => {
     };
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => {
-        return useDetailPanel(updatedProps);
-      });
+      const { result, waitForNextUpdate } = renderUseDetailPanel(updatedProps);
       await waitForNextUpdate();
 
       expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
