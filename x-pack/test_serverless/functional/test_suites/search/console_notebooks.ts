@@ -28,8 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebooksButton();
       await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeOpen();
 
-      // Click the Notebooks button again to switch to the dev console
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebooksButton();
+      // Click the Console Bar button again to switch to the dev console
+      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
       await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
       await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeClosed();
 
@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeOpen();
 
       // Close the console
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebooksButton();
       await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeClosed();
       await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
     });

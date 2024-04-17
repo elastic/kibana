@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useCallback } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -80,27 +80,48 @@ export const EmbeddableConsole = ({
   const setIsConsoleOpen = (value: boolean) => {
     consoleDispatch(value ? { type: 'open' } : { type: 'close' });
   };
-  const toggleConsole = () => setIsConsoleOpen(!isOpen);
-  const clickAlternateViewActivateButton: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.preventDefault();
-    switch (consoleState.view) {
-      case EmbeddableConsoleView.Console:
-      case EmbeddableConsoleView.Closed:
-        consoleDispatch({ type: 'open', payload: { alternateView: true } });
-        break;
-      case EmbeddableConsoleView.Alternate:
-        consoleDispatch({ type: 'open', payload: { alternateView: false } });
-        break;
-    }
-  };
 
-  const onKeyDown = (event: any) => {
+  const closeConsole = useCallback(() => {
+    consoleDispatch({ type: 'close' });
+  }, []);
+  const clickConsoleHeader = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      switch (consoleState.view) {
+        case EmbeddableConsoleView.Console:
+          consoleDispatch({ type: 'close' });
+          break;
+        case EmbeddableConsoleView.Closed:
+        case EmbeddableConsoleView.Alternate:
+          consoleDispatch({ type: 'open', payload: { alternateView: false } });
+          break;
+      }
+    },
+    [consoleState.view, consoleDispatch]
+  );
+  const clickAlternateViewActivateButton: React.MouseEventHandler<HTMLButtonElement> = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      switch (consoleState.view) {
+        case EmbeddableConsoleView.Console:
+        case EmbeddableConsoleView.Closed:
+          consoleDispatch({ type: 'open', payload: { alternateView: true } });
+          break;
+        case EmbeddableConsoleView.Alternate:
+          consoleDispatch({ type: 'close' });
+          break;
+      }
+    },
+    [consoleState.view, consoleDispatch]
+  );
+
+  const onKeyDown = useCallback((event: any) => {
     if (event.key === keys.ESCAPE) {
       event.preventDefault();
       event.stopPropagation();
       setIsConsoleOpen(false);
     }
-  };
+  }, []);
 
   const classes = classNames('embeddableConsole', {
     'embeddableConsole-isOpen': isOpen,
@@ -116,7 +137,7 @@ export const EmbeddableConsole = ({
 
   return (
     <EuiPortal>
-      <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
+      <EuiFocusTrap onClickOutside={closeConsole} disabled={!isOpen}>
         <section
           aria-label={landmarkHeading}
           className={classes}
@@ -130,7 +151,7 @@ export const EmbeddableConsole = ({
               <EuiButtonEmpty
                 color="text"
                 iconType={isOpen ? 'arrowUp' : 'arrowDown'}
-                onClick={toggleConsole}
+                onClick={clickConsoleHeader}
                 className="embeddableConsole__controls--button"
                 data-test-subj="consoleEmbeddedControlBar"
                 data-telemetry-id="console-embedded-controlbar-button"
