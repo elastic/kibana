@@ -260,7 +260,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         defaultQuery={initialQuery}
         box={{
           incremental: true,
-          placeholder: 'Search...',
           schema: {
             strict: true,
             fields: {
