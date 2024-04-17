@@ -18,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { CollapsiblePanel } from './collapsible_panel';
 import { i18n } from '@kbn/i18n';
 import { Processor } from '../../../../common/types';
 
@@ -133,46 +134,35 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
 
         <EuiFlexItem css={shouldHaveFixedWidth ? { maxWidth: COLUMN_MAX_WIDTH } : {}}>
-          <EuiPanel hasShadow={false} hasBorder grow={false}>
-            <EuiFlexGroup gutterSize="xl">
-              <EuiFlexItem grow>
-                <EuiText size="s">
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.versionCardTitle"
-                      defaultMessage="Add version number"
-                    />
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.versionToggleDescription"
-                      defaultMessage="Enabled"
-                    />
-                  }
-                  checked={isVersionVisible}
-                  onChange={(e) => setIsVersionVisible(e.target.checked)}
-                  data-test-subj="versionToggle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            {isVersionVisible && (
-              <>
-                <EuiSpacer size="l" />
-
+          <CollapsiblePanel
+            title={(
+              <EuiText size="s">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.form.versionCardTitle"
+                    defaultMessage="Add version number"
+                  />
+                </strong>
+              </EuiText>
+            )}
+            initialToggleState={isVersionVisible}
+          >
+            {({ isEnabled }) => (
+            <>
+              {isEnabled && (
                 <UseField
                   path="version"
                   componentProps={{
                     ['data-test-subj']: 'versionField',
+                      euiFieldProps: {
+                        disabled: !isEnabled
+                  },
                   }}
                 />
-              </>
+              )}
+            </>
             )}
-          </EuiPanel>
+          </CollapsiblePanel>
 
           <EuiSpacer size="l" />
 
