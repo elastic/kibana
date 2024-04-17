@@ -45,7 +45,8 @@ export const SourcesPanelForStartChat: React.FC = () => {
         <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
           <p>
             {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
-              defaultMessage: 'No fields found for {errorMessage}. Try adding data to these indices.',
+              defaultMessage:
+                'No fields found for {errorMessage}. Try adding data to these indices.',
               values: {
                 errorMessage: noFieldsIndicesWarning,
               },

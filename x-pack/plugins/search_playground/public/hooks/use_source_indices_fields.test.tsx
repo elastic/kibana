@@ -186,6 +186,5 @@ describe('useSourceIndicesFields Hook', () => {
         }
       `);
     });
-
   });
 });
