@@ -134,7 +134,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     }
   );
 
-  if (canManageApiKeys || usernameFilters.size > 1) {
+  if (canManageApiKeys || usernameFilters.length > 1) {
     columns.push({
       field: 'username',
       name: (
@@ -214,7 +214,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
 
   const filters: SearchFilterConfig[] = [];
 
-  if (typeFilters.size > 1) {
+  if (typeFilters.length > 1) {
     filters.push({
       type: 'custom_component',
       component: TypesFilterButton,
@@ -242,7 +242,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     });
   }
 
-  if (usernameFilters.size > 1) {
+  if (usernameFilters.length > 1) {
     filters.push({
       type: 'custom_component',
       component: UsersFilterButton,
@@ -628,8 +628,8 @@ export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
 };
 
 export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations) => {
-  const typeFilters: Set<CategorizedApiKey['type']> = new Set();
-  const usernameFilters: Set<CategorizedApiKey['username']> = new Set();
+  const typeFilters: Array<CategorizedApiKey['type']> = [];
+  const usernameFilters: Array<CategorizedApiKey['username']> = [];
   let expiredCount = 0;
 
   if (aggregationResponse && Object.keys(aggregationResponse).length > 0) {
@@ -643,17 +643,17 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
       : [];
 
     typeBuckets.forEach((type) => {
-      typeFilters.add(type.key);
+      typeFilters.push(type.key);
     });
     usernameBuckets.forEach((username) => {
-      usernameFilters.add(username.key);
+      usernameFilters.push(username.key);
     });
     const { namePrefixBased, metadataBased } = managed?.buckets || {};
     if (
       (namePrefixBased?.doc_count && namePrefixBased.doc_count > 0) ||
       (metadataBased?.doc_count && metadataBased.doc_count > 0)
     ) {
-      typeFilters.add('managed');
+      typeFilters.push('managed');
     }
     expiredCount = expired?.doc_count ?? 0;
   }
