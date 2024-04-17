@@ -1865,7 +1865,7 @@
             "label": "getKibanaPrivileges",
             "description": [],
             "signature": [
-              "(({ consumer }: { consumer: string; }) => string[]) | undefined"
+              "((args: { consumer: string; producer: string; }) => string[]) | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
             "deprecated": false,
@@ -1876,7 +1876,7 @@
                 "id": "def-server.ConnectorAdapter.getKibanaPrivileges.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ consumer }",
+                "label": "args",
                 "description": [],
                 "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
                 "deprecated": false,
@@ -1888,6 +1888,17 @@
                     "type": "string",
                     "tags": [],
                     "label": "consumer",
+                    "description": [],
+                    "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.ConnectorAdapter.getKibanaPrivileges.$1.producer",
+                    "type": "string",
+                    "tags": [],
+                    "label": "producer",
                     "description": [],
                     "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
                     "deprecated": false,

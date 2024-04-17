@@ -8,6 +8,7 @@
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
+import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
 import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_selector';
@@ -15,14 +16,20 @@ import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
 
-  const isLoading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const isLoading = useSelector(
+    service,
+    (state) =>
+      state.matches('integrations.fetching') &&
+      (state.matches('datasets.fetching') || state.matches('degradedDocs.fetching'))
+  );
+
   const {
     timeRange,
     integrations: selectedIntegrations,
     namespaces: selectedNamespaces,
     query: selectedQuery,
   } = useSelector(service, (state) => state.context.filters);
-  const integrations = useSelector(service, (state) => state.context.integrations);
+  const datasets = useSelector(service, (state) => state.context.datasets);
 
   const namespaces = useSelector(service, (state) => state.context.datasets).map(
     (dataset) => dataset.namespace
@@ -68,15 +75,22 @@ export const useDatasetQualityFilters = () => {
     [service, timeRange]
   );
 
-  const integrationItems: IntegrationItem[] = useMemo(
-    () =>
-      integrations.map((integration) => ({
-        ...integration,
-        label: integration.title,
-        checked: selectedIntegrations.includes(integration.name) ? 'on' : undefined,
-      })),
-    [integrations, selectedIntegrations]
-  );
+  const integrationItems: IntegrationItem[] = useMemo(() => {
+    const integrations = [
+      ...datasets
+        .map((dataset) => dataset.integration)
+        .filter((integration): integration is Integration => !!integration),
+      ...(datasets.some((dataset) => !dataset.integration)
+        ? [Integration.create({ name: 'none', title: 'None' })]
+        : []),
+    ];
+
+    return integrations.map((integration) => ({
+      ...integration,
+      label: integration.title,
+      checked: selectedIntegrations.includes(integration.name) ? 'on' : undefined,
+    }));
+  }, [datasets, selectedIntegrations]);
 
   const onIntegrationsChange = useCallback(
     (newIntegrationItems: IntegrationItem[]) => {

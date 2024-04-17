@@ -52,6 +52,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
@@ -93,6 +94,7 @@ export interface SetupPlugins {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  management: ManagementSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -167,8 +169,8 @@ export type StartServices = CoreStart &
     sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
-    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-    onAppLeave: (handler: AppLeaveHandler) => void;
+    setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+    onAppLeave?: (handler: AppLeaveHandler) => void;
 
     /**
      * This component will be exposed to all lazy loaded plugins, via useKibana hook. It should wrap every plugin route.

@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiButton } from '@elastic/eui';
-import { SLOResponse } from '@kbn/slo-schema';
+import { SLODefinitionResponse } from '@kbn/slo-schema';
+import React, { useState } from 'react';
 import { SloDeleteConfirmationModal } from '../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloTimeWindowBadge } from '../slos/components/badges/slo_time_window_badge';
-import { SloIndicatorTypeBadge } from '../slos/components/badges/slo_indicator_type_badge';
+import { SloResetConfirmationModal } from '../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useResetSlo } from '../../hooks/use_reset_slo';
-import { SloResetConfirmationModal } from '../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { SloIndicatorTypeBadge } from '../slos/components/badges/slo_indicator_type_badge';
+import { SloTimeWindowBadge } from '../slos/components/badges/slo_time_window_badge';
 
 interface OutdatedSloProps {
-  slo: SLOResponse;
+  slo: SLODefinitionResponse;
   onReset: () => void;
   onDelete: () => void;
 }
