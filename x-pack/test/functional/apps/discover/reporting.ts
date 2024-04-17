@@ -120,8 +120,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openExportTab();
-        const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = await copyButton.getAttribute('data-share-url');
+        await testSubjects.click('shareReportingCopyURL');
+        const reportURL = await (
+          await testSubjects.find('shareReportingCopyURL')
+        ).getAttribute('data-share-url');
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =

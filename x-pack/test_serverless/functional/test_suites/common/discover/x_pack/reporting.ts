@@ -138,6 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openExportTab();
         await PageObjects.reporting.getReportURL(25000);
+        await PageObjects.share.closeShareModal();
 
         // get clipboard value using field search input, since
         // 'browser.getClipboardValue()' doesn't work, due to permissions

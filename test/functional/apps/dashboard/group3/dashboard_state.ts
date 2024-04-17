@@ -209,6 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
         const currentUrl = await getUrlFromShare();
+        await PageObjects.share.closeShareModal();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {

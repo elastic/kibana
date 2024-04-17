@@ -65,6 +65,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe(`PDF report`, () => {
+      afterEach(async () => {
+        if (await testSubjects.exists('shareContextModal')) {
+          await PageObjects.lens.closeShareModal();
+        }
+      });
       it(`should not allow to download reports for incomplete visualization`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.navigateToNewVisualization();
@@ -101,6 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.openReportingShare('PDF');
         await PageObjects.reporting.clickGenerateReportButton();
         const url = await PageObjects.reporting.getReportURL(60000);
+        await PageObjects.lens.closeShareModal();
         expect(url).to.be.ok();
         if (await testSubjects.exists('toastCloseButton')) {
           await testSubjects.click('toastCloseButton');
@@ -109,7 +115,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it(`should show a warning message for curl reporting of unsaved visualizations`, async () => {
         await PageObjects.lens.openReportingShare('PDF');
-        await testSubjects.click('shareReportingAdvancedOptionsButton');
         await testSubjects.existOrFail('shareReportingUnsavedState');
         expect(await testSubjects.getVisibleText('shareReportingUnsavedState')).to.eql(
           'Unsaved work\nSave your work before copying this URL.'
@@ -120,7 +125,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.save(`ASavedVisualizationToShareInPDF`);
 
         await PageObjects.lens.openReportingShare('PDF');
-        await testSubjects.click('shareReportingAdvancedOptionsButton');
         await testSubjects.existOrFail('shareReportingCopyURL');
         expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Copy POST URL');
       });
@@ -151,6 +155,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe(`PNG report`, () => {
+      afterEach(async () => {
+        if (await testSubjects.exists('shareContextModal')) {
+          await PageObjects.lens.closeShareModal();
+        }
+      });
       it(`should not allow to download reports for incomplete visualization`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.navigateToNewVisualization();
@@ -205,7 +214,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.save(`ASavedVisualizationToShareInPNG`);
 
         await PageObjects.lens.openReportingShare('PNG');
-        await testSubjects.click('shareReportingAdvancedOptionsButton');
         await testSubjects.existOrFail('shareReportingCopyURL');
         expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('POST URL');
       });

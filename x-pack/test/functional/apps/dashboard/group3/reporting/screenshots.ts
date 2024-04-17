@@ -93,7 +93,9 @@ export default function ({
     describe('Print PDF button', () => {
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          await PageObjects.share.closeShareModal(); // close modal
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal(); // close modal
+          }
           return await testSubjects.exists('shareTopNavButton');
         });
       });
