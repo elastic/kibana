@@ -107,7 +107,7 @@ export function defineRoutes({
       try {
         sourceFields = JSON.parse(data.source_fields);
       } catch (e) {
-        log.error('Failed to parse the source fields', e);
+        logger.error('Failed to parse the source fields', e);
         throw Error(e);
       }
 
@@ -140,7 +140,7 @@ export function defineRoutes({
         throw e;
       }
 
-      const { end, push, responseWithHeaders } = streamFactory(request.headers, log);
+      const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
 
       const reader = (stream as ReadableStream).getReader();
       const textDecoder = new TextDecoder();
