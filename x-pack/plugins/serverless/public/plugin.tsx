@@ -11,7 +11,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/cor
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {toMountPoint} from '@kbn/react-kibana-mount';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
@@ -83,7 +83,7 @@ export class ServerlessPlugin
 
     core.chrome.navControls.registerRight({
       order: 1,
-      mount: toMountPoint((
+      mount: toMountPoint(
         <EuiButton
           href="https://ela.st/serverless-feedback"
           size={'s'}
@@ -94,8 +94,9 @@ export class ServerlessPlugin
           {i18n.translate('serverless.header.giveFeedbackBtn.label', {
             defaultMessage: 'Give feedback',
           })}
-        </EuiButton>
-      ), {...core}),
+        </EuiButton>,
+        { ...core }
+      ),
     });
 
     return {
