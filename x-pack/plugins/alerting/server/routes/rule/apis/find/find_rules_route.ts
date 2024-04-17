@@ -77,7 +77,7 @@ const buildFindRulesRoute = ({
         });
 
         const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult);
+          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
 
         return res.ok({
           body: responseBody,
@@ -127,7 +127,7 @@ const buildFindRulesRoute = ({
           });
 
           const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-            transformFindRulesResponseV1<RuleParamsV1>(findResult);
+            transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
 
           return res.ok({
             body: responseBody,

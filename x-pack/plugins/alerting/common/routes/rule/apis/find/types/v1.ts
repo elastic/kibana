@@ -16,6 +16,6 @@ export interface FindRulesResponse<Params extends RuleParamsV1 = never> {
     page: number;
     per_page: number;
     total: number;
-    data: Array<RuleResponseV1<Params>>;
+    data: Array<Partial<RuleResponseV1<Params>>>;
   };
 }
