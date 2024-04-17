@@ -53,18 +53,6 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     }),
   },
   {
-    name: 'max',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.maxDoc', {
-      defaultMessage: 'Returns the maximum value in a field.',
-    }),
-  },
-  {
-    name: 'min',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.minDoc', {
-      defaultMessage: 'Returns the minimum value in a field.',
-    }),
-  },
-  {
     name: 'sum',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sumDoc', {
       defaultMessage: 'Returns the sum of the values in a field.',
@@ -98,6 +86,48 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
   },
 ]
   .map(createNumericAggDefinition)
+  .concat([
+    {
+      name: 'max',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.maxDoc', {
+        defaultMessage: 'Returns the maximum value in a field.',
+      }),
+      type: 'agg',
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
+        },
+        {
+          params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
+        },
+      ],
+    },
+    {
+      name: 'min',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.minDoc', {
+        defaultMessage: 'Returns the minimum value in a field.',
+      }),
+      type: 'agg',
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
+        },
+        {
+          params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
+        },
+      ],
+    },
+  ])
   .concat([
     {
       name: 'count',

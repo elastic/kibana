@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
-import { indexNameToDataStreamParts } from '../../../../common/utils';
-import { DEFAULT_LOGS_DATA_VIEW } from '../../../../common/constants';
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../../../utils';
-import { useCreateDataView } from '../../../hooks';
 import { getLensAttributes } from './lens_attributes';
 
 const CHART_HEIGHT = 180;
@@ -30,10 +28,14 @@ export function DegradedDocsChart({
   dataStream,
   timeRange,
   lastReloadTime,
+  dataView,
+  breakdownDataViewField,
 }: {
   dataStream?: string;
   timeRange: TimeRangeConfig;
   lastReloadTime: number;
+  dataView?: DataView;
+  breakdownDataViewField?: DataViewField;
 }) {
   const {
     services: { lens },
@@ -46,25 +48,23 @@ export function DegradedDocsChart({
     undefined
   );
 
-  const datasetTypeIndexPattern = dataStream
-    ? `${indexNameToDataStreamParts(dataStream).type}-*-*`
-    : undefined;
-  const { dataView } = useCreateDataView({
-    indexPatternString: datasetTypeIndexPattern ?? DEFAULT_LOGS_DATA_VIEW,
-  });
-
-  const handleChartLoading = (isLoading: boolean) => {
+  const handleChartLoading = useCallback((isLoading: boolean) => {
     setIsChartLoading(isLoading);
-  };
+  }, []);
 
   const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
 
   useEffect(() => {
     if (dataView) {
-      const lensAttributes = getLensAttributes(euiTheme.colors.danger, dataView);
+      const lensAttributes = getLensAttributes(
+        euiTheme.colors.danger,
+        dataView,
+        breakdownDataViewField?.name
+      );
+
       setAttributes(lensAttributes);
     }
-  }, [lens, euiTheme.colors.danger, dataView]);
+  }, [lens, euiTheme.colors.danger, dataView, breakdownDataViewField]);
 
   return (
     <>

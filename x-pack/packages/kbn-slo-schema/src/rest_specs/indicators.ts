@@ -15,6 +15,7 @@ import {
   kqlWithFiltersSchema,
   metricCustomIndicatorSchema,
   querySchema,
+  groupingsSchema,
   syntheticsAvailabilityIndicatorSchema,
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,
@@ -41,6 +42,7 @@ type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
+type GroupingsSchema = t.TypeOf<typeof groupingsSchema>;
 
 export type {
   APMTransactionDurationIndicator,
@@ -57,4 +59,5 @@ export type {
   KQLCustomIndicator,
   KqlWithFiltersSchema,
   QuerySchema,
+  GroupingsSchema,
 };

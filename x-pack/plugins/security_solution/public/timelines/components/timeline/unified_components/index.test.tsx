@@ -542,7 +542,9 @@ describe('unified timeline', () => {
     );
   });
 
-  describe('unified field list', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180937
+  // FLAKY: https://github.com/elastic/kibana/issues/180956
+  describe.skip('unified field list', () => {
     it(
       'should be able to add filters',
       async () => {
