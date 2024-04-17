@@ -7,11 +7,7 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import {
-  addObserverVersionTransform,
-  ApmSynthtraceEsClient,
-  deleteSummaryFieldTransform,
-} from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, deleteSummaryFieldTransform } from '@kbn/apm-synthtrace';
 import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_DURATION_SUMMARY,
@@ -258,21 +254,16 @@ function generateTraceDataForService({
     );
 
   const apmPipeline = (base: Readable) => {
-    const defaultPipeline = synthtrace.getDefaultPipeline()(
+    const defaultPipeline = synthtrace.getDefaultPipeline({ overrideVersion: '8.5.0' })(
       base
     ) as unknown as NodeJS.ReadableStream;
 
-    return pipeline(
-      defaultPipeline,
-      addObserverVersionTransform('8.5.0'),
-      deleteSummaryFieldTransform(),
-      (err) => {
-        if (err) {
-          // eslint-disable-next-line no-console
-          console.error(err);
-        }
+    return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
+      if (err) {
+        // eslint-disable-next-line no-console
+        console.error(err);
       }
-    );
+    });
   };
 
   return synthtrace.index(events, isLegacy ? apmPipeline : undefined);

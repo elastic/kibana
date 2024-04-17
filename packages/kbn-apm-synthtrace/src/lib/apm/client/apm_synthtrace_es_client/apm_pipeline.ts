@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import semver from 'semver';
 import { PassThrough, pipeline, Readable } from 'stream';
 import { getDedotTransform } from '../../../shared/get_dedot_transform';
 import { getSerializeTransform } from '../../../shared/get_serialize_transform';
@@ -26,9 +27,13 @@ export function apmPipeline(logger: Logger, version: string, includeSerializatio
       createTransactionMetricsAggregator('1m'),
       createTransactionMetricsAggregator('10m'),
       createTransactionMetricsAggregator('60m'),
-      createServiceMetricsAggregator('1m'),
-      createServiceMetricsAggregator('10m'),
-      createServiceMetricsAggregator('60m'),
+      ...(semver.lt(semver.coerce(version)?.version ?? version, '8.7.0')
+        ? []
+        : [
+            createServiceMetricsAggregator('1m'),
+            createServiceMetricsAggregator('10m'),
+            createServiceMetricsAggregator('60m'),
+          ]),
       createServiceSummaryMetricsAggregator('1m'),
       createServiceSummaryMetricsAggregator('10m'),
       createServiceSummaryMetricsAggregator('60m'),

@@ -11,11 +11,7 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import {
-  addObserverVersionTransform,
-  ApmSynthtraceEsClient,
-  deleteSummaryFieldTransform,
-} from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, deleteSummaryFieldTransform } from '@kbn/apm-synthtrace';
 import { Readable, pipeline } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -145,6 +141,94 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ).length
             ).to.eql(4);
           });
+        });
+      });
+    }
+  );
+
+  registry.when(
+    'Time range metadata when data comes from APM servers pre and post ServiceTransactionMetric docs',
+    { config: 'basic', archives: [] },
+    () => {
+      const withoutServiceTransactionMetricsStart = moment('2023-04-28T00:00:00.000Z');
+      const withoutServiceTransactionMetricsEnd = moment(withoutServiceTransactionMetricsStart).add(
+        1,
+        'hours'
+      );
+
+      const withServiceTransactionMetricsStart = moment(withoutServiceTransactionMetricsEnd);
+      const withServiceTransactionMetricsEnd = moment(withServiceTransactionMetricsStart).add(
+        1,
+        'hours'
+      );
+
+      before(async () => {
+        await getTransactionEvents({
+          start: withoutServiceTransactionMetricsStart,
+          end: withoutServiceTransactionMetricsEnd,
+          isLegacy: true,
+          synthtrace: synthtraceEsClient,
+          logger: log,
+        });
+
+        await getTransactionEvents({
+          start: withServiceTransactionMetricsStart,
+          end: withServiceTransactionMetricsEnd,
+          isLegacy: false,
+          synthtrace: synthtraceEsClient,
+          logger: log,
+        });
+      });
+
+      after(() => {
+        return synthtraceEsClient.clean();
+      });
+
+      describe('date range with and without ServiceTransactionMetric docs', () => {
+        it('returns hasDocs false to all serviceTransactionMetric entries', async () => {
+          const response = await getTimeRangeMedata({
+            start: withoutServiceTransactionMetricsStart,
+            end: withServiceTransactionMetricsEnd,
+          });
+
+          expect(
+            response.sources.filter(
+              (source) =>
+                source.documentType === ApmDocumentType.ServiceTransactionMetric && !source.hasDocs
+            ).length
+          ).to.eql(3);
+        });
+      });
+
+      describe('range starting from when there is no data', () => {
+        it('returns hasDocs false to all serviceTransactionMetric entries', async () => {
+          const response = await getTimeRangeMedata({
+            start: moment(withoutServiceTransactionMetricsStart).subtract(1, 'hour'),
+            end: withServiceTransactionMetricsEnd,
+          });
+
+          expect(
+            response.sources.filter(
+              (source) =>
+                source.documentType === ApmDocumentType.ServiceTransactionMetric && !source.hasDocs
+            ).length
+          ).to.eql(3);
+        });
+      });
+
+      describe('range starting from there is serviceTransactionMetric docs', () => {
+        it('returns hasDocs true to all serviceTransactionMetric entries', async () => {
+          const response = await getTimeRangeMedata({
+            start: withServiceTransactionMetricsStart,
+            end: withServiceTransactionMetricsEnd,
+          });
+
+          expect(
+            response.sources.filter(
+              (source) =>
+                source.documentType === ApmDocumentType.ServiceTransactionMetric && source.hasDocs
+            ).length
+          ).to.eql(3);
         });
       });
     }
@@ -497,7 +581,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: false,
-              hasDurationSummaryField: true,
+              hasDurationSummaryField: false,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
@@ -563,20 +647,15 @@ function getTransactionEvents({
   ];
 
   const apmPipeline = (base: Readable) => {
-    const defaultPipeline = synthtrace.getDefaultPipeline()(
+    const defaultPipeline = synthtrace.getDefaultPipeline({ overrideVersion: '8.5.0' })(
       base
     ) as unknown as NodeJS.ReadableStream;
 
-    return pipeline(
-      defaultPipeline,
-      addObserverVersionTransform('8.5.0'),
-      deleteSummaryFieldTransform(),
-      (err) => {
-        if (err) {
-          logger.error(err);
-        }
+    return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
+      if (err) {
+        logger.error(err);
       }
-    );
+    });
   };
 
   return synthtrace.index(events, isLegacy ? apmPipeline : undefined);

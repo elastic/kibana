@@ -11,15 +11,16 @@ import { random } from 'lodash';
 import { pipeline, Readable } from 'stream';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
-import {
-  addObserverVersionTransform,
-  deleteSummaryFieldTransform,
-} from '../lib/utils/transform_helpers';
+import { deleteSummaryFieldTransform } from '../lib/utils/transform_helpers';
 import { withClient } from '../lib/utils/with_client';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import { Logger } from '../lib/utils/create_logger';
 
-const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
-  const version = versionOverride as string;
-  const isLegacy = versionOverride && semver.lt(version, '8.7.0');
+const scenario: Scenario<ApmFields> = async ({
+  logger,
+  'assume-package-version': assumePackageVersion,
+}: RunOptions & { logger: Logger }) => {
+  const isLegacy = assumePackageVersion ? semver.lt(assumePackageVersion, '8.7.0') : false;
   return {
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
@@ -28,16 +29,11 @@ const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
             base
           ) as unknown as NodeJS.ReadableStream;
 
-          return pipeline(
-            defaultPipeline,
-            addObserverVersionTransform(version),
-            deleteSummaryFieldTransform(),
-            (err) => {
-              if (err) {
-                logger.error(err);
-              }
+          return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
+            if (err) {
+              logger.error(err);
             }
-          );
+          });
         });
       }
     },
@@ -45,7 +41,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
       const successfulTimestamps = range.ratePerMinute(6);
       const instance = apm
         .service({
-          name: `java${isLegacy ? '-legacy' : ''}`,
+          name: `java`,
           environment: 'production',
           agentName: 'java',
         })

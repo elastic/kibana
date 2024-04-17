@@ -65,7 +65,15 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
     this.logger.info(`Updated component template: ${name}`);
   }
 
-  getDefaultPipeline(includeSerialization: boolean = true) {
-    return apmPipeline(this.logger, this.version, includeSerialization);
+  getDefaultPipeline(
+    {
+      includeSerialization,
+      overrideVersion,
+    }: {
+      includeSerialization?: boolean;
+      overrideVersion?: string;
+    } = { includeSerialization: true }
+  ) {
+    return apmPipeline(this.logger, overrideVersion ?? this.version, includeSerialization);
   }
 }
