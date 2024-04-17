@@ -27,10 +27,6 @@ const getTimeRangeFilter = (
         }
       : fetchContext.timeRange;
   if (!dataView || !timeRange) return undefined;
-  console.log(
-    'discoverServices.timefilter.createFilter(dataView, timeRange)',
-    discoverServices.timefilter.createFilter(dataView, timeRange)
-  );
   return discoverServices.timefilter.createFilter(dataView, timeRange);
 };
 
