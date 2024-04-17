@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { EuiSkeletonText } from '@elastic/eui';
 import { ConfigurationFormControlled } from './configuration_form_controlled';
 import { useConnectionDetailsService } from '../../../../context';
 import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
@@ -16,19 +17,24 @@ export const ConfigurationForm: React.FC = () => {
   const keyName = useBehaviorSubject(service.apiKeyName$);
   const keyStatus = useBehaviorSubject(service.apiKeyStatus$);
   const keyError = useBehaviorSubject(service.apiKeyError$);
+  const hasAccess = useBehaviorSubject(service.apiKeyHasAccess$);
+
+  const isLoadingPermissions = hasAccess === null;
 
   return (
-    <ConfigurationFormControlled
-      name={keyName}
-      error={keyError}
-      loading={keyStatus === 'creating'}
-      onNameChange={(event) => {
-        service.setApiKeyName(event.target.value);
-      }}
-      onSubmit={(event) => {
-        event.preventDefault();
-        service.createKey();
-      }}
-    />
+    <EuiSkeletonText isLoading={isLoadingPermissions}>
+      <ConfigurationFormControlled
+        name={keyName}
+        error={keyError}
+        loading={keyStatus === 'creating'}
+        onNameChange={(event) => {
+          service.setApiKeyName(event.target.value);
+        }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          service.createKey();
+        }}
+      />
+    </EuiSkeletonText>
   );
 };

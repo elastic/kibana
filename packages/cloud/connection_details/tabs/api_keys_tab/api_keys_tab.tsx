@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import * as React from 'react';
 import { useConnectionDetailsService } from '../../context';
 import { useBehaviorSubject } from '../../hooks/use_behavior_subject';
@@ -21,7 +20,6 @@ export const ApiKeysTab: React.FC = () => {
   const hasAccess = useBehaviorSubject(service.apiKeyHasAccess$);
 
   if (!apiKeys) return null;
-  if (hasAccess === null) return <EuiLoadingSpinner size="s" />;
   if (hasAccess === false) return <MissingPermissionsPanel />;
   if (apiKey) return <SuccessForm />;
 
