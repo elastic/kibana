@@ -134,7 +134,7 @@ const useSourcererDataViewMocked = jest.fn().mockReturnValue({
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
-// Failing: See https://github.com/elastic/kibana/issues/179831
+// Flaky : See https://github.com/elastic/kibana/issues/179831
 describe.skip('query tab with unified timeline', () => {
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
@@ -197,6 +197,47 @@ describe.skip('query tab with unified timeline', () => {
         await waitFor(() => {
           expect(screen.getByTestId('timeline-sidebar')).toBeVisible();
         });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+    it(
+      'should show row-renderers correctly by default',
+      async () => {
+        renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
+        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+      },
+
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should hide row-renderers when disabled',
+      async () => {
+        renderTestComponents();
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverDocTable')).toBeVisible();
+        });
+
+        expect(screen.getByTestId('timeline-row-renderer-0')).toBeVisible();
+
+        fireEvent.click(screen.getByTestId('show-row-renderers-gear'));
+        expect(screen.getByTestId('row-renderers-modal')).toBeVisible();
+
+        fireEvent.click(screen.getByTestId('disable-all'));
+
+        expect(
+          within(screen.getAllByTestId('renderer-checkbox')[0]).getByRole('checkbox')
+        ).not.toBeChecked();
+
+        fireEvent.click(screen.getByLabelText('Closes this modal window'));
+
+        expect(screen.queryByTestId('row-renderers-modal')).toBeFalsy();
+
+        expect(screen.queryByTestId('timeline-row-renderer-0')).toBeFalsy();
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -285,7 +326,7 @@ describe.skip('query tab with unified timeline', () => {
     );
 
     it(
-      'should remove column left/right ',
+      'should remove column',
       async () => {
         const { container } = renderTestComponents();
 
@@ -476,8 +517,7 @@ describe.skip('query tab with unified timeline', () => {
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179845
-  describe.skip('left controls', () => {
+  describe('left controls', () => {
     it(
       'should clear all sorting',
       async () => {
@@ -507,6 +547,7 @@ describe.skip('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
+    // Failing: See https://github.com/elastic/kibana/issues/179831
     it(
       'should be able to sort by multiple columns',
       async () => {
@@ -556,7 +597,7 @@ describe.skip('query tab with unified timeline', () => {
 
   describe('unified fields list', () => {
     it(
-      'should add the column when clicked on X sign',
+      'should remove the column when clicked on X sign',
       async () => {
         const field = {
           name: 'event.severity',
@@ -588,7 +629,7 @@ describe.skip('query tab with unified timeline', () => {
     );
 
     it(
-      'should remove the column when clicked on ⊕ sign',
+      'should add the column when clicked on ⊕ sign',
       async () => {
         const field = {
           name: 'agent.id',
@@ -628,7 +669,7 @@ describe.skip('query tab with unified timeline', () => {
 
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '36'
+            '37'
           );
         });
 
@@ -654,7 +695,7 @@ describe.skip('query tab with unified timeline', () => {
         expect(await screen.findByTestId('timeline-sidebar')).toBeVisible();
         await waitFor(() => {
           expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent(
-            '36'
+            '37'
           );
         });
 

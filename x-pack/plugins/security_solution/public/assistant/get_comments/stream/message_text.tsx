@@ -156,7 +156,7 @@ const getPluginDependencies = () => {
 
 export function MessageText({ loading, content, index }: Props) {
   const containerClassName = css`
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
   `;
 
   const { parsingPluginList, processingPluginList } = getPluginDependencies();
@@ -169,6 +169,7 @@ export function MessageText({ loading, content, index }: Props) {
         data-test-subj={'messageText'}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
+        textSize="s"
       >
         {`${content}${loading ? CURSOR : ''}`}
       </EuiMarkdownFormat>
