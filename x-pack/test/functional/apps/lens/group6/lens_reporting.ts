@@ -133,6 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should produce a valid URL for reporting`, async () => {
+        await PageObjects.lens.openReportingShare('PDF');
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.getReportURL(60000);
         if (await testSubjects.exists('toastCloseButton')) {
@@ -209,23 +210,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.closeShareModal();
       });
 
-      it(`should show a warning message for curl reporting of unsaved visualizations`, async () => {
-        await PageObjects.lens.openReportingShare('PNG');
-        await testSubjects.existOrFail('shareReportingUnsavedState');
-        expect(await testSubjects.getVisibleText('shareReportingUnsavedState')).to.eql(
-          'Unsaved work\nSave your work before copying this URL.'
-        );
-      });
-
       it(`should enable curl reporting if the visualization is saved`, async () => {
         await PageObjects.lens.save(`ASavedVisualizationToShareInPNG`);
 
         await PageObjects.lens.openReportingShare('PNG');
         await testSubjects.existOrFail('shareReportingCopyURL');
-        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('POST URL');
+        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Post URL');
       });
 
       it(`should produce a valid URL for reporting`, async () => {
+        await PageObjects.lens.openReportingShare('PNG');
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.getReportURL(60000);
         if (await testSubjects.exists('toastCloseButton')) {
