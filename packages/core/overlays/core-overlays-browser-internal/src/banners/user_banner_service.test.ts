@@ -9,7 +9,9 @@
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { UserBannerService } from './user_banner_service';
 import { overlayBannersServiceMock } from './banners_service.test.mocks';
-import { analyticsServiceMock, i18nServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { Subject } from 'rxjs';
 
 describe('OverlayBannersService', () => {
