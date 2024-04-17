@@ -128,6 +128,11 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
+        // await cisIntegration.clickText('Replace secret access key');
+        // expect(
+        //   (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_SECRET_KEY_TEST_ID)) ===
+        //     undefined
+        // ).to.be(true);
       });
     });
 

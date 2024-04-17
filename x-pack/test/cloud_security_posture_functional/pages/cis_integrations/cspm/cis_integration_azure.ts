@@ -49,9 +49,9 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    afterEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
+    // afterEach(async () => {
+    //   await kibanaServer.savedObjects.cleanStandardList();
+    // });
 
     describe('Azure Organization ARM Template', () => {
       it('Azure Organization ARM Template Workflow', async () => {
