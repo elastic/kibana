@@ -6,7 +6,7 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
-import { FilterManager, NowProvider, QueryService } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
@@ -112,13 +112,6 @@ export class PluginServices {
     });
     const customDataService = this.startCustomDataService(query, startPlugins.data);
 
-    const timelineDataService: DataPublicPluginStart = {
-      ...startPlugins.data,
-      query,
-    };
-
-    timelineDataService.query.filterManager = new FilterManager(coreStart.uiSettings);
-
     return {
       ...coreStart,
       ...plugins,
@@ -136,7 +129,7 @@ export class PluginServices {
       telemetry: this.telemetry.start(),
       customDataService,
       topValuesPopover: new TopValuesPopoverService(),
-      timelineDataService,
+      timelineDataService: this.startTimelineDataService(query, startPlugins.data),
     };
   }
 
@@ -156,5 +149,12 @@ export class PluginServices {
     // @ts-expect-error
     customDataService.query.filterManager._name = 'customFilterManager';
     return customDataService;
+  };
+
+  private startTimelineDataService = (query: QueryStart, data: DataPublicPluginStart) => {
+    return {
+      ...data,
+      query,
+    };
   };
 }
