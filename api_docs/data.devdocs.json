@@ -15701,32 +15701,17 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.IndexPatternsFetcher.Unnamed.$2",
-                "type": "boolean",
+                "type": "Object",
                 "tags": [],
-                "label": "allowNoIndices",
+                "label": "optionalParams",
                 "description": [],
                 "signature": [
-                  "boolean"
+                  "IndexPatternsFetcherOptionalParams | undefined"
                 ],
                 "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-server.IndexPatternsFetcher.Unnamed.$3",
-                "type": "boolean",
-                "tags": [],
-                "label": "rollupsEnabled",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []

@@ -43,8 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('API /metrics/infra', () => {
     describe('works', () => {
       describe('with host asset', () => {
-        before(() => esArchiver.load(ARCHIVE_NAME));
-        after(() => esArchiver.unload(ARCHIVE_NAME));
+        before(async () => esArchiver.load(ARCHIVE_NAME));
+        after(async () => esArchiver.unload(ARCHIVE_NAME));
 
         it('received data', async () => {
           const infraHosts = await fetchInfraHosts({

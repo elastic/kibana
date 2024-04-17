@@ -14,7 +14,7 @@ import { createOpenAiChunk } from './create_openai_chunk';
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
-type RequestHandler = (request: Request, response: Response) => void;
+type RequestHandler = (request: Request, response: Response, body: string) => void;
 
 interface RequestInterceptor {
   name: string;
@@ -22,6 +22,7 @@ interface RequestInterceptor {
 }
 
 export interface LlmResponseSimulator {
+  body: string;
   status: (code: number) => Promise<void>;
   next: (
     msg:
@@ -56,7 +57,7 @@ export class LlmProxy {
 
           if (interceptor.when(body)) {
             pull(this.interceptors, interceptor);
-            interceptor.handle(request, response);
+            interceptor.handle(request, response, body);
             return;
           }
         }
@@ -104,7 +105,7 @@ export class LlmProxy {
         this.interceptors.push({
           name,
           when,
-          handle: (request, response) => {
+          handle: (request, response, body) => {
             this.log.info(`LLM request intercepted by "${name}"`);
 
             function write(chunk: string) {
@@ -115,6 +116,7 @@ export class LlmProxy {
             }
 
             const simulator: LlmResponseSimulator = {
+              body,
               status: once(async (status: number) => {
                 response.writeHead(status, {
                   'Content-Type': 'text/event-stream',
