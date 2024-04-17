@@ -20,6 +20,8 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
+import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
+import { bulkCreateSuppressedEsqlAlertsInMemory } from './bulk_create_suppressed_esql_alerts_in_memory';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
@@ -58,6 +60,7 @@ export const esqlExecutor = async ({
     unprocessedExceptions,
     alertTimestampOverride,
     publicBaseUrl,
+    alertWithSuppression,
   },
   services,
   state,
@@ -133,35 +136,90 @@ export const esqlExecutor = async ({
         isFeatureDisabled: !experimentalFeatures?.alertSuppressionForEsqlRuleEnabled,
       });
 
-      const wrappedAlerts = wrapEsqlAlerts({
-        sourceDocuments,
-        isRuleAggregating,
-        results,
-        spaceId,
-        completeRule,
-        mergeStrategy,
-        alertTimestampOverride,
-        ruleExecutionLogger,
-        publicBaseUrl,
-        tuple,
-      });
+      if (isAlertSuppressionActive) {
+        const wrapHits = (esqlResults: Array<Record<string, string | null>>) =>
+          wrapEsqlAlerts({
+            results: esqlResults,
+            spaceId,
+            completeRule,
+            mergeStrategy,
+            sourceDocuments,
+            isRuleAggregating,
+            alertTimestampOverride,
+            ruleExecutionLogger,
+            publicBaseUrl,
+            tuple,
+          });
 
-      const enrichAlerts = createEnrichEventsFunction({
-        services,
-        logger: ruleExecutionLogger,
-      });
-      const bulkCreateResult = await bulkCreate(
-        wrappedAlerts,
-        tuple.maxSignals - result.createdSignalsCount,
-        enrichAlerts
-      );
+        const wrapSuppressedHits = (esqlResults: Array<Record<string, string | null>>) =>
+          wrapSuppressedEsqlAlerts({
+            results: esqlResults,
+            spaceId,
+            completeRule,
+            mergeStrategy,
+            sourceDocuments,
+            isRuleAggregating,
+            alertTimestampOverride,
+            ruleExecutionLogger,
+            publicBaseUrl,
+            primaryTimestamp,
+            secondaryTimestamp,
+            tuple,
+          });
 
-      addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-      ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
+        const bulkCreateResult = await bulkCreateSuppressedEsqlAlertsInMemory({
+          results,
+          toReturn: result,
+          wrapHits,
+          bulkCreate,
+          services,
+          ruleExecutionLogger,
+          tuple,
+          alertSuppression: completeRule.ruleParams.alertSuppression,
+          wrapSuppressedHits,
+          alertTimestampOverride,
+          alertWithSuppression,
+          experimentalFeatures,
+        });
 
-      if (bulkCreateResult.alertsWereTruncated) {
-        result.warningMessages.push(getMaxSignalsWarning());
-        break;
+        addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+        ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts.`);
+
+        if (bulkCreateResult.alertsWereTruncated) {
+          result.warningMessages.push(getMaxSignalsWarning());
+          break;
+        }
+      } else {
+        const wrappedAlerts = wrapEsqlAlerts({
+          sourceDocuments,
+          isRuleAggregating,
+          results,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl,
+          tuple,
+        });
+
+        const enrichAlerts = createEnrichEventsFunction({
+          services,
+          logger: ruleExecutionLogger,
+        });
+        const bulkCreateResult = await bulkCreate(
+          wrappedAlerts,
+          tuple.maxSignals - result.createdSignalsCount,
+          enrichAlerts
+        );
+
+        addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+        ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
+
+        if (bulkCreateResult.alertsWereTruncated) {
+          result.warningMessages.push(getMaxSignalsWarning());
+          break;
+        }
       }
 
       // no more results will be found

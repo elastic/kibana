@@ -33,7 +33,7 @@ export const getSuppressionAlertFields = ({
   fallbackTimestamp,
   instanceId,
 }: {
-  fields: Record<string, string | number> | undefined;
+  fields: Record<string, string | number | null> | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   suppressionTerms: SuppressionTerm[];

@@ -21,10 +21,8 @@ import { executeBulkCreateAlerts } from '../utils/bulk_create_suppressed_alerts_
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-  NewTermsFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { partitionMissingFieldsEvents } from '../utils/partition_missing_fields_events';
-import type { EventsAndTerms } from './types';
 import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
@@ -45,14 +43,12 @@ export interface BulkCreateSuppressedAlertsParams
     | 'alertTimestampOverride'
   > {
   wrapHits: (
-    events: EventsAndTerms[]
-  ) => Array<WrappedFieldsLatest<BaseFieldsLatest & NewTermsFieldsLatest>>;
+    results: Array<Record<string, string | null>>
+  ) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
   wrapSuppressedHits: (
-    events: EventsAndTerms[]
-  ) => Array<
-    WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest & NewTermsFieldsLatest>
-  >;
-  eventsAndTerms: EventsAndTerms[];
+    results: Array<Record<string, string | null>>
+  ) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+  results: Array<Record<string, string | null>>;
   toReturn: SearchAfterAndBulkCreateReturnType;
   experimentalFeatures: ExperimentalFeatures;
 }
@@ -60,10 +56,10 @@ export interface BulkCreateSuppressedAlertsParams
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
  * If parameter alertSuppression.missingFieldsStrategy configured not to be suppressed, regular alerts will be created for such events without suppression
  * This function is similar to x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/bulk_create_suppressed_alerts_in_memory.ts, but
- * it operates with new terms specific eventsAndTerms{@link EventsAndTerms} parameter property, instead of regular events as common utility
+ * it operates ES|QL specific data structure - ES|QL table results
  */
-export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
-  eventsAndTerms,
+export const bulkCreateSuppressedEsqlAlertsInMemory = async ({
+  results,
   wrapHits,
   wrapSuppressedHits,
   toReturn,
@@ -80,22 +76,22 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
     (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
-  let suppressibleEvents = eventsAndTerms;
+  let suppressibleResults = results;
   let unsuppressibleWrappedDocs: Array<WrappedFieldsLatest<BaseFieldsLatest>> = [];
 
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
-      eventsAndTerms,
+      results,
       alertSuppression?.groupBy || [],
-      ['event', 'fields']
+      []
     );
 
     unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1]);
 
-    suppressibleEvents = partitionedEvents[0];
+    suppressibleResults = partitionedEvents[0];
   }
 
-  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleEvents);
+  const suppressibleWrappedDocs = wrapSuppressedHits(suppressibleResults);
 
   return executeBulkCreateAlerts({
     suppressibleWrappedDocs,

@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    it.skip('should suppress an alert during real rule executions', async () => {
+    it('should suppress an alert during real rule executions', async () => {
       const id = uuidv4();
       const firstTimestamp = new Date().toISOString();
 
@@ -123,14 +123,14 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-0'],
+              value: 'host-0',
             },
           ],
           // suppression boundaries equal to original event time, since no alert been suppressed
           [ALERT_SUPPRESSION_START]: firstTimestamp,
           [ALERT_SUPPRESSION_END]: firstTimestamp,
           [ALERT_ORIGINAL_TIME]: firstTimestamp,
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
         })
       );
 
@@ -164,18 +164,18 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-0'],
+              value: 'host-0',
             },
           ],
           [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
           [ALERT_SUPPRESSION_START]: firstTimestamp, // suppression start is the same
           [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 2, // 2 alerts from second rule run, that's why 2 suppressed
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
         })
       );
     });
 
-    it.skip('should NOT suppress and update an alert if the alert is closed', async () => {
+    it('should NOT suppress and update an alert if the alert is closed', async () => {
       const id = uuidv4();
       const firstTimestamp = new Date().toISOString();
 
@@ -246,7 +246,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-0'],
+              value: 'host-0',
             },
           ],
           [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -255,7 +255,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it.skip('should NOT suppress alerts when suppression period is less than rule interval', async () => {
+    it('should NOT suppress alerts when suppression period is less than rule interval', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:15:00.000Z';
@@ -284,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
         alert_suppression: {
           group_by: ['host.name'],
           duration: {
-            value: 60,
+            value: 10,
             unit: 'm',
           },
           missing_fields_strategy: 'suppress',
@@ -309,7 +309,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-0'],
+              value: 'host-0',
             },
           ],
           [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-0'],
+              value: 'host-0',
             },
           ],
           [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
@@ -335,7 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it.skip('should suppress alerts in the time window that covers 3 rule executions', async () => {
+    it('should suppress alerts in the time window that covers 3 rule executions', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:15:00.000Z';
@@ -406,7 +406,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-0'],
+            value: 'host-0',
           },
         ],
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -419,7 +419,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('should suppress the correct alerts based on multi values group_by', async () => {
+    it('should suppress the correct alerts based on multi values group_by', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:15:00.000Z';
@@ -463,7 +463,7 @@ export default ({ getService }: FtrProviderContext) => {
         from: 'now-35m',
         interval: '30m',
         alert_suppression: {
-          group_by: ['host.name', 'agent.name'],
+          group_by: ['host.name', 'agent.version'],
           duration: {
             value: 60,
             unit: 'm',
@@ -493,11 +493,11 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
           {
             field: 'agent.version',
-            value: ['1'],
+            value: '1',
           },
         ],
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -511,11 +511,11 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
           {
             field: 'agent.version',
-            value: ['2'],
+            value: '2',
           },
         ],
         [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -527,7 +527,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('should correctly suppress when using a timestamp override', async () => {
+    it('should correctly suppress when using a timestamp override', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -584,7 +584,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -594,7 +594,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('should deduplicate multiple alerts while suppressing new ones', async () => {
+    it('should deduplicate multiple alerts while suppressing new ones', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -664,7 +664,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -674,7 +674,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('should suppress alerts with missing fields', async () => {
+    it('should suppress alerts with missing fields', async () => {
       const id = uuidv4();
       const firstTimestamp = '2020-10-28T05:45:00.000Z';
       const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -748,7 +748,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -846,7 +846,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -937,7 +937,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1021,7 +1021,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'custom_field',
-            value: ['prefix_host'],
+            value: 'prefix_host',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1035,7 +1035,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'custom_field',
-            value: ['prefix_test'],
+            value: 'prefix_test',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1100,7 +1100,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_SUPPRESSION_TERMS]: [
           {
             field: 'host.name',
-            value: ['host-a'],
+            value: 'host-a',
           },
         ],
         [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1111,7 +1111,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('rule execution only', () => {
-      it.skip('should suppress alerts during rule execution only', async () => {
+      it('should suppress alerts during rule execution only', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:45:00.000Z';
         const laterTimestamp = '2020-10-28T06:50:00.000Z';
@@ -1172,7 +1172,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
@@ -1184,7 +1184,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it.skip('should suppress alerts per rule execution for array field', async () => {
+      it('should suppress alerts per rule execution for array field', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:45:00.000Z';
 
@@ -1243,7 +1243,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it.skip('should suppress alerts with missing fields during rule execution only for multiple suppress by fields', async () => {
+      it('should suppress alerts with missing fields during rule execution only for multiple suppress by fields', async () => {
         const id = uuidv4();
         const timestamp = '2020-10-28T06:45:00.000Z';
 
@@ -1330,11 +1330,11 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['agent-a'],
+              value: 'agent-a',
             },
             {
               field: 'agent.version',
-              value: ['10'],
+              value: '10',
             },
           ],
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -1345,7 +1345,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['agent-a'],
+              value: 'agent-a',
             },
             {
               field: 'agent.version',
@@ -1364,7 +1364,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               field: 'agent.version',
-              value: ['10'],
+              value: '10',
             },
           ],
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -1474,11 +1474,11 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['agent-a'],
+              value: 'agent-a',
             },
             {
               field: 'agent.version',
-              value: ['10'],
+              value: '10',
             },
           ],
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -1495,7 +1495,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it.skip('should deduplicate alerts while suppressing new ones on rule execution', async () => {
+      it('should deduplicate alerts while suppressing new ones on rule execution', async () => {
         const id = uuidv4();
         const firstTimestamp = '2020-10-28T05:45:00.000Z';
         const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -1561,7 +1561,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1574,7 +1574,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'host.name',
-              value: ['host-a'],
+              value: 'host-a',
             },
           ],
           [ALERT_ORIGINAL_TIME]: secondTimestamp,
@@ -1633,7 +1633,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['agent-a'],
+              value: 'agent-a',
             },
           ],
           [ALERT_SUPPRESSION_DOCS_COUNT]: 199,
@@ -1701,7 +1701,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllExceptions(supertest, log);
       });
 
-      it.skip('should apply exceptions', async () => {
+      it('should apply exceptions', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.2' };
@@ -1746,7 +1746,7 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_TERMS]: [
             {
               field: 'agent.name',
-              value: ['test-1'],
+              value: 'test-1',
             },
           ],
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -1763,7 +1763,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
-      it.skip('should be enriched with host risk score', async () => {
+      it('should be enriched with host risk score', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };
@@ -1808,7 +1808,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
       });
 
-      it.skip('should be enriched alert with criticality_level', async () => {
+      it('should be enriched alert with criticality_level', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { host: { name: 'host-0' } };

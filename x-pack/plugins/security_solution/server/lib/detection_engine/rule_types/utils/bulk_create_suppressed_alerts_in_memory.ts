@@ -81,7 +81,8 @@ export const bulkCreateSuppressedAlertsInMemory = async ({
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       enrichedEvents,
-      alertSuppression?.groupBy || []
+      alertSuppression?.groupBy || [],
+      ['fields']
     );
 
     unsuppressibleWrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);

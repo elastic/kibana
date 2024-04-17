@@ -30,7 +30,8 @@ describe('partitionMissingFieldsEvents', () => {
             _index: 'index-0',
           },
         ],
-        ['agent.host', 'agent.type', 'agent.version']
+        ['agent.host', 'agent.type', 'agent.version'],
+        ['fields']
       )
     ).toEqual([
       [
@@ -83,7 +84,7 @@ describe('partitionMissingFieldsEvents', () => {
           },
         ],
         ['agent.host', 'agent.type', 'agent.version'],
-        ['event']
+        ['event', 'fields']
       )
     ).toEqual([
       [
@@ -125,7 +126,8 @@ describe('partitionMissingFieldsEvents', () => {
             _index: 'index-0',
           },
         ],
-        ['agent.host', 'agent.type', 'agent.version']
+        ['agent.host', 'agent.type', 'agent.version'],
+        ['fields']
       )
     ).toEqual([
       [],
@@ -152,7 +154,8 @@ describe('partitionMissingFieldsEvents', () => {
             _index: 'index-0',
           },
         ],
-        ['agent.host', 'agent.type', 'agent.version']
+        ['agent.host', 'agent.type', 'agent.version'],
+        ['fields']
       )
     ).toEqual([
       [],
