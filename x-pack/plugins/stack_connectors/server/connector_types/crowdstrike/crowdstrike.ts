@@ -27,8 +27,6 @@ import {
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
 
-export const API_PATH = 'https://api.crowdstrike.com';
-
 const paramsSerializer = (params: Record<string, string>) => {
   return Object.entries(params)
     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
@@ -36,10 +34,11 @@ const paramsSerializer = (params: Record<string, string>) => {
 };
 
 /**
- * Represents a book.
+ * Crowdstrike Connector
  * @constructor
  * @param {string} token - Authorization token received from OAuth2 API, that needs to be sent along with each request.
  * @param {number} tokenExpiryTimeout - Tokens are valid for 30 minutes, so we will refresh them every 29 minutes
+ * @param {base64} base64encodedToken - The base64 encoded token used for authentication.
  */
 
 export class CrowdstrikeConnector extends SubActionConnector<
@@ -48,7 +47,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
 > {
   private static token: string | null;
   private static tokenExpiryTimeout: NodeJS.Timeout;
-  private static base64encodedData: string;
+  private static base64encodedToken: string;
   private urls: {
     getToken: string;
     agents: string;
@@ -58,13 +57,13 @@ export class CrowdstrikeConnector extends SubActionConnector<
   constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
     super(params);
     this.urls = {
-      getToken: `${API_PATH}/oauth2/token`,
-      hostAction: `${API_PATH}/devices/entities/devices-actions/v2`,
-      agents: `${API_PATH}/devices/entities/devices/v2`,
+      getToken: `${this.config.url}/oauth2/token`,
+      hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
+      agents: `${this.config.url}/devices/entities/devices/v2`,
     };
 
-    if (!CrowdstrikeConnector.base64encodedData) {
-      CrowdstrikeConnector.base64encodedData = Buffer.from(
+    if (!CrowdstrikeConnector.base64encodedToken) {
+      CrowdstrikeConnector.base64encodedToken = Buffer.from(
         this.secrets.clientId + ':' + this.secrets.clientSecret
       ).toString('base64');
     }
@@ -130,7 +129,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       headers: {
         accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
-        authorization: 'Basic ' + this.base64encodedData,
+        authorization: 'Basic ' + this.base64encodedToken,
       },
       responseSchema: CrowdstrikeGetTokenResponseSchema,
     });
@@ -184,9 +183,9 @@ export class CrowdstrikeConnector extends SubActionConnector<
     }
 
     if (!error.response?.status) {
-      return 'Unknown API Error';
+      return `Unknown API Error: ${JSON.stringify(error.response?.data ?? {})}`;
     }
 
-    return `API Error: ${error.response?.statusText}`;
+    return `API Error: ${JSON.stringify(error.response.data ?? {})}`;
   }
 }

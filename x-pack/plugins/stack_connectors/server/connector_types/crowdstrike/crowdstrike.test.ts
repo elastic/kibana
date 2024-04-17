@@ -18,7 +18,7 @@ describe('CrowdstrikeConnector', () => {
   const connector = new CrowdstrikeConnector({
     configurationUtilities: actionsConfigMock.create(),
     connector: { id: '1', type: CROWDSTRIKE_CONNECTOR_ID },
-    config: {},
+    config: { url: 'https://api.crowdstrike.com' },
     secrets: { clientId: '123', clientSecret: 'secret' },
     logger: loggingSystemMock.createLogger(),
     services: actionsMock.createServices(),
@@ -36,9 +36,6 @@ describe('CrowdstrikeConnector', () => {
   });
 
   describe('executeHostActions', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
     it('should make a POST request to the correct URL with correct data', async () => {
       const mockResponse = { data: { id: 'testid', path: 'testpath' } };
       //

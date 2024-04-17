@@ -9,7 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { SUB_ACTION } from './constants';
 
 // Connector schema
-export const CrowdstrikeConfigSchema = schema.object({});
+export const CrowdstrikeConfigSchema = schema.object({
+  url: schema.string(),
+});
 export const CrowdstrikeSecretsSchema = schema.object({
   clientId: schema.string(),
   clientSecret: schema.string(),
@@ -20,11 +22,14 @@ export const CrowdstrikeBaseApiResponseSchema = schema.object(
   {
     resources: schema.arrayOf(schema.any()),
     errors: schema.nullable(schema.arrayOf(schema.any())),
-    meta: schema.object({
-      query_time: schema.maybe(schema.number()),
-      powered_by: schema.maybe(schema.string()),
-      trace_id: schema.maybe(schema.string()),
-    }),
+    meta: schema.object(
+      {
+        query_time: schema.maybe(schema.number()),
+        powered_by: schema.maybe(schema.string()),
+        trace_id: schema.maybe(schema.string()),
+      },
+      { unknowns: 'allow' }
+    ),
   },
   { unknowns: 'allow' }
 );
@@ -79,42 +84,57 @@ export const CrowdstrikeGetAgentsResponseSchema = schema.object(
             ),
             reduced_functionality_mode: schema.maybe(schema.string()),
             device_policies: schema.maybe(
-              schema.object({
-                prevention: schema.object({
-                  policy_type: schema.maybe(schema.string()),
-                  policy_id: schema.maybe(schema.string()),
-                  applied: schema.maybe(schema.boolean()),
-                  settings_hash: schema.maybe(schema.string()),
-                  assigned_date: schema.maybe(schema.string()),
-                  applied_date: schema.maybe(schema.string()),
-                  rule_groups: schema.any(),
-                }),
-                sensor_update: schema.object({
-                  policy_type: schema.maybe(schema.string()),
-                  policy_id: schema.maybe(schema.string()),
-                  applied: schema.maybe(schema.boolean()),
-                  settings_hash: schema.maybe(schema.string()),
-                  assigned_date: schema.maybe(schema.string()),
-                  applied_date: schema.maybe(schema.string()),
-                  uninstall_protection: schema.maybe(schema.string()),
-                }),
-                global_config: schema.object({
-                  policy_type: schema.maybe(schema.string()),
-                  policy_id: schema.maybe(schema.string()),
-                  applied: schema.maybe(schema.boolean()),
-                  settings_hash: schema.maybe(schema.string()),
-                  assigned_date: schema.maybe(schema.string()),
-                  applied_date: schema.maybe(schema.string()),
-                }),
-                remote_response: schema.object({
-                  policy_type: schema.maybe(schema.string()),
-                  policy_id: schema.maybe(schema.string()),
-                  applied: schema.maybe(schema.boolean()),
-                  settings_hash: schema.maybe(schema.string()),
-                  assigned_date: schema.maybe(schema.string()),
-                  applied_date: schema.maybe(schema.string()),
-                }),
-              })
+              schema.object(
+                {
+                  prevention: schema.object(
+                    {
+                      policy_type: schema.maybe(schema.string()),
+                      policy_id: schema.maybe(schema.string()),
+                      applied: schema.maybe(schema.boolean()),
+                      settings_hash: schema.maybe(schema.string()),
+                      assigned_date: schema.maybe(schema.string()),
+                      applied_date: schema.maybe(schema.string()),
+                      rule_groups: schema.any(),
+                    },
+                    { unknowns: 'allow' }
+                  ),
+                  sensor_update: schema.object(
+                    {
+                      policy_type: schema.maybe(schema.string()),
+                      policy_id: schema.maybe(schema.string()),
+                      applied: schema.maybe(schema.boolean()),
+                      settings_hash: schema.maybe(schema.string()),
+                      assigned_date: schema.maybe(schema.string()),
+                      applied_date: schema.maybe(schema.string()),
+                      uninstall_protection: schema.maybe(schema.string()),
+                    },
+                    { unknowns: 'allow' }
+                  ),
+                  global_config: schema.object(
+                    {
+                      policy_type: schema.maybe(schema.string()),
+                      policy_id: schema.maybe(schema.string()),
+                      applied: schema.maybe(schema.boolean()),
+                      settings_hash: schema.maybe(schema.string()),
+                      assigned_date: schema.maybe(schema.string()),
+                      applied_date: schema.maybe(schema.string()),
+                    },
+                    { unknowns: 'allow' }
+                  ),
+                  remote_response: schema.object(
+                    {
+                      policy_type: schema.maybe(schema.string()),
+                      policy_id: schema.maybe(schema.string()),
+                      applied: schema.maybe(schema.boolean()),
+                      settings_hash: schema.maybe(schema.string()),
+                      assigned_date: schema.maybe(schema.string()),
+                      applied_date: schema.maybe(schema.string()),
+                    },
+                    { unknowns: 'allow' }
+                  ),
+                },
+                { unknowns: 'allow' }
+              )
             ),
             groups: schema.maybe(schema.arrayOf(schema.any())),
             group_hash: schema.maybe(schema.string()),
@@ -127,10 +147,13 @@ export const CrowdstrikeGetAgentsResponseSchema = schema.object(
             tags: schema.maybe(schema.arrayOf(schema.any())),
             modified_timestamp: schema.any(),
             meta: schema.maybe(
-              schema.object({
-                version: schema.maybe(schema.string()),
-                version_string: schema.maybe(schema.string()),
-              })
+              schema.object(
+                {
+                  version: schema.maybe(schema.string()),
+                  version_string: schema.maybe(schema.string()),
+                },
+                { unknowns: 'allow' }
+              )
             ),
             zone_group: schema.maybe(schema.string()),
             kernel_version: schema.maybe(schema.string()),
@@ -147,27 +170,36 @@ export const CrowdstrikeGetAgentsResponseSchema = schema.object(
       )
     ),
     errors: schema.nullable(schema.arrayOf(schema.any())),
-    meta: schema.object({
-      query_time: schema.maybe(schema.number()),
-      powered_by: schema.maybe(schema.string()),
-      trace_id: schema.maybe(schema.string()),
-    }),
+    meta: schema.object(
+      {
+        query_time: schema.maybe(schema.number()),
+        powered_by: schema.maybe(schema.string()),
+        trace_id: schema.maybe(schema.string()),
+      },
+      { unknowns: 'allow' }
+    ),
   },
   { unknowns: 'allow' }
 );
 export const CrowdstrikeHostActionsResponseSchema = schema.object(
   {
     resources: schema.arrayOf(
-      schema.object({
-        id: schema.maybe(schema.string()),
-        path: schema.maybe(schema.string()),
-      })
+      schema.object(
+        {
+          id: schema.maybe(schema.string()),
+          path: schema.maybe(schema.string()),
+        },
+        { unknowns: 'allow' }
+      )
     ),
-    meta: schema.object({
-      query_time: schema.maybe(schema.number()),
-      powered_by: schema.maybe(schema.string()),
-      trace_id: schema.maybe(schema.string()),
-    }),
+    meta: schema.object(
+      {
+        query_time: schema.maybe(schema.number()),
+        powered_by: schema.maybe(schema.string()),
+        trace_id: schema.maybe(schema.string()),
+      },
+      { unknowns: 'allow' }
+    ),
     errors: schema.nullable(schema.arrayOf(schema.any())),
   },
   { unknowns: 'allow' }
@@ -188,11 +220,10 @@ export const CrowdstrikeGetTokenResponseSchema = schema.object(
     access_token: schema.string(),
     expires_in: schema.number(),
     token_type: schema.string(),
-    // fields also existing according to the docs
-    // id_token: schema.maybe(schema.string()),
-    // issued_token_type: schema.maybe(schema.string()),
-    // refresh_token: schema.maybe(schema.string()),
-    // scope: schema.maybe(schema.string()),
+    id_token: schema.maybe(schema.string()),
+    issued_token_type: schema.maybe(schema.string()),
+    refresh_token: schema.maybe(schema.string()),
+    scope: schema.maybe(schema.string()),
   },
   { unknowns: 'allow' }
 );
