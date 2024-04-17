@@ -81,6 +81,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-theme-browser-mocks",
+    "@kbn/core-analytics-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
