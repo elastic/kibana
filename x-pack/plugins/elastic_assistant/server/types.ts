@@ -36,7 +36,7 @@ import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/s
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import {
   ActionsClientChatOpenAI,
-  ActionsClientLlm,
+  ActionsClientSimpleChatModel,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
@@ -211,7 +211,7 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
-  llm?: ActionsClientLlm | ActionsClientChatOpenAI;
+  llm?: ActionsClientSimpleChatModel | ActionsClientChatOpenAI;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;

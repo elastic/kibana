@@ -11,11 +11,13 @@ import { APP_UI_ID } from '../../../../common';
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;
 
+const ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION =
+  'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text.';
+
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
-  description:
-    'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
+  description: ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
     const { chain, isEnabledKnowledgeBase, modelExists } = params;
@@ -29,8 +31,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
 
     return new ChainTool({
       name: 'ESQLKnowledgeBaseTool',
-      description:
-        'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language. Input must always be the query on a single line, with no other text.',
+      description: ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION,
       chain,
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });
