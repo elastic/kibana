@@ -191,6 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const alert = await browser.getAlert();
       await alert?.accept();
       await enableNewChartLibraryDebug(true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
@@ -198,6 +199,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let originalPieSliceStyle = '';
 
       before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.switchToEditMode();
         await queryBar.clearQuery();
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         await enableNewChartLibraryDebug();
@@ -211,7 +215,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
         const currentUrl = await getUrlFromShare();
-        await PageObjects.share.closeShareModal();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -236,7 +239,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.share.closeShareModal();
         await hardRefresh(newUrl);
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
           const allPieSlicesColor = await pieChart.getAllPieSliceColor('80,000');
@@ -280,7 +282,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await hardRefresh(newUrl);
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
           const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
