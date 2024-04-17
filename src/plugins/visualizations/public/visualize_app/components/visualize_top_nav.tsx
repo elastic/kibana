@@ -15,6 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type {
   VisualizeServices,
   VisualizeAppState,
@@ -60,7 +61,7 @@ const TopNav = ({
   embeddableId,
   onAppLeave,
   eventEmitter,
-}: VisualizeTopNavProps) => {
+}: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
@@ -380,4 +381,4 @@ const TopNav = ({
   ) : null;
 };
 
-export const VisualizeTopNav = memo(TopNav);
+export const VisualizeTopNav = injectI18n(memo(TopNav));
