@@ -311,12 +311,14 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           adjustedChartPoints !== undefined
         ) {
           if (setAutoRunAnalysis) {
-            setAutoRunAnalysis(
-              typeof startRange === 'number' &&
+            const autoRun =
+              typeof startRange !== 'number' ||
+              (typeof startRange === 'number' &&
                 changePoint !== undefined &&
                 startRange >= changePoint.startTs &&
-                startRange <= changePoint.endTs
-            );
+                startRange <= changePoint.endTs);
+
+            setAutoRunAnalysis(autoRun);
           }
 
           const wp = getWindowParametersForTrigger(

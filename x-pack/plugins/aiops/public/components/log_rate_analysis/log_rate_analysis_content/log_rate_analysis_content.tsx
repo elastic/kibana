@@ -229,8 +229,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         setInitialAnalysisStart(wpSnap);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentCountStats]);
+  }, [documentCountStats, setAutoRunAnalysis, setInitialAnalysisStart]);
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
@@ -289,16 +288,26 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
                 <p>
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptBody"
-                    defaultMessage="Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button below."
+                    defaultMessage={`Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button "Run analysis" below.`}
                   />
                 </p>
                 <EuiButton
                   data-test-subj="aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton"
-                  onClick={triggerAnalysisForChangePoint}
+                  onClick={triggerAnalysisForManualSelection}
                 >
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptRunAnalysisButton"
                     defaultMessage="Run analysis"
+                  />
+                </EuiButton>{' '}
+                <EuiButton
+                  data-test-subj="aiopsClearSelectionBadge"
+                  onClick={() => clearSelection()}
+                  color="text"
+                >
+                  <FormattedMessage
+                    id="xpack.aiops.clearSelectionLabel"
+                    defaultMessage="Clear selection"
                   />
                 </EuiButton>
               </>
@@ -346,7 +355,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
               </p>
               <EuiButton
                 data-test-subj="aiopsLogRateAnalysisContentRunAnalysisButton"
-                onClick={triggerAnalysisForManualSelection}
+                onClick={triggerAnalysisForChangePoint}
               >
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointPromptRunAnalysisButton"
