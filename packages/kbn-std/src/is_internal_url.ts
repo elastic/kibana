@@ -9,7 +9,7 @@
 import { parse as parseUrl } from 'url';
 
 /**
- * Determine if a url is outside Kibana install.
+ * Determine if url is outside of this Kibana install.
  */
 export function isInternalURL(url: string, basePath = '') {
   const { protocol, hostname, port, pathname } = parseUrl(

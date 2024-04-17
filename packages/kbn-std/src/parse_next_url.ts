@@ -11,6 +11,11 @@ import { isInternalURL } from './is_internal_url';
 
 const DEFAULT_NEXT_URL_QUERY_STRING_PARAMETER = 'next';
 
+/**
+ * Parse the url value from query param. By default
+ *
+ * By default query param is set to next.
+ */
 export function parseNextURL(
   href: string,
   basePath = '',
