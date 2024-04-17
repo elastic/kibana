@@ -35,7 +35,9 @@ export function setupNodeEvents(
     version: config.env.APM_PACKAGE_VERSION,
   });
 
-  synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
+  synthtraceEsClient.pipeline(
+    synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
+  );
 
   initPlugin(on, config);
 

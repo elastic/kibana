@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(20);
+          expect(res.hits.total.value).to.be(10);
         });
 
         it('has transaction.duration.summary field for every document type', async () => {
@@ -111,10 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const allHasSummaryField = response.body.sources
             .filter(
               (source) =>
-                [
-                  ApmDocumentType.TransactionMetric,
-                  ApmDocumentType.ServiceTransactionMetric,
-                ].includes(source.documentType) &&
+                source.documentType === ApmDocumentType.TransactionMetric &&
                 source.rollupInterval !== RollupInterval.OneMinute
             )
             .every((source) => {

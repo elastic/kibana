@@ -117,12 +117,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(
               response.sources.filter(
                 (source) =>
-                  [
-                    ApmDocumentType.TransactionMetric,
-                    ApmDocumentType.ServiceTransactionMetric,
-                  ].includes(source.documentType) && source.hasDurationSummaryField
+                  source.documentType === ApmDocumentType.TransactionMetric &&
+                  source.hasDurationSummaryField
               ).length
-            ).to.eql(6);
+            ).to.eql(3);
           });
 
           it('returns false when summary field is available inside but not outside the range', async () => {
@@ -134,12 +132,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(
               response.sources.filter(
                 (source) =>
-                  [
-                    ApmDocumentType.TransactionMetric,
-                    ApmDocumentType.ServiceTransactionMetric,
-                  ].includes(source.documentType) && !source.hasDurationSummaryField
+                  source.documentType === ApmDocumentType.TransactionMetric &&
+                  !source.hasDurationSummaryField
               ).length
-            ).to.eql(4);
+            ).to.eql(2);
           });
         });
       });

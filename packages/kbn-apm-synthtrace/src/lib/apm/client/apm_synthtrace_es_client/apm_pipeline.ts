@@ -27,13 +27,13 @@ export function apmPipeline(logger: Logger, version: string, includeSerializatio
       createTransactionMetricsAggregator('1m'),
       createTransactionMetricsAggregator('10m'),
       createTransactionMetricsAggregator('60m'),
-      ...(semver.lt(semver.coerce(version)?.version ?? version, '8.7.0')
-        ? []
-        : [
+      ...(!version || semver.gte(semver.coerce(version)?.version ?? version, '8.7.0')
+        ? [
             createServiceMetricsAggregator('1m'),
             createServiceMetricsAggregator('10m'),
             createServiceMetricsAggregator('60m'),
-          ]),
+          ]
+        : []),
       createServiceSummaryMetricsAggregator('1m'),
       createServiceSummaryMetricsAggregator('10m'),
       createServiceSummaryMetricsAggregator('60m'),
