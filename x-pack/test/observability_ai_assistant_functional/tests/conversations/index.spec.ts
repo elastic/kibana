@@ -72,7 +72,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       proxy = await createLlmProxy(log);
 
       await ui.auth.login();
-      await telemetry.setOptIn(true);
 
       await ui.router.goto('/conversations/new', { path: {}, query: {} });
     });
@@ -291,6 +290,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               });
 
               describe('and choosing to send feedback', () => {
+                before(async () => {
+                  await telemetry.setOptIn(true);
+                });
                 it('emits a telemetry event that captures the conversation', async () => {
                   await testSubjects.click(ui.pages.conversations.positiveFeedbackButton);
 
