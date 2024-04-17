@@ -18,6 +18,7 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { GuideId, GuideState } from '../../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
@@ -37,8 +38,10 @@ export interface GuideCardsProps {
   url: BrowserUrlService;
   cloud: CloudSetup;
   docLinks: CoreStart['docLinks'];
+  application: CoreStart['application'];
   http: CoreStart['http'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  share: SharePluginStart;
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;

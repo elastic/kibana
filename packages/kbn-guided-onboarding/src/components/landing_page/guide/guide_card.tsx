@@ -44,11 +44,11 @@ export const GuideCard = ({
   overlays,
   i18nStart,
   theme,
+  application,
   http,
-  url,
   cloud,
   docLinks,
-  navigateToUrl,
+  share,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -67,25 +67,36 @@ export const GuideCard = ({
       });
     } else if (card.openEndpointModal) {
       openConnectionDetails({
-        options: {
-          endpoints: {
-            id: cloud.cloudId,
-            url: cloud.elasticsearchUrl,
+        props: {
+          options: {
+            endpoints: {
+              id: cloud.cloudId,
+              url: cloud.elasticsearchUrl,
+            },
+          },
+          start: {
+            core: {
+              i18n: i18nStart,
+              theme,
+              docLinks,
+              http,
+              application,
+            },
+            plugins: {
+              share,
+            },
           },
         },
-        dependencies: {
-          overlays,
-          i18n: i18nStart,
-          theme,
-          docLinks,
-          http,
-          url,
-          navigateToUrl,
+        start: {
+          core: {
+            overlays,
+          },
         },
       });
     }
     setIsLoading(false);
   }, [
+    application,
     activateGuide,
     card.guideId,
     card.navigateTo,
@@ -99,8 +110,7 @@ export const GuideCard = ({
     cloud.cloudId,
     cloud.elasticsearchUrl,
     docLinks,
-    url,
-    navigateToUrl,
+    share,
   ]);
 
   const isHighlighted = activeFilter === card.solution;

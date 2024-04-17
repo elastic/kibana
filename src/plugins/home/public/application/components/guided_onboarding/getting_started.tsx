@@ -66,6 +66,7 @@ export const GettingStarted = () => {
     i18nStart,
     docLinks,
     share,
+    shareStart,
   } = getServices();
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
@@ -249,11 +250,13 @@ export const GettingStarted = () => {
       overlays={overlays}
       i18nStart={i18nStart}
       theme={theme}
+      application={application}
       docLinks={docLinks}
       http={http}
       cloud={cloud!}
       url={share.url}
       navigateToUrl={application.navigateToUrl}
+      share={shareStart}
     />
   );
 
