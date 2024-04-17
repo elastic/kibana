@@ -48,7 +48,7 @@ export const savedObjectMigrations = {
     context: SavedObjectMigrationContext
   ) => {
     try {
-      const { attributes, references } = extractReferences(doc);
+      const { attributes, references } = extractReferencesV1(doc);
 
       return {
         ...doc,

@@ -11,11 +11,14 @@ import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { mapAttributesSchema as mapAttributesSchemaV1 } from '../../common/content_management/v1';
+import { mapAttributesSchema as mapAttributesSchemaV2 } from '../../common/content_management/v2';
 import { APP_ICON, getFullPath } from '../../common/constants';
 import { CONTENT_ID } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
 import type { MapAttributes } from '../../common/content_management';
+import type { MapAttributes as MapAttributesV1 } from '../../common/content_management/v1';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
@@ -29,11 +32,55 @@ export function setupSavedObjects(
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
+    switchToModelVersionAt: '8.10.0',
+    modelVersions: {
+      1: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: mapAttributesSchemaV1,
+          create: mapAttributesSchemaV1,
+        },
+      },
+      2: {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              mapState: { dynamic: false, properties: {} },
+              layerList: { dynamic: false, properties: {} },
+              uiState: { dynamic: false, properties: {} },
+            },
+          },
+          {
+            type: 'data_backfill',
+            backfillFn: (doc: SavedObjectUnsanitizedDoc<MapAttributesV1>) => {
+              const { mapStateJSON, layerListJSON, uiStateJSON, ...rest } = doc.attributes;
+              return {
+                ...doc,
+                attributes: {
+                  ...rest,
+                  mapState: mapStateJSON ? JSON.parse(mapStateJSON) : undefined,
+                  layerList: layerListJSON ? JSON.parse(layerListJSON) : undefined,
+                  uiState: uiStateJSON ? JSON.parse(uiStateJSON) : undefined,
+                },
+              };
+            },
+          },
+        ],
+        schemas: {
+          forwardCompatibility: mapAttributesSchemaV2,
+          create: mapAttributesSchemaV2,
+        },
+      },
+    },
     mappings: {
       properties: {
         description: { type: 'text' },
         title: { type: 'text' },
         version: { type: 'integer' },
+        mapState: { dynamic: false, properties: {} },
+        layerList: { dynamic: false, properties: {} },
+        uiState: { dynamic: false, properties: {} },
         mapStateJSON: { type: 'text' },
         layerListJSON: { type: 'text' },
         uiStateJSON: { type: 'text' },

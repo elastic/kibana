@@ -7,7 +7,6 @@
 
 import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
 import type { MapEmbeddablePersistableState } from './types';
-import type { MapAttributes } from '../content_management';
 import { extractReferences, injectReferences } from '../migrations/references';
 
 export const inject: EmbeddableRegistryDefinition['inject'] = (state, references) => {
@@ -23,7 +22,7 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
     // run embeddable state through extract logic to ensure any state with hard coded ids is replace with refNames
     // refName generation will produce consistent values allowing inject logic to then replace refNames with current ids.
     const { attributes: attributesWithNoHardCodedIds } = extractReferences({
-      attributes: typedState.attributes as MapAttributes,
+      attributes: typedState.attributes,
     });
 
     const { attributes: attributesWithInjectedIds } = injectReferences({

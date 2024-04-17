@@ -8,6 +8,7 @@
 
 import { cloneDeep } from 'lodash';
 import compare from 'semver/functions/compare';
+import coerce from 'semver/functions/coerce';
 
 import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import { EmbeddableFactory, EmbeddableInput } from '../embeddables';
@@ -25,8 +26,10 @@ export const runEmbeddableFactoryMigrations = <ToType extends EmbeddableInput>(
   }
 
   // any embeddable with no version set is considered to require all clientside migrations so we default to 0.0.0
-  const inputVersion = initialInput.version ?? '0.0.0';
-  const migrationRun = compare(inputVersion, factory.latestVersion, true) !== 0;
+  const inputVersion = coerce(initialInput.version)?.format() ?? '0.0.0';
+  const latestVersion = coerce(factory.latestVersion)?.format() ?? '0.0.0';
+  // compare does not like integer strings, so we coerce to a SemVer string
+  const migrationRun = compare(inputVersion, latestVersion, true) !== 0;
 
   // return early to avoid extra operations when there are no migrations to run.
   if (!migrationRun) return { input: initialInput as unknown as ToType, migrationRun };

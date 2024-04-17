@@ -7,6 +7,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { DataViewSpec, Query } from '@kbn/data-plugin/common';
+import { Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
@@ -112,3 +115,26 @@ export type MapSettings = {
   spatialFiltersFillColor: string;
   spatialFiltersLineColor: string;
 };
+
+export interface RefreshConfig {
+  isPaused: boolean;
+  interval: number;
+}
+
+// parsed contents of mapStateJSON
+export interface SerializedMapState {
+  adHocDataViews?: DataViewSpec[];
+  zoom: number;
+  center: MapCenter;
+  timeFilters?: TimeRange;
+  refreshConfig: RefreshConfig;
+  query?: Query;
+  filters: Filter[];
+  settings: MapSettings;
+}
+
+// parsed contents of uiStateJSON
+export interface SerializedUiState {
+  isLayerTOCOpen: boolean;
+  openTOCDetails: string[];
+}

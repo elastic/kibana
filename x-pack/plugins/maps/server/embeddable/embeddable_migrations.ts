@@ -6,12 +6,12 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { MapAttributes } from '../../common/content_management';
+import type { MapV1 } from '../../common/content_management';
 import { moveAttribution } from '../../common/migrations/move_attribution';
 import { migrateOtherCategoryColor } from '../../common/migrations/migrate_other_category_color';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
-import { extractReferences } from '../../common/migrations/references';
+import { extractReferencesV1 } from '../../common/migrations/references';
 
 /*
  * Embeddables such as Maps, Lens, and Visualize can be embedded by value or by reference on a dashboard.
@@ -25,7 +25,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: moveAttribution(state as { attributes: MapAttributes }),
+        attributes: moveAttribution(state as { attributes: MapV1.MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration
@@ -37,7 +37,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: setEmsTmsDefaultModes(state as { attributes: MapAttributes }),
+        attributes: setEmsTmsDefaultModes(state as { attributes: MapV1.MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration
@@ -47,7 +47,7 @@ export const embeddableMigrations = {
   },
   '8.0.1': (state: SerializableRecord) => {
     try {
-      const { attributes } = extractReferences(state as { attributes: MapAttributes });
+      const { attributes } = extractReferencesV1(state as { attributes: MapV1.MapAttributes });
       return {
         ...state,
         attributes,
@@ -62,7 +62,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: renameLayerTypes(state as { attributes: MapAttributes }),
+        attributes: renameLayerTypes(state as { attributes: MapV1.MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration
@@ -74,7 +74,7 @@ export const embeddableMigrations = {
     try {
       return {
         ...state,
-        attributes: migrateOtherCategoryColor(state as { attributes: MapAttributes }),
+        attributes: migrateOtherCategoryColor(state as { attributes: MapV1.MapAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration

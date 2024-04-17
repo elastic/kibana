@@ -12,8 +12,10 @@ import {
   createOptionsSchemas,
   createResultSchema,
 } from '@kbn/content-management-utils';
+import { MapCrudTypes } from './types';
+import { MapCrudTypes as MapCrudTypesV2 } from '../v2';
 
-const mapAttributesSchema = schema.object(
+export const mapAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.nullable(schema.string())),
@@ -56,6 +58,15 @@ export const serviceDefinition: ServicesDefinition = {
       },
       data: {
         schema: mapAttributesSchema,
+        up: (data: MapCrudTypes['CreateIn']['data']): MapCrudTypesV2['CreateIn']['data'] => {
+          const { uiStateJSON, mapStateJSON, layerListJSON, ...rest } = data;
+          return {
+            ...rest,
+            uiState: uiStateJSON ? JSON.parse(uiStateJSON) : undefined,
+            mapState: mapStateJSON ? JSON.parse(mapStateJSON) : undefined,
+            layerList: layerListJSON ? JSON.parse(layerListJSON) : undefined,
+          };
+        },
       },
     },
     out: {
@@ -71,6 +82,15 @@ export const serviceDefinition: ServicesDefinition = {
       },
       data: {
         schema: mapAttributesSchema,
+        up: (data: MapCrudTypes['CreateIn']['data']): MapCrudTypesV2['CreateIn']['data'] => {
+          const { uiStateJSON, mapStateJSON, layerListJSON, ...rest } = data;
+          return {
+            ...rest,
+            uiState: uiStateJSON ? JSON.parse(uiStateJSON) : undefined,
+            mapState: mapStateJSON ? JSON.parse(mapStateJSON) : undefined,
+            layerList: layerListJSON ? JSON.parse(layerListJSON) : undefined,
+          };
+        },
       },
     },
   },

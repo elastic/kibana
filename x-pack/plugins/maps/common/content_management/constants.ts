@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const LATEST_VERSION = 1;
+export const LATEST_VERSION = 2;
 
 export const CONTENT_ID = 'map';

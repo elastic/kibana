@@ -8,16 +8,16 @@
 import type { Serializable } from '@kbn/utility-types';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import type { MapAttributes } from '../content_management';
+import type { MapV1 } from '../content_management';
 
 export function migrateDataViewsPersistedState(
   {
     attributes,
   }: {
-    attributes: MapAttributes;
+    attributes: MapV1.MapAttributes;
   },
   migration: MigrateFunction<Serializable, Serializable>
-): MapAttributes {
+): MapV1.MapAttributes {
   let mapState: { adHocDataViews?: DataViewSpec[] } = { adHocDataViews: [] };
   if (attributes.mapStateJSON) {
     try {

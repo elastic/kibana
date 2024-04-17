@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../content_management';
+import type { MapV1 } from '../content_management';
 import { LayerDescriptor } from '../descriptor_types';
 
 // In 7.14, attribution added to the layer_descriptor. Prior to 7.14, 2 sources, WMS and TMS, had attribution on source descriptor.
-export function moveAttribution({ attributes }: { attributes: MapAttributes }): MapAttributes {
+export function moveAttribution({
+  attributes,
+}: {
+  attributes: MapV1.MapAttributes;
+}): MapV1.MapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

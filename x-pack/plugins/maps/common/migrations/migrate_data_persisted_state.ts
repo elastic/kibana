@@ -7,16 +7,16 @@
 
 import { Filter } from '@kbn/es-query';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import type { MapAttributes } from '../content_management';
+import type { MapV1 } from '../content_management';
 
 export function migrateDataPersistedState(
   {
     attributes,
   }: {
-    attributes: MapAttributes;
+    attributes: MapV1.MapAttributes;
   },
   filterMigration: MigrateFunction<Filter[], Filter[]>
-): MapAttributes {
+): MapV1.MapAttributes {
   let mapState: { filters: Filter[] } = { filters: [] };
   if (attributes.mapStateJSON) {
     try {
