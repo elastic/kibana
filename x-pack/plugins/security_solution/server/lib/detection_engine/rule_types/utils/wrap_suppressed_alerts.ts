@@ -7,16 +7,16 @@
 
 import objectHash from 'object-hash';
 
-import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import type { SignalSourceHit } from '../types';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { RuleWithInMemorySuppression, SignalSourceHit } from '../types';
 
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
+import type { CompleteRule } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
@@ -43,7 +43,7 @@ export const wrapSuppressedAlerts = ({
 }: {
   events: SignalSourceHit[];
   spaceId: string;
-  completeRule: CompleteRule<ThreatRuleParams>;
+  completeRule: CompleteRule<RuleWithInMemorySuppression>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
   indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;

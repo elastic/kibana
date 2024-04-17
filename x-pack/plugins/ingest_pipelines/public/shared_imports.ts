@@ -88,4 +88,6 @@ export {
   useExecutionContext,
 } from '@kbn/kibana-react-plugin/public';
 
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
 export const useKibana = () => _useKibana<AppServices>();

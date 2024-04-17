@@ -38,11 +38,7 @@ export function ServiceGroupSaveButton() {
 
   return (
     <>
-      {isGroupEditMode ? (
-        <EditButton onClick={onClick} />
-      ) : (
-        <CreateButton onClick={onClick} />
-      )}
+      {isGroupEditMode ? <EditButton onClick={onClick} /> : <CreateButton onClick={onClick} />}
 
       {isModalVisible && (
         <SaveGroupModal

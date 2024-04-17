@@ -12,10 +12,7 @@ export const getGroupByTerms = (groupByFields: string[] | undefined = []) => {
   return groupByFields.map((groupByField) => {
     return {
       field: groupByField,
-      missing:
-        groupByField === SERVICE_ENVIRONMENT
-          ? ENVIRONMENT_NOT_DEFINED.value
-          : undefined,
+      missing: groupByField === SERVICE_ENVIRONMENT ? ENVIRONMENT_NOT_DEFINED.value : undefined,
     };
   });
 };
