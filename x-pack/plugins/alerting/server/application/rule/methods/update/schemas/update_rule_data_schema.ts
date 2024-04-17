@@ -26,7 +26,7 @@ export const updateRuleDataSchema = schema.object(
     actions: schema.arrayOf(actionRequestSchema, { defaultValue: [] }),
     systemActions: schema.maybe(schema.arrayOf(systemActionRequestSchema, { defaultValue: [] })),
     notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
-    alertDelay: schema.maybe(alertDelaySchema),
+    alertDelay: schema.maybe(schema.oneOf([alertDelaySchema, schema.literal(null)])),
   },
   { unknowns: 'allow' }
 );

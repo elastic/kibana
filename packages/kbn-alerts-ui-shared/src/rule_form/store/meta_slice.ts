@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { createSlice } from '@reduxjs/toolkit';
-import { setParam } from '../features/rule_definition';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { hydrateState } from '../common/constants';
+import { setParam, selectAreAdvancedOptionsSet } from '../features/rule_definition';
 
 const initialState: {
   haveRuleParamsChanged: boolean;
   hasExpressionParamsComponentBeenInteractedWith: boolean;
+  areAdvancedOptionsVisible: boolean;
 } = {
   hasExpressionParamsComponentBeenInteractedWith: false,
   haveRuleParamsChanged: false,
+  areAdvancedOptionsVisible: false,
 };
 
 export const metaSlice = createSlice({
@@ -24,12 +27,18 @@ export const metaSlice = createSlice({
     expressionFocus(state) {
       state.hasExpressionParamsComponentBeenInteractedWith = true;
     },
+    setAdvancedOptionsVisible(state, { payload }: PayloadAction<boolean>) {
+      state.areAdvancedOptionsVisible = payload;
+    },
   },
   extraReducers(builder) {
     builder.addCase(setParam, (state) => {
       if (state.hasExpressionParamsComponentBeenInteractedWith) state.haveRuleParamsChanged = true;
     });
+    builder.addCase(hydrateState, (state, { payload }) => {
+      state.areAdvancedOptionsVisible = selectAreAdvancedOptionsSet(payload);
+    });
   },
 });
 
-export const { expressionFocus } = metaSlice.actions;
+export const { expressionFocus, setAdvancedOptionsVisible } = metaSlice.actions;

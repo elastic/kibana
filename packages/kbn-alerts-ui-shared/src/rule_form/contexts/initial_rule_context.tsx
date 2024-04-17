@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { RuleFormRule } from '../types';
@@ -22,7 +22,10 @@ const EditRuleProvider: React.FC<{
 }> = ({ ruleId, onLoadRuleSuccess, children }) => {
   const { rule, isLoading } = useResolveRuleApi({
     ruleId,
-    onSuccess: (loadedRule) => onLoadRuleSuccess(loadedRule.ruleTypeId, loadedRule.name),
+    onSuccess: useCallback(
+      (loadedRule) => onLoadRuleSuccess(loadedRule.ruleTypeId, loadedRule.name),
+      [onLoadRuleSuccess]
+    ),
   });
 
   if (isLoading) {

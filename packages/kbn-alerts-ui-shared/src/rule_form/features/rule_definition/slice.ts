@@ -20,6 +20,7 @@ import {
 } from '../../../common/helpers/parse_duration';
 import { useRuleFormSelector } from '../../hooks';
 import { DEFAULT_VALID_CONSUMERS, hydrateState } from '../../common/constants';
+import { RuleFormRule } from '../../types';
 
 export const initialState: {
   id: string;
@@ -111,6 +112,11 @@ export const {
   initializeAndValidateConsumer,
 } = ruleDefinitionSlice.actions;
 
+export const selectAreAdvancedOptionsSet = (state: RuleFormRule | typeof initialState) => {
+  const { alertDelay } = state;
+  return Boolean(alertDelay);
+};
+
 export const useSelectIntervalNumber = () =>
   useRuleFormSelector((state) =>
     getDurationNumberInItsUnit(state.ruleDefinition.schedule.interval)
@@ -121,7 +127,4 @@ export const useSelectAlertDelay = () =>
   useRuleFormSelector((state) => state.ruleDefinition.alertDelay?.active);
 
 export const useSelectAreAdvancedOptionsSet = () =>
-  useRuleFormSelector((state) => {
-    const { alertDelay } = state.ruleDefinition;
-    return Boolean(alertDelay);
-  });
+  useRuleFormSelector((state) => selectAreAdvancedOptionsSet(state.ruleDefinition));

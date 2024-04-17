@@ -7,7 +7,8 @@
  */
 
 import { useRef } from 'react';
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { omit } from 'lodash';
+import { combineReducers, configureStore, type Store } from '@reduxjs/toolkit';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { ruleDetailsSlice, ruleDefinitionSlice, initializeAndValidateConsumer } from '../features';
 import { metaSlice } from './meta_slice';
@@ -47,7 +48,7 @@ export const initializeStore = (
   return store;
 };
 
-export const useStore = (...args: Parameters<typeof initializeStore>) =>
+export const useInitializeStore = (...args: Parameters<typeof initializeStore>) =>
   useRef(initializeStore(...args)).current;
 
 export interface RuleFormRootState {
@@ -55,5 +56,19 @@ export interface RuleFormRootState {
   ruleDetails: ReturnType<typeof ruleDetailsSlice.reducer>;
   meta: ReturnType<typeof metaSlice.reducer>;
 }
-export type RuleFormStore = ReturnType<typeof initializeStore>;
+export type RuleFormStore = Store;
 export type RuleFormDispatch = ReturnType<typeof initializeStore>['dispatch'];
+
+export const selectRuleForSave = ({ meta, ruleDetails, ruleDefinition }: RuleFormRootState) => {
+  const processedRuleDefinition = meta.areAdvancedOptionsVisible
+    ? ruleDefinition
+    : {
+        ...ruleDefinition,
+        alertDelay: null,
+      };
+  return {
+    ...ruleDetails,
+    ...processedRuleDefinition,
+    actions: [],
+  };
+};

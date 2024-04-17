@@ -7,27 +7,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useMemo, useCallback } from 'react';
+import { useStore } from 'react-redux';
+import { useCallback } from 'react';
 import { RuleUpdatesBody, updateRule } from './update_rule';
 import { parseRuleCircuitBreakerErrorMessage } from '../../../common/helpers';
 import { useKibanaServices } from '../../contexts';
-import { useRuleFormSelector } from '../../hooks';
+import { selectRuleForSave } from '../../store';
 
 export const useUpdateRuleApi = () => {
   const { http, toasts } = useKibanaServices();
-  const ruleDefinition = useRuleFormSelector((state) => state.ruleDefinition);
-  const ruleDetails = useRuleFormSelector((state) => state.ruleDetails);
-
-  const rule: RuleUpdatesBody & { id: string } = useMemo(
-    () => ({
-      ...ruleDetails,
-      ...ruleDefinition,
-      actions: [],
-    }),
-    [ruleDefinition, ruleDetails]
-  );
+  const store = useStore();
 
   return useCallback(async () => {
+    const rule: RuleUpdatesBody & { id: string } = selectRuleForSave(store.getState());
+
     try {
       const updatedRule = await updateRule({ http, rule, id: rule.id });
       toasts.addSuccess(
@@ -54,5 +47,5 @@ export const useUpdateRuleApi = () => {
       });
       return null;
     }
-  }, [rule, http, toasts]);
+  }, [http, toasts, store]);
 };

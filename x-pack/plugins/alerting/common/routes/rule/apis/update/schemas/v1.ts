@@ -64,7 +64,7 @@ export const updateBodySchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
-  alert_delay: schema.maybe(alertDelaySchemaV1),
+  alert_delay: schema.maybe(schema.nullable(alertDelaySchemaV1)),
 });
 
 export const updateParamsSchema = schema.object({

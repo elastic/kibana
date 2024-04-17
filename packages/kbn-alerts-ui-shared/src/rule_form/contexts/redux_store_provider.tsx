@@ -9,12 +9,13 @@
 import React, { useMemo } from 'react';
 import { combineReducers } from '@reduxjs/toolkit';
 import { Provider as ReduxProvider } from 'react-redux';
-import { useStore } from '../store';
+import { useInitializeStore } from '../store';
 import { useAuthorizedConsumers } from '../hooks';
 import type { RuleFormAppContext, RuleFormRule } from '../types';
 import { useRuleType } from './rule_type_context';
 import { useInitialRule } from './initial_rule_context';
 import { ruleDefinitionSlice, ruleDetailsSlice } from '../features';
+import { metaSlice } from '../store/meta_slice';
 import { hydrateState } from '../common/constants';
 
 interface ReduxStoreProviderProps {
@@ -26,6 +27,7 @@ const initialRuleToInitialState = (initialRule: RuleFormRule) => {
   const initialStateReducer = combineReducers({
     ruleDefinition: ruleDefinitionSlice.reducer,
     ruleDetails: ruleDetailsSlice.reducer,
+    meta: metaSlice.reducer,
   });
 
   return initialStateReducer(undefined, hydrateState(initialRule));
@@ -51,7 +53,7 @@ export const ReduxStoreProvider: React.FC<ReduxStoreProviderProps> = ({
 
   const authorizedConsumers = useAuthorizedConsumers(ruleTypeModel, validConsumers);
 
-  const store = useStore(initialState, authorizedConsumers);
+  const store = useInitializeStore(initialState, authorizedConsumers);
 
   return <ReduxProvider store={store}>{children}</ReduxProvider>;
 };

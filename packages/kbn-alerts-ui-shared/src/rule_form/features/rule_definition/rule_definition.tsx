@@ -36,11 +36,11 @@ import {
 import { useRuleType, useValidation } from '../../contexts';
 import { useRuleFormSelector, useRuleFormDispatch, useAuthorizedConsumers } from '../../hooks';
 import { RuleTypeParamsExpressionPlugins } from '../../types';
-import { setParam, replaceParams, useSelectAreAdvancedOptionsSet } from './slice';
+import { setParam, replaceParams, useSelectAreAdvancedOptionsSet, setAlertDelay } from './slice';
 import { RuleScheduleField } from './rule_schedule_field';
 import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import { RuleAlertDelayField } from './rule_alert_delay_field';
-import { expressionFocus } from '../../store/meta_slice';
+import { expressionFocus, setAdvancedOptionsVisible } from '../../store/meta_slice';
 import { ValidationStatus } from '../../common/constants';
 import { flattenErrorObject } from '../../common/validation_error';
 
@@ -100,6 +100,15 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
   );
 
   const advancedOptionsInitialIsOpen = useSelectAreAdvancedOptionsSet();
+  const onToggleAdvancedOptions = useCallback(
+    (isOpen) => {
+      dispatch(setAdvancedOptionsVisible(isOpen));
+      if (isOpen && !advancedOptionsInitialIsOpen) {
+        dispatch(setAlertDelay(1));
+      }
+    },
+    [dispatch, advancedOptionsInitialIsOpen]
+  );
 
   const ruleParamsErrorList = useMemo(() => {
     if (ruleDefinitionValidationStatus === ValidationStatus.INVALID) {
@@ -255,6 +264,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
           <EuiAccordion
             id="advancedOptionsAccordion"
             data-test-subj="advancedOptionsAccordion"
+            onToggle={onToggleAdvancedOptions}
             initialIsOpen={advancedOptionsInitialIsOpen}
             buttonContent={
               <EuiText size="s">

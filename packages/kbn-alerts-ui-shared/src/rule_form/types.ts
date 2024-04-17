@@ -23,8 +23,8 @@ export interface RuleFormRule {
   params: RuleTypeParams;
   alertDelay?: {
     active: number;
-  };
-  actions: [];
+  } | null;
+  actions: never[];
   ruleTypeId: string;
 }
 

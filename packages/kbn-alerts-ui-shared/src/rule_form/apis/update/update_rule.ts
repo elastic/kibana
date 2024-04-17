@@ -51,7 +51,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
     };
   }),
   */
-  ...(alertDelay ? { alert_delay: alertDelay } : {}),
+  alert_delay: alertDelay, // Always include alertDelay so we can pass null to clear it
 });
 
 export async function updateRule({
