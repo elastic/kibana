@@ -38,7 +38,7 @@ import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import { initialState, streamReducer } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import type { AiopsLogRateAnalysisSchemaSignificantItem } from '@kbn/aiops-log-rate-analysis/api/schema_v2';
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components/src/log_rate_analysis_state_provider';
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {

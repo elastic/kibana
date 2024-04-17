@@ -10,10 +10,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import type {
-  GroupTableItem,
-  TableItemAction,
-} from '@kbn/aiops-components/src/log_rate_analysis_state_provider/types';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 

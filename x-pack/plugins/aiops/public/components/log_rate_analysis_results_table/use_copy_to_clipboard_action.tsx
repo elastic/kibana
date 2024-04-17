@@ -11,10 +11,7 @@ import { EuiCopy, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { isSignificantItem, type SignificantItem } from '@kbn/ml-agg-utils';
-import type {
-  GroupTableItem,
-  TableItemAction,
-} from '@kbn/aiops-components/src/log_rate_analysis_state_provider/types';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-components';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';

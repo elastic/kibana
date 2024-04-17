@@ -32,7 +32,7 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components/src/log_rate_analysis_state_provider';
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 import { MiniHistogram } from '../mini_histogram';

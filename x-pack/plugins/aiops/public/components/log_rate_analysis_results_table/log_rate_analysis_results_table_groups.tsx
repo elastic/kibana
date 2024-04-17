@@ -32,10 +32,7 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { stringHash } from '@kbn/ml-string-hash';
-import {
-  useLogRateAnalysisStateContext,
-  type GroupTableItem,
-} from '@kbn/aiops-components/src/log_rate_analysis_state_provider';
+import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
 import { MiniHistogram } from '../mini_histogram';
 

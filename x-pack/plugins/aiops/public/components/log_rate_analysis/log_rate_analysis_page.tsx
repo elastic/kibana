@@ -18,7 +18,7 @@ import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components/src/log_rate_analysis_state_provider';
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';

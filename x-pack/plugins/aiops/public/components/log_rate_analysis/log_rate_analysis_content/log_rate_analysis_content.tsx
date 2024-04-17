@@ -26,10 +26,7 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import {
-  useLogRateAnalysisStateContext,
-  type GroupTableItem,
-} from '@kbn/aiops-components/src/log_rate_analysis_state_provider';
+import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
 import { useData } from '../../../hooks/use_data';
 

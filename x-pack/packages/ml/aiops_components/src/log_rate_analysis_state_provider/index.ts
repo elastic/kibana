@@ -9,4 +9,4 @@ export {
   useLogRateAnalysisStateContext,
   LogRateAnalysisStateProvider,
 } from './log_rate_analysis_state_provider';
-export type { GroupTableItem } from './types';
+export type { GroupTableItem, GroupTableItemGroup, TableItemAction } from './types';
