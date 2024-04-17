@@ -23,6 +23,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const supertest = getService('supertest');
   const retry = getService('retry');
   const log = getService('log');
+  const telemetry = getService('kibana_ebt_ui');
 
   const driver = getService('__webdriver__');
 
@@ -71,6 +72,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       proxy = await createLlmProxy(log);
 
       await ui.auth.login();
+      await telemetry.setOptIn(true);
 
       await ui.router.goto('/conversations/new', { path: {}, query: {} });
     });
@@ -285,6 +287,14 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   });
 
                   expect(response.body.conversations[0].messages.length).to.eql(9);
+                });
+              });
+
+              describe('and choosing to send feedback', () => {
+                it('emits a telemetry event that captures the conversation', async () => {
+                  await testSubjects.click(ui.pages.conversations.positiveFeedbackButton);
+
+                  expect(await telemetry.getEvents(1)).to.eql('Test');
                 });
               });
             });

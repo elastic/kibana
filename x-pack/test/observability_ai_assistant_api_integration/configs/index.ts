@@ -6,6 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
+import path from 'path';
 import { createTestConfig, CreateTestConfig } from '../common/config';
 
 export const observabilityAIAssistantDebugLogger = {
@@ -25,6 +26,10 @@ export const observabilityAIAssistantFtrConfigs = {
     license: 'trial' as const,
     kibanaConfig: {
       'logging.loggers': [observabilityAIAssistantDebugLogger],
+      'plugin-path': path.resolve(
+        __dirname,
+        '../../../../test/analytics/plugins/analytics_ftr_helpers'
+      ),
     },
   },
 };
