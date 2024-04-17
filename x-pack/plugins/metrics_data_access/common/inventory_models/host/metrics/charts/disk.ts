@@ -16,8 +16,8 @@ import {
   DEFAULT_XY_YBOUNDS,
 } from '../../../shared/charts/constants';
 
-const diskThroughputReadWrite: LensConfigWithId = {
-  id: 'diskThroughputReadWrite',
+const diskIOReadWrite: LensConfigWithId = {
+  id: 'diskIOReadWrite',
   chartType: 'xy',
   title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskIOPS', {
     defaultMessage: 'Disk IOPS',
@@ -83,8 +83,8 @@ const diskUsageByMountPoint: LensConfigWithId = {
   ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
 };
 
-const diskIOReadWrite: LensConfigWithId = {
-  id: 'diskIOReadWrite',
+const diskThroughputReadWrite: LensConfigWithId = {
+  id: 'diskThroughputReadWrite',
   chartType: 'xy',
   title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskThroughput', {
     defaultMessage: 'Disk Throughput',

@@ -693,10 +693,6 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/plugins/watcher/public/plugin.ts"
-              },
-              {
-                "plugin": "cloudDataMigration",
-                "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
               }
             ]
           }
