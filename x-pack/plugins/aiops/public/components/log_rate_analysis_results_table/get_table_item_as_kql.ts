@@ -7,8 +7,7 @@
 
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { isSignificantItem, type SignificantItem } from '@kbn/ml-agg-utils';
-
-import type { GroupTableItem } from './types';
+import type { GroupTableItem } from '@kbn/aiops-components/src/log_rate_analysis_state_provider/types';
 
 export const getTableItemAsKQL = (tableItem: GroupTableItem | SignificantItem) => {
   if (isSignificantItem(tableItem)) {

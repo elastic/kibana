@@ -136,7 +136,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   );
 
   const {
-    initialAnalysisStart,
     autoRunAnalysis,
     currentSelectedSignificantItem,
     currentSelectedGroup,
