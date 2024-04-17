@@ -1,0 +1,249 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment from 'moment';
+import { log, apm, generateShortId, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
+import { omit } from 'lodash';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { SupertestReturnType } from '../../common/apm_api_supertest';
+
+export default function ApiTest({ getService }: FtrProviderContext) {
+  const registry = getService('registry');
+  const apmApiClient = getService('apmApiClient');
+  const apmSynthtraceClient = getService('synthtraceEsClient');
+  const logSynthtraceClient = getService('logSynthtraceEsClient');
+
+  registry.when(
+    'fetching observability alerts details context for AI assistant contextual insights',
+    { config: 'trial', archives: [] },
+    () => {
+      const serviceName = 'Backend';
+      const environment = 'production';
+      const start = moment().subtract(10, 'minutes').valueOf();
+      const end = moment().valueOf();
+      const range = timerange(start, end);
+
+      before(async () => {
+        await buildTraces({ 'container.id': 'container-a' });
+        await buildLogs({
+          'container.id': 'container-a',
+          'kubernetes.pod.name': 'pod-a',
+        });
+      });
+
+      after(async () => {
+        await cleanup();
+      });
+
+      describe('when no params are specified', async () => {
+        let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+        before(async () => {
+          response = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+            params: {
+              query: {
+                alert_started_at: new Date(end).toISOString(),
+              },
+            },
+          });
+        });
+
+        it('returns no summary', async () => {
+          expect(response.body.serviceSummary).to.be(undefined);
+        });
+
+        it('returns log categories', async () => {
+          expect(response.body.logCategories).to.have.length(1);
+        });
+      });
+
+      describe('when service name is specified', async () => {
+        let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+        before(async () => {
+          response = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+            params: {
+              query: {
+                alert_started_at: new Date(end).toISOString(),
+                'service.name': serviceName,
+              },
+            },
+          });
+        });
+
+        it('returns service summary', () => {
+          expect(response.body.serviceSummary).to.eql({
+            'service.name': 'Backend',
+            'service.environment': ['production'],
+            'agent.name': 'java',
+            'service.version': ['1.0.0'],
+            'language.name': 'java',
+            instances: 1,
+            anomalies: [],
+            alerts: [],
+            deployments: [],
+          });
+        });
+
+        it('returns log categories', () => {
+          const logCategory = response.body.logCategories?.[0];
+          expect(logCategory?.sampleMessage).to.match(/Error message #\d{16} from Backend/);
+          expect(logCategory?.docCount).to.be.greaterThan(0);
+          expect(logCategory?.errorCategory).to.be('Error message from Backend');
+        });
+      });
+
+      describe('when container id is specified', async () => {
+        let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+        before(async () => {
+          response = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+            params: {
+              query: {
+                alert_started_at: new Date(end).toISOString(),
+                'container.id': 'container-a',
+              },
+            },
+          });
+        });
+
+        it('returns service summary', () => {
+          expect(response.body.serviceSummary).to.eql({
+            'service.name': 'Backend',
+            'service.environment': ['production'],
+            'agent.name': 'java',
+            'service.version': ['1.0.0'],
+            'language.name': 'java',
+            instances: 1,
+            anomalies: [],
+            alerts: [],
+            deployments: [],
+          });
+        });
+
+        it('returns log categories', () => {
+          const logCategory = response.body.logCategories?.[0];
+          expect(logCategory?.sampleMessage).to.match(/Error message #\d{16} from Backend/);
+          expect(logCategory?.docCount).to.be.greaterThan(0);
+          expect(logCategory?.errorCategory).to.be('Error message from Backend');
+        });
+      });
+
+      describe('when non-existing container id is specified', async () => {
+        let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+        before(async () => {
+          response = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+            params: {
+              query: {
+                alert_started_at: new Date(end).toISOString(),
+                'container.id': 'non-existing-container',
+              },
+            },
+          });
+        });
+
+        it('returns nothing', () => {
+          expect(response.body).to.eql({
+            logCategories: [],
+            serviceChangePoints: [],
+            exitSpanChangePoints: [],
+            anomalies: [],
+          });
+        });
+      });
+
+      describe('when non-existing service.name is specified', async () => {
+        let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+        before(async () => {
+          response = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+            params: {
+              query: {
+                alert_started_at: new Date(end).toISOString(),
+                'service.name': 'non-existing-service',
+              },
+            },
+          });
+        });
+
+        it('returns nothing but log categories', () => {
+          expect(response.body.logCategories).to.have.length(1);
+          expect(omit(response.body, 'logCategories')).to.eql({
+            serviceSummary: {
+              'service.name': 'non-existing-service',
+              'service.environment': [],
+              instances: 1,
+              anomalies: [],
+              alerts: [],
+              deployments: [],
+            },
+            downstreamDependencies: [],
+            serviceChangePoints: [],
+            exitSpanChangePoints: [],
+            anomalies: [],
+          });
+        });
+      });
+
+      async function buildTraces(eventMetadata: {
+        'container.id'?: string;
+        'host.name'?: string;
+        'kubernetes.pod.name'?: string;
+      }) {
+        const serviceA = apm
+          .service({ name: serviceName, environment, agentName: 'java' })
+          .instance('my-instance');
+
+        const events = range
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) => {
+            return serviceA
+              .transaction({ transactionName: 'tx' })
+              .timestamp(timestamp)
+              .duration(10000)
+              .defaults({ 'service.version': '1.0.0', ...eventMetadata })
+              .outcome('success');
+          });
+
+        await apmSynthtraceClient.index(events);
+      }
+
+      function buildLogs(eventMetadata: {
+        'container.id'?: string;
+        'host.name'?: string;
+        'kubernetes.pod.name'?: string;
+        'service.name'?: string;
+      }) {
+        const events = range
+          .interval('1m')
+          .rate(10)
+          .generator((timestamp) => {
+            return log
+              .create()
+              .message(`Error message #${generateShortId()} from ${serviceName}`)
+              .logLevel('error')
+              .defaults({
+                'trace.id': generateShortId(),
+                'agent.name': 'synth-agent',
+                ...eventMetadata,
+              })
+              .timestamp(timestamp);
+          });
+
+        return logSynthtraceClient.index(events);
+      }
+
+      async function cleanup() {
+        await apmSynthtraceClient.clean();
+        await logSynthtraceClient.clean();
+      }
+    }
+  );
+}

@@ -10,13 +10,16 @@ import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-contex
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   rangeQuery,
-  termQuery,
   typedSearch,
 } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
+import { ESSearchRequest } from '@kbn/es-types';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  APMEventClient,
+  APMEventESSearchRequest,
+} from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { observabilityAlertDetailsContextRt } from '.';
 import { RollupInterval } from '../../../../common/rollup';
 
@@ -35,39 +38,16 @@ export async function getContainerIdFromSignals({
     return query['container.id'];
   }
 
-  if (query['service.name']) {
-    const containerId = await getContainerIdFromTrace({
-      query,
-      apmEventClient,
-    });
-
-    if (containerId) {
-      return containerId;
-    }
-
-    return getContainerIdFromLogs({ query, esClient, coreContext });
+  if (!query['service.name']) {
+    return;
   }
-}
 
-async function getContainerIdFromLogs({
-  query,
-  esClient,
-  coreContext,
-}: {
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
-  esClient: ElasticsearchClient;
-  coreContext: CoreRequestHandlerContext;
-}) {
-  const index =
-    (await coreContext.uiSettings.client.get<string>(
-      aiAssistantLogsIndexPattern
-    )) ?? 'logs-*';
+  const start = moment(query.alert_started_at)
+    .subtract(30, 'minutes')
+    .valueOf();
+  const end = moment(query.alert_started_at).valueOf();
 
-  const start = moment(query.alert_started_at).subtract(30, 'minutes').unix();
-  const end = moment(query.alert_started_at).unix();
-
-  const res = await typedSearch<{ container: { id: string } }, any>(esClient, {
-    index,
+  const params: APMEventESSearchRequest['body'] = {
     _source: ['container.id'],
     terminate_after: 1,
     size: 1,
@@ -76,26 +56,52 @@ async function getContainerIdFromLogs({
       bool: {
         filter: [
           { exists: { field: 'container.id' } },
-          ...termQuery('service.name', query['service.name']),
+          { term: { 'service.name': query['service.name'] } },
           ...rangeQuery(start, end),
         ],
       },
     },
+  };
+  const containerId = await getContainerIdFromTrace({
+    params,
+    apmEventClient,
+  });
+
+  if (containerId) {
+    return containerId;
+  }
+
+  return getContainerIdFromLogs({ params, esClient, coreContext });
+}
+
+async function getContainerIdFromLogs({
+  params,
+  esClient,
+  coreContext,
+}: {
+  params: ESSearchRequest['body'];
+  esClient: ElasticsearchClient;
+  coreContext: CoreRequestHandlerContext;
+}) {
+  const index = await coreContext.uiSettings.client.get<string>(
+    aiAssistantLogsIndexPattern
+  );
+
+  const res = await typedSearch<{ container: { id: string } }, any>(esClient, {
+    index,
+    ...params,
   });
 
   return res.hits.hits[0]?._source?.container?.id;
 }
 
 async function getContainerIdFromTrace({
-  query,
+  params,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof observabilityAlertDetailsContextRt>;
+  params: APMEventESSearchRequest['body'];
   apmEventClient: APMEventClient;
 }) {
-  const start = moment(query.alert_started_at).subtract(30, 'minutes').unix();
-  const end = moment(query.alert_started_at).unix();
-
   const res = await apmEventClient.search('get_container_id', {
     apm: {
       sources: [
@@ -105,21 +111,7 @@ async function getContainerIdFromTrace({
         },
       ],
     },
-    body: {
-      _source: ['container.id'],
-      terminate_after: 1,
-      size: 1,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            { exists: { field: 'container.id' } },
-            ...termQuery('service.name', query['service.name']),
-            ...rangeQuery(start, end),
-          ],
-        },
-      },
-    },
+    body: params,
   });
 
   return res.hits.hits[0]?._source.container?.id;
