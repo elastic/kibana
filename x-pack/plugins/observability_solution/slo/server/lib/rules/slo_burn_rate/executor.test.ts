@@ -508,6 +508,7 @@ describe('BurnRateRuleExecutor', () => {
       await executor({
         params: ruleParams,
         startedAt: new Date(),
+        startedAtOverridden: false,
         services: servicesMock,
         executionId: 'irrelevant',
         logger: loggerMock,
