@@ -16,10 +16,10 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../common/constants';
-import { KQLCustomIndicator, SLO } from '../../domain/models';
+import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  public getTransformParams(slo: SLODefinition): TransformPutTransformRequest {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -36,11 +36,11 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
+  private buildSource(slo: SLODefinition, indicator: KQLCustomIndicator) {
     return {
       index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
@@ -68,7 +68,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: KQLCustomIndicator) {
     const numerator = getElasticsearchQueryOrThrow(indicator.params.good);
     const denominator = getElasticsearchQueryOrThrow(indicator.params.total);
 

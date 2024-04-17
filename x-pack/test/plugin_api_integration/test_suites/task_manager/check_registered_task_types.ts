@@ -60,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.gen-ai',
         'actions:.index',
         'actions:.jira',
+        'actions:.observability-ai-assistant',
         'actions:.opsgenie',
         'actions:.pagerduty',
         'actions:.resilient',

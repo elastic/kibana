@@ -232,15 +232,7 @@
                 "section": "def-common.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               },
-              "; elasticsearch: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerMocksPluginApi",
-                "section": "def-common.MockedElasticSearchServiceStart",
-                "text": "MockedElasticSearchServiceStart"
-              },
-              "; http: ",
+              "; elasticsearch: MockedInternalElasticsearchServiceStart; http: ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
                 "scope": "common",
@@ -257,13 +249,7 @@
                 "text": "MetricsServiceSetup"
               },
               ">; savedObjects: jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsServiceStart",
-                "text": "SavedObjectsServiceStart"
-              },
+              "InternalSavedObjectsServiceStart",
               ">; uiSettings: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-server",

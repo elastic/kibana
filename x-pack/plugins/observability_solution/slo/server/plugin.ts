@@ -37,6 +37,7 @@ import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { SloConfig } from '.';
 import { registerRoutes } from './routes/register_routes';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
+import { sloSettings } from './saved_objects/slo_settings';
 
 export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
 
@@ -127,6 +128,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     const { ruleDataService } = plugins.ruleRegistry;
 
     core.savedObjects.registerType(slo);
+    core.savedObjects.registerType(sloSettings);
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
       alertsLocator,

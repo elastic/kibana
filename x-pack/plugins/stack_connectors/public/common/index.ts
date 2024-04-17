@@ -6,6 +6,7 @@
  */
 
 import OpenAILogo from '../connector_types/openai/logo';
+import BedrockLogo from '../connector_types/bedrock/logo';
 
 export { OPENAI_CONNECTOR_ID, OpenAiProviderType } from '../../common/openai/constants';
 export { OpenAILogo };
@@ -22,3 +23,7 @@ export {
   SUB_ACTION as CROWDSTRIKE_SUB_ACTION,
 } from '../../common/crowdstrike/constants';
 export { CrowdstrikeLogo };
+
+export { BEDROCK_CONNECTOR_ID } from '../../common/bedrock/constants';
+export { BedrockLogo };
+

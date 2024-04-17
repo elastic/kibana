@@ -82,7 +82,7 @@ const PayloadSeveritySchema = schema.oneOf([
 const LinksSchema = schema.arrayOf(schema.object({ href: schema.string(), text: schema.string() }));
 const customDetailsSchema = schema.recordOf(schema.string(), schema.any());
 
-const ParamsSchema = schema.object(
+export const ParamsSchema = schema.object(
   {
     eventAction: schema.maybe(EventActionSchema),
     dedupKey: schema.maybe(schema.string({ maxLength: 255 })),

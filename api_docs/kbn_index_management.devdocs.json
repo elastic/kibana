@@ -1914,7 +1914,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; }"
+              ") => void; isNewVersion: () => boolean; }"
             ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
