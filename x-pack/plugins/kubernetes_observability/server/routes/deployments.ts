@@ -8,17 +8,17 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState} from '../lib/utils';
+import {extractFieldValue} from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
-    POD_STATUS_ROUTE,
+    DEPLOYMENT_STATUS_ROUTE,
 } from '../../common/constants';
 
-export const registerPodsRoute = (router: IRouter, logger: Logger) => {
+export const registerDeploymentsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .get({
       access: 'internal',
-      path: POD_STATUS_ROUTE,
+      path: DEPLOYMENT_STATUS_ROUTE,
     })
     .addVersion(
       {
@@ -26,7 +26,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              pod_name: schema.string(),
+              deployment_name: schema.string(),
               namespace: schema.string(),
             }),
           },
@@ -37,7 +37,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         const musts = [
             {
                 term: {
-                  'resource.attributes.k8s.pod.name': request.query.pod_name,
+                  'resource.attributes.k8s.deployment.name': request.query.deployment_name,
                 },
               },
               {
@@ -45,7 +45,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
                   'resource.attributes.k8s.namespace.name': request.query.namespace,
                 },
               },
-              { exists: { field: 'metrics.k8s.pod.phase' } }
+              { exists: { field: 'metrics.k8s.deployment.available' } }
           ];
         const dsl: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
@@ -54,7 +54,8 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
             _source: false,
             fields: [
               '@timestamp',
-              'metrics.k8s.pod.phase',
+              'metrics.k8s.deployment.available',
+              'metrics.k8s.deployment.desired',
               'resource.attributes.k8s.*',
             ],
             query: {
@@ -67,18 +68,23 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         const esResponse = await client.search(dsl);
         const hit = esResponse.hits.hits[0];
         const { fields = {} } = hit;
-        const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
-        const nodeName = extractFieldValue(fields['resource.attributes.k8s.node.name']);
+        const replicasAvailable = extractFieldValue(fields['metrics.k8s.deployment.available']);
+        const replicasdesired = extractFieldValue(fields['metrics.k8s.deployment.desired']);
+        var message = '';
+        if (replicasAvailable == replicasdesired) {
+             message = `Deployment ${request.query.namespace}/${request.query.deployment_name} has as many replicas available as desired`;
+        } else {
+            message = `Deployment ${request.query.namespace}/${request.query.deployment_name} has ${replicasdesired} replicas but ${replicasAvailable} are available`;
+        }
         const time = extractFieldValue(fields['@timestamp']);
-        const state = phaseToState(podPhase);
         return response.ok({
           body: {
             time: time,
-            message: "Pod " + request.query.namespace + "/" + request.query.pod_name + " is in " + state + " state",
-            state: state,
-            name: request.query.pod_name,
+            message: message,
+            replicasAvailable: replicasAvailable,
+            replicasDesired:replicasdesired,
+            name: request.query.deployment_name,
             namespace: request.query.namespace,
-            node: nodeName,
           },
         });
       }

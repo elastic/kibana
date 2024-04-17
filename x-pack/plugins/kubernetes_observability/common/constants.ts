@@ -7,3 +7,4 @@
 
 
 export const POD_STATUS_ROUTE = '/api/kubernetes/pods/status';
+export const DEPLOYMENT_STATUS_ROUTE = '/api/kubernetes/deployments/status';
