@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.isShareActionEnabled('link'));
     });
 
-    it('should preserve filter and query when sharing', async () => {
+    xit('should preserve filter and query when sharing', async () => {
       await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();

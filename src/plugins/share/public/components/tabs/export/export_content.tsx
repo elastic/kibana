@@ -72,7 +72,6 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     helpText,
     renderCopyURLButton,
     generateReport,
-    generateReportForPrinting,
     downloadCSVLens,
     absoluteUrl,
     renderLayoutOptionSwitch,
@@ -200,7 +199,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
   }, [absoluteUrl, isDirty, renderCopyURLButton]);
 
   const getReport = useCallback(() => {
-    if (!generateReportForPrinting && !generateReport && !downloadCSVLens) {
+    if (!generateReport && !downloadCSVLens) {
       throw new Error('Report cannot be run due to no generate report method registered');
     }
     if (objectType === 'lens' && selectedRadio === 'lens_csv') {
@@ -208,16 +207,10 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     } else if (usePrintLayout && selectedRadio === 'pngV2') {
       return generateReport!({ intl });
     }
-    return usePrintLayout ? generateReportForPrinting!({ intl }) : generateReport!({ intl });
-  }, [
-    downloadCSVLens,
-    generateReport,
-    generateReportForPrinting,
-    objectType,
-    selectedRadio,
-    usePrintLayout,
-    intl,
-  ]);
+    return usePrintLayout
+      ? generateReport!({ intl, optimizeForPrinting: true })
+      : generateReport!({ intl });
+  }, [downloadCSVLens, generateReport, objectType, selectedRadio, usePrintLayout, intl]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (

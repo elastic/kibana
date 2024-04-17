@@ -81,6 +81,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal(); // close modal
+          }
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
+
       it('is available if new', async () => {
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
@@ -109,6 +118,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
+      });
+
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal(); // close modal
+          }
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       // this test does not pass because of discover using short urls - investigate in separate PR
@@ -270,6 +288,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal(); // close modal
+          }
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
+
       it(`handles field formatting for a field that doesn't exist initially`, async () => {
         const res = await getReport();
         expect(res.status).to.equal(200);
@@ -306,6 +333,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let checkForReportingToasts = true;
 
       afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal(); // close modal
+          }
+          return await testSubjects.exists('shareTopNavButton');
+        });
         if (checkForReportingToasts) {
           await PageObjects.reporting.checkForReportingToasts();
         }

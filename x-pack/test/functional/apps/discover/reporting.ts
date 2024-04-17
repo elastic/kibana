@@ -66,7 +66,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.share.closeShareModal();
+        retry.waitFor('close share modal', async () => {
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal(); // close modal
+          }
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       it('is available if new', async () => {
@@ -101,7 +106,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.share.closeShareModal();
+        retry.waitFor('close share modal', async () => {
+          if (await testSubjects.exists('shareContextModal')) {
+            await PageObjects.share.closeShareModal(); // close modal
+          }
+          return await testSubjects.exists('shareTopNavButton');
+        });
       });
 
       beforeEach(async () => {
