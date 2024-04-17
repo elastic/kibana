@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import objectHash from 'object-hash';
 import type { Moment } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
@@ -19,6 +18,7 @@ import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import type { SignalSource } from '../types';
+import { generateAlertId } from './utils';
 
 export const wrapEsqlAlerts = ({
   events,
@@ -46,23 +46,14 @@ export const wrapEsqlAlerts = ({
   };
 }): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest>>((event, i) => {
-    const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
-
-    // for aggregating rules when metadata _id is present, generate alert based on ES document event id
-    const id =
-      !isRuleAggregating && event._id
-        ? objectHash([
-            event._id,
-            event._version,
-            event._index,
-            `${spaceId}:${completeRule.alertId}`,
-          ])
-        : objectHash([
-            ruleRunId,
-            completeRule.ruleParams.query,
-            `${spaceId}:${completeRule.alertId}`,
-            i,
-          ]);
+    const id = generateAlertId({
+      event,
+      spaceId,
+      completeRule,
+      tuple,
+      isRuleAggregating,
+      index: i,
+    });
 
     const baseAlert: BaseFieldsLatest = buildBulkBody(
       spaceId,

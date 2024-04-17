@@ -22,6 +22,7 @@ import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import type { SignalSource } from '../types';
 import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
+import { generateAlertId } from './utils';
 
 export const wrapSuppressedEsqlAlerts = ({
   events,
@@ -61,23 +62,14 @@ export const wrapSuppressedEsqlAlerts = ({
         fields: combinedFields,
       });
 
-      const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
-
-      // for aggregating rules when metadata _id is present, generate alert based on ES document event id
-      const id =
-        !isRuleAggregating && event._id
-          ? objectHash([
-              event._id,
-              event._version,
-              event._index,
-              `${spaceId}:${completeRule.alertId}`,
-            ])
-          : objectHash([
-              ruleRunId,
-              completeRule.ruleParams.query,
-              `${spaceId}:${completeRule.alertId}`,
-              i,
-            ]);
+      const id = generateAlertId({
+        event,
+        spaceId,
+        completeRule,
+        tuple,
+        isRuleAggregating,
+        index: i,
+      });
 
       const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
