@@ -261,7 +261,7 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
   const getHelpText = () => {
     if (objectType === 'lens' && generateReport !== undefined) {
       return helpText;
-    } else {
+    } else if (objectType === 'lens') {
       return (
         <FormattedMessage
           id="share.helpText.goldLicense.roleNotPDFPNG"

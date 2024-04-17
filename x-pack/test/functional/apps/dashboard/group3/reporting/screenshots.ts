@@ -73,14 +73,6 @@ export default function ({
         'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
       ]);
     });
-    afterEach(async () => {
-      retry.waitFor('close share modal', async () => {
-        if (await testSubjects.exists('shareContextModal')) {
-          await PageObjects.share.closeShareModal(); // close modal
-        }
-        return await testSubjects.exists('shareTopNavButton');
-      });
-    });
     after('clean up archives', async () => {
       await PageObjects.share.closeShareModal();
       await unloadEcommerce();
