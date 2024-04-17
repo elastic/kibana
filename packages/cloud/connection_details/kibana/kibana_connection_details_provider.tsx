@@ -20,10 +20,12 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
   const result: ConnectionDetailsOpts = {
     ...options,
-    navigateToUrl: (link: string) => {
-      props.onNavigation?.();
-      start.core.application?.navigateToUrl?.(link);
-    },
+    navigateToUrl: start.core.application
+      ? (link: string) => {
+          props.onNavigation?.();
+          start.core.application?.navigateToUrl?.(link);
+        }
+      : undefined,
     links: {
       learnMore: docLinks.links.fleet.apiKeysLearnMore,
       ...options?.links,

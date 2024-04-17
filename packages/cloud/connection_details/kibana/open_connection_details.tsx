@@ -23,7 +23,12 @@ export interface OpenConnectionDetailsParams {
 export const openConnectionDetails = async ({ props, start }: OpenConnectionDetailsParams) => {
   const mount = (element: HTMLElement) => {
     const reactElement = (
-      <conn.KibanaConnectionDetailsProvider {...props}>
+      <conn.KibanaConnectionDetailsProvider
+        {...props}
+        onNavigation={() => {
+          flyoutRef?.close();
+        }}
+      >
         <conn.ConnectionDetailsFlyoutContent />
       </conn.KibanaConnectionDetailsProvider>
     );
