@@ -8,7 +8,11 @@
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isEqlRule, isNewTermsRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
+import {
+  isEqlRule,
+  isNewTermsRule,
+  isEsqlRule,
+} from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -47,7 +51,11 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForNewTermsRuleEnabled, isAlertSuppressionForEsqlRuleEnabled, isAlertSuppressionForNonSequenceEqlRuleEnabled]
+    [
+      isAlertSuppressionForNewTermsRuleEnabled,
+      isAlertSuppressionForEsqlRuleEnabled,
+      isAlertSuppressionForNonSequenceEqlRuleEnabled,
+    ]
   );
 
   return transformer;
