@@ -23,7 +23,7 @@ export const AlertsTooltipContent = React.memo(() => {
           id="xpack.infra.assetDetails.alerts.tooltip.alertsLabel"
           defaultMessage="Showing alerts for this host. You can create and manage alerts in {alerts}"
           values={{
-            alerts: <LinkToAlertsHomePage />,
+            alerts: <LinkToAlertsHomePage dataTestSubj="assetDetailsTooltipDocumentationLink" />,
           }}
         />
       </p>

@@ -70,6 +70,7 @@ export const AlertsSummaryContent = ({
                 assetName={assetName}
                 queryField={`${assetType}.name`}
                 dateRange={dateRange}
+                dataTestSubj="infraAssetDetailsAlertCollapsibleSectionTooltipDocumentationLink"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

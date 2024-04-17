@@ -68,7 +68,12 @@ export const AlertsSummaryContent = ({
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <LinkToAlertsPage assetId={assetId} queryField={assetIdField} dateRange={dateRange} />
+              <LinkToAlertsPage
+                assetId={assetId}
+                queryField={assetIdField}
+                dateRange={dateRange}
+                dataTestSubj="nfraAssetDetailsAlertsTabAlertsShowAllButton"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

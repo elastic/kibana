@@ -16,9 +16,15 @@ export interface LinkToAlertsPageProps {
   assetId: string;
   dateRange: TimeRange;
   queryField: string;
+  dataTestSubj?: string;
 }
 
-export const LinkToAlertsPage = ({ assetId, queryField, dateRange }: LinkToAlertsPageProps) => {
+export const LinkToAlertsPage = ({
+  assetId,
+  queryField,
+  dateRange,
+  dataTestSubj,
+}: LinkToAlertsPageProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
@@ -30,25 +36,21 @@ export const LinkToAlertsPage = ({ assetId, queryField, dateRange }: LinkToAlert
       status: 'all',
     })}`
   );
-
   return (
     <EuiButtonEmpty
-      data-test-subj="infraAssetDetailsAlertsShowAllButton"
+      data-test-subj={dataTestSubj}
       size="xs"
       iconSide="right"
       iconType="sortRight"
       flush="both"
       href={linkToAlertsPage}
     >
-      <FormattedMessage
-        id="xpack.infra.assetDetails.flyout.AlertsPageLinkLabel"
-        defaultMessage="Show all"
-      />
+      <FormattedMessage id="xpack.infra.AlertsPageLinkLabel" defaultMessage="Show all" />
     </EuiButtonEmpty>
   );
 };
 
-export const LinkToAlertsHomePage = () => {
+export const LinkToAlertsHomePage = ({ dataTestSubj }: { dataTestSubj?: string }) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
@@ -57,7 +59,7 @@ export const LinkToAlertsHomePage = () => {
   return (
     <EuiLink
       style={{ display: 'inline-block' }}
-      data-test-subj="assetDetailsTooltipDocumentationLink"
+      data-test-subj={dataTestSubj}
       href={linkToAlertsPage}
     >
       <FormattedMessage
