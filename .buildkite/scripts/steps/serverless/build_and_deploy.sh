@@ -145,6 +145,10 @@ cat <<EOF > .issue-body
 
 $KIBANA_IMAGE
 
+### Kibana pull request
+
+$BUILDKITE_PULL_REQUEST
+
 ### Further details
 
 Caused by $GITHUB_PR_TRIGGER_USER using the github label in $BUILDKITE_REPO/pull/$BUILDKITE_PULL_REQUEST
