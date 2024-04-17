@@ -98,7 +98,9 @@ const useRightSideItems = (links?: LinkOptions[]) => {
       nodeDetails: (
         <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
       ),
-      alertRule: <LinkToAlertsRule />,
+      alertRule: (
+        <LinkToAlertsRule dataTestSubj="infraAssetDetailsPageHeaderCreateAlertsRuleButton" />
+      ),
     }),
     [asset.id, asset.name, asset.type]
   );

@@ -61,7 +61,10 @@ export const AlertsSummaryContent = ({
           <EuiFlexGroup alignItems="center" responsive={false}>
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
               <EuiFlexItem grow={false}>
-                <LinkToAlertsRule onClick={toggleAlertFlyout} />
+                <LinkToAlertsRule
+                  onClick={toggleAlertFlyout}
+                  dataTestSubj="infraAssetDetailsAlertsTabCreateAlertsRuleButton"
+                />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
