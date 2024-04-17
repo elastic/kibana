@@ -12,6 +12,7 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import { isBidirectionalConnectorType } from '../lib/bidirectional_connectors';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 export interface ConstructorOptions {
@@ -80,7 +81,7 @@ export class ActionsAuthorization {
             ...additionalPrivileges,
             // SentinelOne and Crowdstrike sub-actions require that a user have `all` privilege to Actions and Connectors.
             // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
-            actionTypeId === '.sentinelone' || actionTypeId === '.crowdstrike'
+            isBidirectionalConnectorType(actionTypeId)
               ? 'api:actions:execute-advanced-connectors'
               : 'api:actions:execute-basic-connectors',
           ],
