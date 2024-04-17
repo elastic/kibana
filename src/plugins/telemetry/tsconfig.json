@@ -36,6 +36,7 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-server",
     "@kbn/analytics-collection-utils",
+    "@kbn/core-node-server",
   ],
   "exclude": [
     "target/**/*",
