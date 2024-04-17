@@ -84,15 +84,9 @@ export class ReportingPageObject extends FtrService {
     return response.body as Buffer;
   }
 
-  // needed for Canvas
-  async openPdfReportingPanel() {
-    this.log.debug('openPdfReportingPanel');
-    await this.share.openShareMenuItem('PDF Reports');
-  }
-
   async openExportTab() {
     this.log.debug('open export modal');
-    await this.share.clickTab('Export');
+    await this.share.clickTab('export');
   }
 
   async getQueueReportError() {

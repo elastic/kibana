@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
       await PageObjects.reporting.openExportTab();
-      await testSubjects.click('pngReportOption');
+      await testSubjects.click('pngV2-radioOption');
       await PageObjects.reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('geo_map_report');
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.reporting.openExportTab();
-      await testSubjects.click('pngReportOption');
+      await testSubjects.click('pngV2-radioOption');
       await PageObjects.reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');
