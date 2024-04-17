@@ -156,7 +156,7 @@ export const INFO_TOTAL_ITEMS = i18n.translate('xpack.securitySolution.listItems
 
 export const getInfoTotalItems = (listType: string) =>
   i18n.translate('xpack.securitySolution.listItems.searchBar', {
-    defaultMessage: 'Filter your data using KQL syntax, for example - {listType}:*',
+    defaultMessage: 'Filter your data using KQL syntax, for example: {listType}:*',
     values: { listType },
   });
 
