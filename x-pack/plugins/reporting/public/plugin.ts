@@ -210,7 +210,6 @@ export class ReportingPublicPlugin
     startServices$.subscribe(([{ application, i18n: i18nStart }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          // needed for Canvas and legacy tests
           shareSetup.register(
             reportingExportModalProvider({
               apiClient,
@@ -235,20 +234,6 @@ export class ReportingPublicPlugin
             i18n: i18nStart,
           })
         );
-
-        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.register(
-            reportingExportModalProvider({
-              apiClient,
-              uiSettings,
-              license,
-              application,
-              usesUiCapabilities,
-              theme: core.theme,
-              i18n: i18nStart,
-            })
-          );
-        }
       });
     });
     return reportingStart;
