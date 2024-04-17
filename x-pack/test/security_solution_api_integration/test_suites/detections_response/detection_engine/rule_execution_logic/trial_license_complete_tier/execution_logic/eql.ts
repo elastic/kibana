@@ -52,6 +52,7 @@ import {
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { getMetricsRequest, getMetricsWithRetry } from './utils';
 
 /**
  * Specific AGENT_ID to use for some of the tests. If the archiver changes and you see errors
@@ -66,6 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
@@ -74,7 +76,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverles @serverlessQA EQL type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180641
+  describe.skip('@ess @serverless @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -205,15 +208,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('classifies verification_exception errors as user errors', async () => {
-      function getMetricsRequest(reset: boolean = false) {
-        return request
-          .get(`/api/task_manager/metrics${reset ? '' : '?reset=false'}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => response.body);
-      }
-
-      await getMetricsRequest(true);
+      await getMetricsRequest(request, true);
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*']),
         query: 'file where field.doesnt.exist == true',
@@ -234,9 +229,15 @@ export default ({ getService }: FtrProviderContext) => {
         ruleResponse.execution_summary.last_execution.message.includes('verification_exception')
       ).eql(true);
 
-      const metricsResponse = await getMetricsRequest();
+      const metricsResponse = await getMetricsWithRetry(
+        request,
+        retry,
+        false,
+        (metrics) =>
+          metrics.metrics?.task_run?.value.by_type['alerting:siem__eqlRule'].user_errors === 1
+      );
       expect(
-        metricsResponse.metrics.task_run.value.by_type['alerting:siem__eqlRule'].user_errors
+        metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__eqlRule'].user_errors
       ).eql(1);
     });
 

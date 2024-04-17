@@ -24,6 +24,7 @@ export async function getNewSelectedPromptContext({
       contextAnonymizationFields: undefined,
       promptContextId: promptContext.id,
       rawData,
+      replacements: promptContext.replacements,
     };
   } else {
     const extendedAnonymizationData = Object.keys(rawData).reduce<AnonymizationFieldResponse[]>(
@@ -50,6 +51,7 @@ export async function getNewSelectedPromptContext({
       },
       promptContextId: promptContext.id,
       rawData,
+      replacements: promptContext.replacements,
     };
   }
 }

@@ -141,6 +141,7 @@ class DocLinks {
   public start: string;
   public supportedNlpModels: string;
   public syncRules: string;
+  public syncRulesAdvanced: string;
   public trainedModels: string;
   public textEmbedding: string;
   public workplaceSearchApiKeys: string;
@@ -317,6 +318,7 @@ class DocLinks {
     this.start = '';
     this.supportedNlpModels = '';
     this.syncRules = '';
+    this.syncRulesAdvanced = '';
     this.trainedModels = '';
     this.textEmbedding = '';
     this.workplaceSearchApiKeys = '';
@@ -495,6 +497,7 @@ class DocLinks {
     this.start = docLinks.links.enterpriseSearch.start;
     this.supportedNlpModels = docLinks.links.enterpriseSearch.supportedNlpModels;
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;
+    this.syncRulesAdvanced = docLinks.links.enterpriseSearch.syncRulesAdvanced;
     this.trainedModels = docLinks.links.enterpriseSearch.trainedModels;
     this.textEmbedding = docLinks.links.enterpriseSearch.textEmbedding;
     this.workplaceSearchGatedFormBlog = docLinks.links.workplaceSearch.gatedFormBlog;

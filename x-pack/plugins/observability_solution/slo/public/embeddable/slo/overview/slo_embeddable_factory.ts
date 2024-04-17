@@ -57,7 +57,7 @@ export class SloOverviewEmbeddableFactoryDefinition
     SloEmbeddableInput,
     unknown
   >['getPanelPlacementSettings'] = (input) => {
-    if (input.showAllGroupByInstances) {
+    if (input.showAllGroupByInstances || input.groupFilters) {
       return { width: 24, height: 8 };
     }
     return { width: 12, height: 8 };

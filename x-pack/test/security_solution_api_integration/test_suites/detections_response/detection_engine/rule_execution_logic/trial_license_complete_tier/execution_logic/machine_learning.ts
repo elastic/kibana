@@ -56,6 +56,7 @@ import {
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { getMetricsRequest, getMetricsWithRetry } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -69,6 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
+  const retry = getService('retry');
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
@@ -181,15 +183,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('classifies ml job missing errors as user errors', async () => {
-      function getMetricsRequest(reset: boolean = false) {
-        return request
-          .get(`/api/task_manager/metrics${reset ? '' : '?reset=false'}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200)
-          .then((response) => response.body);
-      }
-
-      await getMetricsRequest(true);
+      await getMetricsRequest(request, true);
       const badRule: MachineLearningRuleCreateProps = {
         ...rule,
         machine_learning_job_id: 'doesNotExist',
@@ -210,10 +204,14 @@ export default ({ getService }: FtrProviderContext) => {
         true
       );
 
-      const metricsResponse = await getMetricsRequest();
-      expect(
-        metricsResponse.metrics.task_run.value.by_type['alerting:siem__mlRule'].user_errors
-      ).toEqual(1);
+      const metricsResponse = await getMetricsWithRetry(
+        request,
+        retry,
+        false,
+        (metrics) =>
+          metrics.metrics?.task_run?.value.by_type['alerting:siem__mlRule'].user_errors === 1
+      );
+      expect(metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__mlRule']).toEqual(1);
     });
 
     it('@skipInServerless generates max alerts warning when circuit breaker is exceeded', async () => {
