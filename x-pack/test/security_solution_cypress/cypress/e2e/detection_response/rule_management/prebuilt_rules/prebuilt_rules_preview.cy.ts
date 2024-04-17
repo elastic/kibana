@@ -337,6 +337,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     type: 'esql',
     language: 'esql',
     query: 'FROM .alerts-security.alerts-default | STATS count = COUNT(@timestamp) BY @timestamp',
+    alert_suppression: undefined,
   });
 
   const RULE_WITHOUT_INVESTIGATION_AND_SETUP_GUIDES = createRuleAssetSavedObject({
