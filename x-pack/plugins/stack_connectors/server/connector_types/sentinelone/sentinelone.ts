@@ -18,11 +18,9 @@ import type {
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneIsolateHostParams,
-  SentinelOneKillProcessParams,
   SentinelOneExecuteScriptParams,
 } from '../../../common/sentinelone/types';
 import {
-  SentinelOneKillProcessResponseSchema,
   SentinelOneExecuteScriptParamsSchema,
   SentinelOneGetRemoteScriptsParamsSchema,
   SentinelOneGetRemoteScriptsResponseSchema,
@@ -33,9 +31,19 @@ import {
   SentinelOneGetRemoteScriptStatusResponseSchema,
   SentinelOneGetAgentsParamsSchema,
   SentinelOneExecuteScriptResponseSchema,
-  SentinelOneKillProcessParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneFetchAgentFilesResponseSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneDownloadAgentFileResponseSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneGetActivitiesResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
+import {
+  SentinelOneFetchAgentFilesParams,
+  SentinelOneDownloadAgentFileParams,
+  SentinelOneGetActivitiesParams,
+} from '../../../common/sentinelone/types';
 
 export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
@@ -51,6 +59,7 @@ export class SentinelOneConnector extends SubActionConnector<
     remoteScripts: string;
     remoteScriptStatus: string;
     remoteScriptsExecute: string;
+    activities: string;
   };
 
   constructor(params: ServiceParams<SentinelOneConfig, SentinelOneSecrets>) {
@@ -63,6 +72,7 @@ export class SentinelOneConnector extends SubActionConnector<
       remoteScriptStatus: `${this.config.url}${API_PATH}/remote-scripts/status`,
       remoteScriptsExecute: `${this.config.url}${API_PATH}/remote-scripts/execute`,
       agents: `${this.config.url}${API_PATH}/agents`,
+      activities: `${this.config.url}${API_PATH}/activities`,
     };
 
     this.registerSubActions();
@@ -73,6 +83,24 @@ export class SentinelOneConnector extends SubActionConnector<
       name: SUB_ACTION.GET_REMOTE_SCRIPTS,
       method: 'getRemoteScripts',
       schema: SentinelOneGetRemoteScriptsParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.FETCH_AGENT_FILES,
+      method: 'fetchAgentFiles',
+      schema: SentinelOneFetchAgentFilesParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.DOWNLOAD_AGENT_FILE,
+      method: 'downloadAgentFile',
+      schema: SentinelOneDownloadAgentFileParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.GET_ACTIVITIES,
+      method: 'getActivities',
+      schema: SentinelOneGetActivitiesParamsSchema,
     });
 
     this.registerSubAction({
@@ -100,69 +128,78 @@ export class SentinelOneConnector extends SubActionConnector<
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.KILL_PROCESS,
-      method: 'killProcess',
-      schema: SentinelOneKillProcessParamsSchema,
-    });
-
-    this.registerSubAction({
       name: SUB_ACTION.EXECUTE_SCRIPT,
       method: 'executeScript',
       schema: SentinelOneExecuteScriptParamsSchema,
     });
   }
 
-  public async executeScript(payload: SentinelOneExecuteScriptParams) {
-    await this.sentinelOneApiRequest({
-      url: this.urls.remoteScriptsExecute,
+  public async fetchAgentFiles({
+    files,
+    agentUUID,
+    zipPassCode,
+  }: SentinelOneFetchAgentFilesParams) {
+    const agent = await this.getAgents({ uuid: agentUUID });
+    const agentId = agent.data[0]?.id;
+
+    if (!agentId) {
+      throw new Error(`No agent found in SentinelOne for UUID [${agentUUID}]`);
+    }
+
+    return this.sentinelOneApiRequest({
+      url: `${this.urls.agents}/${agentId}/actions/fetch-files`,
       method: 'post',
       data: {
         data: {
-          outputDestination: 'SentinelCloud',
-          ...payload.script,
-        },
-        filter: {
-          computerName: payload.computerName,
+          password: zipPassCode,
+          files,
         },
       },
-      responseSchema: SentinelOneExecuteScriptResponseSchema,
+      responseSchema: SentinelOneFetchAgentFilesResponseSchema,
     });
   }
 
-  public async killProcess({ alertIds, processName, ...payload }: SentinelOneKillProcessParams) {
-    const agentData = await this.getAgents(payload);
-
-    const agentId = agentData.data[0]?.id;
+  public async downloadAgentFile({ agentUUID, activityId }: SentinelOneDownloadAgentFileParams) {
+    const agent = await this.getAgents({ uuid: agentUUID });
+    const agentId = agent.data[0]?.id;
 
     if (!agentId) {
-      throw new Error(`No agent found for filter ${JSON.stringify(payload)}`);
+      throw new Error(`No agent found in SentinelOne for UUID [${agentUUID}]`);
     }
 
-    const terminateScriptResponse = await this.getRemoteScripts({
-      query: 'terminate',
-      osTypes: agentData?.data[0]?.osType,
+    return this.sentinelOneApiRequest({
+      url: `${this.urls.agents}/${agentId}/uploads/${activityId}`,
+      method: 'get',
+      responseType: 'stream',
+      responseSchema: SentinelOneDownloadAgentFileResponseSchema,
     });
+  }
 
-    if (!processName) {
-      throw new Error('No process name provided');
+  public async getActivities(queryParams?: SentinelOneGetActivitiesParams) {
+    return this.sentinelOneApiRequest({
+      url: this.urls.activities,
+      method: 'get',
+      params: queryParams,
+      responseSchema: SentinelOneGetActivitiesResponseSchema,
+    });
+  }
+
+  public async executeScript({ filter, script }: SentinelOneExecuteScriptParams) {
+    if (!filter.ids && !filter.uuids) {
+      throw new Error(`A filter must be defined; either 'ids' or 'uuids'`);
     }
 
-    await this.sentinelOneApiRequest({
+    return this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsExecute,
       method: 'post',
       data: {
         data: {
           outputDestination: 'SentinelCloud',
-          scriptId: terminateScriptResponse.data[0].id,
-          scriptRuntimeTimeoutSeconds: terminateScriptResponse.data[0].scriptRuntimeTimeoutSeconds,
-          taskDescription: terminateScriptResponse.data[0].scriptName,
-          inputParams: `--terminate --processes ${processName}`,
+          ...script,
         },
-        filter: {
-          ids: agentId,
-        },
+        filter,
       },
-      responseSchema: SentinelOneKillProcessResponseSchema,
+      responseSchema: SentinelOneExecuteScriptResponseSchema,
     });
   }
 
@@ -257,13 +294,25 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
+    const appendResponseBody = (message: string): string => {
+      const responseBody = JSON.stringify(error.response?.data ?? {});
+
+      if (responseBody) {
+        return `${message}\nResponse body: ${responseBody}`;
+      }
+
+      return message;
+    };
+
     if (!error.response?.status) {
-      return 'Unknown API Error';
+      return appendResponseBody(error.message ?? 'Unknown API Error');
     }
+
     if (error.response.status === 401) {
-      return 'Unauthorized API Error';
+      return appendResponseBody('Unauthorized API Error (401)');
     }
-    return `API Error: ${error.response?.statusText}`;
+
+    return appendResponseBody(`API Error: [${error.response?.statusText}] ${error.message}`);
   }
 
   public async getRemoteScripts(

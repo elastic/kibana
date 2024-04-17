@@ -42,10 +42,7 @@ export function ExperimentalOnboardingFlow() {
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="observabilityOnboardingExperimentalOnboardingFlowSystemLogsButton"
-              {...reactRouterNavigate(
-                history,
-                `/systemLogs/${location.search}`
-              )}
+              {...reactRouterNavigate(history, `/systemLogs/${location.search}`)}
               color="accent"
             >
               {i18n.translate(
@@ -57,10 +54,7 @@ export function ExperimentalOnboardingFlow() {
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="observabilityOnboardingExperimentalOnboardingFlowCustomLogsButton"
-              {...reactRouterNavigate(
-                history,
-                `/customLogs/${location.search}`
-              )}
+              {...reactRouterNavigate(history, `/customLogs/${location.search}`)}
               color="accent"
             >
               {i18n.translate(

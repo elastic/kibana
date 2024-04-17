@@ -14,13 +14,16 @@ import {
   RISK_SCORE_CALCULATION_URL,
 } from '../../../../../common/constants';
 import { riskScoreCalculationRequestSchema } from '../../../../../common/entity_analytics/risk_engine/risk_score_calculation/request_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskScoreCalculationRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .post({
       path: RISK_SCORE_CALCULATION_URL,
