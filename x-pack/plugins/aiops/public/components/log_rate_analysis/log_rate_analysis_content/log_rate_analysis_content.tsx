@@ -222,15 +222,37 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         const snapTimestamps = getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval);
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
-        setAutoRunAnalysis(true);
+        triggerAnalysisForManualSelection();
         setInitialAnalysisStart(wpSnap);
       }
     }
-  }, [documentCountStats, setAutoRunAnalysis, setInitialAnalysisStart]);
+  }, [documentCountStats, setInitialAnalysisStart, triggerAnalysisForManualSelection]);
+
+  const showDocumentCountContent = documentCountStats !== undefined;
+
+  const showLogRateAnalysisResults =
+    autoRunAnalysis &&
+    earliest !== undefined &&
+    latest !== undefined &&
+    windowParameters !== undefined;
+
+  const showNoAutoRunEmptyPrompt =
+    !autoRunAnalysis &&
+    earliest !== undefined &&
+    latest !== undefined &&
+    windowParameters !== undefined;
+
+  const showSpikeDetectedEmptyPrompt =
+    windowParameters === undefined && documentCountStats?.changePoint;
+
+  const showDefaultEmptyPrompt =
+    windowParameters === undefined && documentCountStats?.changePoint === undefined;
+
+  const changePointType = documentCountStats?.changePoint?.type;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
-      {documentCountStats !== undefined && (
+      {showDocumentCountContent && (
         <DocumentCountContent
           brushSelectionUpdateHandler={brushSelectionUpdate}
           documentCountStats={documentCountStats}
@@ -248,71 +270,65 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         />
       )}
       <EuiHorizontalRule />
-      {autoRunAnalysis &&
-        earliest !== undefined &&
-        latest !== undefined &&
-        windowParameters !== undefined && (
-          <LogRateAnalysisResults
-            dataView={dataView}
-            analysisType={logRateAnalysisType}
-            earliest={earliest}
-            isBrushCleared={isBrushCleared}
-            latest={latest}
-            stickyHistogram={stickyHistogram}
-            onReset={clearSelection}
-            sampleProbability={sampleProbability}
-            searchQuery={searchQuery}
-            windowParameters={windowParameters}
-            barColorOverride={barColorOverride}
-            barHighlightColorOverride={barHighlightColorOverride}
-            onAnalysisCompleted={onAnalysisCompleted}
-            embeddingOrigin={embeddingOrigin}
-          />
-        )}
-      {!autoRunAnalysis &&
-        earliest !== undefined &&
-        latest !== undefined &&
-        windowParameters !== undefined && (
-          <EuiEmptyPrompt
-            color="subdued"
-            hasShadow={false}
-            hasBorder={false}
-            css={{ minWidth: '100%' }}
-            title={undefined}
-            titleSize="xs"
-            body={
-              <>
-                <p>
-                  <FormattedMessage
-                    id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptBody"
-                    defaultMessage={`Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button "Run analysis" below.`}
-                  />
-                </p>
-                <EuiButton
-                  data-test-subj="aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton"
-                  onClick={triggerAnalysisForManualSelection}
-                >
-                  <FormattedMessage
-                    id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptRunAnalysisButton"
-                    defaultMessage="Run analysis"
-                  />
-                </EuiButton>{' '}
-                <EuiButton
-                  data-test-subj="aiopsClearSelectionBadge"
-                  onClick={() => clearSelection()}
-                  color="text"
-                >
-                  <FormattedMessage
-                    id="xpack.aiops.clearSelectionLabel"
-                    defaultMessage="Clear selection"
-                  />
-                </EuiButton>
-              </>
-            }
-            data-test-subj="aiopsChangePointDetectedPrompt"
-          />
-        )}
-      {windowParameters === undefined && documentCountStats?.changePoint && (
+      {showLogRateAnalysisResults && (
+        <LogRateAnalysisResults
+          dataView={dataView}
+          analysisType={logRateAnalysisType}
+          earliest={earliest}
+          isBrushCleared={isBrushCleared}
+          latest={latest}
+          stickyHistogram={stickyHistogram}
+          onReset={clearSelection}
+          sampleProbability={sampleProbability}
+          searchQuery={searchQuery}
+          windowParameters={windowParameters}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
+          onAnalysisCompleted={onAnalysisCompleted}
+          embeddingOrigin={embeddingOrigin}
+        />
+      )}
+      {showNoAutoRunEmptyPrompt && (
+        <EuiEmptyPrompt
+          color="subdued"
+          hasShadow={false}
+          hasBorder={false}
+          css={{ minWidth: '100%' }}
+          title={undefined}
+          titleSize="xs"
+          body={
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptBody"
+                  defaultMessage={`Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button "Run analysis" below.`}
+                />
+              </p>
+              <EuiButton
+                data-test-subj="aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton"
+                onClick={triggerAnalysisForManualSelection}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptRunAnalysisButton"
+                  defaultMessage="Run analysis"
+                />
+              </EuiButton>{' '}
+              <EuiButton
+                data-test-subj="aiopsClearSelectionBadge"
+                onClick={() => clearSelection()}
+                color="text"
+              >
+                <FormattedMessage
+                  id="xpack.aiops.clearSelectionLabel"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButton>
+            </>
+          }
+          data-test-subj="aiopsChangePointDetectedPrompt"
+        />
+      )}
+      {showSpikeDetectedEmptyPrompt && (
         <EuiEmptyPrompt
           color="subdued"
           hasShadow={false}
@@ -320,20 +336,20 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           css={{ minWidth: '100%' }}
           title={
             <h2>
-              {documentCountStats?.changePoint.type === LOG_RATE_ANALYSIS_TYPE.SPIKE && (
+              {changePointType === LOG_RATE_ANALYSIS_TYPE.SPIKE && (
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointSpikePromptTitle"
                   defaultMessage="Log rate spike detected"
                 />
               )}
-              {documentCountStats?.changePoint.type === LOG_RATE_ANALYSIS_TYPE.DIP && (
+              {changePointType === LOG_RATE_ANALYSIS_TYPE.DIP && (
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointDipPromptTitle"
                   defaultMessage="Log rate dip detected"
                 />
               )}
-              {documentCountStats?.changePoint.type !== LOG_RATE_ANALYSIS_TYPE.SPIKE &&
-                documentCountStats?.changePoint.type !== LOG_RATE_ANALYSIS_TYPE.DIP && (
+              {changePointType !== LOG_RATE_ANALYSIS_TYPE.SPIKE &&
+                changePointType !== LOG_RATE_ANALYSIS_TYPE.DIP && (
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.changePointOtherPromptTitle"
                     defaultMessage="Log rate change point detected"
@@ -364,7 +380,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           data-test-subj="aiopsChangePointDetectedPrompt"
         />
       )}
-      {windowParameters === undefined && documentCountStats?.changePoint === undefined && (
+      {showDefaultEmptyPrompt && (
         <EuiEmptyPrompt
           color="subdued"
           hasShadow={false}
