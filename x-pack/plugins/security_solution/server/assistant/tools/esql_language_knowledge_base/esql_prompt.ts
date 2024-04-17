@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const getEsqlPrompt = (xxx: string) => `
-${xxx}
+export const getEsqlPrompt = (input: string) => `
+${input}
 
 Only return valid ES|QL queries as described above. Do not add any additional text to describe your output.
  `;

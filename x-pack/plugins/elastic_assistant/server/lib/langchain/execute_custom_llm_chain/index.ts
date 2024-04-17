@@ -180,8 +180,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
           input: latestMessage[0].content,
           chat_history: [],
           signal: abortSignal,
-          model: request.body.model ?? 'gpt-4',
-          // temperature: 0.3,
         },
         {
           callbacks: [
