@@ -205,6 +205,8 @@ const ExportContentUi = ({ isDirty, objectType, aggregateReportTypes, intl }: Ex
     }
     if (objectType === 'lens' && selectedRadio === 'lens_csv') {
       return downloadCSVLens!();
+    } else if (usePrintLayout && selectedRadio === 'pngV2') {
+      return generateReport!({ intl });
     }
     return usePrintLayout ? generateReportForPrinting!({ intl }) : generateReport!({ intl });
   }, [
