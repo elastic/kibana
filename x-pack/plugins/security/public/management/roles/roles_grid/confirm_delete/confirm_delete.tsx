@@ -57,9 +57,7 @@ export class ConfirmDelete extends Component<Props, State> {
     const { rolesToDelete, buildFlavor } = this.props;
     const moreThanOne = rolesToDelete.length > 1;
     const title = i18n.translate('xpack.security.management.roles.deleteRoleTitle', {
-      defaultMessage: `Delete role{value, plural, one {{roleName}} other {s}}${
-        buildFlavor === 'serverless' ? '?' : ''
-      }`,
+      defaultMessage: `Delete role{value, plural, one {{roleName}} other {s}}?`,
       values: { value: rolesToDelete.length, roleName: ` ${rolesToDelete[0]}` },
     });
 
