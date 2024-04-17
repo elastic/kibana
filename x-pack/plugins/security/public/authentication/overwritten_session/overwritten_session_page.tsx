@@ -9,11 +9,12 @@ import { EuiButton } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import type { AppMountParameters, CoreStart, IBasePath } from '@kbn/core/public';
+import type { AppMountParameters, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
+import type { StartServices } from '../..';
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
@@ -53,7 +54,7 @@ export function OverwrittenSessionPage({ authc, basePath }: Props) {
 }
 
 export function renderOverwrittenSessionPage(
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+  services: StartServices,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {

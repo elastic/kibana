@@ -12,12 +12,13 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
-import type { CoreStart, ToastInput } from '@kbn/core/public';
+import type { ToastInput } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { SessionState } from './session_timeout';
+import type { StartServices } from '..';
 import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
 
 export interface SessionExpirationToastProps {
@@ -74,7 +75,7 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
 };
 
 export const createSessionExpirationToast = (
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+  services: StartServices,
   sessionState$: Observable<SessionState>,
   onExtend: () => Promise<any>,
   onClose: () => void

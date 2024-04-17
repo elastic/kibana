@@ -23,7 +23,6 @@ import ReactMarkdown from 'react-markdown';
 
 import type {
   AppMountParameters,
-  CoreStart,
   FatalErrorsStart,
   HttpStart,
   NotificationsStart,
@@ -32,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import type { StartServices } from '../..';
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
@@ -128,7 +128,7 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
 }
 
 export function renderAccessAgreementPage(
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+  services: StartServices,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {

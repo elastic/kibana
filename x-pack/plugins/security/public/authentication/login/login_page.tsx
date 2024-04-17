@@ -25,7 +25,6 @@ import { BehaviorSubject } from 'rxjs';
 
 import type {
   AppMountParameters,
-  CoreStart,
   CustomBrandingStart,
   FatalErrorsStart,
   HttpStart,
@@ -38,6 +37,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
+import type { StartServices } from '../..';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
@@ -368,7 +368,7 @@ export class LoginPage extends Component<Props, State> {
 }
 
 export function renderLoginPage(
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+  services: StartServices,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {

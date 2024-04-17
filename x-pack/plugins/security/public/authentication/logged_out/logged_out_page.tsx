@@ -10,15 +10,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 
-import type {
-  AppMountParameters,
-  CoreStart,
-  CustomBrandingStart,
-  IBasePath,
-} from '@kbn/core/public';
+import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import type { StartServices } from '../..';
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
@@ -47,7 +43,7 @@ export function LoggedOutPage({ basePath, customBranding }: Props) {
 }
 
 export function renderLoggedOutPage(
-  services: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+  services: StartServices,
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
