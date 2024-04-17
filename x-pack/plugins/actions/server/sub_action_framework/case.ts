@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import {
   ExternalServiceIncidentResponse,
   PushToServiceParams,
@@ -15,40 +15,36 @@ import { SubActionConnector } from './sub_action_connector';
 import { ServiceParams } from './types';
 
 export interface CaseConnectorInterface {
-  addComment: ({
-    incidentId,
-    comment,
-  }: {
-    incidentId: string;
-    comment: string;
-  }) => Promise<unknown>;
-  createIncident: (incident: Record<string, unknown>) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: ({
+  addComment: ({ incidentId, comment }: { incidentId: string; comment: string }) => Promise<void>;
+  createIncident: <T>(incident: T) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: <T>({
     incidentId,
     incident,
   }: {
     incidentId: string;
-    incident: Record<string, unknown>;
+    incident: T;
   }) => Promise<ExternalServiceIncidentResponse>;
-  getIncident: ({ id }: { id: string }) => Promise<unknown>;
-  pushToService: (params: PushToServiceParams) => Promise<PushToServiceResponse>;
+  getIncident: <R, T>(params: R) => Promise<T>;
+  pushToService: <T extends PushToServiceParams>(params: T) => Promise<PushToServiceResponse>;
 }
 
 export abstract class CaseConnector<Config, Secrets>
   extends SubActionConnector<Config, Secrets>
   implements CaseConnectorInterface
 {
-  constructor(params: ServiceParams<Config, Secrets>) {
+  constructor(
+    params: ServiceParams<Config, Secrets>,
+    pushToServiceIncidentParamsSchema: Record<string, Type<unknown> | null>
+  ) {
     super(params);
 
     this.registerSubAction({
       name: 'pushToService',
       method: 'pushToService',
       schema: schema.object({
-        incident: schema.object(
-          { externalId: schema.nullable(schema.string()) },
-          { unknowns: 'allow' }
-        ),
+        incident: schema
+          .object({ externalId: schema.nullable(schema.string()) })
+          .extends(pushToServiceIncidentParamsSchema),
         comments: schema.nullable(
           schema.arrayOf(
             schema.object({
@@ -67,21 +63,19 @@ export abstract class CaseConnector<Config, Secrets>
   }: {
     incidentId: string;
     comment: string;
-  }): Promise<unknown>;
+  }): Promise<void>;
 
-  public abstract createIncident(
-    incident: Record<string, unknown>
-  ): Promise<ExternalServiceIncidentResponse>;
-  public abstract updateIncident({
+  public abstract createIncident<T>(incident: T): Promise<ExternalServiceIncidentResponse>;
+  public abstract updateIncident<T>({
     incidentId,
     incident,
   }: {
     incidentId: string;
-    incident: Record<string, unknown>;
+    incident: T;
   }): Promise<ExternalServiceIncidentResponse>;
-  public abstract getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse>;
+  public abstract getIncident<R, T>(params: R): Promise<T>;
 
-  public async pushToService(params: PushToServiceParams) {
+  public async pushToService<T extends PushToServiceParams>(params: T) {
     const { incident, comments } = params;
     const { externalId, ...rest } = incident;
 

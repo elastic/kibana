@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
 import { SubActionConnector } from './sub_action_connector';
 import { CaseConnector } from './case';
@@ -19,6 +19,25 @@ export const TestSecretsSchema = schema.object({
 });
 export type TestConfig = TypeOf<typeof TestConfigSchema>;
 export type TestSecrets = TypeOf<typeof TestSecretsSchema>;
+
+export type GetIncidentParams = {
+  id: string;
+};
+
+export type GetIncidentResponse = {
+  id: string;
+  title: string;
+  description?: string;
+  severity: number;
+};
+
+export type IncidentParams = {
+  incident: {
+    externalId: string | null;
+    name: string;
+    category: string | null;
+  };
+};
 
 interface ErrorSchema {
   errorMessage: string;
@@ -134,17 +153,20 @@ export class TestExecutor extends SubActionConnector<TestConfig, TestSecrets> {
 }
 
 export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
-  constructor(params: ServiceParams<TestConfig, TestSecrets>) {
-    super(params);
+  constructor(
+    params: ServiceParams<TestConfig, TestSecrets>,
+    pushToServiceParamsSchema: Record<string, Type<unknown> | null>
+  ) {
+    super(params, pushToServiceParamsSchema);
   }
 
   protected getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
     return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
   }
 
-  public async createIncident(incident: {
-    category: string;
-  }): Promise<ExternalServiceIncidentResponse> {
+  public async createIncident<IncidentParams>(
+    incident: IncidentParams
+  ): Promise<ExternalServiceIncidentResponse> {
     return {
       id: 'create-incident',
       title: 'Test incident',
@@ -159,21 +181,14 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
   }: {
     incidentId: string;
     comment: string;
-  }): Promise<ExternalServiceIncidentResponse> {
-    return {
-      id: 'add-comment',
-      title: 'Test incident',
-      url: 'https://example.com',
-      pushedDate: '2022-05-06T09:41:00.401Z',
-    };
-  }
+  }): Promise<void> {}
 
-  public async updateIncident({
+  public async updateIncident<IncidentParams>({
     incidentId,
     incident,
   }: {
     incidentId: string;
-    incident: { category: string };
+    incident: IncidentParams;
   }): Promise<ExternalServiceIncidentResponse> {
     return {
       id: 'update-incident',
@@ -183,12 +198,13 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     };
   }
 
-  public async getIncident({ id }: { id: string }): Promise<ExternalServiceIncidentResponse> {
+  public async getIncident<GetIncidentParams, GetIncidentResponse>(
+    params: GetIncidentParams
+  ): Promise<GetIncidentResponse> {
     return {
       id: 'get-incident',
       title: 'Test incident',
-      url: 'https://example.com',
-      pushedDate: '2022-05-06T09:41:00.401Z',
-    };
+      severity: 4,
+    } as GetIncidentResponse;
   }
 }
