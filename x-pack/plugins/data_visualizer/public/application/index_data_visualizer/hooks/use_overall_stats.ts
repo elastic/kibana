@@ -318,7 +318,6 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               const docs = resp.rawResponse.hits.hits.map((d) =>
                 d.fields ? getProcessedFields(d.fields) : {}
               );
-
               sampledNonAggregatableFieldsExamples = docs;
             }
             if (isAggregatableFieldOverallStats(resp)) {

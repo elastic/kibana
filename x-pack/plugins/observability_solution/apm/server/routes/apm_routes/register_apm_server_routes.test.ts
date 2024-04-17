@@ -270,8 +270,7 @@ describe('createApi', () => {
         expect(response.custom).toHaveBeenCalledWith({
           body: {
             attributes: { _inspect: [], data: null },
-            message:
-              'Invalid value 1 supplied to : Partial<{| query: Partial<{| _inspect: pipe(JSON, boolean) |}> |}>/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
+            message: 'Invalid value "1" supplied to "query,_inspect"',
           },
           statusCode: 400,
         });
