@@ -222,7 +222,7 @@ export default function (providerContext: FtrProviderContext) {
               'launchGoogleCloudShellButtonAgentFlyoutTestId',
               'href'
             )
-          ).includes('https://shell.cloud.google.com/cloudshell/')
+          )?.includes('https://shell.cloud.google.com/cloudshell/')
         ).to.be(true);
       });
       it('Users are able to add CIS_GCP Integration with Manual settings using Credentials File', async () => {

@@ -71,7 +71,7 @@ export default function (providerContext: FtrProviderContext) {
               'launchCloudFormationButtonAgentFlyoutTestId',
               'href'
             )
-          ).includes('https://console.aws.amazon.com/cloudformation/')
+          )?.includes('https://console.aws.amazon.com/cloudformation/')
         ).to.be(true);
       });
       it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {

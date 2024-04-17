@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
               'launchCloudFormationButtonAgentFlyoutTestId',
               'href'
             )
-          ).includes('https://console.aws.amazon.com/cloudformation/')
+          )?.includes('https://console.aws.amazon.com/cloudformation/')
         ).to.be(true);
       });
 
