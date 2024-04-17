@@ -43,11 +43,12 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
               {i18n.OPTIONAL}
             </EuiText>
           }
+          labelType="legend"
           fullWidth
           data-test-subj={dataTestSubj}
           hasChildLabel={false}
         >
-          <fieldset>
+          <>
             <EuiFlexGroup direction="column" gutterSize="s">
               {items.map((item) => (
                 <EuiFlexItem key={item.id} data-test-subj="relatedIntegrationRow">
@@ -63,7 +64,7 @@ export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsP
             <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addItem}>
               {i18n.ADD_INTEGRATION}
             </EuiButtonEmpty>
-          </fieldset>
+          </>
         </EuiFormRow>
       )}
     </UseArray>

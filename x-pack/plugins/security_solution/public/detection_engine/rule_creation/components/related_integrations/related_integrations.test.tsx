@@ -58,10 +58,10 @@ describe('RelatedIntegrations form part', () => {
     });
   });
 
-  it('renders related integrations label pointing to fields', () => {
+  it('renders related integrations legend', () => {
     render(<TestForm />);
 
-    expect(screen.getByLabelText('Related integrations')).toBeDefined();
+    expect(screen.getByText('Related integrations')).toBeVisible();
   });
 
   describe('visual representation', () => {
