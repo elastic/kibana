@@ -11,16 +11,16 @@ import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { StartDependencies, AiAssistantManagementSelectionPluginStart } from '../plugin';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { StartDependencies, AIAssistantManagementSelectionPluginPublicStart } from '../plugin';
 import { aIAssistantManagementSelectionRouter } from '../routes/config';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { AppContextProvider } from '../app_context';
 
 interface MountParams {
-  core: CoreSetup<StartDependencies, AiAssistantManagementSelectionPluginStart>;
+  core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>;
   mountParams: ManagementAppMountParams;
 }
 

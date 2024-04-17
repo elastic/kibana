@@ -4725,7 +4725,7 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"HIERARCHICAL\" | \"NONE\""
+              "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -7005,7 +7005,7 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"HIERARCHICAL\" | \"NONE\""
+              "\"NONE\" | \"HIERARCHICAL\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,

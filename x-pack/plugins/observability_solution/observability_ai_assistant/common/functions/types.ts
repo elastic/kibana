@@ -4,14 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { JSONSchema } from 'json-schema-to-ts';
+import type { JSONSchema7TypeName } from 'json-schema';
 import type { Observable } from 'rxjs';
 import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
 import { FunctionVisibility } from './function_visibility';
 export { FunctionVisibility };
 
-export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
+type JSONSchemaOrPrimitive = CompatibleJSONSchema | string | number | boolean;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type CompatibleJSONSchema = {
+  type?: JSONSchema7TypeName;
+  enum?: JSONSchemaOrPrimitive[] | readonly JSONSchemaOrPrimitive[];
+  const?: JSONSchemaOrPrimitive;
+  minLength?: number | undefined;
+  maxLength?: number | undefined;
+  items?: CompatibleJSONSchema[] | CompatibleJSONSchema;
+  required?: string[] | readonly string[] | undefined;
+  properties?: Record<string, CompatibleJSONSchema>;
+  allOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+  anyOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+  oneOf?: CompatibleJSONSchema[] | readonly CompatibleJSONSchema[] | undefined;
+  description?: string;
+};
 
 export interface ContextDefinition {
   name: string;

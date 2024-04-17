@@ -210,6 +210,9 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
               columnId: id,
               columnType,
               sortDirection: direction,
+              // esTypes is needed so that the sort object remains consistent with the
+              // default sort value and does not creates an unnecessary search request
+              esTypes: id === '@timestamp' ? ['date'] : [],
             } as SortColumnTimeline;
           }),
         })
@@ -232,7 +235,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     [dispatch, onSort, timelineId]
   );
 
-  const { onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
+  const {
+    columns: currentColumnIds,
+    onAddColumn,
+    onRemoveColumn,
+    onSetColumns,
+  } = useColumns({
     capabilities,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     dataView: dataView!,
@@ -242,6 +250,18 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     columns: columnIds,
     sort: sortingColumns,
   });
+
+  const onSetColumnsTimeline = useCallback(
+    (nextColumns: string[]) => {
+      const shouldUnifiedTableKeepColumnsUnchanged = true;
+      // to support the legacy table, unified table has the ability to automatically
+      // prepend timestamp field column to the table. We do not want that, otherwise
+      // the list of columns returned does not have timestamp field because unifiedDataTable assumes that
+      // it is automatically available in the table.
+      onSetColumns(nextColumns, shouldUnifiedTableKeepColumnsUnchanged);
+    },
+    [onSetColumns]
+  );
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
@@ -374,13 +394,14 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                   <EventDetailsWidthProvider>
                     <DataGridMemoized
                       columns={columns}
+                      columnIds={currentColumnIds}
                       rowRenderers={rowRenderers}
                       timelineId={timelineId}
                       itemsPerPage={itemsPerPage}
                       itemsPerPageOptions={itemsPerPageOptions}
                       sort={sortingColumns}
                       onSort={onSort}
-                      onSetColumns={onSetColumns}
+                      onSetColumns={onSetColumnsTimeline}
                       events={events}
                       refetch={refetch}
                       onFieldEdited={onFieldEdited}

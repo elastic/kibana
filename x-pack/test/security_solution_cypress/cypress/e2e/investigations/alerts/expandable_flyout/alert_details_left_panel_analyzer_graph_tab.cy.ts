@@ -25,7 +25,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 // TODO enable once the visualize tabs are back
 describe.skip(
   'Alert details expandable flyout left panel analyzer graph',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       deleteAlertsAndRules();

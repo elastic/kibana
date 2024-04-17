@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
-import { EMPTY, merge, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, merge, Subject, Subscription } from 'rxjs';
 import {
   catchError,
   combineLatestWith,
@@ -21,11 +21,8 @@ import {
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  PresentationContainer,
-  PanelPackage,
-  SerializedPanelState,
-} from '@kbn/presentation-containers';
+import { PanelPackage } from '@kbn/presentation-containers';
+import { PresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
 
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 import { EmbeddableStart } from '../../plugin';
@@ -59,9 +56,10 @@ export abstract class Container<
   implements IContainer<TChildInput, TContainerInput, TContainerOutput>, PresentationContainer
 {
   public readonly isContainer: boolean = true;
-  public readonly children: {
-    [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
-  } = {};
+
+  public children$: BehaviorSubject<{ [key: string]: unknown }> = new BehaviorSubject<{
+    [key: string]: unknown;
+  }>({});
 
   private subscription: Subscription | undefined;
   private readonly anyChildOutputChange$;
@@ -69,8 +67,6 @@ export abstract class Container<
   public lastSavedState: Subject<void> = new Subject();
   public getLastSavedStateForChild: (childId: string) => SerializedPanelState | undefined = () =>
     undefined;
-
-  public registerPanelApi = <ApiType extends unknown = unknown>(id: string, api: ApiType) => {};
 
   constructor(
     input: TContainerInput,
@@ -157,7 +153,11 @@ export abstract class Container<
       return;
     }
 
-    this.children[embeddable.id] = embeddable;
+    const currentChildren = this.children$.value;
+    this.children$.next({
+      ...currentChildren,
+      [embeddable.id]: embeddable,
+    });
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,
@@ -189,7 +189,9 @@ export abstract class Container<
   }
 
   public reload() {
-    Object.values(this.children).forEach((child) => child.reload());
+    for (const child of Object.values(this.children$.value)) {
+      (child as IEmbeddable)?.reload?.();
+    }
   }
 
   public async addNewEmbeddable<
@@ -274,11 +276,11 @@ export abstract class Container<
   }
 
   public getChildIds(): string[] {
-    return Object.keys(this.children);
+    return Object.keys(this.children$.value);
   }
 
   public getChild<E extends IEmbeddable>(id: string): E {
-    return this.children[id] as E;
+    return this.children$.value[id] as E;
   }
 
   public getInputForChild<TEmbeddableInput extends EmbeddableInput = EmbeddableInput>(
@@ -319,7 +321,9 @@ export abstract class Container<
 
   public destroy() {
     super.destroy();
-    Object.values(this.children).forEach((child) => child.destroy());
+    for (const child of Object.values(this.children$.value)) {
+      (child as IEmbeddable)?.destroy?.();
+    }
     this.subscription?.unsubscribe();
   }
 
@@ -331,14 +335,14 @@ export abstract class Container<
     }
 
     if (this.output.embeddableLoaded[id]) {
-      return this.children[id] as TEmbeddable;
+      return this.children$.value[id] as TEmbeddable;
     }
 
     return new Promise<TEmbeddable>((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
-          resolve(this.children[id] as TEmbeddable);
+          resolve(this.children$.value[id] as TEmbeddable);
         }
 
         // If we hit this, the panel was removed before the embeddable finished loading.
@@ -497,11 +501,13 @@ export abstract class Container<
   private onPanelRemoved(id: string) {
     // Clean up
     const embeddable = this.getChild(id);
-    if (embeddable) {
+    if (embeddable && embeddable.destroy) {
       embeddable.destroy();
 
       // Remove references.
-      delete this.children[id];
+      const nextChildren = this.children$.value;
+      delete nextChildren[id];
+      this.children$.next(nextChildren);
     }
 
     this.updateOutput({

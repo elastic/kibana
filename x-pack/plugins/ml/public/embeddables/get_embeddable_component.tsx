@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { EmbeddableRoot, useEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { EuiLoadingChart } from '@elastic/eui';
-import type { MappedEmbeddableTypeOf } from './types';
+import React from 'react';
 import type { MlStartDependencies } from '../plugin';
-import type { MlEmbeddableTypes } from './constants';
+import type { AnomalyExplorerChartsEmbeddableType } from './constants';
+import type { MappedEmbeddableTypeOf } from './types';
 
 /**
  * Gets an instance of an embeddable component of requested type.
@@ -20,12 +20,13 @@ import type { MlEmbeddableTypes } from './constants';
  * @param core
  * @param plugins
  */
-export function getEmbeddableComponent<EmbeddableType extends MlEmbeddableTypes>(
+export function getEmbeddableComponent<EmbeddableType extends AnomalyExplorerChartsEmbeddableType>(
   embeddableType: EmbeddableType,
   core: CoreStart,
   plugins: MlStartDependencies
 ) {
   const { embeddable: embeddableStart } = plugins;
+
   const factory =
     embeddableStart.getEmbeddableFactory<MappedEmbeddableTypeOf<EmbeddableType>>(embeddableType);
 

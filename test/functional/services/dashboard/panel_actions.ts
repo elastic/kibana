@@ -210,6 +210,8 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.openContextMenu();
     }
+    const isActionVisible = await this.testSubjects.exists(CLONE_PANEL_DATA_TEST_SUBJ);
+    if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
     await this.dashboard.waitForRenderComplete();
   }
@@ -352,11 +354,6 @@ export class DashboardPanelActionsService extends FtrService {
     await this.expectExistsPanelAction(testSubj, title);
   }
 
-  async expectExistsReplacePanelAction() {
-    this.log.debug('expectExistsReplacePanelAction');
-    await this.expectExistsPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
-  }
-
   async expectExistsClonePanelAction() {
     this.log.debug('expectExistsClonePanelAction');
     await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
@@ -381,11 +378,6 @@ export class DashboardPanelActionsService extends FtrService {
   async expectMissingEditPanelAction() {
     this.log.debug('expectMissingEditPanelAction');
     await this.expectMissingPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async expectMissingReplacePanelAction() {
-    this.log.debug('expectMissingReplacePanelAction');
-    await this.expectMissingPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
   }
 
   async expectMissingDuplicatePanelAction() {

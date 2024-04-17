@@ -2193,6 +2193,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-common.SavedObject.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
+            "description": [
+              "The ID of the user who created this object."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-common.SavedObject.updated_at",
             "type": "string",
             "tags": [],

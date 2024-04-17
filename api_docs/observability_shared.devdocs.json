@@ -682,7 +682,7 @@
                     "section": "def-common.Trigger",
                     "text": "Trigger"
                   },
-                  ") => void; readonly getTrigger: (triggerId: string) => ",
+                  ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
                   "TriggerContract",
                   "<object>; readonly registerAction: <Context extends object>(definition: ",
                   {
@@ -3669,6 +3669,46 @@
     "functions": [
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-common.colorTransformer",
+        "type": "Function",
+        "tags": [],
+        "label": "colorTransformer",
+        "description": [],
+        "signature": [
+          "(color: ",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "common",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-common.Color",
+            "text": "Color"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/color_palette.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.colorTransformer.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "\"color0\" | \"color1\" | \"color2\" | \"color3\" | \"color4\" | \"color5\" | \"color6\" | \"color7\" | \"color8\" | \"color9\""
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/common/color_palette.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-common.getInspectResponse",
         "type": "Function",
         "tags": [],
@@ -4039,6 +4079,21 @@
           "\"transaction.experience.cls\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.Color",
+        "type": "Type",
+        "tags": [],
+        "label": "Color",
+        "description": [],
+        "signature": [
+          "\"color0\" | \"color1\" | \"color2\" | \"color3\" | \"color4\" | \"color5\" | \"color6\" | \"color7\" | \"color8\" | \"color9\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/common/color_palette.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

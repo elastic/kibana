@@ -30,7 +30,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"dashboards\" | \"discover\" | \"visualize\""
+          "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
         ],
         "path": "packages/deeplinks/analytics/deep_links.ts",
         "deprecated": false,
@@ -75,7 +75,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"dashboards\" | \"discover\" | \"visualize\""
+          "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
         ],
         "path": "packages/deeplinks/analytics/deep_links.ts",
         "deprecated": false,

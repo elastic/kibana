@@ -53,6 +53,7 @@ image::management/connectors/images/cases-webhook-connector-comments.png[Add cas
 
 Add HTTP header::
 A set of key-value pairs sent as headers with the request URLs for the create case, update case, get case, and create comment methods.
+For example, set `Content-Type` to the appropriate media type for your requests.
 
 Create case method::
 The REST API HTTP request method to create a case in the third-party system: `post`(default), `put`, or `patch`.

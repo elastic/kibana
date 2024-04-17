@@ -7,12 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { EuiResizeObserver } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import { throttle } from 'lodash';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { useToastNotificationService } from '../../application/services/toast_notification_service';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useSingleMetricViewerInputResolver } from './use_single_metric_viewer_input_resolver';
@@ -38,7 +41,7 @@ interface AppStateZoom {
 export interface EmbeddableSingleMetricViewerContainerProps {
   id: string;
   embeddableContext: InstanceType<ISingleMetricViewerEmbeddable>;
-  embeddableInput: Observable<SingleMetricViewerEmbeddableInput>;
+  embeddableInput$: Observable<SingleMetricViewerEmbeddableInput>;
   services: SingleMetricViewerEmbeddableServices;
   refresh: Observable<void>;
   onInputChange: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
@@ -50,10 +53,10 @@ export interface EmbeddableSingleMetricViewerContainerProps {
 
 export const EmbeddableSingleMetricViewerContainer: FC<
   EmbeddableSingleMetricViewerContainerProps
-> = ({ id, embeddableContext, embeddableInput, services, refresh, onRenderComplete }) => {
+> = ({ id, embeddableContext, embeddableInput$, services, refresh, onRenderComplete }) => {
   useEmbeddableExecutionContext<SingleMetricViewerEmbeddableInput>(
     services[0].executionContext,
-    embeddableInput,
+    embeddableInput$,
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     id
   );
@@ -63,10 +66,11 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
   const [jobsLoaded, setJobsLoaded] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
   const { mlApiServices, mlJobService } = services[2];
   const { data, bounds, lastRefresh } = useSingleMetricViewerInputResolver(
-    embeddableInput,
+    embeddableInput$,
     refresh,
     services[1].data.query.timefilter.timefilter,
     onRenderComplete
@@ -85,8 +89,13 @@ export const EmbeddableSingleMetricViewerContainer: FC<
 
   useEffect(function setUpJobsLoaded() {
     async function loadJobs() {
-      await mlJobService.loadJobsWrapper();
-      setJobsLoaded(true);
+      try {
+        await mlJobService.loadJobsWrapper();
+        setJobsLoaded(true);
+      } catch (e) {
+        const errorMessage = extractErrorMessage(e);
+        setError(errorMessage);
+      }
     }
     loadJobs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,15 +104,20 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   useEffect(
     function setUpSelectedJob() {
       async function fetchSelectedJob() {
-        if (mlApiServices && selectedJobId !== undefined) {
-          const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
-          const job = jobs[0];
-          setSelectedJob(job);
+        if (mlApiServices && selectedJobId !== undefined && error === undefined) {
+          try {
+            const { jobs } = await mlApiServices.getJobs({ jobId: selectedJobId });
+            const job = jobs[0];
+            setSelectedJob(job);
+          } catch (e) {
+            const errorMessage = extractErrorMessage(e);
+            setError(errorMessage);
+          }
         }
       }
       fetchSelectedJob();
     },
-    [selectedJobId, mlApiServices]
+    [selectedJobId, mlApiServices, error]
   );
 
   useEffect(
@@ -158,6 +172,24 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   );
 
   const containerPadding = 10;
+
+  if (error) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.ml.singleMetricViewerEmbeddable.errorMessage"
+            defaultMessage="Unable to load the data for the single metric viewer"
+          />
+        }
+        color="danger"
+        iconType="warning"
+        css={{ width: '100%' }}
+      >
+        <p>{error}</p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <EuiResizeObserver onResize={resizeHandler}>

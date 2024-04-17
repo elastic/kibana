@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask, EuiThemeProvider } from '@elastic/eui';
+import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -99,7 +99,6 @@ export async function getEditLensConfiguration(
     startDependencies,
     getLensAttributeService(coreStart, startDependencies)
   );
-  const theme = coreStart.theme.getTheme();
 
   return ({
     attributes,
@@ -172,6 +171,7 @@ export async function getEditLensConfiguration(
       if (wrapInFlyout) {
         return (
           <EuiFlyout
+            data-test-subj="lnsEditOnFlyFlyout"
             type="push"
             ownFocus
             paddingSize="m"
@@ -224,7 +224,7 @@ export async function getEditLensConfiguration(
 
     return getWrapper(
       <Provider store={lensStore}>
-        <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
+        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
           <I18nProvider>
             <KibanaContextProvider services={lensServices}>
               <RootDragDropProvider>
@@ -232,7 +232,7 @@ export async function getEditLensConfiguration(
               </RootDragDropProvider>
             </KibanaContextProvider>
           </I18nProvider>
-        </EuiThemeProvider>
+        </KibanaThemeProvider>
       </Provider>
     );
   };
