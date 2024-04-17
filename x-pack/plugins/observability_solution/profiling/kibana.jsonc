@@ -13,7 +13,8 @@
       "security",
       "cloud",
       "fleet",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "apmDataAccess",
     ],
     "requiredPlugins": [
       "charts",
