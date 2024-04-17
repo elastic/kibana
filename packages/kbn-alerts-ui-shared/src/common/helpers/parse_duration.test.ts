@@ -153,6 +153,21 @@ test('throws error when 0 based', () => {
   );
 });
 
+test('throws error when negative', () => {
+  expect(() => parseDuration('-1s')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"-1s\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+  expect(() => parseDuration('-1m')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"-1m\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+  expect(() => parseDuration('-1h')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"-1h\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+  expect(() => parseDuration('-1d')).toThrowErrorMatchingInlineSnapshot(
+    `"Invalid duration \\"-1d\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+  );
+});
+
 test('getDurationNumberInItsUnit days', () => {
   const result = getDurationNumberInItsUnit('10d');
   expect(result).toEqual(10);
@@ -166,6 +181,11 @@ test('getDurationNumberInItsUnit minutes', () => {
 test('getDurationNumberInItsUnit seconds', () => {
   const result = getDurationNumberInItsUnit('123s');
   expect(result).toEqual(123);
+});
+
+test('getDurationNumberInItsUnit negative number', () => {
+  const result = getDurationNumberInItsUnit('-10d');
+  expect(result).toEqual(-10);
 });
 
 test('getDurationUnitValue minutes', () => {

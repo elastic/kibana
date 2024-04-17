@@ -60,7 +60,7 @@ export function convertDurationToFrequency(
 }
 
 export function getDurationNumberInItsUnit(duration: string): number {
-  return parseInt(duration.replace(/[^0-9.]/g, ''), 10);
+  return parseInt(duration, 10);
 }
 
 export function getDurationUnitValue(duration: string): string {
