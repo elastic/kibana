@@ -18,8 +18,10 @@ import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/publ
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
-
+import {
+  KibanaContextProvider,
+  useDarkMode,
+} from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
