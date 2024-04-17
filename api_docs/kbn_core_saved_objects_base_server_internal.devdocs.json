@@ -2482,6 +2482,17 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.HASH_TO_VERSION_MAP.casesrules1cb4b03690489e07aa86f283dcea5ce1",
+            "type": "string",
+            "tags": [],
+            "label": "'cases-rules|1cb4b03690489e07aa86f283dcea5ce1'",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
             "id": "def-common.HASH_TO_VERSION_MAP.casestelemetry3d1b76c39bfb2cc8296b024d73854724",
             "type": "string",
             "tags": [],
@@ -2856,10 +2867,10 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestagentpolicies20768dc7ce5eced3eb309e50d8a6cf76",
+            "id": "def-common.HASH_TO_VERSION_MAP.ingestagentpolicies0fd93cd11c019b118e93a9157c22057b",
             "type": "string",
             "tags": [],
-            "label": "'ingest-agent-policies|20768dc7ce5eced3eb309e50d8a6cf76'",
+            "label": "'ingest-agent-policies|0fd93cd11c019b118e93a9157c22057b'",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,
@@ -3263,6 +3274,17 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.HASH_TO_VERSION_MAP.slosettings3d1b76c39bfb2cc8296b024d73854724",
+            "type": "string",
+            "tags": [],
+            "label": "'slo-settings|3d1b76c39bfb2cc8296b024d73854724'",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
             "id": "def-common.HASH_TO_VERSION_MAP.slodc7f35c0cf07d71bb36f154996fe10c6",
             "type": "string",
             "tags": [],
@@ -3296,10 +3318,10 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.syntheticsmonitor50b48ccda9f2f7d73d31fd50c41bf305",
+            "id": "def-common.HASH_TO_VERSION_MAP.syntheticsmonitor918c09d935b1dcb6a84935b176262c3a",
             "type": "string",
             "tags": [],
-            "label": "'synthetics-monitor|50b48ccda9f2f7d73d31fd50c41bf305'",
+            "label": "'synthetics-monitor|918c09d935b1dcb6a84935b176262c3a'",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,

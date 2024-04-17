@@ -54,7 +54,7 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await summaryClient.computeSummary(slo);
+        const result = await summaryClient.computeSummary({ slo });
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
@@ -89,7 +89,7 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        await summaryClient.computeSummary(slo);
+        await summaryClient.computeSummary({ slo });
 
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
           index: SLO_DESTINATION_INDEX_PATTERN,
@@ -132,7 +132,7 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await summaryClient.computeSummary(slo);
+        const result = await summaryClient.computeSummary({ slo });
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
@@ -181,7 +181,7 @@ describe('SummaryClient', () => {
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
 
-        const result = await summaryClient.computeSummary(slo);
+        const result = await summaryClient.computeSummary({ slo });
 
         expect(result).toMatchSnapshot();
 

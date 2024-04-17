@@ -21,8 +21,13 @@ export const updateLatestExecutedState = async (context: InstallContext) => {
   const { name: pkgName } = packageInfo;
 
   try {
-    // If the error is of type ConcurrentInstallationError, don't save it in the SO
-    if (latestExecutedState?.error?.includes('Concurrent installation or upgrade')) return;
+    // if there is no error avoid updating the SO as the call adds ~1s to install time
+    // also don't save it if the error is of type ConcurrentInstallationError
+    if (
+      !latestExecutedState?.error ||
+      latestExecutedState?.error?.includes('Concurrent installation or upgrade')
+    )
+      return;
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',

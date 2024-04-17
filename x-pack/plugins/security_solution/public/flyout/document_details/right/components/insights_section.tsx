@@ -48,10 +48,10 @@ export const InsightsSection: FC = memo(() => {
         <>
           <EuiSpacer size="s" />
           <ThreatIntelligenceOverview />
-          <EuiSpacer size="s" />
-          <CorrelationsOverview />
         </>
       )}
+      <EuiSpacer size="s" />
+      <CorrelationsOverview />
       <EuiSpacer size="s" />
       <PrevalenceOverview />
     </ExpandableSection>

@@ -25,6 +25,9 @@ export const DEFAULT_VALUES = {
   CAN_SELECT_MULTI_TERMS: true,
   SOURCE_FIELDS: [],
 };
+export const SERVERLESS_DEFAULT_VALUES = {
+  SIZE: 10,
+};
 
 export const COMMON_EXPRESSION_ERRORS = {
   searchType: new Array<string>(),

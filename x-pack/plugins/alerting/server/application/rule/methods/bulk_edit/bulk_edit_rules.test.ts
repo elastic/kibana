@@ -1327,7 +1327,7 @@ describe('bulkEdit()', () => {
         Object {
           "errors": Array [
             Object {
-              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
+              "message": "Error validating bulk edit rules operations - [group]: expected value of type [string] but got [undefined]",
               "rule": Object {
                 "id": "1",
                 "name": "my rule name",
@@ -1378,7 +1378,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [0.group]: definition for this key is missing',
+              'Error validating bulk edit rules operations - [group]: definition for this key is missing',
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1432,7 +1432,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [0.frequency]: definition for this key is missing',
+              'Error validating bulk edit rules operations - [frequency]: definition for this key is missing',
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1484,7 +1484,7 @@ describe('bulkEdit()', () => {
         errors: [
           {
             message:
-              'Error validating bulk edit rules operations - [0.alertsFilter]: definition for this key is missing',
+              'Error validating bulk edit rules operations - [alertsFilter]: definition for this key is missing',
             rule: {
               id: '1',
               name: 'my rule name',
@@ -1568,7 +1568,7 @@ describe('bulkEdit()', () => {
         Object {
           "errors": Array [
             Object {
-              "message": "Error validating bulk edit rules operations - [0.group]: expected value of type [string] but got [undefined]",
+              "message": "Error validating bulk edit rules operations - [group]: expected value of type [string] but got [undefined]",
               "rule": Object {
                 "id": "1",
                 "name": "my rule name",
@@ -1580,6 +1580,114 @@ describe('bulkEdit()', () => {
           "total": 1,
         }
       `);
+    });
+
+    test('should throw an error if the user does not have privileges to execute the action', async () => {
+      const defaultAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert' as const,
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+      };
+
+      const systemAction = {
+        id: 'system_action-id',
+        params: {},
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  params: {},
+                  actionRef: 'action_0',
+                  actionTypeId: 'test-1',
+                  uuid: '222',
+                },
+                {
+                  params: {},
+                  actionRef: 'system_action:system_action-id',
+                  actionTypeId: 'test-2',
+                  uuid: '222',
+                },
+              ],
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+            ],
+          },
+        ],
+      });
+
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test-1',
+          config: {},
+          isMissingSecrets: false,
+          name: 'test default connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(
+        new Error('Unauthorized to execute actions')
+      );
+
+      const res = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [defaultAction, systemAction],
+          },
+        ],
+      });
+
+      expect(res.rules.length).toBe(0);
+      expect(res.skipped.length).toBe(0);
+      expect(res.total).toBe(1);
+
+      expect(res.errors).toEqual([
+        {
+          message: 'Unauthorized to execute actions',
+          rule: {
+            id: '1',
+            name: 'my rule name',
+          },
+        },
+      ]);
     });
   });
 
