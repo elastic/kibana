@@ -212,17 +212,17 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   }
 
   const filters: SearchFilterConfig[] = [];
-  const _revertTypeFilters = ['rest', 'managed'];
-  if (_revertTypeFilters.length > 1) {
+
+  if (typeFilters.length > 1) {
     filters.push({
       type: 'custom_component',
       component: ({ query, onChange }) => (
-        <TypesFilterButton types={_revertTypeFilters} query={query} onChange={onChange} />
+        <TypesFilterButton types={typeFilters} query={query} onChange={onChange} />
       ),
     });
   }
-  const _revertExpired = 1;
-  if (_revertExpired > 0) {
+
+  if (expired > 0) {
     filters.push({
       type: 'field_value_toggle_group',
       field: 'expired',

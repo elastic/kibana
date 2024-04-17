@@ -163,8 +163,6 @@ export const APIKeysGridPage: FunctionComponent = () => {
 
   const categorizedApiKeys = apiKeys.map((apiKey) => apiKey as CategorizedApiKey);
 
-  const _revertTotalKeys = 1;
-
   const displayedPageCount =
     totalKeys > MAX_PAGINATED_ITEMS && queryTotal > MAX_PAGINATED_ITEMS
       ? MAX_PAGINATED_ITEMS
@@ -219,7 +217,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
           readOnly={readOnly}
         />
       )}
-      {_revertTotalKeys === 0 ? (
+      {totalKeys === 0 ? (
         <ApiKeysEmptyPrompt readOnly={readOnly}>
           <EuiButton
             {...reactRouterNavigate(history, '/create')}
