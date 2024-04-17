@@ -4596,6 +4596,10 @@
               },
               {
                 "plugin": "profiling",
+                "path": "x-pack/plugins/observability_solution/profiling/server/routes/apm.ts"
+              },
+              {
+                "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/flamechart.ts"
               },
               {
@@ -15250,6 +15254,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/post_results.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/insights/alerts/post_alerts_insights.ts"
               },
               {
                 "plugin": "elasticAssistant",

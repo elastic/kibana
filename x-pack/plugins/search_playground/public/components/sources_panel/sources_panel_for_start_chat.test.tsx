@@ -91,4 +91,20 @@ describe('SourcesPanelForStartChat component', () => {
     render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
     expect(screen.getByTestId('createIndexCallout')).toBeInTheDocument();
   });
+
+  it('renders warning callout', () => {
+    (useSourceIndicesFields as jest.Mock).mockReturnValue({
+      indices: ['index1'],
+      removeIndex: jest.fn(),
+      addIndex: jest.fn(),
+      loading: false,
+      error: {
+        type: 'indices_no_fields_found',
+        indices: ['index1'],
+      },
+    });
+
+    render(<SourcesPanelForStartChat />);
+    expect(screen.getByTestId('NoIndicesFieldsMessage')).toBeInTheDocument();
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AddIndicesField } from './add_indices_field';
@@ -21,6 +21,7 @@ export const SourcesPanelForStartChat: React.FC = () => {
     removeIndex,
     addIndex,
     loading: fieldIndicesLoading,
+    error,
   } = useSourceIndicesFields();
   const { indices, isLoading } = useQueryIndices();
 
@@ -38,6 +39,19 @@ export const SourcesPanelForStartChat: React.FC = () => {
         <EuiFlexItem>
           <IndicesTable indices={selectedIndices} onRemoveClick={removeIndex} />
         </EuiFlexItem>
+      )}
+
+      {error && (
+        <EuiCallOut color="warning" iconType="warning" data-test-subj='NoIndicesFieldsMessage'>
+          <p>
+            {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
+              defaultMessage: 'No source fields found for {errorMessage}',
+              values: {
+                errorMessage: error,
+              },
+            })}
+          </p>
+        </EuiCallOut>
       )}
 
       {isLoading && (

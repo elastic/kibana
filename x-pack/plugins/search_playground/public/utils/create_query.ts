@@ -7,7 +7,7 @@
 
 import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
-type IndexFields = Record<string, string[]>;
+export type IndexFields = Record<string, string[]>;
 
 // These fields are used to suggest the fields to use for the query
 // If the field is not found in the suggested fields,
@@ -221,10 +221,6 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
   const indexFields = Object.keys(fieldDescriptors).reduce<IndexFields>(
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
-
-      if (indexFieldDescriptors.source_fields.length === 0) {
-        throw new Error('No source fields found');
-      }
 
       const suggested = indexFieldDescriptors.source_fields.filter((x) =>
         SUGGESTED_SOURCE_FIELDS.includes(x)
