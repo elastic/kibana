@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlADJobTable } from './job_table';
 
-export function MachineLearningExpandedJobDetailsProvider(
+export function MachineLearningJobExpandedDetailsProvider(
   { getService }: FtrProviderContext,
   jobTable: MlADJobTable
 ) {

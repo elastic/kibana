@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     model_plot_config: { enabled: true },
   };
 
-  describe('job list', function () {
+  describe('job expanded details', function () {
     this.tags(['ml']);
 
     before(async () => {
@@ -82,23 +82,23 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('expanded row with connected calendar shows link to calendar', async () => {
-      await ml.expandedJobDetails.assertJobRowCalendars(jobId, [calendarId]);
+      await ml.jobExpandedDetails.assertJobRowCalendars(jobId, [calendarId]);
     });
 
     it('expanded row with forecast should display open forecast button', async () => {
-      await ml.expandedJobDetails.assertForecastElements(jobId);
+      await ml.jobExpandedDetails.assertForecastElements(jobId);
     });
 
     it('expanded row with annotations can be edited', async () => {
-      await ml.expandedJobDetails.editAnnotation(jobId, 'edited annotation');
+      await ml.jobExpandedDetails.editAnnotation(jobId, 'edited annotation');
     });
 
     it('expanded row with data feed flyout should display correctly', async () => {
-      await ml.expandedJobDetails.assertDataFeedFlyout(jobId);
+      await ml.jobExpandedDetails.assertDataFeedFlyout(jobId);
     });
 
     it('expanded row with model snapshot should display correctly', async () => {
-      await ml.expandedJobDetails.assertModelSnapshotManagement(jobId);
+      await ml.jobExpandedDetails.assertModelSnapshotManagement(jobId);
     });
 
     it('multi-selection with one opened job should only present the opened job when job list is filtered by the Opened button', async () => {
@@ -140,10 +140,10 @@ export default function ({ getService }: FtrProviderContext) {
           'mlJobListSearchBar'
         )
         .selectAllRows();
-      await ml.expandedJobDetails.assertJobListMultiSelectionText('2 jobs selected');
+      await ml.jobExpandedDetails.assertJobListMultiSelectionText('2 jobs selected');
       await ml.jobTable.filterByState(QuickFilterButtonTypes.Opened);
       await ml.jobTable.assertJobsInTable([jobId]);
-      await ml.expandedJobDetails.assertJobListMultiSelectionText('1 job selected');
+      await ml.jobExpandedDetails.assertJobListMultiSelectionText('1 job selected');
     });
 
     it('multi-selection with one closed job should only present the closed job when job list is filtered by the Closed button', async () => {
