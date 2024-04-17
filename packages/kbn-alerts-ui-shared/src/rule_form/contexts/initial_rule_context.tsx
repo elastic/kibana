@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { RuleFormRule } from '../types';
@@ -20,15 +20,9 @@ const EditRuleProvider: React.FC<{
   ruleId: string;
   onLoadRuleSuccess: OnLoadRuleSuccess;
 }> = ({ ruleId, onLoadRuleSuccess, children }) => {
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  const { rule, isSuccess, isLoading } = useResolveRuleApi({
+  const { rule, isLoading } = useResolveRuleApi({
     ruleId,
-    enabled: !hasLoaded,
-    onSuccess: (loadedRule: RuleFormRule) => {
-      setHasLoaded(true);
-      onLoadRuleSuccess(loadedRule.ruleTypeId, loadedRule.name);
-    },
+    onSuccess: (loadedRule) => onLoadRuleSuccess(loadedRule.ruleTypeId, loadedRule.name),
   });
 
   if (isLoading) {
@@ -46,8 +40,7 @@ const EditRuleProvider: React.FC<{
       />
     );
   }
-
-  if (!isSuccess) {
+  if (!rule) {
     return (
       <EuiEmptyPrompt
         color="danger"
@@ -69,8 +62,7 @@ const EditRuleProvider: React.FC<{
       />
     );
   }
-
-  return <InitialRuleContext.Provider value={rule}>{children}</InitialRuleContext.Provider>;
+  return <InitialRuleContext.Provider value={rule!}>{children}</InitialRuleContext.Provider>;
 };
 
 export const InitialRuleProvider: React.FC<{

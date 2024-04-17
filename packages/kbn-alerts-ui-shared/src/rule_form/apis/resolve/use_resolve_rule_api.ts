@@ -6,33 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
 import { useKibanaServices } from '../../contexts';
-import { RuleFormRule } from '../../types';
 import { resolveRule } from './resolve_rule';
+import { RuleFormRule } from '../../types';
 
 export const useResolveRuleApi = ({
   ruleId,
-  enabled = true,
   onSuccess,
 }: {
   ruleId: string;
-  onSuccess: (rule: RuleFormRule) => void;
-  enabled?: boolean;
+  onSuccess: (result: RuleFormRule) => void;
 }) => {
   const { http, toasts } = useKibanaServices();
+  const [rule, setRule] = useState<RuleFormRule | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data, isSuccess, isLoading } = useQuery({
-    enabled,
-    queryKey: ['resolveRule', ruleId],
-    queryFn: async () => {
-      const result = await resolveRule({ ruleId, http });
-      onSuccess(result);
-      return result;
-    },
-    onError: (errorRes: Error) => {
-      if (errorRes) {
+  useEffect(() => {
+    const fetchRule = async () => {
+      try {
+        const resolvedRule = await resolveRule({ ruleId, http });
+        setRule(resolvedRule);
+        onSuccess(resolvedRule);
+      } catch (errorRes) {
         toasts.addDanger(
           i18n.translate('alertsUIShared.ruleForm.resolveError', {
             defaultMessage: 'Unable to load rule ID {ruleId}: {error}',
@@ -40,9 +37,11 @@ export const useResolveRuleApi = ({
           })
         );
       }
-    },
-    refetchOnWindowFocus: false,
-  });
+      setIsLoading(false);
+    };
 
-  return { rule: data, isSuccess, isLoading };
+    fetchRule();
+  }, [ruleId, onSuccess, http, toasts]);
+
+  return { rule, isLoading };
 };
