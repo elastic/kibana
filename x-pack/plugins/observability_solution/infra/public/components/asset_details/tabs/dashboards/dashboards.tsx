@@ -30,7 +30,8 @@ import {
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
   ASSET_DETAILS_LOCATOR_ID,
 } from '@kbn/observability-shared-plugin/public';
-import { useHostsTableUrlState } from '../../../../pages/metrics/hosts/hooks/use_hosts_table_url_state';
+import { useLocation } from 'react-router-dom';
+import { decode } from '@kbn/rison';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { buildAssetIdFilter } from '../../../../utils/filters/build';
 import type {
@@ -52,6 +53,7 @@ import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
   const { asset, renderMode } = useAssetDetailsRenderPropsContext();
+  const location = useLocation();
   const {
     services: { share },
   } = useKibanaContextForPlugin();
@@ -61,8 +63,6 @@ export function Dashboards() {
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const { metrics } = useDataViewsContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  // used for the flyout locator
-  const [tableProperties] = useHostsTableUrlState();
 
   const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: asset.type });
 
@@ -133,7 +133,11 @@ export function Dashboards() {
 
   const getLocatorParams = useCallback(
     (params, isFlyoutView) => {
-      const flyoutParams = isFlyoutView ? { tableProperties: { ...tableProperties } } : {};
+      const searchParams = new URLSearchParams(location.search);
+      const tableProperties = searchParams.get('tableProperties');
+      const flyoutParams =
+        isFlyoutView && tableProperties ? { tableProperties: decode(tableProperties) } : {};
+
       return {
         assetDetails: { ...urlState, dashboardId: params.dashboardId },
         assetType: asset.type,
@@ -141,7 +145,7 @@ export function Dashboards() {
         ...flyoutParams,
       };
     },
-    [asset.id, asset.type, tableProperties, urlState]
+    [asset.id, asset.type, location.search, urlState]
   );
 
   const locator = useMemo(() => {
