@@ -176,4 +176,9 @@ export interface ChromeStart {
    * Get an observable of the current collapsed state of the side nav.
    */
   getIsSideNavCollapsed$(): Observable<boolean>;
+
+  /**
+   * Get the id of the currently active project navigation or `null` otherwise.
+   */
+  getActiveSolutionNavId$(): Observable<string | null>;
 }
