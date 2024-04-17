@@ -80,7 +80,7 @@ export const COLUMN_UPDATED_BY = i18n.translate(
 );
 
 export const COLUMN_ACTIONS = i18n.translate('xpack.securitySolution.listItems.columnActions', {
-  defaultMessage: 'Actions',
+  defaultMessage: 'Action',
 });
 
 export const FAILED_TO_FETCH_LIST_ITEM = i18n.translate(
