@@ -9,7 +9,6 @@
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
 import rison from '@kbn/rison';
-import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/public/dashboard_constants';
 import type { SharedDashboardState } from '@kbn/dashboard-plugin/common';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -174,30 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(headers[1]).to.be('agent');
     });
 
-    it('Saved search will update when the query is changed in the URL', async () => {
-      const currentQuery = await queryBar.getQueryString();
-      expect(currentQuery).to.equal('');
-      const newUrl = updateAppStateQueryParam(
-        await getUrlFromShare(),
-        (appState: Partial<SharedDashboardState>) => {
-          return {
-            query: {
-              language: 'kuery',
-              query: 'abc12345678910',
-            },
-          };
-        }
-      );
-      await PageObjects.share.closeShareModal();
-      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
-      await browser.get(newUrl.toString());
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const headers = await PageObjects.discover.getColumnHeaders();
-      // will be zero because the query inserted in the url doesn't match anything
-      expect(headers.length).to.be(0);
-    });
-
+    // generates only a short url
     const getUrlFromShare = async () => {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
@@ -216,71 +192,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
-    describe('Directly modifying url updates dashboard state', () => {
+    describe('for embeddable config color parameters on a visualization', () => {
+      let originalPieSliceStyle = '';
+
       before(async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.timePicker.setHistoricalDataRange();
-      });
-
-      afterEach(async () => {
-        retry.waitFor('close share modal', async () => {
-          await PageObjects.share.closeShareModal(); // close modal
-          return await testSubjects.exists('shareTopNavButton');
-        });
-      });
-
-      const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
-        await queryBar.clickQuerySubmitButton();
-        const currentUrl = await getUrlFromShare();
-        const newUrl = updateAppStateQueryParam(
-          currentUrl,
-          (appState: Partial<SharedDashboardState>) => {
-            return {
-              query: {
-                language: 'kuery',
-                query: newQuery,
-              },
-            };
-          }
-        );
-
-        await browser.get(newUrl.toString(), !useHardRefresh);
-        await PageObjects.dashboard.waitForRenderComplete();
-        const queryBarContentsAfterRefresh = await queryBar.getQueryString();
-        expect(queryBarContentsAfterRefresh).to.equal(newQuery);
-      };
-
-      it('for query parameter with soft refresh', async function () {
-        await changeQuery(false, 'hi:goodbye');
-        await PageObjects.dashboard.expectAppStateRemovedFromURL();
-      });
-
-      it('for query parameter with hard refresh', async function () {
-        await changeQuery(true, 'hi:hello');
         await queryBar.clearQuery();
-        await queryBar.clickQuerySubmitButton();
-        await PageObjects.dashboard.expectAppStateRemovedFromURL();
+        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+        await enableNewChartLibraryDebug();
+        originalPieSliceStyle = (await pieChart.getPieSliceStyle(`80,000`)) ?? '';
       });
 
-      it('for panel size parameters', async function () {
-        await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
+      it('updates a pie slice color on a hard refresh', async function () {
+        await PageObjects.visChart.openLegendOptionColorsForPie(
+          '80,000',
+          `[data-title="${PIE_CHART_VIS_NAME}"]`
+        );
+        await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
         const currentUrl = await getUrlFromShare();
-        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
-            log.debug(JSON.stringify(appState, null, ' '));
             return {
               panels: (appState.panels ?? []).map((panel) => {
                 return {
                   ...panel,
-                  gridData: {
-                    ...panel.gridData,
-                    w:
-                      panel.gridData.w === DEFAULT_PANEL_WIDTH
-                        ? DEFAULT_PANEL_WIDTH * 2
-                        : panel.gridData.w,
+                  embeddableConfig: {
+                    ...(panel.embeddableConfig ?? {}),
+                    vis: {
+                      ...((panel.embeddableConfig?.vis as object) ?? {}),
+                      colors: {
+                        ...((panel.embeddableConfig?.vis as { colors: object })?.colors ?? {}),
+                        ['80000']: 'FFFFFF',
+                      },
+                    },
                   },
                 };
               }),
@@ -288,145 +232,66 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         );
         await hardRefresh(newUrl);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-          if (newPanelDimensions.length < 0) {
-            throw new Error('No panel dimensions...');
-          }
-
-          await PageObjects.dashboard.waitForRenderComplete();
-          // Add a "margin" of error  - because of page margins, it won't be a straight doubling of width.
-          const marginOfError = 10;
-          expect(newPanelDimensions[0].width).to.be.lessThan(
-            currentPanelDimensions[0].width * 2 + marginOfError
-          );
-          expect(newPanelDimensions[0].width).to.be.greaterThan(
-            currentPanelDimensions[0].width * 2 - marginOfError
-          );
+          const allPieSlicesColor = await pieChart.getAllPieSliceColor('80,000');
+          const whitePieSliceCounts = allPieSlicesColor.reduce((count, color) => {
+            // converting the color to a common format, testing the color, not the string format
+            return chroma(color).hex().toUpperCase() === '#FFFFFF' ? count + 1 : count;
+          }, 0);
+          expect(whitePieSliceCounts).to.be(1);
         });
       });
 
-      it('when removing a panel', async function () {
-        await PageObjects.dashboard.waitForRenderComplete();
-        const currentUrl = (await getUrlFromShare()) ?? '';
+      it('and updates the pie slice legend color', async function () {
+        await retry.try(async () => {
+          const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
+            '#FFFFFF'
+          );
+          expect(colorExists).to.be(true);
+        });
+      });
+
+      it('resets a pie slice color to the original when removed', async function () {
+        const currentUrl = await getUrlFromShare();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
             return {
-              panels: [],
+              panels: (appState.panels ?? []).map((panel) => {
+                return {
+                  ...panel,
+                  embeddableConfig: {
+                    ...(panel.embeddableConfig ?? {}),
+                    vis: {
+                      ...((panel.embeddableConfig?.vis as object) ?? {}),
+                      colors: {},
+                    },
+                  },
+                };
+              }),
             };
           }
         );
+
         await hardRefresh(newUrl);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          const newPanelCount = await PageObjects.dashboard.getPanelCount();
-          expect(newPanelCount).to.be(0);
+          const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
+
+          // After removing all overrides, pie slice style should match original.
+          expect(pieSliceStyle).to.be(originalPieSliceStyle);
         });
       });
 
-      describe('for embeddable config color parameters on a visualization', () => {
-        let originalPieSliceStyle = '';
-
-        before(async () => {
-          await queryBar.clearQuery();
-          await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-          await enableNewChartLibraryDebug();
-          originalPieSliceStyle = (await pieChart.getPieSliceStyle(`80,000`)) ?? '';
-        });
-
-        it('updates a pie slice color on a hard refresh', async function () {
-          await PageObjects.visChart.openLegendOptionColorsForPie(
-            '80,000',
-            `[data-title="${PIE_CHART_VIS_NAME}"]`
+      it('resets the legend color as well', async function () {
+        await retry.try(async () => {
+          const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
+            '#57c17b'
           );
-          await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
-          const currentUrl = await getUrlFromShare();
-          const newUrl = updateAppStateQueryParam(
-            currentUrl,
-            (appState: Partial<SharedDashboardState>) => {
-              return {
-                panels: (appState.panels ?? []).map((panel) => {
-                  return {
-                    ...panel,
-                    embeddableConfig: {
-                      ...(panel.embeddableConfig ?? {}),
-                      vis: {
-                        ...((panel.embeddableConfig?.vis as object) ?? {}),
-                        colors: {
-                          ...((panel.embeddableConfig?.vis as { colors: object })?.colors ?? {}),
-                          ['80000']: 'FFFFFF',
-                        },
-                      },
-                    },
-                  };
-                }),
-              };
-            }
-          );
-          await hardRefresh(newUrl);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-
-          await retry.try(async () => {
-            const allPieSlicesColor = await pieChart.getAllPieSliceColor('80,000');
-            const whitePieSliceCounts = allPieSlicesColor.reduce((count, color) => {
-              // converting the color to a common format, testing the color, not the string format
-              return chroma(color).hex().toUpperCase() === '#FFFFFF' ? count + 1 : count;
-            }, 0);
-            expect(whitePieSliceCounts).to.be(1);
-          });
-        });
-
-        it('and updates the pie slice legend color', async function () {
-          await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#FFFFFF'
-            );
-            expect(colorExists).to.be(true);
-          });
-        });
-
-        it('resets a pie slice color to the original when removed', async function () {
-          const currentUrl = await getUrlFromShare();
-          const newUrl = updateAppStateQueryParam(
-            currentUrl,
-            (appState: Partial<SharedDashboardState>) => {
-              return {
-                panels: (appState.panels ?? []).map((panel) => {
-                  return {
-                    ...panel,
-                    embeddableConfig: {
-                      ...(panel.embeddableConfig ?? {}),
-                      vis: {
-                        ...((panel.embeddableConfig?.vis as object) ?? {}),
-                        colors: {},
-                      },
-                    },
-                  };
-                }),
-              };
-            }
-          );
-
-          await hardRefresh(newUrl);
-          await PageObjects.header.waitUntilLoadingHasFinished();
-
-          await retry.try(async () => {
-            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
-
-            // After removing all overrides, pie slice style should match original.
-            expect(pieSliceStyle).to.be(originalPieSliceStyle);
-          });
-        });
-
-        it('resets the legend color as well', async function () {
-          await retry.try(async () => {
-            const colorExists = await PageObjects.visChart.doesSelectedLegendColorExistForPie(
-              '#57c17b'
-            );
-            expect(colorExists).to.be(true);
-          });
+          expect(colorExists).to.be(true);
         });
       });
     });

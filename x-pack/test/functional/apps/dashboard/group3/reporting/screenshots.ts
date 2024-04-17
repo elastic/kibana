@@ -91,6 +91,12 @@ export default function ({
     });
 
     describe('Print PDF button', () => {
+      afterEach(async () => {
+        retry.waitFor('close share modal', async () => {
+          await PageObjects.share.closeShareModal(); // close modal
+          return await testSubjects.exists('shareTopNavButton');
+        });
+      });
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -128,6 +134,7 @@ export default function ({
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
+        await PageObjects.share.closeShareModal();
       });
     });
 
@@ -138,6 +145,7 @@ export default function ({
       after(async () => {
         await unloadEcommerce();
       });
+
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
           await PageObjects.share.closeShareModal(); // close modal
@@ -150,13 +158,14 @@ export default function ({
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        await PageObjects.share.closeShareModal();
       });
 
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
       });
     });
 
@@ -181,6 +190,7 @@ export default function ({
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
         await PageObjects.reporting.openExportTab();
         await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.share.closeShareModal();
 
         const url = await PageObjects.reporting.getReportURL(60000);
         const res = await PageObjects.reporting.getResponse(url ?? '');

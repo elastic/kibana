@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should enable both download and URL sharing for valid configuration', async () => {
-      await PageObjects.lens.clickShareMenu();
+      await PageObjects.lens.clickShareModal();
 
       expect(await PageObjects.lens.isShareActionEnabled('export'));
       expect(await PageObjects.lens.isShareActionEnabled('link'));

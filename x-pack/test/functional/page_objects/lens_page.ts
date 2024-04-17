@@ -1797,7 +1797,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async clickShareMenu() {
+    async clickShareModal() {
       return await testSubjects.click('lnsApp_shareButton');
     },
 
@@ -1815,10 +1815,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async ensureShareMenuIsOpen(action: 'export' | 'link') {
-      await this.clickShareMenu();
+      await this.clickShareModal();
 
       if (!(await testSubjects.exists('shareContextMenu'))) {
-        await this.clickShareMenu();
+        await this.clickShareModal();
       }
       if (!(await this.isShareActionEnabled(action))) {
         throw Error(`${action} sharing feature is disabled`);
@@ -1859,6 +1859,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openReportingShare(type: 'PNG' | 'PDF') {
       await this.ensureShareMenuIsOpen(`export`);
       await testSubjects.click(`export`);
+      if (type === 'PDF') {
+        return await testSubjects.click('printablePdfV2-radioOption');
+      }
+      if (type === 'PNG') {
+        return await testSubjects.click('pngV2-radioOption');
+      }
     },
 
     async getCSVContent() {
