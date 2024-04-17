@@ -562,6 +562,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       assistantAlertsInsights: config.experimentalFeatures.assistantAlertsInsights,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     });
+    plugins.elasticAssistant.registerFeatures('management', {
+      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+    });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

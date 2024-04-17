@@ -8,14 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiAvatar,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiText, EuiLink } from '@elastic/eui';
 import integrationsIconUrl from './integrations_icon.svg';
 import demoIconUrl from './demo_icon.svg';
 import docsIconUrl from './docs_icon.svg';
@@ -29,8 +22,7 @@ export const Footer: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.dataSourcesFlexItemLabel',
         { defaultMessage: 'Data sources' }
       ),
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
     },
     {
       iconUrl: demoIconUrl,
@@ -38,8 +30,7 @@ export const Footer: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.demoEnvironmentFlexItemLabel',
         { defaultMessage: 'Demo environment' }
       ),
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
     },
     {
       iconUrl: docsIconUrl,
@@ -47,8 +38,7 @@ export const Footer: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.exploreForumFlexItemLabel',
         { defaultMessage: 'Explore forum' }
       ),
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
     },
     {
       iconUrl: forumIconUrl,
@@ -56,8 +46,7 @@ export const Footer: FunctionComponent = () => {
         'xpack.observability_onboarding.experimentalOnboardingFlow.browseDocumentationFlexItemLabel',
         { defaultMessage: 'Browse documentation' }
       ),
-      description:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod',
     },
   ];
 
@@ -65,12 +54,7 @@ export const Footer: FunctionComponent = () => {
     <EuiFlexGroup>
       {sections.map((section, index) => (
         <EuiFlexItem key={index}>
-          <EuiAvatar
-            size="l"
-            name=""
-            imageUrl={section.iconUrl}
-            color="subdued"
-          />
+          <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
           <EuiSpacer size="m" />
           <EuiText size="s">
             <strong>{section.title}</strong>
@@ -87,10 +71,9 @@ export const Footer: FunctionComponent = () => {
                 href="#/navigation/link"
                 external
               >
-                {i18n.translate(
-                  'xpack.observability_onboarding.footer.learnMoreLinkLabel',
-                  { defaultMessage: 'Learn more' }
-                )}
+                {i18n.translate('xpack.observability_onboarding.footer.learnMoreLinkLabel', {
+                  defaultMessage: 'Learn more',
+                })}
               </EuiLink>
             </p>
           </EuiText>

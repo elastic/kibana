@@ -279,6 +279,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "checkedAt": "July 6, 2020 9:14 PM",
+            "configId": undefined,
             "currentTriggerStarted": "foo date string",
             "firstCheckedAt": "foo date string",
             "firstTriggeredAt": "foo date string",
@@ -305,6 +306,7 @@ describe('status check alert', () => {
           Object {
             "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "checkedAt": "July 6, 2020 9:14 PM",
+            "configId": undefined,
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
             "monitorName": "First",
@@ -361,6 +363,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "checkedAt": "July 6, 2020 9:14 PM",
+            "configId": undefined,
             "currentTriggerStarted": "foo date string",
             "firstCheckedAt": "foo date string",
             "firstTriggeredAt": "foo date string",
@@ -387,6 +390,7 @@ describe('status check alert', () => {
           Object {
             "alertDetailsUrl": "mockedAlertsLocator > getLocation",
             "checkedAt": "July 6, 2020 9:14 PM",
+            "configId": undefined,
             "latestErrorMessage": "error message 1",
             "monitorId": "first",
             "monitorName": "First",
@@ -434,6 +438,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "checkedAt": "July 6, 2020 9:14 PM",
+            "configId": undefined,
             "currentTriggerStarted": "7.7 date",
             "firstCheckedAt": "7.7 date",
             "firstTriggeredAt": "7.7 date",
@@ -651,6 +656,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "checkedAt": "July 6, 2020 9:14 PM",
+            "configId": undefined,
             "currentTriggerStarted": "foo date string",
             "firstCheckedAt": "foo date string",
             "firstTriggeredAt": "foo date string",
@@ -845,6 +851,7 @@ describe('status check alert', () => {
         Array [
           Object {
             "checkedAt": "July 6, 2020 9:14 PM",
+            "configId": undefined,
             "currentTriggerStarted": "availability test",
             "firstCheckedAt": "availability test",
             "firstTriggeredAt": "availability test",
@@ -872,6 +879,7 @@ describe('status check alert', () => {
             Object {
               "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
+              "configId": undefined,
               "latestErrorMessage": undefined,
               "monitorId": "foo",
               "monitorName": "Foo",
@@ -889,6 +897,7 @@ describe('status check alert', () => {
             Object {
               "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
+              "configId": undefined,
               "latestErrorMessage": undefined,
               "monitorId": "foo",
               "monitorName": "Foo",
@@ -906,6 +915,7 @@ describe('status check alert', () => {
             Object {
               "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
+              "configId": undefined,
               "latestErrorMessage": undefined,
               "monitorId": "unreliable",
               "monitorName": "Unreliable",
@@ -923,6 +933,7 @@ describe('status check alert', () => {
             Object {
               "alertDetailsUrl": "mockedAlertsLocator > getLocation",
               "checkedAt": "July 6, 2020 9:14 PM",
+              "configId": undefined,
               "latestErrorMessage": undefined,
               "monitorId": "no-name",
               "monitorName": "no-name",

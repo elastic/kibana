@@ -25,8 +25,7 @@ export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
 });
 
 export function RumHome() {
-  const { docLinks, http, observabilityShared, observabilityAIAssistant } =
-    useKibanaServices();
+  const { docLinks, http, observabilityShared, observabilityAIAssistant } = useKibanaServices();
 
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
@@ -42,13 +41,9 @@ export function RumHome() {
             title: i18n.translate('xpack.ux.overview.beatsCard.title', {
               defaultMessage: 'Add RUM data',
             }),
-            description: i18n.translate(
-              'xpack.ux.overview.beatsCard.description',
-              {
-                defaultMessage:
-                  'Enable RUM with the APM agent to collect user experience data.',
-              }
-            ),
+            description: i18n.translate('xpack.ux.overview.beatsCard.description', {
+              defaultMessage: 'Enable RUM with the APM agent to collect user experience data.',
+            }),
             href: http.basePath.prepend('/app/apm/tutorial'),
           },
         },
@@ -74,14 +69,12 @@ export function RumHome() {
         ...(!hasData
           ? [
               {
-                title: i18n.translate(
-                  'xpack.ux.aiAssistant.starterPrompts.explainNoData.title',
-                  { defaultMessage: 'Explain' }
-                ),
-                prompt: i18n.translate(
-                  'xpack.ux.aiAssistant.starterPrompts.explainNoData.prompt',
-                  { defaultMessage: "Why don't I see any data?" }
-                ),
+                title: i18n.translate('xpack.ux.aiAssistant.starterPrompts.explainNoData.title', {
+                  defaultMessage: 'Explain',
+                }),
+                prompt: i18n.translate('xpack.ux.aiAssistant.starterPrompts.explainNoData.prompt', {
+                  defaultMessage: "Why don't I see any data?",
+                }),
                 icon: 'sparkles',
               },
             ]

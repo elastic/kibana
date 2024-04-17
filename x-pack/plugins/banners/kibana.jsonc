@@ -17,8 +17,6 @@
     "optionalPlugins": [
       "screenshotMode"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }
