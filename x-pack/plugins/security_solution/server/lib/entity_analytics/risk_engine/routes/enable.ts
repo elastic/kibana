@@ -11,6 +11,8 @@ import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../../common/constants'
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskEngineAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const riskEngineEnableRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -27,11 +29,37 @@ export const riskEngineEnableRoute = (
     .addVersion(
       { version: '1', validate: {} },
       withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
+        const securitySolution = await context.securitySolution;
+
+        securitySolution.getAuditLogger()?.log({
+          message: 'User attempted to enable the risk engine',
+          event: {
+            action: RiskEngineAuditActions.RISK_ENGINE_ENABLE,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
         const siemResponse = buildSiemResponse(response);
         const [_, { taskManager }] = await getStartServices();
-        const securitySolution = await context.securitySolution;
         const riskEngineClient = securitySolution.getRiskEngineDataClient();
         if (!taskManager) {
+          securitySolution.getAuditLogger()?.log({
+            message:
+              'User attempted to enable the risk engine, but the Kibana Task Manager was unavailable',
+            event: {
+              action: RiskEngineAuditActions.RISK_ENGINE_ENABLE,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.CHANGE,
+              outcome: AUDIT_OUTCOME.FAILURE,
+            },
+            error: {
+              message:
+                'User attempted to enable the risk engine, but the Kibana Task Manager was unavailable',
+            },
+          });
+
           return siemResponse.error({
             statusCode: 400,
             body: TASK_MANAGER_UNAVAILABLE_ERROR,
