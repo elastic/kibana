@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { CustomCard } from './types';
 
-const QUICKSTART_FLOWS = ['kubernetes', 'nginx', 'system-logs-generated'];
+const QUICKSTART_FLOWS = ['system-logs-generated', 'custom-logs-generated'];
 
 const toCustomCard = (card: IntegrationCardItem) => ({
   ...card,

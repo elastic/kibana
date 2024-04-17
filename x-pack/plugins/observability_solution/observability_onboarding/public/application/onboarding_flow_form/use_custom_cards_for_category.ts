@@ -144,12 +144,12 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         {
-          id: 'logs-logs',
+          id: 'custom-logs',
           type: 'generated',
           title: 'Stream log files',
           description:
             'Stream any logs into Elastic in a simple way and explore their data',
-          name: 'logs-logs-generated',
+          name: 'custom-logs-generated',
           categories: ['observability'],
           icons: [
             {
