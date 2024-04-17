@@ -19,6 +19,7 @@ import {
   SearchPlaygroundPluginStartDependencies,
 } from './types';
 import { getChatParams } from './utils/get_chat_params';
+import { fetchIndices } from './utils/fetch_indices';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -195,6 +196,32 @@ export function defineRoutes({
 
       return response.ok({
         body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: APIRoutes.GET_INDICES,
+      validate: {
+        query: schema.object({
+          search_query: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    errorHandler(async (context, request, response) => {
+      const { search_query: searchQuery } = request.query;
+      const {
+        client: { asCurrentUser },
+      } = (await context.core).elasticsearch;
+
+      const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
+
+      return response.ok({
+        body: {
+          indices: indexNames,
+        },
         headers: { 'content-type': 'application/json' },
       });
     })
