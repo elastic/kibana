@@ -8,12 +8,10 @@
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
-import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
@@ -36,33 +34,27 @@ export const AppRootProvider = memo<{
   startServices: StartServices;
   queryClient: QueryClient;
   children: ReactNode | ReactNode[];
-}>(({ store, history, coreStart, depsStart: { data }, queryClient, startServices, children }) => {
-  const { theme: themeStart } = coreStart;
-  const theme = useObservable(themeStart.theme$, themeStart.getTheme());
-  const isDarkMode = theme.darkMode;
-
+}>(({ store, history, coreStart, queryClient, startServices, children }) => {
   return (
-    <Provider store={store}>
-      <I18nProvider>
+    <KibanaRenderContextProvider {...coreStart}>
+      <Provider store={store}>
         <KibanaContextProvider services={startServices}>
-          <EuiThemeProvider darkMode={isDarkMode}>
-            <QueryClientProvider client={queryClient}>
-              <UpsellingProvider upsellingService={startServices.upselling}>
-                <MockAssistantProvider>
-                  <NavigationProvider core={coreStart}>
-                    <Router history={history}>
-                      <ConsoleManager>
-                        <RouteCapture>{children}</RouteCapture>
-                      </ConsoleManager>
-                    </Router>
-                  </NavigationProvider>
-                </MockAssistantProvider>
-              </UpsellingProvider>
-            </QueryClientProvider>
-          </EuiThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <UpsellingProvider upsellingService={startServices.upselling}>
+              <MockAssistantProvider>
+                <NavigationProvider core={coreStart}>
+                  <Router history={history}>
+                    <ConsoleManager>
+                      <RouteCapture>{children}</RouteCapture>
+                    </ConsoleManager>
+                  </Router>
+                </NavigationProvider>
+              </MockAssistantProvider>
+            </UpsellingProvider>
+          </QueryClientProvider>
         </KibanaContextProvider>
-      </I18nProvider>
-    </Provider>
+      </Provider>
+    </KibanaRenderContextProvider>
   );
 });
 

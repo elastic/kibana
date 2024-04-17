@@ -186,6 +186,16 @@ export type StartServices = CoreStart &
     timelineFilterManager: FilterManager;
   };
 
+export type StartRenderServices = Pick<
+  CoreStart,
+  // Used extensively in rendering Security Solution UI
+  | 'notifications'
+  // Needed for rendering Shared React modules
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
+
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   experimentalFeatures: ExperimentalFeatures;

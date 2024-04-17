@@ -105,7 +105,7 @@ export const createConversations = async (
     );
     if (bulkResult && bulkResult.success) {
       storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
-      notifications.toasts?.addSuccess({
+      notifications.toasts.addSuccess({
         iconType: 'check',
         title: LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE,
       });
