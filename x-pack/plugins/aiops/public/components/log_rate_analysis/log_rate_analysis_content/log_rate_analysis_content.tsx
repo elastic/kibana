@@ -301,7 +301,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
               <p>
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptBody"
-                  defaultMessage={`Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button "Run analysis" below.`}
+                  defaultMessage="Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button 'Run analysis' below."
                 />
               </p>
               <EuiButton
