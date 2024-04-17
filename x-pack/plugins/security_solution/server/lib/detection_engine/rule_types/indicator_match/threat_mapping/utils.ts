@@ -21,6 +21,7 @@ import type {
   GetSignalValuesMap,
   ThreatMatchNamedQuery,
 } from './types';
+import { INDICATOR_PER_PAGE } from './get_threat_list';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -245,14 +246,33 @@ export const getMaxClauseCountErrorValue = (
   threatEntriesCount: number
 ) =>
   searchesPerformed.reduce<number>((acc, search) => {
-    const failureMessage: string | undefined = search.errors.find((err) =>
+    console.error('INSIDE OF GET MAX CLAUSE ERROR');
+    const failedToCreateQueryMessage: string | undefined = search.errors.find((err) =>
       err.includes('failed to create query: maxClauseCount is set to')
     );
 
-    const regex = /[0-9]+/g;
-    const foundMaxClauseCountValue = failureMessage?.match(regex)?.[0];
+    // the below error is specific to an error returned by getSignalsQueryMapFromThreatIndex
+    const tooManyNestedClausesMessage: string | undefined = search.errors.find((err) =>
+      err.includes('Query contains too many nested clauses; maxClauseCount is set to')
+    );
 
-    if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+    const regex = /[0-9]+/g;
+    const foundMaxClauseCountValue = failedToCreateQueryMessage?.match(regex)?.[0];
+    const foundNestedClauseCountValue = tooManyNestedClausesMessage?.match(regex)?.[0];
+
+    if (foundNestedClauseCountValue != null && !isEmpty(foundNestedClauseCountValue)) {
+      console.error('TOO MANY NESTED');
+      console.error('foundMaxClauseCountValue', foundNestedClauseCountValue);
+      const tempVal = parseInt(foundNestedClauseCountValue, 10);
+      console.error('tempVal', tempVal);
+
+      // minus 1 since the max clause count value is exclusive
+      // const val = (tempVal - 1) / (threatEntriesCount + 1);
+      const val = Math.ceil((tempVal - 1) / 10); // INDICATOR_PER_PAGE);
+      console.error('WHAT IS VAL', val);
+      return val;
+    } else if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+      console.error('MULTIPLE');
       const tempVal = parseInt(foundMaxClauseCountValue, 10);
       // minus 1 since the max clause count value is exclusive
       const val = (tempVal - 1) / (threatEntriesCount + 1);

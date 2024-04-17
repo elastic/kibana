@@ -24,6 +24,8 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { MAX_PER_PAGE } from './threat_mapping/get_event_count';
+import { getMaxClauseCountErrorValue } from './threat_mapping/utils';
+import { isEmpty } from 'lodash';
 
 export const indicatorMatchExecutor = async ({
   inputIndex,
@@ -71,7 +73,8 @@ export const indicatorMatchExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('indicatorMatchExecutor', async () => {
-    return createThreatSignals({
+    // try {
+    const something = await createThreatSignals({
       alertId: completeRule.alertId,
       bulkCreate,
       completeRule,
@@ -107,5 +110,58 @@ export const indicatorMatchExecutor = async ({
       runOpts,
       licensing,
     });
+    return something;
+    // } catch (exc) {
+    //   console.error('INDICATOR MATCH ERROR', exc);
+    //   if (
+    //     exc.message.includes('Query contains too many nested clauses; maxClauseCount is set to')
+    //   ) {
+    //     // reset the itemsPerSearch param
+    //     // const regex = /[0-9]+/g;
+    //     // const foundMaxClauseCountValue = exc.message?.match(regex)?.[0];
+    //     // if (foundMaxClauseCountValue != null && !isEmpty(foundMaxClauseCountValue)) {
+    //     //   const tempVal = parseInt(foundMaxClauseCountValue, 10);
+    //     //   // minus 1 since the max clause count value is exclusive
+    //     //   const val = (tempVal - 1) / (ruleParams!.threatMapping!.length + 1);
+    //     //   console.error('WHAT IS THE VAL', val);
+    //     //   return createThreatSignals({
+    //     //     alertId: completeRule.alertId,
+    //     //     bulkCreate,
+    //     //     completeRule,
+    //     //     concurrentSearches: ruleParams.concurrentSearches ?? 1,
+    //     //     eventsTelemetry,
+    //     //     filters: ruleParams.filters ?? [],
+    //     //     inputIndex,
+    //     //     itemsPerSearch: 1000, // Math.floor(val),
+    //     //     language: ruleParams.language,
+    //     //     listClient,
+    //     //     outputIndex: ruleParams.outputIndex,
+    //     //     query: ruleParams.query,
+    //     //     ruleExecutionLogger,
+    //     //     savedId: ruleParams.savedId,
+    //     //     searchAfterSize,
+    //     //     services,
+    //     //     threatFilters: ruleParams.threatFilters ?? [],
+    //     //     threatIndex: ruleParams.threatIndex,
+    //     //     threatIndicatorPath: ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH,
+    //     //     threatLanguage: ruleParams.threatLanguage,
+    //     //     threatMapping: ruleParams.threatMapping,
+    //     //     threatQuery: ruleParams.threatQuery,
+    //     //     tuple,
+    //     //     type: ruleParams.type,
+    //     //     wrapHits,
+    //     //     wrapSuppressedHits,
+    //     //     runtimeMappings,
+    //     //     primaryTimestamp,
+    //     //     secondaryTimestamp,
+    //     //     exceptionFilter,
+    //     //     unprocessedExceptions,
+    //     //     inputIndexFields,
+    //     //     runOpts,
+    //     //     licensing,
+    //     //   });
+    //     // }
+    //   }
+    // }
   });
 };

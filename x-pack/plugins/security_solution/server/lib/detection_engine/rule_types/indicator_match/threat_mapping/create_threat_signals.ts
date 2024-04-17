@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { uniq, chunk } from 'lodash/fp';
+import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 import type {
   CreateThreatSignalsOptions,
@@ -102,8 +103,15 @@ export const createThreatSignals = async ({
   };
 
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
+  // console.error(
+  //   'WHAT IS INDICATOR MAPPING FILTER',
+  //   JSON.stringify(indicatorMappingFilter, null, 2)
+  // );
+
+  // console.error('WHAT IS threatFilters', JSON.stringify(threatFilters, null, 2));
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
+
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -167,7 +175,12 @@ export const createThreatSignals = async ({
     createSignal: CreateSignalInterface;
     totalDocumentCount: number;
   }) => {
-    let list = await getDocumentList({ searchAfter: undefined });
+    let list;
+    try {
+      list = await getDocumentList({ searchAfter: undefined });
+    } catch (exc) {
+      console.error('WAS THERE AN EXC', exc);
+    }
     let documentCount = totalDocumentCount;
 
     // this is re-assigned depending on max clause count errors
@@ -191,6 +204,9 @@ export const createThreatSignals = async ({
       );
 
       if (maxClauseCountValue > Number.NEGATIVE_INFINITY) {
+        eventsTelemetry?.sendAsync(TelemetryChannel.DETECTION_ALERTS, [
+          `indicator match with rule id: ${alertId} generated a max clause count error, attempting to resolve within executor`,
+        ]);
         // parse the error message to acquire the number of maximum possible clauses
         // allowed by elasticsearch. The sliced chunk is used in createSignal to generate
         // threat filters.
@@ -206,7 +222,9 @@ export const createThreatSignals = async ({
           results,
           searchesPerformed.filter((search) =>
             search.errors.some(
-              (err) => !err.includes('failed to create query: maxClauseCount is set to')
+              (err) =>
+                !err.includes('failed to create query: maxClauseCount is set to') &&
+                !err.includes('Query contains too many nested clauses; maxClauseCount is set to')
             )
           )
         );

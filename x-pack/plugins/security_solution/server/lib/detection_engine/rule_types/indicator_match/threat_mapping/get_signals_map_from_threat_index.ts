@@ -48,6 +48,7 @@ export async function getSignalsQueryMapFromThreatIndex(
     | GetSignalsQueryMapFromThreatIndexOptionsMatch
 ): Promise<SignalsQueryMap> {
   const { threatSearchParams, eventsCount, termsQueryAllowed } = options;
+  // console.error('THREAT PARAMS', JSON.stringify(threatSearchParams.threatFilters, null, 2));
 
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
   const signalsQueryMap = new Map<string, ThreatMatchNamedQuery[]>();

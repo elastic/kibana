@@ -57,12 +57,15 @@ export const createEventSignal = async ({
   sortOrder = 'desc',
   isAlertSuppressionActive,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  console.error('CURRENT EVENT LIST LENGTH', currentEventList.length);
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
-    threatList: currentEventList,
+    threatList: currentEventList, //.slice(0, 99),
     entryKey: 'field',
     allowedFieldsForTermsQuery,
   });
+
+  // console.error('THREAT FILTERS FROM EVENTS', JSON.stringify(threatFiltersFromEvents));
 
   if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
@@ -91,12 +94,22 @@ export const createEventSignal = async ({
       indexFields: threatIndexFields,
     };
 
+    // console.error('THREAT SEARCH PARAMS', JSON.stringify(threatSearchParams.threatFilters));
+
+    // let signalsQueryMap;
+    // try {
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams,
       eventsCount: currentEventList.length,
-      signalValueMap: getSignalValueMap({ eventList: currentEventList, threatMatchedFields }),
+      signalValueMap: getSignalValueMap({
+        eventList: currentEventList, //.slice(0, 99),
+        threatMatchedFields,
+      }),
       termsQueryAllowed: true,
     });
+    // } catch (exc) {
+    //   console.error('WHAT WAS THE GET SIGNALS QUERY MAP ERROR', exc);
+    // }
 
     const ids = Array.from(signalsQueryMap.keys());
     const indexFilter = {
