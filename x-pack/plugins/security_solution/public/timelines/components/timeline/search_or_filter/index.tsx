@@ -121,28 +121,17 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     // When a filter update comes in through the filter manager, update redux
     useEffect(() => {
-      let isSubscribed = true;
-      const subscriptions = new Subscription();
-
-      subscriptions.add(
-        filterManager.getUpdates$().subscribe({
-          next: () => {
-            if (isSubscribed) {
-              const filtersWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
-              if (!deepEqual(filtersWithoutDropArea, filters)) {
-                setFilters({
-                  id: timelineId,
-                  filters: filtersWithoutDropArea,
-                });
-              }
-            }
-          },
-        })
-      );
-
+      const subscription = filterManager.getUpdates$().subscribe(() => {
+        const filtersWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
+        if (!deepEqual(filtersWithoutDropArea, filters)) {
+          setFilters({
+            id: timelineId,
+            filters: filtersWithoutDropArea,
+          });
+        }
+      });
       return () => {
-        isSubscribed = false;
-        subscriptions.unsubscribe();
+        subscription.unsubscribe();
       };
     }, [filterManager, timelineId, setFilters, filters]);
 
