@@ -34,12 +34,13 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     return new DynamicTool({
       name: toolDetails.name,
       description: toolDetails.description,
-      func: async (xxx) => {
-        const result = await chain.invoke({
-          query: getEsqlPrompt(xxx),
-        });
-        console.log('xxx:::', xxx);
-        console.log('ESQL_KNOWLEDGE_BASE_TOOL_DESCRIPTION:::', result);
+      func: async (input, _, cbManager) => {
+        const result = await chain.invoke(
+          {
+            query: getEsqlPrompt(input),
+          },
+          cbManager
+        );
         return result.text;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
