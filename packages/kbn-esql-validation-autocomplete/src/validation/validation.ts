@@ -51,6 +51,7 @@ import {
   isAssignment,
   isVariable,
   isValidLiteralOption,
+  isSingleItem,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, getUnknownTypeLabel } from './errors';
@@ -766,7 +767,24 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
   // Now validate arguments
   for (const commandArg of command.args) {
     const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
-    for (const arg of wrappedArg) {
+    for (let i = 0; i < wrappedArg.length; i++) {
+      const arg = wrappedArg[i];
+      const argDef = commandDef.signature.params[i];
+      if (isSingleItem(arg) && !isEqualType(arg, argDef, references, command.name)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'wrongArgumentType',
+            values: {
+              name: command.name,
+              argType: argDef.type,
+              value: arg.name,
+              givenType: 'foo',
+            },
+            locations: arg.location,
+          })
+        );
+      }
+
       if (isFunctionItem(arg)) {
         messages.push(...validateFunction(arg, command.name, undefined, references));
       }

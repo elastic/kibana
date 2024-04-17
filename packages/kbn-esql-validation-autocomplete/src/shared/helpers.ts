@@ -386,6 +386,9 @@ export function isEqualType(
   if (arg.type === 'timeInterval') {
     return argType === 'time_literal' && inKnownTimeInterval(arg);
   }
+  if (arg.type === 'source') {
+    return argType === 'source';
+  }
   if (arg.type === 'column') {
     if (argType === 'column') {
       // anything goes, so avoid any effort here
