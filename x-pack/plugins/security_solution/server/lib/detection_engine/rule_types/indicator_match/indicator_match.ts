@@ -26,6 +26,7 @@ import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { MAX_PER_PAGE } from './threat_mapping/get_event_count';
 import { getMaxClauseCountErrorValue } from './threat_mapping/utils';
 import { isEmpty } from 'lodash';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export const indicatorMatchExecutor = async ({
   inputIndex,
@@ -48,6 +49,7 @@ export const indicatorMatchExecutor = async ({
   wrapSuppressedHits,
   runOpts,
   licensing,
+  experimentalFeatures,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -69,6 +71,7 @@ export const indicatorMatchExecutor = async ({
   wrapSuppressedHits: WrapSuppressedHits;
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
+  experimentalFeatures: ExperimentalFeatures;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -109,6 +112,7 @@ export const indicatorMatchExecutor = async ({
       inputIndexFields,
       runOpts,
       licensing,
+      experimentalFeatures,
     });
     return something;
     // } catch (exc) {

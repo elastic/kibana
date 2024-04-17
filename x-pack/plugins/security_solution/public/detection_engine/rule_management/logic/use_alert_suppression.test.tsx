@@ -6,13 +6,54 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_experimental_features';
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+      .mockReturnValue(false);
+  });
+
+  it('should return isSuppressionEnabled false if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is disabled', () => {
+    const { result } = renderHook(() => useAlertSuppression('new_terms'));
+
+    expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+
+  it('should return isSuppressionEnabled true if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
+    jest
+      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+      .mockReset()
+      .mockReturnValue(true);
+    const { result } = renderHook(() => useAlertSuppression('new_terms'));
+
+    expect(result.current.isSuppressionEnabled).toBe(true);
+  });
+
   it('should return the correct isSuppressionEnabled value fot threat_match rule type', () => {
     const { result } = renderHook(() => useAlertSuppression('threat_match'));
 
     expect(result.current.isSuppressionEnabled).toBe(true);
+  });
+
+  describe('Eql Rule', () => {
+    it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
+      jest
+        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+        .mockReset()
+        .mockReturnValue(true);
+      const { result } = renderHook(() => useAlertSuppression('eql'));
+
+      expect(result.current.isSuppressionEnabled).toBe(true);
+    });
+
+    it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is disabled', () => {
+      const { result } = renderHook(() => useAlertSuppression('eql'));
+
+      expect(result.current.isSuppressionEnabled).toBe(false);
+    });
   });
 
   it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES', () => {
@@ -26,7 +67,7 @@ describe('useAlertSuppression', () => {
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
 
-  it('should return false if rule type is not THREAT_MATCH', () => {
+  it('should return false if rule type is not a suppressible rule', () => {
     const { result } = renderHook(() => useAlertSuppression('OTHER_RULE_TYPE' as Type));
 
     expect(result.current.isSuppressionEnabled).toBe(false);

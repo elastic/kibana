@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'settings',
     'common',
@@ -62,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.createAdHocDataView(INDEX_NAME, false);
+      await dataViews.createFromSearchBar({ name: INDEX_NAME, adHoc: true, hasTimeField: false });
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 

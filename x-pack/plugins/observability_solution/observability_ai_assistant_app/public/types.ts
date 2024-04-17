@@ -28,6 +28,10 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
+  AIAssistantManagementSelectionPluginPublicStart,
+  AIAssistantManagementSelectionPluginPublicSetup,
+} from '@kbn/ai-assistant-management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppPublicStart {}
@@ -46,6 +50,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   ml: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -59,4 +64,5 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   ml: MlPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicSetup;
 }

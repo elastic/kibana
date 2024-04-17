@@ -382,7 +382,7 @@ const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyP
       : descriptionStepI18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
   return (
-    <EuiText size="s" data-test-subj="alertSuppressionSuppressionFieldPropertyValue">
+    <EuiText size="s" data-test-subj="alertSuppressionMissingFieldsPropertyValue">
       {missingFieldsDescription}
     </EuiText>
   );
@@ -645,6 +645,28 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
+  if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="newTermsFieldsPropertyTitle">
+          {i18n.NEW_TERMS_FIELDS_FIELD_LABEL}
+        </span>
+      ),
+      description: <NewTermsFields newTermsFields={rule.new_terms_fields} />,
+    });
+  }
+
+  if ('history_window_start' in rule) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="newTermsWindowSizePropertyTitle">
+          {i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL}
+        </span>
+      ),
+      description: <HistoryWindowSize historyWindowStart={rule.history_window_start} />,
+    });
+  }
+
   if (isSuppressionEnabled && 'alert_suppression' in rule && rule.alert_suppression) {
     if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
@@ -669,7 +691,7 @@ const prepareDefinitionSectionListItems = (
     if ('missing_fields_strategy' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
-          <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
+          <span data-test-subj="alertSuppressionMissingFieldPropertyTitle">
             <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
           </span>
         ),
@@ -680,28 +702,6 @@ const prepareDefinitionSectionListItems = (
         ),
       });
     }
-  }
-
-  if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="newTermsFieldsPropertyTitle">
-          {i18n.NEW_TERMS_FIELDS_FIELD_LABEL}
-        </span>
-      ),
-      description: <NewTermsFields newTermsFields={rule.new_terms_fields} />,
-    });
-  }
-
-  if ('history_window_start' in rule) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="newTermsWindowSizePropertyTitle">
-          {i18n.HISTORY_WINDOW_SIZE_FIELD_LABEL}
-        </span>
-      ),
-      description: <HistoryWindowSize historyWindowStart={rule.history_window_start} />,
-    });
   }
 
   return definitionSectionListItems;
