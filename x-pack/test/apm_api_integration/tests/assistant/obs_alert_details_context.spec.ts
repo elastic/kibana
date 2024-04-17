@@ -73,11 +73,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
           });
 
-          it('returns no summary', async () => {
+          it('returns no service summary', async () => {
             expect(response.body.serviceSummary).to.be(undefined);
           });
 
-          it('returns log categories', async () => {
+          it('returns no downstream dependencies', async () => {
+            expect(response.body.downstreamDependencies ?? []).to.eql([]);
+          });
+
+          it('returns 1 log category', async () => {
             expect(response.body.logCategories).to.have.length(1);
           });
         });
@@ -108,6 +112,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               alerts: [],
               deployments: [],
             });
+          });
+
+          it('returns downstream dependencies', async () => {
+            expect(response.body.downstreamDependencies).to.eql([
+              {
+                'span.destination.service.resource': 'elasticsearch',
+                'span.type': 'db',
+                'span.subtype': 'elasticsearch',
+              },
+            ]);
           });
 
           it('returns log categories', () => {
@@ -148,6 +162,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               alerts: [],
               deployments: [],
             });
+          });
+
+          it('returns downstream dependencies', async () => {
+            expect(response.body.downstreamDependencies).to.eql([
+              {
+                'span.destination.service.resource': 'elasticsearch',
+                'span.type': 'db',
+                'span.subtype': 'elasticsearch',
+              },
+            ]);
           });
 
           it('returns log categories', () => {
@@ -209,6 +233,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               alerts: [],
               deployments: [],
             });
+          });
+
+          it('returns no downstream dependencies', async () => {
+            expect(response.body.downstreamDependencies).to.eql([]);
           });
 
           it('returns log categories', () => {
@@ -309,7 +337,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         'host.name'?: string;
         'kubernetes.pod.name'?: string;
       }) {
-        const serviceA = apm
+        const serviceInstance = apm
           .service({
             name: eventMetadata['service.name'],
             environment: 'production',
@@ -321,12 +349,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
-            return serviceA
+            return serviceInstance
               .transaction({ transactionName: 'tx' })
               .timestamp(timestamp)
               .duration(10000)
               .defaults({ 'service.version': '1.0.0', ...eventMetadata })
-              .outcome('success');
+              .outcome('success')
+              .children(
+                serviceInstance
+                  .span({
+                    spanName: 'GET apm-*/_search',
+                    spanType: 'db',
+                    spanSubtype: 'elasticsearch',
+                  })
+                  .duration(1000)
+                  .success()
+                  .destination('elasticsearch')
+                  .timestamp(timestamp)
+              );
           });
 
         await apmSynthtraceClient.index(events);
