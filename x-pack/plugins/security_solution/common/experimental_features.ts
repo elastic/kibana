@@ -117,6 +117,11 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
+   * Enables the Assistant Alerts Insights feature and API endpoint
+   */
+  assistantAlertsInsights: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -173,6 +178,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables alerts suppression for new terms rules
    */
   alertSuppressionForNewTermsRuleEnabled: false,
+
+  /**
+   * Enables alerts suppression for Eql rules with non-sequence queries
+   */
+  alertSuppressionForNonSequenceEqlRuleEnabled: false,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
