@@ -49,8 +49,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('when traces and logs are ingested and logs are not annotated with service.name', async () => {
         before(async () => {
-          await buildTraces({ 'service.name': 'Backend', 'container.id': 'my-container-a' });
-          await buildLogs({
+          await ingestTraces({ 'service.name': 'Backend', 'container.id': 'my-container-a' });
+          await ingestLogs({
             'container.id': 'my-container-a',
             'kubernetes.pod.name': 'pod-a',
           });
@@ -82,7 +82,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           it('returns 1 log category', async () => {
-            expect(response.body.logCategories).to.have.length(1);
+            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
+              'Error message from container my-container-a',
+            ]);
           });
         });
 
@@ -247,16 +249,55 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('when traces and logs are ingested and logs are annotated with service.name', async () => {
         before(async () => {
-          await buildTraces({ 'service.name': 'Backend', 'container.id': 'my-container-a' });
-          await buildLogs({
+          await ingestTraces({ 'service.name': 'Backend', 'container.id': 'my-container-a' });
+          await ingestLogs({
             'service.name': 'Backend',
             'container.id': 'my-container-a',
             'kubernetes.pod.name': 'pod-a',
+          });
+
+          // also ingest unrelated Frontend traces and logs that should not show up in the response when fetching "Backend"-related things
+          await ingestTraces({ 'service.name': 'Frontend', 'container.id': 'my-container-b' });
+          await ingestLogs({
+            'service.name': 'Frontend',
+            'container.id': 'my-container-b',
+            'kubernetes.pod.name': 'pod-b',
+          });
+
+          // also ingest logs that are not annotated with service.name
+          await ingestLogs({
+            'container.id': 'my-container-c',
+            'kubernetes.pod.name': 'pod-c',
           });
         });
 
         after(async () => {
           await cleanup();
+        });
+
+        describe('when no params are specified', async () => {
+          let response: SupertestReturnType<'GET /internal/apm/assistant/get_obs_alert_details_context'>;
+          before(async () => {
+            response = await apmApiClient.writeUser({
+              endpoint: 'GET /internal/apm/assistant/get_obs_alert_details_context',
+              params: {
+                query: {
+                  alert_started_at: new Date(end).toISOString(),
+                },
+              },
+            });
+          });
+
+          it('returns no service summary', async () => {
+            expect(response.body.serviceSummary).to.be(undefined);
+          });
+
+          it('returns 1 log category', async () => {
+            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
+              'Error message from service',
+              'Error message from container my-container-c',
+            ]);
+          });
         });
 
         describe('when service name is specified', async () => {
@@ -325,13 +366,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
           });
 
+          it('returns empty service summary', () => {
+            expect(response.body.serviceSummary).to.eql({
+              'service.name': 'non-existing-service',
+              'service.environment': [],
+              instances: 1,
+              anomalies: [],
+              alerts: [],
+              deployments: [],
+            });
+          });
+
           it('does not return log categories', () => {
-            expect(response.body.logCategories).to.have.length(0);
+            expect(response.body.logCategories?.map(({ errorCategory }) => errorCategory)).to.eql([
+              'Error message from container my-container-c',
+            ]);
           });
         });
       });
 
-      async function buildTraces(eventMetadata: {
+      async function ingestTraces(eventMetadata: {
         'service.name': string;
         'container.id'?: string;
         'host.name'?: string;
@@ -372,7 +426,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await apmSynthtraceClient.index(events);
       }
 
-      function buildLogs(eventMetadata: {
+      function ingestLogs(eventMetadata: {
         'service.name'?: string;
         'container.id'?: string;
         'kubernetes.pod.name'?: string;
