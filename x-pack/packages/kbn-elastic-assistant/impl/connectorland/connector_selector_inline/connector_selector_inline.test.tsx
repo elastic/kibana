@@ -74,6 +74,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
+          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
@@ -88,6 +89,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={defaultConvo}
+          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
@@ -101,6 +103,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={defaultConvo}
+          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
@@ -117,6 +120,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={defaultConvo}
+          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>
@@ -149,6 +153,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={defaultConvo}
+          isFlyoutMode={false}
           onConnectorSelected={jest.fn()}
         />
       </TestProviders>

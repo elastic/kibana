@@ -11,6 +11,7 @@ interface ModelFields {
   field: string;
   model_id: string;
   nested: boolean;
+  indices: string[];
 }
 
 export interface QuerySourceFields {
@@ -29,6 +30,7 @@ export enum APIRoutes {
 export enum LLMs {
   openai = 'openai',
   openai_azure = 'openai_azure',
+  bedrock = 'bedrock',
 }
 
 export interface ChatRequestData {

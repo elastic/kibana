@@ -1865,7 +1865,7 @@
             "label": "getKibanaPrivileges",
             "description": [],
             "signature": [
-              "(({ consumer }: { consumer: string; }) => string[]) | undefined"
+              "((args: { consumer: string; producer: string; }) => string[]) | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
             "deprecated": false,
@@ -1876,7 +1876,7 @@
                 "id": "def-server.ConnectorAdapter.getKibanaPrivileges.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ consumer }",
+                "label": "args",
                 "description": [],
                 "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
                 "deprecated": false,
@@ -1888,6 +1888,17 @@
                     "type": "string",
                     "tags": [],
                     "label": "consumer",
+                    "description": [],
+                    "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-server.ConnectorAdapter.getKibanaPrivileges.$1.producer",
+                    "type": "string",
+                    "tags": [],
+                    "label": "producer",
                     "description": [],
                     "path": "x-pack/plugins/alerting/server/connector_adapters/types.ts",
                     "deprecated": false,
@@ -3030,7 +3041,7 @@
             "label": "systemActions",
             "description": [],
             "signature": [
-              "Readonly<{ uuid?: string | undefined; useAlertDataAsTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; }>[] | undefined"
+              "Readonly<{ uuid?: string | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; }>[] | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -4856,7 +4867,7 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: (Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: (Readonly<{ actionTypeId?: string | undefined; frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4864,7 +4875,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; } & { params: Record<string, any>; id: string; group: string; }> | Readonly<{ uuid?: string | undefined; } & { params: Record<string, any>; id: string; }>)[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; group: string; }> | Readonly<{ actionTypeId?: string | undefined; uuid?: string | undefined; } & { params: Record<string, any>; id: string; }>)[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
         ],
         "path": "x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/types/bulk_edit_rules_options.ts",
         "deprecated": false,
@@ -5155,14 +5166,14 @@
             "text": "RuleTypeParams"
           },
           " = never>(params: ",
-          "UpdateOptions",
+          "UpdateRuleParams",
           "<Params>) => Promise<",
           {
             "pluginId": "alerting",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.PartialRule",
-            "text": "PartialRule"
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
           },
           "<Params>>; get: <Params extends ",
           {

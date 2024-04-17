@@ -73,6 +73,7 @@ The 8.13.2 release includes the following bug fixes.
 === Bug Fixes
 Canvas::
 * Fixes text settings to be honored in Canvas markdown elements ({kibana-pull}179948[#179948]).
+* Fixes custom styling for Canvas markdown Workpads ({kibana-pull}180070[#180070]).
 Discover::
 * Fixes keyboard navigation for search input on the document viewer flyout ({kibana-pull}180022[#180022]).
 Elastic Security::
@@ -81,6 +82,8 @@ Fleet::
 * Fixes having to wait ten minutes after agent upgrade if agent cleared watching state ({kibana-pull}179917[#179917]).
 Fixes using the latest available version in K8's manifest instead of the latest compatible version ({kibana-pull}179662[#179662]).
 * Fixes a step in add agent instructions where a query to get all agents was unnecessary ({kibana-pull}179603[#179603]).
+Lens & Visualizations::
+* Fixes custom styling for TSVB markdown visualizations ({kibana-pull}180053[#180053]).
 Machine Learning::
 * Single Metric Viewer embeddable: Ensures the detector index is passed to chart correctly ({kibana-pull}179761[#179761]).
 * AIOps: Fixes text field candidate selection for log rate analysis ({kibana-pull}179699[#179699]).
@@ -139,6 +142,15 @@ For information about the {kib} 8.13.0 release, review the following information
 ====
 *Details* +
 In Canvas, an empty text element incorrectly triggers a "Markdown content is required in [readOnly] mode" toast notification. For more information, refer to ({kibana-pull}179457[#179457]).
+====
+
+[discrete]
+[[known-177938-8.13]]
+.Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
+[%collapsible]
+====
+*Details* +
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the `allow_auto_create` field is incorrectly set to `false` by default (the default value should be `undefined`). For more information, refer to ({kibana-issue}177938[#177938]).
 ====
 
 [float]
@@ -528,6 +540,19 @@ Security::
 == {kib} 8.12.0
 
 For information about the {kib} 8.12.0 release, review the following information.
+
+[float]
+[[known-issues-8.12.0]]
+=== Known issues
+
+[discrete]
+[[known-177938-8.12]]
+.Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
+[%collapsible]
+====
+*Details* +
+If you are creating or editing an index template using the Index Templates form under the Index Management page, the `allow_auto_create` field is incorrectly set to `false` by default (the default value should be `undefined`). For more information, refer to ({kibana-issue}177938[#177938]).
+====
 
 [float]
 [[breaking-changes-8.12.0]]

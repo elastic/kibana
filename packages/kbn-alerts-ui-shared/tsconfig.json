@@ -19,12 +19,15 @@
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/ui-theme",
+    "@kbn/controls-plugin",
+    "@kbn/embeddable-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/core-doc-links-browser",
     "@kbn/router-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/core-http-browser-mocks",
-    "@kbn/core-doc-links-browser-mocks"
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/kibana-utils-plugin"
   ]
 }
