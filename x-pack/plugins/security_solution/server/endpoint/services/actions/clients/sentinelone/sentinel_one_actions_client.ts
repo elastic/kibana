@@ -426,10 +426,9 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         };
 
         // Fetch the Activity log entry for this get-file request and store needed data
-        const activityLogSearchResponse = await this.sendAction<SentinelOneGetActivitiesResponse>(
-          SUB_ACTION.GET_ACTIVITIES,
-          activitySearchCriteria
-        );
+        const activityLogSearchResponse = await this.sendAction<
+          SentinelOneGetActivitiesResponse<{ commandBatchUuid: string }>
+        >(SUB_ACTION.GET_ACTIVITIES, activitySearchCriteria);
 
         this.log.debug(
           `Search of activity log with:\n${stringify(
@@ -441,7 +440,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           const activityLogItem = activityLogSearchResponse.data?.data[0];
 
           reqIndexOptions.meta = {
-            commandBatchUuid: activityLogItem?.data.commandBatchUuid, // FIXME:PT fix type once PR #180637 is merged
+            commandBatchUuid: activityLogItem?.data.commandBatchUuid,
             activityId: activityLogItem?.id,
           };
         } else {
