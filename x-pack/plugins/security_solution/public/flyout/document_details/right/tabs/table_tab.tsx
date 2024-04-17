@@ -10,9 +10,10 @@ import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
+import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
+import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { FieldValueCell } from '../../../../common/components/event_details/table/field_value_cell';
-import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { FieldNameCell } from '../../../../common/components/event_details/table/field_name_cell';
 import { CellActions } from '../components/cell_actions';
 import * as i18n from '../../../../common/components/event_details/translations';
@@ -20,6 +21,7 @@ import { useRightPanelContext } from '../context';
 import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
 import { EventFieldsBrowser } from '../../../../common/components/event_details/event_fields_browser';
 import { TimelineTabs } from '../../../../../common/types';
+import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 export const getFieldFromBrowserField = memoizeOne(
   (keys: string[], browserFields: BrowserFields): BrowserField | undefined =>
@@ -31,7 +33,6 @@ export const getColumns: ColumnsProvider = ({
   browserFields,
   eventId,
   contextId,
-  scopeId,
   getLinkValue,
   isDraggable,
 }) => [
@@ -45,7 +46,12 @@ export const getColumns: ColumnsProvider = ({
     width: '30%',
     render: (field, data) => {
       return (
-        <FieldNameCell data={data as EventFieldsData} field={field} fieldMapping={undefined} />
+        <FieldNameCell
+          data={data as EventFieldsData}
+          // shows agent.status field name for SentinelOne alerts
+          field={field === SENTINEL_ONE_AGENT_ID_FIELD ? AGENT_STATUS_FIELD_NAME : field}
+          fieldMapping={undefined}
+        />
       );
     },
   },
