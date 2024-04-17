@@ -14,7 +14,7 @@ import { responseActionsClientMock } from '../../../endpoint/services/actions/cl
 
 describe('ScheduleNotificationResponseActions', () => {
   const signalOne = {
-    agent: { id: 'agent-id-1', type: 'endpoint' },
+    agent: { id: 'agent-id-1' },
     _id: 'alert-id-1',
     user: { id: 'S-1-5-20' },
     process: {
@@ -23,7 +23,7 @@ describe('ScheduleNotificationResponseActions', () => {
     [ALERT_RULE_UUID]: 'rule-id-1',
     [ALERT_RULE_NAME]: 'rule-name-1',
   };
-  const signalTwo = { agent: { id: 'agent-id-2', type: 'filebeat' }, _id: 'alert-id-2' };
+  const signalTwo = { agent: { id: 'agent-id-2' }, _id: 'alert-id-2' };
   const getSignals = () => [signalOne, signalTwo];
 
   const osqueryActionMock = {

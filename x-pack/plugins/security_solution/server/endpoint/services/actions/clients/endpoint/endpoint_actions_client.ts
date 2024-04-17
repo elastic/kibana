@@ -82,17 +82,17 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<TResponse> {
     const agentIds = await this.checkAgentIds(actionReq.endpoint_ids);
     const actionId = uuidv4();
-    const { isValid, error } = await this.validateRequest({
+    const { error: validationError } = await this.validateRequest({
       ...actionReq,
       command,
       endpoint_ids: agentIds.valid || [],
     });
 
-    const { hosts, ruleName, ruleId } = this.getMethodOptions<TMethodOptions>(options);
-    let actionError: string | undefined = error?.message;
+    const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
+    let actionError: string | undefined = validationError?.message || error;
 
     // Dispatch action to Endpoint using Fleet
-    if (!actionError && isValid) {
+    if (!actionError) {
       try {
         await this.dispatchActionViaFleet({
           actionId,
