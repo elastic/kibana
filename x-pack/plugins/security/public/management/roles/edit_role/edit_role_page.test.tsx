@@ -213,7 +213,7 @@ function getProps({
     spacesApiUi,
     buildFlavor,
     theme: themeMock,
-    i18nStart: i18nMock,
+    i18n: i18nMock,
   };
 }
 
