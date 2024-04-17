@@ -202,7 +202,7 @@ export class AssetCriticalityDataClient {
       retries,
       refreshOnCompletion: true, // refresh the index after all records are processed
       onDocument: ({ record }) => [
-        { update: { _id: createId(record) } },
+        { update: { _id: AssetCriticalityDataClient.createId(record) } },
         {
           doc: {
             id_field: record.idField,
