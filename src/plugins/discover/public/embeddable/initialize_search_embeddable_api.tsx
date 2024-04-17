@@ -16,7 +16,6 @@ import {
   SavedSearch,
   SavedSearchByValueAttributes,
   SavedSearchUnwrapResult,
-  SortOrder,
 } from '@kbn/saved-search-plugin/public';
 
 import { DiscoverServices } from '../build_services';
@@ -31,7 +30,7 @@ export const initializeSearchEmbeddableApi = async (
   }: {
     startServices: {
       executeTriggerActions: (triggerId: string, context: object) => Promise<void>;
-      isEditable: () => boolean;
+      // isEditable: () => boolean;
     };
     discoverServices: DiscoverServices;
   }

@@ -40,7 +40,7 @@ export const getSearchEmbeddableFactory = ({
 }: {
   startServices: {
     executeTriggerActions: (triggerId: string, context: object) => Promise<void>;
-    isEditable: () => boolean;
+    // isEditable: () => boolean;
   };
   discoverServices: DiscoverServices;
 }) => {
@@ -91,6 +91,7 @@ export const getSearchEmbeddableFactory = ({
           getSavedSearch: () => {
             return undefined;
           },
+          // canEdit: () => startServices.isEditable(),
           canLinkToLibrary: async () => {
             // const { visualize } = coreServices.application.capabilities;
             return !Boolean(searchEmbeddableApi.savedObjectId$.getValue());

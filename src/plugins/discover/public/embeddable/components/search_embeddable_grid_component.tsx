@@ -28,7 +28,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
-import { DiscoverGridEmbeddable } from '../saved_search_grid';
+import { DiscoverGridEmbeddable } from './saved_search_grid';
 import type { EmbeddableComponentSearchProps, SearchEmbeddableApi } from '../types';
 
 interface SavedSearchEmbeddableComponentProps {

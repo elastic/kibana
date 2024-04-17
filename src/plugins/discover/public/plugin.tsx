@@ -465,7 +465,7 @@ export class DiscoverPlugin
       const [coreStart, deps] = await core.getStartServices();
       return {
         executeTriggerActions: deps.uiActions.executeTriggerActions,
-        isEditable: () => coreStart.application.capabilities.discover.save as boolean,
+        // isEditable: () => coreStart.application.capabilities.discover.save as boolean,
       };
     };
 

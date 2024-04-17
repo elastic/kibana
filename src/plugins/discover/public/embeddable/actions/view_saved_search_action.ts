@@ -32,6 +32,12 @@ type ViewSavedSearchActionApi = CanAccessViewMode & HasType & HasSavedSearch;
 const compatibilityCheck = (
   api: EmbeddableApiContext['embeddable']
 ): api is ViewSavedSearchActionApi => {
+  console.log(
+    ' apiCanAccessViewMode(api)',
+    apiCanAccessViewMode(api),
+    'getInheritedViewMode(api) === ViewMode.VIEW ',
+    getInheritedViewMode(api)
+  );
   return (
     apiCanAccessViewMode(api) &&
     getInheritedViewMode(api) === ViewMode.VIEW &&
@@ -73,6 +79,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
     const { capabilities } = this.application;
     const hasDiscoverPermissions =
       (capabilities.discover.show as boolean) || (capabilities.discover.save as boolean);
+    console.log('hasDiscoverPermissions', hasDiscoverPermissions);
     return compatibilityCheck(embeddable) && hasDiscoverPermissions;
   }
 }

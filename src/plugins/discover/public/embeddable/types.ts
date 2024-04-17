@@ -31,7 +31,7 @@ import type {
 
 import type { DiscoverServices } from '../build_services';
 import type { DocTableEmbeddableSearchProps } from '../components/doc_table/doc_table_embeddable';
-import type { DiscoverGridEmbeddableSearchProps } from './saved_search_grid';
+import type { DiscoverGridEmbeddableSearchProps } from './components/saved_search_grid';
 
 export type SearchInput = SearchByValueInput | SearchByReferenceInput; // TODO: Delete
 

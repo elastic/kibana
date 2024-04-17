@@ -48,7 +48,7 @@ const savedSearchStartMock = (): SavedSearchPublicPluginStart => ({
       getInputAsRefType: jest.fn(),
       getInputAsValueType: jest.fn(),
       inputIsRefType: jest.fn(),
-      unwrapAttributes: jest.fn(() => ({
+      unwrapMethod: jest.fn(() => ({
         attributes: { id: 'savedSearch', title: 'savedSearchTitle' },
       })),
       wrapAttributes: jest.fn(),
