@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
@@ -59,12 +60,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .getEntries()
           .filter((entry: any) => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType))
       );
-      return requests.filter((entry) => entry.name.endsWith(`/internal/search/${type}`)).length;
+      return requests.filter((entry) => entry.name.includes(`/internal/search/${type}`)).length;
     };
 
     const waitForLoadingToFinish = async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitForDocTableLoadingComplete();
+      await PageObjects.discover.waitUntilLoadingInChartHasFinished();
       await elasticChart.canvasExists();
     };
 
@@ -88,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearchesRequests,
       setQuery,
       expectedRequests = 2,
+      expectedRefreshRequest,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
@@ -108,8 +111,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchCount).to.be(expectedRequests);
       });
 
-      it(`should send ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
+      it(`should send ${
+        expectedRefreshRequest ?? expectedRequests
+      } requests (documents + chart) when refreshing`, async () => {
+        await expectSearches(type, expectedRefreshRequest ?? expectedRequests, async () => {
           await queryBar.clickQuerySubmitButton();
         });
       });
@@ -221,6 +226,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should send 2 requests (documents + chart) when changing the data view', async () => {
         await expectSearches(type, 2, async () => {
           await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
+        });
+      });
+    });
+
+    describe('ES|QL mode requests', () => {
+      const type = 'esql';
+
+      beforeEach(async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue(
+          'from logstash-* | where bytes > 1000 | stats countB = count(bytes)'
+        );
+        await queryBar.clickQuerySubmitButton();
+        await waitForLoadingToFinish();
+      });
+
+      getSharedTests({
+        type,
+        savedSearch: 'esql test',
+        query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes) ',
+        query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes) ',
+        savedSearchesRequests: 2,
+        setQuery: (query) => monacoEditor.setCodeEditorValue(query),
+        expectedRequests: 2, // table and query editor autocomplete?
+        expectedRefreshRequest: 1,
+      });
+
+      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
+        // table
+        await expectSearches(type, 1, async () => {
+          await PageObjects.discover.toggleChartVisibility();
+        });
+        // table + query editor autocomplete?
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.toggleChartVisibility();
         });
       });
     });

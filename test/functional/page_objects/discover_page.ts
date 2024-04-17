@@ -199,6 +199,19 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('euiFlyoutCloseButton');
   }
 
+  public async waitUntilLoadingInChartHasFinished() {
+    await this.testSubjects.missingOrFail('unifiedHistogramProgressBar', {
+      timeout: this.defaultFindTimeout * 10,
+    });
+    await this.retry.try(async () => {
+      if (await this.testSubjects.exists('unifiedHistogramChartPanelHidden')) {
+        // no chart is available
+        return;
+      }
+      await this.elasticChart.waitForRenderComplete(undefined, 5000);
+    });
+  }
+
   public async clickHistogramBar() {
     await this.elasticChart.waitForRenderComplete(undefined, 5000);
     const el = await this.elasticChart.getCanvas();
