@@ -30,11 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
-import {
-  TimeLabelForData,
-  TIME_LABELS,
-  getDomain,
-} from './chart_preview_helper';
+import { TimeLabelForData, TIME_LABELS, getDomain } from './chart_preview_helper';
 import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
 
 interface ChartPreviewProps {
@@ -78,8 +74,7 @@ export function ChartPreview({
 
   const timeZone = getTimeZone(uiSettings);
 
-  const legendSize =
-    series.length > 1 ? Math.ceil(series.length / 2) * 30 : series.length * 35;
+  const legendSize = series.length > 1 ? Math.ceil(series.length / 2) * 30 : series.length * 35;
 
   const chartSize = 150;
 
@@ -89,10 +84,7 @@ export function ChartPreview({
     min: Math.min(yMin, threshold) * 0.9, // Add 10% headroom.
   };
 
-  const dateFormatter = useMemo(
-    () => niceTimeFormatter([xMin, xMax]),
-    [xMin, xMax]
-  );
+  const dateFormatter = useMemo(() => niceTimeFormatter([xMin, xMax]), [xMin, xMax]);
 
   const lookback = timeSize * ALERT_PREVIEW_BUCKET_SIZE;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
@@ -121,8 +113,7 @@ export function ChartPreview({
           type="none"
           headerFormatter={({ value }) => {
             const dateFormat =
-              (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) ||
-              DEFAULT_DATE_FORMAT;
+              (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
             return moment(value).format(dateFormat);
           }}
         />

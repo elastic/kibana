@@ -60,7 +60,7 @@ export const getConversationById = async ({
 
 export interface PostConversationParams {
   http: HttpSetup;
-  conversation: Conversation;
+  conversation: Partial<Conversation>;
   toasts?: IToasts;
   signal?: AbortSignal | undefined;
 }

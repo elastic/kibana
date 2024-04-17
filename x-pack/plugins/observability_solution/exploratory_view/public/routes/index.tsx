@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
+import { StartServices } from '../application';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -23,8 +24,8 @@ export interface Params {
 
 export const routes = {
   '/': {
-    handler: () => {
-      return <ObservabilityExploratoryView />;
+    handler: ({ startServices }: { startServices: StartServices }) => {
+      return <ObservabilityExploratoryView startServices={startServices} />;
     },
     params: {
       query: t.partial({

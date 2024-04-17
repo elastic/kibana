@@ -202,7 +202,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
           "managed": true,
           "managed_by": "observability",
-          "version": 3.1,
+          "version": 3.2,
         },
         "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.summary.pipeline-irrelevant-1",
@@ -333,6 +333,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           },
           Object {
             "set": Object {
+              "description": "Store the indicator params",
               "field": "slo.indicator.params",
               "ignore_failure": true,
               "value": Object {
@@ -467,6 +468,7 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "errorBudgetRemaining": 1,
           "goodEvents": 0,
           "isTempDoc": true,
+          "kibanaUrl": "http://myhost.com/mock-server-basepath",
           "service": Object {
             "environment": "irrelevant",
             "name": "irrelevant",
@@ -474,18 +476,28 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "sliValue": -1,
           "slo": Object {
             "budgetingMethod": "occurrences",
+            "createdAt": "2023-01-01T00:00:00.000Z",
             "description": "irrelevant",
             "groupBy": "*",
+            "groupings": Object {},
             "id": "irrelevant",
             "indicator": Object {
+              "params": Object {
+                "environment": "irrelevant",
+                "index": "metrics-apm*",
+                "service": "irrelevant",
+                "threshold": 500,
+                "transactionName": "irrelevant",
+                "transactionType": "irrelevant",
+              },
               "type": "sli.apm.transactionDuration",
             },
             "instanceId": "*",
             "name": "irrelevant",
             "objective": Object {
               "target": 0.999,
-              "timesliceTarget": null,
-              "timesliceWindow": null,
+              "timesliceTarget": undefined,
+              "timesliceWindow": undefined,
             },
             "revision": 1,
             "tags": Array [
@@ -496,6 +508,7 @@ exports[`ResetSLO resets all associated resources 11`] = `
               "duration": "7d",
               "type": "rolling",
             },
+            "updatedAt": "2023-01-01T00:00:00.000Z",
           },
           "spaceId": "some-space",
           "status": "NO_DATA",
@@ -507,7 +520,7 @@ exports[`ResetSLO resets all associated resources 11`] = `
           },
         },
         "id": "slo-irrelevant",
-        "index": ".slo-observability.summary-v3.1.temp",
+        "index": ".slo-observability.summary-v3.2.temp",
         "refresh": true,
       },
     ],
