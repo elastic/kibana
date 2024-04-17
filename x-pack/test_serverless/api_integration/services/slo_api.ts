@@ -23,9 +23,15 @@ interface WindowSchema {
   actionGroup: string;
 }
 
+interface Dependency {
+  ruleId: string;
+  actionGroupsToSuppressOn: string[];
+}
+
 export interface SloBurnRateRuleParams {
   sloId: string;
   windows: WindowSchema[];
+  dependencies?: Dependency[];
 }
 
 interface SloParams {

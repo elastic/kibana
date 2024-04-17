@@ -5,22 +5,50 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CustomRequestHandlerContext,
   CoreStart,
   RouteConfigOptions,
+  IScopedClusterClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
-  licensing: LicensingApiRequestHandlerContext;
-  alerting: AlertingApiRequestHandlerContext;
-  rac: RacApiRequestHandlerContext;
+  licensing: Pick<
+    LicensingApiRequestHandlerContext,
+    'license' | 'featureUsage'
+  >;
+  alerting: {
+    // Pick<AlertingApiRequestHandlerContext, 'getRulesClient'> is a superset of this
+    // and incompatible with the start contract from the alerting plugin
+    getRulesClient: () => RulesClientApi;
+  };
+  rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
 }>;
+
+// what is available in system connectors
+export type MinimalApmPluginRequestHandlerContext = Omit<
+  ApmPluginRequestHandlerContext,
+  'core' | 'resolve'
+> & {
+  core: Promise<{
+    elasticsearch: {
+      client: IScopedClusterClient;
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
+  }>;
+};
 
 export interface APMRouteCreateOptions {
   options: {

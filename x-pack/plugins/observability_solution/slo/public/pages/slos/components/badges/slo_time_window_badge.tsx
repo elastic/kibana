@@ -7,19 +7,23 @@
 
 import { EuiBadge, EuiBadgeProps, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import {
+  rollingTimeWindowTypeSchema,
+  SLODefinitionResponse,
+  SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
 import React, { MouseEvent, useCallback } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { SLOS_PATH } from '../../../../../common/locators/paths';
-import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duration';
 import { toDurationLabel } from '../../../../utils/slo/labels';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
 export interface Props {
   color?: EuiBadgeProps['color'];
-  slo: SLOWithSummaryResponse | SLOResponse;
+  slo: SLOWithSummaryResponse | SLODefinitionResponse;
 }
 
 export function SloTimeWindowBadge({ slo, color }: Props) {

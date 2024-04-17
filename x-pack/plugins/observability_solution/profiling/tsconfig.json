@@ -53,7 +53,8 @@
     "@kbn/security-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/apm-data-access-plugin"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.12.1",
+    "node": "20.12.2",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -509,6 +509,7 @@
     "@kbn/iframe-embedded-plugin": "link:x-pack/test/functional_embedded/plugins/iframe_embedded",
     "@kbn/image-embeddable-plugin": "link:src/plugins/image_embeddable",
     "@kbn/index-lifecycle-management-plugin": "link:x-pack/plugins/index_lifecycle_management",
+    "@kbn/index-management": "link:x-pack/packages/index-management",
     "@kbn/index-management-plugin": "link:x-pack/plugins/index_management",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
     "@kbn/infra-forge": "link:x-pack/packages/kbn-infra-forge",
@@ -520,6 +521,7 @@
     "@kbn/interactive-setup-test-endpoints-plugin": "link:test/interactive_setup_api_integration/plugins/test_endpoints",
     "@kbn/interpreter": "link:packages/kbn-interpreter",
     "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
+    "@kbn/ipynb": "link:packages/kbn-ipynb",
     "@kbn/kbn-health-gateway-status-plugin": "link:test/health_gateway/plugins/status",
     "@kbn/kbn-sample-panel-action-plugin": "link:test/plugin_functional/plugins/kbn_sample_panel_action",
     "@kbn/kbn-top-nav-plugin": "link:test/plugin_functional/plugins/kbn_top_nav",
@@ -649,7 +651,7 @@
     "@kbn/repo-info": "link:packages/kbn-repo-info",
     "@kbn/repo-packages": "link:packages/kbn-repo-packages",
     "@kbn/reporting-common": "link:packages/kbn-reporting/common",
-    "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
+    "@kbn/reporting-csv-share-panel": "link:packages/kbn-reporting/get_csv_panel_actions",
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-csv-common": "link:packages/kbn-reporting/export_types/csv_common",
     "@kbn/reporting-export-types-pdf": "link:packages/kbn-reporting/export_types/pdf",
@@ -1020,6 +1022,7 @@
     "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
     "joi": "^17.7.1",
+    "joi-to-json": "^4.2.1",
     "jquery": "^3.5.0",
     "js-levenshtein": "^1.1.6",
     "js-search": "^1.4.3",
@@ -1552,7 +1555,7 @@
     "buildkite-test-collector": "^1.7.0",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
-    "chromedriver": "^122.0.5",
+    "chromedriver": "^123.0.3",
     "clean-webpack-plugin": "^3.0.0",
     "cli-progress": "^3.12.0",
     "cli-table3": "^0.6.1",
