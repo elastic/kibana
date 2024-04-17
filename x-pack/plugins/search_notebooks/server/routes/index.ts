@@ -8,9 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { NotebookDefinition } from '@kbn/ipynb';
 
+import { INTRODUCTION_NOTEBOOK } from '../../common/constants';
 import { DEFAULT_NOTEBOOKS, NOTEBOOKS_MAP, getNotebook } from '../lib/notebook_catalog';
-import { NotebookDefinition } from '../types';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
   router.get(
@@ -35,8 +36,15 @@ export function defineRoutes(router: IRouter, logger: Logger) {
         }),
       },
     },
-    async (context, request, response) => {
+    async (_, request, response) => {
       const notebookId = request.params.notebookId;
+
+      if (notebookId === INTRODUCTION_NOTEBOOK.id) {
+        return response.ok({
+          body: INTRODUCTION_NOTEBOOK,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
 
       if (!NOTEBOOKS_MAP.hasOwnProperty(notebookId)) {
         logger.warn(`Unknown search notebook requested ${notebookId}`);
