@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable } from 'rxjs';
 
-import { ScopedHistory, CoreTheme, ExecutionContextStart } from '@kbn/core/public';
-import { RegisterManagementAppArgs, I18nStart } from '../types';
+import { CoreStart, ScopedHistory, ExecutionContextStart } from '@kbn/core/public';
+import { RegisterManagementAppArgs } from '../types';
 
 export declare const renderApp: (
   elem: HTMLElement | null,
-  I18nContext: I18nStart['Context'],
   appDependencies: {
     isCloudEnabled: boolean;
     cloudBaseUrl: string;
@@ -19,5 +17,5 @@ export declare const renderApp: (
     canUseAPIKeyTrustModel: boolean;
   },
   history: ScopedHistory,
-  theme$: Observable<CoreTheme>
+  startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>
 ) => ReturnType<RegisterManagementAppArgs['mount']>;

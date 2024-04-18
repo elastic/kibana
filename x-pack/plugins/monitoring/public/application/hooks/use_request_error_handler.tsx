@@ -11,9 +11,10 @@ import { includes } from 'lodash';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { formatMsg } from '../../lib/format_msg';
-import { MonitoringStartPluginDependencies } from '../../types';
+import { MonitoringStartServices } from '../../types';
 
 export function formatMonitoringError(err: IHttpFetchError<ResponseErrorBody>) {
   if (err.response?.status && err.response?.status !== -1) {
@@ -35,7 +36,7 @@ export function formatMonitoringError(err: IHttpFetchError<ResponseErrorBody>) {
 }
 
 export const useRequestErrorHandler = () => {
-  const { services } = useKibana<MonitoringStartPluginDependencies>();
+  const { services } = useKibana<MonitoringStartServices>();
   const history = useHistory();
   return useCallback(
     (err: IHttpFetchError<ResponseErrorBody>) => {
@@ -64,7 +65,7 @@ export const useRequestErrorHandler = () => {
                 />
               </EuiButton>
             </div>,
-            { theme$: services.theme?.theme$ }
+            services
           ),
         });
       } else {
@@ -72,10 +73,10 @@ export const useRequestErrorHandler = () => {
           title: i18n.translate('xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle', {
             defaultMessage: 'Monitoring Request Error',
           }),
-          text: toMountPoint(formatMonitoringError(err), { theme$: services.theme?.theme$ }),
+          text: toMountPoint(formatMonitoringError(err), services),
         });
       }
     },
-    [history, services.notifications?.toasts, services.theme]
+    [history, services]
   );
 };

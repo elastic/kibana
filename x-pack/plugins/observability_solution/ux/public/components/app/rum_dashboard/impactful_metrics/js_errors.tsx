@@ -75,11 +75,7 @@ export function JSErrors() {
     },
   ];
 
-  const onTableChange = ({
-    page,
-  }: {
-    page: { size: number; index: number };
-  }) => {
+  const onTableChange = ({ page }: { page: { size: number; index: number } }) => {
     setPagination({
       pageIndex: page.index,
       pageSize: page.size,

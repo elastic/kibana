@@ -23,13 +23,11 @@ async function getFleetAgentByIds({
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
   // @ts-ignore
-  const savedObjectsClient: SavedObjectsClientContract =
-    await getInternalSavedObjectsClient(coreStart);
-
-  return await fleetPluginStart.agentPolicyService.getByIds(
-    savedObjectsClient,
-    policyIds
+  const savedObjectsClient: SavedObjectsClientContract = await getInternalSavedObjectsClient(
+    coreStart
   );
+
+  return await fleetPluginStart.agentPolicyService.getByIds(savedObjectsClient, policyIds);
 }
 
 export interface FleetAgentResponse {

@@ -133,7 +133,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         mobileOptions: { show: true },
         sortable: true,
         align: 'right',
-        render: (contribution: number) => contribution.toFixed(2),
+        render: formatContribution,
       },
     ],
     []
@@ -257,7 +257,7 @@ const ContextsSection: React.FC<{
                 dataTestSubj="risk-inputs-asset-criticality-badge"
               />
             ),
-            contribution: (criticality.contribution || 0).toFixed(2),
+            contribution: formatContribution(criticality.contribution || 0),
           },
         ]}
       />
@@ -337,7 +337,7 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
           defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
           values={{
             count: totals.count - displayed.count,
-            score: (totals.score - displayed.score).toFixed(2),
+            score: formatContribution(totals.score - displayed.score),
           }}
         />
       }
@@ -345,3 +345,6 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
     />
   );
 };
+
+const formatContribution = (value: number) =>
+  value > 0 ? `+${value.toFixed(2)}` : value.toFixed(2);
