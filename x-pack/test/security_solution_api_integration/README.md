@@ -33,6 +33,7 @@ ex:
  describe('@serverless @ess create_rules', () => { ==> tests in this suite will run in both Ess and Serverless
    describe('creating rules', () => {}); 
 
+  // This test is skipped due to flakiness in serverless environments: https://github.com/elastic/kibana/issues/497777
    describe('@skipInServerless missing timestamps', () => {}); ==> tests in this suite will be excluded in Serverless
 
  ```
