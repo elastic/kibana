@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
+  const log = getService('log');
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
@@ -80,7 +81,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await waitForLoadingToFinish();
       searchCount = await getSearchCount(type);
 
-      if (type === 'esql' && searchCount !== expected) {
+      log.debug(
+        `comparing search request counts - type: ${type} actual: ${searchCount} expected: ${expected}`
+      );
+
+      if (type === 'esql' && searchCount !== expected && searchCount > 0) {
         // `searchCount` should be the same as `expected` or it can be less by 1
         expect(searchCount).to.be(expected - 1); // minus esql editor autocomplete request sometimes?
         return;
@@ -96,6 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2,
       setQuery,
       expectedRequests = 2,
+      expectedRequestsAfterNewSearchPressed,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
@@ -103,6 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2: string;
       setQuery: (query: string) => Promise<void>;
       expectedRequests?: number;
+      expectedRequestsAfterNewSearchPressed?: number;
     }) => {
       it(`should send ${expectedRequests} search requests (documents + chart) on page load`, async () => {
         await browser.refresh();
@@ -156,10 +163,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discover.revertUnsavedChanges();
         });
         // clearing the saved search
-        await expectSearches('ese', expectedRequests, async () => {
-          await testSubjects.click('discoverNewButton');
-          await waitForLoadingToFinish();
-        });
+        await expectSearches(
+          type,
+          expectedRequestsAfterNewSearchPressed ?? expectedRequests,
+          async () => {
+            await testSubjects.click('discoverNewButton');
+            await waitForLoadingToFinish();
+          }
+        );
         // loading the saved search
         await expectSearches(type, expectedRequests, async () => {
           await PageObjects.discover.loadSavedSearch(savedSearch);
@@ -246,10 +257,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes)',
         query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes)',
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
-        expectedRequests: 2, // table and query editor autocomplete?
+        expectedRequests: 2, // table and query editor autocomplete sometimes?
+        expectedRequestsAfterNewSearchPressed: 4, // table, 2 chart requests, and query editor autocomplete?
       });
 
-      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
+      it(`should send 1 request (documents) when toggling the chart visibility`, async () => {
         // table
         await expectSearches(type, 1, async () => {
           await PageObjects.discover.toggleChartVisibility();
@@ -257,6 +269,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // table + query editor autocomplete?
         await expectSearches(type, 2, async () => {
           await PageObjects.discover.toggleChartVisibility();
+        });
+      });
+
+      it('should send 0 requests (documents) when sorting in-memory', async () => {
+        await expectSearches(type, 0, async () => {
+          await PageObjects.discover.clickFieldSort('countB', 'Sort Low-High');
         });
       });
     });
