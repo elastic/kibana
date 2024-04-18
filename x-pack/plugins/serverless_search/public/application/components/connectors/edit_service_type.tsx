@@ -15,21 +15,18 @@ import {
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
-import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditServiceTypeProps {
-  connector: Connector;
+  serviceType: string | null;
+  setServiceType: (serviceType: string) => void;
 }
 
-export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
-  const { http } = useKibanaServices();
+export const EditServiceType: React.FC<EditServiceTypeProps> = ({
+  serviceType,
+  setServiceType,
+}) => {
   const connectorTypes = useConnectorTypes();
-  const queryClient = useQueryClient();
-  const { queryKey } = useConnector(connector.id);
 
   const options =
     connectorTypes.map((connectorType) => ({
@@ -52,22 +49,6 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
       value: connectorType.serviceType,
     })) || [];
 
-  const { isLoading, mutate } = useMutation({
-    mutationFn: async (inputServiceType: string) => {
-      const body = { service_type: inputServiceType };
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/service_type`, {
-        body: JSON.stringify(body),
-      });
-      return inputServiceType;
-    },
-    onSuccess: (successData) => {
-      queryClient.setQueryData(queryKey, {
-        connector: { ...connector, service_type: successData },
-      });
-      queryClient.invalidateQueries(queryKey);
-    },
-  });
-
   return (
     <EuiForm>
       <EuiFormLabel data-test-subj="serverlessSearchEditConnectorTypeLabel">
@@ -77,10 +58,9 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
       </EuiFormLabel>
       <EuiSuperSelect
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
-        isLoading={isLoading}
-        onChange={(event) => mutate(event)}
+        onChange={(event) => setServiceType(event)}
         options={options}
-        valueOfSelected={connector.service_type || undefined}
+        valueOfSelected={serviceType || undefined}
       />
     </EuiForm>
   );
