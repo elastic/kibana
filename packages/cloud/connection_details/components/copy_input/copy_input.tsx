@@ -8,12 +8,13 @@
 
 import * as React from 'react';
 import { EuiCopy, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export interface EndpointUrlProps {
+export interface CopyInputProps {
   value: string;
 }
 
-export const CopyInput: React.FC<EndpointUrlProps> = ({ value }) => {
+export const CopyInput: React.FC<CopyInputProps> = ({ value }) => {
   const textRef = React.useRef<HTMLSpanElement>(null);
 
   return (
@@ -49,7 +50,18 @@ export const CopyInput: React.FC<EndpointUrlProps> = ({ value }) => {
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={value}>
             {(copy) => (
-              <EuiButtonIcon onClick={copy} iconType="copyClipboard" size="m" color={'text'} />
+              <EuiButtonIcon
+                onClick={copy}
+                iconType="copyClipboard"
+                size="m"
+                color={'text'}
+                aria-label={i18n.translate(
+                  'cloud.connectionDetails.components.copyInput.copyBtn.label',
+                  {
+                    defaultMessage: 'Copy to clipboard',
+                  }
+                )}
+              />
             )}
           </EuiCopy>
         </EuiFlexItem>
