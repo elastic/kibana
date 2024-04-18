@@ -22,7 +22,7 @@ import { DefaultMissingRequirements } from './default_missing_requirements';
 export const Instructions = (props: InstructionProps) => {
   const {
     isFleetServerPolicySelected,
-    fleetServerHosts,
+    fleetServerHost,
     isLoadingAgentPolicies,
     selectionType,
     setSelectionType,
@@ -35,14 +35,12 @@ export const Instructions = (props: InstructionProps) => {
   const { isLoading: isLoadingEnrollmentSettings, data: enrollmentSettings } =
     useGetEnrollmentSettings();
 
-  const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
+  const hasNoFleetServerHost = fleetStatus.isReady && !fleetServerHost;
 
   const showAgentEnrollment =
     isFleetServerPolicySelected ||
     isFleetServerStandalone ||
-    (fleetStatus.isReady &&
-      enrollmentSettings?.fleet_server.has_active &&
-      (fleetServerHosts?.length ?? 0) > 0);
+    (fleetStatus.isReady && enrollmentSettings?.fleet_server.has_active && fleetServerHost);
 
   const showFleetServerEnrollment =
     !isFleetServerStandalone &&
