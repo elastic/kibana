@@ -1,5 +1,5 @@
 steps:
-  - group: 'Execute Tests'
+  - group: 'API Integration Serverless Release Tests'
     key: test_execution
     depends_on: build_image
     steps:
