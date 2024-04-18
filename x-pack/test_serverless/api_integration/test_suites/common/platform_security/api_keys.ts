@@ -177,20 +177,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(200);
         });
-
-        it.only('query', async () => {
-          let body: unknown;
-          let status: number;
-          const requestBody = {
-            query: {},
-          };
-
-          ({ body, status } = await supertest
-            .put('/internal/security/api_key/_query')
-            .set(svlCommonApi.getCommonRequestHeader())
-            .send(requestBody));
-          console.log({ body });
-        });
       });
     });
   });
