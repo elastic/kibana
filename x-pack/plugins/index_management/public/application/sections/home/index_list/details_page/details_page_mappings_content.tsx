@@ -245,7 +245,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const allFieldsTypes: DataType[] = useMemo(() => {
     return getAllFieldTypesFromState(deNormalize(normalize(mappingsDefinition?.properties)));
   }, [mappingsDefinition]);
-  // const [selectedDataTypes, setSelectedDataTypes] = useState<string[]>([]);
 
   const selectedDataTypes: string[] = useMemo(() => {
     if (!isAddingFields) {
@@ -296,7 +295,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     setPreviousStateFields(getFieldsFromState(state));
     setPreviousState(state);
     setPrevSelectedFieldTypes(selectedFieldTypes);
-    // setFilterFieldTypes(getFieldTypeFromState(deNormalize(previousState.fields)));
+
     // reset mappings and change status to create field.
     dispatch({
       type: 'editor.replaceMappings',
@@ -412,6 +411,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       hasActiveFilters={selectedDataTypes.length > 0}
       numActiveFilters={selectedDataTypes.length}
       isSelected={isFilterByPopoverVisible}
+      data-test-subj="indexDetailsMappingsFilterByFieldTypeButton"
     >
       {i18n.translate('xpack.idxMgmt.indexDetails.mappings.filterByFieldType.button', {
         defaultMessage: 'Field types',
@@ -589,6 +589,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 isOpen={isFilterByPopoverVisible}
                 closePopover={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
                 anchorPosition="downCenter"
+                data-test-subj="indexDetailsMappingsFilter"
               >
                 <EuiSelectable
                   searchable
@@ -611,7 +612,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 >
                   {(list, search) => (
                     <div style={{ width: 300 }}>
-                      <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+                      <EuiPopoverTitle
+                        paddingSize="s"
+                        data-test-subj="indexDetailsMappingsFilterByFieldTypeSearch"
+                      >
+                        {search}
+                      </EuiPopoverTitle>
                       {list}
                     </div>
                   )}

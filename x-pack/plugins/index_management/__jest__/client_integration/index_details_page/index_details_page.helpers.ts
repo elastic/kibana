@@ -41,6 +41,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getActiveTabContent: () => string;
     mappings: {
       addNewMappingFieldNameAndType: (mappingFields?: MappingField[]) => Promise<void>;
+      clickFilterByFieldType: () => Promise<void>;
       clickAddFieldButton: () => Promise<void>;
       clickSaveMappingsButton: () => Promise<void>;
       getCodeBlockContent: () => string;
@@ -212,6 +213,13 @@ export const setup = async ({
       await act(async () => {
         expect(exists('indexDetailsMappingsToggleViewButton')).toBe(true);
         find('indexDetailsMappingsToggleViewButton').simulate('click');
+      });
+      component.update();
+    },
+    clickFilterByFieldType: async () => {
+      expect(exists('indexDetailsMappingsFilterByFieldTypeButton')).toBe(true);
+      await act(async () => {
+        find('indexDetailsMappingsFilterByFieldTypeButton').simulate('click');
       });
       component.update();
     },

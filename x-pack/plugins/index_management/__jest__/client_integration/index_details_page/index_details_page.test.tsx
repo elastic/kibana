@@ -471,10 +471,11 @@ describe('<IndexDetailsPage />', () => {
         requestOptions
       );
     });
-    it('searchbar, toggle button, add field button exists', async () => {
+    it('filter, searchbar, toggle button, add field button exists', async () => {
       expect(testBed.exists('indexDetailsMappingsAddField')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsToggleViewButton')).toBe(true);
       expect(testBed.exists('indexDetailsMappingsFieldSearch')).toBe(true);
+      expect(testBed.exists('indexDetailsMappingsFilter')).toBe(true);
     });
 
     it('displays the mappings in the table view', async () => {
@@ -503,6 +504,19 @@ describe('<IndexDetailsPage />', () => {
       expect(docsLinkHref).toEqual(
         'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping.html'
       );
+    });
+    describe('Filter field by filter Type', () => {
+      beforeEach(async () => {
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+        await testBed.actions.mappings.clickFilterByFieldType();
+      });
+      test('popover is visible and shows list of available field types', () => {
+        expect(testBed.exists('euiSelectableList')).toBe(true);
+        expect(testBed.exists('indexDetailsMappingsFilterByFieldTypeSearch')).toBe(true);
+        expect(testBed.exists('euiSelectableList')).toBe(true);
+        expect(testBed.find('euiSelectableList')).toHaveLength(1);
+      });
     });
     describe('Add a new field ', () => {
       const mockIndexMappingResponse: any = {
