@@ -35,7 +35,7 @@ steps:
     agents:
      queue: n2-4-virt
     timeout_in_minutes: 300
-    parallelism: 6
+    parallelism: 1
     retry:
       automatic:
         - exit_status: '*'
