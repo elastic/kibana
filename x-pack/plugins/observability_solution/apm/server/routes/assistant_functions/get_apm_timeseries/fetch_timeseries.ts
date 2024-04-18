@@ -129,10 +129,7 @@ export async function fetchSeries<T extends ValueAggregationMap>({
         : Number(bucketValue.value);
 
     if (value !== null) {
-      value =
-        Math.abs(value) < 100
-          ? Number(value.toPrecision(3))
-          : Math.round(value);
+      value = Math.abs(value) < 100 ? Number(value.toPrecision(3)) : Math.round(value);
     }
 
     return {

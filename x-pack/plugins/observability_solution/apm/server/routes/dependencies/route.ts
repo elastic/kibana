@@ -28,18 +28,9 @@ import {
   getThroughputChartsForDependency,
   ThroughputChartsForDependencyResponse,
 } from './get_throughput_charts_for_dependency';
-import {
-  getTopDependencies,
-  TopDependenciesResponse,
-} from './get_top_dependencies';
-import {
-  DependencyOperation,
-  getTopDependencyOperations,
-} from './get_top_dependency_operations';
-import {
-  DependencySpan,
-  getTopDependencySpans,
-} from './get_top_dependency_spans';
+import { getTopDependencies, TopDependenciesResponse } from './get_top_dependencies';
+import { DependencyOperation, getTopDependencyOperations } from './get_top_dependency_operations';
+import { DependencySpan, getTopDependencySpans } from './get_top_dependency_spans';
 import {
   getUpstreamServicesForDependency,
   UpstreamServicesForDependencyResponse,
@@ -49,12 +40,7 @@ const topDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/top_dependencies',
   params: t.intersection([
     t.type({
-      query: t.intersection([
-        rangeRt,
-        environmentRt,
-        kueryRt,
-        t.type({ numBuckets: toNumberRt }),
-      ]),
+      query: t.intersection([rangeRt, environmentRt, kueryRt, t.type({ numBuckets: toNumberRt })]),
     }),
     t.partial({
       query: offsetRt,
@@ -65,8 +51,7 @@ const topDependenciesRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<TopDependenciesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
-    const { environment, offset, numBuckets, kuery, start, end } =
-      resources.params.query;
+    const { environment, offset, numBuckets, kuery, start, end } = resources.params.query;
 
     return getTopDependencies({
       apmEventClient,
@@ -97,20 +82,10 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<UpstreamServicesForDependencyResponse> => {
+  handler: async (resources): Promise<UpstreamServicesForDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const {
-      query: {
-        dependencyName,
-        environment,
-        offset,
-        numBuckets,
-        kuery,
-        start,
-        end,
-      },
+      query: { dependencyName, environment, offset, numBuckets, kuery, start, end },
     } = resources.params;
 
     return getUpstreamServicesForDependency({
@@ -219,9 +194,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<ThroughputChartsForDependencyResponse> => {
+  handler: async (resources): Promise<ThroughputChartsForDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {
@@ -317,9 +290,7 @@ const dependencyOperationsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  handler: async (
-    resources
-  ): Promise<{ operations: DependencyOperation[] }> => {
+  handler: async (resources): Promise<{ operations: DependencyOperation[] }> => {
     const apmEventClient = await getApmEventClient(resources);
 
     const {
@@ -366,20 +337,11 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<DependencyLatencyDistributionResponse> => {
+  handler: async (resources): Promise<DependencyLatencyDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
-    const {
-      dependencyName,
-      spanName,
-      percentileThreshold,
-      kuery,
-      environment,
-      start,
-      end,
-    } = params.query;
+    const { dependencyName, spanName, percentileThreshold, kuery, environment, start, end } =
+      params.query;
 
     return getDependencyLatencyDistribution({
       apmEventClient,
