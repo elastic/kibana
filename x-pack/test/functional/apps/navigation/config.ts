@@ -36,7 +36,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--env.name=development',
         '--xpack.cloud_integrations.experiments.enabled=true',
         '--xpack.cloud_integrations.experiments.launch_darkly.sdk_key=a_string',
         '--xpack.cloud_integrations.experiments.launch_darkly.client_id=a_string',
