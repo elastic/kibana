@@ -178,7 +178,6 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "fipsMode": Object {
           "enabled": false,
         },
@@ -238,7 +237,6 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "fipsMode": Object {
           "enabled": false,
         },
