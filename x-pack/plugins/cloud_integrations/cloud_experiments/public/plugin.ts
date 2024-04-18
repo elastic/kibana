@@ -11,6 +11,8 @@ import { duration } from 'moment';
 import { concatMap } from 'rxjs';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Logger } from '@kbn/logging';
+
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
 import type {
   CloudExperimentsFeatureFlagNames,
@@ -35,6 +37,7 @@ interface CloudExperimentsPluginStartDeps {
 export class CloudExperimentsPlugin
   implements Plugin<void, CloudExperimentsPluginStart, CloudExperimentsPluginSetupDeps>
 {
+  private readonly logger: Logger;
   private readonly metadataService: MetadataService;
   private readonly launchDarklyClient?: LaunchDarklyClient;
   private readonly kibanaVersion: string;
@@ -43,6 +46,7 @@ export class CloudExperimentsPlugin
 
   /** Constructor of the plugin **/
   constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get<{
@@ -67,7 +71,7 @@ export class CloudExperimentsPlugin
       );
     }
     if (ldConfig?.client_id) {
-      this.launchDarklyClient = new LaunchDarklyClient(ldConfig, this.kibanaVersion);
+      this.launchDarklyClient = new LaunchDarklyClient(ldConfig, this.kibanaVersion, this.logger);
     }
   }
 

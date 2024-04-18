@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { ldClientMock, launchDarklyLibraryMock } from './launch_darkly_client.test.mock';
 import { LaunchDarklyClient, type LaunchDarklyClientConfig } from './launch_darkly_client';
-import { firstValueFrom } from 'rxjs';
 
 describe('LaunchDarklyClient - browser', () => {
   beforeEach(() => {
@@ -22,9 +22,12 @@ describe('LaunchDarklyClient - browser', () => {
   describe('Public APIs', () => {
     let client: LaunchDarklyClient;
     const testUserMetadata = { userId: 'fake-user-id', kibanaVersion: 'version' };
-
+    const loggerWarnSpy = jest.fn();
     beforeEach(() => {
-      client = new LaunchDarklyClient(config, 'version');
+      const initializerContext = coreMock.createPluginInitializerContext();
+      const logger = initializerContext.logger.get();
+      logger.warn = loggerWarnSpy;
+      client = new LaunchDarklyClient(config, 'version', logger);
     });
 
     describe('updateUserMetadata', () => {
@@ -64,9 +67,6 @@ describe('LaunchDarklyClient - browser', () => {
             logger: undefined,
           }
         );
-
-        const ldClient = await firstValueFrom(client.launchDarklyClient$);
-        expect(ldClient).toBe(ldClientMock);
       });
 
       test('sets a minimum amount of info', async () => {
@@ -103,9 +103,6 @@ describe('LaunchDarklyClient - browser', () => {
           }
         );
         expect(ldClientMock.identify).not.toHaveBeenCalled();
-
-        const ldClient = await firstValueFrom(client.launchDarklyClient$);
-        expect(ldClient).toBe(ldClientMock);
 
         // Update user metadata a 2nd time
         launchDarklyLibraryMock.initialize.mockReset();
@@ -185,14 +182,13 @@ describe('LaunchDarklyClient - browser', () => {
         launchDarklyLibraryMock.initialize.mockReturnValue(ldClientMock);
         await client.updateUserMetadata(testUserMetadata);
 
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
         const err = new Error('Something went terribly wrong');
         ldClientMock.flush.mockRejectedValue(err);
         expect(() => client.stop()).not.toThrow();
         await new Promise((resolve) => process.nextTick(resolve));
         expect(ldClientMock.flush).toHaveBeenCalledTimes(1);
         await new Promise((resolve) => process.nextTick(resolve)); // wait for the flush resolution
-        expect(consoleWarnSpy).toHaveBeenCalledWith(err);
+        expect(loggerWarnSpy).toHaveBeenCalledWith(err);
       });
     });
   });

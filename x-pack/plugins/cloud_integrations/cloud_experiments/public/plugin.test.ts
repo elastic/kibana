@@ -114,7 +114,7 @@ describe('Cloud Experiments public plugin', () => {
         expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
       });
 
-      test('it skips identifying the user if cloud is not enabled and cancel loading the LDclient', () => {
+      test('it skips identifying the user if cloud is not enabled and cancels loading the LDclient', () => {
         const ldClientCancelSpy = jest.spyOn(LaunchDarklyClient.prototype, 'cancel');
         plugin.setup(coreMock.createSetup(), {
           cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
