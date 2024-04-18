@@ -379,16 +379,16 @@ describe('getSharingData', () => {
       servicesMock
     );
     expect(
-      result.getSearchSource({ addGlobalTimeFilter: true, absoluteTime: true }).filter
-    ).toEqual([absoluteTimeFilter, appFilter]);
-    expect(
       result.getSearchSource({ addGlobalTimeFilter: true, absoluteTime: false }).filter
     ).toEqual([relativeTimeFilter, appFilter]);
     expect(
-      result.getSearchSource({ addGlobalTimeFilter: false, absoluteTime: true }).filter
-    ).toEqual([appFilter]);
+      result.getSearchSource({ addGlobalTimeFilter: true, absoluteTime: true }).filter
+    ).toEqual([absoluteTimeFilter, appFilter]);
     expect(
       result.getSearchSource({ addGlobalTimeFilter: false, absoluteTime: false }).filter
+    ).toEqual([appFilter]);
+    expect(
+      result.getSearchSource({ addGlobalTimeFilter: false, absoluteTime: true }).filter
     ).toEqual([appFilter]);
 
     // with app filter as a single filter and the same as the absolute time filter
