@@ -9,27 +9,27 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
-import type { MlStartDependencies } from '../../plugin';
 import type { MlApiServices } from '../../application/services/ml_api_service';
 import { getDefaultSingleMetricViewerPanelTitle } from './get_default_panel_title';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies,
+  data: DataPublicPluginStart,
   mlApiServices: MlApiServices,
   input?: Partial<SingleMetricViewerEmbeddableInput>
 ): Promise<Partial<SingleMetricViewerEmbeddableUserInput>> {
   const { overlays, theme, i18n } = coreStart;
-  const timefilter = pluginStart.data.query.timefilter.timefilter;
+  const timefilter = data.query.timefilter.timefilter;
 
   return new Promise(async (resolve, reject) => {
     try {
       const { jobIds } = await resolveJobSelection(
         coreStart,
-        pluginStart.data.dataViews,
+        data.dataViews,
         input?.jobIds ? input.jobIds : undefined,
         true
       );

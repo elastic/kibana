@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { EuiResizeObserver } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState, Suspense } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -31,7 +31,6 @@ import { throttle } from 'lodash';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 import type { SingleMetricViewerEmbeddableApi, SingleMetricViewerEmbeddableState } from '../types';
 import { initializeSingleMetricViewerControls } from './single_metric_viewer_controls_initializer';
 import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_data_fetcher';
@@ -43,6 +42,7 @@ import './_index.scss';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 const containerPadding = 10;
+const minElemAndChartDiff = 20;
 interface AppStateZoom {
   from?: string;
   to?: string;
@@ -121,7 +121,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
           const [zoom, setZoom] = useState<AppStateZoom | undefined>();
           const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
           const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
-          const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
           const [jobsLoaded, setJobsLoaded] = useState(false);
           const [error, setError] = useState<string | undefined>();
 
@@ -140,8 +139,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
             showFrozenDataTierChoice: false,
           };
 
-          const data = useStateFromPublishingSubject(singleMetricViewerData$);
-          const [singleMetricViewerData, bounds, lastRefresh] = data;
+          const { singleMetricViewerData, bounds, lastRefresh } =
+            useStateFromPublishingSubject(singleMetricViewerData$);
 
           useUnmount(() => {
             onSingleMetricViewerDestroy();
@@ -164,7 +163,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           const functionDescription =
             (singleMetricViewerData?.functionDescription ?? '') === ''
               ? undefined
-              : singleMetricViewerData.functionDescription;
+              : singleMetricViewerData?.functionDescription;
           const previousRefresh = usePrevious(lastRefresh ?? 0);
 
           // Holds the container height for previously fetched data
@@ -203,23 +202,10 @@ export const getSingleMetricViewerEmbeddableFactory = (
             [selectedJobId, mlApiServices, error]
           );
 
-          useEffect(
-            function setUpAutoZoom() {
-              let zoomDuration: number | undefined;
-              if (selectedJobId !== undefined && selectedJob !== undefined) {
-                zoomDuration = mlTimeSeriesExplorerService?.getAutoZoomDuration(selectedJob);
-                setAutoZoomDuration(zoomDuration);
-              }
-            },
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            [selectedJobId, selectedJob?.job_id, mlTimeSeriesExplorerService]
-          );
-
-          useEffect(function onUnmount() {
-            return () => {
-              subscriptions.unsubscribe();
-            };
-          }, []);
+          const autoZoomDuration = useMemo(() => {
+            if (!selectedJob) return;
+            return mlTimeSeriesExplorerService?.getAutoZoomDuration(selectedJob);
+          }, [mlTimeSeriesExplorerService, selectedJob]);
 
           // eslint-disable-next-line react-hooks/exhaustive-deps
           const resizeHandler = useCallback(
@@ -227,7 +213,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
               // Keep previous container height so it doesn't change the page layout
               containerHeightRef.current = e.height;
 
-              if (Math.abs(chartWidth - e.width) > 20) {
+              if (Math.abs(chartWidth - e.width) > minElemAndChartDiff) {
                 setChartWidth(e.width);
               }
             }, RESIZE_THROTTLE_TIME_MS),
@@ -240,7 +226,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
                * Empty zoom indicates that chart hasn't been rendered yet,
                * hence any updates prior that should replace the URL state.
                */
-
               switch (action) {
                 case APP_STATE_ACTION.SET_FORECAST_ID:
                   setSelectedForecastId(payload);
@@ -291,51 +276,47 @@ export const getSingleMetricViewerEmbeddableFactory = (
                   }}
                 >
                   <DatePickerContextProvider {...datePickerDeps}>
-                    <Suspense fallback={<EmbeddableLoading />}>
-                      <EuiResizeObserver onResize={resizeHandler}>
-                        {(resizeRef) => (
-                          <div
-                            id={`mlSingleMetricViewerEmbeddableWrapper-${api.uuid}`}
-                            style={{
-                              width: '100%',
-                              overflowY: 'auto',
-                              overflowX: 'hidden',
-                              padding: '8px',
-                            }}
-                            data-test-subj={`mlSingleMetricViewer_${api.uuid}`}
-                            ref={resizeRef}
-                            className="ml-time-series-explorer"
-                          >
-                            {singleMetricViewerData !== undefined &&
-                              autoZoomDuration !== undefined &&
-                              jobsLoaded && (
-                                <TimeSeriesExplorerEmbeddableChart
-                                  chartWidth={chartWidth - containerPadding}
-                                  dataViewsService={services[1].data.dataViews}
-                                  toastNotificationService={toastNotificationService}
-                                  appStateHandler={appStateHandler}
-                                  autoZoomDuration={autoZoomDuration}
-                                  bounds={bounds}
-                                  dateFormatTz={moment.tz.guess()}
-                                  lastRefresh={lastRefresh ?? 0}
-                                  previousRefresh={previousRefresh}
-                                  selectedJobId={selectedJobId}
-                                  selectedDetectorIndex={
-                                    singleMetricViewerData.selectedDetectorIndex
-                                  }
-                                  selectedEntities={singleMetricViewerData.selectedEntities}
-                                  selectedForecastId={selectedForecastId}
-                                  tableInterval="auto"
-                                  tableSeverity={0}
-                                  zoom={zoom}
-                                  functionDescription={functionDescription}
-                                  selectedJob={selectedJob}
-                                />
-                              )}
-                          </div>
-                        )}
-                      </EuiResizeObserver>
-                    </Suspense>
+                    <EuiResizeObserver onResize={resizeHandler}>
+                      {(resizeRef) => (
+                        <div
+                          id={`mlSingleMetricViewerEmbeddableWrapper-${api.uuid}`}
+                          style={{
+                            width: '100%',
+                            overflowY: 'auto',
+                            overflowX: 'hidden',
+                            padding: '8px',
+                          }}
+                          data-test-subj={`mlSingleMetricViewer_${api.uuid}`}
+                          ref={resizeRef}
+                          className="ml-time-series-explorer"
+                        >
+                          {singleMetricViewerData !== undefined &&
+                            autoZoomDuration !== undefined &&
+                            jobsLoaded && (
+                              <TimeSeriesExplorerEmbeddableChart
+                                chartWidth={chartWidth - containerPadding}
+                                dataViewsService={services[1].data.dataViews}
+                                toastNotificationService={toastNotificationService}
+                                appStateHandler={appStateHandler}
+                                autoZoomDuration={autoZoomDuration}
+                                bounds={bounds}
+                                dateFormatTz={moment.tz.guess()}
+                                lastRefresh={lastRefresh ?? 0}
+                                previousRefresh={previousRefresh}
+                                selectedJobId={selectedJobId}
+                                selectedDetectorIndex={singleMetricViewerData.selectedDetectorIndex}
+                                selectedEntities={singleMetricViewerData.selectedEntities}
+                                selectedForecastId={selectedForecastId}
+                                tableInterval="auto"
+                                tableSeverity={0}
+                                zoom={zoom}
+                                functionDescription={functionDescription}
+                                selectedJob={selectedJob}
+                              />
+                            )}
+                        </div>
+                      )}
+                    </EuiResizeObserver>
                   </DatePickerContextProvider>
                 </KibanaContextProvider>
               </KibanaThemeProvider>

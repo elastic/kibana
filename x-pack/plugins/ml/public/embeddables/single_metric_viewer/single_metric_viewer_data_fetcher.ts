@@ -8,8 +8,27 @@
 import { fetch$ } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { type TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { combineLatest, startWith, BehaviorSubject } from 'rxjs';
-import type { SingleMetricViewerEmbeddableApi } from '../types';
+import type {
+  SingleMetricViewerEmbeddableApi,
+  SingleMetricViewerEmbeddableUserInput,
+} from '../types';
+
+interface SingleMetricViewerData {
+  /**
+   * Config data inputted by the user
+   */
+  singleMetricViewerData: SingleMetricViewerEmbeddableUserInput | undefined;
+  /**
+   * Current time range bounds
+   */
+  bounds: TimeRangeBounds | undefined;
+  /**
+   * Time of last refresh in ms
+   */
+  lastRefresh: number | undefined;
+}
 
 export const initializeSingleMetricViewerDataFetcher = (
   api: SingleMetricViewerEmbeddableApi,
@@ -18,7 +37,11 @@ export const initializeSingleMetricViewerDataFetcher = (
   refresh$: Observable<void>,
   timefilter: TimefilterContract
 ) => {
-  const singleMetricViewerData$ = new BehaviorSubject<any | undefined>(undefined);
+  const singleMetricViewerData$ = new BehaviorSubject<SingleMetricViewerData>({
+    singleMetricViewerData: undefined,
+    bounds: undefined,
+    lastRefresh: undefined,
+  });
 
   const singleMetricViewerInput$ = combineLatest({
     jobIds: api.jobIds,
@@ -32,13 +55,13 @@ export const initializeSingleMetricViewerDataFetcher = (
     fetch$(api),
     refresh$.pipe(startWith(null)),
   ]).subscribe(([singleMetricViewerData, fetchContext]) => {
-    let currentBounds;
+    let bounds;
     let lastRefresh;
     if (timefilter !== undefined && fetchContext.timeRange !== undefined) {
-      currentBounds = timefilter.calculateBounds(fetchContext.timeRange);
+      bounds = timefilter.calculateBounds(fetchContext.timeRange);
       lastRefresh = Date.now();
     }
-    singleMetricViewerData$.next([singleMetricViewerData, currentBounds, lastRefresh]);
+    singleMetricViewerData$.next({ singleMetricViewerData, bounds, lastRefresh });
   });
 
   return {

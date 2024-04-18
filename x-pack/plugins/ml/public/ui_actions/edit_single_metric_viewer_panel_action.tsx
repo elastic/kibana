@@ -42,7 +42,7 @@ export function createEditSingleMetricViewerPanelAction(
         throw new IncompatibleActionError();
       }
 
-      const [coreStart, pluginStart] = await getStartServices();
+      const [coreStart, { data }] = await getStartServices();
 
       try {
         const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
@@ -57,7 +57,7 @@ export function createEditSingleMetricViewerPanelAction(
 
         const result = await resolveEmbeddableSingleMetricViewerUserInput(
           coreStart,
-          pluginStart,
+          data,
           mlApiServices,
           {
             jobIds: jobIds.getValue(),

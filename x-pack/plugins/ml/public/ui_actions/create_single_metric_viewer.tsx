@@ -48,7 +48,8 @@ export function createAddSingleMetricViewerPanelAction(
       }),
     getDisplayNameTooltip: () =>
       i18n.translate('xpack.ml.components.singleMetricViewerEmbeddable.description', {
-        defaultMessage: 'View anomaly detection results in a timeline.',
+        defaultMessage:
+          'View anomaly detection results for a single metric on a focused date range.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
       return Boolean(await parentApiIsCompatible(context.embeddable));
@@ -57,7 +58,7 @@ export function createAddSingleMetricViewerPanelAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      const [coreStart, deps] = await getStartServices();
+      const [coreStart, { data }] = await getStartServices();
 
       try {
         const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
@@ -69,7 +70,7 @@ export function createAddSingleMetricViewerPanelAction(
 
         const initialState = await resolveEmbeddableSingleMetricViewerUserInput(
           coreStart,
-          deps,
+          data,
           mlApiServices
         );
 
