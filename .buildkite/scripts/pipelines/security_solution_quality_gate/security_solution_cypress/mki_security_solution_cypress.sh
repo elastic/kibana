@@ -25,15 +25,13 @@ vault_get security-quality-gate/role-users/sec-sol-auto-03 data -format=json > .
 cd x-pack/test/security_solution_cypress
 set +e
 
-if [ -z "${KIBANA_MKI_USE_LATEST_COMMIT+x}" ] || [ "$KIBANA_MKI_USE_LATEST_COMMIT" = "0" ]; then
-    KIBANA_OVERRIDE_FLAG=0
-else
-    KIBANA_OVERRIDE_FLAG=1
-fi
-
 QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
 QA_CONSOLE_URL=$(vault_get security-solution-quality-gate qa_console_url)
 PROXY_URL=$(vault_get security-solution-quality-gate-temp proxy_url)
 BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
-PROXY_URL=$PROXY_URL QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_USE_LATEST_COMMIT=$KIBANA_OVERRIDE_FLAG BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+if [ -z "${KIBANA_MKI_USE_LATEST_COMMIT+x}" ] || [ "$KIBANA_MKI_USE_LATEST_COMMIT" = "0" ]; then
+    QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_USE_LATEST_COMMIT=0 BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+else
+    PROXY_URL=$PROXY_URL QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_USE_LATEST_COMMIT=1 BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+fi
