@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/kibana-plugin-graph",
+  "owner": "@elastic/kibana-core"
+}

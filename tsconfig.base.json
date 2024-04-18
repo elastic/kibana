@@ -996,6 +996,8 @@
       "@kbn/kibana-manifest-schema/*": ["packages/kbn-kibana-manifest-schema/*"],
       "@kbn/kibana-overview-plugin": ["src/plugins/kibana_overview"],
       "@kbn/kibana-overview-plugin/*": ["src/plugins/kibana_overview/*"],
+      "@kbn/kibana-plugin-graph": ["packages/kbn-kibana-plugin-graph"],
+      "@kbn/kibana-plugin-graph/*": ["packages/kbn-kibana-plugin-graph/*"],
       "@kbn/kibana-react-plugin": ["src/plugins/kibana_react"],
       "@kbn/kibana-react-plugin/*": ["src/plugins/kibana_react/*"],
       "@kbn/kibana-usage-collection-plugin": ["src/plugins/kibana_usage_collection"],

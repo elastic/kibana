@@ -522,6 +522,7 @@
     "@kbn/interpreter": "link:packages/kbn-interpreter",
     "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
     "@kbn/kbn-health-gateway-status-plugin": "link:test/health_gateway/plugins/status",
+    "@kbn/kibana-plugin-graph": "link:packages/kbn-kibana-plugin-graph",
     "@kbn/kbn-sample-panel-action-plugin": "link:test/plugin_functional/plugins/kbn_sample_panel_action",
     "@kbn/kbn-top-nav-plugin": "link:test/plugin_functional/plugins/kbn_top_nav",
     "@kbn/kbn-tp-custom-visualizations-plugin": "link:test/plugin_functional/plugins/kbn_tp_custom_visualizations",
