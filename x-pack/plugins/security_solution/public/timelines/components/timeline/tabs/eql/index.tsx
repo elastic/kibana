@@ -15,22 +15,17 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
-import memoizeOne from 'memoize-one';
-import type { ControlColumnProps } from '../../../../../../common/types';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { useTimelineEvents } from '../../../../containers';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
 import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { calculateTotalPages } from '../../helpers';
 import { TimelineRefetch } from '../../refetch_timeline';
 import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
@@ -41,10 +36,6 @@ import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timelin
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import { DetailsPanel } from '../../../side_panel';
-import { getDefaultControlColumn } from '../../body/control_columns';
-import type { Sort } from '../../body/sort';
-import { useLicense } from '../../../../../common/hooks/use_license';
-import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import {
   EventsCountBadge,
   FullWidthFlexGroup,
@@ -53,24 +44,18 @@ import {
   StyledEuiFlyoutFooter,
   VerticalRule,
 } from '../shared/layout';
-import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
+import {
+  TIMELINE_EMPTY_EVENTS,
+  isTimerangeSame,
+  timelineEmptyTrailingControlColumns,
+  TIMELINE_NO_SORTING,
+} from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
-import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { EqlTabHeader } from './header';
-
-const memoizedGetColumnHeaders: (
-  headers: ColumnHeaderOptions[],
-  browserFields: BrowserFields,
-  isEventRenderedView: boolean
-) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
+import { useTimelineColumns } from '../shared/use-timeline-columns';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
-
-const NO_SORTING: Sort[] = [];
-
-const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
 export const EqlTabContentComponent: React.FC<Props> = ({
   activeTab,
@@ -100,9 +85,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     runtimeMappings,
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const isEnterprisePlus = useLicense().isEnterprise();
-  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+  const { augmentedColumnHeaders, getTimelineQueryFieldsFromColumns, leadingControlColumns } =
+    useTimelineColumns(columns);
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
@@ -118,30 +102,15 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const isBlankTimeline: boolean = isEmpty(eqlQuery);
 
-  const canQueryTimeline = () =>
-    loadingSourcerer != null &&
-    !loadingSourcerer &&
-    !isEmpty(start) &&
-    !isEmpty(end) &&
-    !isBlankTimeline;
-
-  const defaultColumns = useMemo(
-    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
-    [unifiedComponentsInTimelineEnabled]
+  const canQueryTimeline = useCallback(
+    () =>
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
+      !isEmpty(start) &&
+      !isEmpty(end) &&
+      !isBlankTimeline,
+    [end, isBlankTimeline, loadingSourcerer, start]
   );
-
-  const localColumns = useMemo(
-    () => (isEmpty(columns) ? defaultColumns : columns),
-    [columns, defaultColumns]
-  );
-
-  const augumentedColumnHeaders = memoizedGetColumnHeaders(localColumns, browserFields, false);
-
-  const getTimelineQueryFields = () => {
-    const columnFields = augumentedColumnHeaders.map((c) => c.id);
-
-    return [...columnFields, ...requiredFieldsForActions];
-  };
 
   const [
     dataLoadingState,
@@ -150,7 +119,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     dataViewId,
     endDate: end,
     eqlOptions: restEqlOption,
-    fields: getTimelineQueryFields(),
+    fields: getTimelineQueryFieldsFromColumns(),
     filterQuery: eqlQuery ?? '',
     id: timelineId,
     indexNames: selectedPatterns,
@@ -182,15 +151,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     );
   }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
-  const leadingControlColumns = useMemo(
-    () =>
-      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
-        ...x,
-        headerCellRender: HeaderActions,
-      })),
-    [ACTION_BUTTON_COUNT]
-  );
-
   const unifiedHeader = useMemo(
     () => (
       <EuiFlexGroup gutterSize="s" direction="column">
@@ -216,12 +176,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             <ScrollableFlexItem grow={2}>
               <UnifiedTimelineBody
                 header={unifiedHeader}
-                columns={augumentedColumnHeaders}
+                columns={augmentedColumnHeaders}
+                isSortEnabled={false}
                 rowRenderers={rowRenderers}
                 timelineId={timelineId}
                 itemsPerPage={itemsPerPage}
                 itemsPerPageOptions={itemsPerPageOptions}
-                sort={NO_SORTING}
+                sort={TIMELINE_NO_SORTING}
                 events={events}
                 refetch={refetch}
                 dataLoadingState={dataLoadingState}
@@ -268,19 +229,19 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                       <StatefulBody
                         activePage={pageInfo.activePage}
                         browserFields={browserFields}
-                        data={isBlankTimeline ? EMPTY_EVENTS : events}
+                        data={isBlankTimeline ? TIMELINE_EMPTY_EVENTS : events}
                         id={timelineId}
                         refetch={refetch}
                         renderCellValue={renderCellValue}
                         rowRenderers={rowRenderers}
-                        sort={NO_SORTING}
+                        sort={TIMELINE_NO_SORTING}
                         tabType={TimelineTabs.eql}
                         totalPages={calculateTotalPages({
                           itemsCount: totalCount,
                           itemsPerPage,
                         })}
                         leadingControlColumns={leadingControlColumns}
-                        trailingControlColumns={trailingControlColumns}
+                        trailingControlColumns={timelineEmptyTrailingControlColumns}
                       />
                     </StyledEuiFlyoutBody>
 
