@@ -10,10 +10,13 @@ import { EuiButtonEmpty } from '@elastic/eui';
 
 export interface LinkToAlertsRuleProps {
   onClick?: () => void;
-  dataTestSubj?: string;
+  ['data-test-subj']: string;
 }
 
-export const CreateAlertRuleButton = ({ onClick, dataTestSubj }: LinkToAlertsRuleProps) => {
+export const CreateAlertRuleButton = ({
+  onClick,
+  ['data-test-subj']: dataTestSubj,
+}: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
       data-test-subj={dataTestSubj}

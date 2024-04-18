@@ -63,7 +63,7 @@ export const AlertsSummaryContent = ({
               <EuiFlexItem grow={false}>
                 <CreateAlertRuleButton
                   onClick={toggleAlertFlyout}
-                  dataTestSubj="infraAssetDetailsAlertsTabCreateAlertsRuleButton"
+                  data-test-subj="infraAssetDetailsAlertsTabCreateAlertsRuleButton"
                 />
               </EuiFlexItem>
             )}
@@ -71,7 +71,7 @@ export const AlertsSummaryContent = ({
               <LinkToAlertsPage
                 kuery={`${assetIdField}:"${assetId}"`}
                 dateRange={dateRange}
-                dataTestSubj="nfraAssetDetailsAlertsTabAlertsShowAllButton"
+                data-test-subj="nfraAssetDetailsAlertsTabAlertsShowAllButton"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

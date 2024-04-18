@@ -54,7 +54,7 @@ export const AlertsTabContent = () => {
               <EuiFlexItem grow={false}>
                 <CreateAlertRuleButton
                   onClick={toggleAlertFlyout}
-                  dataTestSubj="infraHostAlertsTabCreateAlertsRuleButton"
+                  data-test-subj="infraHostAlertsTabCreateAlertsRuleButton"
                 />
               </EuiFlexItem>
             )}
