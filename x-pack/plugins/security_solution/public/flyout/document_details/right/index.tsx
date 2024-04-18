@@ -65,7 +65,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
     storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
 
     telemetry.reportDetailsFlyoutTabClicked({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'right',
       tabId,
     });
