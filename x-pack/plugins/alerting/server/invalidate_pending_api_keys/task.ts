@@ -179,10 +179,13 @@ export async function runInvalidate({
   const configuredDelay = config.invalidateApiKeysTask.removalDelay;
   const delay: string = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
-  let hasApiKeysPendingInvalidation = true;
+  let hasMoreApiKeysPendingInvalidation = true;
   let totalInvalidated = 0;
   const excludedSOIds = new Set<string>();
+
   do {
+    // Query for PAGE_SIZE api keys to invalidate at a time. At the end of each iteration,
+    // we should have deleted the deletable keys and added keys still in use to the excluded list
     const filter = getFindFilter(delay, [...excludedSOIds]);
     const apiKeysToInvalidate = await savedObjectsClient.find<InvalidatePendingApiKey>({
       type: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -208,8 +211,8 @@ export async function runInvalidate({
       });
     }
 
-    hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
-  } while (hasApiKeysPendingInvalidation);
+    hasMoreApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
+  } while (hasMoreApiKeysPendingInvalidation);
 
   return totalInvalidated;
 }
