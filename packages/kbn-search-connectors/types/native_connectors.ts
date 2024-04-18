@@ -258,12 +258,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 1,
         required: false,
         sensitive: false,
-        tooltip: i18n.translate(
-          'xpack.enterpriseSearch.workplaceSearch.nativeConnectors.box.pathTooltip',
-          {
-            defaultMessage: 'Path is ignored when Advanced Sync Rules are used. ',
-          }
-        ),
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.box.pathTooltip', {
+          defaultMessage: 'Path is ignored when Advanced Sync Rules are used. ',
+        }),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
