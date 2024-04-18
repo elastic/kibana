@@ -6,10 +6,7 @@
  */
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import {
-  KibanaContextProvider,
-  useDarkMode,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -57,29 +54,20 @@ export function ApmAppRoot({
   apmServices: ApmServices;
 }) {
   const { appMountParameters, kibanaEnvironment, core } = apmPluginContextValue;
-  const KibanaEnvironmentContextProvider =
-    useKibanaEnvironmentContextProvider(kibanaEnvironment);
+  const KibanaEnvironmentContextProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
   return (
-    <div
-      className={APP_WRAPPER_CLASS}
-      data-test-subj="apmMainContainer"
-      role="main"
-    >
+    <div className={APP_WRAPPER_CLASS} data-test-subj="apmMainContainer" role="main">
       <RedirectAppLinks
         coreStart={{
           application: core.application,
         }}
       >
         <ApmPluginContext.Provider value={apmPluginContextValue}>
-          <KibanaContextProvider
-            services={{ ...core, ...pluginsStart, storage, ...apmServices }}
-          >
-            <KibanaEnvironmentContextProvider
-              kibanaEnvironment={kibanaEnvironment}
-            >
+          <KibanaContextProvider services={{ ...core, ...pluginsStart, storage, ...apmServices }}>
+            <KibanaEnvironmentContextProvider kibanaEnvironment={kibanaEnvironment}>
               <i18nCore.Context>
                 <TimeRangeIdContextProvider>
                   <RouterProvider history={history} router={apmRouter as any}>
@@ -98,11 +86,7 @@ export function ApmAppRoot({
                                             <ApmThemeProvider>
                                               <MountApmHeaderActionMenu />
 
-                                              <Route
-                                                component={
-                                                  ScrollToTopOnPathChange
-                                                }
-                                              />
+                                              <Route component={ScrollToTopOnPathChange} />
                                               <RouteRenderer />
                                             </ApmThemeProvider>
                                           </InspectorContextProvider>

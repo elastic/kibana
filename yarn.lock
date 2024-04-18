@@ -5692,6 +5692,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/router-to-openapispec@link:packages/kbn-router-to-openapispec":
+  version "0.0.0"
+  uid ""
+
 "@kbn/router-utils@link:packages/kbn-router-utils":
   version "0.0.0"
   uid ""

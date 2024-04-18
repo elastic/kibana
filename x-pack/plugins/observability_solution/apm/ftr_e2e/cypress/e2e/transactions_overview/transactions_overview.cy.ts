@@ -38,30 +38,17 @@ describe('Transactions Overview', () => {
 
   it('has no detectable a11y violations on load', () => {
     cy.visitKibana(serviceTransactionsHref);
-    cy.get('a:contains(Transactions)').should(
-      'have.attr',
-      'aria-selected',
-      'true'
-    );
+    cy.get('a:contains(Transactions)').should('have.attr', 'aria-selected', 'true');
     // set skipFailures to true to not fail the test when there are accessibility failures
     checkA11y({ skipFailures: true });
   });
 
   it('persists transaction type selected when navigating to Overview tab', () => {
     cy.visitKibana(serviceTransactionsHref);
-    cy.getByTestSubj('headerFilterTransactionType').should(
-      'have.value',
-      'request'
-    );
+    cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
     cy.getByTestSubj('headerFilterTransactionType').select('Worker');
-    cy.getByTestSubj('headerFilterTransactionType').should(
-      'have.value',
-      'Worker'
-    );
+    cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
     cy.get('a[href*="/app/apm/services/opbeans-node/overview"]').click();
-    cy.getByTestSubj('headerFilterTransactionType').should(
-      'have.value',
-      'Worker'
-    );
+    cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
   });
 });
