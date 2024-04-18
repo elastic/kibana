@@ -32,6 +32,10 @@ import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import {
+  EuiSelectableOption,
+  EuiSelectableOptionCheckedType,
+} from '@elastic/eui/src/components/selectable/selectable_option';
 import { Index } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
@@ -39,6 +43,7 @@ import { FieldsList } from '../../../../components/mappings_editor/components/do
 import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
 import {
   extractMappingsDefinition,
+  normalize,
   searchFields,
 } from '../../../../components/mappings_editor/lib';
 import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
@@ -59,7 +64,6 @@ import {
   NormalizedFields,
   State,
 } from '../../../../components/mappings_editor/types';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 
 /**
  * get all the fields from given state which matches selected DataTypes from filter
@@ -119,10 +123,10 @@ const getFieldsFromState = (state: State, filteredDataTypes?: string[]): Normali
 };
 
 /** returns all field types from the fields, including multifield and child fields
- * @param fields fields from state
+ * @param allFields fields from state
  * @param fieldArray array that stores all datatypes from fields
  */
-const getAllFieldTypesFromState = (fields: Fields, fieldArray: DataType[] = []): DataType[] => {
+const getAllFieldTypesFromState = (allFields: Fields, fieldArray: DataType[] = []): DataType[] => {
   function filterUnique(value: DataType, index: number, array: string[]) {
     return array.indexOf(value) === index;
   }
@@ -134,10 +138,11 @@ const getAllFieldTypesFromState = (fields: Fields, fieldArray: DataType[] = []):
     });
   };
 
-  getallFieldsIncludingNestedFields(fields);
+  getallFieldsIncludingNestedFields(allFields);
 
   return fieldArray.filter(filterUnique);
 };
+
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
   data: string;
@@ -160,71 +165,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const state = useMappingsState();
   const dispatch = useDispatch();
-
-  const indexName = index.name;
-
-  const pendingFieldListId = useGeneratedHtmlId({
-    prefix: 'pendingFieldListId',
-  });
-
-  const [isAddingFields, setAddingFields] = useState<boolean>(false);
-  const newFieldsLength = useMemo(() => {
-    return Object.keys(state.fields.byId).length;
-  }, [state.fields.byId]);
-
-  const [previousState, setPreviousState] = useState<State>(state);
-  const [previousStateFields, setPreviousStateFields] = useState<NormalizedField[]>(
-    getFieldsFromState(state)
-  );
-
-  const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
-
-  const [selectedFieldTypes, setSelectedFieldTypes] = useState([
-    {
-      checked: undefined as EuiSelectableOptionCheckedType,
-      label: '',
-    },
-  ]);
-  const dataTypesWithActiveFilters = useMemo(() => {
-    const selectedDataTypes = selectedFieldTypes
-      .filter((option) => option.checked === 'on')
-      .map((option) => option.label);
-    return selectedDataTypes;
-  }, [selectedFieldTypes]);
-
-  function checkIfDataTypeIsActive(dataType: string): EuiSelectableOptionCheckedType {
-    return dataTypesWithActiveFilters.includes(dataType) ? 'on' : undefined;
-  }
-
-  const fieldTypes = useMemo(() => {
-    const getFieldTypes: DataType[] = getAllFieldTypesFromState(
-      deNormalize(isAddingFields ? previousState.fields : state.fields)
-    );
-    return getFieldTypes.map((dataType) => ({
-      checked: checkIfDataTypeIsActive(dataType),
-      label: dataType.toString(),
-    }));
-  }, [state.fields, previousState.fields, isAddingFields]);
-
-  useEffect(() => {
-    setSelectedFieldTypes(fieldTypes);
-  }, [fieldTypes]);
-
-  const selectedDataTypes = useMemo(() => {
-    return selectedFieldTypes
-      .filter((option) => option.checked === 'on')
-      .map((option) => option.label);
-  }, [selectedFieldTypes]);
-  useEffect(() => {
-    onSearchChange(isAddingFields ? previousState.search.term : state.search.term);
-  }, [selectedDataTypes]);
-
-  const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
-  const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
-  const onToggleChange = () => {
-    setIsJSONVisible(!isJSONVisible);
-  };
-
   const mappingsDefinition = extractMappingsDefinition(jsonData);
   const { parsedDefaultValue } = useMemo<MappingsEditorParsedMetadata>(() => {
     if (mappingsDefinition === null) {
@@ -270,9 +210,72 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   useMappingsStateListener({ value: parsedDefaultValue, status: 'disabled' });
 
+  const indexName = index.name;
+
+  const pendingFieldListId = useGeneratedHtmlId({
+    prefix: 'pendingFieldListId',
+  });
+
+  const [isAddingFields, setAddingFields] = useState<boolean>(false);
+  const newFieldsLength = useMemo(() => {
+    return Object.keys(state.fields.byId).length;
+  }, [state.fields.byId]);
+
+  const [previousState, setPreviousState] = useState<State>(state);
+  const [previousStateFields, setPreviousStateFields] = useState<NormalizedField[]>(
+    getFieldsFromState(state)
+  );
+
+  const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
+
+  const [selectedFieldTypes, setSelectedFieldTypes] = useState<EuiSelectableOption[]>([
+    {
+      checked: undefined as EuiSelectableOptionCheckedType,
+      label: '',
+    },
+  ]);
+
+  const [prevSelectedFieldTypes, setPrevSelectedFieldTypes] = useState<EuiSelectableOption[]>([
+    {
+      checked: undefined as EuiSelectableOptionCheckedType,
+      label: '',
+    },
+  ]);
+
+  const allFieldsTypes: DataType[] = useMemo(() => {
+    return getAllFieldTypesFromState(deNormalize(normalize(mappingsDefinition?.properties)));
+  }, [mappingsDefinition]);
+  // const [selectedDataTypes, setSelectedDataTypes] = useState<string[]>([]);
+
+  const selectedDataTypes: string[] = useMemo(() => {
+    if (!isAddingFields) {
+      return selectedFieldTypes
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.label);
+    } else {
+      return prevSelectedFieldTypes
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.label);
+    }
+  }, [selectedFieldTypes, isAddingFields, prevSelectedFieldTypes]);
+
+  useEffect(() => {
+    const newSelectedFieldTypes = allFieldsTypes.map((dataType) => ({
+      checked: undefined,
+      label: dataType.toString(),
+    }));
+    setSelectedFieldTypes(newSelectedFieldTypes);
+  }, [allFieldsTypes]);
+
+  const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
+  const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
+  const onToggleChange = () => {
+    setIsJSONVisible(!isJSONVisible);
+  };
+
   const onCancelAddingNewFields = useCallback(() => {
     setAddingFields(!isAddingFields);
-
+    setSelectedFieldTypes(prevSelectedFieldTypes);
     //  reset mappings to previous state
     dispatch({
       type: 'editor.replaceMappings',
@@ -284,7 +287,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         },
       },
     });
-  }, [isAddingFields, dispatch, previousState]);
+  }, [isAddingFields, dispatch, previousState, prevSelectedFieldTypes]);
 
   const addFieldButtonOnClick = useCallback(() => {
     setAddingFields(!isAddingFields);
@@ -292,6 +295,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     // when adding new field, save previous state. This state is then used by FieldsList component to show only saved mappings.
     setPreviousStateFields(getFieldsFromState(state));
     setPreviousState(state);
+    setPrevSelectedFieldTypes(selectedFieldTypes);
     // setFilterFieldTypes(getFieldTypeFromState(deNormalize(previousState.fields)));
     // reset mappings and change status to create field.
     dispatch({
@@ -305,7 +309,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         },
       },
     });
-  }, [dispatch, isAddingFields, state]);
+  }, [dispatch, isAddingFields, state, selectedFieldTypes]);
 
   const updateMappings = useCallback(async () => {
     try {
@@ -325,11 +329,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       setSaveMappingError(exception.message);
     }
   }, [state.fields, indexName, refetchMapping]);
+
   const filterPreviousFieldsMatchingSearchandFilter = useMemo(() => {
     return getFieldsMatchingFilterFromState(previousState, selectedDataTypes);
   }, [previousState, selectedDataTypes]);
 
-  const filterStateFieldsMatchingSearchandFilter = useMemo(() => {
+  const filterStateFieldsMatchingSearchandFilter: {
+    [id: string]: NormalizedField;
+  } = useMemo(() => {
     return getFieldsMatchingFilterFromState(state, selectedDataTypes);
   }, [state, selectedDataTypes]);
 
@@ -377,6 +384,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       selectedDataTypes,
       filterPreviousFieldsMatchingSearchandFilter,
       filterStateFieldsMatchingSearchandFilter,
+      state,
     ]
   );
 
@@ -400,7 +408,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       iconSide="right"
       isDisabled={isJSONVisible}
       onClick={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
-      numFilters={selectedFieldTypes.length}
+      numFilters={!isAddingFields ? selectedFieldTypes.length : prevSelectedFieldTypes.length}
       hasActiveFilters={selectedDataTypes.length > 0}
       numActiveFilters={selectedDataTypes.length}
       isSelected={isFilterByPopoverVisible}
@@ -421,7 +429,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const fieldsListComponent = isAddingFields ? (
     <FieldsList
-      // fields={previousStateFields}
       fields={
         selectedDataTypes.length > 0
           ? getFieldsFromState(
@@ -593,8 +600,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                       }
                     ),
                   }}
-                  options={selectedFieldTypes}
-                  onChange={(options) => setSelectedFieldTypes(options)}
+                  options={!isAddingFields ? selectedFieldTypes : prevSelectedFieldTypes}
+                  onChange={(options) => {
+                    if (!isAddingFields) {
+                      setSelectedFieldTypes(options);
+                    } else {
+                      setPrevSelectedFieldTypes(options);
+                    }
+                  }}
                 >
                   {(list, search) => (
                     <div style={{ width: 300 }}>

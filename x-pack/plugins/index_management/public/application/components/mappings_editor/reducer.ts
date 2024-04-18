@@ -209,8 +209,8 @@ export const reducer = (state: State, action: Action): State => {
           status: 'idle',
         },
         search: {
-          term: action.value?.search?.term?? '',
-          result: action.value?.search?.result?? [],
+          term: action.value?.search?.term ?? '',
+          result: action.value?.search?.result ?? [],
         },
       };
     }
