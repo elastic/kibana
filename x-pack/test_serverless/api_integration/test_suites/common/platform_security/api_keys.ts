@@ -189,7 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
             .send(requestBody)
             .expect(200);
 
-          expect(body.apiKeys.length).toBeGreaterThan(1);
+          expect(body.apiKeys.length).toEqual(1);
         });
       });
     });
