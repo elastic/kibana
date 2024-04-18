@@ -32,6 +32,8 @@ interface Props {
   searchBarRef?: React.Ref<HTMLInputElement>;
   searchQuery?: string;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
+  flowCategory?: string | null;
+  flowSearch?: string;
 }
 
 type WrapperProps = Props & {
@@ -48,6 +50,8 @@ const PackageListGridWrapper = ({
   searchQuery,
   setSearchQuery,
   customCards,
+  flowCategory,
+  flowSearch,
 }: WrapperProps) => {
   const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
@@ -58,7 +62,9 @@ const PackageListGridWrapper = ({
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
-    customCards
+    customCards,
+    flowCategory,
+    flowSearch
   );
 
   React.useEffect(() => {
