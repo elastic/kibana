@@ -28,9 +28,7 @@ export function useDefaultAiAssistantStarterPromptsForAPM({
     screenDescription =
       'The user does not have the APM integration installed and does not have APM data.';
   } else {
-    screenDescription = hasApmData
-      ? 'The user has APM data.'
-      : 'The user does not have APM data.';
+    screenDescription = hasApmData ? 'The user has APM data.' : 'The user does not have APM data.';
     screenDescription = hasApmIntegrations
       ? `${screenDescription} The user has the APM integration installed.`
       : `${screenDescription} The user does not have the APM integration installed.`;
@@ -48,10 +46,9 @@ export function useDefaultAiAssistantStarterPromptsForAPM({
           ? []
           : [
               {
-                title: i18n.translate(
-                  'xpack.apm.aiAssistant.starterPrompts.explainNoData.title',
-                  { defaultMessage: 'Explain' }
-                ),
+                title: i18n.translate('xpack.apm.aiAssistant.starterPrompts.explainNoData.title', {
+                  defaultMessage: 'Explain',
+                }),
                 prompt: i18n.translate(
                   'xpack.apm.aiAssistant.starterPrompts.explainNoData.prompt',
                   { defaultMessage: "Why don't I see any data?" }
