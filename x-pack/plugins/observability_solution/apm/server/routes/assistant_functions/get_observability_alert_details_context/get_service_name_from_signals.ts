@@ -8,11 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  rangeQuery,
-  termQuery,
-  typedSearch,
-} from '@kbn/observability-plugin/server/utils/queries';
+import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
@@ -43,9 +39,7 @@ export async function getServiceNameFromSignals({
     return;
   }
 
-  const start = moment(query.alert_started_at)
-    .subtract(30, 'minutes')
-    .valueOf();
+  const start = moment(query.alert_started_at).subtract(30, 'minutes').valueOf();
   const end = moment(query.alert_started_at).valueOf();
 
   const params: APMEventESSearchRequest['body'] = {
@@ -60,10 +54,7 @@ export async function getServiceNameFromSignals({
             bool: {
               should: [
                 ...termQuery('container.id', query['container.id']),
-                ...termQuery(
-                  'kubernetes.pod.name',
-                  query['kubernetes.pod.name']
-                ),
+                ...termQuery('kubernetes.pod.name', query['kubernetes.pod.name']),
               ],
               minimum_should_match: 1,
             },
@@ -96,9 +87,7 @@ async function getServiceNameFromLogs({
   esClient: ElasticsearchClient;
   coreContext: CoreRequestHandlerContext;
 }) {
-  const index = await coreContext.uiSettings.client.get<string>(
-    aiAssistantLogsIndexPattern
-  );
+  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
 
   const res = await typedSearch<{ service: { name: string } }, any>(esClient, {
     index,

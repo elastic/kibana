@@ -8,10 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  rangeQuery,
-  typedSearch,
-} from '@kbn/observability-plugin/server/utils/queries';
+import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ESSearchRequest } from '@kbn/es-types';
@@ -42,9 +39,7 @@ export async function getContainerIdFromSignals({
     return;
   }
 
-  const start = moment(query.alert_started_at)
-    .subtract(30, 'minutes')
-    .valueOf();
+  const start = moment(query.alert_started_at).subtract(30, 'minutes').valueOf();
   const end = moment(query.alert_started_at).valueOf();
 
   const params: APMEventESSearchRequest['body'] = {
@@ -83,9 +78,7 @@ async function getContainerIdFromLogs({
   esClient: ElasticsearchClient;
   coreContext: CoreRequestHandlerContext;
 }) {
-  const index = await coreContext.uiSettings.client.get<string>(
-    aiAssistantLogsIndexPattern
-  );
+  const index = await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern);
 
   const res = await typedSearch<{ container: { id: string } }, any>(esClient, {
     index,

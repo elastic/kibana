@@ -22,10 +22,7 @@ jest
   .spyOn(core.uiSettings, 'get$')
   .mockImplementation((_key: string) => of(true));
 
-export const render = (
-  component: React.ReactNode,
-  options: { customHistory: MemoryHistory }
-) => {
+export const render = (component: React.ReactNode, options: { customHistory: MemoryHistory }) => {
   const history = options?.customHistory ?? createMemoryHistory();
 
   history.location.key = 'TestKeyForTesting';
