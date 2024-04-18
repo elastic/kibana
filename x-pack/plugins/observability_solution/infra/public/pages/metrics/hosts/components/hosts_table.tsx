@@ -41,6 +41,8 @@ export const HostsTable = () => {
       />
       <EuiBasicTable
         data-test-subj={`hostsView-table-${loading ? 'loading' : 'loaded'}`}
+        // This table has a lot of columns, so break down into mobile view sooner
+        responsiveBreakpoint="xl"
         itemId="id"
         selection={selection}
         pagination={{
