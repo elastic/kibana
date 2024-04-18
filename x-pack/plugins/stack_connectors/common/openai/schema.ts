@@ -28,6 +28,8 @@ export const SecretsSchema = schema.object({ apiKey: schema.string() });
 // Run action schema
 export const RunActionParamsSchema = schema.object({
   body: schema.string(),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
 });
 
 const AIMessage = schema.object({

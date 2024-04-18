@@ -112,7 +112,7 @@ describe('update()', () => {
         "id": "test-alert-table-config",
       }
     `);
-    expect(alertTableConfigRegistry.getActions('test-alert-table-config').toggleColumn).toEqual(
+    expect(alertTableConfigRegistry.getActions('test-alert-table-config')?.toggleColumn).toEqual(
       toggleColumn
     );
   });
