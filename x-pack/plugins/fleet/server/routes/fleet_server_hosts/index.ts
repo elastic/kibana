@@ -23,14 +23,15 @@ import {
   getFleetServerHostHandler,
   postFleetServerHost,
   putFleetServerHostHandler,
+  getFleetServerStatusHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: FLEET_SERVER_HOST_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: {
-        fleet: { readSettings: true },
+      fleetAuthz: (authz) => {
+        return authz.fleet.addAgents || authz.fleet.addFleetServers || authz.fleet.readSettings;
       },
     })
     .addVersion(
