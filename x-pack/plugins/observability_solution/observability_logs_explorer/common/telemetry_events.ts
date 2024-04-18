@@ -9,6 +9,7 @@ import { type EventTypeOpts } from '@kbn/analytics-client';
 
 export const DATA_RECEIVED_TELEMETRY_EVENT: EventTypeOpts<{
   rowCount: number;
+  selectedIntegrationName?: string;
 }> = {
   eventType: 'logs_explorer_data_received',
   schema: {
@@ -17,6 +18,13 @@ export const DATA_RECEIVED_TELEMETRY_EVENT: EventTypeOpts<{
       _meta: {
         description:
           'Number of data rows loaded by the logs explorer. 0 row count is not reported.',
+      },
+    },
+    selectedIntegrationName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the integration that user has selected to filter logs by.',
+        optional: true,
       },
     },
   },
