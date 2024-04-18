@@ -252,6 +252,7 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
           mobileOptions={{ header: column.name }}
           align={column.align ?? LEFT_ALIGNMENT}
           textOnly={column.textOnly ?? true}
+          truncateText={column.truncateText}
         >
           {column.render ? column.render(item[column.field], currentTime) : item[column.field]}
         </EuiTableRowCell>
@@ -291,6 +292,7 @@ const columns: Array<{
   render?: Function;
   width?: string | number;
   textOnly?: boolean;
+  truncateText?: boolean;
   align?: typeof RIGHT_ALIGNMENT | typeof LEFT_ALIGNMENT;
 }> = [
   {
@@ -310,6 +312,7 @@ const columns: Array<{
     }),
     sortable: false,
     width: '40%',
+    truncateText: true,
     render: (command: string) => <CodeLine command={command} />,
   },
   {
