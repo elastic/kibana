@@ -11,8 +11,8 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.15.0",
-  "branch": "main",
+  "version": "8.14.0",
+  "branch": "8.14",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
