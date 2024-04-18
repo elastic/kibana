@@ -48,7 +48,7 @@ export const isAlertFromCrowdstrikeEvent = ({
 
 /**
  * Checks to see if the given alert was generated out of the Crowdstrike Alerts dataset, coming from
- * sentinel_one Fleet integration
+ * crowdstrike Fleet integration
  * @param ecsData
  */
 export const isAlertFromCrowdstrikeAlert = ({
