@@ -11,6 +11,9 @@ xpack.fleet.internal.retrySetupOnBoot: true
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
 
+# Disable preboot phase for serverless
+core.lifecycle.disablePreboot: true
+
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 

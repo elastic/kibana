@@ -7,7 +7,7 @@
  */
 import { AppUpdater, CoreSetup, ScopedHistory } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { isFilterPinned } from '@kbn/es-query';

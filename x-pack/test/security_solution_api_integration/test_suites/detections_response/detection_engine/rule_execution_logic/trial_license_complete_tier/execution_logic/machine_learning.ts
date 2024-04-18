@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import supertestLib from 'supertest';
+import url from 'url';
 import {
   ALERT_REASON,
   ALERT_RISK_SCORE,
@@ -27,7 +29,10 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { expect } from 'expect';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   createListsIndex,
   deleteAllExceptions,
@@ -37,7 +42,7 @@ import {
 import {
   executeSetupModuleRequest,
   forceStartDatafeeds,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
   previewRule,
   previewRuleWithExceptionEntries,
@@ -46,9 +51,12 @@ import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { getMetricsRequest, getMetricsWithRetry } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -58,9 +66,11 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
+  const request = supertestLib(url.format(config.get('servers.kibana')));
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
+  const retry = getService('retry');
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
@@ -96,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).toBe(1);
       const alert = alerts.hits.hits[0];
 
@@ -170,6 +180,38 @@ export default ({ getService }: FtrProviderContext) => {
           ]),
         })
       );
+    });
+
+    it('classifies ml job missing errors as user errors', async () => {
+      await getMetricsRequest(request, true);
+      const badRule: MachineLearningRuleCreateProps = {
+        ...rule,
+        machine_learning_job_id: 'doesNotExist',
+      };
+      const createdRule = await createRule(supertest, log, badRule);
+      await waitForRuleFailure({ supertest, log, id: createdRule.id });
+
+      const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL);
+      const response = await supertest
+        .get(route)
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .query({ id: createdRule.id })
+        .expect(200);
+
+      const ruleResponse = response.body;
+      expect(ruleResponse.execution_summary.last_execution.message.includes('missing')).toEqual(
+        true
+      );
+
+      const metricsResponse = await getMetricsWithRetry(
+        request,
+        retry,
+        false,
+        (metrics) =>
+          metrics.metrics?.task_run?.value.by_type['alerting:siem__mlRule'].user_errors === 1
+      );
+      expect(metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__mlRule']).toEqual(1);
     });
 
     it('@skipInQA generates max alerts warning when circuit breaker is exceeded', async () => {

@@ -10,39 +10,13 @@ For security, you grant users access to the {report-features} and secure the rep
 with TLS/SSL encryption. Additionally, you can install graphical packages into the operating system
 to enable the {kib} server to have screenshotting capabilities.
 
-* <<install-reporting-packages>>
 * <<grant-user-access>>
 * <<reporting-roles-user-api>>
 * <<grant-user-access-basic>>
 * <<grant-user-access-external-provider>>
 * <<securing-reporting>>
-
-[float]
-[[install-reporting-packages]]
-=== Install the reporting packages
-
-Make sure the {kib} server operating system has the appropriate packages installed for the distribution.
-
-If you are using RHEL operating systems, install the following packages:
-
-* `ipa-gothic-fonts`
-* `xorg-x11-fonts-100dpi`
-* `xorg-x11-fonts-75dpi`
-* `xorg-x11-utils`
-* `xorg-x11-fonts-cyrillic`
-* `xorg-x11-fonts-Type1`
-* `xorg-x11-fonts-misc`
-* `fontconfig`
-* `freetype`
-
-If you are using Ubuntu/Debian systems, install the following packages:
-
-* `fonts-liberation`
-* `libfontconfig1`
-* `libnss3`
-
-The reporting plugin has a built-in utility to check for common issues, such as missing dependencies. See
-<<reporting-diagnostics>> for more information.
+* <<install-reporting-packages>>
+* <<set-reporting-server-host>>
 
 [float]
 [[grant-user-access]]
@@ -139,7 +113,7 @@ PUT <kibana host>:<port>/api/security/role/custom_reporting_user
 // CONSOLE
 
 <1> Grants access to generate PNG and PDF reports in *Dashboard*.
-<2> Grants access to download CSV files from saved search panels in *Dashboard*.
+<2> Grants access to generate CSV reports from saved search panels in *Dashboard*.
 <3> Grants access to generate CSV reports from saved searches in *Discover*.
 <4> Grants access to generate PDF reports in *Canvas*.
 <5> Grants access to generate PNG and PDF reports in *Visualize Library*.
@@ -176,7 +150,7 @@ PUT localhost:5601/api/security/role/custom_reporting_user
 // CONSOLE
 
 <1> Grants access to generate CSV reports from saved searches in *Discover*.
-<2> Grants access to download CSV reports from saved search panels in *Dashboard*.
+<2> Grants access to generate CSV reports from saved search panels in *Dashboard*.
 
 [float]
 [[grant-user-access-external-provider]]
@@ -231,3 +205,44 @@ For more information, see {ref}/notification-settings.html#ssl-notification-sett
 Once you've enabled SSL for {kib}, all requests to the reporting endpoints must include valid credentials.
 
 For more information on sharing reports, direct links, and more, refer to <<reporting-getting-started, Reporting and sharing>>.
+
+[float]
+[[install-reporting-packages]]
+=== Install the dependencies for the headless browser
+
+If using PNG/PDF {report-features}, make sure the {kib} server operating system has the appropriate packages installed for the distribution.
+
+If you are using RHEL operating systems, install the following packages:
+
+* `ipa-gothic-fonts`
+* `xorg-x11-fonts-100dpi`
+* `xorg-x11-fonts-75dpi`
+* `xorg-x11-utils`
+* `xorg-x11-fonts-cyrillic`
+* `xorg-x11-fonts-Type1`
+* `xorg-x11-fonts-misc`
+* `fontconfig`
+* `freetype`
+
+If you are using Ubuntu/Debian systems, install the following packages:
+
+* `fonts-liberation`
+* `libfontconfig1`
+* `libnss3`
+
+The screenshotting plugin used for {reporting-features} has a built-in utility to check for common issues, such as missing dependencies. See
+<<reporting-diagnostics>> for more information.
+
+[float]
+[[set-reporting-server-host]]
+=== Set the `server.host` for the headless browser
+
+If using PNG/PDF {report-features} in a production environment, it is preferred to use the setting of
+`server.host: 0.0.0.0` in the `kibana.yml` configuration file. This allows the headless browser used for
+PDF/PNG reporting to reach {kib} over a local interface, while also allowing the {kib} server to listen on
+outward-facing network interfaces, as it makes the {kib} server accessible from any network interface on the
+machine. Make sure that no firewall rules or other routing rules prevent local services from accessing this
+address.
+
+For the most reliable configuration of PDF/PNG {report-features}, consider installing {kib} using <<docker, Docker>>, or
+using <<set-up-on-cloud, Elastic Cloud>>.

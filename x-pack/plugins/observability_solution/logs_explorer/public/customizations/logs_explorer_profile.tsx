@@ -67,6 +67,7 @@ export const createLogsExplorerProfileCustomizations =
           <KibanaContextProviderForPlugin>
             <LazyCustomDataSourceSelector
               controller={controller}
+              core={core}
               datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
               logsExplorerControllerStateService={service}

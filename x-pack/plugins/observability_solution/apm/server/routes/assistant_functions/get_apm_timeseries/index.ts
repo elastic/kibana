@@ -8,6 +8,7 @@
 import datemath from '@elastic/datemath';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
+import type { ChangePointType } from '@kbn/es-types/src';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -48,6 +49,7 @@ export const getApmTimeseriesRt = t.type({
             }),
             t.partial({
               'transaction.type': t.string,
+              'transaction.name': t.string,
             }),
           ]),
           t.intersection([
@@ -73,6 +75,7 @@ export const getApmTimeseriesRt = t.type({
             }),
             t.partial({
               'transaction.type': t.string,
+              'transaction.name': t.string,
             }),
           ]),
           t.type({
@@ -93,6 +96,15 @@ export const getApmTimeseriesRt = t.type({
 
 type ApmTimeseriesArgs = t.TypeOf<typeof getApmTimeseriesRt>;
 
+export interface TimeseriesChangePoint {
+  change_point?: number | undefined;
+  r_value?: number | undefined;
+  trend?: string | undefined;
+  p_value?: number;
+  date: string | undefined;
+  type: ChangePointType;
+}
+
 export interface ApmTimeseries {
   stat: ApmTimeseriesArgs['stats'][number];
   group: string;
@@ -102,14 +114,7 @@ export interface ApmTimeseries {
   start: number;
   end: number;
   unit: string;
-  changes: Array<{
-    change_point?: number | undefined;
-    r_value?: number | undefined;
-    trend?: string | undefined;
-    p_value: number;
-    date: string | undefined;
-    type: string;
-  }>;
+  changes: TimeseriesChangePoint[];
 }
 
 export async function getApmTimeseries({
@@ -128,19 +133,15 @@ export async function getApmTimeseries({
     numBuckets: 100,
   });
 
-  const sharedParameters = {
-    apmEventClient,
-    start,
-    end,
-    bucketSize,
-    intervalString,
-  };
-
   return (
     await Promise.all(
       args.stats.map(async (stat) => {
         const parameters = {
-          ...sharedParameters,
+          apmEventClient,
+          start,
+          end,
+          bucketSize,
+          intervalString,
           filter: [
             ...rangeQuery(start, end),
             ...termQuery(SERVICE_NAME, stat['service.name']),
@@ -156,18 +157,21 @@ export async function getApmTimeseries({
               return await getTransactionThroughput({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
+                transactionName: stat.timeseries['transaction.name'],
               });
 
             case ApmTimeseriesType.transactionFailureRate:
               return await getTransactionFailureRate({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
+                transactionName: stat.timeseries['transaction.name'],
               });
 
             case ApmTimeseriesType.transactionLatency:
               return await getTransactionLatency({
                 ...parameters,
                 transactionType: stat.timeseries['transaction.type'],
+                transactionName: stat.timeseries['transaction.name'],
                 latencyAggregationType: stat.timeseries.function,
               });
 
@@ -205,7 +209,7 @@ export async function getApmTimeseries({
     statResults.flatMap((statResult) => {
       const changePointType = Object.keys(
         statResult.change_point?.type ?? {}
-      )?.[0];
+      )?.[0] as ChangePointType;
 
       return {
         stat: statResult.stat,
@@ -217,7 +221,9 @@ export async function getApmTimeseries({
         end,
         unit: statResult.unit,
         changes: [
-          ...(changePointType && changePointType !== 'indeterminable'
+          ...(changePointType &&
+          changePointType !== 'indeterminable' &&
+          changePointType !== 'stationary'
             ? [
                 {
                   date: statResult.change_point.bucket?.key,

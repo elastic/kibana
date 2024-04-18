@@ -8,6 +8,7 @@
 import http from 'http';
 import https from 'https';
 import getPort from 'get-port';
+import { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import {
@@ -20,33 +21,6 @@ import { createTlsWebhookServer } from '../../../../../common/lib/get_tls_webhoo
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-
-  async function createWebhookAction(
-    webhookSimulatorURL: string,
-    config: Record<string, string | Record<string, string>> = {}
-  ): Promise<string> {
-    const url = formatUrl(new URL(webhookSimulatorURL), { auth: false });
-    const composedConfig = {
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-      ...config,
-      url,
-    };
-
-    const { body: createdAction } = await supertest
-      .post('/api/actions/action')
-      .set('kbn-xsrf', 'test')
-      .send({
-        name: 'A generic Webhook action',
-        actionTypeId: '.webhook',
-        secrets: {},
-        config: composedConfig,
-      })
-      .expect(200);
-
-    return createdAction.id;
-  }
 
   async function getPortOfConnector(connectorId: string): Promise<string> {
     const response = await supertest.get(`/api/actions/connectors`).expect(200);
@@ -73,7 +47,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       it('webhook can be executed without username and password', async () => {
-        const webhookActionId = await createWebhookAction(webhookSimulatorURL);
+        const webhookActionId = await createWebhookAction(supertest, webhookSimulatorURL);
         const { body: result } = await supertest
           .post(`/api/actions/action/${webhookActionId}/_execute`)
           .set('kbn-xsrf', 'test')
@@ -104,7 +78,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       it('should support the POST method against webhook target', async () => {
-        const webhookActionId = await createWebhookAction(webhookSimulatorURL, { method: 'post' });
+        const webhookActionId = await createWebhookAction(supertest, webhookSimulatorURL, {
+          method: 'post',
+        });
         const { body: result } = await supertest
           .post(`/api/actions/action/${webhookActionId}/_execute`)
           .set('kbn-xsrf', 'test')
@@ -198,4 +174,32 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
     });
   });
+}
+
+export async function createWebhookAction(
+  supertest: SuperTest<Test>,
+  webhookSimulatorURL: string,
+  config: Record<string, string | Record<string, string>> = {}
+): Promise<string> {
+  const url = formatUrl(new URL(webhookSimulatorURL), { auth: false });
+  const composedConfig = {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+    ...config,
+    url,
+  };
+
+  const { body: createdAction } = await supertest
+    .post('/api/actions/action')
+    .set('kbn-xsrf', 'test')
+    .send({
+      name: 'A generic Webhook action',
+      actionTypeId: '.webhook',
+      secrets: {},
+      config: composedConfig,
+    })
+    .expect(200);
+
+  return createdAction.id;
 }

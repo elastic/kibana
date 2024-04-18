@@ -33,6 +33,7 @@ export type DarkModeValue = '' | 'dark' | 'light';
  */
 export interface UserSettingsData {
   darkMode?: DarkModeValue;
+  solutionNavOptOut?: boolean;
 }
 
 export interface UserProfileData {
@@ -43,5 +44,6 @@ export interface UserProfileData {
 
 export interface UserProfileAPIClient {
   userProfile$: Observable<UserProfileData | null>;
-  update: <D extends UserProfileData>(data: D) => Promise<void>;
+  enabled$: Observable<boolean>;
+  partialUpdate: <D extends Partial<UserProfileData>>(data: D) => Promise<void>;
 }

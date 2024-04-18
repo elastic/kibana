@@ -11,7 +11,7 @@ import {
   RouteConfig,
   RouteConfigOptions,
   RouteMethod,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
 } from '@kbn/core/server';
 
 type Config<Method extends DestructiveRouteMethod> = RouteConfig<unknown, unknown, unknown, Method>;
@@ -19,7 +19,7 @@ type Config<Method extends DestructiveRouteMethod> = RouteConfig<unknown, unknow
 // We disallow options to set 'body' because we override them.
 interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
   extends RouteConfig<P, Q, B, Method> {
-  validate: Omit<RouteValidatorFullConfig<P, Q, B>, 'body'>;
+  validate: Omit<RouteValidatorFullConfigRequest<P, Q, B>, 'body'>;
   options?: Omit<RouteConfigOptions<Method>, 'body'>;
 }
 

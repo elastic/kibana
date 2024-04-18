@@ -7,7 +7,7 @@
 
 import { get, set } from 'lodash';
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 interface PolicyProtectionReference {
   keyPath: string;
@@ -103,7 +103,10 @@ const disableCommonProtections = (policy: PolicyConfig) => {
   }, policy);
 };
 
-const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
+const getDisabledCommonProtectionsForOS = (
+  policy: PolicyConfig,
+  os: PolicyOperatingSystem
+): Partial<PolicyConfig['windows']> => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
     mode: ProtectionModes.off,
@@ -115,6 +118,7 @@ const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: PolicyOpera
   malware: {
     ...policy[os].malware,
     blocklist: false,
+    on_write_scan: false,
     mode: ProtectionModes.off,
   },
 });
@@ -161,6 +165,7 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
 export const ensureOnlyEventCollectionIsAllowed = (policy: PolicyConfig): PolicyConfig => {
   const updatedPolicy = disableProtections(policy);
 
+  set(updatedPolicy, 'windows.antivirus_registration.mode', AntivirusRegistrationModes.disabled);
   set(updatedPolicy, 'windows.antivirus_registration.enabled', false);
 
   return updatedPolicy;

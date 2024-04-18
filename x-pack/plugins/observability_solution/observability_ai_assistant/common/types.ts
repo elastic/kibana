@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IconType } from '@elastic/eui';
 import type { ObservabilityAIAssistantChatService } from '../public';
 import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
 
@@ -42,9 +43,15 @@ export interface Message {
   };
 }
 
+export interface TokenCount {
+  prompt: number;
+  completion: number;
+  total: number;
+}
+
 export interface Conversation {
   '@timestamp': string;
-  user: {
+  user?: {
     id?: string;
     name: string;
   };
@@ -52,6 +59,7 @@ export interface Conversation {
     id: string;
     title: string;
     last_updated: string;
+    token_count?: TokenCount;
   };
   messages: Message[];
   labels: Record<string, string>;
@@ -61,11 +69,13 @@ export interface Conversation {
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string };
+  conversation: { title: string; token_count?: TokenCount; id?: string };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
-export type ConversationUpdateRequest = ConversationRequestBase & { conversation: { id: string } };
+export type ConversationUpdateRequest = ConversationRequestBase & {
+  conversation: { id: string };
+};
 
 export interface KnowledgeBaseEntry {
   '@timestamp': string;
@@ -77,6 +87,11 @@ export interface KnowledgeBaseEntry {
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
+}
+
+export interface UserInstruction {
+  doc_id: string;
+  text: string;
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
@@ -104,6 +119,12 @@ export interface ScreenContextActionDefinition<TArguments = undefined> {
   respond: ScreenContextActionRespondFunction<TArguments>;
 }
 
+export interface StarterPrompt {
+  title: string;
+  prompt: string;
+  icon: IconType;
+}
+
 export interface ObservabilityAIAssistantScreenContext {
   screenDescription?: string;
   data?: Array<{
@@ -112,4 +133,5 @@ export interface ObservabilityAIAssistantScreenContext {
     value: any;
   }>;
   actions?: ScreenContextActionDefinition[];
+  starterPrompts?: StarterPrompt[];
 }

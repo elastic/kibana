@@ -32,6 +32,8 @@ import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rule
 import {
   ABOUT_CONTINUE_BTN,
   ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_FIELDS_INPUT,
   ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
@@ -105,7 +107,7 @@ import {
   THREAT_MAPPING_COMBO_BOX_INPUT,
   THREAT_MATCH_AND_BUTTON,
   THREAT_MATCH_CUSTOM_QUERY_INPUT,
-  THREAT_MATCH_INDICATOR_INDEX,
+  CUSTOM_INDEX_PATTERN_INPUT,
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
@@ -145,6 +147,7 @@ import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
+import { TOOLTIP } from '../screens/common';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -521,7 +524,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
@@ -537,18 +540,19 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
       }
     });
   cy.get(TOAST_ERROR).should('not.exist');
+};
 
+export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
+  fillDefineEqlRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
+export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
     .type(rule.query || '');
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
-  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(rule.new_terms_fields[0], { delay: 35 });
-
-  cy.get(EUI_FILTER_SELECT_ITEM).click();
+  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${rule.new_terms_fields[0]}{enter}`);
 
   cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
   const historySize = convertHistoryStartToSize(rule.history_window_start);
@@ -557,6 +561,10 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type('{selectAll}');
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
+};
+
+export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
+  fillDefineNewTermsRule(rule);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
@@ -657,7 +665,7 @@ export const fillIndexAndIndicatorIndexPattern = (
 ) => {
   getIndexPatternClearButton().click();
 
-  getIndicatorIndex().type(`${indexPattern}{enter}`);
+  getRuleIndexInput().type(`${indexPattern}{enter}`);
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
@@ -694,9 +702,9 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
-/** Returns the indicator index pattern */
-export const getIndicatorIndex = () => {
-  return cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+/** Returns the custom rule index pattern input */
+export const getRuleIndexInput = () => {
+  return cy.get(CUSTOM_INDEX_PATTERN_INPUT).eq(0);
 };
 
 /** Returns the indicator's indicator index */
@@ -872,6 +880,18 @@ export const selectDoNotSuppressForMissingFields = () => {
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
   cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
   cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
+};
+
+/**
+ * Opens tooltip on disabled suppression fields and checks if it contains requirement for Platinum license.
+ *
+ * Suppression fields are disabled when app has insufficient license
+ */
+export const openSuppressionFieldsTooltipAndCheckLicense = () => {
+  cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
+  // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
+  cy.get(TOOLTIP).contains('Platinum license');
 };
 
 export const checkLoadQueryDynamically = () => {

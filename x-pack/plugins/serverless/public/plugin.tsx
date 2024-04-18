@@ -7,15 +7,18 @@
 
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
-import { SideNavComponent } from './navigation';
+import {
+  generateManageOrgMembersNavCard,
+  manageOrgMembersNavCardName,
+  SideNavComponent,
+} from './navigation';
 import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
@@ -77,8 +80,8 @@ export class ServerlessPlugin
     return {
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
-        project.initNavigation(navigationTree$);
+      initNavigation: (id, navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+        project.initNavigation(id, navigationTree$);
         project.setSideNavComponent(() => (
           <SideNavComponent
             navProps={{
@@ -95,6 +98,16 @@ export class ServerlessPlugin
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
+      getNavigationCards: (roleManagementEnabled, extendCardNavDefinitions) => {
+        if (!roleManagementEnabled) return extendCardNavDefinitions;
+
+        const manageOrgMembersNavCard = generateManageOrgMembersNavCard(cloud.organizationUrl);
+        if (extendCardNavDefinitions) {
+          extendCardNavDefinitions[manageOrgMembersNavCardName] = manageOrgMembersNavCard;
+          return extendCardNavDefinitions;
+        }
+        return { [manageOrgMembersNavCardName]: manageOrgMembersNavCard };
+      },
     };
   }
 
@@ -106,13 +119,11 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-            <ProjectSwitcher {...{ currentProjectType }} />
-          </ProjectSwitcherKibanaProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+      <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+          <ProjectSwitcher {...{ currentProjectType }} />
+        </ProjectSwitcherKibanaProvider>
+      </KibanaRenderContextProvider>,
       targetDomElement
     );
 

@@ -18,6 +18,7 @@ import { IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
+import { MappingField } from '../index_template_wizard/template_form.helpers';
 
 let routerMock: typeof reactRouterMock;
 const getTestBedConfig = (initialEntry?: string): AsyncTestBedConfig => ({
@@ -39,11 +40,15 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getIndexDetailsTabs: () => string[];
     getActiveTabContent: () => string;
     mappings: {
+      addNewMappingFieldNameAndType: (mappingFields?: MappingField[]) => Promise<void>;
+      clickAddFieldButton: () => Promise<void>;
+      clickSaveMappingsButton: () => Promise<void>;
       getCodeBlockContent: () => string;
       getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
+      isSaveMappingsErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
-      getTreeViewContent: () => string;
+      getTreeViewContent: (fieldName: string) => string;
       clickToggleViewButton: () => Promise<void>;
       isSearchBarDisabled: () => boolean;
     };
@@ -198,17 +203,62 @@ export const setup = async ({
       });
       component.update();
     },
-    getTreeViewContent: () => {
-      return find('@timestampField-fieldName').text();
+    getTreeViewContent: (fieldName: string) => {
+      expect(exists(fieldName)).toBe(true);
+      return find(fieldName).text();
     },
+
     clickToggleViewButton: async () => {
       await act(async () => {
+        expect(exists('indexDetailsMappingsToggleViewButton')).toBe(true);
         find('indexDetailsMappingsToggleViewButton').simulate('click');
       });
       component.update();
     },
     isSearchBarDisabled: () => {
-      return find('DocumentFieldsSearch').prop('disabled');
+      return find('indexDetailsMappingsFieldSearch').prop('disabled');
+    },
+    clickAddFieldButton: async () => {
+      expect(exists('indexDetailsMappingsAddField')).toBe(true);
+      await act(async () => {
+        find('indexDetailsMappingsAddField').simulate('click');
+      });
+      component.update();
+    },
+    clickSaveMappingsButton: async () => {
+      expect(exists('indexDetailsMappingsSaveMappings')).toBe(true);
+      expect(find('indexDetailsMappingsSaveMappings').props().disabled).toBeFalsy();
+      await act(async () => {
+        find('indexDetailsMappingsSaveMappings').simulate('click');
+      });
+      component.update();
+    },
+    isSaveMappingsErrorDisplayed: () => {
+      return exists('indexDetailsSaveMappingsError');
+    },
+    addNewMappingFieldNameAndType: async (mappingFields?: MappingField[]) => {
+      const { form } = testBed;
+      if (mappingFields) {
+        for (const field of mappingFields) {
+          const { name, type } = field;
+          await act(async () => {
+            form.setInputValue('nameParameterInput', name);
+            find('createFieldForm').simulate('change', [
+              {
+                label: type,
+                value: type,
+              },
+            ]);
+          });
+
+          await act(async () => {
+            expect(exists('createFieldForm.addButton')).toBe(true);
+            find('createFieldForm.addButton').simulate('click');
+          });
+
+          component.update();
+        }
+      }
     },
   };
 

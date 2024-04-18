@@ -512,78 +512,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "share",
-            "path": "src/plugins/share/public/services/share_menu_manager.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "guidedOnboarding",
-            "path": "src/plugins/guided_onboarding/public/plugin.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
-            "plugin": "management",
-            "path": "src/plugins/management/public/components/management_app/management_app.tsx"
-          },
-          {
             "plugin": "spaces",
             "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
           },
@@ -630,22 +558,6 @@
           {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/index.tsx"
           },
           {
             "plugin": "devTools",
@@ -664,6 +576,114 @@
             "path": "src/plugins/console/public/shared_imports.ts"
           },
           {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
           },
@@ -722,42 +742,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
           },
           {
             "plugin": "expressionXY",
@@ -857,7 +841,15 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
+            "path": "x-pack/plugins/lens/public/app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration.tsx"
           },
           {
             "plugin": "lens",
@@ -884,184 +876,32 @@
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/users/users_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/roles/roles_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/login/login_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_page.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/public/application/maintenance_windows.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/connectors_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/alerts_app.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/application.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/dashboard_router.tsx"
           },
           {
             "plugin": "aiops",
@@ -1196,22 +1036,6 @@
             "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx"
           },
           {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "licenseManagement",
-            "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx"
           },
@@ -1282,18 +1106,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/embeddables/single_metric_viewer/single_metric_viewer_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
           },
           {
             "plugin": "ml",
@@ -1348,18 +1160,6 @@
             "path": "x-pack/plugins/cross_cluster_replication/public/shared_imports.ts"
           },
           {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
-            "plugin": "crossClusterReplication",
-            "path": "x-pack/plugins/cross_cluster_replication/public/app/index.tsx"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/application.tsx"
           },
@@ -1376,50 +1176,10 @@
             "path": "x-pack/plugins/grokdebugger/public/shared_imports.ts"
           },
           {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/shared_imports.ts"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
-            "plugin": "indexLifecycleManagement",
-            "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
-          },
-          {
             "plugin": "ingestPipelines",
             "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
           },
           {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
-            "plugin": "logstash",
-            "path": "x-pack/plugins/logstash/public/application/index.tsx"
-          },
-          {
             "plugin": "metricsDataAccess",
             "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
           },
@@ -1430,18 +1190,6 @@
           {
             "plugin": "metricsDataAccess",
             "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
           },
           {
             "plugin": "osquery",
@@ -1508,18 +1256,6 @@
             "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
           },
           {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
             "plugin": "painlessLab",
             "path": "x-pack/plugins/painless_lab/public/shared_imports.ts"
           },
@@ -1534,26 +1270,6 @@
           {
             "plugin": "painlessLab",
             "path": "x-pack/plugins/painless_lab/public/application/index.tsx"
-          },
-          {
-            "plugin": "remoteClusters",
-            "path": "x-pack/plugins/remote_clusters/public/shared_imports.ts"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/shared_imports.ts"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/application.tsx"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/application.tsx"
-          },
-          {
-            "plugin": "rollup",
-            "path": "x-pack/plugins/rollup/public/application.tsx"
           },
           {
             "plugin": "searchprofiler",
@@ -1596,22 +1312,6 @@
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           },
           {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/shared_imports.ts"
-          },
-          {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/application/app_providers.tsx"
-          },
-          {
-            "plugin": "snapshotRestore",
-            "path": "x-pack/plugins/snapshot_restore/public/application/app_providers.tsx"
-          },
-          {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/app.tsx"
           },
@@ -1622,62 +1322,6 @@
           {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/shared_imports.ts"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "upgradeAssistant",
-            "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/shared_imports.ts"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/index.tsx"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/index.tsx"
-          },
-          {
-            "plugin": "watcher",
-            "path": "x-pack/plugins/watcher/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "cloudDataMigration",
-            "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/application/index.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
           },
           {
             "plugin": "apm",
@@ -1704,54 +1348,6 @@
             "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/test_utils.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/test_utils.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/test_utils.tsx"
-          },
-          {
             "plugin": "filesManagement",
             "path": "src/plugins/files_management/public/mount_management_section.tsx"
           },
@@ -1762,18 +1358,6 @@
           {
             "plugin": "filesManagement",
             "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
           },
           {
             "plugin": "visDefaultEditor",
@@ -2461,26 +2045,6 @@
             "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
           },
           {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/shared_imports.ts"
-          },
-          {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
-          },
-          {
-            "plugin": "runtimeFields",
-            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
-          },
-          {
-            "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
-          },
-          {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/shared_imports.ts"
           },
@@ -2509,6 +2073,22 @@
             "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx"
           },
           {
+            "plugin": "licensing",
+            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
+          },
+          {
+            "plugin": "licensing",
+            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_objects_utils/confirm_modal_promise.tsx"
           },
@@ -2539,82 +2119,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_actions/open_replace_panel_flyout.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
-          },
-          {
-            "plugin": "licensing",
-            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
-          },
-          {
-            "plugin": "licensing",
-            "path": "x-pack/plugins/licensing/public/expired_banner.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
           },
           {
             "plugin": "dataViewFieldEditor",
@@ -2669,112 +2173,44 @@
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/account_management/account_management_app.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/show_settings.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
           },
           {
-            "plugin": "security",
-            "path": "x-pack/plugins/security/public/session/session_expiration_toast.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/confirm_overlays.tsx"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_app/listing_page/dashboard_no_match.tsx"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_edit_response.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing.tsx"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
           },
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_bulk_operation_toast.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_add.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_add.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_edit.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_edit.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/rule_details.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_dropdown.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_dropdown.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/common/use_cases_toast.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_new_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/visualizations/actions/add_to_existing_case.tsx"
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/dashboard_listing/dashboard_listing_table.tsx"
           },
           {
             "plugin": "observabilityShared",
@@ -2783,14 +2219,6 @@
           {
             "plugin": "observabilityShared",
             "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
           },
           {
             "plugin": "maps",
@@ -2993,6 +2421,26 @@
             "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
           },
           {
+            "plugin": "runtimeFields",
+            "path": "x-pack/plugins/runtime_fields/public/shared_imports.ts"
+          },
+          {
+            "plugin": "runtimeFields",
+            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
+          },
+          {
+            "plugin": "runtimeFields",
+            "path": "x-pack/plugins/runtime_fields/public/load_editor.tsx"
+          },
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
+          },
+          {
+            "plugin": "indexManagement",
+            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
+          },
+          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_create_drilldown/flyout_create_drilldown.tsx"
           },
@@ -3009,14 +2457,6 @@
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_edit_drilldown/flyout_edit_drilldown.tsx"
           },
           {
-            "plugin": "imageEmbeddable",
-            "path": "src/plugins/image_embeddable/public/image_editor/configure_image.tsx"
-          },
-          {
-            "plugin": "imageEmbeddable",
-            "path": "src/plugins/image_embeddable/public/image_editor/configure_image.tsx"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/confirm_modal_promise.tsx"
           },
@@ -3031,54 +2471,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/application.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/lib/alerts_toast.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/lib/alerts_toast.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
           },
           {
             "plugin": "securitySolution",
@@ -3133,98 +2525,6 @@
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
           },
           {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
             "plugin": "dataViewManagement",
             "path": "src/plugins/data_view_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
           },
@@ -3271,14 +2571,6 @@
           {
             "plugin": "embeddable",
             "path": "src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_exportable_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/tests/test_samples/hello_world_action.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/tests/test_samples/hello_world_action.tsx"
           },
           {
             "plugin": "visTypeVislib",

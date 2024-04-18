@@ -18,9 +18,22 @@ import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { DocumentDetailsPreviewPanelKey } from '../../preview';
+import { TestProviders } from '../../../../common/mock';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
 
@@ -63,11 +76,13 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
 
 const renderDescription = (panelContext: RightPanelContext) =>
   render(
-    <IntlProvider locale="en">
-      <RightPanelContext.Provider value={panelContext}>
-        <AlertDescription />
-      </RightPanelContext.Provider>
-    </IntlProvider>
+    <TestProviders>
+      <IntlProvider locale="en">
+        <RightPanelContext.Provider value={panelContext}>
+          <AlertDescription />
+        </RightPanelContext.Provider>
+      </IntlProvider>
+    </TestProviders>
   );
 
 const NO_DATA_MESSAGE = "There's no description for this rule.";

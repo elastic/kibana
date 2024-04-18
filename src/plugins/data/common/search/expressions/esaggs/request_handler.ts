@@ -8,7 +8,7 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';

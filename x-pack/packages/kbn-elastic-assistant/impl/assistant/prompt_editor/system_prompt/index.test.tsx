@@ -23,7 +23,7 @@ const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,
   apiConfig: {
     connectorId: '123',
-    connectorTypeTitle: 'OpenAI',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: mockSystemPrompt.id,
   },
 };
@@ -90,6 +90,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       );
     });
@@ -120,6 +121,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       );
     });
@@ -154,6 +156,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -200,6 +203,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -260,6 +264,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -327,6 +332,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -376,13 +382,13 @@ describe('SystemPrompt', () => {
         id: 'second',
         category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: '123',
-          connectorTypeTitle: 'OpenAI',
           defaultSystemPromptId: undefined,
         },
         title: 'second',
         messages: [],
-        replacements: [],
+        replacements: {},
       };
       const localMockConversations: Record<string, Conversation> = {
         [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
@@ -409,6 +415,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -462,7 +469,6 @@ describe('SystemPrompt', () => {
           ...secondMockConversation,
           apiConfig: {
             connectorId: '123',
-            connectorTypeTitle: 'OpenAI',
             defaultSystemPromptId: mockSystemPrompt.id,
           },
         },
@@ -479,6 +485,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -497,6 +504,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );

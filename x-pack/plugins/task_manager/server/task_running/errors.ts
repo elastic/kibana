@@ -56,10 +56,14 @@ export function isRetryableError(error: Error | DecoratedError) {
   return null;
 }
 
-export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
+export function createRetryableError(error: Error, shouldRetry: Date | boolean): DecoratedError {
   (error as DecoratedError)[code] = CODE_RETRYABLE;
   (error as DecoratedError)[retry] = shouldRetry;
-  throw error;
+  return error;
+}
+
+export function throwRetryableError(error: Error, shouldRetry: Date | boolean) {
+  throw createRetryableError(error, shouldRetry);
 }
 
 export function createTaskRunError(

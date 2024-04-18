@@ -10,6 +10,7 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { updateSavedSearch } from './update_saved_search';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 describe('updateSavedSearch', () => {
   const query: Query = {
@@ -71,6 +72,56 @@ describe('updateSavedSearch', () => {
     });
     expect(savedSearch.searchSource.getField('query')).toEqual(query);
     expect(savedSearch.searchSource.getField('filter')).toEqual([globalFilter, appFilter]);
+  });
+
+  it('should set time range is timeRestore is enabled', async () => {
+    const savedSearch: SavedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+      timeRestore: true,
+    };
+    (discoverServiceMock.timefilter.getTime as jest.Mock).mockReturnValue({
+      from: 'now-666m',
+      to: 'now',
+    });
+    updateSavedSearch({
+      savedSearch,
+      globalStateContainer: createGlobalStateContainer(),
+      services: discoverServiceMock,
+      state: {
+        query,
+        filters: [appFilter],
+      },
+    });
+    expect(savedSearch.timeRange).toEqual({
+      from: 'now-666m',
+      to: 'now',
+    });
+  });
+
+  it('should not set time range if timeRestore is not enabled', async () => {
+    const savedSearch: SavedSearch = {
+      ...savedSearchMock,
+      searchSource: savedSearchMock.searchSource.createCopy(),
+      timeRestore: false,
+    };
+    (discoverServiceMock.timefilter.getTime as jest.Mock).mockReturnValue({
+      from: 'now-666m',
+      to: 'now',
+    });
+    updateSavedSearch({
+      savedSearch,
+      globalStateContainer: createGlobalStateContainer(),
+      services: discoverServiceMock,
+      state: {
+        query,
+        filters: [appFilter],
+      },
+    });
+    expect(savedSearch.timeRange).not.toEqual({
+      from: 'now-666m',
+      to: 'now',
+    });
   });
 
   it('should set query and filters from services', async () => {

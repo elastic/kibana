@@ -14,7 +14,6 @@ import {
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getDetails } from '../../../../tasks/rule_details';
 import { ruleFields } from '../../../../data/detection_engine';
-import { getTimeline } from '../../../../objects/timeline';
 import { getExistingRule, getNewRule } from '../../../../objects/rule';
 
 import {
@@ -58,7 +57,7 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, function
     login();
     deleteAlertsAndRules();
     deleteConnectors();
-    createTimeline(getTimeline()).then((response) => {
+    createTimeline().then((response) => {
       createRule({
         ...getNewRule({
           rule_id: 'rulez',

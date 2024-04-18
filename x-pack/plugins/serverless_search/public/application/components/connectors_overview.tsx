@@ -31,7 +31,7 @@ export const ConnectorsOverview = () => {
   const { http, console: consolePlugin } = useKibanaServices();
   const { createConnector, isLoading } = useCreateConnector();
   const embeddableConsole = useMemo(
-    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
 

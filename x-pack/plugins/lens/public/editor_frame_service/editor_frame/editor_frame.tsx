@@ -115,7 +115,10 @@ export function EditorFrame(props: EditorFrameProps) {
   }, []);
 
   return (
-    <RootDragDropProvider dataTestSubj="lnsDragDrop" customMiddleware={telemetryMiddleware}>
+    <RootDragDropProvider
+      initialState={{ dataTestSubjPrefix: 'lnsDragDrop' }}
+      customMiddleware={telemetryMiddleware}
+    >
       <FrameLayout
         bannerMessages={
           bannerMessages.length ? (

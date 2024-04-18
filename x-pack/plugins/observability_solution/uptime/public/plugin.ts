@@ -56,6 +56,7 @@ import {
   ObservabilityAIAssistantPublicSetup,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
+import { UptimeConfig } from '../common/config';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -73,7 +74,7 @@ export interface ClientPluginsSetup {
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
@@ -89,7 +90,7 @@ export interface ClientPluginsStart {
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
@@ -119,9 +120,15 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
+    this.experimentalFeatures =
+      this.initContext.config.get().experimental || this.experimentalFeatures;
+  }
 
   private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private experimentalFeatures: UptimeConfig['experimental'] = {
+    ruleFormV2Enabled: false,
+  };
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
@@ -202,7 +209,14 @@ export class UptimePlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
         const { renderApp } = await import('./legacy_uptime/app/render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
+        return renderApp(
+          coreStart,
+          plugins,
+          corePlugins,
+          params,
+          this.initContext.env.mode.dev,
+          this.experimentalFeatures
+        );
       },
       updater$: this.uptimeAppUpdater,
     });

@@ -25,8 +25,8 @@ export interface LogsExplorerPluginStart {
 }
 
 export interface LogsExplorerSetupDeps {
-  share: SharePluginSetup;
   discover: DiscoverSetup;
+  share: SharePluginSetup;
 }
 
 export interface LogsExplorerStartDeps {
@@ -35,6 +35,6 @@ export interface LogsExplorerStartDeps {
   discover: DiscoverStart;
   fieldFormats: FieldFormatsStart;
   navigation: NavigationPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

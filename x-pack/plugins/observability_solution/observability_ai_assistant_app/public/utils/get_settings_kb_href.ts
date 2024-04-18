@@ -9,6 +9,6 @@ import { HttpStart } from '@kbn/core/public';
 
 export function getSettingsKnowledgeBaseHref(http: HttpStart) {
   return http!.basePath.prepend(
-    `/app/management/kibana/aiAssistantManagementObservability?tab=knowledge_base`
+    `/app/management/kibana/observabilityAiAssistantManagement?tab=knowledge_base`
   );
 }

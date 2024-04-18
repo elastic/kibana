@@ -14,7 +14,11 @@ import type { ElasticsearchApiToRedactInLogs } from './client';
  */
 export interface IElasticsearchConfig {
   /**
-   * The interval between health check requests Kibana sends to the Elasticsearch.
+   * The interval between health check requests Kibana sends to the Elasticsearch before the first green signal.
+   */
+  readonly healthCheckStartupDelay: Duration;
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   readonly healthCheckDelay: Duration;
 

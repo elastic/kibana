@@ -253,6 +253,11 @@ const RESTRICTED_IMPORTS = [
     importNames: ['Route'],
     message: 'Please use @kbn/shared-ux-router instead',
   },
+  {
+    name: 'rxjs/operators',
+    message:
+      'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
+  },
 ];
 
 module.exports = {
@@ -875,6 +880,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -897,6 +903,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
         'x-pack/plugins/observability_solution/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
+        'x-pack/plugins/observability_solution/slo/**/*.stories.*',
       ],
       rules: {
         'react/function-component-definition': [
@@ -926,6 +933,7 @@ module.exports = {
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
+        '@kbn/i18n/formatted_message_should_start_with_the_right_id': 'warn',
       },
     },
     {

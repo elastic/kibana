@@ -34,8 +34,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { HelpPopover } from '../components/help_popover';
-import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
@@ -65,25 +66,31 @@ import {
 import { AnomalyTimeline } from './anomaly_timeline';
 import type { FilterAction } from './explorer_constants';
 import { FILTER_ACTION } from './explorer_constants';
-// Explorer Charts
-// @ts-ignore
-import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
 // Anomalies Table
 // @ts-ignore
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-// Anomalies Map
-import { AnomaliesMap } from './anomalies_map';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import type { ExplorerState } from './reducers';
-import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
 import { useMlIndexUtils } from '../util/index_service';
+
+const AnnotationFlyout = dynamic(async () => ({
+  default: (await import('../components/annotations/annotation_flyout')).AnnotationFlyout,
+}));
+
+const AnomaliesMap = dynamic(async () => ({
+  default: (await import('./anomalies_map')).AnomaliesMap,
+}));
+
+const ExplorerChartsContainer = dynamic(async () => ({
+  default: (await import('./explorer_charts/explorer_charts_container')).ExplorerChartsContainer,
+}));
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;

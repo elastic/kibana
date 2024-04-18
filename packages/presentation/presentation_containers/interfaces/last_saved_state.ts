@@ -8,7 +8,7 @@
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 import { SerializedPanelState } from './serialized_state';
 
 export interface PublishesLastSavedState {

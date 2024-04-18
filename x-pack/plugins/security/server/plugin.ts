@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
@@ -269,6 +269,9 @@ export class SecurityPlugin
 
     registerSecurityUsageCollector({ usageCollection, config, license });
 
+    const getCurrentUser = (request: KibanaRequest) =>
+      this.getAuthentication().getCurrentUser(request);
+
     this.auditSetup = this.auditService.setup({
       license,
       config: config.audit,
@@ -276,7 +279,7 @@ export class SecurityPlugin
       http: core.http,
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
-      getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      getCurrentUser,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
 
@@ -293,7 +296,7 @@ export class SecurityPlugin
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: () => spaces?.spacesService,
       features,
-      getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      getCurrentUser,
       customBranding: core.customBranding,
     });
 
@@ -306,12 +309,14 @@ export class SecurityPlugin
       spaces,
       audit: this.auditSetup,
       authz: this.authorizationSetup,
+      getCurrentUser,
     });
 
     setupSavedObjects({
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
+      getCurrentUser,
     });
 
     this.registerDeprecations(core, license);

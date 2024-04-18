@@ -8,5 +8,5 @@
 import { HttpStart } from '@kbn/core/public';
 
 export function getSettingsHref(http: HttpStart) {
-  return http!.basePath.prepend(`/app/management/kibana/aiAssistantManagementObservability`);
+  return http!.basePath.prepend(`/app/management/kibana/observabilityAiAssistantManagement`);
 }

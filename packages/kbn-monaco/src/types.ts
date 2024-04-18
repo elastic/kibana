@@ -41,7 +41,7 @@ export interface CustomLangModuleType<Deps = unknown>
   onLanguage: () => void;
 }
 
-export interface EditorError {
+export interface MonacoEditorError {
   severity: monaco.MarkerSeverity;
   startLineNumber: number;
   startColumn: number;
@@ -54,13 +54,13 @@ export interface EditorError {
 export interface LangValidation {
   isValidating: boolean;
   isValid: boolean;
-  errors: EditorError[];
+  errors: MonacoEditorError[];
 }
 
 export interface SyntaxErrors {
-  [modelId: string]: EditorError[];
+  [modelId: string]: MonacoEditorError[];
 }
 
 export interface BaseWorkerDefinition {
-  getSyntaxErrors: (modelUri: string) => Promise<EditorError[] | undefined>;
+  getSyntaxErrors: (modelUri: string) => Promise<MonacoEditorError[] | undefined>;
 }

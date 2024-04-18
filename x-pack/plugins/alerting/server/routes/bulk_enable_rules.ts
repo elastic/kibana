@@ -35,8 +35,19 @@ export const bulkEnableRulesRoute = ({
           const { filter, ids } = req.body;
 
           try {
-            const result = await rulesClient.bulkEnableRules({ filter, ids });
-            return res.ok({ body: result });
+            const bulkEnableResults = await rulesClient.bulkEnableRules({ filter, ids });
+
+            const resultBody = {
+              body: {
+                ...bulkEnableResults,
+                // TODO We need to fix this API to return snake case like every other API
+                rules: bulkEnableResults.rules.map(({ actions, systemActions, ...rule }) => {
+                  return { ...rule, actions: [...actions, ...(systemActions ?? [])] };
+                }),
+              },
+            };
+
+            return res.ok(resultBody);
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);

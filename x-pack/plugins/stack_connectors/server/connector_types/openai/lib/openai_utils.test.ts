@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sanitizeRequest, getRequestWithStreamOption } from './openai_utils';
+import { sanitizeRequest, getRequestWithStreamOption, removeEndpointFromUrl } from './openai_utils';
 import {
   DEFAULT_OPENAI_MODEL,
   OPENAI_CHAT_URL,
@@ -180,6 +180,24 @@ describe('Open AI Utils', () => {
         DEFAULT_OPENAI_MODEL
       );
       expect(sanitizedBodyString).toEqual(bodyString);
+    });
+  });
+  describe('removeEndpointFromUrl', () => {
+    test('removes "/chat/completions" from the end of the URL', () => {
+      const originalUrl = 'https://api.openai.com/v1/chat/completions';
+      const expectedUrl = 'https://api.openai.com/v1';
+      expect(removeEndpointFromUrl(originalUrl)).toBe(expectedUrl);
+    });
+
+    test('does not modify the URL if it does not end with "/chat/completions"', () => {
+      const originalUrl = 'https://api.openai.com/v1/some/other/endpoint';
+      expect(removeEndpointFromUrl(originalUrl)).toBe(originalUrl);
+    });
+
+    test('handles URLs with a trailing slash correctly', () => {
+      const originalUrl = 'https://api.openai.com/v1/chat/completions/';
+      const expectedUrl = 'https://api.openai.com/v1';
+      expect(removeEndpointFromUrl(originalUrl)).toBe(expectedUrl);
     });
   });
 });

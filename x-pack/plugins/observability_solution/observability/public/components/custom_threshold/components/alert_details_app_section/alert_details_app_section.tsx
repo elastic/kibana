@@ -37,13 +37,15 @@ import type {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
+import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { TimeRange } from '@kbn/es-query';
 import { AlertHistoryChart } from './alert_history';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField } from '../../../..';
-import { AlertParams, MetricExpression } from '../../types';
+import { AlertParams } from '../../types';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
@@ -51,6 +53,9 @@ import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
+import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
@@ -58,44 +63,6 @@ interface AppSectionProps {
   ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
-
-const CHART_TITLE_LIMIT = 120;
-
-const equationResultText = i18n.translate('xpack.observability.customThreshold.alertChartTitle', {
-  defaultMessage: 'Equation result for ',
-});
-
-const generateChartTitleAndTooltip = (criterion: MetricExpression) => {
-  const metricNameResolver: Record<string, string> = {};
-
-  criterion.metrics.forEach(
-    (metric) =>
-      (metricNameResolver[metric.name] = `${metric.aggType} (${
-        metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
-      })`)
-  );
-
-  let equation = criterion.equation
-    ? criterion.equation
-    : criterion.metrics.map((m) => m.name).join(' + ');
-
-  Object.keys(metricNameResolver)
-    .sort()
-    .reverse()
-    .forEach((metricName) => {
-      equation = equation.replaceAll(metricName, metricNameResolver[metricName]);
-    });
-
-  const chartTitle =
-    equation.length > CHART_TITLE_LIMIT
-      ? `${equation.substring(0, CHART_TITLE_LIMIT)}...`
-      : equation;
-
-  return {
-    tooltip: `${equationResultText}${equation}`,
-    title: `${equationResultText}${chartTitle}`,
-  };
-};
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertDetailsAppSection({
@@ -105,19 +72,26 @@ export default function AlertDetailsAppSection({
   setAlertSummaryFields,
 }: AppSectionProps) {
   const services = useKibana().services;
-  const { charts, data } = services;
+  const {
+    charts,
+    data,
+    share: {
+      url: { locators },
+    },
+  } = services;
   const { hasAtLeast } = useLicense();
   const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
+  const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
-  const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
 
@@ -155,6 +129,25 @@ export default function AlertDetailsAppSection({
   annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
   useEffect(() => {
+    setTimeRange(getPaddedAlertTimeRange(alertStart!, alertEnd));
+  }, [alertStart, alertEnd]);
+
+  useEffect(() => {
+    const appUrl = getViewInAppUrl({
+      dataViewId: dataView?.id,
+      groups,
+      logsExplorerLocator: locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID),
+      metrics: ruleParams.criteria[0]?.metrics,
+      searchConfiguration:
+        ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
+      startedAt: alertStart,
+      endedAt: alertEnd,
+    });
+
+    setViewInAppUrl(appUrl);
+  }, [dataView, alertStart, alertEnd, groups, ruleParams, locators]);
+
+  useEffect(() => {
     const alertSummaryFields = [];
     if (groups) {
       alertSummaryFields.push({
@@ -164,7 +157,28 @@ export default function AlertDetailsAppSection({
             defaultMessage: 'Source',
           }
         ),
-        value: <Groups groups={groups} />,
+        value: (
+          <>
+            <Groups
+              groups={groups}
+              timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+            />
+            <span>
+              <EuiLink
+                data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
+                href={viewInAppUrl}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
+                  {
+                    defaultMessage: 'View related logs',
+                  }
+                )}
+              </EuiLink>
+            </span>
+          </>
+        ),
       });
     }
     if (tags && tags.length > 0) {
@@ -193,7 +207,7 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields, timeRange, alertEnd, viewInAppUrl]);
 
   useEffect(() => {
     const initDataView = async () => {
@@ -210,7 +224,11 @@ export default function AlertDetailsAppSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource]);
 
-  const overview = !!ruleParams.criteria ? (
+  if (!ruleParams.criteria) {
+    return null;
+  }
+
+  return (
     <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
       {ruleParams.criteria.map((criterion, index) => (
         <EuiFlexItem key={`criterion-${index}`}>
@@ -278,7 +296,5 @@ export default function AlertDetailsAppSection({
       )}
       <AlertHistoryChart alert={alert} dataView={dataView} rule={rule} />
     </EuiFlexGroup>
-  ) : null;
-
-  return overview;
+  );
 }

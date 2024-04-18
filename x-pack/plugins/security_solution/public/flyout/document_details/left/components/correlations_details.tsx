@@ -21,7 +21,7 @@ import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_relat
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
 
-export const CORRELATIONS_TAB_ID = 'correlations-details';
+export const CORRELATIONS_TAB_ID = 'correlations';
 
 /**
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
@@ -51,7 +51,7 @@ export const CorrelationsDetails: React.FC = () => {
     getFieldsData,
   });
   const { show: showAlertsBySession, entityId } = useShowRelatedAlertsBySession({ getFieldsData });
-  const showCases = useShowRelatedCases();
+  const showCases = useShowRelatedCases({ getFieldsData });
   const { show: showSuppressedAlerts, alertSuppressionCount } = useShowSuppressedAlerts({
     getFieldsData,
   });

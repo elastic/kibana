@@ -12,6 +12,7 @@ import {
   ALERT_END,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -22,7 +23,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { EuiCallOut } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
@@ -31,11 +37,7 @@ import { getAggsTypeFromRule } from './helpers';
 import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
 import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
-import {
-  AlertDetailsAppSectionProps,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from './types';
+import { AlertDetailsAppSectionProps } from './types';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 export function AlertDetailsAppSection({
@@ -50,8 +52,11 @@ export function AlertDetailsAppSection({
   const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
   const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
   const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
+
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const serviceName = String(alert.fields[SERVICE_NAME]);
+  const transactionName = alert.fields[TRANSACTION_NAME];
+  const transactionType = alert.fields[TRANSACTION_TYPE];
 
   useEffect(() => {
     const alertSummaryFields = [
@@ -62,10 +67,7 @@ export function AlertDetailsAppSection({
             defaultMessage="Actual value"
           />
         ),
-        value: formatAlertEvaluationValue(
-          alertRuleTypeId,
-          alertEvaluationValue
-        ),
+        value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationValue),
       },
       {
         label: (
@@ -74,10 +76,7 @@ export function AlertDetailsAppSection({
             defaultMessage="Expected value"
           />
         ),
-        value: formatAlertEvaluationValue(
-          alertRuleTypeId,
-          alertEvaluationThreshold
-        ),
+        value: formatAlertEvaluationValue(alertRuleTypeId, alertEvaluationThreshold),
       },
       {
         label: (
@@ -97,6 +96,19 @@ export function AlertDetailsAppSection({
         ),
         value: serviceName,
       },
+      ...(transactionName
+        ? [
+            {
+              label: (
+                <FormattedMessage
+                  id="xpack.apm.pages.alertDetails.alertSummary.transactionName"
+                  defaultMessage="Transaction name"
+                />
+              ),
+              value: transactionName,
+            },
+          ]
+        : []),
     ];
     setAlertSummaryFields(alertSummaryFields);
   }, [
@@ -105,16 +117,13 @@ export function AlertDetailsAppSection({
     alertEvaluationThreshold,
     environment,
     serviceName,
+    transactionName,
     setAlertSummaryFields,
   ]);
 
   const params = rule.params;
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
-  const timeRange = getPaddedAlertTimeRange(
-    alert.fields[ALERT_START]!,
-    alert.fields[ALERT_END]
-  );
-  const transactionType = alert.fields[TRANSACTION_TYPE];
+  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const comparisonChartTheme = getComparisonChartTheme();
   const historicalRange = useMemo(() => {
     return {
@@ -160,6 +169,7 @@ export function AlertDetailsAppSection({
             <LatencyChart
               alert={alert}
               transactionType={transactionType}
+              transactionName={transactionName}
               serviceName={serviceName}
               environment={environment}
               start={from}
@@ -174,6 +184,7 @@ export function AlertDetailsAppSection({
             <EuiFlexGroup direction="row" gutterSize="s">
               <ThroughputChart
                 transactionType={transactionType}
+                transactionName={transactionName}
                 serviceName={serviceName}
                 environment={environment}
                 start={from}
@@ -185,6 +196,7 @@ export function AlertDetailsAppSection({
               />
               <FailedTransactionChart
                 transactionType={transactionType}
+                transactionName={transactionName}
                 serviceName={serviceName}
                 environment={environment}
                 start={from}
@@ -197,6 +209,7 @@ export function AlertDetailsAppSection({
           <EuiFlexItem grow={false}>
             <LatencyAlertsHistoryChart
               ruleId={alert.fields[ALERT_RULE_UUID]}
+              alertInstanceId={alert.fields[ALERT_INSTANCE_ID]}
               serviceName={serviceName}
               start={historicalRange.start}
               end={historicalRange.end}

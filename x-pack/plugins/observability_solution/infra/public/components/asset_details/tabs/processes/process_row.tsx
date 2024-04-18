@@ -34,28 +34,21 @@ interface Props {
   supportAIAssistant?: boolean;
 }
 export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
-  const {
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-  } = useKibanaContextForPlugin().services;
+  const { observabilityAIAssistant } = useKibanaContextForPlugin().services;
 
   const explainProcessMessages = useMemo<Message[] | undefined>(() => {
-    if (!command) {
+    if (!command || !observabilityAIAssistant) {
       return undefined;
     }
 
-    return getContextualInsightMessages({
+    return observabilityAIAssistant.getContextualInsightMessages({
       message: `I am a software engineer. I am trying to understand what this process running on my
       machine does.`,
       instructions: `Your task is to first describe what the process is and what its general use cases are. If I also provide you
       with the arguments to the process you should then explain its arguments and how they influence the behaviour
       of the process. If I do not provide any arguments then explain the behaviour of the process when no arguments are
       provided.
-      If you do not recognise the process say "No information available for this process". If I provide an argument
-      to the process that you do not recognise then say "No information available for this argument" when explaining
-      that argument.
+      
       Here is an example with arguments.
       Process: metricbeat -c /etc/metricbeat.yml -d autodiscover,kafka -e -system.hostfs=/hostfs
       Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
@@ -90,14 +83,15 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
       Process: ${command}
       Explanation:`,
     });
-  }, [command, getContextualInsightMessages]);
+  }, [command, observabilityAIAssistant]);
   return (
     <>
-      {ObservabilityAIAssistantContextualInsight && explainProcessMessages ? (
+      {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight &&
+      explainProcessMessages ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ObservabilityAIAssistantContextualInsight
+              <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
                 title={explainProcessMessageTitle}
                 messages={explainProcessMessages}
               />

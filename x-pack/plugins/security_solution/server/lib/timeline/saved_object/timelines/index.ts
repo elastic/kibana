@@ -548,27 +548,18 @@ export const updatePartialSavedTimeline = async (
 
 export const resetTimeline = async (
   request: FrameworkRequest,
-  timelineIds: string[],
+  timelineId: string,
   timelineType: TimelineType
 ) => {
-  if (!timelineIds.length) {
-    return Promise.reject(new Error('timelineIds is empty'));
-  }
+  await Promise.all([
+    note.deleteNotesByTimelineId(request, timelineId),
+    pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+  ]);
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
-      Promise.all([
-        note.deleteNoteByTimelineId(request, timelineId),
-        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
-      ])
-    )
-  );
-
-  const response = await Promise.all(
-    timelineIds.map((timelineId) =>
-      updatePartialSavedTimeline(request, timelineId, { ...draftTimelineDefaults, timelineType })
-    )
-  );
+  const response = await updatePartialSavedTimeline(request, timelineId, {
+    ...draftTimelineDefaults,
+    timelineType,
+  });
 
   return response;
 };
@@ -584,7 +575,7 @@ export const deleteTimeline = async (
     ...timelineIds.map((timelineId) =>
       Promise.all([
         savedObjectsClient.delete(timelineSavedObjectType, timelineId),
-        note.deleteNoteByTimelineId(request, timelineId),
+        note.deleteNotesByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
     ),

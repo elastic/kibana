@@ -17,6 +17,7 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
   children,
   pageChrome,
   pageViewTelemetry,
+  restrictWidth = true,
   ...pageTemplateProps
 }) => {
   return (
@@ -26,7 +27,7 @@ export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = 
         items: useEnterpriseSearchNav(),
         name: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME,
       }}
-      restrictWidth
+      restrictWidth={restrictWidth}
       setPageChrome={pageChrome && <SetEnterpriseSearchContentChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (

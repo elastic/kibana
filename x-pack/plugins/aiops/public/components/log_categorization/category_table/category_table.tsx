@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+import moment from 'moment';
 
 import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
@@ -24,14 +25,9 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
-
-import moment from 'moment';
-import type { CategorizationAdditionalFilter } from '../../../../common/api/log_categorization/create_category_request';
-import {
-  type QueryMode,
-  QUERY_MODE,
-} from '../../../../common/api/log_categorization/get_category_query';
-import type { Category } from '../../../../common/api/log_categorization/types';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { type QueryMode, QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';

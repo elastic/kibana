@@ -12,9 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { PLUGIN_ID } from '@kbn/reporting-common';
-import type { ReportingConfigType } from '@kbn/reporting-server';
-import { setFieldFormats } from '@kbn/reporting-server';
+import { PLUGIN_ID, setFieldFormats, type ReportingConfigType } from '@kbn/reporting-server';
 import { ReportingCore } from '.';
 import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';

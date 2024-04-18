@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { getHostMetadata } from './api';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
@@ -23,10 +24,12 @@ interface HostIsolationStatusResponse {
 
 /*
  * Retrieves the current isolation status of a host and the agent/host status */
-export const useHostIsolationStatus = ({
+export const useEndpointHostIsolationStatus = ({
   agentId,
+  agentType,
 }: {
   agentId: string;
+  agentType: ResponseActionAgentType;
 }): HostIsolationStatusResponse => {
   const [isIsolated, setIsIsolated] = useState<boolean>(false);
   const [capabilities, setCapabilities] = useState<string[]>([]);
@@ -64,6 +67,10 @@ export const useHostIsolationStatus = ({
         }
       }
 
+      if (!(fleetAgentId && fleetAgentId.length)) {
+        return;
+      }
+
       try {
         const { data } = await fetchPendingActionsByAgentId(fleetAgentId);
         if (isMounted) {
@@ -80,7 +87,7 @@ export const useHostIsolationStatus = ({
       }
     };
 
-    if (!isEmpty(agentId)) {
+    if (!isEmpty(agentId) && agentType === 'endpoint') {
       fetchData();
     }
     return () => {
@@ -88,6 +95,6 @@ export const useHostIsolationStatus = ({
       isMounted = false;
       abortCtrl.abort();
     };
-  }, [agentId]);
+  }, [agentId, agentType]);
   return { loading, capabilities, isIsolated, agentStatus, pendingIsolation, pendingUnisolation };
 };

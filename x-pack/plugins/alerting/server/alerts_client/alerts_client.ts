@@ -277,6 +277,10 @@ export class AlertsClient<
     }
   }
 
+  public isTrackedAlert(id: string) {
+    return this.legacyAlertsClient.isTrackedAlert(id);
+  }
+
   public hasReachedAlertLimit(): boolean {
     return this.legacyAlertsClient.hasReachedAlertLimit();
   }
@@ -409,7 +413,7 @@ export class AlertsClient<
       this.legacyAlertsClient.getAlertsToSerialize(false);
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
+    const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -474,7 +478,7 @@ export class AlertsClient<
       // If there is not, log an error because there should be
       if (this.fetchedAlerts.data.hasOwnProperty(id)) {
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
+          currentRecoveredAlerts[id]
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -483,7 +487,7 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: this.fetchedAlerts.data[id],
-                legacyAlert: recoveredAlerts[id],
+                legacyAlert: currentRecoveredAlerts[id],
                 rule: this.rule,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
@@ -499,7 +503,7 @@ export class AlertsClient<
         );
       } else {
         this.options.logger.debug(
-          `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
+          `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
             id
           ].getUuid()}`
         );
@@ -745,6 +749,7 @@ export class AlertsClient<
           WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
         >
       ) => this.report(alert),
+      isTrackedAlert: (id: string) => this.isTrackedAlert(id),
       setAlertData: (
         alert: UpdateableAlert<AlertData, LegacyState, LegacyContext, RecoveryActionGroupId>
       ) => this.setAlertData(alert),

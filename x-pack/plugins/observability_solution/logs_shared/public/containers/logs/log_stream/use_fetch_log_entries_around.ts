@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { last, map, startWith, switchMap } from 'rxjs/operators';
+import { last, map, startWith, switchMap } from 'rxjs';
 import { subtractMillisecondsFromDate } from '../../../../common/utils';
 import { LogEntryCursor } from '../../../../common/log_entry';
 import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
