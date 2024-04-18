@@ -36,6 +36,7 @@ import {
 import type { TelemetryLogger } from '../telemetry_logger';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
+import { fetchClusterData } from '../kbn-rs/telemetry';
 
 // Endpoint agent uses this Policy ID while it's installing.
 const DefaultEndpointPolicyIdToIgnore = '00000000-0000-0000-0000-000000000000';
@@ -202,20 +203,6 @@ async function fetchEndpointData(
     epPolicyResponse: safeValue(policyResponse),
     endpointMetadata: safeValue(endpointMetadata),
   };
-}
-
-async function fetchClusterData(
-  receiver: ITelemetryReceiver
-): Promise<{ clusterInfo: ESClusterInfo; licenseInfo: Nullable<ESLicense> }> {
-  const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
-    receiver.fetchClusterInfo(),
-    receiver.fetchLicenseInfo(),
-  ]);
-
-  const clusterInfo = safeValue(clusterInfoPromise);
-  const licenseInfo = safeValue(licenseInfoPromise);
-
-  return { clusterInfo, licenseInfo };
 }
 
 async function endpointPolicies(
