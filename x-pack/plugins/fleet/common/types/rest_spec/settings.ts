@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Settings } from '../models';
+import type { Settings, AgentPolicy, FleetServerHost, FleetProxy, DownloadSource } from '../models';
 
 export interface GetSettingsResponse {
   item: Settings;
@@ -17,4 +17,16 @@ export interface PutSettingsRequest {
 
 export interface PutSettingsResponse {
   item: Settings;
+}
+
+export interface GetEnrollmentSettingsResponse {
+  fleet_server: {
+    agent_policies: Array<
+      Pick<AgentPolicy, 'id' | 'name' | 'fleet_server_host_id' | 'download_source_id'>
+    >;
+    has_active: boolean;
+    host?: FleetServerHost;
+    host_proxy?: FleetProxy;
+  };
+  download_source?: DownloadSource;
 }
