@@ -105,12 +105,23 @@ export class PluginServices {
 
     const { savedObjectsTaggingOss, ...plugins } = startPlugins;
 
-    const query = this.queryService.start({
-      uiSettings: coreStart.uiSettings,
-      storage: this.storage,
-      http: coreStart.http,
-    });
-    const customDataService = this.startCustomDataService(query, startPlugins.data);
+    const customDataService = this.startCustomDataService(
+      this.queryService.start({
+        uiSettings: coreStart.uiSettings,
+        storage: this.storage,
+        http: coreStart.http,
+      }),
+      startPlugins.data
+    );
+
+    const timelineDataService = this.startTimelineDataService(
+      this.queryService.start({
+        uiSettings: coreStart.uiSettings,
+        storage: this.storage,
+        http: coreStart.http,
+      }),
+      startPlugins.data
+    );
 
     return {
       ...coreStart,
@@ -128,8 +139,8 @@ export class PluginServices {
       contentManagement: startPlugins.contentManagement,
       telemetry: this.telemetry.start(),
       customDataService,
+      timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
-      timelineDataService: this.startTimelineDataService(query, startPlugins.data),
     };
   }
 
@@ -152,6 +163,7 @@ export class PluginServices {
   };
 
   private startTimelineDataService = (query: QueryStart, data: DataPublicPluginStart) => {
+    // Used in the unified timeline
     return {
       ...data,
       query,
