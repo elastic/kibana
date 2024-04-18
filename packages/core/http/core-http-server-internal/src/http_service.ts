@@ -242,9 +242,11 @@ export class HttpService
     if (!basePath || !server) {
       throw new Error('Cannot register OAS API before server setup is complete');
     }
+
     const baseUrl =
-      basePath!.publicBaseUrl ?? `http://localhost:${config.port}${basePath.serverBasePath}`;
-    server!.route({
+      basePath.publicBaseUrl ?? `http://localhost:${config.port}${basePath.serverBasePath}`;
+
+    server.route({
       path: '/api/oas',
       method: 'GET',
       handler: async (req, h) => {
