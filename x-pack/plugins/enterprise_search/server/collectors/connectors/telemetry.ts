@@ -130,6 +130,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 accessControl: {
                   total: { type: 'long' },
@@ -142,6 +146,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 full: {
                   total: { type: 'long' },
@@ -154,6 +162,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 incremental: {
                   total: { type: 'long' },
@@ -166,6 +178,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
               },
               last7Days: {
@@ -180,6 +196,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 accessControl: {
                   total: { type: 'long' },
@@ -192,6 +212,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 full: {
                   total: { type: 'long' },
@@ -204,6 +228,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 incremental: {
                   total: { type: 'long' },
@@ -216,6 +244,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
               },
             },
@@ -233,6 +265,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 accessControl: {
                   total: { type: 'long' },
@@ -245,6 +281,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 full: {
                   total: { type: 'long' },
@@ -257,6 +297,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 incremental: {
                   total: { type: 'long' },
@@ -269,6 +313,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
               },
               last7Days: {
@@ -283,6 +331,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 accessControl: {
                   total: { type: 'long' },
@@ -295,6 +347,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 full: {
                   total: { type: 'long' },
@@ -307,6 +363,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
                 incremental: {
                   total: { type: 'long' },
@@ -319,6 +379,10 @@ export const registerTelemetryUsageCollector = (
                   idle: { type: 'long' },
                   running: { type: 'long' },
                   totalDurationSeconds: { type: 'long' },
+                  topErrors: {
+                    type: 'array',
+                    items: { type: 'keyword' },
+                  },
                 },
               },
             },

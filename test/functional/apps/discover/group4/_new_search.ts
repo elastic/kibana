@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
+  const dataViews = getService('dataViews');
 
   describe('discover new search action', function () {
     before(async function () {
@@ -61,9 +62,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should work correctly for a saved search in data view mode', async function () {
-      await PageObjects.discover.createAdHocDataView('logs*', true);
+      await dataViews.createFromSearchBar({
+        name: 'logs*',
+        adHoc: true,
+        hasTimeField: true,
+      });
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await queryBar.setQuery('bytes > 100');
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -81,10 +88,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getHitCount()).to.be('14,004');
       expect(await filterBar.hasFilter('extension', 'css')).to.be(false);
       expect(await queryBar.getQueryString()).to.be('');
-      expect(
-        await PageObjects.unifiedSearch.getSelectedDataView('discover-dataView-switch-link')
-      ).to.be('logs**');
-      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(true);
+      expect(await dataViews.getSelectedName()).to.be('logs**');
+      expect(await dataViews.isAdHoc()).to.be(true);
     });
 
     it('should work correctly for ESQL mode', async () => {
@@ -96,12 +101,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await PageObjects.discover.getHitCountInt()).to.greaterThan(10);
-      await testSubjects.existOrFail('unifiedHistogramSuggestionSelector');
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
-      await testSubjects.missingOrFail('unifiedHistogramSuggestionSelector'); // histogram also updated
+      expect(await PageObjects.discover.getVisContextSuggestionType()).to.be('histogramForESQL');
       expect(await PageObjects.discover.getHitCount()).to.be('10');
     });
 
@@ -114,7 +119,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await PageObjects.discover.getHitCountInt()).to.greaterThan(10);
-      await testSubjects.existOrFail('unifiedHistogramSuggestionSelector');
 
       await PageObjects.discover.saveSearch('esql');
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -123,7 +127,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
-      await testSubjects.missingOrFail('unifiedHistogramSuggestionSelector'); // histogram also updated
       expect(await PageObjects.discover.getHitCount()).to.be('10');
     });
   });

@@ -16,13 +16,22 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+
+  // Add an ID to each citation to use for expanding the row
+  const citationsWithId = citations.map((citation) => ({
+    ...citation,
+    id: citation.metadata._id,
+  }));
+
   const toggleDetails = (citation: Doc) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
-    if (itemIdToExpandedRowMapValues[citation.id]) {
-      delete itemIdToExpandedRowMapValues[citation.id];
+    if (itemIdToExpandedRowMapValues[citation.metadata._id]) {
+      delete itemIdToExpandedRowMapValues[citation.metadata._id];
     } else {
-      itemIdToExpandedRowMapValues[citation.id] = <EuiText size="s">{citation.content}</EuiText>;
+      itemIdToExpandedRowMapValues[citation.metadata._id] = (
+        <EuiText size="s">{citation.content}</EuiText>
+      );
     }
 
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
@@ -32,9 +41,9 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
     <EuiBasicTable
       columns={[
         {
-          field: 'id',
+          field: 'metadata._id',
           name: i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.idField', {
-            defaultMessage: 'Index Id',
+            defaultMessage: 'Index ID',
           }),
           truncateText: true,
         },
@@ -49,8 +58,11 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
+                data-test-subj={`expandButton-${citation.metadata._id}`}
                 onClick={() => toggleDetails(citation)}
-                iconType={itemIdToExpandedRowMapValues[citation.id] ? 'arrowDown' : 'arrowRight'}
+                iconType={
+                  itemIdToExpandedRowMapValues[citation.metadata._id] ? 'arrowDown' : 'arrowRight'
+                }
               >
                 {i18n.translate('xpack.searchPlayground.chat.message.assistant.citations.snippet', {
                   defaultMessage: 'Snippet',
@@ -60,7 +72,7 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
           },
         },
       ]}
-      items={citations}
+      items={citationsWithId}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable

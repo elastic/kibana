@@ -64,6 +64,7 @@ describe('ml_executor', () => {
       errors: [],
       createdItems: [],
     });
+    jobsSummaryMock.mockResolvedValue([]);
   });
 
   it('should throw an error if ML plugin was not available', async () => {
@@ -130,5 +131,27 @@ describe('ml_executor', () => {
       'Machine learning job(s) are not started'
     );
     expect(response.warningMessages.length).toEqual(1);
+  });
+
+  it('should report job missing errors as user errors', async () => {
+    (findMlSignals as jest.Mock).mockRejectedValue({
+      message: 'my_test_job_name missing',
+    });
+
+    const result = await mlExecutor({
+      completeRule: mlCompleteRule,
+      tuple,
+      ml: mlMock,
+      services: alertServices,
+      ruleExecutionLogger,
+      listClient,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
+      exceptionFilter: undefined,
+      unprocessedExceptions: [],
+    });
+    expect(result.userError).toEqual(true);
+    expect(result.success).toEqual(false);
+    expect(result.errors).toEqual(['my_test_job_name missing']);
   });
 });

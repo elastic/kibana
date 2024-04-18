@@ -17,10 +17,7 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../../types';
+import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
 import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
 import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
@@ -59,13 +56,12 @@ export async function createCloudApmPackgePolicy({
     fleetPluginStart,
     request,
   });
-  const mergedAPMPackagePolicy =
-    await decoratePackagePolicyWithAgentConfigAndSourceMap({
-      internalESClient,
-      packagePolicy: apmPackagePolicyDefinition,
-      fleetPluginStart,
-      apmIndices,
-    });
+  const mergedAPMPackagePolicy = await decoratePackagePolicyWithAgentConfigAndSourceMap({
+    internalESClient,
+    packagePolicy: apmPackagePolicyDefinition,
+    fleetPluginStart,
+    apmIndices,
+  });
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create start`);
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(
     savedObjectsClient,
