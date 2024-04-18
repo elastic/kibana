@@ -10,7 +10,9 @@ import React, { memo } from 'react';
 import { Provider } from 'react-redux';
 import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
+import useObservable from 'react-use/lib/useObservable';
 import type { Store } from 'redux';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -35,23 +37,29 @@ export const AppRootProvider = memo<{
   queryClient: QueryClient;
   children: ReactNode | ReactNode[];
 }>(({ store, history, coreStart, queryClient, startServices, children }) => {
+  const { theme: themeStart } = coreStart;
+  const theme = useObservable(themeStart.theme$, themeStart.getTheme());
+  const isDarkMode = theme.darkMode;
+
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <Provider store={store}>
         <KibanaContextProvider services={startServices}>
-          <QueryClientProvider client={queryClient}>
-            <UpsellingProvider upsellingService={startServices.upselling}>
-              <MockAssistantProvider>
-                <NavigationProvider core={coreStart}>
-                  <Router history={history}>
-                    <ConsoleManager>
-                      <RouteCapture>{children}</RouteCapture>
-                    </ConsoleManager>
-                  </Router>
-                </NavigationProvider>
-              </MockAssistantProvider>
-            </UpsellingProvider>
-          </QueryClientProvider>
+          <EuiThemeProvider darkMode={isDarkMode}>
+            <QueryClientProvider client={queryClient}>
+              <UpsellingProvider upsellingService={startServices.upselling}>
+                <MockAssistantProvider>
+                  <NavigationProvider core={coreStart}>
+                    <Router history={history}>
+                      <ConsoleManager>
+                        <RouteCapture>{children}</RouteCapture>
+                      </ConsoleManager>
+                    </Router>
+                  </NavigationProvider>
+                </MockAssistantProvider>
+              </UpsellingProvider>
+            </QueryClientProvider>
+          </EuiThemeProvider>
         </KibanaContextProvider>
       </Provider>
     </KibanaRenderContextProvider>

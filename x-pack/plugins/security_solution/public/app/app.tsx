@@ -14,6 +14,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AppMountParameters } from '@kbn/core/public';
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UpsellingProvider } from '../common/components/upselling_provider';
@@ -22,7 +23,7 @@ import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana, useDarkMode } from '../common/lib/kibana';
 import type { State } from '../common/store';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
@@ -46,31 +47,35 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     upselling,
   } = services;
 
+  const darkMode = useDarkMode();
+
   return (
     <KibanaRenderContextProvider {...services}>
       <ManageGlobalToaster>
         <ReduxStoreProvider store={store}>
-          <MlCapabilitiesProvider>
-            <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-              <ManageUserInfo>
-                <NavigationProvider core={services}>
-                  <ReactQueryClientProvider>
-                    <CellActionsProvider
-                      getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                    >
-                      <UpsellingProvider upsellingService={upselling}>
-                        <DiscoverInTimelineContextProvider>
-                          <AssistantProvider>
-                            <PageRouter history={history}>{children}</PageRouter>
-                          </AssistantProvider>
-                        </DiscoverInTimelineContextProvider>
-                      </UpsellingProvider>
-                    </CellActionsProvider>
-                  </ReactQueryClientProvider>
-                </NavigationProvider>
-              </ManageUserInfo>
-            </UserPrivilegesProvider>
-          </MlCapabilitiesProvider>
+          <EuiThemeProvider darkMode={darkMode}>
+            <MlCapabilitiesProvider>
+              <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                <ManageUserInfo>
+                  <NavigationProvider core={services}>
+                    <ReactQueryClientProvider>
+                      <CellActionsProvider
+                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                      >
+                        <UpsellingProvider upsellingService={upselling}>
+                          <DiscoverInTimelineContextProvider>
+                            <AssistantProvider>
+                              <PageRouter history={history}>{children}</PageRouter>
+                            </AssistantProvider>
+                          </DiscoverInTimelineContextProvider>
+                        </UpsellingProvider>
+                      </CellActionsProvider>
+                    </ReactQueryClientProvider>
+                  </NavigationProvider>
+                </ManageUserInfo>
+              </UserPrivilegesProvider>
+            </MlCapabilitiesProvider>
+          </EuiThemeProvider>
           <ErrorToastDispatcher />
           <GlobalToaster />
         </ReduxStoreProvider>
