@@ -57,6 +57,11 @@ export const getSignificantTermRequest = (
   }
 
   const pValueAgg: Record<'change_point_p_value', estypes.AggregationsAggregationContainer> = {
+    value_count: {
+      cardinality: {
+        field: fieldName,
+      },
+    },
     change_point_p_value: {
       significant_terms: {
         field: fieldName,
@@ -161,10 +166,23 @@ export const fetchSignificantTermPValues = async (
       randomSamplerWrapper.unwrap(resp.aggregations) as Record<'change_point_p_value', Aggs>
     ).change_point_p_value;
 
+    const valueCount = (
+      randomSamplerWrapper.unwrap(resp.aggregations) as Record<
+        'value_count',
+        estypes.AggregationsCardinalityAggregate
+      >
+    ).value_count.value;
+
+    // console.log('valueCount', fieldName, valueCount, overallResult.buckets.length);
+
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);
 
-      if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD) {
+      if (
+        typeof pValue === 'number' &&
+        pValue < LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD &&
+        valueCount > 1
+      ) {
         result.push({
           key: `${fieldName}:${String(bucket.key)}`,
           type: SIGNIFICANT_ITEM_TYPE.KEYWORD,
