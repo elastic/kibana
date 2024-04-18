@@ -33,6 +33,8 @@ export function defineQueryApiKeysAndAggregationsRoute({
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(
+    // SECURITY: We don't apply any authorization tags (e.g., access:security) to this route because all actions performed
+    // on behalf of the user making the request and governed by the user's own cluster privileges.
     {
       path: '/internal/security/api_key/_query',
       validate: {
