@@ -32,7 +32,7 @@ describe('getResponseActionsClient()', () => {
   );
 
   it(`should throw error if agentType is not supported`, () => {
-    // @ts-ignore
+    // @ts-expect-error Argument of type "foo" is not assignable to ResponseActionAgentType
     expect(() => getResponseActionsClient('foo', options)).toThrow(
       UnsupportedResponseActionsAgentTypeError
     );
