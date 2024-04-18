@@ -9,15 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
-const errorToastTitle = i18n.translate(
-  'xpack.apm.anomalyDetection.createJobs.failed.title',
-  { defaultMessage: 'Anomaly detection jobs could not be created' }
-);
+const errorToastTitle = i18n.translate('xpack.apm.anomalyDetection.createJobs.failed.title', {
+  defaultMessage: 'Anomaly detection jobs could not be created',
+});
 
-const successToastTitle = i18n.translate(
-  'xpack.apm.anomalyDetection.createJobs.succeeded.title',
-  { defaultMessage: 'Anomaly detection jobs created' }
-);
+const successToastTitle = i18n.translate('xpack.apm.anomalyDetection.createJobs.succeeded.title', {
+  defaultMessage: 'Anomaly detection jobs created',
+});
 
 export async function createJobs({
   environments,
@@ -49,14 +47,11 @@ export async function createJobs({
 }
 
 function getSuccessToastMessage(environments: string[]) {
-  return i18n.translate(
-    'xpack.apm.anomalyDetection.createJobs.succeeded.text',
-    {
-      defaultMessage:
-        'Anomaly detection jobs successfully created for APM service environments [{environments}]. It will take some time for machine learning to start analyzing traffic for anomalies.',
-      values: { environments: environments.join(', ') },
-    }
-  );
+  return i18n.translate('xpack.apm.anomalyDetection.createJobs.succeeded.text', {
+    defaultMessage:
+      'Anomaly detection jobs successfully created for APM service environments [{environments}]. It will take some time for machine learning to start analyzing traffic for anomalies.',
+    values: { environments: environments.join(', ') },
+  });
 }
 
 function getErrorToastMessage(environments: string[], error: Error) {

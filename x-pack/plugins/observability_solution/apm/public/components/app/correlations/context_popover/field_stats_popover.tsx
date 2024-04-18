@@ -24,12 +24,7 @@ import {
   FieldTopValuesBucket,
   type FieldTopValuesBucketParams,
 } from '@kbn/unified-field-list/src/components/field_stats';
-import {
-  EuiHorizontalRule,
-  EuiText,
-  EuiSpacer,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiText, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
@@ -68,10 +63,7 @@ export type OnAddFilter = ({
   include: boolean;
 }) => void;
 
-type FieldStatsPopoverContentProps = Omit<
-  FieldStatsProps,
-  'dataViewOrDataViewId'
-> & {
+type FieldStatsPopoverContentProps = Omit<FieldStatsProps, 'dataViewOrDataViewId'> & {
   fieldName: string;
   fieldValue: string | number;
   dslQuery: object;
@@ -91,8 +83,7 @@ export function FieldStatsPopoverContent({
   onAddFilter,
   overrideFieldTopValueBar,
 }: FieldStatsPopoverContentProps) {
-  const [needToFetchIndividualStat, setNeedToFetchIndividualStat] =
-    useState(false);
+  const [needToFetchIndividualStat, setNeedToFetchIndividualStat] = useState(false);
 
   const onStateChange = useCallback(
     (nextState: FieldStatsState) => {
@@ -102,9 +93,7 @@ export function FieldStatsPopoverContent({
         : null;
 
       setNeedToFetchIndividualStat(
-        idxToHighlight === -1 &&
-          fieldName !== undefined &&
-          fieldValue !== undefined
+        idxToHighlight === -1 && fieldName !== undefined && fieldValue !== undefined
       );
     },
     [fieldName, fieldValue]
@@ -114,20 +103,17 @@ export function FieldStatsPopoverContent({
   const { data: fieldValueStats, status } = useFetcher(
     (callApmApi) => {
       if (needToFetchIndividualStat) {
-        return callApmApi(
-          'GET /internal/apm/correlations/field_value_stats/transactions',
-          {
-            params: {
-              query: {
-                ...params,
-                fieldName,
-                fieldValue,
-                // Using sampler shard size to match with unified field list's default
-                samplerShardSize: '5000',
-              },
+        return callApmApi('GET /internal/apm/correlations/field_value_stats/transactions', {
+          params: {
+            query: {
+              ...params,
+              fieldName,
+              fieldValue,
+              // Using sampler shard size to match with unified field list's default
+              samplerShardSize: '5000',
             },
-          }
-        );
+          },
+        });
       }
     },
     [params, fieldName, fieldValue, needToFetchIndividualStat]
@@ -158,17 +144,13 @@ export function FieldStatsPopoverContent({
             />
           </EuiText>
           <EuiSpacer size="s" />
-          {status === FETCH_STATUS.SUCCESS &&
-          Array.isArray(fieldValueStats?.topValues) ? (
+          {status === FETCH_STATUS.SUCCESS && Array.isArray(fieldValueStats?.topValues) ? (
             fieldValueStats?.topValues.map((value) => {
               if (progressBarMax === undefined) return null;
 
               const formatted = formatter.convert(fieldValue);
               const decimal = value.doc_count / progressBarMax;
-              const valueText =
-                progressBarMax !== undefined
-                  ? numeral(decimal).format('0.0%')
-                  : '';
+              const valueText = progressBarMax !== undefined ? numeral(decimal).format('0.0%') : '';
 
               return (
                 <FieldTopValuesBucket
@@ -253,15 +235,8 @@ export function FieldStatsPopover({
   );
 
   const addFilter = useCallback(
-    (
-      popoverField: DataViewField | '_exists_',
-      value: unknown,
-      type: '+' | '-'
-    ) => {
-      if (
-        popoverField !== '_exists_' &&
-        (typeof value === 'number' || typeof value === 'string')
-      ) {
+    (popoverField: DataViewField | '_exists_', value: unknown, type: '+' | '-') => {
+      if (popoverField !== '_exists_' && (typeof value === 'number' || typeof value === 'string')) {
         onAddFilter({
           fieldName: popoverField.name,
           fieldValue: value,
@@ -277,9 +252,7 @@ export function FieldStatsPopover({
       if (fieldTopValuesBucketParams.type === 'other') {
         return { color: 'primary' };
       }
-      return fieldValue === fieldTopValuesBucketParams.fieldValue
-        ? HIGHLIGHTED_BUCKET_PROPS
-        : {};
+      return fieldValue === fieldTopValuesBucketParams.fieldValue ? HIGHLIGHTED_BUCKET_PROPS : {};
     },
     [fieldValue]
   );
@@ -317,9 +290,7 @@ export function FieldStatsPopover({
       isOpen={infoIsOpen}
       closePopover={closePopover}
       button={trigger}
-      renderHeader={() => (
-        <FieldPopoverHeader field={field} closePopover={closePopover} />
-      )}
+      renderHeader={() => <FieldPopoverHeader field={field} closePopover={closePopover} />}
       renderContent={() => (
         <>
           <FieldStatsPopoverContent

@@ -33,6 +33,7 @@
     "@kbn/config",
     "@kbn/shared-ux-avatar-solution",
     "@kbn/core-http-server",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

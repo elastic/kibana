@@ -6,9 +6,9 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SLO } from '../../../domain/models/slo';
+import { SLODefinition } from '../../../domain/models/slo';
 
-export const getGroupBy = (slo: SLO) => {
+export const getGroupBy = (slo: SLODefinition) => {
   const groups = [slo.groupBy].flat().filter((group) => !!group);
 
   const groupings =

@@ -47,7 +47,11 @@ export function useFetchSloBurnRates({
           const response = await http.post<GetSLOBurnRatesResponse>(
             `/internal/observability/slos/${slo.id}/_burn_rates`,
             {
-              body: JSON.stringify({ windows, instanceId: slo.instanceId ?? ALL_VALUE }),
+              body: JSON.stringify({
+                windows,
+                instanceId: slo.instanceId ?? ALL_VALUE,
+                remoteName: slo.remote?.remoteName,
+              }),
               signal,
             }
           );
