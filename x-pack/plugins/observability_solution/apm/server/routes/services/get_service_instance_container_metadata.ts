@@ -69,8 +69,7 @@ export const getServiceInstanceContainerMetadata = async ({
     },
   });
 
-  const sample = maybe(response.hits.hits[0])
-    ?._source as ServiceInstanceContainerMetadataDetails;
+  const sample = maybe(response.hits.hits[0])?._source as ServiceInstanceContainerMetadataDetails;
 
   return {
     kubernetes: {
