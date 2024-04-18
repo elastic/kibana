@@ -8,10 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { tasks } from './tasks';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import { IndicesStatsResponse } from '../telemetry_client';
 
 describe('data telemetry collection tasks', () => {
@@ -69,9 +66,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         environments: {
           services_with_multiple_environments: 1,
           services_without_environment: 2,
@@ -95,9 +90,7 @@ describe('data telemetry collection tasks', () => {
           },
         });
 
-        expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
-        ).toEqual({});
+        expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({});
       });
     });
 
@@ -140,9 +133,7 @@ describe('data telemetry collection tasks', () => {
           });
         });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         aggregated_transactions: {
           current_implementation: {
             expected_metric_document_count: 1250,
@@ -195,9 +186,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)).toEqual({
         counts: {
           global_labels: {
             '1d': 1,
@@ -212,9 +201,7 @@ describe('data telemetry collection tasks', () => {
         fields: {},
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)).toEqual({
         counts: {
           global_labels: {
             '1d': 0,
@@ -251,9 +238,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         cloud: {
           availability_zone: ['us-west-1', 'europe-west1-c'],
           provider: ['aws', 'gcp'],
@@ -266,9 +251,7 @@ describe('data telemetry collection tasks', () => {
       it('returns an empty map', async () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
-        expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
-        ).toEqual({
+        expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
           cloud: {
             availability_zone: [],
             provider: [],
@@ -295,9 +278,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         host: {
           os: { platform: ['linux', 'windows', 'macos'] },
         },
@@ -308,9 +289,7 @@ describe('data telemetry collection tasks', () => {
       it('returns an empty map', async () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
-        expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
-        ).toEqual({
+        expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
           host: {
             os: {
               platform: [],
@@ -325,9 +304,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'processor_events');
 
     it('returns a map of processor events', async () => {
-      const getTime = jest
-        .spyOn(Date.prototype, 'getTime')
-        .mockReturnValue(1594330792957);
+      const getTime = jest.spyOn(Date.prototype, 'getTime').mockReturnValue(1594330792957);
 
       const search = jest.fn().mockImplementation((params: any) => {
         const isTotalHitsQuery = params?.body?.track_total_hits;
@@ -343,9 +320,7 @@ describe('data telemetry collection tasks', () => {
         );
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         counts: {
           error: {
             '1d': 1,
@@ -395,9 +370,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'integrations');
 
     it('returns the count of ML jobs', async () => {
-      const transportRequest = jest
-        .fn()
-        .mockResolvedValueOnce({ body: { count: 1 } });
+      const transportRequest = jest.fn().mockResolvedValueOnce({ body: { count: 1 } });
 
       expect(
         await task?.executor({
@@ -681,9 +654,7 @@ describe('data telemetry collection tasks', () => {
         }
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         cardinality: {
           client: { geo: { country_iso_code: { rum: { '1d': 5 } } } },
           transaction: { name: { all_agents: { '1d': 3 }, rum: { '1d': 1 } } },
@@ -894,9 +865,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         top_traces: {
           max: 1026,
           median: 1023,

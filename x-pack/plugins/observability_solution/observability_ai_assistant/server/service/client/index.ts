@@ -83,7 +83,7 @@ export class ObservabilityAIAssistantClient {
       };
       resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
-      user: {
+      user?: {
         id?: string;
         name: string;
       };
@@ -156,18 +156,38 @@ export class ObservabilityAIAssistantClient {
     responseLanguage?: string;
     conversationId?: string;
     title?: string;
+    isPublic?: boolean;
+    kibanaPublicUrl?: string;
     instructions?: Array<string | UserInstruction>;
     simulateFunctionCalling?: boolean;
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
-        const { messages, connectorId, signal, functionClient, persist, simulateFunctionCalling } =
-          params;
+        const {
+          messages,
+          connectorId,
+          signal,
+          functionClient,
+          persist,
+          kibanaPublicUrl,
+          simulateFunctionCalling,
+          isPublic = false,
+        } = params;
 
-        const conversationId = params.conversationId || '';
+        const isConversationUpdate = persist && !!params.conversationId;
+        const conversationId = persist ? params.conversationId || v4() : '';
         const title = params.title || '';
         const responseLanguage = params.responseLanguage || 'English';
         const requestInstructions = params.instructions || [];
+
+        if (persist && !isConversationUpdate && kibanaPublicUrl) {
+          const systemMessage = messages.find(
+            (message) => message.message.role === MessageRole.System
+          );
+          systemMessage!.message.content += `This conversation will be persisted in Kibana and available at this url: ${
+            kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+          }.`;
+        }
 
         const tokenCountResult = {
           prompt: 0,
@@ -471,7 +491,7 @@ export class ObservabilityAIAssistantClient {
           });
 
           // store the updated conversation and close the stream
-          if (conversationId) {
+          if (isConversationUpdate) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
             if (!conversation) {
               throw createConversationNotFoundError();
@@ -523,11 +543,12 @@ export class ObservabilityAIAssistantClient {
               conversation: {
                 title: generatedTitle || title || 'New conversation',
                 token_count: tokenCountResult,
+                id: conversationId,
               },
               messages: nextMessages,
               labels: {},
               numeric_labels: {},
-              public: false,
+              public: isPublic,
             });
 
             subscriber.next({
@@ -556,7 +577,7 @@ export class ObservabilityAIAssistantClient {
           });
 
         const titlePromise =
-          !conversationId && !title && persist
+          !isConversationUpdate && !title && persist
             ? this.getGeneratedTitle({
                 chat: chatWithTokenCountIncrement,
                 messages,
@@ -872,7 +893,7 @@ export class ObservabilityAIAssistantClient {
       conversation,
       {
         '@timestamp': now,
-        conversation: { id: v4() },
+        conversation: { id: conversation.conversation.id || v4() },
       },
       this.getConversationUpdateValues(now)
     );
@@ -953,8 +974,8 @@ export class ObservabilityAIAssistantClient {
 
   private resolveInstructions = async (requestInstructions: Array<string | UserInstruction>) => {
     const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
-      this.dependencies.user,
-      this.dependencies.namespace
+      this.dependencies.namespace,
+      this.dependencies.user
     );
 
     if (requestInstructions.length + knowledgeBaseInstructions.length === 0) {
@@ -973,6 +994,8 @@ export class ObservabilityAIAssistantClient {
 
     const instructionsPrompt = `What follows is a set of instructions provided by the user, please abide by them as long as they don't conflict with anything you've been told so far:\n`;
 
-    return `${instructionsPrompt}${instructionsWithinBudget.join('\n\n')}`;
+    return `${instructionsPrompt}${instructionsWithinBudget
+      .map((instruction) => instruction.text)
+      .join('\n\n')}`;
   };
 }

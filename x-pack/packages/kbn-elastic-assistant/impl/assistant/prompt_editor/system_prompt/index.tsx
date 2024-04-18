@@ -21,6 +21,7 @@ interface Props {
   isSettingsModalVisible: boolean;
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  isFlyoutMode: boolean;
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
@@ -29,6 +30,7 @@ const SystemPromptComponent: React.FC<Props> = ({
   isSettingsModalVisible,
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
+  isFlyoutMode,
 }) => {
   const { allSystemPrompts } = useAssistantContext();
 
@@ -53,6 +55,25 @@ const SystemPromptComponent: React.FC<Props> = ({
 
   const handleEditSystemPrompt = useCallback(() => setIsEditing(true), []);
 
+  if (isFlyoutMode) {
+    return (
+      <SelectSystemPrompt
+        allSystemPrompts={allSystemPrompts}
+        clearSelectedSystemPrompt={handleClearSystemPrompt}
+        conversation={conversation}
+        data-test-subj="systemPrompt"
+        isClearable={true}
+        isEditing={true}
+        setIsEditing={setIsEditing}
+        isSettingsModalVisible={isSettingsModalVisible}
+        onSystemPromptSelectionChange={onSystemPromptSelectionChange}
+        selectedPrompt={selectedPrompt}
+        setIsSettingsModalVisible={setIsSettingsModalVisible}
+        isFlyoutMode={isFlyoutMode}
+      />
+    );
+  }
+
   return (
     <div>
       {selectedPrompt == null || isEditing ? (
@@ -69,6 +90,7 @@ const SystemPromptComponent: React.FC<Props> = ({
           selectedPrompt={selectedPrompt}
           setIsEditing={setIsEditing}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={isFlyoutMode}
         />
       ) : (
         <EuiFlexGroup alignItems="flexStart" gutterSize="none">

@@ -6,15 +6,15 @@
  */
 
 import { EuiBasicTable, EuiSpacer, EuiText, EuiTitle, HorizontalAlignment } from '@elastic/eui';
-import { SLOResponse } from '@kbn/slo-schema';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
+import { SLODefinitionResponse } from '@kbn/slo-schema';
+import React from 'react';
 import { WindowSchema } from '../../typings';
 import { toDuration, toMinutes } from '../../utils/slo/duration';
 
 interface AlertTimeTableProps {
-  slo: SLOResponse;
+  slo: SLODefinitionResponse;
   windows: WindowSchema[];
 }
 
