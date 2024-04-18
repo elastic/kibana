@@ -27,10 +27,7 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 type ErrorDistributionAPIResponse =
@@ -108,12 +105,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showOverlappingTicks
             tickFormat={xFormatter}
           />
-          <Axis
-            id="y-axis"
-            position={Position.Left}
-            ticks={2}
-            gridLine={{ visible: true }}
-          />
+          <Axis id="y-axis" position={Position.Left} ticks={2} gridLine={{ visible: true }} />
 
           {timeseries.map((serie) => {
             return (

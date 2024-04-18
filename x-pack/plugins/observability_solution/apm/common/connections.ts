@@ -70,7 +70,5 @@ export interface ConnectionStatsItemWithComparisonData {
 }
 
 export function getNodeName(node: Node) {
-  return node.type === NodeType.service
-    ? node.serviceName
-    : node.dependencyName;
+  return node.type === NodeType.service ? node.serviceName : node.dependencyName;
 }

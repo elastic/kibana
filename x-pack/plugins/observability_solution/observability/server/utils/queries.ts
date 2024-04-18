@@ -101,3 +101,7 @@ export async function typedSearch<
 ): Promise<ESSearchResponse<DocumentSource, TParams>> {
   return (await esClient.search(params)) as unknown as ESSearchResponse<DocumentSource, TParams>;
 }
+
+export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
+  return params;
+}

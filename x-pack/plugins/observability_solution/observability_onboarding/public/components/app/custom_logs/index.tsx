@@ -7,10 +7,7 @@
 
 import { CustomIntegrationOptions } from '@kbn/custom-integrations';
 import { i18n } from '@kbn/i18n';
-import {
-  createWizardContext,
-  Step,
-} from '../../../context/create_wizard_context';
+import { createWizardContext, Step } from '../../../context/create_wizard_context';
 import { ConfigureLogs } from './configure_logs';
 import { Inspect } from './inspect';
 import { InstallElasticAgent } from './install_elastic_agent';
@@ -52,23 +49,16 @@ const initialState: WizardState = {
   onboardingId: '',
 };
 
-export type CustomLogsSteps =
-  | 'selectLogs'
-  | 'configureLogs'
-  | 'installElasticAgent'
-  | 'inspect';
+export type CustomLogsSteps = 'selectLogs' | 'configureLogs' | 'installElasticAgent' | 'inspect';
 
 const steps: Record<CustomLogsSteps, Step> = {
   selectLogs: { component: SelectLogs },
   configureLogs: { component: ConfigureLogs },
   installElasticAgent: {
     component: InstallElasticAgent,
-    title: i18n.translate(
-      'xpack.observability_onboarding.customLogs.installShipper.title',
-      {
-        defaultMessage: 'Install shipper to collect logs',
-      }
-    ),
+    title: i18n.translate('xpack.observability_onboarding.customLogs.installShipper.title', {
+      defaultMessage: 'Install shipper to collect logs',
+    }),
   },
   inspect: { component: Inspect },
 };
