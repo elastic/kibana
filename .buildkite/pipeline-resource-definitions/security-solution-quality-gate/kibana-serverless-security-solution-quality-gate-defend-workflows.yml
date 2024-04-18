@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-serverless-secsol-defend-workflows
-  description: "[MKI] Executes Cypress tests for the Defend Workflows team"
+  description: "[MKI] Executes Cypress tests for the EDR Workflows team"
 spec:
   type: buildkite-pipeline
   owner: 'group:security-engineering-productivity'
@@ -12,11 +12,11 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: "Kibana / Serverless / Security Solution Quality Gate / Defend Workflows"
-      description: "[MKI] Executes Cypress tests for the Defend Workflows team"
+      name: "Kibana / Serverless / Security Solution Quality Gate / EDR Workflows"
+      description: "[MKI] Executes Cypress tests for the EDR Workflows team"
     spec:
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_explore.yml
+      pipeline_file: .buildkite/pipelines/security_solution_quality_gate/mki_security_solution_edr_workflows.yml
       provider_settings:
         build_branches: false
         build_pull_requests: false
