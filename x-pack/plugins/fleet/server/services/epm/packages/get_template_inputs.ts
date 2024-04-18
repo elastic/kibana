@@ -16,11 +16,11 @@ import type {
   PackageInfo,
   NewPackagePolicy,
   PackagePolicyInput,
-  FullAgentPolicyInput,
+  FullAgentPolicyInputStream,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
-import { getFullInputs } from '../../agent_policies/package_policies_to_agent_inputs';
+import { getFullInputStreams } from '../../agent_policies/package_policies_to_agent_inputs';
 
 import { getPackageInfo } from '.';
 import { getPackageAssetsMap } from './get';
@@ -28,28 +28,28 @@ import { getPackageAssetsMap } from './get';
 type Format = 'yml' | 'json';
 
 // Function based off storedPackagePolicyToAgentInputs, it only creates the `streams` section instead of the FullAgentPolicyInput
-export const templatePackagePolicyToFullInputs = (
+export const templatePackagePolicyToFullInputStreams = (
   packagePolicyInputs: PackagePolicyInput[]
-): FullAgentPolicyInput[] => {
-  const fullInputs: FullAgentPolicyInput[] = [];
+): FullAgentPolicyInputStream[] => {
+  const fullInputsStreams: FullAgentPolicyInputStream[] = [];
 
-  if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputs;
+  if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputsStreams;
 
   packagePolicyInputs.forEach((input) => {
-    const fullInput = getFullInputs(input, true);
-
-    // deeply merge the input.config values with the full policy input
+    const fullInputStream = getFullInputStreams(input, true);
+    // console.log('## fullInputStream', JSON.stringify(fullInputStream, null, 2));
+    // deeply merge the input.config values with the full policy input stream
     merge(
-      fullInput,
+      fullInputStream,
       Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
         acc[key] = value;
         return acc;
       }, {} as Record<string, unknown>)
     );
-    fullInputs.push(fullInput);
+    fullInputsStreams.push(fullInputStream);
   });
 
-  return fullInputs;
+  return fullInputsStreams;
 };
 
 export async function getTemplateInputs(
@@ -79,6 +79,7 @@ export async function getTemplateInputs(
     packageInfo,
     savedObjectsClient: soClient,
   });
+
   const compiledInputs = await _compilePackagePolicyInputs(
     packageInfo,
     emptyPackagePolicy.vars || {},
@@ -89,12 +90,9 @@ export async function getTemplateInputs(
     ...emptyPackagePolicy,
     inputs: compiledInputs,
   };
-  const fullAgentPolicyInputs = templatePackagePolicyToFullInputs(
+  const inputs = templatePackagePolicyToFullInputStreams(
     packagePolicyWithInputs.inputs as PackagePolicyInput[]
   );
-  // @ts-ignore-next-line The return type is any because in some case we can have compiled_input instead of input.streams
-  // we don't know what it is. An example is integration APM
-  const inputs: any = fullAgentPolicyInputs.flatMap((input) => input?.streams || input);
 
   if (format === 'json') {
     return { inputs };

@@ -49,16 +49,18 @@ export const storedPackagePolicyToAgentInputs = (
       : packagePolicy.id;
 
     const fullInput: FullAgentPolicyInput = {
+      // @ts-ignore-next-line
       id: inputId,
       revision: packagePolicy.revision,
       name: packagePolicy.name,
       type: input.type,
+      // @ts-ignore-next-line
       data_stream: {
         namespace: packagePolicy?.namespace || agentPolicyNamespace || 'default', // custom namespace has precedence on agent policy's one
       },
       use_output: outputId,
       package_policy_id: packagePolicy.id,
-      ...getFullInputs(input),
+      ...getFullInputStreams(input),
     };
 
     // deeply merge the input.config values with the full policy input
@@ -78,13 +80,15 @@ export const storedPackagePolicyToAgentInputs = (
         },
       };
     }
-
     fullInputs.push(fullInput);
   });
   return fullInputs;
 };
 
-export const getFullInputs = (input: PackagePolicyInput, allStreamEnabled: boolean = false) => {
+export const getFullInputStreams = (
+  input: PackagePolicyInput,
+  allStreamEnabled: boolean = false
+): FullAgentPolicyInputStream => {
   return {
     ...(input.compiled_input || {}),
     ...(input.streams.length
