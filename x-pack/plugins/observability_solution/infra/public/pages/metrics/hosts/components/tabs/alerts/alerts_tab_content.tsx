@@ -61,7 +61,7 @@ export const AlertsTabContent = () => {
             <EuiFlexItem grow={false}>
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
-                dataTestSubj="infraHostAlertsTabAlertsShowAllButton"
+                data-test-subj="infraHostAlertsTabAlertsShowAllButton"
                 kuery={`${ALERT_RULE_PRODUCER}: ${INFRA_ALERT_FEATURE_ID}`}
               />
             </EuiFlexItem>

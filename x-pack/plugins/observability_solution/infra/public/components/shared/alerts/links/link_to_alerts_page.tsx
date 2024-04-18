@@ -15,10 +15,14 @@ import { ALERTS_PATH } from '../constants';
 export interface LinkToAlertsPageProps {
   dateRange: TimeRange;
   kuery?: string;
-  dataTestSubj?: string;
+  ['data-test-subj']: string;
 }
 
-export const LinkToAlertsPage = ({ kuery, dateRange, dataTestSubj }: LinkToAlertsPageProps) => {
+export const LinkToAlertsPage = ({
+  kuery,
+  dateRange,
+  ['data-test-subj']: dataTestSubj,
+}: LinkToAlertsPageProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
