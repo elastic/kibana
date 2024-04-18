@@ -223,6 +223,13 @@ function handleResultForRolling(
     });
 }
 
+export const getEsDateRange = (dateRange: DateRange) => {
+  return {
+    gte: typeof dateRange.from === 'string' ? dateRange.from : dateRange.from.toISOString(),
+    lte: typeof dateRange.to === 'string' ? dateRange.to : dateRange.to.toISOString(),
+  };
+};
+
 function generateSearchQuery({
   sloId,
   groupBy,
@@ -260,13 +267,7 @@ function generateSearchQuery({
           { term: { 'slo.revision': revision } },
           {
             range: {
-              '@timestamp': {
-                gte:
-                  typeof dateRange.from === 'string'
-                    ? dateRange.from
-                    : dateRange.from.toISOString(),
-                lte: typeof dateRange.to === 'string' ? dateRange.to : dateRange.to.toISOString(),
-              },
+              '@timestamp': getEsDateRange(dateRange),
             },
           },
           ...extraFilterByInstanceId,

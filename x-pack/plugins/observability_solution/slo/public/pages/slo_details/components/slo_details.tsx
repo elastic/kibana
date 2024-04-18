@@ -70,7 +70,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
           isAutoRefreshing={isAutoRefreshing}
         />
         <EuiFlexItem>
-          <EventsChartPanel slo={slo} range={range} />
+          <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>

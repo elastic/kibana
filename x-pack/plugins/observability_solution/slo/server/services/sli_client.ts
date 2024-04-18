@@ -20,6 +20,7 @@ import {
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import { getEsDateRange } from './historical_summary_client';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { DateRange, Duration, IndicatorData, SLODefinition } from '../domain/models';
 import { InternalQueryError } from '../errors';
@@ -109,7 +110,7 @@ function commonQuery(
     { term: { 'slo.revision': slo.revision } },
     {
       range: {
-        '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+        '@timestamp': getEsDateRange(dateRange),
       },
     },
   ];
