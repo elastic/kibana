@@ -57,18 +57,14 @@ export function SelectedFilters({
                 removeFilter={() => {
                   onChange(
                     name,
-                    (uxUiFilters?.[name] as string[]).filter(
-                      (valT) => valT !== value
-                    )
+                    (uxUiFilters?.[name] as string[]).filter((valT) => valT !== value)
                   );
                 }}
                 invertFilter={({ negate }) => {
                   invertFilter(name, value, negate);
                 }}
                 field={fieldName}
-                value={
-                  name === 'transactionUrl' ? formatUrlValue(value) : value
-                }
+                value={name === 'transactionUrl' ? formatUrlValue(value) : value}
                 negate={!!excluded}
                 label={title}
               />
