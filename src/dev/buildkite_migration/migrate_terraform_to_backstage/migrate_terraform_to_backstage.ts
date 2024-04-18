@@ -400,7 +400,7 @@ function convertBuildkitePipeline(
           skip_intermediate_builds: valueOrDefault(pipeline.skip_intermediate_builds, false),
 
           provider_settings: {
-            build_branches: providerSettings.build_branches,
+            build_branches: valueOrDefault(providerSettings.build_branches, true),
             build_pull_requests: providerSettings.build_pull_requests,
             publish_commit_status: providerSettings.publish_commit_status,
             trigger_mode: providerSettings.trigger_mode,
