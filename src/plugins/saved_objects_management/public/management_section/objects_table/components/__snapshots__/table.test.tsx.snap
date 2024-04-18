@@ -144,7 +144,7 @@ exports[`Table prevents hidden saved objects from being deleted 1`] = `
             "name": "Type",
             "render": [Function],
             "sortable": true,
-            "width": "50px",
+            "width": "65px",
           },
           Object {
             "data-test-subj": "savedObjectsTableRowTitle",
@@ -383,7 +383,7 @@ exports[`Table should render normally 1`] = `
             "name": "Type",
             "render": [Function],
             "sortable": true,
-            "width": "50px",
+            "width": "65px",
           },
           Object {
             "data-test-subj": "savedObjectsTableRowTitle",
