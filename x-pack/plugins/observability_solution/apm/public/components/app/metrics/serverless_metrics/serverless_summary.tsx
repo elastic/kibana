@@ -16,10 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import {
-  asMillisecondDuration,
-  asPercent,
-} from '../../../../../common/utils/formatters';
+import { asMillisecondDuration, asPercent } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
@@ -61,23 +58,20 @@ export function ServerlessSummary({ serverlessId }: Props) {
       if (!start || !end) {
         return undefined;
       }
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/metrics/serverless/summary',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              kuery,
-              environment,
-              start,
-              end,
-              serverlessId,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/metrics/serverless/summary', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      );
+          query: {
+            kuery,
+            environment,
+            start,
+            end,
+            serverlessId,
+          },
+        },
+      });
     },
     [kuery, environment, serviceName, start, end, serverlessId]
   );
@@ -116,16 +110,13 @@ export function ServerlessSummary({ serverlessId }: Props) {
             isLoading={isLoading}
             title={data?.serverlessFunctionsTotal}
             titleSize="s"
-            description={i18n.translate(
-              'xpack.apm.serverlessMetrics.summary.lambdaFunctions',
-              {
-                defaultMessage:
-                  'Lambda {serverlessFunctionsTotal, plural, one {function} other {functions}}',
-                values: {
-                  serverlessFunctionsTotal: data?.serverlessFunctionsTotal,
-                },
-              }
-            )}
+            description={i18n.translate('xpack.apm.serverlessMetrics.summary.lambdaFunctions', {
+              defaultMessage:
+                'Lambda {serverlessFunctionsTotal, plural, one {function} other {functions}}',
+              values: {
+                serverlessFunctionsTotal: data?.serverlessFunctionsTotal,
+              },
+            })}
             reverse
           />
         </EuiFlexItem>
@@ -135,10 +126,9 @@ export function ServerlessSummary({ serverlessId }: Props) {
             isLoading={isLoading}
             title={asMillisecondDuration(data?.serverlessDurationAvg)}
             titleSize="s"
-            description={i18n.translate(
-              'xpack.apm.serverlessMetrics.summary.functionDurationAvg',
-              { defaultMessage: 'Function duration avg.' }
-            )}
+            description={i18n.translate('xpack.apm.serverlessMetrics.summary.functionDurationAvg', {
+              defaultMessage: 'Function duration avg.',
+            })}
             reverse
           />
         </EuiFlexItem>
@@ -147,10 +137,9 @@ export function ServerlessSummary({ serverlessId }: Props) {
             isLoading={isLoading}
             title={asMillisecondDuration(data?.billedDurationAvg)}
             titleSize="s"
-            description={i18n.translate(
-              'xpack.apm.serverlessMetrics.summary.billedDurationAvg',
-              { defaultMessage: 'Billed duration avg.' }
-            )}
+            description={i18n.translate('xpack.apm.serverlessMetrics.summary.billedDurationAvg', {
+              defaultMessage: 'Billed duration avg.',
+            })}
             reverse
           />
         </EuiFlexItem>
@@ -159,10 +148,9 @@ export function ServerlessSummary({ serverlessId }: Props) {
             isLoading={isLoading}
             title={asPercent(data?.memoryUsageAvgRate, 1)}
             titleSize="s"
-            description={i18n.translate(
-              'xpack.apm.serverlessMetrics.summary.memoryUsageAvg',
-              { defaultMessage: 'Memory usage avg.' }
-            )}
+            description={i18n.translate('xpack.apm.serverlessMetrics.summary.memoryUsageAvg', {
+              defaultMessage: 'Memory usage avg.',
+            })}
             reverse
           />
         </EuiFlexItem>
@@ -173,10 +161,9 @@ export function ServerlessSummary({ serverlessId }: Props) {
               isLoading={isLoading}
               title={`$${data.estimatedCost}`}
               titleSize="s"
-              description={i18n.translate(
-                'xpack.apm.serverlessMetrics.summary.estimatedCost',
-                { defaultMessage: 'Estimated costs avg.' }
-              )}
+              description={i18n.translate('xpack.apm.serverlessMetrics.summary.estimatedCost', {
+                defaultMessage: 'Estimated costs avg.',
+              })}
               reverse
             />
           </EuiFlexItem>
