@@ -47,7 +47,6 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   );
   const { renderHeaderActions } = useValues(KibanaLogic);
   useLayoutEffect(() => {
-    debugger
     const docAction = {
       playground: PlaygroundHeaderDocsAction,
       search_application: SearchApplicationHeaderDocsAction,

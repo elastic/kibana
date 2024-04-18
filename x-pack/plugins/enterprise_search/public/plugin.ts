@@ -130,6 +130,7 @@ const applicationsLinks: AppDeepLink[] = [
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
       defaultMessage: 'Playground',
     }),
+    visibleIn: ['sideNav', 'globalSearch'],
   },
   {
     id: 'searchApplications',
@@ -140,6 +141,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
+    visibleIn: ['globalSearch'],
   },
 ];
 
@@ -358,6 +360,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Applications, kibanaDeps, pluginData);
       },
       title: APPLICATIONS_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
