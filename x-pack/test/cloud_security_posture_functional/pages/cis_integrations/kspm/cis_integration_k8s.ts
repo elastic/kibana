@@ -23,9 +23,9 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationKspmPage();
     });
 
-    // afterEach(async () => {
-    //   await kibanaServer.savedObjects.cleanStandardList();
-    // });
+    afterEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     describe('KSPM K8S', () => {
       it('KSPM K8S Workflow', async () => {

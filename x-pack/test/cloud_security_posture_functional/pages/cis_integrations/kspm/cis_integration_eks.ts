@@ -36,9 +36,9 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationKspmPage();
     });
 
-    // afterEach(async () => {
-    //   await kibanaServer.savedObjects.cleanStandardList();
-    // });
+    afterEach(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     describe('KSPM EKS Assume Role', async () => {
       it('KSPM EKS Assume Role workflow', async () => {

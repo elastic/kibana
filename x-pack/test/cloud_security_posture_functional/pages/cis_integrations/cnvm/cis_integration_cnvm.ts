@@ -24,9 +24,9 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    // after(async () => {
-    //   await kibanaServer.savedObjects.cleanStandardList();
-    // });
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     describe('CNVM AWS', () => {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {

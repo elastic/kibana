@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      // await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await findings.index.remove();
     });

@@ -37,9 +37,9 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
-    // after(async () => {
-    //   await kibanaServer.savedObjects.cleanStandardList();
-    // });
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
     describe('CIS_GCP Organization', () => {
       it('Switch between Manual and Google cloud shell', async () => {
