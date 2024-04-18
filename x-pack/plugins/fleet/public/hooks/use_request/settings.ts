@@ -78,3 +78,12 @@ export function useGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['q
     query,
   });
 }
+
+export function sendGetEnrollmentSettings(query?: GetEnrollmentSettingsRequest['query']) {
+  return sendRequest<GetEnrollmentSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getEnrollmentInfoPath(),
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+}
