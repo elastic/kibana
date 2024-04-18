@@ -102,6 +102,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       setQuery,
       expectedRequests = 2,
       expectedRequestsAfterNewSearchPressed,
+      expectedRequestsAfterTimeRangeChanged,
+      expectedRequestsForSavedSearches,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
@@ -110,6 +112,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       setQuery: (query: string) => Promise<void>;
       expectedRequests?: number;
       expectedRequestsAfterNewSearchPressed?: number;
+      expectedRequestsAfterTimeRangeChanged?: number;
+      expectedRequestsForSavedSearches?: number;
     }) => {
       it(`should send ${expectedRequests} search requests (documents + chart) on page load`, async () => {
         await browser.refresh();
@@ -134,13 +138,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it(`should send ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
-          await PageObjects.timePicker.setAbsoluteRange(
-            'Sep 21, 2015 @ 06:31:44.000',
-            'Sep 23, 2015 @ 00:00:00.000'
-          );
-        });
+      it(`should send ${
+        expectedRequestsAfterTimeRangeChanged ?? expectedRequests
+      } requests (documents + chart) when changing the time range`, async () => {
+        await expectSearches(
+          type,
+          expectedRequestsAfterTimeRangeChanged ?? expectedRequests,
+          async () => {
+            await PageObjects.timePicker.setAbsoluteRange(
+              'Sep 21, 2015 @ 06:31:44.000',
+              'Sep 23, 2015 @ 00:00:00.000'
+            );
+          }
+        );
       });
 
       it(`should send ${expectedRequests} requests for saved search changes`, async () => {
@@ -152,9 +162,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await waitForLoadingToFinish();
         // creating the saved search
-        await expectSearches(type, expectedRequests, async () => {
-          await PageObjects.discover.saveSearch(savedSearch);
-        });
+        await expectSearches(
+          type,
+          expectedRequestsForSavedSearches ?? expectedRequests,
+          async () => {
+            await PageObjects.discover.saveSearch(savedSearch);
+          }
+        );
         // resetting the saved search
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
@@ -172,9 +186,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         );
         // loading the saved search
-        await expectSearches(type, expectedRequests, async () => {
-          await PageObjects.discover.loadSavedSearch(savedSearch);
-        });
+        await expectSearches(
+          type,
+          expectedRequestsForSavedSearches ?? expectedRequests,
+          async () => {
+            await PageObjects.discover.loadSavedSearch(savedSearch);
+          }
+        );
       });
     };
 
@@ -261,7 +279,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedRequestsAfterNewSearchPressed: 4, // table, 2 chart requests, and query editor autocomplete?
       });
 
-      it(`should send 1 request (documents) when toggling the chart visibility`, async () => {
+      it('should send 1 request (documents) when toggling the chart visibility', async () => {
         // table
         await expectSearches(type, 1, async () => {
           await PageObjects.discover.toggleChartVisibility();
@@ -275,6 +293,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should send 0 requests (documents) when sorting in-memory', async () => {
         await expectSearches(type, 0, async () => {
           await PageObjects.discover.clickFieldSort('countB', 'Sort Low-High');
+        });
+      });
+    });
+
+    describe('ES|QL mode requests for histogram chart', () => {
+      const type = 'esql';
+
+      beforeEach(async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await waitForLoadingToFinish();
+      });
+
+      getSharedTests({
+        type,
+        savedSearch: 'esql test',
+        query1: 'from logstash-* | sort @timestamp desc | limit 10',
+        query2: 'from logstash-* | limit 20',
+        setQuery: (query) => monacoEditor.setCodeEditorValue(query),
+        expectedRequests: 3, // table, chart and query editor autocomplete sometimes?
+        expectedRequestsAfterTimeRangeChanged: 4, // table, chart, query editor autocomplete or chart again?
+        expectedRequestsAfterNewSearchPressed: 4, // table, 2 chart requests, and query editor autocomplete?
+        expectedRequestsForSavedSearches: 4, // table, 2 chart requests, and query editor autocomplete?
+      });
+
+      it('should send 2 request (documents + chart) when toggling the chart visibility', async () => {
+        // table, chart
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.toggleChartVisibility();
+        });
+        // table, chart and query editor autocomplete?
+        await expectSearches(type, 3, async () => {
+          await PageObjects.discover.toggleChartVisibility();
+        });
+      });
+
+      it('should send 0 requests when sorting in-memory', async () => {
+        await expectSearches(type, 0, async () => {
+          await PageObjects.discover.clickFieldSort('@timestamp', 'Sort Old-New');
         });
       });
     });
