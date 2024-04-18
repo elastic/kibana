@@ -56,9 +56,7 @@ journey('Page Views Chart', async ({ page, params }) => {
 
   step('can click through to exploratory view', async () => {
     expect(await page.hover('text=Firefox'));
-    await page.click(
-      `.pageViewsChart  ${byTestId('embeddablePanelToggleMenuIcon')}`
-    );
+    await page.click(`.pageViewsChart  ${byTestId('embeddablePanelToggleMenuIcon')}`);
     await page.click(byTestId('embeddablePanelAction-expViewExplore'));
     await page.waitForNavigation();
   });

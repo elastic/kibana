@@ -402,7 +402,8 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('esql', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/181090
+        describe.skip('esql', () => {
           it(`should return request meta`, async () => {
             const resp = await supertest
               .post(`/internal/bsearch`)

@@ -7,11 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -57,8 +53,7 @@ export async function getTraceSampleIds({
     },
   };
 
-  const isUnfilteredGlobalServiceMap =
-    !serviceName && !serviceGroupKuery && !kuery;
+  const isUnfilteredGlobalServiceMap = !serviceName && !serviceGroupKuery && !kuery;
   let events = [ProcessorEvent.span, ProcessorEvent.transaction];
 
   // perf optimization that is only possible on the global service map with no filters
@@ -144,10 +139,7 @@ export async function getTraceSampleIds({
   };
 
   try {
-    const tracesSampleResponse = await apmEventClient.search(
-      'get_trace_sample_ids',
-      params
-    );
+    const tracesSampleResponse = await apmEventClient.search('get_trace_sample_ids', params);
     // make sure at least one trace per composite/connection bucket is queried
     const traceIdsWithPriority =
       tracesSampleResponse.aggregations?.connections.buckets.flatMap((bucket) =>
@@ -158,9 +150,7 @@ export async function getTraceSampleIds({
       ) || [];
 
     const traceIds = take(
-      uniq(
-        sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId)
-      ),
+      uniq(sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId)),
       config.serviceMapMaxTraces
     );
 

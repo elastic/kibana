@@ -24,7 +24,8 @@ function parseBfetchResponse(resp: request.Response, compressed: boolean = false
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('bsearch', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/181091
+  describe.skip('bsearch', () => {
     describe('ES|QL', () => {
       it(`should return getColumns response in expected shape`, async () => {
         const resp = await supertest

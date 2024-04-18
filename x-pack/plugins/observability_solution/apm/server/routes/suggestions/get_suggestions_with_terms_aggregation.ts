@@ -29,46 +29,40 @@ export async function getSuggestionsWithTermsAggregation({
   start: number;
   end: number;
 }) {
-  const response = await apmEventClient.search(
-    'get_suggestions_with_terms_aggregation',
-    {
-      apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        timeout: '1500ms',
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(start, end),
-              {
-                wildcard: {
-                  [fieldName]: `*${fieldValue}*`,
-                },
+  const response = await apmEventClient.search('get_suggestions_with_terms_aggregation', {
+    apm: {
+      events: [
+        getProcessorEventForTransactions(searchAggregatedTransactions),
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+      ],
+    },
+    body: {
+      track_total_hits: false,
+      timeout: '1500ms',
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...rangeQuery(start, end),
+            {
+              wildcard: {
+                [fieldName]: `*${fieldValue}*`,
               },
-            ],
-          },
-        },
-        aggs: {
-          items: {
-            terms: { field: fieldName, size },
-          },
+            },
+          ],
         },
       },
-    }
-  );
+      aggs: {
+        items: {
+          terms: { field: fieldName, size },
+        },
+      },
+    },
+  });
 
   return {
-    terms:
-      response.aggregations?.items.buckets.map(
-        (bucket) => bucket.key as string
-      ) ?? [],
+    terms: response.aggregations?.items.buckets.map((bucket) => bucket.key as string) ?? [],
   };
 }
