@@ -14,7 +14,7 @@ export const useManagementLink = (connectorId: string) => {
   } = useKibana();
   const managementLocator = useMemo(
     () => share.url.locators.get('MANAGEMENT_APP_LOCATOR'),
-    [share]
+    [share.url.locators]
   );
   const [managementLink, setManagementLink] = useState('');
   useEffect(() => {

@@ -37,6 +37,7 @@ export interface SearchPlaygroundPluginStart {
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export interface AppServicesContext {

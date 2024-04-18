@@ -11,7 +11,7 @@ xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
 xpack.fleet.enabled: false
-xpack.observabilityAIAssistant.enabled: false
+xpack.observabilityAIAssistant.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
@@ -28,8 +28,9 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
-# Alerts config
-xpack.actions.enabledActionTypes: ['.email', '.index', '.slack', '.jira', '.webhook', '.teams']
+# Alerts and LLM config
+xpack.actions.enabledActionTypes:
+  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
