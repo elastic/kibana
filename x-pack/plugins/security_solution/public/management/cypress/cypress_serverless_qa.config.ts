@@ -12,9 +12,8 @@ import { getCypressBaseConfig } from './cypress_base.config';
 export default defineCypressConfig(
   getCypressBaseConfig({
     env: {
-      IS_SERVERLESS: true,
       // Uncomment to enable logging
-      TOOLING_LOG_LEVEL: 'verbose',
+      // TOOLING_LOG_LEVEL: 'verbose',
       grepTags: '@serverlessQA --@skipInServerless',
     },
   })

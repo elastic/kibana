@@ -52,6 +52,7 @@ export const login: CyLoginTask = (
   const isCloudServerless = Cypress.env('CLOUD_SERVERLESS');
 
   if (isServerless && isCloudServerless) {
+    // MKI QA Cloud Serverless
     return sendApiLoginRequest(username, password);
   } else if (user) {
     return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
