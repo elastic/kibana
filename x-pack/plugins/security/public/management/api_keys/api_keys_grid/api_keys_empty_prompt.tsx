@@ -177,3 +177,12 @@ function doesErrorIndicateAPIKeysAreDisabled(error: Record<string, any>) {
 function doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error: Record<string, any>) {
   return error.body?.statusCode === 403;
 }
+
+export function doesErrorIndicateBadQuery(error: Record<string, any>) {
+  const message = error.body?.message || '';
+  const errorString = error.body?.error || '';
+  return (
+    errorString.indexOf('Bad Request') !== '-1' ||
+    message.indexOf('illegal_argument_exception') !== -1
+  );
+}

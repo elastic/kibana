@@ -8,10 +8,9 @@
 import type { Criteria, EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
-import { debounce } from 'lodash';
 import moment from 'moment';
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -24,7 +23,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 
 import { ApiKeyFlyout } from './api_key_flyout';
-import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
+import { ApiKeysEmptyPrompt, doesErrorIndicateBadQuery } from './api_keys_empty_prompt';
 import { ApiKeysTable, MAX_PAGINATED_ITEMS } from './api_keys_table';
 import type { CategorizedApiKey } from './api_keys_table';
 import { InvalidateProvider } from './invalidate_provider';
@@ -34,6 +33,13 @@ import { useCapabilities } from '../../../components/use_capabilities';
 import { useAuthentication } from '../../../components/use_current_user';
 import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
+
+interface ApiKeysTableState {
+  query: Query;
+  from: number;
+  size: number;
+  sort: QueryApiKeySortOptions;
+}
 
 const parseSearchBarQuery = (query: Query): QueryContainer => {
   let parsedQuery = query;
@@ -65,64 +71,80 @@ const parseSearchBarQuery = (query: Query): QueryContainer => {
   return EuiSearchBar.Query.toESQuery(parsedQuery);
 };
 
+const DEFAULT_TABLE_STATE = {
+  query: EuiSearchBar.Query.parse(''),
+  sort: {
+    field: 'creation',
+    direction: 'desc',
+  } as QueryApiKeySortOptions,
+  from: 0,
+  size: 25,
+};
+
 export const APIKeysGridPage: FunctionComponent = () => {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
   const authc = useAuthentication();
 
-  const [query, setQuery] = useState<Query>(EuiSearchBar.Query.parse(''));
-  const [from, setFrom] = useState<number>(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [tableSort, setTableSort] = useState<QueryApiKeySortOptions>({
-    field: 'creation',
-    direction: 'desc',
-  });
   const [createdApiKey, setCreatedApiKey] = useState<CreateAPIKeyResult>();
   const [openedApiKey, setOpenedApiKey] = useState<CategorizedApiKey>();
   const readOnly = !useCapabilities('api_keys').save;
 
-  const [state, queryApiKeysAndAggregations] = useAsyncFn(() => {
-    const queryContainer = parseSearchBarQuery(query);
+  const [tableState, setTableState] = useState<ApiKeysTableState>(DEFAULT_TABLE_STATE);
+
+  const [state, queryApiKeysAndAggregations] = useAsyncFn((tableStateArgs: ApiKeysTableState) => {
+    const queryContainer = parseSearchBarQuery(tableStateArgs.query);
 
     const requestBody = {
+      ...tableStateArgs,
       query: queryContainer,
-      from,
-      size: pageSize,
-      sort: tableSort,
     };
 
     return Promise.all([
       new APIKeysAPIClient(services.http).queryApiKeys(requestBody),
       authc.getCurrentUser(),
     ]);
-  }, [services.http, query, from, pageSize, tableSort]);
+  }, []);
 
   const resetQueryOnError = () => {
-    setQuery(EuiSearchBar.Query.parse(''));
-    setFrom(0);
-    setTableSort({ field: 'creation', direction: 'desc' });
+    const newState = {
+      query: EuiSearchBar.Query.parse(''),
+      sort: {
+        field: 'creation',
+        direction: 'desc',
+      } as QueryApiKeySortOptions,
+      from: 0,
+      size: 25,
+    };
+    setTableState(newState);
+    queryApiKeysAndAggregations(newState);
   };
 
   const onTableChange = ({ page, sort }: Criteria<CategorizedApiKey>) => {
-    setFrom(page?.index! * pageSize);
-    setPageSize(page?.size!);
-    if (sort) {
-      setTableSort(sort);
-    }
+    const newState = {
+      ...tableState,
+      from: page?.index! * page?.size!,
+      size: page?.size!,
+      sort: sort ?? tableState.sort,
+    };
+    setTableState(newState);
+    queryApiKeysAndAggregations(newState);
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
     if (!args.error) {
-      setQuery(args.query);
+      const newState = {
+        ...tableState,
+        query: args.query,
+      };
+      setTableState(newState);
+      queryApiKeysAndAggregations(newState);
     }
   };
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnSearchChange = useCallback(debounce(onSearchChange, 500), []);
-
   useEffect(() => {
-    queryApiKeysAndAggregations();
-  }, [query, from, pageSize, tableSort]); // eslint-disable-line react-hooks/exhaustive-deps
+    queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!state.value) {
     if (state.loading) {
@@ -157,11 +179,16 @@ export const APIKeysGridPage: FunctionComponent = () => {
       canManageCrossClusterApiKeys,
       aggregationTotal: totalKeys,
       total: queryTotal,
+      queryError,
     },
     currentUser,
   ] = state.value && state.value;
 
-  const categorizedApiKeys = apiKeys.map((apiKey) => apiKey as CategorizedApiKey);
+  const categorizedApiKeys = !queryError
+    ? apiKeys.map((apiKey) => apiKey as CategorizedApiKey)
+    : [];
+
+  const isBadRequest = queryError && doesErrorIndicateBadQuery(queryError);
 
   const displayedPageCount =
     totalKeys > MAX_PAGINATED_ITEMS && queryTotal > MAX_PAGINATED_ITEMS
@@ -171,8 +198,8 @@ export const APIKeysGridPage: FunctionComponent = () => {
       : queryTotal;
 
   const pagination = {
-    pageIndex: from / pageSize,
-    pageSize,
+    pageIndex: tableState.from / tableState.size,
+    pageSize: tableState.size,
     totalItemCount: displayedPageCount,
     pageSizeOptions: [25, 50, 100],
   };
@@ -190,7 +217,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             onSuccess={(createApiKeyResponse) => {
               history.push({ pathname: '/' });
               setCreatedApiKey(createApiKeyResponse);
-              queryApiKeysAndAggregations();
+              queryApiKeysAndAggregations(tableState);
             }}
             onCancel={() => history.push({ pathname: '/' })}
             canManageCrossClusterApiKeys={canManageCrossClusterApiKeys}
@@ -210,7 +237,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             });
 
             setOpenedApiKey(undefined);
-            queryApiKeysAndAggregations();
+            queryApiKeysAndAggregations(DEFAULT_TABLE_STATE);
           }}
           onCancel={() => setOpenedApiKey(undefined)}
           apiKey={openedApiKey}
@@ -298,10 +325,11 @@ export const APIKeysGridPage: FunctionComponent = () => {
                 <ApiKeysTable
                   apiKeys={categorizedApiKeys}
                   onClick={(apiKey) => setOpenedApiKey(apiKey)}
+                  query={tableState.query}
                   onDelete={(apiKeysToDelete) =>
                     invalidateApiKeyPrompt(
                       apiKeysToDelete.map(({ name, id }) => ({ name, id })),
-                      queryApiKeysAndAggregations
+                      () => queryApiKeysAndAggregations(tableState)
                     )
                   }
                   currentUser={currentUser}
@@ -314,9 +342,11 @@ export const APIKeysGridPage: FunctionComponent = () => {
                   totalItemCount={totalKeys}
                   pagination={pagination}
                   onTableChange={onTableChange}
-                  onSearchChange={debouncedOnSearchChange}
+                  onSearchChange={onSearchChange}
                   aggregations={aggregations}
-                  sortingOptions={tableSort}
+                  sortingOptions={tableState.sort}
+                  queryErrors={{ isBadRequest, queryError }}
+                  resetQuery={resetQueryOnError}
                 />
               )}
             </InvalidateProvider>

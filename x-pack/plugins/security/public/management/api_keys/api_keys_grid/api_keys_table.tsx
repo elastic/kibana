@@ -9,6 +9,7 @@ import type {
   Criteria,
   EuiBasicTableColumn,
   EuiSearchBarOnChangeArgs,
+  Query,
   SearchFilterConfig,
 } from '@elastic/eui';
 import {
@@ -34,6 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
+import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import type { AuthenticatedUser } from '../../../../common';
 import type { ApiKey, ApiKeyAggregations, BaseApiKey } from '../../../../common/model';
 import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
@@ -50,6 +52,7 @@ export interface ApiKeysTableProps {
   apiKeys: CategorizedApiKey[];
   currentUser: AuthenticatedUser;
   createdApiKey?: CreateAPIKeyResult;
+  query: Query;
   readOnly?: boolean;
   loading?: boolean;
   canManageCrossClusterApiKeys: boolean;
@@ -63,6 +66,11 @@ export interface ApiKeysTableProps {
   onSearchChange: (args: EuiSearchBarOnChangeArgs) => boolean | void;
   aggregations?: ApiKeyAggregations;
   sortingOptions: QueryApiKeySortOptions;
+  queryErrors?: {
+    isBadRequest?: boolean;
+    queryError?: Error;
+  };
+  resetQuery: () => void;
 }
 
 export const MAX_PAGINATED_ITEMS = 10000;
@@ -84,15 +92,19 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   onSearchChange,
   aggregations,
   sortingOptions,
+  queryErrors,
+  resetQuery,
+  query,
 }) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
-  const initialQuery = EuiSearchBar.Query.parse('');
 
   const { typeFilters, usernameFilters, expired } = categorizeAggregations(aggregations);
 
   const deletable = (item: CategorizedApiKey) =>
     canManageApiKeys || (canManageOwnApiKeys && item.username === currentUser.username);
+
+  const itemsToDisplay = queryErrors?.isBadRequest ? [] : apiKeys;
 
   columns.push(
     {
@@ -255,7 +267,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     <>
       <FiltersContext.Provider value={{ types: [...typeFilters], usernames: [...usernameFilters] }}>
         <EuiSearchBar
-          defaultQuery={initialQuery}
+          query={query}
           box={{
             incremental: true,
             schema: {
@@ -302,41 +314,60 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         />
       </FiltersContext.Provider>
       <EuiSpacer size="s" />
-      {exceededResultCount && (
-        <>
-          <EuiText color="subdued" size="s" data-test-subj="apiKeysTableTooManyResultsLabel">
+      {queryErrors?.isBadRequest ? (
+        <ApiKeysEmptyPrompt error={queryErrors.queryError}>
+          <EuiButton
+            iconType="refresh"
+            onClick={() => {
+              // onSearchChange({ query: initialQuery, queryText: '', error: null });
+              resetQuery();
+            }}
+          >
             <FormattedMessage
-              id="xpack.security.management.apiKeys.table.tooManyResultsLabel"
-              defaultMessage="Showing {limit} of {totalItemCount, plural, one {# api key} other {# api keys}}"
-              values={{ totalItemCount, limit: MAX_PAGINATED_ITEMS }}
+              id="xpack.security.accountManagement.apiKeys.retryButton"
+              defaultMessage="Try again"
             />
-          </EuiText>
-          <EuiSpacer size="s" />
+          </EuiButton>
+        </ApiKeysEmptyPrompt>
+      ) : (
+        <>
+          {exceededResultCount && (
+            <>
+              <EuiText color="subdued" size="s" data-test-subj="apiKeysTableTooManyResultsLabel">
+                <FormattedMessage
+                  id="xpack.security.management.apiKeys.table.tooManyResultsLabel"
+                  defaultMessage="Showing {limit} of {totalItemCount, plural, one {# api key} other {# api keys}}"
+                  values={{ totalItemCount, limit: MAX_PAGINATED_ITEMS }}
+                />
+              </EuiText>
+              <EuiSpacer size="s" />
+            </>
+          )}
+          <EuiBasicTable
+            items={itemsToDisplay}
+            itemId="id"
+            columns={columns}
+            loading={loading}
+            pagination={pagination}
+            onChange={onTableChange}
+            selection={
+              readOnly
+                ? undefined
+                : {
+                    selectable: deletable,
+                    onSelectionChange: setSelectedItems,
+                  }
+            }
+            isSelectable={canManageOwnApiKeys}
+            sorting={{
+              sort: {
+                field: sortingOptions.field,
+                direction: sortingOptions.direction,
+              },
+            }}
+          />
         </>
       )}
-      <EuiBasicTable
-        items={apiKeys}
-        itemId="id"
-        columns={columns}
-        loading={loading}
-        pagination={pagination}
-        onChange={onTableChange}
-        selection={
-          readOnly
-            ? undefined
-            : {
-                selectable: deletable,
-                onSelectionChange: setSelectedItems,
-              }
-        }
-        isSelectable={canManageOwnApiKeys}
-        sorting={{
-          sort: {
-            field: sortingOptions.field,
-            direction: sortingOptions.direction,
-          },
-        }}
-      />
     </>
   );
 };

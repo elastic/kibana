@@ -26,6 +26,7 @@ export interface QueryApiKeyResult {
   total: number;
   aggregationTotal: number;
   aggregations: Record<string, SecurityQueryApiKeysAPIKeyAggregate> | undefined;
+  queryError?: Error;
 }
 
 export function defineQueryApiKeysAndAggregationsRoute({
@@ -79,13 +80,24 @@ export function defineQueryApiKeysAndAggregationsRoute({
         const { query, size, from, sort } = request.body;
 
         const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
-
-        const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
-          query,
-          sort: transformedSort,
-          size,
-          from,
-        });
+        const responseBody: QueryApiKeyResult = {} as QueryApiKeyResult;
+        try {
+          const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({
+            query,
+            sort: transformedSort,
+            size,
+            from,
+          });
+          // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
+          responseBody.apiKeys = queryResponse.api_keys;
+          responseBody.total = queryResponse.total;
+          responseBody.count = queryResponse.api_keys.length;
+        } catch ({ name, message }) {
+          responseBody.queryError = {
+            name,
+            message,
+          };
+        }
 
         const aggregationResponse = await esClient.asCurrentUser.security.queryApiKeys({
           filter_path: [
@@ -127,20 +139,15 @@ export function defineQueryApiKeysAndAggregationsRoute({
             },
           },
         });
+        responseBody.aggregationTotal = aggregationResponse.total;
+        responseBody.aggregations = aggregationResponse.aggregations;
+        responseBody.canManageCrossClusterApiKeys =
+          clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled;
+        responseBody.canManageApiKeys = clusterPrivileges.manage_api_key;
+        responseBody.canManageOwnApiKeys = clusterPrivileges.manage_own_api_key;
 
         return response.ok<QueryApiKeyResult>({
-          body: {
-            // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
-            apiKeys: queryResponse.api_keys,
-            total: queryResponse.total,
-            count: queryResponse.api_keys.length,
-            canManageCrossClusterApiKeys:
-              clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
-            canManageApiKeys: clusterPrivileges.manage_api_key,
-            canManageOwnApiKeys: clusterPrivileges.manage_own_api_key,
-            aggregationTotal: aggregationResponse.total,
-            aggregations: aggregationResponse.aggregations,
-          },
+          body: responseBody,
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
