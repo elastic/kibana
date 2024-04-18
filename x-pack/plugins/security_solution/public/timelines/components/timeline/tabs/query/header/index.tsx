@@ -146,11 +146,6 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
             </EuiFlexGroup>
           </TabHeaderContainer>
         </EuiFlexItem>
-        {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
-        {/* https://github.com/elastic/kibana/issues/17156 */}
-        {/* <EuiFlexItem grow={false}> */}
-        {/*   <TimelineKpi timelineId={timelineId} /> */}
-        {/* </EuiFlexItem> */}
       </EuiFlexGroup>
     </StyledEuiFlyoutHeader>
   );
