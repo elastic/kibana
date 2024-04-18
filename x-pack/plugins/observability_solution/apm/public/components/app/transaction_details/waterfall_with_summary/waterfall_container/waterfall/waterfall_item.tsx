@@ -10,14 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
-import {
-  isMobileAgentName,
-  isRumAgentName,
-} from '../../../../../../../common/agent_name';
-import {
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../../../../common/es_fields/apm';
+import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
+import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -198,9 +192,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
       let name = item.doc.span.name;
       if (item.doc.span.composite) {
         const compositePrefix =
-          item.doc.span.composite.compression_strategy === 'exact_match'
-            ? 'x'
-            : '';
+          item.doc.span.composite.compression_strategy === 'exact_match' ? 'x' : '';
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
       }
       return (
@@ -233,9 +225,7 @@ export function WaterfallItem({
   const waterfallItemRef: React.RefObject<any> = useRef(null);
   useEffect(() => {
     if (waterfallItemRef?.current && marginLeftLevel) {
-      setWidthFactor(
-        1 + marginLeftLevel / waterfallItemRef.current.offsetWidth
-      );
+      setWidthFactor(1 + marginLeftLevel / waterfallItemRef.current.offsetWidth);
     }
   }, [marginLeftLevel]);
 
@@ -244,18 +234,13 @@ export function WaterfallItem({
   }
 
   const width = (item.duration / totalDuration) * widthFactor * 100;
-  const left =
-    (((item.offset + item.skew) / totalDuration) * widthFactor -
-      widthFactor +
-      1) *
-    100;
+  const left = (((item.offset + item.skew) / totalDuration) * widthFactor - widthFactor + 1) * 100;
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
 
   const itemBarStyle = getItemBarStyle(item, color, width, left);
 
-  const isServerlessColdstart =
-    item.docType === 'transaction' && item.doc.faas?.coldstart;
+  const isServerlessColdstart = item.docType === 'transaction' && item.doc.faas?.coldstart;
 
   const waterfallItemFlyoutTab = 'metadata';
 
@@ -300,10 +285,7 @@ export function WaterfallItem({
         <Duration item={item} />
         <RelatedErrors item={item} errorCount={errorCount} />
         {item.docType === 'span' && (
-          <SyncBadge
-            sync={item.doc.span.sync}
-            agentName={item.doc.agent.name}
-          />
+          <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}
         <SpanLinksBadge
           linkedParents={item.spanLinksCount.linkedParents}
@@ -338,17 +320,14 @@ function RelatedErrors({
     kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
   }
 
-  const mobileHref = apmRouter.link(
-    `/mobile-services/{serviceName}/errors-and-crashes`,
-    {
-      path: { serviceName: item.doc.service.name },
-      query: {
-        ...query,
-        serviceGroup: '',
-        kuery,
-      },
-    }
-  );
+  const mobileHref = apmRouter.link(`/mobile-services/{serviceName}/errors-and-crashes`, {
+    path: { serviceName: item.doc.service.name },
+    query: {
+      ...query,
+      serviceGroup: '',
+      kuery,
+    },
+  });
 
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
@@ -391,8 +370,7 @@ function getItemBarStyle(
 
   if (item.docType === 'span' && item.doc.span.composite) {
     const percNumItems = 100.0 / item.doc.span.composite.count;
-    const spanSumRatio =
-      item.doc.span.composite.sum.us / item.doc.span.duration.us;
+    const spanSumRatio = item.doc.span.composite.sum.us / item.doc.span.duration.us;
     const percDuration = percNumItems * spanSumRatio;
 
     itemBarStyle = {

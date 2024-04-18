@@ -14,6 +14,7 @@ import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badg
 import { BurnRateRuleParams } from '../../../../typings';
 import { SloTagsList } from '../common/slo_tags_list';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
+import { SloRemoteBadge } from './slo_remote_badge';
 import { SloRulesBadge } from './slo_rules_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 
@@ -44,7 +45,8 @@ export function SloBadges({
           <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
-          <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
+          <SloRemoteBadge slo={slo} />
+          <SloRulesBadge rules={rules} onClick={onClickRuleBadge} isRemote={!!slo.remote} />
           <SloTagsList tags={slo.tags} numberOfTagsToDisplay={1} color="default" ignoreEmpty />
         </>
       )}

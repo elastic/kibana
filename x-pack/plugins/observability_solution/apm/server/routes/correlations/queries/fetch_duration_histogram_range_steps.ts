@@ -19,9 +19,7 @@ const getHistogramRangeSteps = (min: number, max: number, steps: number) => {
   // A d3 based scale function as a helper to get equally distributed bins on a log scale.
   // We round the final values because the ES range agg we use won't accept numbers with decimals for `transaction.duration.us`.
   const logFn = scaleLog().domain([min, max]).range([1, steps]);
-  return [...Array(steps).keys()]
-    .map(logFn.invert)
-    .map((d) => (isNaN(d) ? 0 : Math.round(d)));
+  return [...Array(steps).keys()].map(logFn.invert).map((d) => (isNaN(d) ? 0 : Math.round(d)));
 };
 
 export const fetchDurationHistogramRangeSteps = async ({
@@ -52,11 +50,7 @@ export const fetchDurationHistogramRangeSteps = async ({
     return {
       durationMin: durationMinOverride,
       durationMax: durationMaxOverride,
-      rangeSteps: getHistogramRangeSteps(
-        durationMinOverride,
-        durationMaxOverride,
-        steps
-      ),
+      rangeSteps: getHistogramRangeSteps(durationMinOverride, durationMaxOverride, steps),
     };
   }
 
@@ -71,29 +65,26 @@ export const fetchDurationHistogramRangeSteps = async ({
       }
     : query;
 
-  const resp = await apmEventClient.search(
-    'get_duration_histogram_range_steps',
-    {
-      apm: {
-        events: [getEventType(chartType, searchMetrics)],
+  const resp = await apmEventClient.search('get_duration_histogram_range_steps', {
+    apm: {
+      events: [getEventType(chartType, searchMetrics)],
+    },
+    body: {
+      track_total_hits: 1,
+      size: 0,
+      query: getCommonCorrelationsQuery({
+        start,
+        end,
+        environment,
+        kuery,
+        query: filteredQuery,
+      }),
+      aggs: {
+        duration_min: { min: { field: durationField } },
+        duration_max: { max: { field: durationField } },
       },
-      body: {
-        track_total_hits: 1,
-        size: 0,
-        query: getCommonCorrelationsQuery({
-          start,
-          end,
-          environment,
-          kuery,
-          query: filteredQuery,
-        }),
-        aggs: {
-          duration_min: { min: { field: durationField } },
-          duration_max: { max: { field: durationField } },
-        },
-      },
-    }
-  );
+    },
+  });
 
   if (resp.hits.total.value === 0) {
     return { rangeSteps: getHistogramRangeSteps(0, 1, 100) };

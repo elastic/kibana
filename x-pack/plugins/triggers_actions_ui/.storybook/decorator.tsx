@@ -60,7 +60,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
     experimentalFeatures: {
       rulesListDatagrid: true,
       ruleTagFilter: true,
-      globalAlertsPage: false,
+      stackAlertsPage: true,
       ruleStatusFilter: true,
       rulesDetailLogs: true,
       ruleUseExecutionStatus: false,

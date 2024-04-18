@@ -78,7 +78,7 @@ top --> bottom
 
 ## Grouping
 
-The case action accepts an array of alerts provided by the connector adapter. Duplicate alerts will not be attached to the same case. The case action groups the alerts by the grouping field configured by the user. For example, if the grouping field is `host.name` the case action will group the alerts by the values of the `host.name` field. Users may define more than one grouping field. In this case, the grouping will be done by multiple fields. The grouping is performed in memory by the case action as the number of alerts is expected to be low on average and they are already loaded in memory by the alerting framework.
+The case action accepts an array of alerts provided by the connector adapter. Duplicate alerts will not be attached to the same case. The case action groups the alerts by the grouping field configured by the user. For example, if the grouping field is `host.name` the case action will group the alerts by the values of the `host.name` field. In this case, the grouping will be done by multiple fields. The grouping is performed in memory by the case action as the number of alerts is expected to be low on average and they are already loaded in memory by the alerting framework.
 
 ```mermaid
 flowchart LR
