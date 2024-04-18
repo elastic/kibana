@@ -33,4 +33,4 @@ steps:
   - command: "echo 'Running the defend worklows tests in this step"
     depends_on: build_image
     key: test_defend_workflows
-    label: 'Serverless MKI QA EDR Workflows - Security Solution Cypress Tests'
+    label: 'Serverless MKI QA Defend Workflows - Security Solution Cypress Tests'
