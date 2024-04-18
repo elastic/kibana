@@ -18,10 +18,9 @@ export function MigrationInProgressPanel() {
       <EuiFlexItem style={{ maxWidth: '500px' }}>
         <EuiCard
           icon={<EuiLoadingSpinner size="xl" />}
-          title={i18n.translate(
-            'xpack.apm.settings.schema.migrationInProgressPanelTitle',
-            { defaultMessage: 'Switching to Elastic Agent...' }
-          )}
+          title={i18n.translate('xpack.apm.settings.schema.migrationInProgressPanelTitle', {
+            defaultMessage: 'Switching to Elastic Agent...',
+          })}
           description={i18n.translate(
             'xpack.apm.settings.schema.migrationInProgressPanelDescription',
             {

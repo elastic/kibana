@@ -15,11 +15,14 @@ export function defineGetAllRolesRoutes({
   authz,
   getFeatures,
   logger,
+  buildFlavor,
+  config,
 }: RouteDefinitionParams) {
   router.get(
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const hideReservedRoles = buildFlavor === 'serverless';
         const esClient = (await context.core).elasticsearch.client;
         const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
@@ -39,6 +42,9 @@ export function defineGetAllRolesRoutes({
                 logger
               )
             )
+            .filter((role) => {
+              return !hideReservedRoles || !role.metadata?._reserved;
+            })
             .sort((roleA, roleB) => {
               if (roleA.name < roleB.name) {
                 return -1;

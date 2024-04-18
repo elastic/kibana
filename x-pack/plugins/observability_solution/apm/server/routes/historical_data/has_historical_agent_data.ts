@@ -24,19 +24,12 @@ export async function hasHistoricalAgentData(apmEventClient: APMEventClient) {
 }
 
 type DataTier = 'data_hot' | 'data_warm' | 'data_cold' | 'data_frozen';
-async function hasDataRequest(
-  apmEventClient: APMEventClient,
-  dataTiers?: DataTier[]
-) {
+async function hasDataRequest(apmEventClient: APMEventClient, dataTiers?: DataTier[]) {
   const query = dataTiers ? { terms: { _tier: dataTiers } } : undefined;
 
   const params = {
     apm: {
-      events: [
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-        ProcessorEvent.transaction,
-      ],
+      events: [ProcessorEvent.error, ProcessorEvent.metric, ProcessorEvent.transaction],
     },
     body: {
       terminate_after: 1,

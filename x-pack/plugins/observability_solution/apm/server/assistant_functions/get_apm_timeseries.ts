@@ -8,10 +8,7 @@ import { FromSchema } from 'json-schema-to-ts';
 import { omit } from 'lodash';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { FunctionRegistrationParameters } from '.';
-import {
-  ApmTimeseries,
-  getApmTimeseries,
-} from '../routes/assistant_functions/get_apm_timeseries';
+import { ApmTimeseries, getApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
 const parameters = {
@@ -19,13 +16,11 @@ const parameters = {
   properties: {
     start: {
       type: 'string',
-      description:
-        'The start of the time range, in Elasticsearch date math, like `now-24h`.',
+      description: 'The start of the time range, in Elasticsearch date math, like `now-24h`.',
     },
     end: {
       type: 'string',
-      description:
-        'The end of the time range, in Elasticsearch date math, like `now`.',
+      description: 'The end of the time range, in Elasticsearch date math, like `now`.',
     },
     stats: {
       type: 'array',
@@ -40,10 +35,7 @@ const parameters = {
                 properties: {
                   name: {
                     type: 'string',
-                    enum: [
-                      'transaction_throughput',
-                      'transaction_failure_rate',
-                    ],
+                    enum: ['transaction_throughput', 'transaction_failure_rate'],
                   },
                   'transaction.type': {
                     type: 'string',
@@ -57,16 +49,11 @@ const parameters = {
                 properties: {
                   name: {
                     type: 'string',
-                    enum: [
-                      'exit_span_throughput',
-                      'exit_span_failure_rate',
-                      'exit_span_latency',
-                    ],
+                    enum: ['exit_span_throughput', 'exit_span_failure_rate', 'exit_span_latency'],
                   },
                   'span.destination.service.resource': {
                     type: 'string',
-                    description:
-                      'The name of the downstream dependency for the service',
+                    description: 'The name of the downstream dependency for the service',
                   },
                 },
                 required: ['name'],
@@ -115,13 +102,11 @@ const parameters = {
           },
           title: {
             type: 'string',
-            description:
-              'A unique, human readable, concise title for this specific group series.',
+            description: 'A unique, human readable, concise title for this specific group series.',
           },
           offset: {
             type: 'string',
-            description:
-              'The offset. Right: 15m. 8h. 1d. Wrong: -15m. -8h. -1d.',
+            description: 'The offset. Right: 15m. 8h. 1d. Wrong: -15m. -8h. -1d.',
           },
         },
         required: ['service.name', 'timeseries', 'title'],
@@ -144,19 +129,14 @@ export function registerGetApmTimeseriesFunction({
       // deprecated
       visibility: FunctionVisibility.Internal,
     },
-    async (
-      { arguments: args },
-      signal
-    ): Promise<GetApmTimeseriesFunctionResponse> => {
+    async ({ arguments: args }, signal): Promise<GetApmTimeseriesFunctionResponse> => {
       const timeseries = await getApmTimeseries({
         apmEventClient,
         arguments: args as any,
       });
 
       return {
-        content: timeseries.map(
-          (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')
-        ),
+        content: timeseries.map((series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')),
         data: timeseries,
       };
     }
