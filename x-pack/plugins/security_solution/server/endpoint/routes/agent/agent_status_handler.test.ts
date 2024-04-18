@@ -43,6 +43,7 @@ describe('Agent Status API route handler', () => {
     apiTestSetup.endpointAppContextMock.experimentalFeatures = {
       ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
       responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
       agentStatusClientEnabled: false,
     };
 
@@ -53,6 +54,7 @@ describe('Agent Status API route handler', () => {
     apiTestSetup.endpointAppContextMock.experimentalFeatures = {
       ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
       responseActionsSentinelOneV1Enabled: false,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: false,
     };
 
     await apiTestSetup
