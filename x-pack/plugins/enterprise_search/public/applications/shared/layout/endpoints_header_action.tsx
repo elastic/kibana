@@ -31,6 +31,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -59,7 +60,7 @@ export const EndpointsHeaderAction: React.FC = ({ children }) => {
   const elasticsearchEndpoint = esConfig.elasticsearch_host;
 
   const button = (
-    <EuiButtonEmpty iconType={EndpointIcon} size="s" onClick={() => setPopoverOpen(!isPopoverOpen)}>
+    <EuiButtonEmpty iconType={EndpointIcon} size="s" onClick={() => openWiredConnectionDetails()}>
       {i18n.translate('xpack.enterpriseSearch.pageTemplate.endpointsButtonLabel', {
         defaultMessage: 'Endpoints & API keys',
       })}
