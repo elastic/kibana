@@ -57,6 +57,10 @@ export function MachineLearningJobTableProvider(
   const find = getService('find');
 
   return new (class MlJobTable {
+    public async selectAllJobs(): Promise<void> {
+      await testSubjects.click('checkboxSelectAll');
+    }
+
     public async assertJobsInTable(expectedJobIds: string[]) {
       const sortedExpectedIds = expectedJobIds.sort();
       const sortedActualJobIds = (await this.parseJobTable()).map((row) => row.id).sort();

@@ -102,44 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('multi-selection with one opened job should only present the opened job when job list is filtered by the Opened button', async () => {
-      await ml.tableService
-        .getServiceInstance(
-          'AnomalyDetetectionJobsTable',
-          'mlJobListTable',
-          'mlJobListRow',
-          [
-            {
-              id: 'jobId',
-              testSubj: 'mlJobListColumnId',
-            },
-            {
-              id: 'description',
-              testSubj: 'mlJobListColumnDescription',
-            },
-            {
-              id: 'processedRecords',
-              testSubj: 'mlJobListColumnRecordCount',
-            },
-            {
-              id: 'memoryStatus',
-              testSubj: 'mlJobListColumnMemoryStatus',
-            },
-            {
-              id: 'jobState',
-              testSubj: 'mlJobListColumnJobState',
-            },
-            {
-              id: 'dataFeedState',
-              testSubj: 'mlJobListColumnDatafeedState',
-            },
-            {
-              id: 'latestTimestamp',
-              testSubj: 'mlJobListColumnLatestTimestamp',
-            },
-          ],
-          'mlJobListSearchBar'
-        )
-        .selectAllRows();
+      await ml.jobTable.selectAllJobs();
       await ml.jobExpandedDetails.assertJobListMultiSelectionText('2 jobs selected');
       await ml.jobTable.filterByState(QuickFilterButtonTypes.Opened);
       await ml.jobTable.assertJobsInTable([jobId]);
