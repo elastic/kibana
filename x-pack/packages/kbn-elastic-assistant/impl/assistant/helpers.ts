@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge } from 'lodash/fp';
+import { isEmpty, some } from 'lodash';
 import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
@@ -41,19 +41,24 @@ export const mergeBaseWithPersistedConversations = (
   baseConversations: Record<string, Conversation>,
   conversationsData: FetchConversationsResponse
 ): Record<string, Conversation> => {
-  const userConversations = (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
-    (transformed, conversation) => {
-      transformed[conversation.title] = conversation;
-      return transformed;
-    },
-    {}
-  );
-  return merge(baseConversations, userConversations);
+  return [...(conversationsData?.data ?? []), ...Object.values(baseConversations)].reduce<
+    Record<string, Conversation>
+  >((transformed, conversation) => {
+    if (!isEmpty(conversation.id)) {
+      transformed[conversation.id] = conversation;
+    } else {
+      if (!some(Object.values(transformed), ['title', conversation.title])) {
+        transformed[conversation.title] = conversation;
+      }
+    }
+    return transformed;
+  }, {});
 };
 
 export const getBlockBotConversation = (
   conversation: Conversation,
-  isAssistantEnabled: boolean
+  isAssistantEnabled: boolean,
+  isFlyoutMode: boolean
 ): Conversation => {
   if (!isAssistantEnabled) {
     if (
@@ -71,7 +76,7 @@ export const getBlockBotConversation = (
 
   return {
     ...conversation,
-    messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
+    messages: [...conversation.messages, ...(!isFlyoutMode ? WELCOME_CONVERSATION.messages : [])],
   };
 };
 
@@ -81,7 +86,14 @@ export const getBlockBotConversation = (
  */
 export const getDefaultConnector = (
   connectors: AIConnector[] | undefined
-): AIConnector | undefined => (connectors?.length === 1 ? connectors[0] : undefined);
+): AIConnector | undefined => {
+  const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
+  if (validConnectors?.length) {
+    return validConnectors[0];
+  }
+
+  return undefined;
+};
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;

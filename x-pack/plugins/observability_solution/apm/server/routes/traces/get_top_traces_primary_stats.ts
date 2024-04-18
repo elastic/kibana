@@ -6,11 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -32,10 +28,7 @@ import {
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export type BucketKey = Record<
-  typeof TRANSACTION_NAME | typeof SERVICE_NAME,
-  string
->;
+export type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 
 interface TopTracesParams {
   environment: string;
@@ -72,77 +65,66 @@ export async function getTopTracesPrimaryStats({
   randomSampler,
 }: TopTracesParams): Promise<TopTracesPrimaryStatsResponse> {
   return withApmSpan('get_top_traces_primary_stats', async () => {
-    const response = await apmEventClient.search(
-      'get_transaction_group_stats',
-      {
-        apm: {
-          events: [
-            getProcessorEventForTransactions(searchAggregatedTransactions),
-          ],
-        },
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...termQuery(TRANSACTION_NAME, transactionName),
-                ...getBackwardCompatibleDocumentTypeFilter(
-                  searchAggregatedTransactions
-                ),
-                ...rangeQuery(start, end),
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-                isRootTransaction(searchAggregatedTransactions),
-              ],
-            },
+    const response = await apmEventClient.search('get_transaction_group_stats', {
+      apm: {
+        events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      },
+      body: {
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(TRANSACTION_NAME, transactionName),
+              ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              isRootTransaction(searchAggregatedTransactions),
+            ],
           },
-          aggs: {
-            sample: {
-              random_sampler: randomSampler,
-              aggs: {
-                transaction_groups: {
-                  composite: {
-                    sources: asMutableArray([
-                      { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
-                      {
-                        [TRANSACTION_NAME]: {
-                          terms: { field: TRANSACTION_NAME },
-                        },
+        },
+        aggs: {
+          sample: {
+            random_sampler: randomSampler,
+            aggs: {
+              transaction_groups: {
+                composite: {
+                  sources: asMutableArray([
+                    { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+                    {
+                      [TRANSACTION_NAME]: {
+                        terms: { field: TRANSACTION_NAME },
                       },
-                    ] as const),
-                    // traces overview is hardcoded to 10000
-                    size: 10000,
+                    },
+                  ] as const),
+                  // traces overview is hardcoded to 10000
+                  size: 10000,
+                },
+                aggs: {
+                  transaction_type: {
+                    top_metrics: {
+                      sort: {
+                        '@timestamp': 'desc' as const,
+                      },
+                      metrics: [
+                        {
+                          field: TRANSACTION_TYPE,
+                        } as const,
+                        {
+                          field: AGENT_NAME,
+                        } as const,
+                      ],
+                    },
                   },
-                  aggs: {
-                    transaction_type: {
-                      top_metrics: {
-                        sort: {
-                          '@timestamp': 'desc' as const,
-                        },
-                        metrics: [
-                          {
-                            field: TRANSACTION_TYPE,
-                          } as const,
-                          {
-                            field: AGENT_NAME,
-                          } as const,
-                        ],
-                      },
-                    },
+                  avg: {
                     avg: {
-                      avg: {
-                        field: getDurationFieldForTransactions(
-                          searchAggregatedTransactions
-                        ),
-                      },
+                      field: getDurationFieldForTransactions(searchAggregatedTransactions),
                     },
+                  },
+                  sum: {
                     sum: {
-                      sum: {
-                        field: getDurationFieldForTransactions(
-                          searchAggregatedTransactions
-                        ),
-                      },
+                      field: getDurationFieldForTransactions(searchAggregatedTransactions),
                     },
                   },
                 },
@@ -150,37 +132,29 @@ export async function getTopTracesPrimaryStats({
             },
           },
         },
-      }
-    );
+      },
+    });
 
     const calculateImpact = calculateImpactBuilder(
-      response.aggregations?.sample.transaction_groups.buckets.map(
-        ({ sum }) => sum.value
-      )
+      response.aggregations?.sample.transaction_groups.buckets.map(({ sum }) => sum.value)
     );
 
-    const items = response.aggregations?.sample.transaction_groups.buckets.map(
-      (bucket) => {
-        return {
-          key: bucket.key as BucketKey,
-          serviceName: bucket.key[SERVICE_NAME] as string,
-          transactionName: bucket.key[TRANSACTION_NAME] as string,
-          averageResponseTime: bucket.avg.value,
-          transactionsPerMinute: calculateThroughputWithRange({
-            start,
-            end,
-            value: bucket.doc_count ?? 0,
-          }),
-          transactionType: bucket.transaction_type.top[0].metrics[
-            TRANSACTION_TYPE
-          ] as string,
-          impact: calculateImpact(bucket.sum.value ?? 0),
-          agentName: bucket.transaction_type.top[0].metrics[
-            AGENT_NAME
-          ] as AgentName,
-        };
-      }
-    );
+    const items = response.aggregations?.sample.transaction_groups.buckets.map((bucket) => {
+      return {
+        key: bucket.key as BucketKey,
+        serviceName: bucket.key[SERVICE_NAME] as string,
+        transactionName: bucket.key[TRANSACTION_NAME] as string,
+        averageResponseTime: bucket.avg.value,
+        transactionsPerMinute: calculateThroughputWithRange({
+          start,
+          end,
+          value: bucket.doc_count ?? 0,
+        }),
+        transactionType: bucket.transaction_type.top[0].metrics[TRANSACTION_TYPE] as string,
+        impact: calculateImpact(bucket.sum.value ?? 0),
+        agentName: bucket.transaction_type.top[0].metrics[AGENT_NAME] as AgentName,
+      };
+    });
 
     return {
       // sort by impact by default so most impactful services are not cut off

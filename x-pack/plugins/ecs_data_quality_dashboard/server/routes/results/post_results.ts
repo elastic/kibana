@@ -11,7 +11,7 @@ import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/consta
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { PostResultBody } from '../../schemas/result';
-import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
+import { API_CURRENT_USER_ERROR_MESSAGE, API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { checkIndicesPrivileges } from './privileges';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
@@ -33,6 +33,7 @@ export const postResultsRoute = (
       },
       async (context, request, response) => {
         const services = await context.resolve(['core', 'dataQualityDashboard']);
+
         const resp = buildResponse(response);
 
         let index: string;
@@ -43,6 +44,14 @@ export const postResultsRoute = (
           return resp.error({
             body: `${API_RESULTS_INDEX_NOT_AVAILABLE}: ${err.message}`,
             statusCode: 503,
+          });
+        }
+
+        const currentUser = services.core.security.authc.getCurrentUser();
+        if (!currentUser) {
+          return resp.error({
+            body: API_CURRENT_USER_ERROR_MESSAGE,
+            statusCode: 500,
           });
         }
 
@@ -70,7 +79,11 @@ export const postResultsRoute = (
           }
 
           // Index the result
-          const body = { '@timestamp': Date.now(), ...request.body };
+          const body = {
+            ...request.body,
+            '@timestamp': Date.now(),
+            checkedBy: currentUser.profile_uid,
+          };
           const outcome = await client.asInternalUser.index({ index, body });
 
           return response.ok({ body: { result: outcome.result } });
