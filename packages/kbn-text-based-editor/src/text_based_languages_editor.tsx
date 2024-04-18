@@ -70,6 +70,7 @@ import { addQueriesToCache, updateCachedQueries } from './history_local_storage'
 import './overwrite.scss';
 import { set } from 'lodash';
 import { pop } from 'fp-ts/lib/ReadonlyRecord';
+import { createPortal } from 'react-dom';
 
 export interface TextBasedLanguagesEditorProps {
   /** The aggregate type query */
@@ -277,7 +278,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     const editorLeft = editorCoords.left;
 
     // Calculate the absolute position of the popover
-    const absoluteTop = editorPosition.top + 40;
+    const absoluteTop = editorTop + editorPosition.top + 20;
     const absoluteLeft = editorLeft + editorPosition.left;
     setPopoverState({ top: absoluteTop, left: absoluteLeft });
   }
@@ -1134,57 +1135,62 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             </EuiOutsideClickDetector>
           )}
         </EuiResizeObserver>
-        {popoverState.top && popoverState.left && (
-          <div
-            id="sdfsd"
-            style={{
-              ...popoverState,
+        {createPortal(
+          popoverState.top && popoverState.left && (
+            <div
+              id="sdfsd"
+              style={{
+                ...popoverState,
 
-              position: 'absolute',
-              background: '#fff',
-              border: '1px solid #ccc',
-              padding: '10px',
-              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-              zIndex: '1000',
-              height: 400,
-              overflow: 'auto',
-            }}
-          >
-            <ul>
-              {integrations.map((integration) => (
-                <li>
-                  {integration.title}
-                  <ul style={{ marginLeft: 20 }}>
-                    {integration.dataStreams.map((dataStream) => {
-                      i++;
-                      return (
-                        <li
-                          style={
-                            i - 1 === selectedIndex
-                              ? { backgroundColor: 'red' }
-                              : { cursor: 'pointer' }
-                          }
-                          onClick={() => {
-                            // strip from plus pattern from code:
-                            const fromPlusPattern = /from.+\| /;
-                            const strippedCode = code.replace(fromPlusPattern, '').trim();
-                            // add the data stream to the query
-                            const updatedCode = `from "${dataStream.name}" | ${strippedCode}`;
-                            if (code !== updatedCode) {
-                              setCode(updatedCode);
-                              onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
+                position: 'absolute',
+                background: '#fff',
+                border: '1px solid #ccc',
+                padding: '10px',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                zIndex: '1000',
+                height: 400,
+                overflow: 'auto',
+              }}
+            >
+              <ul>
+                {integrations.map((integration) => (
+                  <li>
+                    {integration.title}
+                    <ul style={{ marginLeft: 20 }}>
+                      {integration.dataStreams.map((dataStream) => {
+                        i++;
+                        return (
+                          <li
+                            style={
+                              i - 1 === selectedIndex
+                                ? { backgroundColor: 'red' }
+                                : { cursor: 'pointer' }
                             }
-                          }}
-                        >
-                          {dataStream.title}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </div>
+                            onClick={() => {
+                              // strip from plus pattern from code:
+                              const fromPlusPattern = /from.+\| /;
+                              const strippedCode = code.replace(fromPlusPattern, '').trim();
+                              // add the data stream to the query
+                              const updatedCode = `from "${dataStream.name}" | ${strippedCode}`;
+                              if (code !== updatedCode) {
+                                setCode(updatedCode);
+                                onTextLangQueryChange({
+                                  [language]: updatedCode,
+                                } as AggregateQuery);
+                              }
+                            }}
+                          >
+                            {dataStream.title}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ),
+          document.body
         )}
         {!isCodeEditorExpanded && (
           <EuiFlexItem grow={false}>
