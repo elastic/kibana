@@ -155,10 +155,6 @@ interface InternalGetRoutesOptions {
   excludeVersionedRoutes?: boolean;
 }
 
-interface SimplifiedHapiRequest extends Request {
-  method: RouteMethod;
-}
-
 /**
  * @internal
  */
@@ -191,7 +187,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           handler: async (req, responseToolkit) =>
             await this.handle({
               routeSchemas,
-              request: req as SimplifiedHapiRequest,
+              request: req,
               responseToolkit,
               handler: this.enhanceWithContext(handler),
             }),
@@ -246,7 +242,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     responseToolkit,
     handler,
   }: {
-    request: SimplifiedHapiRequest;
+    request: Request;
     responseToolkit: ResponseToolkit;
     handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
     routeSchemas?: RouteValidator<P, Q, B>;
