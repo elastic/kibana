@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
-  EuiSwitch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiCodeBlock,
   useIsWithinBreakpoints,
   EuiText,
 } from '@elastic/eui';
 
-import { CollapsiblePanel } from './collapsible_panel';
 import { i18n } from '@kbn/i18n';
+import { BulkRequestPanel } from './bulk_request_panel';
+import { CollapsiblePanel, CollapsiblePanelRenderProps } from './collapsible_panel';
 import { Processor } from '../../../../common/types';
 
 import { getFormRow, getUseField, Field, JsonEditorField } from '../../../shared_imports';
@@ -47,12 +45,6 @@ const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
 const COLUMN_MAX_WIDTH = 420;
-const requestExample = `POST _bulk?pipeline=my-pipeline-name
-{"index1": { "_index" : "test", "_id" : "1" }}
-{"field1": "value1"}
-{"field1": "value3"}
-{"update": {"_id" : "1", "_index" : "test"}}
-`;
 
 export const PipelineFormFields: React.FunctionComponent<Props> = ({
   processors,
@@ -66,9 +58,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   isEditing,
 }) => {
   const shouldHaveFixedWidth = useIsWithinBreakpoints(['l', 'xl']);
-
-  const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
-  const [isMetaVisible, setIsMetaVisible] = useState<boolean>(hasMeta);
 
   return (
     <>
@@ -135,7 +124,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
 
         <EuiFlexItem css={shouldHaveFixedWidth ? { maxWidth: COLUMN_MAX_WIDTH } : {}}>
           <CollapsiblePanel
-            title={(
+            title={
               <EuiText size="s">
                 <strong>
                   <FormattedMessage
@@ -144,59 +133,55 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
                   />
                 </strong>
               </EuiText>
-            )}
-            initialToggleState={isVersionVisible}
+            }
+            fieldName="version"
+            toggleProps={{
+              'data-test-subj': 'versionToggle',
+            }}
+            accordionProps={{
+              'data-test-subj': 'versionAccordion',
+            }}
+            initialToggleState={hasVersion}
           >
-            {({ isEnabled }) => (
-            <>
-              {isEnabled && (
+            {({ isEnabled }: CollapsiblePanelRenderProps) => (
+              <>
                 <UseField
                   path="version"
                   componentProps={{
                     ['data-test-subj']: 'versionField',
-                      euiFieldProps: {
-                        disabled: !isEnabled
-                  },
+                    euiFieldProps: {
+                      disabled: !isEnabled,
+                    },
                   }}
                 />
-              )}
-            </>
+              </>
             )}
           </CollapsiblePanel>
 
           <EuiSpacer size="l" />
 
-          <EuiPanel hasShadow={false} hasBorder grow={false}>
-            <EuiFlexGroup gutterSize="xl">
-              <EuiFlexItem grow>
-                <EuiText size="s">
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.metadataCardTitle"
-                      defaultMessage="Add metadata"
-                    />
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.form.metaSwitchCaption"
-                      defaultMessage="Enabled"
-                    />
-                  }
-                  checked={isMetaVisible}
-                  onChange={(e) => setIsMetaVisible(e.target.checked)}
-                  data-test-subj="metaToggle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            {isMetaVisible && (
+          <CollapsiblePanel
+            title={
+              <EuiText size="s">
+                <strong>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.form.metadataCardTitle"
+                    defaultMessage="Add metadata"
+                  />
+                </strong>
+              </EuiText>
+            }
+            fieldName="_meta"
+            toggleProps={{
+              'data-test-subj': 'metaToggle',
+            }}
+            accordionProps={{
+              'data-test-subj': 'metaAccordion',
+            }}
+            initialToggleState={hasMeta}
+          >
+            {({ isEnabled }: CollapsiblePanelRenderProps) => (
               <>
-                <EuiSpacer size="l" />
-
                 <EuiText size="s" color="subdued">
                   <FormattedMessage
                     id="xpack.ingestPipelines.form.metaDescription"
@@ -211,36 +196,28 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
                   component={JsonEditorField}
                   componentProps={{
                     codeEditorProps: {
+                      readOnly: true,
                       'data-test-subj': 'metaEditor',
                       height: '200px',
                       'aria-label': i18n.translate('xpack.ingestPipelines.form.metaAriaLabel', {
                         defaultMessage: '_meta field data editor',
                       }),
+                      options: {
+                        readOnly: !isEnabled,
+                        lineNumbers: 'off',
+                        tabSize: 2,
+                        automaticLayout: true,
+                      },
                     },
                   }}
                 />
               </>
             )}
-          </EuiPanel>
+          </CollapsiblePanel>
 
           <EuiSpacer size="l" />
 
-          <EuiPanel hasShadow={false} hasBorder grow={false}>
-            <EuiText size="s">
-              <strong>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.form.bulkCardTitle"
-                  defaultMessage="How to use this pipeline during data ingestion"
-                />
-              </strong>
-            </EuiText>
-
-            <EuiSpacer size="l" />
-
-            <EuiCodeBlock language="json" overflowHeight={250} isCopyable>
-              {requestExample}
-            </EuiCodeBlock>
-          </EuiPanel>
+          <BulkRequestPanel />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
