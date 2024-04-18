@@ -44,6 +44,7 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
     | 'noMatchesMessage'
     | 'emptyMessage'
     | 'errorMessage'
+    | 'data-test-subj'
   > {
   /**
    * List of users to be rendered as suggestions.
@@ -152,6 +153,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   nullOptionProps,
   defaultOptionsLabel,
   clearButtonLabel,
+  ...props
 }: UserProfilesSelectableProps<Option>) => {
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -262,6 +264,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
 
   return (
     <EuiSelectable
+      data-test-subj={props['data-test-subj']}
       options={displayedOptions}
       // @ts-expect-error: Type of `nextOptions` in EuiSelectable does not match what's actually being passed back so need to manually override it
       onChange={(
@@ -445,6 +448,7 @@ function toSelectableOption(
       key: userProfile.uid,
       label: getUserDisplayName(userProfile.user),
       data: userProfile,
+      'data-test-subj': `userProfileSelectableOption-${userProfile.user.username}`,
     };
   }
   return {
@@ -454,6 +458,7 @@ function toSelectableOption(
       i18n.translate('userProfileComponents.userProfilesSelectable.nullOptionLabel', {
         defaultMessage: 'No users',
       }),
+    'data-test-subj': 'userProfileSelectableOption-null',
     ...nullOptionProps,
   };
 }

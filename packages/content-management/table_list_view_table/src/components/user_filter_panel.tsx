@@ -127,6 +127,7 @@ export const UserFilterPanel: FC<{}> = () => {
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverOpen(false)}
         selectableProps={{
+          'data-test-subj': 'userSelectableList',
           isLoading: query.isLoading,
           options: visibleOptions,
           errorMessage: query.error ? (
