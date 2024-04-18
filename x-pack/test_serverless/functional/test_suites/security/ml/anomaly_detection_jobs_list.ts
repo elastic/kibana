@@ -50,5 +50,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.jobTable.assertJobActionAnomalyExplorerButtonEnabled(adJobId, true);
       });
     });
+
+    describe('job creation', () => {
+      it('does not show exclude frozen data tier control in wizard', async () => {
+        await ml.testExecution.logTestStep('loads the anomaly detection creation wizard');
+        await ml.navigation.navigateToMl();
+        await svlMl.navigation.observability.navigateToAnomalyDetection();
+        await ml.jobManagement.navigateToNewJobSourceSelection();
+        await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('logstash-2015.09.22');
+        await ml.jobTypeSelection.selectSingleMetricJob();
+
+        await ml.testExecution.logTestStep('shows full data button, but not data tier control');
+        await ml.jobWizardCommon.assertUseFullDataButtonVisible(true);
+        await ml.jobWizardCommon.assertDataTierOptionsVisible(false);
+      });
+    });
   });
 }

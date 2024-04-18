@@ -534,6 +534,23 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
+    async assertUseFullDataButtonVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonUseFullData';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+    async assertDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
