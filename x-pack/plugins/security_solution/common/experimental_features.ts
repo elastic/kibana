@@ -177,12 +177,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables alerts suppression for new terms rules
    */
-  alertSuppressionForNewTermsRuleEnabled: false,
+  alertSuppressionForNewTermsRuleEnabled: true,
 
   /**
    * Enables alerts suppression for Eql rules with non-sequence queries
    */
-  alertSuppressionForNonSequenceEqlRuleEnabled: false,
+  alertSuppressionForNonSequenceEqlRuleEnabled: true,
 
   /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
@@ -251,7 +251,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new modal for the value list items
    */
-  valueListItemsModalEnabled: false,
+  valueListItemsModalEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
