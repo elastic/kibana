@@ -54,7 +54,7 @@ import {
   timelineEmptyTrailingControlColumns,
 } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
-import { useTimelineColumns } from '../shared/use-timeline-columns';
+import { useTimelineColumns } from '../shared/use_timeline_columns';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&

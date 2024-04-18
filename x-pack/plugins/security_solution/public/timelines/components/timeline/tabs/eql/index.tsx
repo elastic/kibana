@@ -53,7 +53,7 @@ import {
 import type { TimelineTabCommonProps } from '../shared/types';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { EqlTabHeader } from './header';
-import { useTimelineColumns } from '../shared/use-timeline-columns';
+import { useTimelineColumns } from '../shared/use_timeline_columns';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
