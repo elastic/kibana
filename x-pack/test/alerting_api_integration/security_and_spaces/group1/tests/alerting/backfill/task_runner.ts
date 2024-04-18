@@ -166,7 +166,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
       // Schedule backfill for this rule
-      // schedule backfill for both rules as current user
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')

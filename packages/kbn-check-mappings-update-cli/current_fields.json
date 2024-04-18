@@ -5,6 +5,7 @@
   ],
   "action_task_params": [],
   "ad_hoc_run_params": [
+    "apiKeyId",
     "createdAt",
     "end",
     "rule",

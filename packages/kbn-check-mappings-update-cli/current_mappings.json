@@ -22,6 +22,9 @@
   "ad_hoc_run_params": {
     "dynamic": false,
     "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
       "createdAt": {
         "type": "date"
       },
