@@ -173,7 +173,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -244,7 +244,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -315,7 +315,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -386,7 +386,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -457,7 +457,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; }"
+                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
