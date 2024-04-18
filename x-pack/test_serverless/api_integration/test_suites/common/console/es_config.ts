@@ -7,19 +7,25 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
 
   describe('GET /api/console/es_config', () => {
     it('returns es host', async () => {
-      const { body } = await supertest
+      const roleAuthc: RoleCredentials = await svlUserManager.createApiKeyForRole('viewer');
+      const { body } = await supertestWithoutAuth
         .get('/api/console/es_config')
         .set('kbn-xsrf', 'true')
         .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .expect(200);
       expect(body.host).to.be.ok();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
   });
 }

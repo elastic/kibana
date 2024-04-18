@@ -7,18 +7,28 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertest = getService('supertest');
+  let roleAuthc: RoleCredentials;
 
   describe('POST /api/console/proxy', () => {
     describe('system indices behavior', () => {
+      before(async () => {
+        roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      });
+      after(async () => {
+        await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      });
       it('returns warning header when making requests to .kibana index', async () => {
         return await supertest
           .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
           .set('kbn-xsrf', 'true')
           .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .then((response) => {
             expect(response.header).to.have.property('warning');
             const { warning } = response.header as { warning: string };
@@ -34,6 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set(svlCommonApi.getInternalRequestHeader())
           .set('x-elastic-product-origin', 'kibana')
+          .set(roleAuthc.apiKeyHeader)
           .then((response) => {
             expect(response.header).to.have.property('warning');
             const { warning } = response.header as { warning: string };
