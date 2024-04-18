@@ -24,7 +24,9 @@ describe('Agents guards', () => {
   it('isOpenTelemetryAgentName should guard if the passed agent is an OpenTelemetry one.', () => {
     expect(isOpenTelemetryAgentName('otlp')).toBe(true);
     expect(isOpenTelemetryAgentName('opentelmetry/java')).toBe(true);
-    expect(isOpenTelemetryAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(true);
+    expect(isOpenTelemetryAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(
+      true
+    );
     expect(isOpenTelemetryAgentName('not-an-agent')).toBe(false);
   });
 
