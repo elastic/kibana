@@ -20,10 +20,6 @@ export const TestSecretsSchema = schema.object({
 export type TestConfig = TypeOf<typeof TestConfigSchema>;
 export type TestSecrets = TypeOf<typeof TestSecretsSchema>;
 
-export type GetIncidentParams = {
-  id: string;
-};
-
 export type GetIncidentResponse = {
   id: string;
   title: string;
@@ -31,12 +27,9 @@ export type GetIncidentResponse = {
   severity: number;
 };
 
-export type IncidentParams = {
-  incident: {
-    externalId: string | null;
-    name: string;
-    category: string | null;
-  };
+export type Incident = {
+  name: string;
+  category: string | null;
 };
 
 interface ErrorSchema {
@@ -152,7 +145,12 @@ export class TestExecutor extends SubActionConnector<TestConfig, TestSecrets> {
   public noAsync() {}
 }
 
-export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
+export class TestCaseConnector extends CaseConnector<
+  TestConfig,
+  TestSecrets,
+  Incident,
+  GetIncidentResponse
+> {
   constructor(
     params: ServiceParams<TestConfig, TestSecrets>,
     pushToServiceParamsSchema: Record<string, Type<unknown> | null>
@@ -164,9 +162,7 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     return `Message: ${error.response?.data.errorMessage}. Code: ${error.response?.data.errorCode}`;
   }
 
-  public async createIncident<IncidentParams>(
-    incident: IncidentParams
-  ): Promise<ExternalServiceIncidentResponse> {
+  public async createIncident(incident: Incident): Promise<ExternalServiceIncidentResponse> {
     return {
       id: 'create-incident',
       title: 'Test incident',
@@ -183,12 +179,12 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     comment: string;
   }): Promise<void> {}
 
-  public async updateIncident<IncidentParams>({
+  public async updateIncident({
     incidentId,
     incident,
   }: {
     incidentId: string;
-    incident: IncidentParams;
+    incident: Incident;
   }): Promise<ExternalServiceIncidentResponse> {
     return {
       id: 'update-incident',
@@ -198,13 +194,11 @@ export class TestCaseConnector extends CaseConnector<TestConfig, TestSecrets> {
     };
   }
 
-  public async getIncident<GetIncidentParams, GetIncidentResponse>(
-    params: GetIncidentParams
-  ): Promise<GetIncidentResponse> {
+  public async getIncident({ id }: { id: string }): Promise<GetIncidentResponse> {
     return {
       id: 'get-incident',
       title: 'Test incident',
       severity: 4,
-    } as GetIncidentResponse;
+    };
   }
 }

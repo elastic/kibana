@@ -6,31 +6,30 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
-import {
-  ExternalServiceIncidentResponse,
-  PushToServiceParams,
-  PushToServiceResponse,
-} from './types';
+import { ExternalServiceIncidentResponse, PushToServiceResponse } from './types';
 import { SubActionConnector } from './sub_action_connector';
 import { ServiceParams } from './types';
 
-export interface CaseConnectorInterface {
+export interface CaseConnectorInterface<Incident, GetIncidentResponse> {
   addComment: ({ incidentId, comment }: { incidentId: string; comment: string }) => Promise<void>;
-  createIncident: <T>(incident: T) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: <T>({
+  createIncident: (incident: Incident) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: ({
     incidentId,
     incident,
   }: {
     incidentId: string;
-    incident: T;
+    incident: Incident;
   }) => Promise<ExternalServiceIncidentResponse>;
-  getIncident: <R, T>(params: R) => Promise<T>;
-  pushToService: <T extends PushToServiceParams>(params: T) => Promise<PushToServiceResponse>;
+  getIncident: ({ id }: { id: string }) => Promise<GetIncidentResponse>;
+  pushToService: (params: {
+    incident: { externalId: string | null } & Incident;
+    comments: Array<{ commentId: string; comment: string }>;
+  }) => Promise<PushToServiceResponse>;
 }
 
-export abstract class CaseConnector<Config, Secrets>
+export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentResponse>
   extends SubActionConnector<Config, Secrets>
-  implements CaseConnectorInterface
+  implements CaseConnectorInterface<Incident, GetIncidentResponse>
 {
   constructor(
     params: ServiceParams<Config, Secrets>,
@@ -65,17 +64,20 @@ export abstract class CaseConnector<Config, Secrets>
     comment: string;
   }): Promise<void>;
 
-  public abstract createIncident<T>(incident: T): Promise<ExternalServiceIncidentResponse>;
-  public abstract updateIncident<T>({
+  public abstract createIncident(incident: Incident): Promise<ExternalServiceIncidentResponse>;
+  public abstract updateIncident({
     incidentId,
     incident,
   }: {
     incidentId: string;
-    incident: T;
+    incident: Incident;
   }): Promise<ExternalServiceIncidentResponse>;
-  public abstract getIncident<R, T>(params: R): Promise<T>;
+  public abstract getIncident({ id }: { id: string }): Promise<GetIncidentResponse>;
 
-  public async pushToService<T extends PushToServiceParams>(params: T) {
+  public async pushToService(params: {
+    incident: { externalId: string | null } & Incident;
+    comments: Array<{ commentId: string; comment: string }>;
+  }) {
     const { incident, comments } = params;
     const { externalId, ...rest } = incident;
 
@@ -84,10 +86,10 @@ export abstract class CaseConnector<Config, Secrets>
     if (externalId != null) {
       res = await this.updateIncident({
         incidentId: externalId,
-        incident: rest,
+        incident: rest as Incident,
       });
     } else {
-      res = await this.createIncident(rest);
+      res = await this.createIncident(rest as Incident);
     }
 
     if (comments && Array.isArray(comments) && comments.length > 0) {

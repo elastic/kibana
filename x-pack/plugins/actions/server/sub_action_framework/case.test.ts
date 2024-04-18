@@ -202,8 +202,8 @@ describe('CaseConnector', () => {
 
     it('should update an incident if externalId is not null', async () => {
       const res = await service.pushToService({
-        ...pushToServiceParams,
-        incident: { externalId: 'test-id' },
+        incident: { ...pushToServiceParams.incident, externalId: 'test-id' },
+        comments: [],
       });
 
       expect(res).toEqual({
