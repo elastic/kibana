@@ -55,7 +55,7 @@ export default function (ctx: FtrProviderContext) {
     });
     afterEach(async () => {
       retry.waitFor('close share modal', async () => {
-        if (await testSubjects.exists('shareContextMenu')) {
+        if (await testSubjects.exists('shareContextModal')) {
           await PageObjects.share.closeShareModal(); // close modal
         }
         return await testSubjects.exists('shareTopNavButton');
@@ -106,7 +106,7 @@ export default function (ctx: FtrProviderContext) {
       });
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextMenu')) {
+          if (await testSubjects.exists('shareContextModal')) {
             await PageObjects.share.closeShareModal(); // close modal
           }
           return await testSubjects.exists('shareTopNavButton');
@@ -175,7 +175,7 @@ export default function (ctx: FtrProviderContext) {
       });
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextMenu')) {
+          if (await testSubjects.exists('shareContextModal')) {
             await PageObjects.share.closeShareModal(); // close modal
           }
           return await testSubjects.exists('shareTopNavButton');
@@ -246,7 +246,7 @@ export default function (ctx: FtrProviderContext) {
       });
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextMenu')) {
+          if (await testSubjects.exists('shareContextModal')) {
             await PageObjects.share.closeShareModal(); // close modal
           }
           return await testSubjects.exists('shareTopNavButton');
@@ -318,7 +318,7 @@ export default function (ctx: FtrProviderContext) {
       });
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextMenu')) {
+          if (await testSubjects.exists('shareContextModal')) {
             await PageObjects.share.closeShareModal(); // close modal
           }
           return await testSubjects.exists('shareTopNavButton');
@@ -379,7 +379,7 @@ export default function (ctx: FtrProviderContext) {
 
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextMenu')) {
+          if (await testSubjects.exists('shareContextModal')) {
             await PageObjects.share.closeShareModal(); // close modal
           }
           return await testSubjects.exists('shareTopNavButton');
@@ -455,7 +455,7 @@ export default function (ctx: FtrProviderContext) {
 
       afterEach(async () => {
         retry.waitFor('close share modal', async () => {
-          if (await testSubjects.exists('shareContextMenu')) {
+          if (await testSubjects.exists('shareContextModal')) {
             await PageObjects.share.closeShareModal(); // close modal
           }
           return await testSubjects.exists('shareTopNavButton');
