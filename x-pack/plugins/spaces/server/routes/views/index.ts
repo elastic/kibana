@@ -28,7 +28,9 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
     {
       path: ENTER_SPACE_PATH,
       validate: {
-        query: schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' }),
+        query: schema.maybe(
+          schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' })
+        ),
       },
     },
     async (context, request, response) => {
