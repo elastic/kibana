@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { GetSLOSuggestionsResponse } from '@kbn/slo-schema';
 import { SO_SLO_TYPE } from '../saved_objects';
 type Buckets = Array<{
   key: string;
@@ -19,7 +20,7 @@ interface AggsResponse {
 export class GetSLOSuggestions {
   constructor(private soClient: SavedObjectsClientContract) {}
 
-  public async execute() {
+  public async execute(): Promise<GetSLOSuggestionsResponse> {
     const findResponse = await this.soClient.find({
       type: SO_SLO_TYPE,
       perPage: 0,

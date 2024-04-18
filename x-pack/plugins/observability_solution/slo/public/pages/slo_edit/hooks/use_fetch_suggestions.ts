@@ -6,15 +6,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { GetSLOSuggestionsResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
-
-export interface Suggestion {
-  label: string;
-  value: string;
-  count: number;
-}
-
-type ApiResponse = Record<string, Suggestion[]>;
 
 export function useFetchSLOSuggestions() {
   const { http } = useKibana().services;
@@ -23,9 +16,12 @@ export function useFetchSLOSuggestions() {
     queryKey: ['fetchSLOSuggestions'],
     queryFn: async ({ signal }) => {
       try {
-        return await http.get<ApiResponse>('/internal/api/observability/slos/suggestions', {
-          signal,
-        });
+        return await http.get<GetSLOSuggestionsResponse>(
+          '/internal/api/observability/slos/suggestions',
+          {
+            signal,
+          }
+        );
       } catch (error) {
         // ignore error
       }

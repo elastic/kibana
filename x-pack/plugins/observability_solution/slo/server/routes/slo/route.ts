@@ -456,8 +456,8 @@ const getSLOSuggestionsRoute = createSloServerRoute({
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
-    const findSLOGroups = new GetSLOSuggestions(soClient);
-    return await findSLOGroups.execute();
+    const getSLOSuggestions = new GetSLOSuggestions(soClient);
+    return await getSLOSuggestions.execute();
   },
 });
 
