@@ -6,11 +6,7 @@
  */
 
 export {
-  DocumentCountChart,
-  DocumentCountChartWithAutoAnalysisStart,
-} from './document_count_chart';
-export type {
-  BrushSelectionUpdateHandler,
-  BrushSettings,
-  DocumentCountChartProps,
-} from './document_count_chart';
+  useLogRateAnalysisStateContext,
+  LogRateAnalysisStateProvider,
+} from './log_rate_analysis_state_provider';
+export type { GroupTableItem, GroupTableItemGroup, TableItemAction } from './types';
