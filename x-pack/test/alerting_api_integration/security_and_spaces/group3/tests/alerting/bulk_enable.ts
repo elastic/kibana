@@ -572,13 +572,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect([restAction, restSystemAction]).to.eql([
           {
             id: createdAction.id,
-            actionTypeId: 'test.noop',
+            connector_type_id: 'test.noop',
             group: 'default',
             params: {},
           },
           {
             id: 'system-connector-test.system-action',
-            actionTypeId: 'test.system-action',
+            connector_type_id: 'test.system-action',
             params: {},
           },
           ,
