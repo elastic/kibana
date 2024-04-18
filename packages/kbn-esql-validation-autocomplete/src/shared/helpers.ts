@@ -363,7 +363,7 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignat
  * Checks if an AST argument is of the correct type
  * given the definition.
  */
-export function checkArgTypeMatchesDefinitionType(
+export function checkArgTypeMatchesDefinition(
   arg: ESQLSingleAstItem,
   argDef: SignatureArgType,
   references: ReferenceMaps,

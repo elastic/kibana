@@ -53,7 +53,7 @@ export {
   columnExists,
   shouldBeQuotedText,
   printFunctionSignature,
-  checkArgTypeMatchesDefinitionType,
+  checkArgTypeMatchesDefinition,
   isSourceItem,
   isSettingItem,
   isFunctionItem,

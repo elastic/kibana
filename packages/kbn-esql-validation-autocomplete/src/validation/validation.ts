@@ -34,7 +34,7 @@ import {
   getFunctionDefinition,
   isArrayType,
   isColumnItem,
-  checkArgTypeMatchesDefinitionType,
+  checkArgTypeMatchesDefinition,
   isFunctionItem,
   isLiteralItem,
   isOptionItem,
@@ -100,12 +100,7 @@ function validateFunctionLiteralArg(
       );
     }
 
-    const matchResult = checkArgTypeMatchesDefinitionType(
-      actualArg,
-      argDef,
-      references,
-      parentCommand
-    );
+    const matchResult = checkArgTypeMatchesDefinition(actualArg, argDef, references, parentCommand);
     if (!matchResult.matches) {
       messages.push(
         getMessageFromId({
@@ -134,7 +129,7 @@ function validateFunctionLiteralArg(
         })
       );
     } else {
-      const matchResult = checkArgTypeMatchesDefinitionType(
+      const matchResult = checkArgTypeMatchesDefinition(
         actualArg,
         argDef,
         references,
@@ -185,12 +180,7 @@ function validateNestedFunctionArg(
         })
       );
     }
-    const matchResult = checkArgTypeMatchesDefinitionType(
-      actualArg,
-      argDef,
-      references,
-      parentCommand
-    );
+    const matchResult = checkArgTypeMatchesDefinition(actualArg, argDef, references, parentCommand);
     if (!matchResult.matches) {
       messages.push(
         getMessageFromId({
@@ -271,7 +261,7 @@ function validateFunctionColumnArg(
           }
           // do not validate any further for now, only count() accepts wildcard as args...
         } else {
-          const matchResult = checkArgTypeMatchesDefinitionType(
+          const matchResult = checkArgTypeMatchesDefinition(
             actualArg,
             argDef,
             references,
