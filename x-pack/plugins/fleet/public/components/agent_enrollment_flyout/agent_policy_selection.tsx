@@ -33,7 +33,7 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 `;
 
 type Props = {
-  agentPolicies: AgentPolicy[];
+  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'name'>>;
   selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
@@ -115,7 +115,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
         <EuiSelect
           fullWidth
           isLoading={!agentPolicies}
-          options={agentPolicies.map((agentPolicy: AgentPolicy) => ({
+          options={agentPolicies.map((agentPolicy) => ({
             value: agentPolicy.id,
             text: agentPolicy.name,
           }))}

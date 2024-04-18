@@ -13,13 +13,13 @@ import {
   CREATE_STATUS,
 } from '../../applications/fleet/sections/agents/components';
 import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, EnrollmentSettingsAgentPolicy } from '../../types';
 import { incrementPolicyName, policyHasFleetServer } from '../../services';
 
 import { AgentPolicySelection } from '.';
 
 interface Props {
-  agentPolicies: AgentPolicy[];
+  agentPolicies: EnrollmentSettingsAgentPolicy[];
   selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;

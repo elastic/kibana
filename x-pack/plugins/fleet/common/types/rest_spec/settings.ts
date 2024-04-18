@@ -19,11 +19,26 @@ export interface PutSettingsResponse {
   item: Settings;
 }
 
+export interface GetEnrollmentSettingsRequest {
+  query: {
+    agentPolicyId?: string;
+  };
+}
+
+export type EnrollmentSettingsAgentPolicy = Pick<
+  AgentPolicy,
+  | 'id'
+  | 'name'
+  | 'is_managed'
+  | 'is_default_fleet_server'
+  | 'has_fleet_server'
+  | 'fleet_server_host_id'
+  | 'download_source_id'
+>;
+
 export interface GetEnrollmentSettingsResponse {
   fleet_server: {
-    agent_policies: Array<
-      Pick<AgentPolicy, 'id' | 'name' | 'fleet_server_host_id' | 'download_source_id'>
-    >;
+    agent_policies: EnrollmentSettingsAgentPolicy[];
     has_active: boolean;
     host?: FleetServerHost;
     host_proxy?: FleetProxy;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FleetServerHost, AgentPolicy } from '../models';
+import type { FleetServerHost } from '../models';
 
 import type { ListResult } from './common';
 
@@ -37,9 +37,4 @@ export interface PostFleetServerHostsRequest {
 
 export interface PostFleetServerHostsResponse {
   item: FleetServerHost;
-}
-
-export interface GetFleetServerStatusResponse {
-  agent_policies: Array<Pick<AgentPolicy, 'id' | 'name'>>;
-  has_active_fleet_server: boolean;
 }

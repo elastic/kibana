@@ -20,9 +20,10 @@ import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_h
 import { getFleetProxy } from '../../services/fleet_proxies';
 
 export const getEnrollmentSettingsHandler: FleetRequestHandler<
-  TypeOf<typeof GetEnrollmentSettingsRequestSchema.params>
+  undefined,
+  TypeOf<typeof GetEnrollmentSettingsRequestSchema.query>
 > = async (context, request, response) => {
-  const agentPolicyId = request.params?.agent_policy_id;
+  const agentPolicyId = request.query?.agent_policy_id;
   const settingsResponse: GetEnrollmentSettingsResponse = {
     fleet_server: {
       agent_policies: [],
@@ -106,6 +107,9 @@ const getFleetServerAgentPolicies = async (
   return agentPolicies.map((policy) => ({
     id: policy.id,
     name: policy.name,
+    is_managed: policy.is_managed,
+    is_default_fleet_server: policy.is_default_fleet_server,
+    has_fleet_server: policy.has_fleet_server,
     fleet_server_host_id: policy.fleet_server_host_id,
     download_source_id: policy.download_source_id,
   }));

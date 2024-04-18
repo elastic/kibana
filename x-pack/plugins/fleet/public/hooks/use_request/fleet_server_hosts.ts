@@ -14,7 +14,6 @@ import type {
   PostFleetServerHostsRequest,
   PutFleetServerHostsRequest,
   PostFleetServerHostsResponse,
-  GetFleetServerStatusResponse,
 } from '../../../common/types/rest_spec/fleet_server_hosts';
 
 import { sendRequest, useRequest } from './use_request';
@@ -50,13 +49,5 @@ export function sendPostFleetServerHost(body: PostFleetServerHostsRequest['body'
     path: fleetServerHostsRoutesService.getCreatePath(),
     version: API_VERSIONS.public.v1,
     body,
-  });
-}
-
-export function useGetFleetServerPolicyStatus() {
-  return useRequest<GetFleetServerStatusResponse>({
-    method: 'get',
-    path: fleetServerHostsRoutesService.getPolicyStatusPath(),
-    version: API_VERSIONS.public.v1,
   });
 }

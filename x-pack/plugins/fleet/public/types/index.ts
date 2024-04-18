@@ -139,6 +139,9 @@ export type {
   GetInputsTemplatesResponse,
   BulkGetAgentPoliciesResponse,
   RegistryPolicyIntegrationTemplate,
+  EnrollmentSettingsAgentPolicy,
+  GetEnrollmentSettingsRequest,
+  GetEnrollmentSettingsResponse,
 } from '../../common/types';
 export {
   entries,

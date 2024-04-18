@@ -9,11 +9,7 @@ import React, { useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  useFleetStatus,
-  useFleetServerStandalone,
-  useGetFleetServerPolicyStatus,
-} from '../../hooks';
+import { useFleetStatus, useFleetServerStandalone, useGetEnrollmentSettings } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import { Loading } from '..';
@@ -36,8 +32,8 @@ export const Instructions = (props: InstructionProps) => {
   } = props;
   const fleetStatus = useFleetStatus();
   const { isFleetServerStandalone } = useFleetServerStandalone();
-  const { isLoading: isLoadingFleetServerPolicyStatus, data: fleetServerPolicyStatus } =
-    useGetFleetServerPolicyStatus();
+  const { isLoading: isLoadingEnrollmentSettings, data: enrollmentSettings } =
+    useGetEnrollmentSettings();
 
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
@@ -45,13 +41,13 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerPolicySelected ||
     isFleetServerStandalone ||
     (fleetStatus.isReady &&
-      fleetServerPolicyStatus?.has_active_fleet_server &&
+      enrollmentSettings?.fleet_server.has_active &&
       (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
     !isFleetServerStandalone &&
     !isFleetServerPolicySelected &&
-    (!fleetServerPolicyStatus?.has_active_fleet_server ||
+    (!enrollmentSettings?.fleet_server.has_active ||
       (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   useEffect(() => {
@@ -69,7 +65,7 @@ export const Instructions = (props: InstructionProps) => {
     }
   }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
 
-  if (isLoadingFleetServerPolicyStatus || isLoadingAgentPolicies) return <Loading size="l" />;
+  if (isLoadingEnrollmentSettings || isLoadingAgentPolicies) return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;

@@ -12,7 +12,7 @@ import { SO_SEARCH_LIMIT } from '../constants';
 
 import { useAuthz } from './use_authz';
 
-import { useGetAgentPolicies, useGetFleetServerPolicyStatus } from './use_request';
+import { useGetAgentPolicies, useGetEnrollmentSettings } from './use_request';
 
 interface AgentEnrollmentFlyoutData {
   agentPolicies: AgentPolicy[];
@@ -39,11 +39,11 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
     isInitialRequest: isInitialFleetServerPolicyStatusRequest,
     isLoading: isLoadingFleetServerPolicyStatus,
     resendRequest: refreshFleetServerPolicyStatus,
-  } = useGetFleetServerPolicyStatus();
+  } = useGetEnrollmentSettings();
 
   const agentPolicies = useMemo(() => {
     if (!isLoadingAgentPolicies || !isLoadingFleetServerPolicyStatus) {
-      const fleetServerPolicyIds = fleetServerPolicyStatus?.agent_policies.map(
+      const fleetServerPolicyIds = fleetServerPolicyStatus?.fleet_server?.agent_policies.map(
         (policy) => policy.id
       );
       return (agentPoliciesData?.items ?? []).filter(
@@ -54,7 +54,7 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
   }, [
     isLoadingAgentPolicies,
     isLoadingFleetServerPolicyStatus,
-    fleetServerPolicyStatus?.agent_policies,
+    fleetServerPolicyStatus?.fleet_server?.agent_policies,
     agentPoliciesData?.items,
   ]);
 

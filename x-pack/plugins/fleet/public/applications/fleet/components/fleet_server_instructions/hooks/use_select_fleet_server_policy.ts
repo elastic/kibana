@@ -7,34 +7,26 @@
 
 import { useEffect, useState } from 'react';
 
-import { useGetFleetServerPolicyStatus } from '../../../hooks';
+import { useGetEnrollmentSettings } from '../../../hooks';
 
 export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>(
     defaultAgentPolicyId
   );
-  const {
-    isLoading,
-    isInitialRequest,
-    data: fleetServerPolicyStatus = {
-      agent_policies: [],
-      has_active_fleet_server: false,
-    },
-    resendRequest,
-  } = useGetFleetServerPolicyStatus();
+  const { isLoading, isInitialRequest, data, resendRequest } = useGetEnrollmentSettings();
 
   useEffect(() => {
     // Default to the first policy found with a fleet server integration installed
-    if (fleetServerPolicyStatus?.agent_policies.length === 1 && !fleetServerPolicyId) {
-      setFleetServerPolicyId(fleetServerPolicyStatus?.agent_policies[0].id);
+    if (data?.fleet_server?.agent_policies.length === 1 && !fleetServerPolicyId) {
+      setFleetServerPolicyId(data?.fleet_server?.agent_policies[0].id);
     }
-  }, [fleetServerPolicyStatus, fleetServerPolicyId]);
+  }, [data?.fleet_server, fleetServerPolicyId]);
 
   return {
     isSelectFleetServerPolicyLoading: isLoading && isInitialRequest,
     fleetServerPolicyId,
     setFleetServerPolicyId,
-    eligibleFleetServerPolicies: fleetServerPolicyStatus?.agent_policies,
+    eligibleFleetServerPolicies: data?.fleet_server?.agent_policies || [],
     refreshEligibleFleetServerPolicies: resendRequest,
   };
 };
