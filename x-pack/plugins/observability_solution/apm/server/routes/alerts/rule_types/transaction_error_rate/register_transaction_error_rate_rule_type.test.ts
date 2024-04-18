@@ -46,8 +46,7 @@ describe('Transaction error rate alert', () => {
   });
 
   it('sends alerts for services that exceeded the threshold', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -117,12 +116,8 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo'
-    );
-    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
-    );
+    expect(services.alertFactory.create).toHaveBeenCalledWith('foo_env-foo_type-foo');
+    expect(services.alertFactory.create).not.toHaveBeenCalledWith('bar_env-bar_type-bar');
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -140,8 +135,7 @@ describe('Transaction error rate alert', () => {
   });
 
   it('sends alert when rule is configured with group by on transaction.name', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -205,21 +199,14 @@ describe('Transaction error rate alert', () => {
       threshold: 10,
       windowSize: 5,
       windowUnit: 'm',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
 
     await executor({ params });
 
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo_tx-name-foo'
-    );
+    expect(services.alertFactory.create).toHaveBeenCalledWith('foo_env-foo_type-foo_tx-name-foo');
     expect(services.alertFactory.create).not.toHaveBeenCalledWith(
       'bar_env-bar_type-bar_tx-name-bar'
     );
@@ -241,8 +228,7 @@ describe('Transaction error rate alert', () => {
   });
 
   it('sends alert when rule is configured with preselected group by', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -313,12 +299,8 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo'
-    );
-    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
-    );
+    expect(services.alertFactory.create).toHaveBeenCalledWith('foo_env-foo_type-foo');
+    expect(services.alertFactory.create).not.toHaveBeenCalledWith('bar_env-bar_type-bar');
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'foo',
@@ -336,8 +318,7 @@ describe('Transaction error rate alert', () => {
   });
 
   it('sends alert when service.environment field does not exist in the source', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -431,8 +412,7 @@ describe('Transaction error rate alert', () => {
   });
 
   it('sends alert when rule is configured with a filter query', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor, scheduleActions } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -495,9 +475,7 @@ describe('Transaction error rate alert', () => {
 
     expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
-    );
+    expect(services.alertFactory.create).toHaveBeenCalledWith('bar_env-bar_type-bar');
 
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
       serviceName: 'bar',

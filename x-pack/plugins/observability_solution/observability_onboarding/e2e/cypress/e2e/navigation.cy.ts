@@ -33,10 +33,7 @@ describe('[Observability onboarding] Navigation', () => {
     it('navigates to kubernetes integration', () => {
       cy.getByTestSubj('obltOnboardingHomeGoToKubernetesIntegration').click();
 
-      cy.url().should(
-        'include',
-        '/app/integrations/detail/kubernetes/overview'
-      );
+      cy.url().should('include', '/app/integrations/detail/kubernetes/overview');
     });
 
     it('navigates to integrations', () => {
