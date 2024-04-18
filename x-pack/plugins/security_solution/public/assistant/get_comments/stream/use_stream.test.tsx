@@ -43,7 +43,9 @@ const defaultProps = {
   isError: false,
   actionTypeId: '.gen-ai',
 };
-describe('useStream', () => {
+
+// FLAKY: https://github.com/elastic/kibana/issues/180091
+describe.skip('useStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

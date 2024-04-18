@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export function string(
-  parts: TemplateStringsArray,
-  ...variables: Array<string | number>
-): string {
+export function string(parts: TemplateStringsArray, ...variables: Array<string | number>): string {
   const joined = Array.from(parts.raw).concat(variables.map(String)).join('');
   return `"${joined.replaceAll(/[^\\]"/g, '\\"')}"`;
 }

@@ -565,15 +565,10 @@ describe('waterfall_helpers', () => {
         },
       ];
 
-      const childrenByParentId = groupBy(items, (hit) =>
-        hit.parentId ? hit.parentId : 'root'
-      );
-      const entryTransactionItem = childrenByParentId
-        .root[0] as IWaterfallTransaction;
+      const childrenByParentId = groupBy(items, (hit) => (hit.parentId ? hit.parentId : 'root'));
+      const entryTransactionItem = childrenByParentId.root[0] as IWaterfallTransaction;
 
-      expect(
-        getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
-      ).toMatchSnapshot();
+      expect(getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)).toMatchSnapshot();
     });
 
     it('should handle cyclic references', () => {
@@ -599,14 +594,9 @@ describe('waterfall_helpers', () => {
           } as unknown as WaterfallSpan,
         } as IWaterfallSpanOrTransaction,
       ];
-      const childrenByParentId = groupBy(items, (hit) =>
-        hit.parentId ? hit.parentId : 'root'
-      );
-      const entryTransactionItem = childrenByParentId
-        .root[0] as IWaterfallTransaction;
-      expect(
-        getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
-      ).toMatchSnapshot();
+      const childrenByParentId = groupBy(items, (hit) => (hit.parentId ? hit.parentId : 'root'));
+      const entryTransactionItem = childrenByParentId.root[0] as IWaterfallTransaction;
+      expect(getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)).toMatchSnapshot();
     });
   });
 
