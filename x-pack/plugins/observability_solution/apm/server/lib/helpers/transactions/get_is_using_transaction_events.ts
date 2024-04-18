@@ -36,8 +36,7 @@ export async function getIsUsingTransactionEvents({
 
   if (
     !searchesAggregatedTransactions &&
-    config.searchAggregatedTransactions !==
-      SearchAggregatedTransactionSetting.never
+    config.searchAggregatedTransactions !== SearchAggregatedTransactionSetting.never
   ) {
     // if no aggregrated transactions, check if any transactions at all
     return await getHasTransactions({
@@ -76,10 +75,7 @@ async function getHasTransactions({
       size: 0,
       query: {
         bool: {
-          filter: [
-            ...(start && end ? rangeQuery(start, end) : []),
-            ...kqlQuery(kuery),
-          ],
+          filter: [...(start && end ? rangeQuery(start, end) : []), ...kqlQuery(kuery)],
         },
       },
     },

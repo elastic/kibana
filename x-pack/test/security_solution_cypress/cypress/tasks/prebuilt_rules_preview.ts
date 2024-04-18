@@ -14,8 +14,8 @@ import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib
 import {
   ALERT_SUPPRESSION_DURATION_TITLE,
   ALERT_SUPPRESSION_DURATION_VALUE,
-  ALERT_SUPPRESSION_FIELD_TITLE,
-  ALERT_SUPPRESSION_FIELD_VALUE,
+  ALERT_SUPPRESSION_MISSING_FIELD_TITLE,
+  ALERT_SUPPRESSION_MISSING_FIELD_VALUE,
   ALERT_SUPPRESSION_GROUP_BY_TITLE,
   ALERT_SUPPRESSION_GROUP_BY_VALUE_ITEM,
   ANOMALY_THRESHOLD_TITLE,
@@ -262,8 +262,11 @@ export const assertAlertSuppressionPropertiesShown = (alertSuppression: AlertSup
   cy.get(ALERT_SUPPRESSION_DURATION_TITLE).should('contain', 'Suppress alerts for');
   cy.get(ALERT_SUPPRESSION_DURATION_VALUE).should('contain', `${duration.value}${duration.unit}`);
 
-  cy.get(ALERT_SUPPRESSION_FIELD_TITLE).should('contain', 'If a suppression field is missing');
-  cy.get(ALERT_SUPPRESSION_FIELD_VALUE).should(
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELD_TITLE).should(
+    'contain',
+    'If a suppression field is missing'
+  );
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELD_VALUE).should(
     'contain',
     'Suppress and group alerts for events with missing fields'
   );

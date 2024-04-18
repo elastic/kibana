@@ -25,10 +25,7 @@ export function useTimeRange(range: {
   optional: true;
 }): PartialTimeRange;
 
-export function useTimeRange(range: {
-  rangeFrom: string;
-  rangeTo: string;
-}): TimeRange;
+export function useTimeRange(range: { rangeFrom: string; rangeTo: string }): TimeRange;
 
 export function useTimeRange({
   rangeFrom,
