@@ -1,0 +1,6 @@
+{
+  "ignorePatterns": [
+    "index.js",
+    "index.d.ts"
+  ]
+}

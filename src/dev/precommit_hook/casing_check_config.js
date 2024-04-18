@@ -82,6 +82,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // ecs templates
   '**/ecs/fields/**/*',
+
+  // rust POC
+  'x-pack/plugins/security_solution/server/lib/telemetry/kbn-rs/**/*',
 ];
 
 /**

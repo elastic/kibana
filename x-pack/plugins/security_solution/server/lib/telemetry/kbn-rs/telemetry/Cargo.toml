@@ -1,0 +1,25 @@
+[package]
+edition = "2021"
+name = "telemetry"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1.0.82"
+elasticsearch = "8.5.0-alpha.1"
+futures = "0.3.30"
+napi-derive = "2.16.2"
+# Since kibana uses node 20+ it's safe to enable `napi9`
+# more info: https://nodejs.org/api/n-api.html#node-api-version-matrix
+napi = { version = "2.16.2", features = ["tokio_rt", "compat-mode", "napi9", "serde-json", "async"] }
+serde = "1.0.197"
+serde_json = "1.0.115"
+tokio = { version = "1.37.0", features = ["full"] }
+
+[build-dependencies]
+napi-build = "2.1.3"
+
+[profile.release]
+lto = true
