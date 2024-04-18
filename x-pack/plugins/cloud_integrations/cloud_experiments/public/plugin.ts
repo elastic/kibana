@@ -84,6 +84,8 @@ export class CloudExperimentsPlugin
         trialEndDate: deps.cloud.trialEndDate?.toISOString(),
         isElasticStaff: deps.cloud.isElasticStaffOwned,
       });
+    } else {
+      this.launchDarklyClient?.cancel();
     }
   }
 
@@ -106,7 +108,7 @@ export class CloudExperimentsPlugin
         .pipe(
           // Using concatMap to ensure we call the promised update in an orderly manner to avoid concurrency issues
           concatMap(
-            async (userMetadata) => await this.launchDarklyClient!.updateUserMetadata(userMetadata)
+            async (userMetadata) => await this.launchDarklyClient?.updateUserMetadata(userMetadata)
           )
         )
         .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
