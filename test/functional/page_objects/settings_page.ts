@@ -880,7 +880,8 @@ export class SettingsPageObject extends FtrService {
 
   async setFieldTypeComposite() {
     this.log.debug('set type = Composite');
-    this.comboBox.set('typeField', 'Composite');
+    const comboBox = await this.testSubjects.find('typeField');
+    this.comboBox.setElement(comboBox, 'Composite');
   }
 
   async setFieldScript(script: string) {
