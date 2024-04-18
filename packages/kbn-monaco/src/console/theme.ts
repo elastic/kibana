@@ -7,48 +7,38 @@
  */
 
 import { makeHighContrastColor } from '@elastic/eui';
-import { darkMode, euiThemeVars } from '@kbn/ui-theme';
-
+import { euiThemeVars } from '@kbn/ui-theme';
+import { darkMode } from '@kbn/ui-theme';
+import { LIGHT_THEME, DARK_THEME } from '@kbn/code-editor';
 import { themeRuleGroupBuilderFactory } from '../common/theme';
 import { monaco } from '../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
-const background = euiThemeVars.euiColorLightestShade;
-const stringTextColor = '#009926';
-const commentTextColor = '#4C886B';
-const variableTextColor = '#0079A5';
+const background = euiThemeVars.euiFormBackgroundColor;
 const booleanTextColor = '#585CF6';
-const numericTextColor = variableTextColor;
 const methodTextColor = '#DD0A73';
 const urlTextColor = '#00A69B';
 export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
+  const euiTheme = darkMode ? DARK_THEME : LIGHT_THEME;
   return {
-    base: darkMode ? 'vs-dark' : 'vs',
-    inherit: true,
+    ...euiTheme,
     rules: [
+      ...euiTheme.rules,
       ...buildRuleGroup(
-        ['string', 'string-literal', 'multi-string', 'punctuation.end-triple-quote'],
-        makeHighContrastColor(stringTextColor)(background)
+        ['string-literal', 'multi-string', 'punctuation.end-triple-quote'],
+        makeHighContrastColor(euiThemeVars.euiColorDangerText)(background)
       ),
-      ...buildRuleGroup(['comment'], makeHighContrastColor(commentTextColor)(background)),
-      ...buildRuleGroup(['variable'], makeHighContrastColor(variableTextColor)(background)),
       ...buildRuleGroup(
         ['constant.language.boolean'],
         makeHighContrastColor(booleanTextColor)(background)
       ),
-      ...buildRuleGroup(['constant.numeric'], makeHighContrastColor(numericTextColor)(background)),
+      ...buildRuleGroup(
+        ['constant.numeric'],
+        makeHighContrastColor(euiThemeVars.euiColorAccentText)(background)
+      ),
       ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
       ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
     ],
-    colors: {
-      'editor.background': background,
-      // color of the line numbers
-      'editorLineNumber.foreground': euiThemeVars.euiColorDarkShade,
-      // color of the active line number
-      'editorLineNumber.activeForeground': euiThemeVars.euiColorDarkShade,
-      // background of the line numbers side panel
-      'editorGutter.background': euiThemeVars.euiColorEmptyShade,
-    },
   };
 };

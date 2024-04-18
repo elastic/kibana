@@ -13,12 +13,7 @@ import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 import { YAML_LANG_ID } from './yaml';
 import { registerLanguage, registerTheme } from './helpers';
-import {
-  ConsoleLang,
-  ConsoleOutputLang,
-  CONSOLE_THEME_ID,
-  buildConsoleTheme,
-} from './console';
+import { ConsoleLang, ConsoleOutputLang, CONSOLE_THEME_ID, buildConsoleTheme } from './console';
 
 export const DEFAULT_WORKER_ID = 'default';
 const langSpecificWorkerIds = [
