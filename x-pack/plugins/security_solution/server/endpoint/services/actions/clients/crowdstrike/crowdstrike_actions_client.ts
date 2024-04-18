@@ -6,10 +6,9 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import {
-  CROWDSTRIKE_CONNECTOR_ID,
-  SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
@@ -17,7 +16,12 @@ import type {
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
-import type { ActionDetails, LogsEndpointAction } from '../../../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
+  LogsEndpointAction,
+} from '../../../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
@@ -41,14 +45,24 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
   }
 
-  protected async writeActionRequestToEndpointIndex(
-    actionRequest: Omit<ResponseActionsClientWriteActionRequestToEndpointIndexOptions, 'hosts'>
-  ): Promise<LogsEndpointAction> {
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<
+    LogsEndpointAction<TParameters, TOutputContent, TMeta & CrowdstrikeActionRequestCommonMeta>
+  > {
     const agentId = actionRequest.endpoint_ids[0];
     const eventDetails = await super.getEventDetailsById<{
       crowdstrike: { event: { HostName: string } };
     }>({
-      index: ['logs-crowdstrike.fdr-default'],
+      index: ['logs-crowdstrike.fdr*', 'logs-crowdstrike.falcon*'],
       term: { 'crowdstrike.event.DeviceId': agentId },
       fields: [{ field: 'crowdstrike.event.HostName' }],
     });
@@ -59,6 +73,11 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       hosts: {
         [agentId]: { name: hostname },
       },
+      meta: {
+        hostName: hostname,
+        agentId,
+        ...(actionRequest.meta ?? {}),
+      } as TMeta & CrowdstrikeActionRequestCommonMeta,
     });
   }
 

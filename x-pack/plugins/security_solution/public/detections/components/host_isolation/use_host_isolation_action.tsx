@@ -158,12 +158,19 @@ export const useHostIsolationAction = ({
       );
     }
 
+    if (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert) {
+      // TODO TC: crowdstrikeAgentStatus functionality is going to be implemented in another PR
+      return false;
+    }
+
     return agentStatus === HostStatus.UNENROLLED;
   }, [
     agentStatus,
     isSentinelOneAlert,
     sentinelOneAgentStatus,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeManualHostActionsEnabled,
+    isCrowdstrikeAlert,
   ]);
 
   const menuItems = useMemo(
