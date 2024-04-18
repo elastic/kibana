@@ -1125,12 +1125,14 @@ async function getFunctionArgsSuggestions(
       );
     }
 
-    const existingTypes = node.args.map((nodeArg) =>
-      extractFinalTypeFromArg(nodeArg, {
-        fields: fieldsMap,
-        variables: variablesExcludingCurrentCommandOnes,
-      })
-    );
+    const existingTypes = node.args
+      .map((nodeArg) =>
+        extractFinalTypeFromArg(nodeArg, {
+          fields: fieldsMap,
+          variables: variablesExcludingCurrentCommandOnes,
+        })
+      )
+      .filter(nonNullable);
 
     const validSignatures = fnDefinition.signatures
       // if existing arguments are preset already, use them to filter out incompatible signatures
@@ -1153,7 +1155,9 @@ async function getFunctionArgsSuggestions(
       })
       .filter(nonNullable);
 
-    const shouldBeConstant = validSignatures.some(({ params }) => params[argIndex]?.constantOnly);
+    const shouldBeConstant = validSignatures.some(
+      ({ params }) => params[argIndex]?.constantOnly || /_literal$/.test(params[argIndex]?.type)
+    );
 
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
@@ -1180,7 +1184,9 @@ async function getFunctionArgsSuggestions(
   }
 
   const hasMoreMandatoryArgs =
-    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length > 0 ||
+    (refSignature.params.length >= argIndex &&
+      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+        0) ||
     ('minParams' in refSignature && refSignature.minParams
       ? refSignature.minParams - 1 > argIndex
       : false);
