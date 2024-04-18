@@ -24,9 +24,7 @@ export function RefreshServiceGroupsSubscriber({
   const subscription = useRef<Subscription | null>(null);
   useEffect(() => {
     if (!subscription.current) {
-      subscription.current = refreshServiceGroupsSubject.subscribe(() =>
-        onRefresh()
-      );
+      subscription.current = refreshServiceGroupsSubject.subscribe(() => onRefresh());
     }
     return () => {
       if (!subscription.current) {

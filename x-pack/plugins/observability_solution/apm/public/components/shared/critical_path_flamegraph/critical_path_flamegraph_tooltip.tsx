@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -54,9 +48,7 @@ export function CriticalPathFlamegraphTooltip({
               style={{ overflowWrap: 'anywhere' }}
               alignItems="center"
             >
-              <EuiFlexItem grow={false}>
-                {metadata[TRANSACTION_NAME]}
-              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{metadata[TRANSACTION_NAME]}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge>{metadata[TRANSACTION_TYPE]}</EuiBadge>
               </EuiFlexItem>
@@ -71,10 +63,7 @@ export function CriticalPathFlamegraphTooltip({
               alignItems="center"
             >
               <EuiFlexItem grow={false}>
-                <SpanIcon
-                  type={metadata[SPAN_TYPE]}
-                  subtype={metadata[SPAN_SUBTYPE]}
-                />
+                <SpanIcon type={metadata[SPAN_TYPE]} subtype={metadata[SPAN_SUBTYPE]} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{metadata[SPAN_NAME]}</EuiFlexItem>
             </EuiFlexGroup>

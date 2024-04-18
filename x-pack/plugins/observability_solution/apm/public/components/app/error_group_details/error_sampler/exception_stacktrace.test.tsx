@@ -20,21 +20,16 @@ describe('ExceptionStacktrace', () => {
         expect(mount(<JavaWithLongLines />).find('Stacktrace')).toHaveLength(3);
       });
       it('should have the title in a specific format', function () {
-        const wrapper = mount(<JavaWithLongLines />).find(
-          'ExceptionStacktraceTitle'
-        );
+        const wrapper = mount(<JavaWithLongLines />).find('ExceptionStacktraceTitle');
         expect(wrapper).toHaveLength(1);
-        const { type, message } =
-          wrapper.props() as ExceptionStackTraceTitleProps;
+        const { type, message } = wrapper.props() as ExceptionStackTraceTitleProps;
         expect(wrapper.text()).toContain(`${type}: ${message}`);
       });
     });
 
     describe('with more than one stack trace', () => {
       it('renders cause stacktraces', () => {
-        expect(
-          mount(<JavaWithLongLines />).find('CauseStacktrace')
-        ).toHaveLength(2);
+        expect(mount(<JavaWithLongLines />).find('CauseStacktrace')).toHaveLength(2);
       });
     });
   });
