@@ -20,11 +20,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { query } = useApmParams('/services/{serviceName}/overview');
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      data-test-subj="serviceOverviewErrorsTable"
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="serviceOverviewErrorsTable">
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

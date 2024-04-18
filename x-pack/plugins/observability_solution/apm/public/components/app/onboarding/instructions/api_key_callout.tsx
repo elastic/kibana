@@ -22,40 +22,30 @@ export function ApiKeyCallout({
     return (
       <>
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.apm.onboarding.apiKey.success.calloutTitle',
-            {
-              defaultMessage: 'API key created',
-            }
-          )}
+          title={i18n.translate('xpack.apm.onboarding.apiKey.success.calloutTitle', {
+            defaultMessage: 'API key created',
+          })}
           color="success"
           iconType="check"
           data-test-subj="apiKeySuccessCallout"
         >
-          {i18n.translate(
-            'xpack.apm.onboarding.apiKey.success.calloutMessage',
-            {
-              defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue`,
-            }
-          )}
+          {i18n.translate('xpack.apm.onboarding.apiKey.success.calloutMessage', {
+            defaultMessage: `Remember to store this information in a safe place. It won't be displayed anymore after you continue`,
+          })}
         </EuiCallOut>
       </>
     );
   }
 
   const regex = /missing the following requested privilege\(s\)/;
-  const isInsufficientPermissionsError =
-    isError && regex.test(errorMessage || '');
+  const isInsufficientPermissionsError = isError && regex.test(errorMessage || '');
 
   if (isInsufficientPermissionsError) {
     return (
       <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.onboarding.apiKey.warning.calloutTitle',
-          {
-            defaultMessage: 'User does not have permissions to create API Key',
-          }
-        )}
+        title={i18n.translate('xpack.apm.onboarding.apiKey.warning.calloutTitle', {
+          defaultMessage: 'User does not have permissions to create API Key',
+        })}
         color="warning"
         iconType="warning"
         data-test-subj="apiKeyWarningCallout"
