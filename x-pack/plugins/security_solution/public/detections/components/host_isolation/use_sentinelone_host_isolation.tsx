@@ -21,7 +21,7 @@ interface ErrorType {
   meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 }
 
-// TODO: 8.14: Remove this function when agentStatusClientEnabled is enabled/removed
+// TODO: 8.15: Remove `useGetSentinelOneAgentStatus` function when `agentStatusClientEnabled` is enabled/removed
 export const useGetSentinelOneAgentStatus = (
   agentIds: string[],
   agentType?: string,
@@ -76,6 +76,6 @@ export const useAgentStatusHook = ():
   | typeof useGetAgentStatus
   | typeof useGetSentinelOneAgentStatus => {
   const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-  // 8.14 use agent status client hook if FF enabled
+  // 8.15 use agent status client hook if `agentStatusClientEnabled` FF enabled
   return !agentStatusClientEnabled ? useGetSentinelOneAgentStatus : useGetAgentStatus;
 };

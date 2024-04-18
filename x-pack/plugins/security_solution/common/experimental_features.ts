@@ -86,7 +86,7 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV2Enabled: false,
 
   /**
-   * 8.14
+   * 8.15
    * Enables use of agent status service to get agent status information
    * for endpoint and third-party agents.
    */

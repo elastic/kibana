@@ -81,7 +81,7 @@ export const getAgentStatusRouteHandler = (
       endpointService: endpointContext.service,
     });
 
-    // 8.14: use the new agent status client if FF enabled
+    // 8.15: use the new `agentStatusClientEnabled` FF enabled
     const getAgentStatusPromise = endpointContext.experimentalFeatures.agentStatusClientEnabled
       ? agentStatusClient.getAgentStatuses(agentIds)
       : getAgentStatus({

@@ -23,7 +23,7 @@ export interface AgentStatusRecords {
   };
 }
 
-// TODO: remove when agentStatusClientEnabled is enabled/removed
+// TODO: 8.15 remove when `agentStatusClientEnabled` is enabled/removed
 export interface AgentStatusInfo {
   [agentId: string]: AgentStatusRecords[string] & {
     isPendingUninstall: boolean;

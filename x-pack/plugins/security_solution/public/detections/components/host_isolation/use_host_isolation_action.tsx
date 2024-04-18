@@ -140,7 +140,7 @@ export const useHostIsolationAction = ({
 
   const isIsolationActionDisabled = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
-      // 8.14 use FF for computing if action is enabled
+      // 8.15 use FF for computing if action is enabled
       if (agentStatusClientEnabled) {
         return sentinelOneAgentStatus?.status === HostStatus.UNENROLLED;
       }
