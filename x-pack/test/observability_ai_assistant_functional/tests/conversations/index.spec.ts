@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
+import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import {
@@ -290,13 +291,44 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               });
 
               describe('and choosing to send feedback', () => {
-                before(async () => {
-                  await telemetry.setOptIn(true);
-                });
                 it('emits a telemetry event that captures the conversation', async () => {
+                  await telemetry.setOptIn(true);
                   await testSubjects.click(ui.pages.conversations.positiveFeedbackButton);
 
-                  expect(await telemetry.getEvents(1)).to.eql('Test');
+                  const events = await telemetry.getEvents(1, {
+                    eventTypes: ['observability_ai_assistant_chat_feedback'],
+                  });
+
+                  expect(events.length).to.eql(1);
+
+                  const { messageWithFeedback, conversation } = events[0]
+                    .properties as unknown as ChatFeedback;
+
+                  expect(messageWithFeedback.feedback).to.eql('positive');
+                  expect(messageWithFeedback.message.message).to.eql({
+                    content: 'My response',
+                    function_call: {
+                      arguments: '',
+                      name: '',
+                      trigger: 'assistant',
+                    },
+                    role: 'assistant',
+                  });
+
+                  expect(conversation.conversation.title).to.eql('My title');
+                  expect(conversation.namespace).to.eql('default');
+                  expect(conversation.public).to.eql(false);
+                  expect(conversation.user?.name).to.eql('test_user');
+
+                  const { messages } = conversation;
+
+                  expect(messages.length).to.eql(5);
+
+                  expect(messages[0].message.role).to.eql('system');
+                  // Verify that system message extension that happen on the server are captured in the telemetry
+                  expect(messages[0].message.content).to.contain(
+                    'You MUST respond in the users preferred language which is: English.'
+                  );
                 });
               });
             });
