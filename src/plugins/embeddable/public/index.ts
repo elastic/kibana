@@ -41,6 +41,7 @@ export {
   panelBadgeTrigger,
   panelHoverTrigger,
   PanelNotFoundError,
+  PanelIncompatibleError,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,

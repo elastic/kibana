@@ -26,12 +26,13 @@ export async function getServicesCounts({
   if (!serviceGroups.length) {
     return {};
   }
-  const serviceGroupsKueryMap = serviceGroups.reduce<
-    Record<string, QueryDslQueryContainer>
-  >((acc, sg) => {
-    acc[sg.id] = kqlQuery(sg.kuery)[0];
-    return acc;
-  }, {});
+  const serviceGroupsKueryMap = serviceGroups.reduce<Record<string, QueryDslQueryContainer>>(
+    (acc, sg) => {
+      acc[sg.id] = kqlQuery(sg.kuery)[0];
+      return acc;
+    },
+    {}
+  );
 
   const params = {
     apm: {

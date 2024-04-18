@@ -11,11 +11,7 @@ import React from 'react';
 import { ApmPluginStartDeps } from '../../../../plugin';
 import { SavedApmCustomDashboard } from '../../../../../common/custom_dashboards';
 
-export function GotoDashboard({
-  currentDashboard,
-}: {
-  currentDashboard: SavedApmCustomDashboard;
-}) {
+export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApmCustomDashboard }) {
   const {
     services: {
       dashboard: { locator: dashboardLocator },

@@ -41,22 +41,19 @@ export function useServiceMetricChartsFetcher({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && agentName) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/metrics/charts',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                serviceNodeName,
-                start,
-                end,
-                agentName,
-              },
+        return callApmApi('GET /internal/apm/services/{serviceName}/metrics/charts', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              serviceNodeName,
+              start,
+              end,
+              agentName,
             },
-          }
-        );
+          },
+        });
       }
     },
     [environment, kuery, serviceName, start, end, agentName, serviceNodeName]

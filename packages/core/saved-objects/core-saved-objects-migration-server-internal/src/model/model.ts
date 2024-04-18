@@ -1429,40 +1429,33 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CHECK_TARGET_MAPPINGS') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
-      // The mappings have NOT changed, no need to pick up changes in any documents
+      // The types mappings have NOT changed, no need to pick up changes in any documents
       return {
         ...stateP,
         controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+        logs: [
+          ...stateP.logs,
+          {
+            level: 'info',
+            message:
+              'There are no changes in the mappings of any of the SO types, skipping UPDATE_TARGET_MAPPINGS steps.',
+          },
+        ],
       };
     } else {
       const left = res.left;
       if (isTypeof(left, 'index_mappings_incomplete')) {
         // reindex migration
-        // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see checkTargetMappings())
+        // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see checkTargetTypesMappings())
         // we must "pick-up" all documents on the index (by not providing a query)
         return {
           ...stateP,
           controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
           updatedTypesQuery: Option.none,
         };
-      } else if (isTypeof(left, 'root_fields_changed')) {
-        // compatible migration: some core fields have been updated
-        return {
-          ...stateP,
-          controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
-          // we must "pick-up" all documents on the index (by not providing a query)
-          updatedTypesQuery: Option.none,
-          logs: [
-            ...stateP.logs,
-            {
-              level: 'info',
-              message: `Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: ${left.updatedFields}.`,
-            },
-          ],
-        };
       } else if (isTypeof(left, 'types_changed')) {
-        // compatible migration: some fields have been updated, and they all correspond to SO types
-        const updatedTypesQuery = Option.fromNullable(buildPickupMappingsQuery(left.updatedTypes));
+        // compatible migration: the mappings of some SO types have been updated
+        const updatedTypesQuery = Option.some(buildPickupMappingsQuery(left.updatedTypes));
 
         return {
           ...stateP,
@@ -1473,7 +1466,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP.logs,
             {
               level: 'info',
-              message: `Kibana is performing a compatible upgrade and NO root fields have been updated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
+              message: `Documents of the following SO types will be updated, so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
             },
           ],
         };

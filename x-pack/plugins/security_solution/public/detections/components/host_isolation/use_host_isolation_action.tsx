@@ -93,7 +93,9 @@ export const useHostIsolationAction = ({
     agentType: sentinelOneAgentId ? 'sentinel_one' : 'endpoint',
   });
 
-  const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || '']);
+  const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || ''], {
+    enabled: !!sentinelOneAgentId && sentinelOneManualHostActionsEnabled,
+  });
   const sentinelOneAgentStatus = sentinelOneAgentData?.[`${sentinelOneAgentId}`];
   // TODO TC: Add support for Crowdstrike agent status - ongoing work by Ash :+1:
 

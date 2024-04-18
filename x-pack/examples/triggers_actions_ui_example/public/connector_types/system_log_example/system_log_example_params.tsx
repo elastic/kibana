@@ -5,59 +5,54 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { SystemLogActionParams } from '../types';
 
 export const ServerLogParamsFields: React.FunctionComponent<
   ActionParamsProps<SystemLogActionParams>
-> = ({
-  actionParams,
-  editAction,
-  index,
-  errors,
-  messageVariables,
-  defaultMessage,
-  useDefaultMessage,
-}) => {
-  const { message } = actionParams;
+> = ({ actionParams, editAction, index, errors, messageVariables }) => {
+  const { message = 'Alerts have been triggered.' } = actionParams;
 
-  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
-    [boolean, string | undefined]
-  >([false, defaultMessage]);
   // This params component is derived primarily from server_log_params.tsx, see that file and its
   // corresponding unit tests for details on functionality
   useEffect(() => {
-    if (
-      useDefaultMessage ||
-      !actionParams?.message ||
-      (isUsingDefault &&
-        actionParams?.message === defaultMessageUsed &&
-        defaultMessageUsed !== defaultMessage)
-    ) {
-      setDefaultMessageUsage([true, defaultMessage]);
-      editAction('message', defaultMessage, index);
+    if (!actionParams?.message) {
+      editAction('message', message, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage]);
+  }, [actionParams.message]);
 
   return (
-    <TextAreaWithMessageVariables
-      index={index}
-      editAction={editAction}
-      messageVariables={messageVariables}
-      paramsProperty={'message'}
-      inputTargetValue={message}
+    <EuiFormRow
+      fullWidth
+      error={errors.message as string[]}
+      isInvalid={errors.message.length > 0 && message !== undefined}
       label={i18n.translate(
         'xpack.stackConnectors.components.systemLogExample.logMessageFieldLabel',
         {
           defaultMessage: 'Message',
         }
       )}
-      errors={errors.message as string[]}
-    />
+    >
+      <EuiTextArea
+        fullWidth
+        isInvalid={errors.message.length > 0 && message !== undefined}
+        name={'message'}
+        value={message || ''}
+        data-test-subj={'messageTextArea'}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+          editAction('message', e.target.value, index)
+        }
+        onBlur={() => {
+          if (!message) {
+            editAction('message', '', index);
+          }
+        }}
+      />
+    </EuiFormRow>
   );
 };
 

@@ -30,5 +30,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_view_mode_toggle'));
     loadTestFile(require.resolve('./_unsaved_changes_badge'));
     loadTestFile(require.resolve('./_panels_toggle'));
+    loadTestFile(require.resolve('./_lens_vis'));
   });
 }

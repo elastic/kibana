@@ -49,7 +49,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   // https://github.com/elastic/kibana/issues/173168
-  describe('Favorite Timelines', { tags: ['@brokenInServerless'] }, () => {
+  describe('Favorite Timelines', { tags: ['@skipInServerless'] }, () => {
     it('should appear on overview page', () => {
       createTimeline()
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
@@ -66,7 +66,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   });
 });
 
-describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
+describe('Overview page with no data', { tags: '@skipInServerless' }, () => {
   it('Splash screen should be here', () => {
     login();
     visitWithTimeRange(OVERVIEW_URL);

@@ -21,11 +21,7 @@ import {
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
 
-export function useLocalUIFilters({
-  filterNames,
-}: {
-  filterNames: UxLocalUIFilterName[];
-}) {
+export function useLocalUIFilters({ filterNames }: { filterNames: UxLocalUIFilterName[] }) {
   const history = useHistory();
   const { uxUiFilters } = useLegacyUrlParams();
 
@@ -55,25 +51,17 @@ export function useLocalUIFilters({
         );
 
         const excludedName = getExcludedName(name);
-        setFilterValue(excludedName, [
-          ...(uxUiFilters?.[excludedName] ?? []),
-          value,
-        ]);
+        setFilterValue(excludedName, [...(uxUiFilters?.[excludedName] ?? []), value]);
       } else {
         const includeName = name.split('Excluded')[0] as UxLocalUIFilterName;
         const excludedName = name;
 
         setFilterValue(
           excludedName,
-          (uxUiFilters?.[excludedName] as string[]).filter(
-            (valT) => valT !== value
-          )
+          (uxUiFilters?.[excludedName] as string[]).filter((valT) => valT !== value)
         );
 
-        setFilterValue(includeName, [
-          ...(uxUiFilters?.[includeName] ?? []),
-          value,
-        ]);
+        setFilterValue(includeName, [...(uxUiFilters?.[includeName] ?? []), value]);
       }
     },
     [setFilterValue, uxUiFilters]
