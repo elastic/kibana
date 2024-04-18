@@ -48,7 +48,7 @@ import { getQueryRequiredMessage } from './utils';
 export const schema: FormSchema<DefineStepRule> = {
   index: {
     defaultValue: [],
-    fieldsToValidateOnChange: ['index', 'queryBar'],
+    fieldsToValidateOnChange: ['index', 'queryBar', 'requiredFields'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
@@ -248,18 +248,7 @@ export const schema: FormSchema<DefineStepRule> = {
     type: FIELD_TYPES.JSON,
   },
   requiredFields: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsLabel',
-      {
-        defaultMessage: 'Required fields',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsHelpText',
-      {
-        defaultMessage: 'Fields required for this Rule to function.',
-      }
-    ),
+    type: FIELD_TYPES.JSON,
   },
   timeline: {
     label: i18n.translate(

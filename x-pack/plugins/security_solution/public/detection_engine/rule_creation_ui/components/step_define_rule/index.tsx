@@ -5,34 +5,23 @@
  * 2.0.
  */
 
-import type {
-  EuiButtonGroupOptionProps,
-  EuiComboBoxOptionOption,
-  EuiSelectOption,
-} from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiLoadingSpinner,
-  EuiSelect,
   EuiSpacer,
   EuiButtonGroup,
   EuiText,
   EuiRadioGroup,
-  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
 import styled from 'styled-components';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
@@ -79,7 +68,7 @@ import {
   useFormData,
   UseMultiFields,
 } from '../../../../shared_imports';
-import type { FieldHook, FormHook } from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { getTermsAggregationFields } from './utils';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
@@ -101,19 +90,17 @@ import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
+import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { RequiredField } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
-
-// import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -929,7 +916,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
-
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
@@ -954,7 +940,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
@@ -1040,7 +1025,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </RuleTypeEuiFormRow>
-
           <EuiSpacer size="m" />
 
           <>
@@ -1132,17 +1116,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <EuiSpacer size="xl" />
 
-          <UseField
-            path="requiredFields"
-            component={RequiredFields}
-            componentProps={{
-              indexPatternFields: indexPattern.fields as BrowserField[],
-              disabledText: alertSuppressionUpsellingMessage,
-              isDisabled: !isAlertSuppressionLicenseValid,
-            }}
-          />
-
-          <EuiSpacer size="xl" />
+          {!isMlRule(ruleType) && (
+            <>
+              <RequiredFields path="requiredFields" indexPatternFields={indexPattern.fields} />
+              <EuiSpacer size="xl" />
+            </>
+          )}
 
           <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
 
@@ -1187,287 +1166,3 @@ export const StepDefineRuleReadOnly = memo(StepDefineRuleReadOnlyComponent);
 export function aggregatableFields<T extends { aggregatable: boolean }>(browserFields: T[]): T[] {
   return browserFields.filter((field) => field.aggregatable === true);
 }
-
-function applyChangeToFieldValue(
-  selectedOptions: Array<EuiComboBoxOptionOption<undefined>>,
-  index: number,
-  field: FieldHook,
-  typesByFieldName: Record<string, string[]>
-): void {
-  const newlySelectedOption = selectedOptions[0];
-
-  const fieldValue = field.value as Array<Omit<RequiredField, 'ecs'> & { ecs?: boolean }>;
-
-  const newFieldValue: RequiredField[] = fieldValue.map((requiredField, requiredFieldIndex) => {
-    if (index === requiredFieldIndex) {
-      const availableFieldTypes = typesByFieldName[newlySelectedOption.label];
-
-      return {
-        name: newlySelectedOption.label,
-        // Preserve previous type if possible
-        type: availableFieldTypes.includes(requiredField.type)
-          ? requiredField.type
-          : availableFieldTypes[0],
-      };
-    }
-
-    return requiredField;
-  });
-
-  field.setValue(newFieldValue);
-}
-
-function updateRequiredFieldType(newType: string, index: number, field: FieldHook): void {
-  const fieldValue = field.value as RequiredField[];
-
-  const newFieldValue: RequiredField[] = fieldValue.map((requiredField, requiredFieldIndex) => {
-    if (index === requiredFieldIndex) {
-      return {
-        ...requiredField,
-        type: newType,
-      };
-    }
-
-    return requiredField;
-  });
-
-  field.setValue(newFieldValue);
-}
-
-function deleteRequiredField(index: number, field: FieldHook): void {
-  const fieldValue = field.value as RequiredField[];
-  const newFieldValue = fieldValue.filter((_, requiredFieldIndex) => index !== requiredFieldIndex);
-  field.setValue(newFieldValue);
-}
-
-function addRequiredField(
-  nameOptions: Array<EuiComboBoxOptionOption<undefined>>,
-  typesByFieldName: Record<string, string[]>,
-  field: FieldHook
-): void {
-  // const newOptionFieldName = nameOptions[0].label;
-  // const newOptionType = typesByFieldName[newOptionFieldName][0];
-  // const newOption = { ecs: true, name: newOptionFieldName, type: newOptionType };
-
-  const newOption = { name: '', type: '' };
-
-  const fieldValue = field.value as RequiredField[];
-  const newFieldValue = [...fieldValue, newOption];
-  field.setValue(newFieldValue);
-}
-
-interface RequiredFieldRowProps {
-  requiredField: RequiredField;
-  requiredFieldIndex: number;
-  typesByFieldName: Record<string, string[]>;
-  field: FieldHook;
-  allFieldNames: string[];
-  availableFieldNames: string[];
-  nameWarning?: string;
-  typeWarning?: string;
-}
-
-const RequiredFieldRow = ({
-  requiredField,
-  requiredFieldIndex,
-  availableFieldNames,
-  typesByFieldName,
-  field,
-  allFieldNames,
-  nameWarning,
-  typeWarning,
-}: RequiredFieldRowProps) => {
-  const isFieldNameFoundInIndexPatterns = allFieldNames.includes(requiredField.name);
-
-  // /* Show a warning if selected field name is not found in the index pattern */
-  // let nameWarning = '';
-  // if (requiredField.name && !isFieldNameFoundInIndexPatterns) {
-  //   nameWarning = `Field "${requiredField.name}" is not found within specified index patterns`;
-  // }
-
-  // Do not not add empty option to the list of selectable field names
-  const selectableNameOptions = (requiredField.name ? [requiredField.name] : [])
-    .concat(availableFieldNames)
-    .map((name) => ({
-      label: name,
-    }));
-
-  const selectedNameOption = selectableNameOptions.find(
-    (option) => option.label === requiredField.name
-  ) || { label: '' };
-
-  // let typeWarning = '';
-
-  const typesAvailableForSelectedName = typesByFieldName[requiredField.name];
-
-  let selectableTypeOptions: EuiSelectOption[] = [];
-  if (typesAvailableForSelectedName) {
-    const isSelectedTypeAvailable = typesAvailableForSelectedName.includes(requiredField.type);
-
-    selectableTypeOptions = typesAvailableForSelectedName.map((type) => ({
-      text: type,
-    }));
-
-    if (!isSelectedTypeAvailable) {
-      // case: field name exists, but such type is not among the list of field types
-      selectableTypeOptions.push({ text: requiredField.type });
-      // typeWarning = `Field "${selectedNameOption.label}" with type "${requiredField.type}" is not found within specified index patterns`;
-    }
-  } else {
-    // case: no such field name in index patterns
-    selectableTypeOptions = [
-      {
-        text: requiredField.type,
-      },
-    ];
-  }
-
-  const warningText = nameWarning || typeWarning;
-
-  return (
-    <EuiFormRow
-      fullWidth
-      helpText={warningText ? <EuiTextColor color="warning">{warningText}</EuiTextColor> : ''}
-      color="warning"
-    >
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow>
-          <EuiComboBox
-            aria-label="Accessible screen reader label"
-            placeholder="Select a single option"
-            singleSelection={{ asPlainText: true }}
-            options={selectableNameOptions}
-            selectedOptions={[selectedNameOption]}
-            onChange={(selectedOptions) =>
-              applyChangeToFieldValue(selectedOptions, requiredFieldIndex, field, typesByFieldName)
-            }
-            isClearable={false}
-            prepend={
-              nameWarning ? (
-                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-              ) : undefined
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiSelect
-            options={selectableTypeOptions}
-            disabled={selectedNameOption.label === '' || selectableTypeOptions.length <= 1}
-            value={requiredField.type}
-            onChange={(event) => {
-              updateRequiredFieldType(event.target.value, requiredFieldIndex, field);
-            }}
-            prepend={
-              typeWarning ? (
-                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-              ) : undefined
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            color="danger"
-            iconType="trash"
-            onClick={() => deleteRequiredField(requiredFieldIndex, field)}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
-  );
-};
-
-const RequiredFields = ({
-  field,
-  indexPatternFields,
-}: {
-  field: FieldHook;
-  indexPatternFields: BrowserField[];
-}) => {
-  // const { loading, jobs } = useSecurityJobs();
-  // console.log('[dbg] jobs', jobs);
-
-  const fieldValue = field.value as RequiredField[];
-
-  const selectedFieldNames = fieldValue.map(({ name }) => name);
-
-  const fieldsWithTypes = indexPatternFields.filter(
-    (indexPatternField) => indexPatternField.esTypes && indexPatternField.esTypes.length > 0
-  );
-
-  const allFieldNames = fieldsWithTypes.map(({ name }) => name);
-  const availableFieldNames = allFieldNames.filter((name) => !selectedFieldNames.includes(name));
-
-  const availableNameOptions: Array<EuiComboBoxOptionOption<undefined>> = availableFieldNames.map(
-    (availableFieldName) => ({
-      label: availableFieldName,
-    })
-  );
-
-  const typesByFieldName: Record<string, string[]> = fieldsWithTypes.reduce(
-    (accumulator, browserField) => {
-      if (browserField.esTypes) {
-        accumulator[browserField.name] = browserField.esTypes;
-      }
-      return accumulator;
-    },
-    {} as Record<string, string[]>
-  );
-
-  const isEmptyRowDisplayed = !!fieldValue.find(({ name }) => name === '');
-
-  const nameWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name }) => {
-    if (name !== '' && !allFieldNames.includes(name)) {
-      warnings[name] = `Field "${name}" is not found within specified index patterns`;
-    }
-    return warnings;
-  }, {});
-
-  const typeWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name, type }) => {
-    if (name !== '' && !typesByFieldName[name]?.includes(type)) {
-      warnings[
-        name
-      ] = `Field "${name}" with type "${type}" is not found within specified index patterns`;
-    }
-    return warnings;
-  }, {});
-
-  const hasWarnings = Object.keys(nameWarnings).length > 0 || Object.keys(typeWarnings).length > 0;
-
-  return (
-    <EuiFormRow fullWidth label={field.label} helpText={field.helpText}>
-      <>
-        {hasWarnings && (
-          <EuiCallOut
-            title="Some fields are not found within specified index patterns."
-            color="warning"
-            iconType="help"
-          >
-            <p>{`This doesn't break rule execution, but it might indicate that required fields were set incorrectly. Please check that indices specified in index patterns exist and have expected fields and types in mappings.`}</p>
-          </EuiCallOut>
-        )}
-        <EuiSpacer size="m" />
-        {fieldValue.map((requiredField, requiredFieldIndex) => (
-          <RequiredFieldRow
-            key={requiredField.name}
-            requiredField={requiredField}
-            requiredFieldIndex={requiredFieldIndex}
-            typesByFieldName={typesByFieldName}
-            field={field}
-            allFieldNames={allFieldNames}
-            availableFieldNames={availableFieldNames}
-            nameWarning={nameWarnings[requiredField.name]}
-            typeWarning={typeWarnings[requiredField.name]}
-          />
-        ))}
-        <EuiButtonEmpty
-          onClick={() => {
-            addRequiredField(availableNameOptions, typesByFieldName, field);
-          }}
-          isDisabled={availableNameOptions.length === 0 || isEmptyRowDisplayed}
-        >
-          {'Add required field'}
-        </EuiButtonEmpty>
-      </>
-    </EuiFormRow>
-  );
-};
