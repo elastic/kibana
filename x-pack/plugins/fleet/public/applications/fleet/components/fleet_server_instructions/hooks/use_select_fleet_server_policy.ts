@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useGetAgentPolicies } from '../../../hooks';
-import { policyHasFleetServer } from '../../../services';
+import { useGetFleetServerPolicyStatus } from '../../../hooks';
 
 export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   const [fleetServerPolicyId, setFleetServerPolicyId] = useState<string | undefined>(
@@ -17,32 +16,25 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
   const {
     isLoading,
     isInitialRequest,
-    data: agentPoliciesData,
+    data: fleetServerPolicyStatus = {
+      agent_policies: [],
+      has_active_fleet_server: false,
+    },
     resendRequest,
-  } = useGetAgentPolicies({
-    full: true,
-  });
-
-  const eligibleFleetServerPolicies = useMemo(
-    () =>
-      agentPoliciesData
-        ? agentPoliciesData.items?.filter((item) => !item.is_managed && policyHasFleetServer(item))
-        : [],
-    [agentPoliciesData]
-  );
+  } = useGetFleetServerPolicyStatus();
 
   useEffect(() => {
     // Default to the first policy found with a fleet server integration installed
-    if (eligibleFleetServerPolicies.length === 1 && !fleetServerPolicyId) {
-      setFleetServerPolicyId(eligibleFleetServerPolicies[0].id);
+    if (fleetServerPolicyStatus?.agent_policies.length === 1 && !fleetServerPolicyId) {
+      setFleetServerPolicyId(fleetServerPolicyStatus?.agent_policies[0].id);
     }
-  }, [eligibleFleetServerPolicies, fleetServerPolicyId]);
+  }, [fleetServerPolicyStatus, fleetServerPolicyId]);
 
   return {
     isSelectFleetServerPolicyLoading: isLoading && isInitialRequest,
     fleetServerPolicyId,
     setFleetServerPolicyId,
-    eligibleFleetServerPolicies,
+    eligibleFleetServerPolicies: fleetServerPolicyStatus?.agent_policies,
     refreshEligibleFleetServerPolicies: resendRequest,
   };
 };

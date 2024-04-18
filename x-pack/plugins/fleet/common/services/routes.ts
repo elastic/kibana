@@ -271,6 +271,7 @@ export const fleetServerHostsRoutesService = {
   getDeletePath: (itemId: string) =>
     FLEET_SERVER_HOST_API_ROUTES.DELETE_PATTERN.replace('{itemId}', itemId),
   getCreatePath: () => FLEET_SERVER_HOST_API_ROUTES.CREATE_PATTERN,
+  getPolicyStatusPath: () => FLEET_SERVER_HOST_API_ROUTES.POLICY_STATUS_PATTERN,
 };
 
 export const settingsRoutesService = {

@@ -62,7 +62,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
     isFleetServerPolicy,
   } = props;
 
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
 
   const onChangeCallback = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
@@ -101,7 +101,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <div>
-                <EuiLink disabled={!hasFleetAllPrivileges} onClick={onClickCreatePolicy}>
+                <EuiLink disabled={!authz.fleet.all} onClick={onClickCreatePolicy}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
                     defaultMessage="Create new agent policy"
@@ -132,7 +132,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           isInvalid={!selectedPolicyId}
         />
       </AgentPolicyFormRow>
-      {selectedPolicyId && !isFleetServerPolicy && (
+      {authz.fleet.readAgentPolicies && selectedPolicyId && !isFleetServerPolicy && (
         <>
           <EuiSpacer size="m" />
           <AgentPolicyPackageBadges

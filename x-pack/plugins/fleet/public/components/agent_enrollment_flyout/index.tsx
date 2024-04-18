@@ -189,7 +189,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           ) : undefined
         }
       >
-        {isLoadingInitialAgentPolicies ? (
+        {isLoadingInitialAgentPolicies || isLoadingAgentPolicies ? (
           <Loading size="l" />
         ) : (
           <Instructions
