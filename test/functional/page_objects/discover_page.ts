@@ -204,11 +204,9 @@ export class DiscoverPageObject extends FtrService {
       timeout: this.defaultFindTimeout * 10,
     });
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('unifiedHistogramChartPanelHidden')) {
-        // no chart is available
-        return;
+      if (await this.isChartVisible()) {
+        await this.elasticChart.waitForRenderComplete(undefined, 5000);
       }
-      await this.elasticChart.waitForRenderComplete(undefined, 5000);
     });
   }
 
