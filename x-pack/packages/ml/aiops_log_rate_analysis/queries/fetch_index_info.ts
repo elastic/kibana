@@ -25,8 +25,6 @@ const SUPPORTED_ES_FIELD_TYPES = [
 
 const SUPPORTED_ES_FIELD_TYPES_TEXT = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.MATCH_ONLY_TEXT];
 
-const IGNORE_FIELD_NAMES = ['_tier'];
-
 interface IndexInfo {
   fieldCandidates: string[];
   textFieldCandidates: string[];
@@ -74,11 +72,11 @@ export const fetchIndexInfo = async (
     const isTextField = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES_TEXT.includes(type));
 
     // Check if fieldName is something we can aggregate on
-    if (isSupportedType && isAggregatable && !IGNORE_FIELD_NAMES.includes(key)) {
+    if (isSupportedType && isAggregatable) {
       acceptableFields.add(key);
     }
 
-    if (isTextField && !IGNORE_FIELD_NAMES.includes(key)) {
+    if (isTextField) {
       acceptableTextFields.add(key);
     }
 
