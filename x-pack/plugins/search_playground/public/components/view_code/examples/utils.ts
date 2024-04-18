@@ -11,7 +11,8 @@ export const getESQuery = (query: any) => {
       .replace('"{query}"', 'query')
       .split('\n')
       .map((line) => `  ${line}`)
-      .join('\n');
+      .join('\n')
+      .trim();
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('Error parsing ES query', e);

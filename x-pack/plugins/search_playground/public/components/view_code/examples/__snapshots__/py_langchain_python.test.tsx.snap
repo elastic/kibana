@@ -20,9 +20,9 @@ es_client = Elasticsearch(
       
 
 def build_query(query):
-  return {
-  \\"query\\": {}
-}
+  return   {
+    \\"query\\": {}
+  }
 
 index_source_fields = {
   \\"index1\\": [

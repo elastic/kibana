@@ -29,10 +29,10 @@ index_source_fields = {
 }
 
 def get_elasticsearch_results(query):
-  es_query = {
-  \\"query\\": {},
-  \\"size\\": 10
-}
+  es_query =   {
+    \\"query\\": {},
+    \\"size\\": 10
+  }
 
   result = es.search(index=\\"index1,index2\\", body=es_query)
   return result[\\"hits\\"][\\"hits\\"]
