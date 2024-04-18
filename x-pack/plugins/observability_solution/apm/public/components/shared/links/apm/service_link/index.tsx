@@ -33,11 +33,7 @@ interface ServiceLinkProps {
   serviceName: string;
   serviceOverflowCount?: number;
 }
-export function ServiceLink({
-  agentName,
-  query,
-  serviceName,
-}: ServiceLinkProps) {
+export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
   const { link } = useApmRouter();
 
   const serviceLink = isMobileAgentName(agentName)
@@ -48,10 +44,7 @@ export function ServiceLink({
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiText
-            grow={false}
-            style={{ fontStyle: 'italic', fontSize: '1rem' }}
-          >
+          <EuiText grow={false} style={{ fontStyle: 'italic', fontSize: '1rem' }}>
             {i18n.translate('xpack.apm.serviceLink.otherBucketName', {
               defaultMessage: 'Remaining Services',
             })}
