@@ -76,16 +76,7 @@ function getName() {
   return NAMES[Math.floor(Math.random() * NAMES.length)];
 }
 
-const AGENT_NAMES = [
-  'dotnet',
-  'go',
-  'java',
-  'rum-js',
-  'nodejs',
-  'php',
-  'python',
-  'ruby',
-];
+const AGENT_NAMES = ['dotnet', 'go', 'java', 'rum-js', 'nodejs', 'php', 'python', 'ruby'];
 
 const NAMES = [
   'abomination',

@@ -29,11 +29,7 @@ export function useAdHocApmDataView() {
 
       try {
         const displayError = false;
-        return await services.dataViews.create(
-          { title: indexPattern },
-          undefined,
-          displayError
-        );
+        return await services.dataViews.create({ title: indexPattern }, undefined, displayError);
       } catch (e) {
         const noDataScreen = e.message.includes('No matching indices found');
         if (noDataScreen) {
