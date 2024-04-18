@@ -177,7 +177,7 @@ export const RuleDefinition: React.FC<RuleDefinitionProps> = ({
                   size="s"
                   color="danger"
                   iconType="warning"
-                  title={ruleParamsErrorList.join(' ')}
+                  title={ruleParamsErrorList[0]}
                   data-test-subj="ruleParamsErrorCallout"
                 />
               )}
