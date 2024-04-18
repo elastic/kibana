@@ -11,12 +11,9 @@ import type { EntityType } from '@kbn/timelines-plugin/common';
 import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { UserPanelKey } from '../../../../flyout/entity_details/user_right';
-import { HostPanelKey } from '../../../../flyout/entity_details/host_right';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ExpandedDetailType } from '../../../../../common/types';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
-import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { timelineSelectors } from '../../../store';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -36,14 +33,6 @@ export interface UseDetailPanelConfig {
 }
 export interface UseDetailPanelReturn {
   openEventDetailsPanel: (eventId?: string, onClose?: () => void) => void;
-  openHostDetailsPanel: (hostName: string, onClose?: () => void) => void;
-  openNetworkDetailsPanel: (
-    ip: string,
-    flowTarget: FlowTargetSourceDest,
-    onClose?: () => void
-  ) => void;
-  openUserDetailsPanel: (userName: string, onClose?: () => void) => void;
-  handleOnDetailsPanelClosed: () => void;
   DetailsPanel: JSX.Element | null;
   shouldShowDetailsPanel: boolean;
 }
@@ -135,57 +124,8 @@ export const useDetailPanel = ({
     [isSecurityFlyoutEnabled, openFlyout, eventDetailsIndex, scopeId, telemetry, loadDetailsPanel]
   );
 
-  const openHostDetailsPanel = useCallback(
-    (hostName: string, onClose?: () => void) => {
-      if (isSecurityFlyoutEnabled) {
-        openFlyout({
-          right: {
-            id: HostPanelKey,
-            params: {
-              hostName,
-              scopeId,
-            },
-          },
-        });
-      } else {
-        loadDetailsPanel({ panelView: 'hostDetail', params: { hostName } });
-        onPanelClose.current = onClose ?? noopPanelClose;
-      }
-    },
-    [isSecurityFlyoutEnabled, loadDetailsPanel, openFlyout, scopeId]
-  );
-
-  const openNetworkDetailsPanel = useCallback(
-    (ip: string, flowTarget: FlowTargetSourceDest, onClose?: () => void) => {
-      loadDetailsPanel({ panelView: 'networkDetail', params: { ip, flowTarget } });
-      onPanelClose.current = onClose ?? noopPanelClose;
-    },
-    [loadDetailsPanel]
-  );
-
-  const openUserDetailsPanel = useCallback(
-    (userName: string, onClose?: () => void) => {
-      if (isSecurityFlyoutEnabled) {
-        openFlyout({
-          right: {
-            id: UserPanelKey,
-            params: {
-              userName,
-              scopeId,
-            },
-          },
-        });
-      } else {
-        loadDetailsPanel({ panelView: 'userDetail', params: { userName } });
-        onPanelClose.current = onClose ?? noopPanelClose;
-      }
-    },
-    [isSecurityFlyoutEnabled, loadDetailsPanel, openFlyout, scopeId]
-  );
-
   const handleOnDetailsPanelClosed = useCallback(() => {
     if (isSecurityFlyoutEnabled) return;
-
     if (onPanelClose.current) onPanelClose.current();
     if (scopedActions) {
       dispatch(scopedActions.toggleDetailPanel({ tabType, id: scopeId }));
@@ -219,10 +159,6 @@ export const useDetailPanel = ({
 
   return {
     openEventDetailsPanel,
-    openHostDetailsPanel,
-    openNetworkDetailsPanel,
-    openUserDetailsPanel,
-    handleOnDetailsPanelClosed,
     shouldShowDetailsPanel,
     DetailsPanel,
   };
