@@ -10,6 +10,7 @@ import * as React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
@@ -43,21 +44,15 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           throw new Error('HTTP service is not available');
         }
 
-        interface KeyResponse {
-          id: string;
-          name: string;
-          expiration: number;
-          api_key: string;
-          encoded: string;
-        }
+        const request: CreateAPIKeyParams = {
+          name,
+          expiration: '90d',
+          metadata: {},
+          role_descriptors: {},
+        };
 
-        const response = await http.post<KeyResponse>('/internal/security/api_key', {
-          body: JSON.stringify({
-            name,
-            expiration: '90d',
-            metadata: '{}',
-            role_descriptors: '{}',
-          }),
+        const response = await http.post<CreateAPIKeyResult>('/internal/security/api_key', {
+          body: JSON.stringify(request),
         });
 
         return {
