@@ -37,12 +37,19 @@ export default ({ getService }: FtrProviderContext): void => {
           await ml.api.assureMlStatsIndexExists();
         });
 
+        after(async () => {
+          await ml.api.stopAllTrainedModelDeploymentsES();
+          await ml.api.deleteAllTrainedModelsES();
+          await ml.api.cleanMlIndices();
+        });
+
         it('executes NLP Cleanup Task and successfully cleans up only pytorch models', async () => {
           // Poll for model to be imported, this can fail with a 404 till the model is imported
           let m1: MlGetTrainedModelsResponse = { count: 0, trained_model_configs: [] };
           await waitFor(
             async () => {
               const { body, status } = await esSupertest.get(`/_ml/trained_models`);
+              logger.log(`body:\n${JSON.stringify(body, null, 2)}`);
               m1 = body;
               return status === 200 && m1.count > 0;
             },
