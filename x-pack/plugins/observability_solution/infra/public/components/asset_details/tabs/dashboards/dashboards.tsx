@@ -41,6 +41,7 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { FilterExplanationCallout } from './filter_explanation_callout';
 
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
@@ -182,6 +183,12 @@ export function Dashboards() {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          {currentDashboard && (
+            <FilterExplanationCallout
+              dashboardFilterAssetIdEnabled={currentDashboard.dashboardFilterAssetIdEnabled}
+            />
+          )}
           <EuiFlexItem grow>
             <EuiSpacer size="l" />
             {urlState?.dashboardId && (
