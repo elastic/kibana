@@ -101,6 +101,7 @@ const esqlLanguagePlugin = () => {
     if (node.type === 'code' && node.lang === 'esql') {
       node.type = 'esql';
     } else if (node.type === 'code') {
+      // switch to type that allows us to control rendering
       node.type = 'codeBlock';
     }
   };

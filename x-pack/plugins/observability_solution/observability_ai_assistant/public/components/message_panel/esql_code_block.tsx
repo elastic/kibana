@@ -31,9 +31,8 @@ const getCodeBlockClassName = (theme: UseEuiTheme) => css`
   }
 `;
 
-export function CodeBlock({ children }: { children: React.ReactNode }) {
+function CodeBlockWrapper({ children }: { children: React.ReactNode }) {
   const theme = useEuiTheme();
-
   return (
     <EuiPanel
       hasShadow={false}
@@ -41,6 +40,14 @@ export function CodeBlock({ children }: { children: React.ReactNode }) {
       paddingSize="s"
       className={getCodeBlockClassName(theme)}
     >
+      {children}
+    </EuiPanel>
+  );
+}
+
+export function CodeBlock({ children }: { children: React.ReactNode }) {
+  return (
+    <CodeBlockWrapper>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiCodeBlock isCopyable fontSize="m">
@@ -48,7 +55,7 @@ export function CodeBlock({ children }: { children: React.ReactNode }) {
           </EuiCodeBlock>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </CodeBlockWrapper>
   );
 }
 
@@ -61,15 +68,8 @@ export function EsqlCodeBlock({
   actionsDisabled: boolean;
   onActionClick: ChatActionClickHandler;
 }) {
-  const theme = useEuiTheme();
-
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder={false}
-      paddingSize="s"
-      className={getCodeBlockClassName(theme)}
-    >
+    <CodeBlockWrapper>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiCodeBlock isCopyable fontSize="m">
@@ -111,6 +111,6 @@ export function EsqlCodeBlock({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </CodeBlockWrapper>
   );
 }

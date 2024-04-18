@@ -40,9 +40,8 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
         client,
         screenContexts: [],
       }),
-      client.fetchKnowledgeBaseInstructions().catch((error) => {
-        return [];
-      }),
+      // error is caught in client
+      client.fetchKnowledgeBaseInstructions(),
     ]);
 
     const functionDefinitions = functionClient.getFunctions().map((fn) => fn.definition);

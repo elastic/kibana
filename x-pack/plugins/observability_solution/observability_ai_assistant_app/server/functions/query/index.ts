@@ -413,6 +413,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             name: 'query',
             content: {},
             data: {
+              // add the included docs for debugging
               documentation: {
                 intention: args.intention,
                 keywords,

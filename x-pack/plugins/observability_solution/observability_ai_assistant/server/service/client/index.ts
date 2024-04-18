@@ -508,24 +508,18 @@ export class ObservabilityAIAssistantClient {
             tokenCountTotal: tokenCountResult.total,
           });
 
-          this.dependencies.logger.debug('isConversationUpdate: ' + isConversationUpdate);
-
           // store the updated conversation and close the stream
           if (isConversationUpdate) {
             const conversation = await this.getConversationWithMetaFields(conversationId);
-            this.dependencies.logger.debug('fetched existing conversation');
             if (!conversation) {
               throw createConversationNotFoundError();
             }
 
             if (signal.aborted) {
-              this.dependencies.logger.debug('Exiting because aborted');
               return;
             }
 
             const persistedTokenCount = conversation._source?.conversation.token_count;
-
-            this.dependencies.logger.debug('Got persisted token count');
 
             const updatedConversation = await this.update(
               conversationId,
@@ -553,17 +547,13 @@ export class ObservabilityAIAssistantClient {
               )
             );
 
-            this.dependencies.logger.debug('Updated conversation');
-
             subscriber.next({
               type: StreamingChatResponseEventType.ConversationUpdate,
               conversation: updatedConversation.conversation,
             });
           } else {
-            this.dependencies.logger.debug('Awaiting title');
             const generatedTitle = await titlePromise;
             if (signal.aborted) {
-              this.dependencies.logger.debug('Exiting, aborted');
               return;
             }
 
@@ -580,15 +570,11 @@ export class ObservabilityAIAssistantClient {
               public: isPublic,
             });
 
-            this.dependencies.logger.debug('Created conversation');
-
             subscriber.next({
               type: StreamingChatResponseEventType.ConversationCreate,
               conversation: conversation.conversation,
             });
           }
-
-          this.dependencies.logger.debug('Completing');
 
           subscriber.complete();
         };
