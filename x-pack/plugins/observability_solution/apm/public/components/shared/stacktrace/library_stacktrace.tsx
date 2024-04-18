@@ -29,14 +29,10 @@ export function LibraryStacktrace({ codeLanguage, id, stackframes }: Props) {
 
   return (
     <LibraryStacktraceAccordion
-      buttonContent={i18n.translate(
-        'xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel',
-        {
-          defaultMessage:
-            '{count, plural, one {# library frame} other {# library frames}}',
-          values: { count: stackframes.length },
-        }
-      )}
+      buttonContent={i18n.translate('xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel', {
+        defaultMessage: '{count, plural, one {# library frame} other {# library frames}}',
+        values: { count: stackframes.length },
+      })}
       data-test-subj="LibraryStacktraceAccordion"
       id={id}
     >

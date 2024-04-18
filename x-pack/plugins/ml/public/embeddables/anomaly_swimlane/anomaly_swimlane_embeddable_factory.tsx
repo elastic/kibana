@@ -266,7 +266,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 title={
                   <FormattedMessage
                     id="xpack.ml.swimlaneEmbeddable.errorMessage"
-                    defaultMessage="Unable to load the ML swim lane data"
+                    defaultMessage="Unable to load the data for the swim lane"
                   />
                 }
                 color="danger"
