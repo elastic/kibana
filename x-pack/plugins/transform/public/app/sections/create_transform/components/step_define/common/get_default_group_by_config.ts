@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EsFieldName } from '../../../../../../../common/types/fields';
+import type { EsFieldName } from '../../../../../../../common/types/fields';
 
-import { GroupByConfigWithUiSupport, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../../common';
+import type { GroupByConfigWithUiSupport } from '../../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../../common';
 
 export function getDefaultGroupByConfig(
   aggName: string,

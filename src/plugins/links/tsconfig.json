@@ -31,7 +31,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/core-mount-utils-browser",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }

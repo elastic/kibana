@@ -6,28 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { TagWithRelations } from '../../../common';
-import { ITagInternalClient } from '../../services/tags';
 import { getEditModalOpener } from '../../components/edition_modal';
+import { ITagInternalClient } from '../../services/tags';
+import { StartServices } from '../../types';
 import { TagAction } from './types';
 
-interface GetEditActionOptions {
-  overlays: OverlayStart;
-  theme: ThemeServiceStart;
-  notifications: NotificationsStart;
+interface GetEditActionOptions extends StartServices {
   tagClient: ITagInternalClient;
   fetchTags: () => Promise<void>;
 }
 
 export const getEditAction = ({
-  notifications,
-  theme,
-  overlays,
   tagClient,
   fetchTags,
+  ...startServices
 }: GetEditActionOptions): TagAction => {
-  const editModalOpener = getEditModalOpener({ overlays, theme, tagClient, notifications });
+  const editModalOpener = getEditModalOpener({
+    ...startServices,
+    tagClient,
+  });
   return {
     id: 'edit',
     name: ({ name }) =>
@@ -44,7 +42,9 @@ export const getEditAction = ({
     ),
     type: 'icon',
     icon: 'pencil',
+    available: (tag) => !tag.managed,
     onClick: (tag: TagWithRelations) => {
+      const { notifications } = startServices;
       editModalOpener({
         tagId: tag.id,
         onUpdate: (updatedTag) => {

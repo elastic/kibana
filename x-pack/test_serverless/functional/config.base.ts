@@ -115,6 +115,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
       },
+      failureDebugging: {
+        htmlDirectory: resolve(__dirname, 'failure_debug', 'html'),
+      },
       junit: options.junit,
       suiteTags: options.suiteTags,
     };

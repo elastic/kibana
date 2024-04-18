@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getReport = async () => {
     // close any open notification toasts
-    await PageObjects.reporting.clearToastNotifications();
+    await toasts.dismissAll();
 
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
@@ -124,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.getActions().keyDown(Key.CONTROL).perform();
         await browser.getActions().keyDown('v').perform();
 
-        const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
+        const reportURL = decodeURIComponent((await textInput.getAttribute('value')) ?? '');
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =

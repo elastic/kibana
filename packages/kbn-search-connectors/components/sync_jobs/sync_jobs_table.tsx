@@ -13,16 +13,22 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiCode,
+  EuiIcon,
+  EuiToolTip,
   Pagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ConnectorSyncJob, SyncJobType, SyncStatus } from '../..';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ConnectorSyncJob, isSyncCancellable, SyncJobType, SyncStatus } from '../..';
 
 import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { SyncJobFlyout } from './sync_job_flyout';
+import { CancelSyncJobModal, CancelSyncModalProps } from './sync_job_cancel_modal';
 
 interface SyncJobHistoryTableProps {
   isLoading?: boolean;
@@ -30,6 +36,10 @@ interface SyncJobHistoryTableProps {
   pagination: Pagination;
   syncJobs: ConnectorSyncJob[];
   type: 'content' | 'access_control';
+  cancelConfirmModalProps?: Pick<CancelSyncModalProps, 'isLoading' | 'onConfirmCb'> & {
+    syncJobIdToCancel?: ConnectorSyncJob['id'];
+    setSyncJobIdToCancel: (syncJobId: ConnectorSyncJob['id'] | undefined) => void;
+  };
 }
 
 export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
@@ -38,23 +48,62 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
   pagination,
   syncJobs,
   type,
+  cancelConfirmModalProps = {
+    onConfirmCb: () => {},
+    isLoading: false,
+    setSyncJobIdToCancel: () => {},
+    syncJobIdToCancel: undefined,
+  },
 }) => {
   const [selectedSyncJob, setSelectedSyncJob] = useState<ConnectorSyncJob | undefined>(undefined);
   const columns: Array<EuiBasicTableColumn<ConnectorSyncJob>> = [
     {
       field: 'completed_at',
-      name: i18n.translate('searchConnectors.syncJobs.lastSync.columnTitle', {
-        defaultMessage: 'Last sync',
-      }),
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="searchConnectors.syncJobs.lastSync.columnTitle.tooltip"
+              defaultMessage="The timestamp of a given job's {completed_at}. This is when syncs finish, either successfully, in error, or by being canceled."
+              values={{ completed_at: <EuiCode>completed_at</EuiCode> }}
+            />
+          }
+        >
+          <>
+            {i18n.translate('searchConnectors.syncJobs.lastSync.columnTitle', {
+              defaultMessage: 'Last sync',
+            })}
+            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (lastSync: string) =>
         lastSync ? <FormattedDateTime date={new Date(lastSync)} /> : '--',
       sortable: true,
       truncateText: false,
     },
     {
-      name: i18n.translate('searchConnectors.syncJobs.syncDuration.columnTitle', {
-        defaultMessage: 'Sync duration',
-      }),
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="searchConnectors.syncJobs.syncDuration.columnTitle.tooltip"
+              defaultMessage="The time between when a sync started ({started_at}) and when it terminated ({completed_at}) (whether successfully, in error, or canceled). Note that this does not include the time the job may have spent in a “pending” stage, waiting for a worker to pick it up."
+              values={{
+                completed_at: <EuiCode>completed_at</EuiCode>,
+                started_at: <EuiCode>started_at</EuiCode>,
+              }}
+            />
+          }
+        >
+          <>
+            {i18n.translate('searchConnectors.syncJobs.syncDuration.columnTitle', {
+              defaultMessage: 'Sync duration',
+            })}
+            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
       render: (syncJob: ConnectorSyncJob) => durationToText(getSyncJobDuration(syncJob)),
       truncateText: false,
     },
@@ -62,17 +111,57 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
       ? [
           {
             field: 'indexed_document_count',
-            name: i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
-              defaultMessage: 'Docs added',
-            }),
+            name: (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="searchConnectors.index.syncJobs.documents.upserted.tooltip"
+                    defaultMessage="The number of {index} operations the connector sent to the Elasticsearch _bulk API during this sync. This includes net-new documents and updates to existing documents. This does not account for duplicate _ids, or any documents dropped by an ingest processor"
+                    values={{ index: <EuiCode>index</EuiCode> }}
+                  />
+                }
+              >
+                <>
+                  {i18n.translate('searchConnectors.searchIndices.addedDocs.columnTitle', {
+                    defaultMessage: 'Docs upserted',
+                  })}
+                  <EuiIcon
+                    size="s"
+                    type="questionInCircle"
+                    color="subdued"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
+            ),
             sortable: true,
             truncateText: true,
           },
           {
             field: 'deleted_document_count',
-            name: i18n.translate('searchConnectors.searchIndices.deletedDocs.columnTitle', {
-              defaultMessage: 'Docs deleted',
-            }),
+            name: (
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="searchConnectors.index.syncJobs.documents.deleted.tooltip"
+                    defaultMessage="The number of {delete} operations the connector sent to the Elasticsearch _bulk API at the conclusion of this sync. This may include documents dropped by Sync Rules. This does not include documents dropped by ingest processors. Documents are deleted from the index if the connector determines that they are no longer present in the data that should be fetched from the 3rd-party source."
+                    values={{ delete: <EuiCode>delete</EuiCode> }}
+                  />
+                }
+              >
+                <>
+                  {i18n.translate('searchConnectors.searchIndices.deletedDocs.columnTitle', {
+                    defaultMessage: 'Docs deleted',
+                  })}
+                  <EuiIcon
+                    size="s"
+                    type="questionInCircle"
+                    color="subdued"
+                    className="eui-alignTop"
+                  />
+                </>
+              </EuiToolTip>
+            ),
             sortable: true,
             truncateText: true,
           },
@@ -127,6 +216,33 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
           onClick: (job) => setSelectedSyncJob(job),
           type: 'icon',
         },
+        ...(cancelConfirmModalProps
+          ? [
+              {
+                render: (job: ConnectorSyncJob) => {
+                  return isSyncCancellable(job.status) ? (
+                    <EuiButtonIcon
+                      iconType="cross"
+                      color="danger"
+                      onClick={() => cancelConfirmModalProps.setSyncJobIdToCancel(job.id)}
+                      aria-label={i18n.translate(
+                        'searchConnectors.index.syncJobs.actions.cancelSyncJob.caption',
+                        {
+                          defaultMessage: 'Cancel this sync job',
+                        }
+                      )}
+                    >
+                      {i18n.translate('searchConnectors.index.syncJobs.actions.deleteJob.caption', {
+                        defaultMessage: 'Delete',
+                      })}
+                    </EuiButtonIcon>
+                  ) : (
+                    <></>
+                  );
+                },
+              },
+            ]
+          : []),
       ],
     },
   ];
@@ -135,6 +251,13 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
     <>
       {Boolean(selectedSyncJob) && (
         <SyncJobFlyout onClose={() => setSelectedSyncJob(undefined)} syncJob={selectedSyncJob} />
+      )}
+      {Boolean(cancelConfirmModalProps) && cancelConfirmModalProps?.syncJobIdToCancel && (
+        <CancelSyncJobModal
+          {...cancelConfirmModalProps}
+          syncJobId={cancelConfirmModalProps.syncJobIdToCancel}
+          onCancel={() => cancelConfirmModalProps.setSyncJobIdToCancel(undefined)}
+        />
       )}
       <EuiBasicTable
         data-test-subj={`entSearchContent-index-${type}-syncJobs-table`}

@@ -50,6 +50,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   }
 
   const { ids, filter } = options;
+  const actionsClient = await context.getActionsClient();
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
@@ -96,13 +97,17 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
     // when we are doing the bulk delete and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
-      id,
-      logger: context.logger,
-      ruleType,
-      references,
-      omitGeneratedValues: false,
-    });
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
+    );
 
     try {
       ruleDomainSchema.validate(ruleDomain);

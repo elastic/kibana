@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
 import { times } from 'lodash/fp';
 import { RiskInputsTab } from './risk_inputs_tab';
-import { alertDataMock } from '../../mocks';
+import { alertInputDataMock } from '../../mocks';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 
@@ -19,6 +19,16 @@ const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false
 jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
   useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
 }));
+
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
 
 const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
 
@@ -40,11 +50,15 @@ const riskScore = {
 };
 
 describe('RiskInputsTab', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders', () => {
     mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,
       error: false,
-      data: [alertDataMock],
+      data: [alertInputDataMock],
     });
     mockUseRiskScore.mockReturnValue({
       loading: false,
@@ -52,22 +66,63 @@ describe('RiskInputsTab', () => {
       data: [riskScore],
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-contexts-title')).toBeInTheDocument();
+    expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
-      'Risk inputRule Name'
+      'Rule nameRule Name'
     );
   });
 
-  it('paginates', () => {
+  it('Does not render the context section if enabled but no asset criticality', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
+  });
+
+  it('Renders the context section if enabled and risks contains asset criticality', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    const riskScoreWithAssetCriticality = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          criticality_level: 'extreme_impact',
+        },
+      },
+    };
+
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScoreWithAssetCriticality],
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-contexts-title')).toBeInTheDocument();
+  });
+
+  it('shows extra alerts contribution message', () => {
     const alerts = times(
       (number) => ({
-        ...alertDataMock,
+        ...alertInputDataMock,
         _id: number.toString(),
       }),
       11
@@ -84,16 +139,12 @@ describe('RiskInputsTab', () => {
       data: [riskScore],
     });
 
-    const { getAllByTestId, getByLabelText } = render(
+    const { queryByTestId } = render(
       <TestProviders>
         <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 
-    expect(getAllByTestId('risk-input-table-description-cell')).toHaveLength(10);
-
-    fireEvent.click(getByLabelText('Next page'));
-
-    expect(getAllByTestId('risk-input-table-description-cell')).toHaveLength(1);
+    expect(queryByTestId('risk-input-extra-alerts-message')).toBeInTheDocument();
   });
 });

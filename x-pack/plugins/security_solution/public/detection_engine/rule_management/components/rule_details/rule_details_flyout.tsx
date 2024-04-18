@@ -109,6 +109,7 @@ interface RuleDetailsFlyoutProps {
   size?: EuiFlyoutProps['size'];
   extraTabs?: EuiTabbedContentTab[];
   dataTestSubj?: string;
+  id?: string;
   closeFlyout: () => void;
 }
 
@@ -118,6 +119,7 @@ export const RuleDetailsFlyout = ({
   size = 'm',
   extraTabs = [],
   dataTestSubj,
+  id,
   closeFlyout,
 }: RuleDetailsFlyoutProps) => {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
@@ -181,6 +183,7 @@ export const RuleDetailsFlyout = ({
 
   return (
     <EuiFlyout
+      id={id}
       size={size}
       onClose={closeFlyout}
       ownFocus={false}

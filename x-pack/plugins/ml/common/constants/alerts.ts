@@ -14,7 +14,7 @@ import {
   ALERT_STATUS,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { JobsHealthTests } from '../types/alerts';
+import type { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
   ANOMALY_DETECTION: ML_ANOMALY_DETECTION_RULE_TYPE_ID,
@@ -85,12 +85,20 @@ export const HEALTH_CHECK_NAMES: Record<JobsHealthTests, { name: string; descrip
 };
 
 const ML_ALERT_NAMESPACE = ALERT_NAMESPACE;
+
+// Anomaly detection rule type fields
 export const ALERT_ANOMALY_TIMESTAMP = `${ML_ALERT_NAMESPACE}.anomaly_timestamp` as const;
 export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ML_ALERT_NAMESPACE}.job_id` as const;
 export const ALERT_ANOMALY_SCORE = `${ML_ALERT_NAMESPACE}.anomaly_score` as const;
 export const ALERT_ANOMALY_IS_INTERIM = `${ML_ALERT_NAMESPACE}.is_interim` as const;
 export const ALERT_TOP_RECORDS = `${ML_ALERT_NAMESPACE}.top_records` as const;
 export const ALERT_TOP_INFLUENCERS = `${ML_ALERT_NAMESPACE}.top_influencers` as const;
+
+// Anomaly detection health rule type fields
+export const ALERT_MML_RESULTS = `${ML_ALERT_NAMESPACE}.mml_results` as const;
+export const ALERT_DATAFEED_RESULTS = `${ML_ALERT_NAMESPACE}.datafeed_results` as const;
+export const ALERT_DELAYED_DATA_RESULTS = `${ML_ALERT_NAMESPACE}.delayed_data_results` as const;
+export const ALERT_JOB_ERRORS_RESULTS = `${ML_ALERT_NAMESPACE}.job_errors_results` as const;
 
 export const alertFieldNameMap = Object.freeze<Record<string, string>>({
   [ALERT_RULE_NAME]: i18n.translate('xpack.ml.alertsTable.columns.ruleName', {

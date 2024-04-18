@@ -9,20 +9,19 @@
 // `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/utils/saved_search_utils.ts`
 
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { FilterManager, isQuery, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { isQuery, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
   buildQueryFromFilters,
   buildEsQuery,
-  Query,
-  Filter,
-  AggregateQuery,
 } from '@kbn/es-query';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

@@ -31,6 +31,7 @@ import {
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
@@ -53,6 +54,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
   const RECOVERED_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.recovered';
   const ACTION_PATH = 'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
   const UUID_PATH = 'kibana.alert.rule.execution.uuid';
+  const DELAYED_PATH = 'kibana.alert.rule.execution.metrics.number_of_delayed_alerts';
 
   const es = getService('es');
   const retry = getService('retry');
@@ -152,6 +154,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
       const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
@@ -178,6 +181,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
       const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
@@ -205,6 +209,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(1);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(1);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
@@ -244,6 +249,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(source[EVENT_KIND]).to.equal('signal');
       // tags should equal rule tags because rule type doesn't set any tags
       expect(source.tags).to.eql(['foo']);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(3);
 
       // --------------------------
       // RUN 4 - 1 active alert
@@ -260,6 +267,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun4 = await queryForAlertDocs<PatternFiringAlert>();
@@ -295,6 +303,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(source[EVENT_KIND]).to.eql(run3Source[EVENT_KIND]);
       expect(source[ALERT_WORKFLOW_STATUS]).to.eql(run3Source[ALERT_WORKFLOW_STATUS]);
       expect(source[ALERT_TIME_RANGE]?.gte).to.equal(run3Source[ALERT_TIME_RANGE]?.gte);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(4);
 
       // --------------------------
       // RUN 5 - 1 recovered alert
@@ -311,6 +321,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(1);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun5 = await queryForAlertDocs<PatternFiringAlert>();
@@ -351,6 +362,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(source[ALERT_TIME_RANGE]?.gte).to.equal(run3Source[ALERT_TIME_RANGE]?.gte);
       // time_range.lte should be set to end time
       expect(source[ALERT_TIME_RANGE]?.lte).to.equal(source[ALERT_END]);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(0);
 
       // --------------------------
       // RUN 6 - 0 new alerts
@@ -366,6 +379,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
       const alertDocsRun6 = await queryForAlertDocs<PatternFiringAlert>();
@@ -439,6 +453,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(2);
 
       // Query for alerts
       const alertDocsRun1 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);
@@ -465,6 +480,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(2);
 
       // Query for alerts
       const alertDocsRun2 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);
@@ -493,6 +509,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(2);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(2);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun3 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);
@@ -538,6 +555,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(source[EVENT_KIND]).to.equal('signal');
       // tags should equal rule tags because rule type doesn't set any tags
       expect(source.tags).to.eql(['foo']);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(3);
 
       // --------------------------
       // RUN 4 - 1 active alert
@@ -555,6 +574,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun4 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);
@@ -597,6 +617,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(source[EVENT_KIND]).to.eql(run3Source[EVENT_KIND]);
       expect(source[ALERT_WORKFLOW_STATUS]).to.eql(run3Source[ALERT_WORKFLOW_STATUS]);
       expect(source[ALERT_TIME_RANGE]?.gte).to.equal(run3Source[ALERT_TIME_RANGE]?.gte);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(4);
     });
   });
 

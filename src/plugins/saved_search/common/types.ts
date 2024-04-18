@@ -20,6 +20,20 @@ export interface DiscoverGridSettingsColumn extends SerializableRecord {
   width?: number;
 }
 
+export type VisContextUnmapped =
+  | {
+      // UnifiedHistogramVisContext (can't be referenced here directly due to circular dependency)
+      attributes: unknown;
+      requestData: {
+        dataViewId?: string;
+        timeField?: string;
+        timeInterval?: string;
+        breakdownField?: string;
+      };
+      suggestionType: string;
+    }
+  | {}; // cleared value
+
 /** @internal **/
 export interface SavedSearchAttributes {
   title: string;
@@ -36,6 +50,7 @@ export interface SavedSearchAttributes {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
 
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
@@ -44,6 +59,7 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  visContext?: VisContextUnmapped;
 }
 
 /** @internal **/
@@ -63,6 +79,7 @@ export interface SavedSearch {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  headerRowHeight?: number;
   isTextBasedQuery?: boolean;
   usesAdHocDataView?: boolean;
 
@@ -74,6 +91,8 @@ export interface SavedSearch {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  visContext?: VisContextUnmapped;
+
   // Whether or not this saved search is managed by the system
   managed: boolean;
   references?: SavedObjectReference[];

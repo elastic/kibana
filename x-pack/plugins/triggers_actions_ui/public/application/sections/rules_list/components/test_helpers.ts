@@ -6,7 +6,7 @@
  */
 
 import {
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
@@ -262,11 +262,11 @@ export const ruleTypeFromApi = {
   recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
   actionVariables: { context: [], state: [] },
   defaultActionGroupId: 'default',
-  producer: ALERTS_FEATURE_ID,
+  producer: ALERTING_FEATURE_ID,
   minimumLicenseRequired: 'basic',
   enabledInLicense: true,
   authorizedConsumers: {
-    [ALERTS_FEATURE_ID]: { read: true, all: true },
+    [ALERTING_FEATURE_ID]: { read: true, all: true },
   },
   ruleTaskTimeout: '1m',
 };
@@ -278,11 +278,11 @@ export const getDisabledByLicenseRuleTypeFromApi = (authorized: boolean = true) 
   recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
   actionVariables: { context: [], state: [] },
   defaultActionGroupId: 'default',
-  producer: ALERTS_FEATURE_ID,
+  producer: ALERTING_FEATURE_ID,
   minimumLicenseRequired: 'platinum',
   enabledInLicense: false,
   authorizedConsumers: {
-    [ALERTS_FEATURE_ID]: { read: true, all: authorized },
+    [ALERTING_FEATURE_ID]: { read: true, all: authorized },
   },
 });
 

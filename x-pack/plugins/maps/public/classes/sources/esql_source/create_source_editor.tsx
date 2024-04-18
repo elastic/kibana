@@ -213,7 +213,7 @@ export function CreateSourceEditor(props: Props) {
             <EuiFormRow>
               <EuiSwitch
                 label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalSearchLabel', {
-                  defaultMessage: `Narrow ES|QL statement by global search`,
+                  defaultMessage: `Apply global search to ES|QL statement`,
                 })}
                 checked={narrowByGlobalSearch}
                 onChange={(event: EuiSwitchEvent) => {

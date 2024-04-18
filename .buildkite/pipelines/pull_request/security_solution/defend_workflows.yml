@@ -7,10 +7,10 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 16
+    parallelism: 20
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
@@ -21,10 +21,10 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 14
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   # status_exception: Native role management is not enabled in this Elasticsearch instance
@@ -36,5 +36,5 @@ steps:
   #   timeout_in_minutes: 60
   #   retry:
   #     automatic:
-  #       - exit_status: '*'
+  #       - exit_status: '-1'
   #         limit: 1

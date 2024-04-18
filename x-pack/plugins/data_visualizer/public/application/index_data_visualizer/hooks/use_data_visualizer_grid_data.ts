@@ -20,7 +20,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { useTimeBuckets } from '../../common/hooks/use_time_buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
@@ -37,14 +37,18 @@ import {
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
-import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
-import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
 import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
+import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
+import {
+  DATA_VISUALIZER_INDEX_VIEWER_ID,
+  getDefaultPageState,
+} from '../constants/index_data_visualizer_viewer';
+import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
 
 const defaults = getDefaultPageState();
 
@@ -58,7 +62,8 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   probability: 0,
 };
 export const useDataVisualizerGridData = (
-  input: DataVisualizerGridInput,
+  // Data view is required for non-ES|QL queries like kuery or lucene
+  input: Required<DataVisualizerGridInput, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
@@ -102,27 +107,30 @@ export const useDataVisualizerGridData = (
     return seed;
   }, [security]);
 
-  const {
-    currentSavedSearch,
-    currentDataView,
-    currentQuery,
-    currentFilters,
-    visibleFieldNames,
-    fieldsToFetch,
-    samplingOption,
-  } = useMemo(
-    () => ({
-      currentSavedSearch: input?.savedSearch,
-      currentDataView: input.dataView,
-      currentQuery: input?.query,
-      visibleFieldNames: input?.visibleFieldNames ?? [],
-      currentFilters: input?.filters,
-      fieldsToFetch: input?.fieldsToFetch,
-      /** By default, use random sampling **/
-      samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
-    }),
-    [input]
-  );
+  const { currentSavedSearch, currentDataView, currentQuery, currentFilters, samplingOption } =
+    useMemo(
+      () => ({
+        currentSavedSearch: input?.savedSearch,
+        currentDataView: input.dataView,
+        currentQuery: input?.query,
+        currentFilters: input?.filters,
+        /** By default, use random sampling **/
+        samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
+      }),
+      [input]
+    );
+  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
+
+  const { visibleFieldNames, fieldsToFetch } = useMemo(() => {
+    // Helper logic to add multi-fields to the table for embeddables outside of Index data visualizer
+    // For example, adding {field} will also add {field.keyword} if it exists
+    return getFieldsWithSubFields({
+      input,
+      currentDataView,
+      shouldGetSubfields: input.id !== DATA_VISUALIZER_INDEX_VIEWER_ID,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input.id, input.fieldsToFetch, input.visibleFieldNames, currentDataView]);
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
@@ -173,7 +181,7 @@ export const useDataVisualizerGridData = (
     data.query.filterManager,
   ]);
 
-  const _timeBuckets = useTimeBuckets();
+  const _timeBuckets = useTimeBuckets(uiSettings);
 
   const timefilter = useTimefilter({
     timeRangeSelector: currentDataView?.timeFieldName !== undefined,
@@ -239,7 +247,6 @@ export const useDataVisualizerGridData = (
           }
         }
       });
-
       return {
         earliest,
         latest,
@@ -252,7 +259,6 @@ export const useDataVisualizerGridData = (
         runtimeFieldMap: currentDataView.getRuntimeMappings(),
         aggregatableFields,
         nonAggregatableFields,
-        fieldsToFetch,
         browserSessionSeed,
         samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
         embeddableExecutionContext,
@@ -281,7 +287,6 @@ export const useDataVisualizerGridData = (
     lastRefresh,
     dataVisualizerListState.probability
   );
-
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;
     const existMetricFields = metricConfigs
@@ -346,8 +351,6 @@ export const useDataVisualizerGridData = (
       timeUpdateSubscription.unsubscribe();
     };
   });
-
-  const dataViewFields: DataViewField[] = useMemo(() => currentDataView.fields, [currentDataView]);
 
   const createMetricCards = useCallback(() => {
     const configs: FieldVisConfig[] = [];
@@ -571,6 +574,7 @@ export const useDataVisualizerGridData = (
   // Inject custom action column for the index based visualizer
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
+    if (!input.dataView) return undefined;
     const actions = getActions(
       input.dataView,
       services,

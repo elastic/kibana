@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import d3 from 'd3';
+import type d3 from 'd3';
 
 import React from 'react';
-import { Annotation } from '../../../../../common/types/annotations';
-import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
-import { ChartTooltipService } from '../../../components/chart_tooltip';
-import { AnnotationState, AnnotationUpdatesService } from '../../../services/annotations_service';
+import type { Annotation } from '../../../../../common/types/annotations';
+import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { ChartTooltipService } from '../../../components/chart_tooltip';
+import type {
+  AnnotationState,
+  AnnotationUpdatesService,
+} from '../../../services/annotations_service';
 
 interface Props {
   selectedJob: CombinedJob;

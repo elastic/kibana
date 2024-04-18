@@ -13,9 +13,11 @@ import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_e
  * @param editAction {@link BulkActionEditType}
  * @returns {boolean}
  */
-export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) =>
-  [
+export const isIndexPatternsBulkEditAction = (editAction: BulkActionEditType) => {
+  const indexPatternsActions: BulkActionEditType[] = [
     BulkActionEditTypeEnum.add_index_patterns,
     BulkActionEditTypeEnum.delete_index_patterns,
     BulkActionEditTypeEnum.set_index_patterns,
-  ].includes(editAction);
+  ];
+  return indexPatternsActions.includes(editAction);
+};

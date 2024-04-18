@@ -27,10 +27,10 @@ describe('RuleToImport', () => {
   });
 
   test('extra properties are removed', () => {
-    const payload: RuleToImportInput & { madeUp: string } = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
+      // @ts-expect-error add an unknown field
       madeUp: 'hi',
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseSuccess(result);
@@ -241,10 +241,7 @@ describe('RuleToImport', () => {
   });
 
   test('You can send in an empty array to threat', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      threat: [],
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ threat: [] });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -289,10 +286,7 @@ describe('RuleToImport', () => {
   });
 
   test('allows references to be sent as valid', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      references: ['index-1'],
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ references: ['index-1'] });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -307,10 +301,10 @@ describe('RuleToImport', () => {
   });
 
   test('references cannot be numbers', () => {
-    const payload: Omit<RuleToImportInput, 'references'> & { references: number[] } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign wrong type value
       references: [5],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -321,10 +315,10 @@ describe('RuleToImport', () => {
   });
 
   test('indexes cannot be numbers', () => {
-    const payload: Omit<RuleToImportInput, 'index'> & { index: number[] } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign wrong type value
       index: [5],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -358,10 +352,9 @@ describe('RuleToImport', () => {
   });
 
   test('saved_query type can have filters with it', () => {
-    const payload = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
       filters: [],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -369,10 +362,10 @@ describe('RuleToImport', () => {
   });
 
   test('filters cannot be a string', () => {
-    const payload: Omit<RuleToImportInput, 'filters'> & { filters: string } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign wrong type value
       filters: 'some string',
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -383,10 +376,7 @@ describe('RuleToImport', () => {
   });
 
   test('language validates with kuery', () => {
-    const payload = {
-      ...getImportRulesSchemaMock(),
-      language: 'kuery',
-    };
+    const payload = getImportRulesSchemaMock({ language: 'kuery' });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -394,10 +384,7 @@ describe('RuleToImport', () => {
   });
 
   test('language validates with lucene', () => {
-    const payload = {
-      ...getImportRulesSchemaMock(),
-      language: 'lucene',
-    };
+    const payload = getImportRulesSchemaMock({ language: 'lucene' });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -405,10 +392,10 @@ describe('RuleToImport', () => {
   });
 
   test('language does not validate with something made up', () => {
-    const payload: Omit<RuleToImportInput, 'language'> & { language: string } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       language: 'something-made-up',
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -419,10 +406,7 @@ describe('RuleToImport', () => {
   });
 
   test('max_signals cannot be negative', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      max_signals: -1,
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ max_signals: -1 });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -433,10 +417,7 @@ describe('RuleToImport', () => {
   });
 
   test('max_signals cannot be zero', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      max_signals: 0,
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ max_signals: 0 });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -447,10 +428,7 @@ describe('RuleToImport', () => {
   });
 
   test('max_signals can be 1', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      max_signals: 1,
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ max_signals: 1 });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -458,10 +436,7 @@ describe('RuleToImport', () => {
   });
 
   test('You can optionally send in an array of tags', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      tags: ['tag_1', 'tag_2'],
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ tags: ['tag_1', 'tag_2'] });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -469,10 +444,10 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
-    const payload: Omit<RuleToImportInput, 'tags'> & { tags: number[] } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       tags: [0, 1, 2],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -483,11 +458,9 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of threat that are missing "framework"', () => {
-    const payload: Omit<RuleToImportInput, 'threat'> & {
-      threat: Array<Partial<Omit<RuleToImportInput['threat'], 'framework'>>>;
-    } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
       threat: [
+        // @ts-expect-error assign unsupported value
         {
           tactic: {
             id: 'fakeId',
@@ -503,7 +476,7 @@ describe('RuleToImport', () => {
           ],
         },
       ],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -512,11 +485,9 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
-    const payload: Omit<RuleToImportInput, 'threat'> & {
-      threat: Array<Partial<Omit<RuleToImportInput['threat'], 'tactic'>>>;
-    } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
       threat: [
+        // @ts-expect-error assign unsupported value
         {
           framework: 'fake',
           technique: [
@@ -528,7 +499,7 @@ describe('RuleToImport', () => {
           ],
         },
       ],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -537,10 +508,7 @@ describe('RuleToImport', () => {
   });
 
   test('You can send in an array of threat that are missing "technique"', () => {
-    const payload: Omit<RuleToImportInput, 'threat'> & {
-      threat: Array<Partial<Omit<RuleToImportInput['threat'], 'technique'>>>;
-    } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
       threat: [
         {
           framework: 'fake',
@@ -551,7 +519,7 @@ describe('RuleToImport', () => {
           },
         },
       ],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -559,10 +527,9 @@ describe('RuleToImport', () => {
   });
 
   test('You can optionally send in an array of false positives', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       false_positives: ['false_1', 'false_2'],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -570,10 +537,10 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
-    const payload: Omit<RuleToImportInput, 'false_positives'> & { false_positives: number[] } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       false_positives: [5, 4],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -584,10 +551,10 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot set the immutable to a number when trying to create a rule', () => {
-    const payload: Omit<RuleToImportInput, 'immutable'> & { immutable: number } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       immutable: 5,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -598,10 +565,9 @@ describe('RuleToImport', () => {
   });
 
   test('You can optionally set the immutable to be false', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       immutable: false,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -609,10 +575,10 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot set the immutable to be true', () => {
-    const payload: Omit<RuleToImportInput, 'immutable'> & { immutable: true } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       immutable: true,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -623,10 +589,10 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot set the immutable to be a number', () => {
-    const payload: Omit<RuleToImportInput, 'immutable'> & { immutable: number } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       immutable: 5,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -637,10 +603,9 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot set the risk_score to 101', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       risk_score: 101,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -651,10 +616,9 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot set the risk_score to -1', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       risk_score: -1,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -665,10 +629,9 @@ describe('RuleToImport', () => {
   });
 
   test('You can set the risk_score to 0', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       risk_score: 0,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -676,10 +639,9 @@ describe('RuleToImport', () => {
   });
 
   test('You can set the risk_score to 100', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       risk_score: 100,
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -687,12 +649,11 @@ describe('RuleToImport', () => {
   });
 
   test('You can set meta to any object you want', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       meta: {
         somethingMadeUp: { somethingElse: true },
       },
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -700,10 +661,10 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot create meta as a string', () => {
-    const payload: Omit<RuleToImportInput, 'meta'> & { meta: string } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       meta: 'should not work',
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -714,11 +675,10 @@ describe('RuleToImport', () => {
   });
 
   test('validates with timeline_id and timeline_title', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       timeline_id: 'timeline-id',
       timeline_title: 'timeline-title',
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -726,10 +686,9 @@ describe('RuleToImport', () => {
   });
 
   test('rule_id is required and you cannot get by with just id', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       id: 'c4e80a0d-e20f-4efc-84c1-08112da5a612',
-    };
+    });
     // @ts-expect-error
     delete payload.rule_id;
 
@@ -740,13 +699,12 @@ describe('RuleToImport', () => {
   });
 
   test('it validates with created_at, updated_at, created_by, updated_by values', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
+    const payload: RuleToImportInput = getImportRulesSchemaMock({
       created_at: '2020-01-09T06:15:24.749Z',
       updated_at: '2020-01-09T06:15:24.749Z',
       created_by: 'Braden Hassanabad',
       updated_by: 'Evan Hassanabad',
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
 
@@ -754,10 +712,7 @@ describe('RuleToImport', () => {
   });
 
   test('it does not validate with epoch strings for created_at', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      created_at: '1578550728650',
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ created_at: '1578550728650' });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -766,10 +721,7 @@ describe('RuleToImport', () => {
   });
 
   test('it does not validate with epoch strings for updated_at', () => {
-    const payload: RuleToImportInput = {
-      ...getImportRulesSchemaMock(),
-      updated_at: '1578550728650',
-    };
+    const payload: RuleToImportInput = getImportRulesSchemaMock({ updated_at: '1578550728650' });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -800,10 +752,10 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
-    const payload: Omit<RuleToImportInput, 'severity'> & { severity: string } = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
+      // @ts-expect-error assign unsupported value
       severity: 'junk',
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -825,10 +777,12 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload: Omit<RuleToImportInput['actions'], 'group'> = {
-      ...getImportRulesSchemaMock(),
-      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-    };
+    const payload = getImportRulesSchemaMock({
+      actions: [
+        // @ts-expect-error assign unsupported value
+        { id: 'id', action_type_id: 'action_type_id', params: {} },
+      ],
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -837,10 +791,12 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of actions that are missing "id"', () => {
-    const payload: Omit<RuleToImportInput['actions'], 'id'> = {
-      ...getImportRulesSchemaMock(),
-      actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
-    };
+    const payload = getImportRulesSchemaMock({
+      actions: [
+        // @ts-expect-error assign unsupported value
+        { group: 'group', action_type_id: 'action_type_id', params: {} },
+      ],
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -849,10 +805,12 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
-    const payload: Omit<RuleToImportInput['actions'], 'action_type_id'> = {
-      ...getImportRulesSchemaMock(),
-      actions: [{ group: 'group', id: 'id', params: {} }],
-    };
+    const payload = getImportRulesSchemaMock({
+      actions: [
+        // @ts-expect-error assign unsupported value
+        { group: 'group', id: 'id', params: {} },
+      ],
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -863,10 +821,12 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of actions that are missing "params"', () => {
-    const payload: Omit<RuleToImportInput['actions'], 'params'> = {
-      ...getImportRulesSchemaMock(),
-      actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
-    };
+    const payload = getImportRulesSchemaMock({
+      actions: [
+        // @ts-expect-error assign unsupported value
+        { group: 'group', id: 'id', action_type_id: 'action_type_id' },
+      ],
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -875,17 +835,17 @@ describe('RuleToImport', () => {
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
-    const payload: Omit<RuleToImportInput['actions'], 'actions'> = {
-      ...getImportRulesSchemaMock(),
+    const payload = getImportRulesSchemaMock({
       actions: [
         {
           group: 'group',
           id: 'id',
+          // @ts-expect-error assign unsupported value
           actionTypeId: 'actionTypeId',
           params: {},
         },
       ],
-    };
+    });
 
     const result = RuleToImport.safeParse(payload);
     expectParseError(result);
@@ -907,32 +867,28 @@ describe('RuleToImport', () => {
 
   describe('note', () => {
     test('You can set note to a string', () => {
-      const payload: RuleToImport = {
-        ...getImportRulesSchemaMock(),
+      const payload: RuleToImport = getImportRulesSchemaMock({
         note: '# documentation markdown here',
-      };
+      });
 
       const result = RuleToImport.safeParse(payload);
       expectParseSuccess(result);
     });
 
     test('You can set note to an empty string', () => {
-      const payload: RuleToImportInput = {
-        ...getImportRulesSchemaMock(),
-        note: '',
-      };
+      const payload: RuleToImportInput = getImportRulesSchemaMock({ note: '' });
 
       const result = RuleToImport.safeParse(payload);
       expectParseSuccess(result);
     });
 
     test('You cannot create note as an object', () => {
-      const payload: Omit<RuleToImportInput, 'note'> & { note: {} } = {
-        ...getImportRulesSchemaMock(),
+      const payload = getImportRulesSchemaMock({
+        // @ts-expect-error assign unsupported value
         note: {
           somethingHere: 'something else',
         },
-      };
+      });
 
       const result = RuleToImport.safeParse(payload);
       expectParseError(result);
@@ -1102,10 +1058,10 @@ describe('RuleToImport', () => {
     });
 
     test('data_view_id cannot be a number', () => {
-      const payload: Omit<RuleToImportInput, 'data_view_id'> & { data_view_id: number } = {
-        ...getImportRulesSchemaMock(),
+      const payload = getImportRulesSchemaMock({
+        // @ts-expect-error assign unsupported value
         data_view_id: 5,
-      };
+      });
 
       const result = RuleToImport.safeParse(payload);
       expectParseError(result);

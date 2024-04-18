@@ -8,10 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  getLimitFromESQLQuery,
+  ESQL_LATEST_VERSION,
+} from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
@@ -28,6 +32,7 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
+import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { InlineField } from '../../fields/inline_field';
 import { getData, getUiSettings } from '../../../kibana_services';
@@ -44,7 +49,10 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
-export class ESQLSource extends AbstractVectorSource implements IVectorSource {
+export class ESQLSource
+  extends AbstractVectorSource
+  implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
+{
   readonly _descriptor: ESQLSourceDescriptor;
 
   static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
@@ -149,6 +157,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     const params: ESQLSearchParams = {
       query: this._descriptor.esql,
       dropNullColumns: true,
+      version: ESQL_LATEST_VERSION,
     };
 
     const query: Query[] = [];
@@ -324,5 +333,9 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
   getIndexPatternId() {
     return this._descriptor.dataViewId;
+  }
+
+  getGeoFieldName() {
+    return this._descriptor.geoField;
   }
 }

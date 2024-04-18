@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isEqlRule, isNewTermsRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -16,17 +16,21 @@ import { isThreatMatchRule } from '../../../../../common/detection_engine/utils'
 export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineStepRule>>(): ((
   fields: T
 ) => T) => {
-  const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForIndicatorMatchRuleEnabled'
+  const isAlertSuppressionForNonSequenceEqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForNonSequenceEqlRuleEnabled'
+  );
+  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForNewTermsRuleEnabled'
   );
 
   const transformer = useCallback(
     (fields: T) => {
-      const isIndicatorMatchSuppressionDisabled = isThreatMatchRule(fields.ruleType)
-        ? !isAlertSuppressionForIndicatorMatchRuleEnabled
-        : false;
+      const isSuppressionDisabled =
+        (isNewTermsRule(fields.ruleType) && !isAlertSuppressionForNewTermsRuleEnabled) ||
+        (isEqlRule(fields.ruleType) && !isAlertSuppressionForNonSequenceEqlRuleEnabled);
+
       // reset any alert suppression values hidden behind feature flag
-      if (isIndicatorMatchSuppressionDisabled) {
+      if (isSuppressionDisabled) {
         return {
           ...fields,
           groupByFields: [],
@@ -38,7 +42,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForIndicatorMatchRuleEnabled]
+    [isAlertSuppressionForNewTermsRuleEnabled, isAlertSuppressionForNonSequenceEqlRuleEnabled]
   );
 
   return transformer;

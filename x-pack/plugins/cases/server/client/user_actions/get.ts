@@ -12,7 +12,7 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import type { UserActionGet } from './types';
 import { extractAttributes } from './utils';
-import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { decodeOrThrow } from '../../common/runtime_types';
 
 export const get = async (
   { caseId }: UserActionGet,

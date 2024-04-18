@@ -126,6 +126,7 @@ export interface KafkaOutput extends NewBaseOutput {
     hash?: string;
     random?: boolean;
   };
+  topic?: string;
   topics?: Array<{
     topic: string;
     when?: {

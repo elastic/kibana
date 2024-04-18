@@ -39,13 +39,24 @@ import { TreeItem } from '../components/tree';
 
 export const getUniqueId = () => uuidv4();
 
+const fieldsWithoutMultiFields: DataType[] = [
+  // @ts-expect-error aggregate_metric_double is not yet supported by the editor
+  'aggregate_metric_double',
+  'constant_keyword',
+  'flattened',
+  'geo_shape',
+  'join',
+  'percolator',
+  'point',
+  'shape',
+];
 export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
-  if (dataType === 'text' || dataType === 'keyword' || dataType === 'ip') {
-    return 'fields';
+  if (fieldsWithoutMultiFields.includes(dataType)) {
+    return undefined;
   } else if (dataType === 'object' || dataType === 'nested') {
     return 'properties';
   }
-  return undefined;
+  return 'fields';
 };
 
 export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta => {

@@ -43,6 +43,7 @@ export class CommonPageObject extends FtrService {
     const NEW_FEATURES_TOUR_STORAGE_KEYS = {
       RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
       TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+      FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
     };
 
     const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
@@ -478,39 +479,6 @@ export class CommonPageObject extends FtrService {
         throw new Error('Local nav not visible yet');
       }
     });
-  }
-
-  async closeToast() {
-    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
-    await toast.moveMouseTo();
-    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
-
-    await this.testSubjects.click('toastCloseButton');
-    return title;
-  }
-
-  async closeToastIfExists() {
-    const toastShown = await this.find.existsByCssSelector('.euiToast');
-    if (toastShown) {
-      try {
-        await this.testSubjects.click('toastCloseButton');
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
-  }
-
-  async clearAllToasts() {
-    const toasts = await this.find.allByCssSelector('.euiToast');
-    for (const toastElement of toasts) {
-      try {
-        await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
-        await closeBtn.click();
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
   }
 
   async getJsonBodyText() {

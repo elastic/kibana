@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { resetIndexUrlParams } from './reset_index_url_params';
@@ -39,25 +40,25 @@ import { DetailsPageTab } from './details_page_tab';
 const defaultTabs: IndexDetailsTab[] = [
   {
     id: IndexDetailsSection.Overview,
-    name: (
-      <FormattedMessage id="xpack.idxMgmt.indexDetails.overviewTitle" defaultMessage="Overview" />
-    ),
+    name: i18n.translate('xpack.idxMgmt.indexDetails.overviewTitle', {
+      defaultMessage: 'Overview',
+    }),
     renderTabContent: ({ index }) => <DetailsPageOverview indexDetails={index} />,
     order: 10,
   },
   {
     id: IndexDetailsSection.Mappings,
-    name: (
-      <FormattedMessage id="xpack.idxMgmt.indexDetails.mappingsTitle" defaultMessage="Mappings" />
-    ),
+    name: i18n.translate('xpack.idxMgmt.indexDetails.mappingsTitle', {
+      defaultMessage: 'Mappings',
+    }),
     renderTabContent: ({ index }) => <DetailsPageMappings index={index} />,
     order: 20,
   },
   {
     id: IndexDetailsSection.Settings,
-    name: (
-      <FormattedMessage id="xpack.idxMgmt.indexDetails.settingsTitle" defaultMessage="Settings" />
-    ),
+    name: i18n.translate('xpack.idxMgmt.indexDetails.settingsTitle', {
+      defaultMessage: 'Settings',
+    }),
     renderTabContent: ({ index }) => <DetailsPageSettings indexName={index.name} />,
     order: 30,
   },
@@ -65,7 +66,9 @@ const defaultTabs: IndexDetailsTab[] = [
 
 const statsTab: IndexDetailsTab = {
   id: IndexDetailsSection.Stats,
-  name: <FormattedMessage id="xpack.idxMgmt.indexDetails.statsTitle" defaultMessage="Statistics" />,
+  name: i18n.translate('xpack.idxMgmt.indexDetails.statsTitle', {
+    defaultMessage: 'Statistics',
+  }),
   renderTabContent: ({ index }) => (
     <DetailsPageStats indexName={index.name} isIndexOpen={index.status === INDEX_OPEN} />
   ),
@@ -178,7 +181,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       >
         <DetailsPageTab tabs={tabs} tab={tab} index={index} />
       </div>
-      {consolePlugin?.renderEmbeddableConsole?.() ?? <></>}
+      {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>
   );
 };

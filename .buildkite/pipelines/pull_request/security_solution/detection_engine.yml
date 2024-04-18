@@ -1,4 +1,4 @@
-steps: 
+steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
@@ -7,10 +7,10 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 5
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
@@ -21,12 +21,12 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
-          
+
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
@@ -35,10 +35,10 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 5
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
@@ -49,8 +49,8 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1

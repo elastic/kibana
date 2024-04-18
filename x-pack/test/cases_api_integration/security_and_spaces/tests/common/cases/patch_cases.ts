@@ -44,16 +44,16 @@ import {
   getConfigurationRequest,
 } from '../../../../common/lib/api';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
   createRule,
-  getQuerySignalIds,
-} from '../../../../../detection_engine_api_integration/utils';
+  getQueryAlertIds,
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -1714,7 +1714,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('detections rule', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
@@ -1725,15 +1725,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('updates alert status when the status is updated and syncAlerts=true', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
           const postedCase = await createCase(supertest, postCaseReq);
 
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1774,7 +1774,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1784,7 +1784,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('does NOT updates alert status when the status is updated and syncAlerts=false', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
 
@@ -1795,8 +1795,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1832,7 +1832,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql('open');
@@ -1840,7 +1840,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('it updates alert status when syncAlerts is turned on', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
 
@@ -1851,8 +1851,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1906,7 +1906,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1916,15 +1916,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('it does NOT updates alert status when syncAlerts is turned off', async () => {
           const rule = {
-            ...getRuleForSignalTesting(['auditbeat-*']),
+            ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
           };
 
           const postedCase = await createCase(supertest, postCaseReq);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccess({ supertest, log, id });
-          await waitForSignalsToBePresent(supertest, log, 1, [id]);
-          const signals = await getSignalsByIds(supertest, log, [id]);
+          await waitForAlertsToBePresent(supertest, log, 1, [id]);
+          const signals = await getAlertsByIds(supertest, log, [id]);
 
           const alert = signals.hits.hits[0];
           expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
@@ -1975,7 +1975,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds([alert._id]))
+            .send(getQueryAlertIds([alert._id]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source['kibana.alert.workflow_status']).eql('open');

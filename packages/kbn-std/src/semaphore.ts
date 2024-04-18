@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import type { OperatorFunction } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { finalize } from 'rxjs';
 
 type Task = () => void;
 

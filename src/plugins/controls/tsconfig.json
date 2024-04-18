@@ -38,6 +38,7 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": [
     "target/**/*",

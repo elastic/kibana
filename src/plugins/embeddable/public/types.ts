@@ -8,6 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectAttributes } from '@kbn/core/public';
+import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   EmbeddableFactory,
@@ -34,7 +35,7 @@ export type EmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T = SavedObjectAttributes
+  T extends FinderAttributes = SavedObjectAttributes
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ) => EmbeddableFactory<I, O, E, T>;

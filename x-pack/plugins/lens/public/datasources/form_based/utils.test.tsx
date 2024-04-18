@@ -310,7 +310,11 @@ describe('indexpattern_datasource utils', () => {
         ]),
         [
           `${rootId}X${formulaParts.length}`,
-          { operationType: 'math', references: formulaParts.map((_, i) => `${rootId}X${i}`) },
+          {
+            operationType: 'math',
+            references: formulaParts.map((_, i) => `${rootId}X${i}`),
+            label: 'Part of formula',
+          },
         ],
       ]);
     }

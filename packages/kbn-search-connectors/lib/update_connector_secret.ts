@@ -7,14 +7,14 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { ConnectorsAPIUpdateResponse } from '../types/connectors_api';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 
 export const updateConnectorSecret = async (
   client: ElasticsearchClient,
   value: string,
   secretId: string
 ) => {
-  return await client.transport.request<ConnectorsAPIUpdateResponse>({
+  return await client.transport.request<Result>({
     method: 'PUT',
     path: `/_connector/_secret/${secretId}`,
     body: {

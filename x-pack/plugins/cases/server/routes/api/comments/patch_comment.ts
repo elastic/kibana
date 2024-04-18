@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AttachmentPatchRequestRt } from '../../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';

@@ -6,12 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -20,11 +15,18 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
   // TODO: add a new service for pulling kibana username, similar to getService('es')
@@ -46,10 +48,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // delete the rule by its rule_id
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { rule_id: 'rule-1' } })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -62,10 +62,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
         // delete that rule by its auto-generated rule_id
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${bodyWithCreatedRule.rule_id}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { rule_id: bodyWithCreatedRule.rule_id } })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -81,10 +79,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
 
         // delete that rule by its auto-generated id
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?id=${bodyWithCreatedRule.id}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { id: bodyWithCreatedRule.id } })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -97,10 +93,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return an error if the id does not exist when trying to delete it', async () => {
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?id=c1e1b359-7ac1-4e96-bc81-c683c092436f`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f' } })
           .expect(404);
 
         expect(body).to.eql({
@@ -110,10 +104,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return an error if the rule_id does not exist when trying to delete it', async () => {
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=fake_id`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { rule_id: 'fake_id' } })
           .expect(404);
 
         expect(body).to.eql({

@@ -290,51 +290,21 @@ exports[`<CodeEditor /> is rendered 1`] = `
       </EuiToolTipAnchor>
     </EuiToolTip>
     <Component>
-      <MockedMonacoEditor
-        editorDidMount={[Function]}
-        editorWillMount={[Function]}
-        editorWillUnmount={[Function]}
-        height={250}
-        language="loglang"
-        onChange={[Function]}
-        options={
-          Object {
-            "bracketPairColorization.enabled": false,
-            "fontFamily": "Roboto Mono",
-            "fontSize": 12,
-            "lineHeight": 21,
-            "matchBrackets": "never",
-            "minimap": Object {
-              "enabled": false,
-            },
-            "padding": Object {},
-            "renderLineHighlight": "none",
-            "scrollBeyondLastLine": false,
-            "scrollbar": Object {
-              "alwaysConsumeMouseWheel": false,
-              "useShadows": false,
-            },
-            "wordBasedSuggestions": false,
-            "wordWrap": "on",
-            "wrappingIndent": "indent",
+      <UseBug177756ReBroadcastMouseDown>
+        <div
+          style={
+            Object {
+              "display": "contents",
+            }
           }
-        }
-        theme="euiColors"
-        value="
-[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
-[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
-[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
-"
-      >
-        <div>
-          <div />
-          <textarea
-            data-test-subj="monacoEditorTextarea"
+        >
+          <MockedMonacoEditor
+            editorDidMount={[Function]}
+            editorWillMount={[Function]}
             editorWillUnmount={[Function]}
             height={250}
             language="loglang"
             onChange={[Function]}
-            onKeyDown={[Function]}
             options={
               Object {
                 "bracketPairColorization.enabled": false,
@@ -363,9 +333,49 @@ exports[`<CodeEditor /> is rendered 1`] = `
 [Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 "
-          />
+          >
+            <div>
+              <div />
+              <textarea
+                data-test-subj="monacoEditorTextarea"
+                editorWillUnmount={[Function]}
+                height={250}
+                language="loglang"
+                onChange={[Function]}
+                onKeyDown={[Function]}
+                options={
+                  Object {
+                    "bracketPairColorization.enabled": false,
+                    "fontFamily": "Roboto Mono",
+                    "fontSize": 12,
+                    "lineHeight": 21,
+                    "matchBrackets": "never",
+                    "minimap": Object {
+                      "enabled": false,
+                    },
+                    "padding": Object {},
+                    "renderLineHighlight": "none",
+                    "scrollBeyondLastLine": false,
+                    "scrollbar": Object {
+                      "alwaysConsumeMouseWheel": false,
+                      "useShadows": false,
+                    },
+                    "wordBasedSuggestions": false,
+                    "wordWrap": "on",
+                    "wrappingIndent": "indent",
+                  }
+                }
+                theme="euiColors"
+                value="
+[Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
+[Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
+[Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
+"
+              />
+            </div>
+          </MockedMonacoEditor>
         </div>
-      </MockedMonacoEditor>
+      </UseBug177756ReBroadcastMouseDown>
     </Component>
   </div>
 </CodeEditor>

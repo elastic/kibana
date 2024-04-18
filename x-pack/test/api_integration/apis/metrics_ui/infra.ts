@@ -165,8 +165,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
         expect(names).eql([
-          'gke-observability-8--observability-8--bc1afd95-f0zc',
           'gke-observability-8--observability-8--bc1afd95-ngmh',
+          'gke-observability-8--observability-8--bc1afd95-f0zc',
           'gke-observability-8--observability-8--bc1afd95-nhhw',
         ]);
       });
@@ -208,8 +208,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
       expect(names).eql([
-        'gke-observability-8--observability-8--bc1afd95-f0zc',
         'gke-observability-8--observability-8--bc1afd95-ngmh',
+        'gke-observability-8--observability-8--bc1afd95-f0zc',
+        ,
       ]);
     });
 
@@ -267,6 +268,39 @@ export default function ({ getService }: FtrProviderContext) {
         expect(normalizeNewLine(response.body.message)).to.be(
           '[request body]: Failed to validate: in range: undefined does not match expected type { from: Date, to: Date }'
         );
+      });
+    });
+
+    describe('Host with active alerts', () => {
+      before(async () => {
+        await Promise.all([
+          esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
+          esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        ]);
+      });
+
+      after(async () => {
+        await Promise.all([
+          esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
+          esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        ]);
+      });
+
+      describe('fetch hosts', () => {
+        it('should return metrics for a host with alert count', async () => {
+          const body: GetInfraMetricsRequestBodyPayload = {
+            ...basePayload,
+            range: {
+              from: '2018-10-17T19:42:21.208Z',
+              to: '2018-10-17T19:58:03.952Z',
+            },
+            limit: 1,
+          };
+          const response = await makeRequest({ body, expectedHTTPCode: 200 });
+
+          expect(response.body.nodes).length(1);
+          expect(response.body.nodes[0].alertsCount).eql(2);
+        });
       });
     });
   });

@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { isEmpty } from 'lodash';
+import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 
 interface OwnProps {
-  currentConversation: Conversation;
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
+  currentConversation?: Conversation;
+  defaultConnector?: AIConnector;
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
-  onConversationSelected: (cId: string) => void;
-  onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
-  selectedConversationId: string;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  onConversationDeleted: (conversationId: string) => void;
+  onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
-  title: string | JSX.Element;
+  title: string;
+  conversations: Record<string, Conversation>;
+  refetchConversationsState: () => Promise<void>;
 }
 
 type Props = OwnProps;
@@ -49,27 +49,42 @@ type Props = OwnProps;
  */
 export const AssistantHeader: React.FC<Props> = ({
   currentConversation,
-  defaultConnectorId,
-  defaultProvider,
+  defaultConnector,
   docLinks,
   isDisabled,
   isSettingsModalVisible,
   onConversationSelected,
+  onConversationDeleted,
   onToggleShowAnonymizedValues,
-  selectedConversationId,
   setIsSettingsModalVisible,
-  setSelectedConversationId,
   shouldDisableKeyboardShortcut,
   showAnonymizedValues,
   title,
+  conversations,
+  refetchConversationsState,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
-      currentConversation.replacements != null &&
-      Object.keys(currentConversation.replacements).length > 0 &&
+      currentConversation?.replacements != null &&
+      Object.keys(currentConversation?.replacements).length > 0 &&
       showAnonymizedValues,
-    [currentConversation.replacements, showAnonymizedValues]
+    [currentConversation?.replacements, showAnonymizedValues]
   );
+  const onConversationChange = useCallback(
+    (updatedConversation) => {
+      onConversationSelected({
+        cId: updatedConversation.id,
+        cTitle: updatedConversation.title,
+      });
+    },
+    [onConversationSelected]
+  );
+  const selectedConversationId = useMemo(
+    () =>
+      !isEmpty(currentConversation?.id) ? currentConversation?.id : currentConversation?.title,
+    [currentConversation?.id, currentConversation?.title]
+  );
+
   return (
     <>
       <EuiFlexGroup
@@ -84,7 +99,10 @@ export const AssistantHeader: React.FC<Props> = ({
             isDisabled={isDisabled}
             docLinks={docLinks}
             selectedConversation={currentConversation}
+            onChange={onConversationChange}
             title={title}
+            isFlyoutMode={false}
+            refetchConversationsState={refetchConversationsState}
           />
         </EuiFlexItem>
 
@@ -95,12 +113,13 @@ export const AssistantHeader: React.FC<Props> = ({
           `}
         >
           <ConversationSelector
-            defaultConnectorId={defaultConnectorId}
-            defaultProvider={defaultProvider}
+            defaultConnector={defaultConnector}
             selectedConversationId={selectedConversationId}
             onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
             isDisabled={isDisabled}
+            conversations={conversations}
+            onConversationDeleted={onConversationDeleted}
           />
 
           <>
@@ -116,7 +135,7 @@ export const AssistantHeader: React.FC<Props> = ({
                     data-test-subj="showAnonymizedValues"
                     checked={showAnonymizedValuesChecked}
                     compressed={true}
-                    disabled={currentConversation.replacements == null}
+                    disabled={isEmpty(currentConversation?.replacements)}
                     label={i18n.SHOW_ANONYMIZED}
                     onChange={onToggleShowAnonymizedValues}
                   />
@@ -125,13 +144,15 @@ export const AssistantHeader: React.FC<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <AssistantSettingsButton
-                  defaultConnectorId={defaultConnectorId}
-                  defaultProvider={defaultProvider}
+                  defaultConnector={defaultConnector}
                   isDisabled={isDisabled}
                   isSettingsModalVisible={isSettingsModalVisible}
-                  selectedConversation={currentConversation}
+                  selectedConversationId={selectedConversationId}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  setSelectedConversationId={setSelectedConversationId}
+                  onConversationSelected={onConversationSelected}
+                  conversations={conversations}
+                  refetchConversationsState={refetchConversationsState}
+                  isFlyoutMode={false}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

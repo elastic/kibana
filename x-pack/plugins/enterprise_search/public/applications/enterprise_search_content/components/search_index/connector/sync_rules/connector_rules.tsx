@@ -11,6 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,8 +28,8 @@ import { BetaBadge } from '../../../../../shared/beta/beta_badge';
 
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 import { FilteringRulesTable } from '../../../shared/filtering_rules_table/filtering_rules_table';
-import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 import { EditSyncRulesFlyout } from './edit_sync_rules_flyout';
@@ -36,7 +37,7 @@ import { SyncRulesStateCallouts } from './sync_rules_callouts';
 
 export const ConnectorSyncRules: React.FC = () => {
   const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } =
-    useValues(IndexViewLogic);
+    useValues(ConnectorViewLogic);
   const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =
     useActions(ConnectorFilteringLogic);
   const { advancedSnippet, draftErrors, draftState, filteringRules, hasDraft, isEditing } =
@@ -190,7 +191,7 @@ export const ConnectorSyncRules: React.FC = () => {
                       )}
                     </p>
                     <p>
-                      <EuiLink external href={docLinks.syncRules}>
+                      <EuiLink external href={docLinks.syncRulesAdvanced}>
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersLinkTitle',
                           {
@@ -204,6 +205,28 @@ export const ConnectorSyncRules: React.FC = () => {
                 <EuiCodeBlock isCopyable language="json">
                   {advancedSnippet}
                 </EuiCodeBlock>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutTitle',
+                      { defaultMessage: 'Configuration' }
+                    )}
+                    color="warning"
+                    iconType="iInCircle"
+                  >
+                    <EuiText size="s">
+                      <p>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.index.connector.syncRules.advancedRulesCalloutDescription',
+                          {
+                            defaultMessage:
+                              'This advanced sync rule might override some configuration fields.',
+                          }
+                        )}
+                      </p>
+                    </EuiText>
+                  </EuiCallOut>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>

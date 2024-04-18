@@ -48,6 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177496
   registry.when('Service nodes when data is loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       const instance = apm

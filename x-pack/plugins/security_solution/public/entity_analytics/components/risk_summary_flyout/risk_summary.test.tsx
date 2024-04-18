@@ -27,13 +27,23 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
     mockVisualizationEmbeddable(props),
 }));
 
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
 describe('RiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
 
-  it('renders risk summary table', () => {
-    const { getByTestId } = render(
+  it('renders risk summary table with alerts only', () => {
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <RiskSummary
           riskScoreData={mockHostRiskScoreState}
@@ -54,19 +64,44 @@ describe('RiskSummary', () => {
     );
 
     // Context
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
       `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
     );
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
       `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
+    );
+
+    // Result row doesn't exist if alerts are the only category
+    expect(queryByTestId('risk-summary-result-count')).not.toBeInTheDocument();
+    expect(queryByTestId('risk-summary-result-score')).not.toBeInTheDocument();
+  });
+
+  it('renders risk summary table with context and totals', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+
+    // Alerts
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
     );
 
     // Result
     expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
-      `${
-        (mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0) +
-        (mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0)
-      }`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
     );
 
     expect(getByTestId('risk-summary-result-score')).toHaveTextContent(

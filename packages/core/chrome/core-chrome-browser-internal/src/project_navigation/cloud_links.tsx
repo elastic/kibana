@@ -13,7 +13,7 @@ const stripTrailingForwardSlash = (str: string) => {
 };
 
 const parseCloudURLs = (cloudLinks: CloudLinks): CloudLinks => {
-  const { userAndRoles, billingAndSub, deployment, performance } = cloudLinks;
+  const { userAndRoles, billingAndSub, deployment, deployments, performance } = cloudLinks;
 
   // We remove potential trailing forward slash ("/") at the end of the URL
   // because it breaks future navigation in Cloud console once we navigate there.
@@ -27,12 +27,20 @@ const parseCloudURLs = (cloudLinks: CloudLinks): CloudLinks => {
     userAndRoles: parseLink(userAndRoles),
     billingAndSub: parseLink(billingAndSub),
     deployment: parseLink(deployment),
+    deployments: parseLink(deployments),
     performance: parseLink(performance),
   };
 };
 
 export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
-  const { billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
+  const {
+    billingUrl,
+    deploymentsUrl,
+    deploymentUrl,
+    projectsUrl,
+    performanceUrl,
+    usersAndRolesUrl,
+  } = cloud;
 
   const links: CloudLinks = {};
 
@@ -69,6 +77,24 @@ export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
         defaultMessage: 'Project',
       }),
       href: deploymentUrl,
+    };
+  }
+
+  if (deploymentsUrl) {
+    links.deployments = {
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.allDeploymentsLinkText', {
+        defaultMessage: 'View all deployments',
+      }),
+      href: deploymentsUrl,
+    };
+  }
+
+  if (projectsUrl) {
+    links.projects = {
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.allProjectsLinkText', {
+        defaultMessage: 'View all projects',
+      }),
+      href: projectsUrl,
     };
   }
 

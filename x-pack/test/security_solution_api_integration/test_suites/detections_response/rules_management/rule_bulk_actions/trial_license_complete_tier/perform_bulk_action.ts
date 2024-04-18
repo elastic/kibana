@@ -21,10 +21,6 @@ import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/c
 import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
 import {
   binaryToString,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleMlRule,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -34,6 +30,12 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';

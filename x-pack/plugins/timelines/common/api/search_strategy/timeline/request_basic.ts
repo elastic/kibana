@@ -12,6 +12,7 @@ import { timerange } from '../model/timerange';
 
 export const timelineRequestBasicOptionsSchema = z.object({
   indexType: z.string().optional(),
+  id: z.string().optional(),
   timerange: timerange.optional(),
   filterQuery,
   defaultIndex: z.array(z.string()).optional(),

@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import { LinkCardProps } from '../link_card/link_card';
+import type { ResultLinks } from '../../../../../common/app';
+import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 type LinkType = 'file' | 'index';
@@ -49,6 +51,7 @@ interface Props {
   createDataView: boolean;
   showFilebeatFlyout(): void;
   getAdditionalLinks?: GetAdditionalLinks;
+  resultLinks?: ResultLinks;
 }
 
 interface GlobalState {
@@ -66,6 +69,7 @@ export const ResultsLinks: FC<Props> = ({
   createDataView,
   showFilebeatFlyout,
   getAdditionalLinks,
+  resultLinks,
 }) => {
   const {
     services: {
@@ -256,21 +260,25 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <EuiCard
-          hasBorder
-          icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
-          data-test-subj="fileDataVisFilebeatConfigLink"
-          title={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.resultsLinks.fileBeatConfig"
-              defaultMessage="Create Filebeat configuration"
-            />
-          }
-          description=""
-          onClick={showFilebeatFlyout}
-        />
-      </EuiFlexItem>
+
+      {resultLinks?.fileBeat?.enabled === false ? null : (
+        <EuiFlexItem>
+          <EuiCard
+            hasBorder
+            icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
+            data-test-subj="fileDataVisFilebeatConfigLink"
+            title={
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.resultsLinks.fileBeatConfig"
+                defaultMessage="Create Filebeat configuration"
+              />
+            }
+            description=""
+            onClick={showFilebeatFlyout}
+          />
+        </EuiFlexItem>
+      )}
+
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (
           <EuiFlexItem key={link.title}>

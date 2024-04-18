@@ -40,10 +40,11 @@ export class ElasticChartService extends FtrService {
     return await this.find.existsByCssSelector('.echChart canvas:last-of-type');
   }
 
-  public async waitForRenderComplete(dataTestSubj?: string) {
-    const chart = await this.getChart(dataTestSubj);
+  public async waitForRenderComplete(dataTestSubj?: string, timeout?: number) {
+    const chart = await this.getChart(dataTestSubj, timeout);
     const rendered = await chart.findAllByCssSelector(
-      '.echChartStatus[data-ech-render-complete=true]'
+      '.echChartStatus[data-ech-render-complete=true]',
+      timeout
     );
     expect(rendered.length).to.equal(1);
   }
@@ -123,12 +124,10 @@ export class ElasticChartService extends FtrService {
    */
   public async getChartDebugDataFromChart(chart: WebElementWrapper): Promise<DebugState> {
     const visContainer = await chart.findByCssSelector('.echChartStatus');
-    const debugDataString: string | undefined = await visContainer.getAttribute(
-      'data-ech-debug-state'
-    );
+    const debugDataString = await visContainer.getAttribute('data-ech-debug-state');
     this.log.debug('data-ech-debug-state: ', debugDataString);
 
-    if (debugDataString === undefined) {
+    if (!debugDataString) {
       throw Error(
         `Elastic charts debugState not found, ensure 'setNewChartUiDebugFlag' is called before DOM rendering starts.`
       );

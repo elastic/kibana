@@ -99,7 +99,10 @@ export const findAlertRoute = (
 
       const findResult = await rulesClient.find({ options, excludeFromPublicApi: true });
       return res.ok({
-        body: findResult,
+        body: {
+          ...findResult,
+          data: findResult.data.map(({ systemActions, ...rule }) => rule),
+        },
       });
     })
   );

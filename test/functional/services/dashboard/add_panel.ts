@@ -16,6 +16,7 @@ export class DashboardAddPanelService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly browser = this.ctx.getService('browser');
+  private readonly toasts = this.ctx.getService('toasts');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
@@ -95,7 +96,7 @@ export class DashboardAddPanelService extends FtrService {
           continue;
         }
         await button.click();
-        await this.common.closeToastIfExists();
+
         embeddableList.push(name);
       }
     });
@@ -105,7 +106,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickPagerNextButton() {
     // Clear all toasts that could hide pagination controls
-    await this.common.clearAllToasts();
+    await this.toasts.dismissAll();
 
     const addPanel = await this.testSubjects.find('dashboardAddPanel');
 
@@ -252,7 +253,7 @@ export class DashboardAddPanelService extends FtrService {
     }
 
     // close "Added successfully" toast
-    await this.common.clearAllToasts();
+    await this.toasts.dismissAll();
     return embeddableName;
   }
 

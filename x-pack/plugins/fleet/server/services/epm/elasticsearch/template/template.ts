@@ -14,6 +14,8 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
+import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
@@ -135,7 +137,7 @@ const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): stri
 
     return [STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS];
   } else if (type === 'logs') {
-    return [STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
+    return [STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS, STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS];
   }
 
   return [];
@@ -449,6 +451,10 @@ function _generateMappings(
             throw new PackageInvalidArchiveError(
               `No dynamic mapping generated for field ${path} of type ${field.object_type}`
             );
+        }
+
+        if (field.dimension && isIndexModeTimeSeries) {
+          dynProperties.time_series_dimension = field.dimension;
         }
 
         // When a wildcard field specifies the subobjects setting,

@@ -7,7 +7,10 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
+import {
+  mockDataFormattedForFieldBrowser,
+  mockDataFormattedForFieldBrowserWithOverridenField,
+} from '../mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 
@@ -19,6 +22,25 @@ describe('useHighlightedFields', () => {
     expect(hookResult.result.current).toEqual({
       'kibana.alert.rule.type': {
         values: ['query'],
+      },
+    });
+  });
+
+  it('should return overriden field value when it is present', () => {
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowserWithOverridenField,
+      })
+    );
+
+    // NOTE: overrideField is constructed based on specific field from the result set
+    expect(hookResult.result.current).toMatchObject({
+      'kibana.alert.threshold_result.terms.field': {
+        overrideField: {
+          field: 'kibana.alert.threshold_result.terms.value',
+          values: ['overriden value'], // missing value in the override
+        },
+        values: ['original value'],
       },
     });
   });

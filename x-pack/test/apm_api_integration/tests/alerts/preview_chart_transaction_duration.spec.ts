@@ -70,7 +70,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/176989
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176986
+    // Failing: See https://github.com/elastic/kibana/issues/176989
     describe('transaction_duration', () => {
       before(async () => {
         await generateLatencyData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
@@ -297,6 +300,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/176989
   registry.when(`with data loaded and using KQL filter`, { config: 'basic', archives: [] }, () => {
     describe('transaction_duration', () => {
       before(async () => {

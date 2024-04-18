@@ -11,18 +11,20 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   fetchRule,
-  getRuleForAlertTesting,
   installMockPrebuiltRules,
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
-  removeTimeFieldsFromTelemetryStats,
+  removeExtraFieldsFromTelemetryStats,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -97,11 +99,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -153,11 +155,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -209,11 +211,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -265,11 +267,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -321,11 +323,11 @@ export default ({ getService }: FtrProviderContext) => {
         // Get the stats and ensure they're empty
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -449,7 +451,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -471,7 +473,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -526,7 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -548,7 +550,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -603,7 +605,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -625,7 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -680,7 +682,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -702,7 +704,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -757,7 +759,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
@@ -779,7 +781,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -858,7 +860,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          removeTimeFieldsFromTelemetryStats(stats);
+          removeExtraFieldsFromTelemetryStats(stats);
           const detectionRules = stats.detection_rules
             .flat()
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule))
@@ -898,7 +900,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[1].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);

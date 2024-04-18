@@ -9,23 +9,17 @@ import type { History } from 'history';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { Observable } from 'rxjs';
 
 import type {
   ApplicationSetup,
   AppMountParameters,
   CoreStart,
-  CoreTheme,
   StartServicesAccessor,
 } from '@kbn/core/public';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
@@ -50,9 +44,9 @@ export const accountManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.account.breadcrumb', {
         defaultMessage: 'User settings',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       appRoute: '/security/account',
-      async mount({ element, theme$, history }: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const [[coreStart], { AccountManagementPage }] = await Promise.all([
           getStartServices(),
           import('./account_management_page'),
@@ -61,7 +55,6 @@ export const accountManagementApp = Object.freeze({
         render(
           <Providers
             services={coreStart}
-            theme$={theme$}
             history={history}
             authc={authc}
             securityApiClients={securityApiClients}
@@ -79,7 +72,6 @@ export const accountManagementApp = Object.freeze({
 
 export interface ProvidersProps {
   services: CoreStart;
-  theme$: Observable<CoreTheme>;
   history: History;
   authc: AuthenticationServiceSetup;
   securityApiClients: SecurityApiClients;
@@ -88,34 +80,31 @@ export interface ProvidersProps {
 
 export const Providers: FunctionComponent<ProvidersProps> = ({
   services,
-  theme$,
   history,
   authc,
   securityApiClients,
   onChange,
   children,
 }) => (
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <SecurityApiClientsProvider {...securityApiClients}>
-        <I18nProvider>
-          <KibanaThemeProvider theme$={theme$}>
-            <Router history={history}>
-              <BreadcrumbsProvider onChange={onChange}>
-                <UserProfilesKibanaProvider
-                  core={services}
-                  security={{
-                    userProfiles: securityApiClients.userProfiles,
-                  }}
-                  toMountPoint={toMountPoint}
-                >
-                  {children}
-                </UserProfilesKibanaProvider>
-              </BreadcrumbsProvider>
-            </Router>
-          </KibanaThemeProvider>
-        </I18nProvider>
-      </SecurityApiClientsProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <SecurityApiClientsProvider {...securityApiClients}>
+          <Router history={history}>
+            <BreadcrumbsProvider onChange={onChange}>
+              <UserProfilesKibanaProvider
+                core={services}
+                security={{
+                  userProfiles: securityApiClients.userProfiles,
+                }}
+                toMountPoint={toMountPoint}
+              >
+                {children}
+              </UserProfilesKibanaProvider>
+            </BreadcrumbsProvider>
+          </Router>
+        </SecurityApiClientsProvider>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
 );

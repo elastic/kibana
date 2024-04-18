@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
-import moment, { Moment } from 'moment';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
 import { useMlKibana } from '../../../../contexts/kibana';

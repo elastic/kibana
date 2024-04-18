@@ -33,7 +33,7 @@ const mockedServices = {
   uiSettings: coreMock.createStart().uiSettings,
 };
 
-describe('UnifiedFieldList <FieldStats />', () => {
+describe('UnifiedFieldList FieldStats', () => {
   let defaultProps: FieldStatsWithKbnQuery;
   let dataView: DataView;
 
@@ -467,6 +467,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
         sampledDocuments: 1624,
         sampledValues: 3248,
         topValues: {
+          areExamples: true,
           buckets: [
             {
               count: 1349,

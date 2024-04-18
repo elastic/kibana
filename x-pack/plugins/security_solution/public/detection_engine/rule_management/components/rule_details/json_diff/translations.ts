@@ -17,20 +17,6 @@ export const EXPAND_UNCHANGED_LINES = (linesCount: number) =>
     }
   );
 
-export const BASE_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.baseVersionLabel',
-  {
-    defaultMessage: 'Base version',
-  }
-);
-
-export const BASE_VERSION_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.baseVersionDescriptionLabel',
-  {
-    defaultMessage: 'Shows currently installed rule',
-  }
-);
-
 export const CURRENT_RULE_VERSION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionLabel',
   {

@@ -7,6 +7,7 @@
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
+import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 import {
   Operation,
   OperationDescriptor,
@@ -221,7 +222,24 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "colorMapping": undefined,
+              "colorMapping": Object {
+                "assignments": Array [],
+                "colorMode": Object {
+                  "type": "categorical",
+                },
+                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
+                "specialAssignments": Array [
+                  Object {
+                    "color": Object {
+                      "type": "loop",
+                    },
+                    "rule": Object {
+                      "type": "other",
+                    },
+                    "touched": false,
+                  },
+                ],
+              },
               "layerId": "l1",
               "layerType": "data",
               "palette": undefined,
@@ -2765,6 +2783,48 @@ describe('xy_visualization', () => {
           {
             shortMessage: 'Missing Vertical axis.',
             longMessage: 'Layers 2, 3 require a field for the Vertical axis.',
+          },
+        ]);
+      });
+      it('should return an error with batched messages for the same error with the correct index for multiple layers', () => {
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'referenceLine',
+                layerType: layerTypes.REFERENCELINE,
+                accessors: [],
+              },
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'third',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          })
+        ).toEqual([
+          {
+            shortMessage: 'Missing Vertical axis.',
+            longMessage: 'Layers 3, 4 require a field for the Vertical axis.',
           },
         ]);
       });

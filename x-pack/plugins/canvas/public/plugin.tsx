@@ -23,7 +23,7 @@ import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
@@ -38,6 +38,7 @@ import { getSessionStorage } from './lib/storage';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
+import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
 
 export type { CoreStart, CoreSetup };
 
@@ -54,6 +55,7 @@ export interface CanvasSetupDeps {
   usageCollection?: UsageCollectionSetup;
   bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface CanvasStartDeps {
@@ -181,6 +183,8 @@ export class CanvasPlugin
       const { transitions } = await import('./transitions');
       return transitions;
     });
+
+    setupPlugins.uiActions.registerTrigger(addCanvasElementTrigger);
 
     return {
       ...canvasApi,

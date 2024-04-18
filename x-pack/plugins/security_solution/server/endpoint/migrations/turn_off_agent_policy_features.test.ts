@@ -9,25 +9,25 @@ import { createMockEndpointAppContextServiceStartContract } from '../mocks';
 import type { Logger } from '@kbn/logging';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
-import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
-import { createAppFeaturesServiceMock } from '../../lib/app_features_service/mocks';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { turnOffAgentPolicyFeatures } from './turn_off_agent_policy_features';
 
 describe('Turn Off Agent Policy Features Migration', () => {
   let fleetServices: EndpointInternalFleetServicesInterface;
-  let appFeatureService: AppFeaturesService;
+  let productFeatureService: ProductFeaturesService;
   let logger: Logger;
 
   const callTurnOffAgentPolicyFeatures = () =>
-    turnOffAgentPolicyFeatures(fleetServices, appFeatureService, logger);
+    turnOffAgentPolicyFeatures(fleetServices, productFeatureService, logger);
 
   beforeEach(() => {
     const endpointContextStartContract = createMockEndpointAppContextServiceStartContract();
 
     ({ logger } = endpointContextStartContract);
 
-    appFeatureService = endpointContextStartContract.appFeaturesService;
+    productFeatureService = endpointContextStartContract.productFeaturesService;
     fleetServices = endpointContextStartContract.endpointFleetServicesFactory.asInternalUser();
   });
 
@@ -46,8 +46,8 @@ describe('Turn Off Agent Policy Features Migration', () => {
 
   describe('and `agentTamperProtection` is disabled', () => {
     beforeEach(() => {
-      appFeatureService = createAppFeaturesServiceMock(
-        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_agent_tamper_protection')
+      productFeatureService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_agent_tamper_protection')
       );
     });
 

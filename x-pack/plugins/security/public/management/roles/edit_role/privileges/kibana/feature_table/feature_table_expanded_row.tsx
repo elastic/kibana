@@ -63,7 +63,8 @@ export const FeatureTableExpandedRow = ({
       privilegeCalculator.updateSelectedFeaturePrivilegesForCustomization(
         feature.id,
         privilegeIndex,
-        e.target.checked
+        e.target.checked,
+        allSpacesSelected
       )
     );
     setIsCustomizing(e.target.checked);

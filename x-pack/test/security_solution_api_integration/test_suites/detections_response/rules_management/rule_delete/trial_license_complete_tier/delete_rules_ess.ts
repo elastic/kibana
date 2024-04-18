@@ -8,23 +8,25 @@
 import expect from '@kbn/expect';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   removeServerGeneratedProperties,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
 
@@ -58,12 +60,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('deletes rule with investigation fields as array', async () => {
-          const { body } = await supertest
-            .delete(
-              `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationField.params.ruleId}`
-            )
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
+          const { body } = await securitySolutionApi
+            .deleteRule({ query: { rule_id: ruleWithLegacyInvestigationField.params.ruleId } })
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
@@ -73,12 +71,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('deletes rule with investigation fields as empty array', async () => {
-          const { body } = await supertest
-            .delete(
-              `${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId}`
-            )
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
+          const { body } = await securitySolutionApi
+            .deleteRule({
+              query: { rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId },
+            })
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
@@ -86,10 +82,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('deletes rule with investigation fields as intended object type', async () => {
-          const { body } = await supertest
-            .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-with-investigation-field`)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
+          const { body } = await securitySolutionApi
+            .deleteRule({ query: { rule_id: 'rule-with-investigation-field' } })
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);

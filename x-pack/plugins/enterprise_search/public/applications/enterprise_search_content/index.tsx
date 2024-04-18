@@ -20,20 +20,19 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { ConnectorDetailRouter } from './components/connector_detail/connector_detail_router';
-import { Connectors } from './components/connectors/connectors';
+import { ConnectorsRouter } from './components/connectors/connectors_router';
+import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
+import { Playground } from './components/playground/playground';
 import { SearchIndicesRouter } from './components/search_indices';
-import { Settings } from './components/settings';
 import {
   CONNECTORS_PATH,
-  CONNECTOR_DETAIL_PATH,
   CRAWLERS_PATH,
   ERROR_STATE_PATH,
   ROOT_PATH,
   SEARCH_INDICES_PATH,
-  SETTINGS_PATH,
   SETUP_GUIDE_PATH,
+  PLAYGROUND_PATH,
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -79,17 +78,14 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
       </Route>
-      <Route path={CONNECTOR_DETAIL_PATH}>
-        <ConnectorDetailRouter />
-      </Route>
       <Route path={CONNECTORS_PATH}>
-        <Connectors isCrawler={false} />
+        <ConnectorsRouter />
       </Route>
       <Route path={CRAWLERS_PATH}>
-        <Connectors isCrawler />
+        <CrawlersRouter />
       </Route>
-      <Route path={SETTINGS_PATH}>
-        <Settings />
+      <Route path={PLAYGROUND_PATH}>
+        <Playground />
       </Route>
       <Route>
         <NotFound />

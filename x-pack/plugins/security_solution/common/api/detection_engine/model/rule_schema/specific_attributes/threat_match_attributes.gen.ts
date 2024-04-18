@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-import { NonEmptyString } from '../common_attributes.gen';
+import { NonEmptyString } from '../../../../model/primitives.gen';
 
 /**
  * Query to execute

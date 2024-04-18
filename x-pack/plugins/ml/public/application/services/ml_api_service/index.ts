@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -117,8 +117,6 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     }
   },
 });
-
-export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;
 
 export const ml = mlApiServicesProvider(new HttpService(proxyHttpStart));
 
@@ -820,3 +818,5 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jsonSchema: jsonSchemaProvider(httpService),
   };
 }
+
+export type MlApiServices = ReturnType<typeof mlApiServicesProvider>;

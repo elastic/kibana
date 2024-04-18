@@ -7,16 +7,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ServerlessPluginSetup } from '@kbn/serverless/public';
+import { type CoreSetup, Plugin, type CoreStart } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ServerlessPluginSetup } from '@kbn/serverless/public';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { AIAssistantType } from '../common/ai_assistant_type';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementSelectionPluginSetup {}
+export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AiAssistantManagementSelectionPluginStart {}
+export interface AIAssistantManagementSelectionPluginPublicStart {
+  aiAssistantType$: Observable<AIAssistantType>;
+}
 
 export interface SetupDependencies {
   management: ManagementSetup;
@@ -27,20 +31,24 @@ export interface SetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {}
 
-export class AiAssistantManagementPlugin
+export class AIAssistantManagementPlugin
   implements
     Plugin<
-      AiAssistantManagementSelectionPluginSetup,
-      AiAssistantManagementSelectionPluginStart,
+      AIAssistantManagementSelectionPluginPublicSetup,
+      AIAssistantManagementSelectionPluginPublicStart,
       SetupDependencies,
       StartDependencies
     >
 {
+  constructor() {}
+
   public setup(
-    core: CoreSetup<StartDependencies, AiAssistantManagementSelectionPluginStart>,
+    core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>,
     { home, management, serverless }: SetupDependencies
-  ): AiAssistantManagementSelectionPluginSetup {
-    if (serverless) return {};
+  ): AIAssistantManagementSelectionPluginPublicSetup {
+    if (serverless) {
+      return {};
+    }
 
     if (home) {
       home.featureCatalogue.register({
@@ -77,7 +85,15 @@ export class AiAssistantManagementPlugin
     return {};
   }
 
-  public start() {
-    return {};
+  public start(coreStart: CoreStart) {
+    const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    );
+
+    const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
+
+    return {
+      aiAssistantType$: aiAssistantType$.asObservable(),
+    };
   }
 }

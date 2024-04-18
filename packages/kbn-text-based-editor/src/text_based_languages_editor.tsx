@@ -21,7 +21,8 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   type LanguageDocumentationSections,
@@ -57,12 +58,14 @@ import {
   getWrappedInPipesCode,
   parseErrors,
   getIndicesList,
+  getRemoteIndicesList,
   clearCacheWhenOld,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
+import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
 
@@ -89,7 +92,9 @@ export interface TextBasedLanguagesEditorProps {
   errors?: Error[];
   /** Warning string as it comes from ES */
   warning?: string;
-  /** Disables the editor and displays loading icon in run button */
+  /** Disables the editor and displays loading icon in run button
+   * It is also used for hiding the history component if it is not defined
+   */
   isLoading?: boolean;
   /** Disables the editor */
   isDisabled?: boolean;
@@ -112,9 +117,16 @@ export interface TextBasedLanguagesEditorProps {
 
   /** when set to true enables query cancellation **/
   allowQueryCancellation?: boolean;
+
+  /** hide @timestamp info **/
+  hideTimeFilterInfo?: boolean;
+
+  /** hide query history **/
+  hideQueryHistory?: boolean;
 }
 
 interface TextBasedEditorDeps {
+  core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
@@ -166,14 +178,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   disableSubmitAction,
   dataTestSubj,
   allowQueryCancellation,
+  hideTimeFilterInfo,
+  hideQueryHistory,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application, docLinks } =
+  const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
     kibana.services;
-  const [code, setCode] = useState(queryString ?? '');
+  const timeZone = core?.uiSettings?.get('dateFormat:tz');
+  const [code, setCode] = useState<string>(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -181,11 +196,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
   const [isSpaceReduced, setIsSpaceReduced] = useState(false);
+  const [editorWidth, setEditorWidth] = useState(0);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
@@ -193,6 +211,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+  // contains only client side validation messages
+  const [clientParserMessages, setClientParserMessages] = useState<{
+    errors: MonacoMessage[];
+    warnings: MonacoMessage[];
+  }>({
+    errors: [],
+    warnings: [],
+  });
+  const [refetchHistoryItems, setRefetchHistoryItems] = useState(false);
+
+  // as the duration on the history component is being calculated from
+  // the isLoading property, if this property is not defined we want
+  // to hide the history component
+  const hideHistoryComponent = hideQueryHistory || isLoading == null;
+
+  const onQueryUpdate = useCallback(
+    (value: string) => {
+      setCode(value);
+      onTextLangQueryChange({ [language]: value } as AggregateQuery);
+    },
+    [language, onTextLangQueryChange]
+  );
 
   const onQuerySubmit = useCallback(() => {
     if (isQueryLoading && allowQueryCancellation) {
@@ -220,6 +260,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const codeRef = useRef<string>(code);
 
+  const toggleHistory = useCallback((status: boolean) => {
+    setIsHistoryOpen(status);
+  }, []);
+
   // Registers a command to redirect users to the index management page
   // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
   monaco.editor.registerCommand('esql.policies.create', (...args) => {
@@ -238,7 +282,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Boolean(editorMessages.warnings.length),
     isCodeEditorExpandedFocused,
     Boolean(documentationSections),
-    Boolean(editorIsInline)
+    Boolean(editorIsInline),
+    isHistoryOpen
   );
   const isDark = isDarkMode;
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -346,7 +391,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(
     () => ({
       getSources: async () => {
-        return await getIndicesList(dataViews);
+        const [remoteIndices, localIndices] = await Promise.all([
+          getRemoteIndicesList(dataViews),
+          getIndicesList(dataViews),
+        ]);
+        return [...localIndices, ...remoteIndices];
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
@@ -390,15 +439,52 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     ]
   );
 
+  const parseMessages = useCallback(async () => {
+    if (editorModel.current) {
+      return await ESQLLang.validate(editorModel.current, queryString, esqlCallbacks);
+    }
+    return {
+      errors: [],
+      warnings: [],
+    };
+  }, [esqlCallbacks, queryString]);
+
+  useEffect(() => {
+    const validateQuery = async () => {
+      if (editorModel?.current) {
+        const parserMessages = await parseMessages();
+        setClientParserMessages({
+          errors: parserMessages?.errors ?? [],
+          warnings: parserMessages?.warnings ?? [],
+        });
+      }
+    };
+    if (isQueryLoading || isLoading) {
+      addQueriesToCache({
+        queryString,
+        timeZone,
+      });
+      validateQuery();
+      setRefetchHistoryItems(false);
+    } else {
+      updateCachedQueries({
+        queryString,
+        status: clientParserMessages.errors?.length
+          ? 'error'
+          : clientParserMessages.warnings.length
+          ? 'warning'
+          : 'success',
+      });
+
+      setRefetchHistoryItems(true);
+    }
+  }, [clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
+
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await ESQLLang.validate(
-        editorModel.current,
-        code,
-        esqlCallbacks
-      );
+      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
       const markers = [];
 
       if (parserErrors.length) {
@@ -410,32 +496,33 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return;
       }
     },
-    [esqlCallbacks, language, code]
+    [language, parseMessages]
   );
 
   useDebounceWithOptions(
-    () => {
+    async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
-      if (code === codeWhenSubmitted) {
-        if (serverErrors || serverWarning) {
-          const parsedErrors = parseErrors(serverErrors || [], code);
-          const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
-          setEditorMessages({
-            errors: parsedErrors,
-            warnings: parsedErrors.length ? [] : parsedWarning,
-          });
-          monaco.editor.setModelMarkers(
-            editorModel.current,
-            'Unified search',
-            parsedErrors.length ? parsedErrors : []
-          );
-          return;
-        }
-      } else {
-        queryValidation(subscription).catch((error) => {
-          // console.log({ error });
+      if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        const parsedErrors = parseErrors(serverErrors || [], code);
+        const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
+        setEditorMessages({
+          errors: parsedErrors,
+          warnings: parsedErrors.length ? [] : parsedWarning,
         });
+        monaco.editor.setModelMarkers(
+          editorModel.current,
+          'Unified search',
+          parsedErrors.length ? parsedErrors : []
+        );
+        const parserMessages = await parseMessages();
+        setClientParserMessages({
+          errors: parserMessages?.errors ?? [],
+          warnings: parserMessages?.warnings ?? [],
+        });
+        return;
+      } else {
+        queryValidation(subscription).catch(() => {});
       }
       return () => (subscription.active = false);
     },
@@ -522,6 +609,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
+  useEffect(() => {
+    // make sure to always update the code in expanded editor when query prop changes
+    if (isCodeEditorExpanded && editor1.current?.getValue() !== queryString) {
+      setCode(queryString);
+    }
+  }, [isCodeEditorExpanded, queryString]);
+
   const linesBreaksButtonsStatus = useMemo(() => {
     const pipes = code?.split('|');
     const pipesWithNewLine = code?.split('\n|');
@@ -534,18 +628,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onResize = ({ width }: { width: number }) => {
     setIsSpaceReduced(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
     calculateVisibleCode(width);
+    setEditorWidth(width);
     if (editor1.current) {
       editor1.current.layout({ width, height: editorHeight });
     }
   };
-
-  const onQueryUpdate = useCallback(
-    (value: string) => {
-      setCode(value);
-      onTextLangQueryChange({ [language]: value } as AggregateQuery);
-    },
-    [language, onTextLangQueryChange]
-  );
 
   useEffect(() => {
     async function getDocumentation() {
@@ -679,6 +766,31 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {documentationSections && (
+                  <EuiFlexItem grow={false}>
+                    <LanguageDocumentationPopover
+                      language={getLanguageDisplayName(String(language))}
+                      sections={documentationSections}
+                      searchInDescription
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
+                      }
+                      buttonProps={{
+                        color: 'text',
+                        size: 's',
+                        'data-test-subj': 'TextBasedLangEditor-documentation',
+                        'aria-label': i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
+                          {
+                            defaultMessage: 'Documentation',
+                          }
+                        ),
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexItem>
               {!Boolean(hideMinimizeButton) && (
                 <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
                   <EuiToolTip
@@ -709,31 +821,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false}>
-                {documentationSections && (
-                  <EuiFlexItem grow={false}>
-                    <LanguageDocumentationPopover
-                      language={getLanguageDisplayName(String(language))}
-                      sections={documentationSections}
-                      searchInDescription
-                      linkToDocumentation={
-                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
-                      }
-                      buttonProps={{
-                        color: 'text',
-                        size: 's',
-                        'data-test-subj': 'TextBasedLangEditor-documentation',
-                        'aria-label': i18n.translate(
-                          'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
-                          {
-                            defaultMessage: 'Documentation',
-                          }
-                        ),
-                      }}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -867,14 +954,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     {isCompactFocused && !isCodeEditorExpanded && (
                       <EditorFooter
                         lines={lines}
-                        containerCSS={styles.bottomContainer}
+                        styles={{
+                          bottomContainer: styles.bottomContainer,
+                          historyContainer: styles.historyContainer,
+                        }}
                         {...editorMessages}
                         onErrorClick={onErrorClick}
-                        runQuery={() => {
-                          if (editorMessages.errors.some((e) => e.source !== 'client')) {
-                            onQuerySubmit();
-                          }
-                        }}
+                        runQuery={onQuerySubmit}
+                        updateQuery={onQueryUpdate}
                         detectTimestamp={detectTimestamp}
                         editorIsInline={editorIsInline}
                         disableSubmitAction={disableSubmitAction}
@@ -882,6 +969,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         isSpaceReduced={isSpaceReduced}
                         isLoading={isQueryLoading}
                         allowQueryCancellation={allowQueryCancellation}
+                        hideTimeFilterInfo={hideTimeFilterInfo}
+                        isHistoryOpen={isHistoryOpen}
+                        setIsHistoryOpen={toggleHistory}
+                        containerWidth={editorWidth}
+                        hideQueryHistory={hideHistoryComponent}
+                        refetchHistoryItems={refetchHistoryItems}
+                        isInCompactMode={true}
                       />
                     )}
                   </div>
@@ -893,38 +987,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         {!isCodeEditorExpanded && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.expandTooltip',
-                    {
-                      defaultMessage: 'Expand query editor',
-                    }
-                  )}
-                >
-                  <EuiButtonIcon
-                    display="empty"
-                    iconType="expand"
-                    size="m"
-                    aria-label="Expand"
-                    onClick={() => expandCodeEditor(true)}
-                    data-test-subj="TextBasedLangEditor-expand"
-                    css={{
-                      ...(documentationSections
-                        ? {
-                            borderRadius: 0,
-                          }
-                        : {
-                            borderTopLeftRadius: 0,
-                            borderBottomLeftRadius: 0,
-                          }),
-                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
-                      border: '1px solid rgb(17 43 134 / 10%) !important',
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {documentationSections && (
                   <EuiFlexItem grow={false}>
@@ -948,16 +1010,41 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         ),
                         size: 'm',
                         css: {
-                          borderTopLeftRadius: 0,
-                          borderBottomLeftRadius: 0,
+                          borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
-                          borderLeft: 'transparent !important',
                         },
                       }}
                     />
                   </EuiFlexItem>
                 )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'textBasedEditor.query.textBasedLanguagesEditor.expandTooltip',
+                    {
+                      defaultMessage: 'Expand query editor',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    display="empty"
+                    iconType="expand"
+                    size="m"
+                    aria-label="Expand"
+                    onClick={() => expandCodeEditor(true)}
+                    data-test-subj="TextBasedLangEditor-expand"
+                    css={{
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0,
+                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
+                      border: '1px solid rgb(17 43 134 / 10%) !important',
+                      borderLeft: 'transparent !important',
+                    }}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -966,11 +1053,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       {isCodeEditorExpanded && (
         <EditorFooter
           lines={lines}
-          containerCSS={styles.bottomContainer}
-          onErrorClick={onErrorClick}
-          runQuery={() => {
-            onQuerySubmit();
+          styles={{
+            bottomContainer: styles.bottomContainer,
+            historyContainer: styles.historyContainer,
           }}
+          onErrorClick={onErrorClick}
+          runQuery={onQuerySubmit}
+          updateQuery={onQueryUpdate}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
@@ -978,7 +1067,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           isSpaceReduced={isSpaceReduced}
           isLoading={isQueryLoading}
           allowQueryCancellation={allowQueryCancellation}
+          hideTimeFilterInfo={hideTimeFilterInfo}
           {...editorMessages}
+          isHistoryOpen={isHistoryOpen}
+          setIsHistoryOpen={toggleHistory}
+          containerWidth={editorWidth}
+          hideQueryHistory={hideHistoryComponent}
+          refetchHistoryItems={refetchHistoryItems}
         />
       )}
       {isCodeEditorExpanded && (

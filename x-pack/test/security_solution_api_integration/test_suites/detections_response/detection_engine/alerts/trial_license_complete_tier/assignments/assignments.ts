@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { setAlertAssignees } from '../../../../utils';
 import {
   createAlertsIndex,
   createRule,
@@ -22,10 +23,9 @@ import {
   getAlertsByIds,
   getQueryAlertIds,
   getRuleForAlertTesting,
-  setAlertAssignees,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -39,7 +39,8 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Alert User Assignment - ESS & Serverless', () => {
+  // Intentionally setting as @skipInQA, keeping tests running in MKI that should block release
+  describe('@ess @serverless @skipInQA Alert User Assignment - ESS & Serverless', () => {
     describe('validation checks', () => {
       it('should give errors when no alert ids are provided', async () => {
         const { body } = await supertest

@@ -24,7 +24,8 @@ export const getAdditionalScreenReaderOnlyContext = ({
 export const createFilter = (
   key: string,
   value: string[] | string | null | undefined,
-  negate: boolean = false
+  negate: boolean = false,
+  index?: string
 ): Filter => {
   const queryValue = value != null ? (Array.isArray(value) ? value[0] : value) : null;
   return queryValue != null
@@ -39,6 +40,7 @@ export const createFilter = (
           params: {
             query: queryValue,
           },
+          index,
         },
         query: {
           match: {
@@ -60,6 +62,7 @@ export const createFilter = (
           negate: value === undefined,
           type: 'exists',
           value: 'exists',
+          index,
         },
       } as Filter);
 };

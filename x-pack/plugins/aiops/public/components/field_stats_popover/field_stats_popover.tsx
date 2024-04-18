@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import {
+import type {
   FieldStatsServices,
   FieldStatsProps,
 } from '@kbn/unified-field-list/src/components/field_stats';

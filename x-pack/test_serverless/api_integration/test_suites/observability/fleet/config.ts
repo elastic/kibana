@@ -7,6 +7,7 @@
 
 import { createTestConfig } from '../../../config.base';
 import { services } from '../apm_api_integration/common/services';
+import { kbnServerArgs } from '../../common/fleet/default_setup';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
@@ -19,23 +20,7 @@ export default createTestConfig({
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=false'],
+  esServerArgs: ['xpack.ml.dfa.enabled=false'],
 
-  kbnServerArgs: [
-    '--xpack.cloud.serverless.project_id=ftr_fake_project_id',
-    `--xpack.fleet.fleetServerHosts=[${JSON.stringify({
-      id: 'default-fleet-server',
-      name: 'Default Fleet Server',
-      is_default: true,
-      host_urls: ['https://localhost:8220'],
-    })}]`,
-    `--xpack.fleet.outputs=[${JSON.stringify({
-      id: 'es-default-output',
-      name: 'Default Output',
-      type: 'elasticsearch',
-      is_default: true,
-      is_default_monitoring: true,
-      hosts: ['https://localhost:9200'],
-    })}]`,
-  ],
+  kbnServerArgs,
 });

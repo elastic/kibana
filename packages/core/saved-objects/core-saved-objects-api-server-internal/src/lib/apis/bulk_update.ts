@@ -263,7 +263,7 @@ export const performBulkUpdate = async <T>(
       const typeDefinition = registry.getType(type)!;
       const updatedAttributes = mergeForUpdate({
         targetAttributes: {
-          ...migrated!.attributes,
+          ...(migrated!.attributes as Record<string, unknown>),
         },
         updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
           type,

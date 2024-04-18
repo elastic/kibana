@@ -4,19 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ASSET_CRITICALITY_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
+import {
+  ASSET_CRITICALITY_PRIVILEGES_URL,
+  APP_ID,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { getUserAssetCriticalityPrivileges } from '../get_user_asset_criticality_privileges';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-import type { StartPlugins } from '../../../../plugin';
 export const assetCriticalityPrivilegesRoute = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>,
-  logger: Logger
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({
@@ -34,6 +38,8 @@ export const assetCriticalityPrivilegesRoute = (
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
+          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
+
           await checkAndInitAssetCriticalityResources(context, logger);
 
           const [_, { security }] = await getStartServices();

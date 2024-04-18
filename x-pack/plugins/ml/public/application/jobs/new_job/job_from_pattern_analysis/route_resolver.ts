@@ -52,6 +52,7 @@ export async function resolver(
   const stopOnWarn = getRisonValue<boolean>(stopOnWarnRisonString, false);
 
   const jobCreator = new QuickCategorizationJobCreator(
+    data.dataViews,
     kibanaConfig,
     timeFilter,
     dashboardService,

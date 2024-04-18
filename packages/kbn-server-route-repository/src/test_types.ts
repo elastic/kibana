@@ -69,11 +69,10 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
 });
 
 // Public APIs should be versioned
+// @ts-expect-error
 createServerRouteFactory<{}, { options: { tags: string[] } }>()({
-  // @ts-expect-error
   endpoint: 'GET /api/endpoint_with_params',
   options: {
-    // @ts-expect-error
     tags: [],
   },
   // @ts-expect-error

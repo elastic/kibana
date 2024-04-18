@@ -13,7 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -248,7 +248,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     core.application.register({
       id: 'ingestManager',
       category: DEFAULT_APP_CATEGORIES.management,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       title: i18n.translate('xpack.fleet.oldAppTitle', { defaultMessage: 'Ingest Manager' }),
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
@@ -319,12 +319,24 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           fleet: {
             all: capabilities.fleetv2.all as boolean,
             setup: false,
+            agents: {
+              read: capabilities.fleetv2.agents_read as boolean,
+              all: capabilities.fleetv2.agents_all as boolean,
+            },
+            agentPolicies: {
+              read: capabilities.fleetv2.agent_policies_read as boolean,
+              all: capabilities.fleetv2.agent_policies_all as boolean,
+            },
+            settings: {
+              read: capabilities.fleetv2.settings_read as boolean,
+              all: capabilities.fleetv2.settings_all as boolean,
+            },
           },
           integrations: {
             all: capabilities.fleet.all as boolean,
             read: capabilities.fleet.read as boolean,
           },
-          isSuperuser: false,
+          subfeatureEnabled: this.experimentalFeatures.subfeaturePrivileges ?? false,
         }),
         packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
         endpointExceptionsPrivileges:

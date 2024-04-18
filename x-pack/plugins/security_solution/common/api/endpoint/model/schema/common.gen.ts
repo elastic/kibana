@@ -16,6 +16,8 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
+import { AlertIds } from '../../../model/alert.gen';
+
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();
 
@@ -114,12 +116,6 @@ export const Types = z.array(Type);
  */
 export type EndpointIds = z.infer<typeof EndpointIds>;
 export const EndpointIds = z.array(z.string().min(1)).min(1);
-
-/**
- * If defined, any case associated with the given IDs will be updated (cannot contain empty strings)
- */
-export type AlertIds = z.infer<typeof AlertIds>;
-export const AlertIds = z.array(z.string().min(1)).min(1);
 
 /**
  * Case IDs to be updated (cannot contain empty strings)

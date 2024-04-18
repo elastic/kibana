@@ -22,7 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
+import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
@@ -77,8 +78,17 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const columns = useMemo(buildColumns, []);
-  const rows = useMemo(() => getItems(entityData), [entityData]);
+  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
+
+  const columns = useMemo(
+    () => buildColumns(isAssetCriticalityEnabled),
+    [isAssetCriticalityEnabled]
+  );
+
+  const rows = useMemo(
+    () => getItems(entityData, isAssetCriticalityEnabled),
+    [entityData, isAssetCriticalityEnabled]
+  );
 
   const onToggle = useCallback(
     (isOpen) => {
@@ -130,7 +140,8 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           <h3>
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.title"
-              defaultMessage="Risk summary"
+              defaultMessage="{entity} risk summary"
+              values={{ entity: isUserRiskData(riskData) ? 'User' : 'Host' }}
             />
           </h3>
         </EuiTitle>
@@ -168,7 +179,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           title: (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.riskInputs"
-              defaultMessage="Risk inputs"
+              defaultMessage="View risk contributions"
             />
           ),
           link: {
@@ -199,6 +210,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
               {riskData && (
                 <VisualizationEmbeddable
                   applyGlobalQueriesAndFilters={false}
+                  applyPageAndTabsFilters={false}
                   lensAttributes={lensAttributes}
                   id={`RiskSummary-risk_score_metric`}
                   timerange={timerange}

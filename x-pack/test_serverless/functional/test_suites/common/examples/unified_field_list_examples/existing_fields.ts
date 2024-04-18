@@ -78,7 +78,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
+      await PageObjects.unifiedFieldList.openSidebarSection('meta');
     });
 
     after(async () => {
@@ -92,8 +92,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/172781
-    describe.skip('existence', () => {
+    describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const sidebarFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(sidebarFields.sort()).to.eql([...metaFields, ...fieldsWithData].sort());

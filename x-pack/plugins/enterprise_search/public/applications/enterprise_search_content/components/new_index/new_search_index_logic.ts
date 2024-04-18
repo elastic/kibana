@@ -43,6 +43,7 @@ export interface NewSearchIndexValues {
   fullIndexName: string;
   fullIndexNameExists: boolean;
   fullIndexNameIsValid: boolean;
+  hasPrefix: boolean;
   language: LanguageForOptimization;
   languageSelectValue: string;
   rawName: string;
@@ -61,12 +62,14 @@ type NewSearchIndexActions = Pick<
     AddConnectorApiLogicResponse
   >['apiSuccess'];
   crawlerIndexCreated: Actions<CreateCrawlerIndexArgs, CreateCrawlerIndexResponse>['apiSuccess'];
+  setHasPrefix(hasPrefix: boolean): { hasPrefix: boolean };
   setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
 };
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
   actions: {
+    setHasPrefix: (hasPrefix) => ({ hasPrefix }),
     setLanguageSelectValue: (language) => ({ language }),
     setRawName: (rawName) => ({ rawName }),
   },
@@ -103,6 +106,12 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   }),
   path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
+    hasPrefix: [
+      false,
+      {
+        setHasPrefix: (_, { hasPrefix }) => hasPrefix,
+      },
+    ],
     languageSelectValue: [
       UNIVERSAL_LANGUAGE_VALUE,
       {
@@ -117,7 +126,10 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     ],
   },
   selectors: ({ selectors }) => ({
-    fullIndexName: [() => [selectors.rawName], (name: string) => `search-${name}`],
+    fullIndexName: [
+      () => [selectors.rawName, selectors.hasPrefix],
+      (name: string, hasPrefix: boolean) => (hasPrefix ? `search-${name}` : name),
+    ],
     fullIndexNameExists: [
       () => [selectors.data, selectors.fullIndexName],
       (data: IndexExistsApiResponse | undefined, fullIndexName: string) =>

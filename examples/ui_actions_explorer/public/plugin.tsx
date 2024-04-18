@@ -7,7 +7,7 @@
  */
 
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   PHONE_TRIGGER,
@@ -51,7 +51,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     );
     deps.uiActions.addTriggerAction(
       USER_TRIGGER,
-      createEditUserAction(async () => (await startServices)[0].overlays.openModal)
+      createEditUserAction(async () => (await startServices)[0])
     );
 
     deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, viewInMapsAction);
@@ -64,14 +64,11 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     core.application.register({
       id: 'uiActionsExplorer',
       title: 'Ui Actions Explorer',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        return renderApp(
-          { uiActionsStartService: depsStart.uiActions, openModal: coreStart.overlays.openModal },
-          params
-        );
+        return renderApp({ uiActionsStartService: depsStart.uiActions, core: coreStart }, params);
       },
     });
 

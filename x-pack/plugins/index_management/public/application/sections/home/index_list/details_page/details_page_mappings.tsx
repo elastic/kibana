@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { Index } from '../../../../..';
 import { DetailsPageMappingsContent } from './details_page_mappings_content';
-import { Index } from '../../../../../../common';
-import { useLoadIndexMappings } from '../../../../services';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 
-export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index }) => {
-  const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index.name);
+import { useLoadIndexMappings } from '../../../../services';
+
+export const DetailsPageMappings: FunctionComponent<{
+  index?: Index;
+  showAboutMappings?: boolean;
+}> = ({ index, showAboutMappings = true }) => {
+  const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index?.name || '');
   const [jsonError, setJsonError] = useState<boolean>(false);
 
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsMappings);
-  }, []);
   const stringifiedData = useMemo(() => {
     if (data) {
       try {
@@ -44,7 +44,7 @@ export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index
       </SectionLoading>
     );
   }
-  if (error || jsonError || !stringifiedData) {
+  if (error || jsonError || !stringifiedData || !index?.name) {
     return (
       <EuiPageTemplate.EmptyPrompt
         data-test-subj="indexDetailsMappingsError"
@@ -65,7 +65,7 @@ export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index
                 id="xpack.idxMgmt.indexDetails.mappings.errorDescription"
                 defaultMessage="We encountered an error loading mappings for index {indexName}. Make sure that the index name in the URL is correct and try again."
                 values={{
-                  indexName: index.name,
+                  indexName: index?.name || undefined,
                 }}
               />
             </EuiText>
@@ -88,5 +88,13 @@ export const DetailsPageMappings: FunctionComponent<{ index: Index }> = ({ index
     );
   }
 
-  return <DetailsPageMappingsContent index={index} data={stringifiedData} />;
+  return (
+    <DetailsPageMappingsContent
+      index={index}
+      data={stringifiedData}
+      jsonData={data}
+      showAboutMappings={showAboutMappings}
+      refetchMapping={resendRequest}
+    />
+  );
 };

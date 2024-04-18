@@ -35,15 +35,17 @@ export async function bulkUntrackAlerts(
   );
 }
 
-async function bulkUntrackAlertsWithOCC(
-  context: RulesClientContext,
-  { indices, alertUuids }: BulkUntrackBody
-) {
+async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: BulkUntrackBody) {
   try {
     if (!context.alertsService) throw new Error('unable to access alertsService');
     const result = await context.alertsService.setAlertsToUntracked({
-      indices,
-      alertUuids,
+      ...params,
+      featureIds: params.featureIds || [],
+      spaceId: context.spaceId,
+      getAlertIndicesAlias: context.getAlertIndicesAlias,
+      getAuthorizedRuleTypes: context.authorization.getAuthorizedRuleTypes.bind(
+        context.authorization
+      ),
       ensureAuthorized: async ({
         ruleTypeId,
         consumer,

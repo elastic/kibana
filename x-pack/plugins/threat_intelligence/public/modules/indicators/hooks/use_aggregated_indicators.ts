@@ -79,11 +79,7 @@ export const useAggregatedIndicators = ({
   } = useKibana();
   const userTimeZone = useTimeZone();
   const userFormat = useDateFormat();
-
-  const {
-    sourcererDataView: { selectedPatterns },
-  } = useSourcererDataView();
-
+  const { selectedPatterns } = useSourcererDataView();
   const { inspectorAdapters } = useInspector();
 
   const [field, setField] = useState<EuiComboBoxOptionOption<string>>({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { get, isEqual, omit } from 'lodash';
 import expect from '@kbn/expect';
 import {
@@ -37,14 +38,19 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
   previewRule,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
+  dataGeneratorFactory,
+  getThreatMatchRuleForAlertTesting,
+} from '../../../../utils';
+import {
   deleteAllAlerts,
   deleteAllRules,
   createRule,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -147,6 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
@@ -155,10 +162,15 @@ export default ({ getService }: FtrProviderContext) => {
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
 
+  const { indexListOfDocuments } = dataGeneratorFactory({
+    es,
+    index: 'ecs_compliant',
+    log,
+  });
+
   /**
    * Specific api integration tests for threat matching rule type
    */
-  // FLAKY: https://github.com/elastic/kibana/issues/155304
   describe('@ess @serverless Threat match type rules', () => {
     before(async () => {
       await esArchiver.load(audibeatHostsPath);
@@ -175,7 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule();
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(
+      const alerts = await getAlerts(
         supertest,
         log,
         es,
@@ -356,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(
+      const alerts = await getAlerts(
         supertest,
         log,
         es,
@@ -558,7 +570,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const createdRuleTerm = await createRule(supertest, log, termRule);
       const createdRuleMatch = await createRule(supertest, log, matchRule);
-      const alertsTerm = await getOpenAlerts(
+      const alertsTerm = await getAlerts(
         supertest,
         log,
         es,
@@ -566,7 +578,7 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatusEnum.succeeded,
         100
       );
-      const alertsMatch = await getOpenAlerts(
+      const alertsMatch = await getAlerts(
         supertest,
         log,
         es,
@@ -1627,6 +1639,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await kibanaServer.uiSettings.update({
+          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+        });
       });
 
       after(async () => {
@@ -1663,8 +1678,81 @@ export default ({ getService }: FtrProviderContext) => {
           return expect(fullAlert).to.be.ok();
         }
 
-        expect(fullAlert?.['host.asset.criticality']).to.eql('low');
-        expect(fullAlert?.['user.asset.criticality']).to.eql('very_important');
+        expect(fullAlert?.['host.asset.criticality']).to.eql('low_impact');
+        expect(fullAlert?.['user.asset.criticality']).to.eql('extreme_impact');
+      });
+    });
+
+    // https://github.com/elastic/kibana/issues/174573
+    describe('timestamp override and fallback timestamp', () => {
+      const timestamp = '2020-10-28T05:45:00.000Z';
+
+      const eventDoc = (id: string) => ({
+        id,
+        '@timestamp': timestamp,
+        host: { name: 'host-a' },
+      });
+
+      const threatDoc = (id: string) => ({
+        id,
+        '@timestamp': timestamp,
+        host: { name: 'host-a' },
+        'agent.type': 'threat',
+      });
+
+      const threatMatchRule = (id: string): ThreatMatchRuleCreateProps => ({
+        ...getThreatMatchRuleForAlertTesting(['ecs_compliant']),
+        query: `id:${id} and NOT agent.type:threat`,
+        threat_query: `id:${id} and agent.type:threat`,
+        name: 'ALert suppression IM test rule',
+        from: 'now-35m',
+        interval: '30m',
+        timestamp_override: 'event.ingested',
+        timestamp_override_fallback_disabled: false,
+      });
+
+      it('should create alerts using a timestamp override and timestamp fallback enabled on threats first code path execution', async () => {
+        const id = uuidv4();
+
+        await indexListOfDocuments([eventDoc(id), eventDoc(id), threatDoc(id)]);
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule: threatMatchRule(id),
+          timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
+          invocationCount: 1,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['host.name', ALERT_ORIGINAL_TIME],
+        });
+
+        expect(previewAlerts.length).to.eql(2);
+        expect(logs[0].errors).to.have.length(0);
+      });
+
+      it('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
+        const id = uuidv4();
+
+        await indexListOfDocuments([eventDoc(id), threatDoc(id), threatDoc(id)]);
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule: threatMatchRule(id),
+          timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
+          invocationCount: 1,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['host.name', ALERT_ORIGINAL_TIME],
+        });
+
+        expect(previewAlerts.length).to.eql(1);
+        expect(logs[0].errors).to.have.length(0);
       });
     });
   });

@@ -242,7 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.closeAddPanel();
 
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.unlinkFromLibary(originalPanel);
+      await panelActions.legacyUnlinkFromLibary(originalPanel);
       await testSubjects.existOrFail('unlinkPanelSuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
@@ -255,7 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('save lens panel to embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
-      await panelActions.saveToLibrary('lnsPieVis - copy', originalPanel);
+      await panelActions.legacySaveToLibrary('lnsPieVis - copy', originalPanel);
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis-copy');
       const libraryActionExists = await testSubjects.descendantExists(

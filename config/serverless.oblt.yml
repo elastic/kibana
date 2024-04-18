@@ -4,7 +4,12 @@
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
+xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
+xpack.search.notebooks.enabled: false
+
+## Enable the slo plugin
+xpack.slo.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
@@ -39,11 +44,7 @@ xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
-xpack.fleet.internal.registry.capabilities: [
-  'apm',
-  'observability',
-  'uptime',
-]
+xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.max: '3.0'
 # Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
@@ -81,12 +82,15 @@ xpack.apm.featureFlags.migrationToFleetAvailable: false
 xpack.apm.featureFlags.sourcemapApiAvailable: false
 xpack.apm.featureFlags.storageExplorerAvailable: false
 
+## Set the AI Assistant type
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp.enabled: false
+xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console

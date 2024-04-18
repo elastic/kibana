@@ -33,6 +33,7 @@ import {
   getTupleDuplicateErrorsAndUniqueRules,
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
+import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -50,6 +51,9 @@ export const importRulesRoute = (
         body: {
           maxBytes: config.maxRuleImportPayloadBytes,
           output: 'stream',
+        },
+        timeout: {
+          idleSocket: RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS,
         },
       },
     })

@@ -8,24 +8,63 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
+import type { BuildFlavor } from '@kbn/config';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
+import type { Props as EditRolePageProps } from './edit_role/edit_role_page';
+import type { Props as RolesGridPageProps } from './roles_grid/roles_grid_page';
 import { rolesManagementApp } from './roles_management_app';
 import { licenseMock } from '../../../common/licensing/index.mock';
 
 jest.mock('./roles_grid', () => ({
-  RolesGridPage: (props: any) => `Roles Page: ${JSON.stringify(props)}`,
+  RolesGridPage: ({
+    // props object is too big to include into test snapshot, so we just check for existence of fields we care about
+    buildFlavor,
+    cloudOrgUrl,
+    readOnly,
+    rolesAPIClient,
+  }: RolesGridPageProps) =>
+    `Roles Page: ${JSON.stringify(
+      {
+        buildFlavor,
+        cloudOrgUrl,
+        readOnly,
+        rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+      },
+      null,
+      '  '
+    )}`,
 }));
 
 jest.mock('./edit_role', () => ({
-  // `docLinks` object is too big to include into test snapshot, so we just check its existence.
-  EditRolePage: (props: any) =>
-    `Role Edit Page: ${JSON.stringify({ ...props, docLinks: props.docLinks ? {} : undefined })}`,
+  EditRolePage: ({
+    // props object is too big to include into test snapshot, so we just check for existence of fields we care about
+    buildFlavor,
+    cloudOrgUrl,
+    roleName,
+    indicesAPIClient,
+    privilegesAPIClient,
+    rolesAPIClient,
+    userAPIClient,
+  }: EditRolePageProps) =>
+    `Role Edit Page: ${JSON.stringify(
+      {
+        buildFlavor,
+        cloudOrgUrl,
+        roleName,
+        indicesAPIClient: indicesAPIClient ? 'indicesAPIClient' : undefined,
+        privilegesAPIClient: privilegesAPIClient ? 'privilegesAPIClient' : undefined,
+        rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+        userAPIClient: userAPIClient ? 'userAPIClient' : undefined,
+      },
+      null,
+      '  '
+    )}`,
 }));
 
-async function mountApp(basePath: string, pathname: string) {
+async function mountApp(basePath: string, pathname: string, buildFlavor?: BuildFlavor) {
   const { fatalErrors } = coreMock.createSetup();
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
@@ -48,13 +87,15 @@ async function mountApp(basePath: string, pathname: string) {
         getStartServices: jest
           .fn()
           .mockResolvedValue([coreStart, { data: {}, features: featuresStart }]),
+        buildFlavor: buildFlavor ?? 'traditional',
       })
       .mount({
         basePath,
         element: container,
         setBreadcrumbs,
         history: scopedHistoryMock.create({ pathname }),
-        theme$: themeServiceMock.createTheme$(),
+        theme: coreStart.theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
       });
   });
 
@@ -70,6 +111,7 @@ describe('rolesManagementApp', () => {
         license: licenseMock.create(),
         fatalErrors,
         getStartServices: getStartServices as any,
+        buildFlavor: 'traditional',
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -90,7 +132,11 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Roles Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":false}
+        Roles Page: {
+        "buildFlavor": "traditional",
+        "readOnly": false,
+        "rolesAPIClient": "rolesAPIClient"
+      }
       </div>
     `);
 
@@ -112,7 +158,13 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
+        Role Edit Page: {
+        "buildFlavor": "traditional",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -139,7 +191,14 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","roleName":"role@name","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@name","search":"","hash":""}}}
+        Role Edit Page: {
+        "buildFlavor": "traditional",
+        "roleName": "role@name",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -166,7 +225,14 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"clone","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/clone/someRoleName","search":"","hash":""}}}
+        Role Edit Page: {
+        "buildFlavor": "traditional",
+        "roleName": "someRoleName",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -187,6 +253,179 @@ describe('rolesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       { href: `/`, text: 'Roles' },
+      {
+        text: roleName,
+      },
+    ]);
+  });
+});
+
+describe('rolesManagementApp - serverless', () => {
+  it('create() returns proper management app descriptor', () => {
+    const { fatalErrors, getStartServices } = coreMock.createSetup();
+
+    expect(
+      rolesManagementApp.create({
+        license: licenseMock.create(),
+        fatalErrors,
+        getStartServices: getStartServices as any,
+        buildFlavor: 'serverless',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "id": "roles",
+        "mount": [Function],
+        "order": 20,
+        "title": "Custom Roles",
+      }
+    `);
+  });
+
+  it('mount() works for the `grid` page', async () => {
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp('/', '/', 'serverless');
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Custom Roles' }]);
+    expect(docTitle.change).toHaveBeenCalledWith('Custom Roles');
+    expect(docTitle.reset).not.toHaveBeenCalled();
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        Roles Page: {
+        "buildFlavor": "serverless",
+        "readOnly": false,
+        "rolesAPIClient": "rolesAPIClient"
+      }
+      </div>
+    `);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
+    expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() works for the `create role` page', async () => {
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp(
+      '/',
+      '/edit',
+      'serverless'
+    );
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: `/`, text: 'Custom Roles' },
+      { text: 'Create' },
+    ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Custom Roles');
+    expect(docTitle.reset).not.toHaveBeenCalled();
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        Role Edit Page: {
+        "buildFlavor": "serverless",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
+      </div>
+    `);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
+    expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() works for the `edit role` page', async () => {
+    const roleName = 'role@name';
+
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp(
+      '/',
+      `/edit/${roleName}`,
+      'serverless'
+    );
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: `/`, text: 'Custom Roles' },
+      { text: roleName },
+    ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Custom Roles');
+    expect(docTitle.reset).not.toHaveBeenCalled();
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        Role Edit Page: {
+        "buildFlavor": "serverless",
+        "roleName": "role@name",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
+      </div>
+    `);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
+    expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() works for the `clone role` page', async () => {
+    const roleName = 'someRoleName';
+
+    const { setBreadcrumbs, container, unmount, docTitle } = await mountApp(
+      '/',
+      `/clone/${roleName}`,
+      'serverless'
+    );
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: `/`, text: 'Custom Roles' },
+      { text: 'Create' },
+    ]);
+    expect(docTitle.change).toHaveBeenCalledWith('Custom Roles');
+    expect(docTitle.reset).not.toHaveBeenCalled();
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        Role Edit Page: {
+        "buildFlavor": "serverless",
+        "roleName": "someRoleName",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
+      </div>
+    `);
+
+    act(() => {
+      unmount();
+    });
+
+    expect(docTitle.reset).toHaveBeenCalledTimes(1);
+
+    expect(container).toMatchInlineSnapshot(`<div />`);
+  });
+
+  it('mount() properly encodes role name in `edit role` page link in breadcrumbs', async () => {
+    const roleName = 'some 安全性 role';
+
+    const { setBreadcrumbs } = await mountApp('/', `/edit/${roleName}`, 'serverless');
+
+    expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([
+      { href: `/`, text: 'Custom Roles' },
       {
         text: roleName,
       },

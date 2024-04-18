@@ -13,8 +13,6 @@ The flyout is composed of 3 sections:
 
 ## Design decisions
 
-The expandable-flyout package is designed to render a single flyout for an entire plugin. While displaying multiple flyouts might be feasible, it will be a bit complicated, and we recommend instead to build multiple panels, with each their own context to manage their data (for example, take a look at the Security Solution [setup](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout)).
-
 The expandable-flyout is making some strict UI design decisions:
 - when in collapsed mode (i.e. when only the right/preview section is open), the flyout's width linearly grows from its minimum value of 380px to its maximum value of 750px
 - when in expanded mode (i.e. when the left section is opened), the flyout's width changes depending on the browser's width:
@@ -22,6 +20,25 @@ The expandable-flyout is making some strict UI design decisions:
   - for windows bigger than 1600px, the flyout's width is 80% of the entire browser window (with a max width of 1500px for the left section, and 750px for the right section)
 
 > While the expandable-flyout will work on very small screens, having both the right and left sections visible at the same time will not be a good experience to the user. We recommend only showing the right panel, and therefore handling this situation when you build your panels by considering hiding the actions that could open the left panel (like the expand details button in the [FlyoutNavigation](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout/shared/components/flyout_navigation.tsx)).
+
+## State persistence
+
+The expandable flyout offers 2 ways of managing its state:
+
+### Memory storage
+
+The default behavior saves the state of the flyout in memory. The state is internal to the package and based on an isolated redux context. Using this mode means the state will not be persisted when sharing url or reloading browser pages.
+
+### Url storage
+
+The second way (done by setting the `urlKey` prop to a string value) saves the state of the flyout in the url. This allows the flyout to be automatically reopened when users refresh the browser page, or when users share an url. The `urlKey` will be used as the url parameter. 
+
+**_Note: the word `memory` cannot be used as an `urlKey` as it is reserved for the memory storage behavior. You can use any other string value, try to use something that should be unique._**
+
+> We highly recommend NOT nesting flyouts in your code, as it would cause conflicts for the url keys. We recommend instead to build multiple panels, with each their own context to manage their data (for example, take a look at the Security Solution [setup](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution/public/flyout)).
+>
+> A good solution is for example to have one instance of a flyout at a page level, and then have multiple panels that can be opened in that flyout.
+
 
 ## Package API
 
@@ -46,10 +63,15 @@ To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi]
 
 To use the expandable flyout in your plugin, first you need wrap your code with the [context provider](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx) at a high enough level as follows:
 ```typescript jsx
-<ExpandableFlyoutProvider>
-  
+// state stored in the url
+<ExpandableFlyoutProvider urlKey={'myUrlKey'}>
   ...
-  
+</ExpandableFlyoutProvider>
+
+
+// state stored in memory
+<ExpandableFlyoutProvider>
+  ...
 </ExpandableFlyoutProvider>
 ```
 
@@ -59,13 +81,6 @@ Then use the [React UI component](https://github.com/elastic/kibana/tree/main/pa
 <ExpandableFlyout registeredPanels={myPanels} />
 ```
 _where `myPanels` is a list of all the panels that can be rendered in the flyout_
-
-## State persistence 
-
-The expandable flyout offers 2 ways of managing its state:
-- the default behavior saves the state of the flyout in the url. This allows the flyout to be automatically reopened when users refresh the browser page, or when users share a url 
-- the second way (done by setting the `storage` prop to `memory`) stores the state of the flyout in memory. This means that the flyout will not be reopened when users refresh the browser page, or when users share a url
-
 
 ## Terminology
 

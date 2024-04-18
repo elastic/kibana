@@ -24,13 +24,14 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnTypes,
-  getTextBasedColumnTypes,
+  type DataTableColumnsMeta,
+  getTextBasedColumnsMeta,
+  getRenderCustomToolbarWithElements,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  DOC_TABLE_LEGACY,
   HIDE_ANNOUNCEMENTS,
+  isLegacyTableEnabled,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -61,11 +62,11 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { getRenderCustomToolbarWithElements } from '../../../../components/discover_grid/render_custom_toolbar';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 
 const containerStyles = css`
   position: relative;
@@ -86,12 +87,7 @@ export const onResize = (
   stateContainer: DiscoverStateContainer
 ) => {
   const state = stateContainer.appState.getState();
-  const grid = { ...(state.grid || {}) };
-  const newColumns = { ...(grid.columns || {}) };
-  newColumns[colSettings.columnId] = {
-    width: Math.round(colSettings.width),
-  };
-  const newGrid = { ...grid, columns: newColumns };
+  const newGrid = onResizeGridColumn(colSettings, state.grid);
   stateContainer.appState.update({ grid: newGrid });
 };
 
@@ -112,19 +108,29 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [query, sort, rowHeight, rowsPerPage, grid, columns, index, sampleSizeState] =
-    useAppStateSelector((state) => {
-      return [
-        state.query,
-        state.sort,
-        state.rowHeight,
-        state.rowsPerPage,
-        state.grid,
-        state.columns,
-        state.index,
-        state.sampleSize,
-      ];
-    });
+  const [
+    query,
+    sort,
+    rowHeight,
+    headerRowHeight,
+    rowsPerPage,
+    grid,
+    columns,
+    index,
+    sampleSizeState,
+  ] = useAppStateSelector((state) => {
+    return [
+      state.query,
+      state.sort,
+      state.rowHeight,
+      state.headerRowHeight,
+      state.rowsPerPage,
+      state.grid,
+      state.columns,
+      state.index,
+      state.sampleSize,
+    ];
+  });
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {
       stateContainer.internalState.transitions.setExpandedDoc(doc);
@@ -134,15 +140,19 @@ function DiscoverDocumentsComponent({
 
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
 
+  const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const isLegacy = useMemo(
+    () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
+    [uiSettings, isTextBasedQuery]
+  );
 
   const documentState = useDataState(documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
-  const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+
   // This is needed to prevent EuiDataGrid pushing onSort because the data view has been switched.
   // It's just necessary for non-text-based query lang requests since they don't have a partial result state, that's
   // considered as loading state in the Component.
@@ -212,19 +222,23 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const showTimeCol = useMemo(
-    () =>
-      // for ES|QL we want to show the time column only when is on Document view
-      (!isTextBasedQuery || !columns?.length) &&
-      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!dataView.timeFieldName,
-    [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
+  const onUpdateHeaderRowHeight = useCallback(
+    (newHeaderRowHeight: number) => {
+      stateContainer.appState.update({ headerRowHeight: newHeaderRowHeight });
+    },
+    [stateContainer]
   );
 
-  const columnTypes: DataTableColumnTypes | undefined = useMemo(
+  // should be aligned with embeddable `showTimeCol` prop
+  const showTimeCol = useMemo(
+    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    [uiSettings]
+  );
+
+  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>
       documentState.textBasedQueryColumns
-        ? getTextBasedColumnTypes(documentState.textBasedQueryColumns)
+        ? getTextBasedColumnsMeta(documentState.textBasedQueryColumns)
         : undefined,
     [documentState.textBasedQueryColumns]
   );
@@ -234,7 +248,7 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      customColumnTypes?: DataTableColumnTypes
+      customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
         dataView={dataView}
@@ -242,7 +256,7 @@ function DiscoverDocumentsComponent({
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnTypes={customColumnTypes}
+        columnsMeta={customColumnsMeta}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}
@@ -308,7 +322,7 @@ function DiscoverDocumentsComponent({
     [isDataLoading]
   );
 
-  const renderCustomToolbar = useMemo(
+  const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         leftSide: viewModeToggle,
@@ -385,7 +399,7 @@ function DiscoverDocumentsComponent({
                 <DiscoverGridMemoized
                   ariaLabelledBy="documentsAriaLabel"
                   columns={currentColumns}
-                  columnTypes={columnTypes}
+                  columnsMeta={columnsMeta}
                   expandedDoc={expandedDoc}
                   dataView={dataView}
                   loadingState={
@@ -404,12 +418,15 @@ function DiscoverDocumentsComponent({
                   settings={grid}
                   onFilter={onAddFilter as DocViewFilterFn}
                   onSetColumns={onSetColumns}
-                  onSort={!isTextBasedQuery ? onSort : undefined}
+                  onSort={onSort}
                   onResize={onResizeDataGrid}
                   useNewFieldsApi={useNewFieldsApi}
+                  configHeaderRowHeight={3}
+                  headerRowHeightState={headerRowHeight}
+                  onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}
-                  isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
+                  isSortEnabled={true}
                   isPlainRecord={isTextBasedQuery}
                   rowsPerPageState={rowsPerPage ?? getDefaultRowsPerPage(services.uiSettings)}
                   onUpdateRowsPerPage={onUpdateRowsPerPage}
@@ -421,12 +438,11 @@ function DiscoverDocumentsComponent({
                   showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
                   maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
                   renderDocumentView={renderDocumentView}
-                  renderCustomToolbar={renderCustomToolbar}
+                  renderCustomToolbar={renderCustomToolbarWithElements}
                   services={services}
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
-                  headerRowHeight={3}
                   externalCustomRenderers={externalCustomRenderers}
                   customGridColumnsConfiguration={customGridColumnsConfiguration}
                   customControlColumnsConfiguration={customControlColumnsConfiguration}

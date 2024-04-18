@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -141,10 +142,10 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       ) : (
         <>
           {highlightedLines.map((line, i) => (
-            <>
+            <React.Fragment key={`line-${i}`}>
               {line}
               {i === highlightedLines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
-            </>
+            </React.Fragment>
           ))}
         </>
       )}

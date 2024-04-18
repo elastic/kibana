@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 
 import {
   type TestTrainedModelsContextType,

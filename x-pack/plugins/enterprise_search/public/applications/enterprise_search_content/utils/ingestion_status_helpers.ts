@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { IngestionStatus } from '../types';
+import { IngestionStatus } from '@kbn/search-connectors';
 
 export function ingestionStatusToText(ingestionStatus: IngestionStatus): string {
   if (ingestionStatus === IngestionStatus.CONNECTED) {

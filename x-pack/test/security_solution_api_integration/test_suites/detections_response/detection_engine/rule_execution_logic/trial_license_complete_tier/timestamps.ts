@@ -14,6 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
+import { getAlerts, getEqlRuleForAlertTesting } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
@@ -21,12 +22,10 @@ import {
   createRule,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-  getOpenAlerts,
   getRuleForAlertTesting,
   getAlertsByIds,
-  getEqlRuleForAlertTesting,
   waitForRulePartialFailure,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
@@ -252,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           const createdRule = await createRule(supertest, log, rule);
-          const alertsOpen = await getOpenAlerts(
+          const alertsOpen = await getAlerts(
             supertest,
             log,
             es,
@@ -331,7 +330,7 @@ export default ({ getService }: FtrProviderContext) => {
             timestamp_override_fallback_disabled: true,
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alertsOpen = await getOpenAlerts(
+          const alertsOpen = await getAlerts(
             supertest,
             log,
             es,

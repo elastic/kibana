@@ -31,7 +31,16 @@ describe('RuleResultService', () => {
 
   test('should return errors array with added error', () => {
     lastRunSetters.addLastRunError('First error');
-    expect(ruleResultService.getLastRunErrors()).toEqual(['First error']);
+    expect(ruleResultService.getLastRunErrors()).toEqual([
+      { message: 'First error', userError: false },
+    ]);
+  });
+
+  test('should return errors array with added user error', () => {
+    lastRunSetters.addLastRunError('First error', true);
+    expect(ruleResultService.getLastRunErrors()).toEqual([
+      { message: 'First error', userError: true },
+    ]);
   });
 
   test('should return warnings array with added warning', () => {
@@ -49,7 +58,12 @@ describe('RuleResultService', () => {
     lastRunSetters.addLastRunWarning('warning');
     lastRunSetters.setLastRunOutcomeMessage('outcome message');
     const expectedLastRun: RuleResultServiceResults = {
-      errors: ['error'],
+      errors: [
+        {
+          message: 'error',
+          userError: false,
+        },
+      ],
       warnings: ['warning'],
       outcomeMessage: 'outcome message',
     };
@@ -63,7 +77,16 @@ describe('RuleResultService', () => {
     lastRunSetters.setLastRunOutcomeMessage('second outcome message');
     lastRunSetters.setLastRunOutcomeMessage('last outcome message');
     const expectedLastRun = {
-      errors: ['first error', 'second error'],
+      errors: [
+        {
+          message: 'first error',
+          userError: false,
+        },
+        {
+          message: 'second error',
+          userError: false,
+        },
+      ],
       warnings: [],
       outcomeMessage: 'last outcome message',
     };

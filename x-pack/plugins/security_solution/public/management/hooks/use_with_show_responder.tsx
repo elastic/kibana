@@ -6,6 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  TECHNICAL_PREVIEW,
+  TECHNICAL_PREVIEW_TOOLTIP,
+  UPGRADE_AGENT_FOR_RESPONDER,
+} from '../../common/translations';
 import { useLicense } from '../../common/hooks/use_license';
 import type { ImmutableArray } from '../../../common/endpoint/types';
 import {
@@ -26,6 +32,7 @@ import {
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
@@ -43,13 +50,15 @@ type ResponderInfoProps =
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
       capabilities: ImmutableArray<string>;
       platform: string;
-      lastCheckin: string;
     });
 
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
 
   return useCallback(
     (props: ResponderInfoProps) => {
@@ -94,6 +103,12 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               return {
                 ...command,
                 helpHidden: true,
+                validate: () => {
+                  return UPGRADE_AGENT_FOR_RESPONDER(
+                    agentType,
+                    command.name as ConsoleResponseActionCommands
+                  );
+                },
               };
             }
             return command;
@@ -109,7 +124,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                 <HeaderSentinelOneInfo
                   agentId={agentId}
                   hostName={hostName}
-                  lastCheckin={props.lastCheckin}
                   platform={props.platform}
                 />
               );
@@ -126,13 +140,32 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               hostName,
             },
             consoleProps,
-            PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
+            PageTitleComponent: () => {
+              if (isSentinelOneV1Enabled && agentType === 'sentinel_one') {
+                return (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge
+                        label={TECHNICAL_PREVIEW}
+                        tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+              return <>{RESPONDER_PAGE_TITLE}</>;
+            },
             ActionComponents: endpointPrivileges.canReadActionsLogManagement
               ? [ActionLogButton]
               : undefined,
             PageBodyComponent: () => (
               <>
-                <OfflineCallout endpointId={props.agentId} />
+                <OfflineCallout
+                  endpointId={props.agentId}
+                  agentType={agentType}
+                  hostName={hostName}
+                />
                 <MissingEncryptionKeyCallout />
               </>
             ),
@@ -140,6 +173,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, isEnterpriseLicense, consoleManager]
+    [endpointPrivileges, isEnterpriseLicense, isSentinelOneV1Enabled, consoleManager]
   );
 };

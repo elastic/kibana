@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
-import { GraphControls } from './graph_controls';
+import { GraphControls } from './controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';

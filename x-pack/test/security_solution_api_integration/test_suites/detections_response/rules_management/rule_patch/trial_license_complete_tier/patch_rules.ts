@@ -17,16 +17,12 @@ import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleMlRuleOutput,
-  createRule,
   getSimpleMlRule,
   getSimpleRuleWithoutRuleId,
   removeUUIDFromActions,
@@ -35,6 +31,12 @@ import {
   getSomeActionsWithFrequencies,
   updateUsername,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -652,6 +654,38 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.investigation_fields.field_names).to.eql(['blob', 'boop']);
         });
+      });
+    });
+
+    describe('setup guide', () => {
+      beforeEach(async () => {
+        await createAlertsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should overwrite setup field on patch', async () => {
+        await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          setup: 'A setup guide',
+        });
+
+        const rulePatch = {
+          rule_id: 'rule-1',
+          setup: 'A different setup guide',
+        };
+
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send(rulePatch)
+          .expect(200);
+
+        expect(body.setup).to.eql('A different setup guide');
       });
     });
   });

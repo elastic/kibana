@@ -36,6 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'kibana_sample_admin',
         'test_logstash_reader',
       ]);
+      // disable the invalid selection warning toast
+      await browser.setLocalStorageItem('controls:showInvalidSelectionWarning', 'false');
+
       await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -99,7 +102,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           additionalSettings: { step: 100 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
-        const secondId = (await dashboardControls.getAllControlIds())[1];
+        const [firstId, secondId] = await dashboardControls.getAllControlIds();
+        await dashboardControls.clearControlSelections(firstId);
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
 
         await dashboardControls.rangeSliderSetLowerBound(secondId, '200');

@@ -38,3 +38,13 @@ export interface SingleDatasetLocatorParams extends DatasetLocatorParams {
    */
   dataset: string;
 }
+
+// Data view locator
+export const OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID = 'OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR';
+
+export interface ObsLogsExplorerDataViewLocatorParams extends DatasetLocatorParams {
+  /**
+   * Data view id to select
+   */
+  id: string;
+}

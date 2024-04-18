@@ -11,6 +11,7 @@ oneOf:
   - $ref: 'update_connector_request_opsgenie.yaml'
   - $ref: 'update_connector_request_pagerduty.yaml' 
   - $ref: 'update_connector_request_resilient.yaml'
+  - $ref: 'update_connector_request_sentinelone.yaml'
   - $ref: 'update_connector_request_serverlog.yaml'
   - $ref: 'update_connector_request_servicenow.yaml'
   - $ref: 'update_connector_request_servicenow_itom.yaml'

@@ -7,7 +7,7 @@
 
 import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
+import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction, TaskPriority } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
@@ -45,6 +45,12 @@ export interface TaskRegisterDefinition {
    */
   timeout?: string;
   /**
+   * An optional definition of task priority. Tasks will be sorted by priority prior to claiming
+   * so high priority tasks will always be claimed before normal priority, which will always be
+   * claimed before low priority
+   */
+  priority?: TaskPriority;
+  /**
    * An optional more detailed description of what this task does.
    */
   description?: string;
@@ -76,7 +82,6 @@ export interface TaskRegisterDefinition {
   >;
 
   paramsSchema?: ObjectType;
-  indirectParamsSchema?: ObjectType;
 }
 
 /**

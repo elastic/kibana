@@ -72,7 +72,10 @@ import {
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
 import {
+  migratePackagePolicyAddAntivirusRegistrationModeToV8140,
   migratePackagePolicyToV8100,
+  migratePackagePolicyToV8140,
+  migratePackagePolicyEnableCapsToV8140,
   migratePackagePolicyToV870,
 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
@@ -89,7 +92,7 @@ import { settingsV1 } from './model_versions/v1';
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
+export const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
   // Deprecated
   [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
     name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -155,6 +158,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         is_protected: { type: 'boolean' },
         overrides: { type: 'flattened', index: false },
         keep_monitoring_alive: { type: 'boolean' },
+        advanced_settings: { type: 'flattened', index: false },
       },
     },
     migrations: {
@@ -163,6 +167,18 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       '8.4.0': migrateAgentPolicyToV840,
       '8.5.0': migrateAgentPolicyToV850,
       '8.9.0': migrateAgentPolicyToV890,
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              advanced_settings: { type: 'flattened', index: false },
+            },
+          },
+        ],
+      },
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -230,6 +246,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             random: { type: 'boolean' },
           },
         },
+        topic: { type: 'text', index: false },
         topics: {
           dynamic: false,
           properties: {
@@ -362,6 +379,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         ],
       },
+      '6': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              topic: { type: 'text', index: false },
+            },
+          },
+        ],
+      },
     },
     migrations: {
       '7.13.0': migrateOutputToV7130,
@@ -462,6 +489,30 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         ],
       },
+      '6': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8140,
+          },
+        ],
+      },
+      '7': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyEnableCapsToV8140,
+          },
+        ],
+      },
+      '8': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyAddAntivirusRegistrationModeToV8140,
+          },
+        ],
+      },
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
@@ -510,6 +561,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         },
         latest_install_failed_attempts: { type: 'object', enabled: false },
+        latest_executed_state: { type: 'object', enabled: false },
         installed_kibana: {
           dynamic: false,
           properties: {},
@@ -547,6 +599,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             type: 'mappings_addition',
             addedMappings: {
               latest_install_failed_attempts: { type: 'object', enabled: false },
+            },
+          },
+        ],
+      },
+      '2': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              latest_executed_state: { type: 'object', enabled: false },
             },
           },
         ],
@@ -703,58 +765,37 @@ export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   });
 }
 
+export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
+  'service_token',
+  'shipper',
+  'allow_edit',
+  'broker_ack_reliability',
+  'broker_buffer_size',
+  'channel_buffer_size',
+]);
+
+export const OUTPUT_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
+  { key: 'password', dangerouslyExposeValue: true },
+]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
   encryptedSavedObjects.registerType({
     type: OUTPUT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([
-      { key: 'ssl', dangerouslyExposeValue: true },
-      { key: 'password', dangerouslyExposeValue: true },
-    ]),
-    attributesToExcludeFromAAD: new Set([
-      'output_id',
-      'name',
-      'type',
-      'is_default',
-      'is_default_monitoring',
-      'hosts',
-      'ca_sha256',
-      'ca_trusted_fingerprint',
-      'config',
-      'config_yaml',
-      'is_internal',
-      'is_preconfigured',
-      'proxy_id',
-      'version',
-      'key',
-      'compression',
-      'compression_level',
-      'client_id',
-      'auth_type',
-      'connection_type',
-      'username',
-      'sasl',
-      'partition',
-      'random',
-      'round_robin',
-      'hash',
-      'topics',
-      'headers',
-      'timeout',
-      'broker_timeout',
-      'required_acks',
-      'preset',
-      'secrets',
-    ]),
+    attributesToEncrypt: OUTPUT_ENCRYPTED_FIELDS,
+    attributesToIncludeInAAD: OUTPUT_INCLUDE_AAD_FIELDS,
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
     type: MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['passphrase']),
+    attributesToIncludeInAAD: new Set(['private_key', 'public_key', 'passphrase_plain']),
   });
   encryptedSavedObjects.registerType({
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
   });
 }

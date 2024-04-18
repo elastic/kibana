@@ -65,6 +65,9 @@ export const kibanaContextMock = {
       mlCapabilities: {
         refreshCapabilities: jest.fn(),
       },
+      mlFieldFormatService: {
+        getFieldFormat: jest.fn(),
+      },
     },
     notifications: notificationServiceMock.createStartContract(),
   },

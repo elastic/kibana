@@ -603,9 +603,12 @@ function createNewLayerWithMetricAggregation(
 
 export function getDatasourceSuggestionsFromCurrentState(
   state: FormBasedPrivateState,
-  indexPatterns: IndexPatternMap,
+  indexPatterns?: IndexPatternMap,
   filterLayers: (layerId: string) => boolean = () => true
 ): Array<DatasourceSuggestion<FormBasedPrivateState>> {
+  if (!indexPatterns) {
+    return [];
+  }
   const layers = Object.entries(state.layers || {}).filter(([layerId]) => filterLayers(layerId));
 
   if (layers.length > 1) {

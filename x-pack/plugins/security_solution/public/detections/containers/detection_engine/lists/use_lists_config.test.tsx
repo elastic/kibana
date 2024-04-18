@@ -88,6 +88,17 @@ describe('useListsConfig', () => {
       renderHook(() => useListsConfig());
       expect(listsIndexMock.createIndex).not.toHaveBeenCalled();
     });
+
+    it('does not call create index if the user can manage indexes and have cluster privilege, but index loading', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        detectionEnginePrivileges: { result: { cluster: { manage: true } } },
+      });
+      listsPrivilegesMock.canManageIndex = true;
+      (useListsIndex as jest.Mock).mockReturnValue({ ...listsIndexMock, loading: true });
+
+      renderHook(() => useListsConfig());
+      expect(listsIndexMock.createIndex).not.toHaveBeenCalled();
+    });
   });
 
   describe('when lists are enabled and indexes exist', () => {

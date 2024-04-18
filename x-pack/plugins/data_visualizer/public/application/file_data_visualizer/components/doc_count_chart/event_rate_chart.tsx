@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
+import type { PartialTheme } from '@elastic/charts';
 import {
   HistogramBarSeries,
   Chart,
   ScaleType,
   Settings,
-  PartialTheme,
   Tooltip,
   TooltipType,
 } from '@elastic/charts';

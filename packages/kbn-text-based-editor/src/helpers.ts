@@ -53,8 +53,10 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
         // if there's line number encoded in the message use it as new positioning
         // and replace the actual message without it
         if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage] = warningMessage.split(':');
-          warningMessage = innerMessage;
+          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+            warningMessage.split(':');
+          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+          warningMessage = additionalInfoMessage ?? innerMessage;
           if (!Number.isNaN(Number(encodedColumn))) {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
@@ -154,6 +156,7 @@ export const getDocumentationSections = async (language: string) => {
       initialSection,
       functions,
       aggregationFunctions,
+      spatialFunctions,
       operators,
     } = await import('./esql_documentation_sections');
     groups.push({
@@ -162,7 +165,14 @@ export const getDocumentationSections = async (language: string) => {
       }),
       items: [],
     });
-    groups.push(sourceCommands, processingCommands, functions, aggregationFunctions, operators);
+    groups.push(
+      sourceCommands,
+      processingCommands,
+      functions,
+      aggregationFunctions,
+      spatialFunctions,
+      operators
+    );
     return {
       groups,
       initialSection,
@@ -189,6 +199,20 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
     isRollupIndex: () => false,
   });
   return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
+};
+
+export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
+  const indices = await dataViews.getIndices({
+    showAllIndices: false,
+    pattern: '*:*',
+    isRollupIndex: () => false,
+  });
+  const finalIndicesList = indices.filter((source) => {
+    const [_, index] = source.name.split(':');
+    return !index.startsWith('.') && !Boolean(source.item.indices);
+  });
+
+  return finalIndicesList.map((source) => ({ name: source.name, hidden: false }));
 };
 
 // refresh the esql cache entry after 10 minutes

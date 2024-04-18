@@ -90,10 +90,7 @@ describe('Connector selector', () => {
     expect(getByTestId('connector-selector')).toBeInTheDocument();
     fireEvent.click(getByTestId('connector-selector'));
     fireEvent.click(getByTestId(connectorTwo.id));
-    expect(onConnectorSelectionChange).toHaveBeenCalledWith({
-      ...connectorTwo,
-      connectorTypeTitle: 'OpenAI',
-    });
+    expect(onConnectorSelectionChange).toHaveBeenCalledWith(connectorTwo);
   });
   it('Calls onConnectorSelectionChange once new connector is saved', () => {
     const { getByTestId } = render(
@@ -106,10 +103,7 @@ describe('Connector selector', () => {
 
     fireEvent.click(getByTestId('modal-mock'));
 
-    expect(onConnectorSelectionChange).toHaveBeenCalledWith({
-      ...newConnector,
-      connectorTypeTitle: 'OpenAI',
-    });
+    expect(onConnectorSelectionChange).toHaveBeenCalledWith(newConnector);
     expect(mockRefetchConnectors).toHaveBeenCalled();
     expect(setIsOpen).toHaveBeenCalledWith(false);
   });

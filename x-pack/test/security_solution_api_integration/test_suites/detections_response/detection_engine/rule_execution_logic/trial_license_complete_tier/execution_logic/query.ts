@@ -43,6 +43,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import moment from 'moment';
@@ -50,12 +51,8 @@ import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/ut
 import {
   createExceptionList,
   createExceptionListItem,
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-  getOpenAlerts,
+  getAlerts,
   getPreviewAlerts,
-  getRuleForAlertTesting,
   getSimpleRule,
   previewRule,
   setAlertStatus,
@@ -65,6 +62,12 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFields,
   dataGeneratorFactory,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -87,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
@@ -122,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
         query: `_id:${ID}`,
       };
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
       expect(alerts.hits.hits.length).greaterThan(0);
       expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).eql(ID);
     });
@@ -198,7 +202,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('should query and get back expected alert structure when it is a alert on a alert', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177101
+    it.skip('should query and get back expected alert structure when it is a alert on a alert', async () => {
       const alertId = 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1';
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
@@ -273,6 +278,45 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+      });
+
+      it('should have host and user risk score fields when suppression enabled on interval', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
+        expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
+        expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+      });
+
+      it('should have host and user risk score fields when suppression enabled on rule execution only', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+          alert_suppression: {
+            group_by: ['host.name'],
+          },
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Critical');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
@@ -283,6 +327,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await kibanaServer.uiSettings.update({
+          [ENABLE_ASSET_CRITICALITY_SETTING]: true,
+        });
       });
 
       after(async () => {
@@ -296,8 +343,26 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('important');
-        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('very_important');
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('high_impact');
+        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('extreme_impact');
+      });
+
+      it('should be enriched alert with criticality_level when suppression enabled', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+          alert_suppression: {
+            group_by: ['host.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts[0]?._source?.['host.asset.criticality']).to.eql('high_impact');
+        expect(previewAlerts[0]?._source?.['user.asset.criticality']).to.eql('extreme_impact');
       });
     });
 
@@ -803,7 +868,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+          const alerts = await getAlerts(supertest, log, es, createdRule);
           expect(alerts.hits.hits.length).eql(1);
           expect(alerts.hits.hits[0]._source).to.eql({
             ...alerts.hits.hits[0]._source,
@@ -833,7 +898,7 @@ export default ({ getService }: FtrProviderContext) => {
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
-          const secondAlerts = await getOpenAlerts(
+          const secondAlerts = await getAlerts(
             supertest,
             log,
             es,
@@ -884,7 +949,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           };
           const createdRule = await createRule(supertest, log, rule);
-          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+          const alerts = await getAlerts(supertest, log, es, createdRule);
 
           // Close the alert. Subsequent rule executions should ignore this closed alert
           // for suppression purposes.
@@ -909,7 +974,7 @@ export default ({ getService }: FtrProviderContext) => {
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
-          const secondAlerts = await getOpenAlerts(
+          const secondAlerts = await getAlerts(
             supertest,
             log,
             es,
@@ -2349,7 +2414,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('elastic-api-version', '2023-10-31')
           .expect(200);
 
-        const alertsAfterEnable = await getOpenAlerts(supertest, log, es, ruleBody, 'succeeded');
+        const alertsAfterEnable = await getAlerts(supertest, log, es, ruleBody, 'succeeded');
         expect(alertsAfterEnable.hits.hits.length > 0).eql(true);
       });
     });

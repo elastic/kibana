@@ -558,6 +558,22 @@
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.accessibilityOverlayEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessibilityOverlayEnabled",
+            "description": [
+              "\nEnables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

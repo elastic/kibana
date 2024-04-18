@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import { LogicMounter } from '../../__mocks__/kea_logic';
 import { mockKibanaValues } from '../../__mocks__/kea_logic/kibana_logic.mock';
 
 import { resetContext } from 'kea';
 
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+
 const { history } = mockKibanaValues;
 
-import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
+import { FlashMessagesLogic } from './flash_messages_logic';
 import { IFlashMessage } from './types';
 
 describe('FlashMessagesLogic', () => {
+  const { mount: mountFlashMessagesLogic, unmount: unmountFlashMessagesLogic } = new LogicMounter(
+    FlashMessagesLogic
+  );
   const mount = () => {
     resetContext({});
-    return mountFlashMessagesLogic();
+    mountFlashMessagesLogic(undefined, {
+      notifications: {} as unknown as NotificationsStart,
+    });
+    return unmountFlashMessagesLogic;
   };
 
   beforeEach(() => {
@@ -27,10 +36,10 @@ describe('FlashMessagesLogic', () => {
   it('has default values', () => {
     mount();
     expect(FlashMessagesLogic.values).toEqual({
-      messages: [],
-      queuedMessages: [],
-      toastMessages: [],
       historyListener: expect.any(Function),
+      messages: [],
+      notifications: {},
+      queuedMessages: [],
     });
   });
 
@@ -90,45 +99,6 @@ describe('FlashMessagesLogic', () => {
         FlashMessagesLogic.actions.clearQueuedMessages();
 
         expect(FlashMessagesLogic.values.queuedMessages).toEqual([]);
-      });
-    });
-  });
-
-  describe('toastMessages', () => {
-    beforeAll(() => {
-      mount();
-    });
-
-    describe('addToastMessage', () => {
-      it('appends a toast message to the current toasts array', () => {
-        FlashMessagesLogic.actions.addToastMessage({ id: 'hello' });
-        FlashMessagesLogic.actions.addToastMessage({ id: 'world' });
-        FlashMessagesLogic.actions.addToastMessage({ id: 'lorem ipsum' });
-
-        expect(FlashMessagesLogic.values.toastMessages).toEqual([
-          { id: 'hello' },
-          { id: 'world' },
-          { id: 'lorem ipsum' },
-        ]);
-      });
-    });
-
-    describe('dismissToastMessage', () => {
-      it('removes a specific toast ID from the current toasts array', () => {
-        FlashMessagesLogic.actions.dismissToastMessage({ id: 'world' });
-
-        expect(FlashMessagesLogic.values.toastMessages).toEqual([
-          { id: 'hello' },
-          { id: 'lorem ipsum' },
-        ]);
-      });
-    });
-
-    describe('clearToastMessages', () => {
-      it('resets toast messages back to an empty array', () => {
-        FlashMessagesLogic.actions.clearToastMessages();
-
-        expect(FlashMessagesLogic.values.toastMessages).toEqual([]);
       });
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { UserActionTypes } from '../../../common/types/domain';
 import type {
@@ -79,6 +79,7 @@ export interface UserActionBuilderArgs {
   onShowAlertDetails?: (alertId: string, index: string) => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+  euiTheme?: EuiThemeComputed<{}>;
 }
 
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {

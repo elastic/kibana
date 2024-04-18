@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
+import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
 import {
   useIsWithinMaxBreakpoint,
   EuiButton,
@@ -16,8 +18,6 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
   type EuiSuperDatePickerProps,
-  OnRefreshProps,
-  OnTimeChangeProps,
 } from '@elastic/eui';
 
 import type { TimeRange } from '@kbn/es-query';
@@ -94,6 +94,15 @@ interface DatePickerWrapperProps {
    * Boolean flag to disable the date picker
    */
   isDisabled?: boolean;
+  /**
+   * Boolean flag to force change from 'Refresh' to 'Update' state
+   */
+  needsUpdate?: boolean;
+  /**
+   * Callback function that gets called
+   * when EuiSuperDatePicker's 'Refresh'|'Update' button is clicked
+   */
+  onRefresh?: () => void;
 }
 
 /**
@@ -111,6 +120,8 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     width,
     flexGroup = true,
     isDisabled = false,
+    needsUpdate,
+    onRefresh,
   } = props;
   const {
     data,
@@ -285,6 +296,12 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     setRefreshInterval({ pause, value });
   }
 
+  const handleRefresh = useCallback(() => {
+    updateLastRefresh();
+    if (onRefresh) {
+      onRefresh();
+    }
+  }, [onRefresh]);
   const flexItems = (
     <>
       <EuiFlexItem>
@@ -296,12 +313,16 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           isAutoRefreshOnly={!isTimeRangeSelectorEnabled || isAutoRefreshOnly}
           refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
           onTimeChange={updateTimeFilter}
-          onRefresh={updateLastRefresh}
+          onRefresh={handleRefresh}
           onRefreshChange={updateInterval}
           recentlyUsedRanges={recentlyUsedRanges}
           dateFormat={dateFormat}
           commonlyUsedRanges={commonlyUsedRanges}
-          updateButtonProps={{ iconOnly: isWithinLBreakpoint, fill: false }}
+          updateButtonProps={{
+            iconOnly: isWithinLBreakpoint,
+            fill: false,
+            ...(needsUpdate ? { needsUpdate } : {}),
+          }}
           width={width}
           isDisabled={isDisabled}
         />
@@ -310,13 +331,20 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
         <EuiFlexItem grow={false}>
           <EuiButton
             fill={false}
-            color="primary"
-            iconType={'refresh'}
-            onClick={() => updateLastRefresh()}
+            color={needsUpdate ? 'success' : 'primary'}
+            iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
+            onClick={handleRefresh}
             data-test-subj={`mlDatePickerRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
             isLoading={isLoading}
           >
-            <FormattedMessage id="xpack.ml.datePicker.pageRefreshButton" defaultMessage="Refresh" />
+            {needsUpdate ? (
+              <FormattedMessage id="xpack.ml.datePicker.pageUpdateButton" defaultMessage="Update" />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.datePicker.pageRefreshButton"
+                defaultMessage="Refresh"
+              />
+            )}
           </EuiButton>
         </EuiFlexItem>
       ) : null}

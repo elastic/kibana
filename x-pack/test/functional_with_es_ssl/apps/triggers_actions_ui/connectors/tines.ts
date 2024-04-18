@@ -29,6 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const actions = getService('actions');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
+  const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
   let simulatorUrl: string;
 
@@ -63,7 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           token: 'apiToken',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -99,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           token: 'apiToken',
         });
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
 
         await testSubjects.click('euiFlyoutCloseButton');

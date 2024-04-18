@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana } from '../../contexts/kibana';
-import { ModelItem } from '../models_list';
+import type { ModelItem } from '../models_list';
 import { ProcessorsStats } from './expanded_row';
 
 export type IngestStatsResponse = Exclude<ModelItem['stats'], undefined>['ingest'];

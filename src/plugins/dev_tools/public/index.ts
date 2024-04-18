@@ -9,11 +9,10 @@
 // TODO: https://github.com/elastic/kibana/issues/110892
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { DevToolsPlugin } from './plugin';
 export * from './plugin';
 export * from '../common/constants';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DevToolsPlugin(initializerContext);
+export function plugin() {
+  return new DevToolsPlugin();
 }

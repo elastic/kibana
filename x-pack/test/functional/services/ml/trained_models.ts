@@ -146,6 +146,27 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
         await testSubjects.missingOrFail('mlTestModelsFlyout');
       });
     },
+
+    async closeCheckingSpacePermissionsModal(): Promise<void> {
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('mlDeleteSpaceAwareItemCheckModalOverlayCloseButton');
+        await testSubjects.missingOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      });
+    },
+
+    async selectModel(name: string): Promise<void> {
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click(`checkboxSelectRow-${name}`);
+        await testSubjects.isChecked(`checkboxSelectRow-${name}`);
+      });
+    },
+
+    async clickBulkDelete() {
+      await retry.tryForTime(3_000, async () => {
+        await testSubjects.click('mlTrainedModelsDeleteSelectedModelsButton');
+        await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay');
+      });
+    },
   };
 }
 

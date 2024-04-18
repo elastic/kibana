@@ -7,10 +7,10 @@
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
-  deleteAllRules,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { deleteAllPrebuiltRuleAssets } from '../../../../utils/rules/prebuilt_rules/delete_all_prebuilt_rule_assets';
 import { deleteAllTimelines } from '../../../../utils/rules/prebuilt_rules/delete_all_timelines';
 import { deletePrebuiltRulesFleetPackage } from '../../../../utils/rules/prebuilt_rules/delete_prebuilt_rules_fleet_package';
@@ -49,7 +49,6 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         overrideExistingPackage: true,
         retryService: retry,
-        log,
       });
 
       // Verify that status is updated after package installation

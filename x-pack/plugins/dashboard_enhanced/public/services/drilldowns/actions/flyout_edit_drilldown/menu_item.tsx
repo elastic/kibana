@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useContainerState } from '@kbn/kibana-utils-plugin/public';
-import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import React, { useMemo } from 'react';
+import { FlyoutEditDrilldownActionApi } from './flyout_edit_drilldown';
 import { txtDisplayName } from './i18n';
 
-export const MenuItem = ({ context }: { context: EnhancedEmbeddableContext }) => {
-  const { events } = useContainerState(context.embeddable.enhancements.dynamicActions.state);
-  const count = events.length;
+export const MenuItem = ({
+  context: { embeddable },
+}: {
+  context: { embeddable: FlyoutEditDrilldownActionApi };
+}) => {
+  const dynamicActionsState = useStateFromPublishingSubject(embeddable.dynamicActionsState$);
+
+  const count = useMemo(() => {
+    return (dynamicActionsState?.dynamicActions?.events ?? []).length;
+  }, [dynamicActionsState]);
 
   return (
     <EuiFlexGroup alignItems={'center'}>

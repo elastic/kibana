@@ -9,6 +9,7 @@
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 type SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueInput> = (
+  // @ts-expect-error upgrade typescript v4.9.5
   savedObject: SavedObjectCommon<TSavedObjectAttributes>
 ) => { savedObjectId: string } | Partial<TByValueInput>;
 

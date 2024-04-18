@@ -8,12 +8,17 @@ import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AssetCriticalityStatusResponse } from '../../../../../common/api/entity_analytics/asset_criticality';
-import { ASSET_CRITICALITY_STATUS_URL, APP_ID } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
+import {
+  ASSET_CRITICALITY_STATUS_URL,
+  APP_ID,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '../../../../../common/constants';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 
 export const assetCriticalityStatusRoute = (
-  router: SecuritySolutionPluginRouter,
+  router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
   router.versioned
@@ -27,6 +32,7 @@ export const assetCriticalityStatusRoute = (
     .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
+        await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
         await checkAndInitAssetCriticalityResources(context, logger);
 
         const securitySolution = await context.securitySolution;

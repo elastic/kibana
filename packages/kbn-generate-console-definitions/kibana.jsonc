@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/generate-console-definitions",
-  "owner": "@elastic/platform-deployment-management"
+  "owner": "@elastic/kibana-management"
 }

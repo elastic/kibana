@@ -13,11 +13,11 @@ import {
   INTERNAL_API_ACCESS,
   GetEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {

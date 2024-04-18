@@ -44,11 +44,11 @@ Please, before opening a PR with the new test, please make sure that the test fa
 
 Note that we use tags in order to select which tests we want to execute:
 
-- `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environemnt (the so-called second quality gate). You need to explicitly add this tag to any test you want to run in CI for serverless. 
+- `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless. 
+- `@serverlessQA` includes a test in the Serverless test suite for the Kibana release process of serverless. You need to explicitly add this tag to any test you want yo run in CI for the second quality gate. These tests should be stable, otherviswe they will be blocking the release pipeline. They should be alsy critical enough, so that when they fail, there's a high chance of an SDH or blocker issue to be reported. 
 - `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
-- `@brokenInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Indicates that a test should run in Serverless, but currently is broken.
-- `@brokenInServerlessQA` excludes a test form the Serverless QA enviornment (second quality gate). Indicates that a test should run on it, but currently is broken.
-- `@skipInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environemnt", "the test has been temporarily excluded, see the comment above why".
+- `@skipInEss` excludes a test from the non-Serverless test suite. The test will not be executed as part for the PR process. All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
+- `@skipInServerless` excludes a test from the Serverless test suite and Serverless QA environment for both, periodic pipeline and second quality gate (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environment", "the test has been temporarily excluded, see the comment above why". All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
 
 Please, before opening a PR with a new test, make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
@@ -233,6 +233,21 @@ Note that the command will create the folder if it does not exist.
 
 Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
 
+Archives used only for Cypress tests purposes are stored in `x-pack/test/security_solution_cypress/es_archives` and are used as follow on the tests.
+
+```typescript
+cy.task('esArchiverLoad', { archiveName: 'overview' });
+cy.task('esArchiverUnload', { archiveName: 'overview'});
+
+```
+
+You can also use archives stored in `kibana/x-pack/test/functional/es_archives`. In order to do sow uste it on the tests as follow.
+
+```typescript
+cy.task('esArchiverLoad', { archiveName: 'security_solution/alias' }, type: 'ftr');
+cy.task('esArchiverUnload', { archiveName: 'security_solution/alias', type:'ftr'});
+```
+
 ## Serverless
 
 Note that we use tags in order to select which tests we want to execute, if you want a test to be executed on serverless you need to add @serverless tag to it.
@@ -288,7 +303,10 @@ For test developing or test debugging purposes, you need to modify the configura
 
 ### Running serverless tests locally pointing to a MKI project created in QA environment (Second Quality Gate)
 
-Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
+Note that when using any of the below scripts, the tests are going to be executed through an MKI project with the version that is currently available in QA. If you need to use
+a specific commit (i.e. debugging a failing tests on the periodic pipeline), check the section: `Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image`.
+
+Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`: 
 
 | Script Name | Description |
 | ----------- | ----------- |
@@ -297,9 +315,9 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:run:qa:serverless:explore | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode using the QA environment and real MKI prorjects. |
 | cypress:run:qa:serverless:investigations | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` directory, excluding `e2e/detection_response/rule_management/prebuilt_rules` in headless mode using the QA environment and reak MKI projects. |
-| cypress:run:qa:serverless:rule_management:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode using the QA environment and reak MKI projects. |
+| cypress:run:qa:serverless:rule_management:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode using the QA environment and real MKI projects. |
 | cypress:run:qa:serverless:detection_engine | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` directory, excluding `e2e/detection_response/detection_engine/exceptions` in headless mode using the QA environment and reak MKI projects. |
-| cypress:run:qa:serverless:detection_engine:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode using the QA environment and reak MKI projects. |
+| cypress:run:qa:serverless:detection_engine:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode using the QA environment and real MKI projects. |
 | cypress:run:qa:serverless:ai_assistant | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode using the QA environment and reak MKI projects. |
 
 
@@ -339,6 +357,19 @@ Store the email and password of the account you used to login in the QA Environm
   }
 }
 ```
+
+### Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image
+
+In order to execute Cypress using a project wih an overridden image, you need to first make sure that the image is created (if you need to debug a failing test of the periodic pipeline, the image is already created you just need to check the commit that was used).
+
+In order to check for the existance of an image check: https://container-library.elastic.co/r/kibana-ci, if the image with the commit you want to use does not exist **DON'T USE THE COMMIT FLAG SINCE YOU MAY CAUSE A MAJOR ISSUE IN CONTROL PLANE > CAUSE A BULK OF ALERTS IN CONTROL PLANE** and the project will not be functional.
+
+You need to have everything setup as mentioned above in `Setup required`. Once the setup is ready you just need to execute Cypress with the following option:
+
+```
+yarn cypress:open:qa:serverless --commit <commitHash>
+```
+
 
 #### Testing with different roles 
 

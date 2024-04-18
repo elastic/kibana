@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
-  AppNavLinkStatus,
+  AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -143,11 +143,11 @@ export class GraphPlugin
       const licenseInformation = checkLicense(license);
 
       this.appUpdater$.next(() => ({
-        navLinkStatus: licenseInformation.showAppLink
+        status: licenseInformation.showAppLink
           ? licenseInformation.enableAppLink
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.disabled
-          : AppNavLinkStatus.hidden,
+            ? AppStatus.accessible
+            : AppStatus.inaccessible
+          : AppStatus.inaccessible,
         tooltip: licenseInformation.showAppLink ? licenseInformation.message : undefined,
       }));
 

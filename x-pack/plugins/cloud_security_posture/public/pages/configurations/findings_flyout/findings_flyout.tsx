@@ -41,8 +41,8 @@ import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { BenchmarkName } from '../../../../common/types_old';
 import { FINDINGS_FLYOUT } from '../test_subjects';
-import { createDetectionRuleFromFinding } from '../utils/create_detection_rule_from_finding';
 import { useKibana } from '../../../common/hooks/use_kibana';
+import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 
 const tabs = [
   {
@@ -147,7 +147,7 @@ export const FindingsRuleFlyout = ({
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
-    await createDetectionRuleFromFinding(http, findings);
+    await createDetectionRuleFromBenchmarkRule(http, findings.rule);
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>

@@ -7,6 +7,9 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
+import { Message, TraceData } from '@kbn/elastic-assistant-common';
+import { ILicense } from '@kbn/licensing-plugin/server';
+import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;
@@ -50,3 +53,37 @@ export const getPluginNameFromRequest = ({
   }
   return defaultPluginName;
 };
+
+export const getMessageFromRawResponse = ({
+  rawContent,
+  isError,
+  traceData,
+}: {
+  rawContent?: string;
+  traceData?: TraceData;
+  isError?: boolean;
+}): Message => {
+  const dateTimeString = new Date().toISOString();
+  if (rawContent) {
+    return {
+      role: 'assistant',
+      content: rawContent,
+      timestamp: dateTimeString,
+      isError,
+      traceData,
+    };
+  } else {
+    return {
+      role: 'assistant',
+      content: 'Error: Response from LLM API is empty or undefined.',
+      timestamp: dateTimeString,
+      isError: true,
+    };
+  }
+};
+
+export const hasAIAssistantLicense = (license: ILicense): boolean =>
+  license.hasAtLeast(MINIMUM_AI_ASSISTANT_LICENSE);
+
+export const UPGRADE_LICENSE_MESSAGE =
+  'Your license does not support AI Assistant. Please upgrade your license.';

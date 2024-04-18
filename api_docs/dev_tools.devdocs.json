@@ -52,32 +52,7 @@
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "devTools",
-                "id": "def-public.DevToolsPlugin.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "initializerContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
-                  "<",
-                  "ConfigSchema",
-                  ">"
-                ],
-                "path": "src/plugins/dev_tools/public/plugin.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
+            "children": [],
             "returnComment": []
           },
           {
@@ -217,15 +192,15 @@
       },
       {
         "parentPluginId": "devTools",
-        "id": "def-public.ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "id": "def-public.ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
         "type": "string",
         "tags": [],
-        "label": "ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "label": "ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
         "description": [
-          "\nUI Setting ID for enabling / disabling the docked console in Kibana"
+          "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
         ],
         "signature": [
-          "\"devTools:enableDockedConsole\""
+          "\"devTools:enablePersistentConsole\""
         ],
         "path": "src/plugins/dev_tools/common/constants.ts",
         "deprecated": false,
@@ -322,15 +297,15 @@
       },
       {
         "parentPluginId": "devTools",
-        "id": "def-common.ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "id": "def-common.ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
         "type": "string",
         "tags": [],
-        "label": "ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "label": "ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID",
         "description": [
-          "\nUI Setting ID for enabling / disabling the docked console in Kibana"
+          "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
         ],
         "signature": [
-          "\"devTools:enableDockedConsole\""
+          "\"devTools:enablePersistentConsole\""
         ],
         "path": "src/plugins/dev_tools/common/constants.ts",
         "deprecated": false,

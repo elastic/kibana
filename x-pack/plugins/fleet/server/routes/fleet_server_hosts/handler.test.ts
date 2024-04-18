@@ -33,14 +33,10 @@ describe('fleet server hosts handler', () => {
     jest
       .spyOn(fleetServerService, 'updateFleetServerHost')
       .mockResolvedValue({ id: 'host1' } as any);
-    jest.spyOn(fleetServerService, 'listFleetServerHosts').mockResolvedValue({
-      items: [
-        { id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID, host_urls: ['http://elasticsearch:9200'] },
-      ] as any,
-      total: 1,
-      page: 1,
-      perPage: 1,
-    });
+    jest.spyOn(fleetServerService, 'getFleetServerHost').mockResolvedValue({
+      id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+      host_urls: ['http://elasticsearch:9200'],
+    } as any);
     jest
       .spyOn(agentPolicyService, 'bumpAllAgentPoliciesForFleetServerHosts')
       .mockResolvedValue({} as any);
@@ -118,17 +114,29 @@ describe('fleet server hosts handler', () => {
     expect(res).toEqual({ body: { item: { id: 'host1' } } });
   });
 
-  // it('should return ok on put in stateful if host url is different from default', async () => {
-  //   jest
-  //     .spyOn(appContextService, 'getCloud')
-  //     .mockReturnValue({ isServerlessEnabled: false } as any);
+  it('should return ok on put in serverless if host urls are not passed', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-  //   const res = await putFleetServerHostHandler(
-  //     mockContext,
-  //     { body: { host_urls: ['http://localhost:8080'] }, params: { outputId: 'host1' } } as any,
-  //     mockResponse as any
-  //   );
+    const res = await putFleetServerHostHandler(
+      mockContext,
+      { body: { name: ['Renamed'] }, params: { outputId: 'host1' } } as any,
+      mockResponse as any
+    );
 
-  //   expect(res).toEqual({ body: { item: { id: 'host1' } } });
-  // });
+    expect(res).toEqual({ body: { item: { id: 'host1' } } });
+  });
+
+  it('should return ok on put in stateful if host url is different from default', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+
+    const res = await putFleetServerHostHandler(
+      mockContext,
+      { body: { host_urls: ['http://localhost:8080'] }, params: { outputId: 'host1' } } as any,
+      mockResponse as any
+    );
+
+    expect(res).toEqual({ body: { item: { id: 'host1' } } });
+  });
 });

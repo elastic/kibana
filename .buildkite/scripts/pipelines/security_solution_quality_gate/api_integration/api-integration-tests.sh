@@ -51,7 +51,7 @@ KB_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.kibana')
 sleep 5
 
 # Resetting the credentials of the elastic user in the project
-CREDS_BODY=$(curl -s --location --request POST "$QA_CONSOLE_URL/api/v1/serverless/projects/security/$ID/_reset-credentials" \
+CREDS_BODY=$(curl -s --location --request POST "$QA_CONSOLE_URL/api/v1/serverless/projects/security/$ID/_reset-internal-credentials" \
   --header "Authorization: ApiKey $QA_API_KEY" \
   --header 'Content-Type: application/json' | jq '.')
 USERNAME=$(echo $CREDS_BODY | jq -r '.username')
@@ -90,7 +90,7 @@ FORMATTED_KB_URL="${KB_URL/https:\/\//}"
 # This is used in order to wait for the environment to be ready.
 sleep 150
 
-TEST_CLOUD=1 TEST_ES_URL="https://elastic:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://elastic:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1
+TEST_CLOUD=1 TEST_ES_URL="https://$USERNAME:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://$USERNAME:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1
 cmd_status=$?
 echo "Exit code with status: $cmd_status"
 

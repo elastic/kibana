@@ -40,7 +40,6 @@ describe('pipeline_serialization', () => {
             description: 'pipeline3 description',
             version: 1,
             processors: [],
-            // @ts-expect-error es type do not contains _meta https://github.com/elastic/elasticsearch-js/issues/1724
             _meta: {
               managed: true,
             },

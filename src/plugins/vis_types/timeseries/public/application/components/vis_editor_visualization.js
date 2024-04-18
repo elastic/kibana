@@ -18,7 +18,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 
 import './_vis_editor_visualization.scss';
 

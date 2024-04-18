@@ -97,8 +97,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Should redirect to Node Details page', async () => {
-            await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
             await pageObjects.infraHome.goToPods();
+            await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 

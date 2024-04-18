@@ -12,7 +12,7 @@ import moment from 'moment';
 import { getApi } from './api';
 import { TestScheduler } from 'rxjs/testing';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 
 import { NewsfeedApiDriver as MockNewsfeedApiDriver } from './driver';
 import { NeverFetchNewsfeedApiDriver as MockNeverFetchNewsfeedApiDriver } from './never_fetch_driver';

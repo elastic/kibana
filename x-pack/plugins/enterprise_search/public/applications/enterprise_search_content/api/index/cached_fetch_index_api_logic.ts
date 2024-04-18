@@ -13,6 +13,7 @@ import { Status } from '../../../../../common/types/api';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
+import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 
 import {
   FetchIndexApiParams,
@@ -56,7 +57,12 @@ export const CachedFetchIndexApiLogic = kea<
   },
   connect: {
     actions: [FetchIndexApiLogic, ['apiSuccess', 'apiError', 'apiReset', 'makeRequest']],
-    values: [FetchIndexApiLogic, ['data as fetchIndexApiData', 'status']],
+    values: [
+      FetchIndexApiLogic,
+      ['data as fetchIndexApiData', 'status'],
+      IndexNameLogic,
+      ['indexName'],
+    ],
   },
   events: ({ values }) => ({
     beforeUnmount: () => {
@@ -92,9 +98,11 @@ export const CachedFetchIndexApiLogic = kea<
         if (indexName === values.indexName) return;
         clearTimeout(values.pollTimeoutId);
       }
-      actions.makeRequest({ indexName });
+      if (indexName) {
+        actions.makeRequest({ indexName });
 
-      actions.createPollTimeout(FETCH_INDEX_POLLING_DURATION);
+        actions.createPollTimeout(FETCH_INDEX_POLLING_DURATION);
+      }
     },
     stopPolling: () => {
       if (values.pollTimeoutId) {
@@ -112,13 +120,6 @@ export const CachedFetchIndexApiLogic = kea<
         apiSuccess: (currentState, newIndexData) => {
           return isEqual(currentState, newIndexData) ? currentState : newIndexData;
         },
-      },
-    ],
-    indexName: [
-      '',
-      {
-        apiReset: () => '',
-        startPolling: (_, { indexName }) => indexName,
       },
     ],
     pollTimeoutId: [
