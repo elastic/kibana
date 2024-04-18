@@ -503,30 +503,26 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
-      if (code === codeWhenSubmitted) {
-        if (serverErrors || serverWarning) {
-          const parsedErrors = parseErrors(serverErrors || [], code);
-          const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
-          setEditorMessages({
-            errors: parsedErrors,
-            warnings: parsedErrors.length ? [] : parsedWarning,
-          });
-          monaco.editor.setModelMarkers(
-            editorModel.current,
-            'Unified search',
-            parsedErrors.length ? parsedErrors : []
-          );
-          const parserMessages = await parseMessages();
-          setClientParserMessages({
-            errors: parserMessages?.errors ?? [],
-            warnings: parserMessages?.warnings ?? [],
-          });
-          return;
-        }
-      } else {
-        queryValidation(subscription).catch((error) => {
-          // console.log({ error });
+      if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        const parsedErrors = parseErrors(serverErrors || [], code);
+        const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
+        setEditorMessages({
+          errors: parsedErrors,
+          warnings: parsedErrors.length ? [] : parsedWarning,
         });
+        monaco.editor.setModelMarkers(
+          editorModel.current,
+          'Unified search',
+          parsedErrors.length ? parsedErrors : []
+        );
+        const parserMessages = await parseMessages();
+        setClientParserMessages({
+          errors: parserMessages?.errors ?? [],
+          warnings: parserMessages?.warnings ?? [],
+        });
+        return;
+      } else {
+        queryValidation(subscription).catch(() => {});
       }
       return () => (subscription.active = false);
     },
