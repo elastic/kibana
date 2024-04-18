@@ -6,12 +6,17 @@
  */
 
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { HealthOverviewStats, HealthOverviewState, HealthHistory } from './health_stats';
+import type { SpaceHealthOverviewStats, HealthOverviewState, HealthHistory } from './health_stats';
 
 /**
  * Health calculation parameters for the current Kibana space.
  */
-export type SpaceHealthParameters = HealthParameters;
+export interface SpaceHealthParameters extends HealthParameters {
+  /**
+   * Number of top rules for each metric
+   */
+  num_of_top_rules: number;
+}
 
 /**
  * Health calculation result for the current Kibana space.
@@ -41,4 +46,4 @@ export type SpaceHealthState = HealthOverviewState;
 /**
  * Health stats calculated over a given interval.
  */
-export type SpaceHealthStats = HealthOverviewStats;
+export type SpaceHealthStats = SpaceHealthOverviewStats;

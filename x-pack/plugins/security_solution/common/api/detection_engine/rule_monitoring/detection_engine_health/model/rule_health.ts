@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '../../../model';
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { HealthOverviewStats, HealthHistory } from './health_stats';
+import type { RuleHealthOverviewStats, HealthHistory } from './health_stats';
 
 /**
  * Health calculation parameters for a given rule.
@@ -52,4 +52,4 @@ export interface RuleHealthState {
 /**
  * Health stats calculated over a given interval.
  */
-export type RuleHealthStats = HealthOverviewStats;
+export type RuleHealthStats = RuleHealthOverviewStats;

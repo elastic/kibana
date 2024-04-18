@@ -10,12 +10,12 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-
 import type {
   GetClusterHealthRequest,
   GetClusterHealthResponse,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
+  TOP_N_RULES_LIMIT,
   GET_CLUSTER_HEALTH_URL,
   GetClusterHealthRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -107,7 +107,10 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
     const params = resolveParameters();
     const { healthClient } = await resolveDependencies();
 
-    const clusterHealthParameters = { interval: params.interval };
+    const clusterHealthParameters = {
+      interval: params.interval,
+      num_of_top_rules: TOP_N_RULES_LIMIT,
+    };
     const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
     const responseBody: GetClusterHealthResponse = {

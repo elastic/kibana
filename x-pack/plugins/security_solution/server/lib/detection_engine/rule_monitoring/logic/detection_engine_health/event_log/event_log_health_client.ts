@@ -29,9 +29,10 @@ import {
 import { kqlOr } from '../../utils/kql';
 import type { IRuleSpacesClient } from '../rule_spaces/rule_spaces_client';
 import {
-  getRuleHealthAggregation,
   normalizeRuleHealthAggregationResult,
-} from './aggregations/health_stats_for_rule';
+  normalizeSpacesHealthAggregationResult,
+} from './normalizers';
+import { getRuleHealthAggregation, getSpacesHealthAggregation } from './aggregations';
 
 /**
  * Client for calculating health stats based on events in .kibana-event-log-* index.
@@ -124,23 +125,23 @@ export const createEventLogHealthClient = (
     },
 
     async calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
-      const { interval } = args;
+      const { interval, num_of_top_rules: numOfTopRules } = args;
 
       const spaceIds = [ruleSpacesClient.getCurrentSpaceId()];
 
-      const aggs = getRuleHealthAggregation(interval.granularity);
+      const aggs = getSpacesHealthAggregation(interval.granularity, numOfTopRules);
       const result = await aggregateEventsForSpaces(spaceIds, interval, aggs);
-      return normalizeRuleHealthAggregationResult(result, aggs);
+      return normalizeSpacesHealthAggregationResult(result, aggs);
     },
 
     async calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth> {
-      const { interval } = args;
+      const { interval, num_of_top_rules: numOfTopRules } = args;
 
       const spaceIds = await ruleSpacesClient.getAllSpaceIds();
 
-      const aggs = getRuleHealthAggregation(interval.granularity);
+      const aggs = getSpacesHealthAggregation(interval.granularity, numOfTopRules);
       const result = await aggregateEventsForSpaces(spaceIds, interval, aggs);
-      return normalizeRuleHealthAggregationResult(result, aggs);
+      return normalizeSpacesHealthAggregationResult(result, aggs);
     },
   };
 };
