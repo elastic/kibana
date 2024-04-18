@@ -120,6 +120,10 @@ describe('CrowdstrikeActionsClient class', () => {
               type: 'INPUT_ACTION',
             },
             agent: { id: ['1-2-3'] },
+            meta: {
+              agentId: '1-2-3',
+              hostName: 'Crowdstrike-1460',
+            },
             user: { id: 'foo' },
           },
           index: ENDPOINT_ACTIONS_INDEX,
@@ -188,6 +192,10 @@ describe('CrowdstrikeActionsClient class', () => {
               type: 'INPUT_ACTION',
             },
             agent: { id: ['1-2-3'] },
+            meta: {
+              agentId: '1-2-3',
+              hostName: 'Crowdstrike-1460',
+            },
             user: { id: 'foo' },
           },
           index: ENDPOINT_ACTIONS_INDEX,
