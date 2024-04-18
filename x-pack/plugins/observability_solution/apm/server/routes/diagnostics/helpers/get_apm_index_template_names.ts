@@ -35,9 +35,7 @@ export function getApmIndexTemplates(
 ) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
   const standardIndexTemplates = apmIndexTemplateNames.map((templateName) => {
-    const matchingTemplate = existingIndexTemplates.find(
-      ({ name }) => name === templateName
-    );
+    const matchingTemplate = existingIndexTemplates.find(({ name }) => name === templateName);
 
     return {
       name: templateName,
@@ -49,9 +47,7 @@ export function getApmIndexTemplates(
   const nonStandardIndexTemplates = existingIndexTemplates
     .filter(
       (indexTemplate) =>
-        standardIndexTemplates.some(
-          ({ name }) => name === indexTemplate.name
-        ) === false
+        standardIndexTemplates.some(({ name }) => name === indexTemplate.name) === false
     )
     .map((indexTemplate) => ({
       name: indexTemplate.name,
