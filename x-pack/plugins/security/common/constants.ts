@@ -25,6 +25,11 @@ export const APPLICATION_PREFIX = 'kibana-';
 export const RESERVED_PRIVILEGES_APPLICATION_WILDCARD = 'kibana-*';
 
 /**
+ * The wildcard identifier for all application privileges.
+ */
+export const RESERVED_PRIVILEGES_ALL_WILDCARD = '*';
+
+/**
  * This is the key of a query parameter that contains the name of the authentication provider that should be used to
  * authenticate request. It's also used while the user is being redirected during single-sign-on authentication flows.
  * That query parameter is discarded after the authentication flow succeeds. See the `Authenticator`,
