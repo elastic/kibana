@@ -7,45 +7,22 @@
  */
 
 import React from 'react';
-import * as PropTypes from 'prop-types';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import { IntlProvider, FormattedMessage } from 'react-intl';
+import { IntlProvider } from 'react-intl';
 import { i18n } from '@kbn/i18n';
 
 const emptyMessages = {};
-const locale = 'en_EN';
 
 export const I18nProviderMock: React.FC = ({ children }) => {
   return (
     <IntlProvider
-      locale={locale}
+      locale={i18n.getLocale()}
       messages={emptyMessages}
-      defaultLocale={locale}
+      defaultLocale={i18n.getLocale()}
       formats={i18n.getFormats()}
       textComponent={React.Fragment}
     >
-      <MockTranslateWrapper>{children}</MockTranslateWrapper>
+      {children}
     </IntlProvider>
   );
 };
-
-// inspired from PseudoLocaleWrapper
-class MockTranslateWrapper extends React.PureComponent {
-  public static propTypes = { children: PropTypes.element.isRequired };
-
-  public static contextTypes = {
-    intl: PropTypes.object.isRequired,
-  };
-
-  constructor(props: { children: React.ReactNode }, context: any) {
-    super(props, context);
-
-    context.intl.formatMessage = (message: FormattedMessage.MessageDescriptor) => {
-      return message.defaultMessage ?? message.id;
-    };
-  }
-
-  public render() {
-    return this.props.children;
-  }
-}
