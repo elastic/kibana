@@ -20,24 +20,22 @@ import {
 import React, { Component, Fragment } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
-import type { I18nStart, NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { StartServices } from '../../../..';
 import type { RolesAPIClient } from '../../roles_api_client';
 
-interface Props {
+interface Props extends StartServices {
   rolesToDelete: string[];
   callback: (rolesToDelete: string[], errors: string[]) => void;
   onCancel: () => void;
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   buildFlavor: BuildFlavor;
-  theme: ThemeServiceStart;
-  i18nStart: I18nStart;
   cloudOrgUrl?: string;
 }
 
@@ -213,10 +211,7 @@ export class ConfirmDelete extends Component<Props, State> {
               </EuiFlexItem>
             </EuiFlexGroup>
           </>,
-          {
-            i18n: this.props.i18nStart,
-            theme: this.props.theme,
-          }
+          this.props
         ),
       });
     }
