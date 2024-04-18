@@ -480,7 +480,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     const { messages } = conversation;
 
                     // Verify that data changed after user interaction before being sent to telemetry
-                    expect(messages.length).to.eql(7);
+                    expect(messages.length).to.eql(9);
                   });
                 });
               });
