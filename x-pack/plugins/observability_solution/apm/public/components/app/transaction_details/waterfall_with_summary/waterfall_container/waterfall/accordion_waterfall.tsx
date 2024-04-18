@@ -22,10 +22,7 @@ import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
-import {
-  IWaterfall,
-  IWaterfallSpanOrTransaction,
-} from './waterfall_helpers/waterfall_helpers';
+import { IWaterfall, IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
 
 interface AccordionWaterfallProps {
@@ -36,10 +33,7 @@ interface AccordionWaterfallProps {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (
-    item: IWaterfallSpanOrTransaction,
-    flyoutDetailTab: string
-  ) => void;
+  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   showCriticalPath: boolean;
   maxLevelOpen: number;
 }
@@ -47,8 +41,7 @@ interface AccordionWaterfallProps {
 const ACCORDION_HEIGHT = '48px';
 
 const StyledAccordion = euiStyled(EuiAccordion).withConfig({
-  shouldForwardProp: (prop) =>
-    !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
+  shouldForwardProp: (prop) => !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
 })<
   EuiAccordionProps & {
     childrenCount: number;
@@ -103,21 +96,14 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 
   let children = waterfall.childrenByParentId[item.id] || [];
 
-  const criticalPath = showCriticalPath
-    ? getCriticalPath(waterfall)
-    : undefined;
+  const criticalPath = showCriticalPath ? getCriticalPath(waterfall) : undefined;
 
-  const criticalPathSegmentsById = groupBy(
-    criticalPath?.segments,
-    (segment) => segment.item.id
-  );
+  const criticalPathSegmentsById = groupBy(criticalPath?.segments, (segment) => segment.item.id);
 
   let displayedColor = item.color;
 
   if (showCriticalPath) {
-    children = children.filter(
-      (child) => criticalPathSegmentsById[child.id]?.length
-    );
+    children = children.filter((child) => criticalPathSegmentsById[child.id]?.length);
     displayedColor = transparentize(0.5, item.color);
   }
 
@@ -172,8 +158,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
                 ?.filter((segment) => segment.self)
                 .map((segment) => ({
                   color: theme.eui.euiColorAccent,
-                  left:
-                    (segment.offset - item.offset - item.skew) / item.duration,
+                  left: (segment.offset - item.offset - item.skew) / item.duration,
                   width: segment.duration / item.duration,
                 }))}
             />
