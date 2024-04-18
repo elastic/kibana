@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/173095
+  // Failing: See https://github.com/elastic/kibana/issues/173095
   describe.skip('Auto open file upload wizard in maps app', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('integrations', 'browse', {
