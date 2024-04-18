@@ -219,7 +219,7 @@ function compareLiteralType(argTypes: string, item: ESQLLiteral) {
   return argTypes === item.literalType;
 }
 
-export function getColumnHit(
+export function getColumnByName(
   columnName: string,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>,
   position?: number
@@ -322,8 +322,8 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = getColumnHit(subArg.name, references);
-        types.push(hit?.type || 'unsupported');
+        const column = getColumnByName(subArg.name, references);
+        types.push(column?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
         types.push('time_literal');
@@ -363,42 +363,57 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionArgSignat
  * Checks if an AST argument is of the correct type
  * given the definition.
  */
-export function isEqualType(
+export function checkArgTypeMatchesDefinitionType(
   arg: ESQLSingleAstItem,
   argDef: SignatureArgType,
   references: ReferenceMaps,
   parentCommand?: string,
   nameHit?: string
-) {
-  const argType = 'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
-  if (argType === 'any') {
-    return true;
+): { matches: true } | { matches: false; expectedType: string; givenType: string } {
+  const expectedArgType =
+    'innerType' in argDef && argDef.innerType ? argDef.innerType : argDef.type;
+  if (expectedArgType === 'any') {
+    return { matches: true };
   }
   if (arg.type === 'literal') {
-    return compareLiteralType(argType, arg);
+    return compareLiteralType(expectedArgType, arg)
+      ? { matches: true }
+      : { matches: false, expectedType: expectedArgType, givenType: arg.literalType };
   }
   if (arg.type === 'function') {
     if (isSupportedFunction(arg.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(arg.name)!;
-      return fnDef.signatures.some((signature) => argType === signature.returnType);
+      // TODO - should filter down signatures based on current args
+      return fnDef.signatures.some((signature) => expectedArgType === signature.returnType)
+        ? { matches: true }
+        : {
+            matches: false,
+            expectedType: expectedArgType,
+            givenType: fnDef.signatures[0].returnType,
+          };
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(arg);
+    return expectedArgType === 'time_literal' && inKnownTimeInterval(arg)
+      ? { matches: true }
+      : { matches: false, expectedType: expectedArgType, givenType: arg.type };
   }
   if (arg.type === 'column') {
-    if (argType === 'column') {
+    if (expectedArgType === 'column') {
       // anything goes, so avoid any effort here
-      return true;
+      return { matches: true };
     }
-    const hit = getColumnHit(nameHit ?? arg.name, references);
-    const validHit = hit;
-    if (!validHit) {
-      return false;
+    const column = getColumnByName(nameHit ?? arg.name, references);
+    if (!column) {
+      return { matches: false, expectedType: expectedArgType, givenType: arg.type };
     }
-    const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
-    return wrappedTypes.some((ct) => argType === ct);
+    const wrappedTypes = Array.isArray(column.type) ? column.type : [column.type];
+    return wrappedTypes.some((ct) => expectedArgType === ct)
+      ? { matches: true }
+      : { matches: false, expectedType: expectedArgType, givenType: wrappedTypes[0] };
   }
+
+  return { matches: false, expectedType: expectedArgType, givenType: arg.type };
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {

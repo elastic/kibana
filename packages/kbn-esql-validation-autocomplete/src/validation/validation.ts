@@ -29,12 +29,12 @@ import {
 import {
   areFieldAndVariableTypesCompatible,
   extractSingularType,
-  getColumnHit,
+  getColumnByName,
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
   isColumnItem,
-  isEqualType,
+  checkArgTypeMatchesDefinitionType,
   isFunctionItem,
   isLiteralItem,
   isOptionItem,
@@ -100,15 +100,21 @@ function validateFunctionLiteralArg(
       );
     }
 
-    if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+    const matchResult = checkArgTypeMatchesDefinitionType(
+      actualArg,
+      argDef,
+      references,
+      parentCommand
+    );
+    if (!matchResult.matches) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type,
+            expectedType: matchResult.expectedType,
             value: actualArg.value,
-            givenType: actualArg.literalType,
+            givenType: matchResult.givenType,
           },
           locations: actualArg.location,
         })
@@ -128,15 +134,21 @@ function validateFunctionLiteralArg(
         })
       );
     } else {
-      if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+      const matchResult = checkArgTypeMatchesDefinitionType(
+        actualArg,
+        argDef,
+        references,
+        parentCommand
+      );
+      if (!matchResult.matches) {
         messages.push(
           getMessageFromId({
             messageId: 'wrongArgumentType',
             values: {
               name: astFunction.name,
-              argType: argDef.type,
+              expectedType: matchResult.expectedType,
               value: actualArg.name,
-              givenType: 'duration',
+              givenType: matchResult.givenType,
             },
             locations: actualArg.location,
           })
@@ -173,15 +185,21 @@ function validateNestedFunctionArg(
         })
       );
     }
-    if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+    const matchResult = checkArgTypeMatchesDefinitionType(
+      actualArg,
+      argDef,
+      references,
+      parentCommand
+    );
+    if (!matchResult.matches) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type,
             value: printFunctionSignature(actualArg) || actualArg.name,
-            givenType: argFn.signatures[0].returnType,
+            expectedType: matchResult.expectedType,
+            givenType: matchResult.givenType,
           },
           locations: actualArg.location,
         })
@@ -253,17 +271,22 @@ function validateFunctionColumnArg(
           }
           // do not validate any further for now, only count() accepts wildcard as args...
         } else {
-          if (!isEqualType(actualArg, argDef, references, parentCommand, nameHit)) {
-            // guaranteed by the check above
-            const columnHit = getColumnHit(nameHit!, references);
+          const matchResult = checkArgTypeMatchesDefinitionType(
+            actualArg,
+            argDef,
+            references,
+            parentCommand,
+            nameHit
+          );
+          if (!matchResult.matches) {
             messages.push(
               getMessageFromId({
                 messageId: 'wrongArgumentType',
                 values: {
                   name: astFunction.name,
-                  argType: argDef.type,
                   value: actualArg.name,
-                  givenType: columnHit!.type,
+                  expectedType: matchResult.expectedType,
+                  givenType: matchResult.givenType,
                 },
                 locations: actualArg.location,
               })
@@ -694,7 +717,7 @@ function validateColumnForCommand(
         ({ type, innerType }) => type === 'column' && innerType
       );
       // this should be guaranteed by the columnCheck above
-      const columnRef = getColumnHit(nameHit, references)!;
+      const columnRef = getColumnByName(nameHit, references)!;
 
       if (columnParamsWithInnerTypes.length) {
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {

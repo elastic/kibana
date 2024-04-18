@@ -22,17 +22,19 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
   // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
   switch (messageId) {
     case 'wrongArgumentType':
+      const printType = (type: string) => (type === 'timeInterval' ? 'duration' : type);
+
       return {
         message: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.validation.wrongArgumentType',
           {
             defaultMessage:
-              'Argument of [{name}] must be [{argType}], found value [{value}] type [{givenType}]',
+              'Argument of [{name}] must be [{expectedType}], found value [{value}] type [{givenType}]',
             values: {
               name: out.name,
-              argType: out.argType,
               value: out.value,
-              givenType: out.givenType,
+              expectedType: printType(out.expectedType),
+              givenType: printType(out.givenType),
             },
           }
         ),
