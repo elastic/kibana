@@ -15,7 +15,7 @@ export default defineCypressConfig(
       IS_SERVERLESS: true,
       // Uncomment to enable logging
       // TOOLING_LOG_LEVEL: 'verbose',
-      grepTags: '@serverless --@skipInServerless',
+      grepTags: '@serverlessQA --@skipInServerless',
     },
   })
 );
