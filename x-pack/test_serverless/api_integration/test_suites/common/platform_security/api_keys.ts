@@ -177,6 +177,20 @@ export default function ({ getService }: FtrProviderContext) {
           });
           expect(status).toBe(200);
         });
+
+        it('query', async () => {
+          const requestBody = {
+            query: {},
+          };
+
+          const { body } = await supertest
+            .put('/internal/security/api_key/_query')
+            .set(svlCommonApi.getCommonRequestHeader())
+            .send(requestBody)
+            .expect(200);
+
+          expect(body.apiKeys.length).toBeGreaterThan(1);
+        });
       });
     });
   });
