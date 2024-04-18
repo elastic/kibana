@@ -16,6 +16,7 @@ import { InPortal } from 'react-reverse-portal';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import memoizeOne from 'memoize-one';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -30,8 +31,6 @@ import { TimelineRefetch } from '../../refetch_timeline';
 import type { ToggleDetailPanel } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
-import { ExitFullScreen } from '../../../../../common/components/exit_full_screen';
-import { SuperDatePicker } from '../../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
@@ -40,31 +39,26 @@ import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
-import { TimelineDatePickerLock } from '../../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import { DetailsPanel } from '../../../side_panel';
-import { EqlQueryBarTimeline } from '../../query_bar/eql';
 import { getDefaultControlColumn } from '../../body/control_columns';
 import type { Sort } from '../../body/sort';
-import { Sourcerer } from '../../../../../common/components/sourcerer';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
 import {
   EventsCountBadge,
   FullWidthFlexGroup,
   ScrollableFlexItem,
-  StyledEuiFlyoutHeader,
   StyledEuiFlyoutBody,
   StyledEuiFlyoutFooter,
   VerticalRule,
-  TabHeaderContainer,
 } from '../shared/layout';
 import { EMPTY_EVENTS, isTimerangeSame } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import memoizeOne from 'memoize-one';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
+import { EqlTabHeader } from './header';
 
 const memoizedGetColumnHeaders: (
   headers: ColumnHeaderOptions[],
@@ -197,60 +191,19 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [ACTION_BUTTON_COUNT]
   );
 
-  const header = useMemo(
+  const unifiedHeader = useMemo(
     () => (
-      <>
-        <EuiFlexItem grow={false}>
-          <StyledEuiFlyoutHeader
-            data-test-subj={`${activeTab}-tab-flyout-header`}
-            hasBorder={false}
-          >
-            <TabHeaderContainer data-test-subj="timelineHeader">
-              <EuiFlexGroup
-                className="euiScrollBar"
-                alignItems="flexStart"
-                gutterSize="s"
-                data-test-subj="timeline-date-picker-container"
-                responsive={false}
-              >
-                {timelineFullScreen && setTimelineFullScreen != null && (
-                  <ExitFullScreen
-                    fullScreen={timelineFullScreen}
-                    setFullScreen={setTimelineFullScreen}
-                  />
-                )}
-                <EuiFlexItem grow={false}>
-                  {activeTab === TimelineTabs.eql && (
-                    <Sourcerer scope={SourcererScopeName.timeline} />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <SuperDatePicker
-                    width="auto"
-                    id={InputsModelId.timeline}
-                    timelineId={timelineId}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <TimelineDatePickerLock />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </TabHeaderContainer>
-          </StyledEuiFlyoutHeader>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EqlQueryBarTimeline timelineId={timelineId} />
-        </EuiFlexItem>
-      </>
+      <EuiFlexGroup gutterSize="s" direction="column">
+        <EqlTabHeader
+          activeTab={activeTab}
+          setTimelineFullScreen={setTimelineFullScreen}
+          timelineFullScreen={timelineFullScreen}
+          timelineId={timelineId}
+        />
+      </EuiFlexGroup>
     ),
-    []
+    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
-
-  const unifiedHeader = useMemo(() => (
-    <EuiFlexGroup gutterSize="s" direction="column">
-      {header}
-    </EuiFlexGroup>
-  ), []);
 
   return (
     <>
@@ -300,7 +253,12 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           <FullWidthFlexGroup>
             <ScrollableFlexItem grow={2}>
               <EuiFlexGroup gutterSize="s" direction="column">
-                {header}
+                <EqlTabHeader
+                  activeTab={activeTab}
+                  setTimelineFullScreen={setTimelineFullScreen}
+                  timelineFullScreen={timelineFullScreen}
+                  timelineId={timelineId}
+                />
                 <EuiFlexItem grow={true}>
                   <EventDetailsWidthProvider>
                     <StyledEuiFlyoutBody
