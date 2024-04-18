@@ -7,7 +7,8 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import { APIKeysAPIClient, QueryApiKeyParams } from './api_keys_api_client';
+import { APIKeysAPIClient } from './api_keys_api_client';
+import type { QueryApiKeyParams } from './api_keys_api_client';
 
 describe('APIKeysAPIClient', () => {
   it('invalidateApiKeys() queries correct endpoint', async () => {
