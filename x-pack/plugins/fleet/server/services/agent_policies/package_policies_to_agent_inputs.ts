@@ -49,7 +49,7 @@ export const storedPackagePolicyToAgentInputs = (
       : packagePolicy.id;
 
     const fullInput: FullAgentPolicyInput = {
-      // @ts-ignore-next-line
+      // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
       id: inputId,
       revision: packagePolicy.revision,
       name: packagePolicy.name,

@@ -120,6 +120,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
       await templatePackagePolicyToFullInputStreams([{ ...mockInput, enabled: false }])
     ).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             data_stream: {
@@ -129,7 +130,6 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
             id: 'test-logs-foo',
-            type: 'test-logs',
           },
           {
             data_stream: {
@@ -137,7 +137,6 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
               type: 'logs',
             },
             id: 'test-logs-bar',
-            type: 'test-logs',
           },
         ],
       },
@@ -147,18 +146,17 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
   it('returns agent inputs with streams', async () => {
     expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
-            type: 'test-logs',
           },
           {
             id: 'test-logs-bar',
             data_stream: { dataset: 'bar', type: 'logs' },
-            type: 'test-logs',
           },
         ],
       },
@@ -168,10 +166,10 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
   it('returns unique agent inputs IDs, with policy template name if one exists for non-limited packages', async () => {
     expect(await templatePackagePolicyToFullInputStreams([mockInput])).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
-            type: 'test-logs',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
@@ -179,7 +177,6 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
           {
             id: 'test-logs-bar',
             data_stream: { dataset: 'bar', type: 'logs' },
-            type: 'test-logs',
           },
         ],
       },
@@ -189,6 +186,7 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
   it('returns agent inputs without streams', async () => {
     expect(await templatePackagePolicyToFullInputStreams([mockInput2])).toEqual([
       {
+        id: 'test-metrics-some-template',
         streams: [
           {
             data_stream: {
@@ -198,7 +196,6 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
             id: 'test-metrics-foo',
-            type: 'test-metrics',
           },
         ],
       },
@@ -215,10 +212,10 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
       ])
     ).toEqual([
       {
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
-            type: 'test-logs',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
@@ -229,7 +226,6 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
               type: 'logs',
             },
             id: 'test-logs-bar',
-            type: 'test-logs',
           },
         ],
       },
@@ -289,15 +285,15 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
           },
           inputVar4: '',
         },
+        id: 'test-logs',
         streams: [
           {
             id: 'test-logs-foo',
             data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
-            type: 'test-logs',
           },
-          { id: 'test-logs-bar', data_stream: { dataset: 'bar', type: 'logs' }, type: 'test-logs' },
+          { id: 'test-logs-bar', data_stream: { dataset: 'bar', type: 'logs' } },
         ],
       },
     ]);

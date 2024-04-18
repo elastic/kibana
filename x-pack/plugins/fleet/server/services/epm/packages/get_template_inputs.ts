@@ -36,8 +36,12 @@ export const templatePackagePolicyToFullInputStreams = (
   if (!packagePolicyInputs || packagePolicyInputs.length === 0) return fullInputsStreams;
 
   packagePolicyInputs.forEach((input) => {
-    const fullInputStream = getFullInputStreams(input, true);
-    // console.log('## fullInputStream', JSON.stringify(fullInputStream, null, 2));
+    const fullInputStream = {
+      // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
+      id: input.policy_template ? `${input.type}-${input.policy_template}` : `${input.type}`,
+      ...getFullInputStreams(input, true),
+    };
+
     // deeply merge the input.config values with the full policy input stream
     merge(
       fullInputStream,
