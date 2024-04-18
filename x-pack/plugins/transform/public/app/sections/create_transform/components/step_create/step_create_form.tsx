@@ -174,6 +174,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const { data: stats } = useGetTransformStats(
       transformId,
+      false,
       progressBarRefetchEnabled,
       progressBarRefetchInterval
     );

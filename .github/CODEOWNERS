@@ -490,6 +490,7 @@ src/plugins/interactive_setup @elastic/kibana-security
 test/interactive_setup_api_integration/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
+packages/kbn-ipynb @elastic/enterprise-search-frontend
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
@@ -645,7 +646,7 @@ packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
-x-pack/examples/reporting_example @elastic/appex-sharedux
+packages/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 packages/kbn-reporting/export_types/csv @elastic/appex-sharedux
 packages/kbn-reporting/export_types/csv_common @elastic/appex-sharedux
 packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
@@ -662,6 +663,7 @@ x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations
 x-pack/plugins/rollup @elastic/kibana-management
+packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
 examples/routing_example @elastic/kibana-core
 packages/kbn-rrule @elastic/response-ops
@@ -801,7 +803,6 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/analytics @elastic/appex-sharedux @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/solution-nav/es @elastic/appex-sharedux @elastic/enterprise-search-frontend
 packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
@@ -994,6 +995,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /docs/user/reporting @elastic/appex-sharedux
 /docs/settings/reporting-settings.asciidoc @elastic/appex-sharedux
 /docs/setup/configuring-reporting.asciidoc @elastic/appex-sharedux
+/x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/appex-sharedux
 
 ### Global Experience Tagging
 /x-pack/test/saved_object_tagging/ @elastic/appex-sharedux
@@ -1075,10 +1077,15 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 
 # Observability UX management team
-x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
-x-pack/test/observability_functional @elastic/obs-ux-management-team
-x-pack/plugins/observability_solution/infra/public/alerting @elastic/obs-ux-management-team
-x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-management-team
+/x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
+/x-pack/test/observability_functional @elastic/obs-ux-management-team
+/x-pack/plugins/observability_solution/infra/public/alerting @elastic/obs-ux-management-team
+/x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-management-team
+/x-pack/test_serverless/**/test_suites/observability/custom_threshold_rule/ @elastic/obs-ux-management-team
+/x-pack/test_serverless/**/test_suites/observability/slos/ @elastic/obs-ux-management-team
+/x-pack/test_serverless/api_integration/test_suites/observability/es_query_rule @elastic/obs-ux-management-team
+/x-pack/test_serverless/api_integration/test_suites/observability/burn_rate_rule @elastic/obs-ux-management-team
+/x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team
 
 # Elastic Stack Monitoring
 /x-pack/test/functional/apps/monitoring @elastic/stack-monitoring
@@ -1092,6 +1099,7 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test/fleet_functional @elastic/fleet
 /src/dev/build/tasks/bundle_fleet_packages.ts @elastic/fleet @elastic/kibana-operations
 /x-pack/plugins/fleet/server/services/elastic_agent_manifest.ts @elastic/fleet @elastic/obs-cloudnative-monitoring
+/x-pack/test_serverless/**/test_suites/**/fleet/ @elastic/fleet
 
 # APM
 /x-pack/test/functional/apps/apm/  @elastic/obs-ux-infra_services-team
@@ -1099,6 +1107,7 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-utility-types/src/dot.ts @dgieselaar
 /packages/kbn-utility-types/src/dot_test.ts @dgieselaar
+/x-pack/test_serverless/api_integration/test_suites/observability/apm_api_integration/ @elastic/obs-ux-infra_services-team
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability_solution/observability/ @elastic/apm-ui
 
@@ -1120,6 +1129,7 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/test_suites/observability/ @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/platform-onboarding
@@ -1153,6 +1163,8 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /x-pack/test/alerting_api_integration/spaces_only/tests/alerting/transform_rule_types/ @elastic/ml-ui
 /x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
 /x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
+/x-pack/test_serverless/**/test_suites/**/ml/ @elastic/ml-ui
+/x-pack/test_serverless/**/test_suites/common/management/transforms/ @elastic/ml-ui
 
 # Additional plugins and packages maintained by the ML team.
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
@@ -1205,12 +1217,21 @@ x-pack/plugins/observability_solution/infra/server/lib/alerting @elastic/obs-ux-
 /packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
 /x-pack/test_serverless/**/deployment_agnostic_services.ts @elastic/appex-qa
+/x-pack/test_serverless/shared/ @elastic/appex-qa
+/x-pack/test_serverless/**/test_suites/**/common_configs/ @elastic/appex-qa
+/x-pack/test_serverless/api_integration/test_suites/common/elasticsearch_api @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/security/ftr/ @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/common/home_page/  @elastic/appex-qa
+/x-pack/test_serverless/functional/services/ @elastic/appex-qa
 
 # Core
 /config/ @elastic/kibana-core
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
+/x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
+/x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
+/x-pack/test_serverless/api_integration/test_suites/**/telemetry/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
@@ -1257,6 +1278,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_functional/ @elastic/kibana-security
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
 /x-pack/test/saved_object_api_integration/ @elastic/kibana-security
+/x-pack/test_serverless/**/test_suites/common/platform_security/ @elastic/kibana-security
 /packages/core/http/core-http-server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
@@ -1277,13 +1299,31 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/api_integration/test_suites/search/cases/ @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/observability/cases/ @elastic/response-ops
 /x-pack/test_serverless/api_integration/test_suites/security/cases/ @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/search/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/security/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/test_serverless/api_integration/test_suites/common/alerting/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
 /x-pack/plugins/enterprise_search/public/applications/shared/doc_links @elastic/ent-search-docs-team
+/x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/enterprise-search-frontend
+/x-pack/test_serverless/functional/test_suites/search/ @elastic/enterprise-search-frontend
 
 # Management Experience - Deployment Management
-/x-pack/test_serverless/functional/test_suites/common/index_management/ @elastic/kibana-management
+/x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
+/x-pack/test_serverless/**/test_suites/common/management/index_management/ @elastic/kibana-management
+/x-pack/test_serverless/**/test_suites/common/painless_lab/ @elastic/kibana-management
+/x-pack/test_serverless/**/test_suites/common/console/ @elastic/kibana-management
+/x-pack/test_serverless/api_integration/test_suites/common/management/ @elastic/kibana-management
+/x-pack/test_serverless/api_integration/test_suites/common/search_profiler/ @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/**/advanced_settings.ts @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/common/management/disabled_uis.ts @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/common/management/ingest_pipelines.ts @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/common/management/landing_page.ts @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/common/dev_tools/ @elastic/kibana-management
+/x-pack/test_serverless/**/test_suites/common/grok_debugger/ @elastic/kibana-management
+
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 # Security Solution

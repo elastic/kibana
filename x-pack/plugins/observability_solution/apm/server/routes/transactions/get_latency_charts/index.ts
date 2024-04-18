@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
   FAAS_ID,
@@ -102,10 +98,7 @@ function searchLatency({
             min_doc_count: 0,
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
-          aggs: getLatencyAggregation(
-            latencyAggregationType,
-            transactionDurationField
-          ),
+          aggs: getLatencyAggregation(latencyAggregationType, transactionDurationField),
         },
         overall_avg_duration: { avg: { field: transactionDurationField } },
       },
@@ -171,19 +164,16 @@ export async function getLatencyTimeseries({
   }
 
   return {
-    overallAvgDuration:
-      response.aggregations.overall_avg_duration.value || null,
-    latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map(
-      (bucket) => {
-        return {
-          x: bucket.key,
-          y: getLatencyValue({
-            latencyAggregationType,
-            aggregation: bucket.latency,
-          }),
-        };
-      }
-    ),
+    overallAvgDuration: response.aggregations.overall_avg_duration.value || null,
+    latencyTimeseries: response.aggregations.latencyTimeseries.buckets.map((bucket) => {
+      return {
+        x: bucket.key,
+        y: getLatencyValue({
+          latencyAggregationType,
+          aggregation: bucket.latency,
+        }),
+      };
+    }),
   };
 }
 

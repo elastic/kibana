@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getMessageContentAndRole } from './helpers';
+import { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
+
+const DEFAULT_OPEN_AI_TEMPERATURE = 0.2;
+const DEFAULT_TEMPERATURE = 0;
 
 interface ActionsClientLlmParams {
   actions: ActionsPluginStart;
@@ -22,7 +26,9 @@ interface ActionsClientLlmParams {
   logger: Logger;
   request: KibanaRequest;
   model?: string;
+  temperature?: number;
   traceId?: string;
+  traceOptions?: TraceOptions;
 }
 
 export class ActionsClientLlm extends LLM {
@@ -37,6 +43,7 @@ export class ActionsClientLlm extends LLM {
   protected llmType: string;
 
   model?: string;
+  temperature?: number;
 
   constructor({
     actions,
@@ -46,8 +53,12 @@ export class ActionsClientLlm extends LLM {
     logger,
     model,
     request,
+    temperature,
+    traceOptions,
   }: ActionsClientLlmParams) {
-    super({});
+    super({
+      callbacks: [...(traceOptions?.tracers ?? [])],
+    });
 
     this.#actions = actions;
     this.#connectorId = connectorId;
@@ -56,6 +67,7 @@ export class ActionsClientLlm extends LLM {
     this.#logger = logger;
     this.#request = request;
     this.model = model;
+    this.temperature = temperature;
   }
 
   _llmType() {
@@ -87,8 +99,8 @@ export class ActionsClientLlm extends LLM {
           model: this.model,
           messages: [assistantMessage], // the assistant message
           ...(this.llmType === 'openai'
-            ? { n: 1, stop: null, temperature: 0.2 }
-            : { temperature: 0, stopSequences: [] }),
+            ? { n: 1, stop: null, temperature: this.temperature ?? DEFAULT_OPEN_AI_TEMPERATURE }
+            : { temperature: this.temperature ?? DEFAULT_TEMPERATURE, stopSequences: [] }),
         },
       },
     };

@@ -39,12 +39,7 @@ interface Props {
 
 const POPOVER_WIDTH = '305px';
 
-export function InstanceActionsMenu({
-  serviceName,
-  serviceNodeName,
-  kuery,
-  onClose,
-}: Props) {
+export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClose }: Props) {
   const { core, share } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
@@ -57,9 +52,8 @@ export function InstanceActionsMenu({
   const metricOverviewHref = useMetricOverviewHref(serviceName);
   const history = useHistory();
 
-  const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
-  )!;
+  const allDatasetsLocator =
+    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
   const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
 
   if (isPending(status)) {
@@ -112,9 +106,7 @@ export function InstanceActionsMenu({
             {section.map((item) => (
               <Section key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                {item.subtitle && (
-                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                )}
+                {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
                 <SectionLinks>
                   {item.actions.map((action) => (
                     <SectionLink

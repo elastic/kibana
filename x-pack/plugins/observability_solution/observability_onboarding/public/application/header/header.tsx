@@ -43,9 +43,7 @@ export const Header = () => {
                     {
                       defaultMessage: 'Hi {username}!',
                       values: {
-                        username:
-                          currentUser.value.full_name ??
-                          currentUser.value.username,
+                        username: currentUser.value.full_name ?? currentUser.value.username,
                       },
                     }
                   )}

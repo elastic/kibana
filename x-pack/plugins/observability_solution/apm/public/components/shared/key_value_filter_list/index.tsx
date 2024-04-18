@@ -35,8 +35,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
-  margin: ${({ theme }) =>
-    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS}`};
+  margin: ${({ theme }) => `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS}`};
   .descriptionList__title,
   .descriptionList__description {
     margin-top: 0;
@@ -89,11 +88,7 @@ export function KeyValueFilterList({
                 className="descriptionList__description"
                 style={{ height: '40px' }}
               >
-                <EuiFlexGroup
-                  alignItems="baseline"
-                  responsive={false}
-                  gutterSize="none"
-                >
+                <EuiFlexGroup alignItems="baseline" responsive={false} gutterSize="none">
                   <EuiFlexItem style={{ minWidth: '32px' }} grow={false}>
                     {isFilterable && (
                       <EuiButtonEmpty
@@ -127,23 +122,12 @@ export function KeyValueFilterList({
   );
 }
 
-function AccordionButtonContent({
-  icon,
-  title,
-}: {
-  icon?: string;
-  title: string;
-}) {
+function AccordionButtonContent({ icon, title }: { icon?: string; title: string }) {
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
       {icon && (
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={icon}
-            size="l"
-            title={title}
-            data-test-subj="accordion_title_icon"
-          />
+          <EuiIcon type={icon} size="l" title={title} data-test-subj="accordion_title_icon" />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
