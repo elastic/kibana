@@ -6,9 +6,9 @@
  */
 
 import type { GetAgentStatusOptions } from './agent_status';
+import { getAgentStatus, SENTINEL_ONE_NETWORK_STATUS } from './agent_status';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { sentinelOneMock } from '../actions/clients/sentinelone/mocks';
-import { getAgentStatus, SENTINEL_ONE_NETWORK_STATUS } from './agent_status';
 import { responseActionsClientMock } from '../actions/clients/mocks';
 
 describe('Endpoint Get Agent Status service', () => {
@@ -102,7 +102,7 @@ describe('Endpoint Get Agent Status service', () => {
       aaa: {
         agentType: 'sentinel_one',
         found: true,
-        id: 'aaa',
+        agentId: 'aaa',
         isUninstalled: false,
         isPendingUninstall: false,
         isolated: true,
@@ -122,7 +122,7 @@ describe('Endpoint Get Agent Status service', () => {
       bbb: {
         agentType: 'sentinel_one',
         found: true,
-        id: 'bbb',
+        agentId: 'bbb',
         isUninstalled: false,
         isPendingUninstall: false,
         isolated: false,
@@ -142,7 +142,7 @@ describe('Endpoint Get Agent Status service', () => {
       ccc: {
         agentType: 'sentinel_one',
         found: true,
-        id: 'ccc',
+        agentId: 'ccc',
         isUninstalled: false,
         isPendingUninstall: false,
         isolated: false,
@@ -162,7 +162,7 @@ describe('Endpoint Get Agent Status service', () => {
       invalid: {
         agentType: 'sentinel_one',
         found: false,
-        id: 'invalid',
+        agentId: 'invalid',
         isUninstalled: false,
         isPendingUninstall: false,
         isolated: false,
