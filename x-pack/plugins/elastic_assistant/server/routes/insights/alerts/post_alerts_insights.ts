@@ -19,6 +19,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { INSIGHTS_ALERTS } from '../../../../common/constants';
 import { getAssistantToolParams, isInsightsFeatureEnabled } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../../helpers';
+import { getLangSmithTracer } from '../../evaluate/utils';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { getLlmType } from '../../utils';
@@ -73,7 +74,14 @@ export const postAlertsInsightsRoute = (router: IRouter<ElasticAssistantRequestH
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
           const connectorId = decodeURIComponent(request.body.connectorId);
-          const { actionTypeId, anonymizationFields, replacements, size } = request.body;
+          const {
+            actionTypeId,
+            anonymizationFields,
+            langSmithApiKey,
+            langSmithProject,
+            replacements,
+            size,
+          } = request.body;
 
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -91,6 +99,17 @@ export const postAlertsInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             return response.notFound(); // insights tool not found
           }
 
+          const traceOptions = {
+            projectName: langSmithProject,
+            tracers: [
+              ...getLangSmithTracer({
+                apiKey: langSmithApiKey,
+                projectName: langSmithProject,
+                logger,
+              }),
+            ],
+          };
+
           const llm = new ActionsClientLlm({
             actions,
             connectorId,
@@ -98,6 +117,7 @@ export const postAlertsInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             logger,
             request,
             temperature: 0, // zero temperature for insights, because we want structured JSON output
+            traceOptions,
           });
 
           const assistantToolParams = getAssistantToolParams({

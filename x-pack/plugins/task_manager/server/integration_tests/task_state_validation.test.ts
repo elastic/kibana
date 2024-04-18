@@ -258,7 +258,8 @@ describe('task state validation', () => {
     });
   });
 
-  describe('allow_reading_invalid_state: false', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/164032
+  describe.skip('allow_reading_invalid_state: false', () => {
     const taskIdsToRemove: string[] = [];
     let esServer: TestElasticsearchUtils;
     let kibanaServer: TestKibanaUtils;

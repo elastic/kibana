@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
+import { v4 as uuidv4 } from 'uuid';
 import { getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
+import { TraceOptions } from './types';
 
 const LLM_TYPE = 'ActionsClientLlm';
 
@@ -25,6 +26,7 @@ interface ActionsClientLlmParams {
   model?: string;
   temperature?: number;
   traceId?: string;
+  traceOptions?: TraceOptions;
 }
 
 export class ActionsClientLlm extends LLM {
@@ -50,8 +52,11 @@ export class ActionsClientLlm extends LLM {
     model,
     request,
     temperature,
+    traceOptions,
   }: ActionsClientLlmParams) {
-    super({});
+    super({
+      callbacks: [...(traceOptions?.tracers ?? [])],
+    });
 
     this.#actions = actions;
     this.#connectorId = connectorId;
