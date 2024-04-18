@@ -36,6 +36,7 @@ import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SloTabId } from './slo_details';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
@@ -48,9 +49,10 @@ export interface Props {
     start: number;
     end: number;
   };
+  selectedTabId: SloTabId;
 }
 
-export function EventsChartPanel({ slo, range }: Props) {
+export function EventsChartPanel({ slo, range, selectedTabId }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -157,13 +159,15 @@ export function EventsChartPanel({ slo, range }: Props) {
         <EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={1}> {title}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText color="subdued" size="s">
-                {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.duration', {
-                  defaultMessage: 'Last 24h',
-                })}
-              </EuiText>
-            </EuiFlexItem>
+            {selectedTabId !== 'history' && (
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.duration', {
+                    defaultMessage: 'Last 24h',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {showViewEventsLink && (
             <EuiFlexItem grow={0}>

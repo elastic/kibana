@@ -7,4 +7,5 @@
 
 export interface SloDetailsPathParams {
   sloId: string;
+  tabId?: string;
 }

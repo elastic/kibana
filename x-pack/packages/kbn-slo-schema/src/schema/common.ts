@@ -81,7 +81,10 @@ const groupSummarySchema = t.type({
   noData: t.number,
 });
 
-const dateRangeSchema = t.type({ from: dateType, to: dateType });
+const dateRangeSchema = t.type({
+  from: t.union([dateType, t.string]),
+  to: t.union([dateType, t.string]),
+});
 
 export {
   ALL_VALUE,
