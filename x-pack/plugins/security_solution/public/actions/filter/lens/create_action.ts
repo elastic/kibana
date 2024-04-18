@@ -31,19 +31,21 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
+export interface CreateFilterLensActionParams {
+  id: string;
+  order: number;
+  store: SecurityAppStore;
+  services: StartServices;
+  negate?: boolean;
+}
+
 export const createFilterLensAction = ({
   id,
   order,
   store,
   services,
   negate,
-}: {
-  id: string;
-  order: number;
-  store: SecurityAppStore;
-  services: StartServices;
-  negate?: boolean;
-}) => {
+}: CreateFilterLensActionParams) => {
   const { application, notifications, data: dataService, topValuesPopover } = services;
 
   let currentAppId: string | undefined;
@@ -72,6 +74,7 @@ export const createFilterLensAction = ({
       isInSecurityApp(currentAppId),
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
+      const valueType = data[0]?.columnMeta?.sourceParams?.type;
       const rawValue = data[0]?.value;
       const mayBeDataViewId = data[0]?.columnMeta?.sourceParams?.indexPatternId;
       const dataViewId = typeof mayBeDataViewId === 'string' ? mayBeDataViewId : undefined;
@@ -95,7 +98,24 @@ export const createFilterLensAction = ({
         ? services.timelineFilterManager
         : dataService.query.filterManager;
 
-      addFilter({ filterManager, fieldName: field, value, dataViewId });
+      // If value type is value_count, we want to filter an `Exists` filter instead of a `Term` filter
+      if (valueType === 'value_count') {
+        addFilter({
+          filterManager,
+          fieldName: field,
+          value: [],
+          negate: !!negate,
+          dataViewId,
+        });
+        return;
+      }
+
+      addFilter({
+        filterManager,
+        fieldName: field,
+        value,
+        dataViewId,
+      });
     },
   });
 };

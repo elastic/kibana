@@ -73,18 +73,20 @@ export const addFilterOut = ({
   filterManager,
   fieldName,
   value,
+  negate,
   dataViewId,
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
   value: DefaultActionsSupportedValue;
+  negate?: boolean;
   dataViewId?: string;
 }) => {
   if (filterManager != null) {
     const filter = createFilter({
       key: fieldName,
       value,
-      negate: !isEmptyFilterValue(value),
+      negate: negate ?? !isEmptyFilterValue(value),
       dataViewId,
     });
     filterManager.addFilters(filter);
