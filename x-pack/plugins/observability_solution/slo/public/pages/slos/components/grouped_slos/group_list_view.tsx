@@ -55,10 +55,26 @@ export function GroupListView({
   filters,
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
-  const query = kqlQuery ? `"${groupQuery}) and ${kqlQuery}` : groupQuery;
+  const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {
     groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
+  }
+  if (groupBy === '_index') {
+    // get remote cluster name from index name
+    if (groupName.includes(':.')) {
+      const [remoteClusterName] = groupName.split(':.');
+      groupName = i18n.translate('xpack.slo.group.remoteCluster', {
+        defaultMessage: 'Remote Cluster: {remoteClusterName}',
+        values: {
+          remoteClusterName,
+        },
+      });
+    } else {
+      groupName = i18n.translate('xpack.slo.group.remoteCluster.localKibana', {
+        defaultMessage: 'Local Kibana',
+      });
+    }
   }
 
   const [page, setPage] = useState(0);

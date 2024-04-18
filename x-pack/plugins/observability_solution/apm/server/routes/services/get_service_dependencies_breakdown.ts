@@ -45,10 +45,7 @@ export async function getServiceDependenciesBreakdown({
     ],
   });
 
-  return take(
-    sortBy(items, (item) => item.stats.totalTime ?? 0).reverse(),
-    20
-  ).map((item) => {
+  return take(sortBy(items, (item) => item.stats.totalTime ?? 0).reverse(), 20).map((item) => {
     const { stats, location } = item;
 
     return {

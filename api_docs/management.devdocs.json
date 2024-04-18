@@ -643,10 +643,6 @@
                 "path": "x-pack/plugins/security/public/management/role_mappings/role_mappings_management_app.tsx"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-              },
-              {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts"
               },
