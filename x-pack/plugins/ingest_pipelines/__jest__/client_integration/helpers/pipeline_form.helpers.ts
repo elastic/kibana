@@ -40,12 +40,6 @@ export const getFormActions = (testBed: TestBed) => {
   const getToggleValue = (testSubject: string): boolean =>
     find(testSubject).props()['aria-checked'];
 
-  const toggleMetaSwitch = () => {
-    act(() => {
-      form.toggleEuiSwitch('metaToggle');
-    });
-  };
-
   const setMetaField = (value: object) => {
     find('metaEditor').getDOMNode().setAttribute('data-currentvalue', JSON.stringify(value));
     find('metaEditor').simulate('change');
@@ -56,7 +50,6 @@ export const getFormActions = (testBed: TestBed) => {
     clickSubmitButton,
     clickShowRequestLink,
     toggleSwitch,
-    toggleMetaSwitch,
     setMetaField,
   };
 };

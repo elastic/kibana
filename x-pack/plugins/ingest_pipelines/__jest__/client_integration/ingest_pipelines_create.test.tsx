@@ -145,12 +145,10 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should send the correct payload', async () => {
-        const { component, actions } = testBed;
+        const { actions } = testBed;
 
-        await act(async () => {
-          actions.toggleMetaSwitch();
-        });
-        component.update();
+        await actions.toggleSwitch('metaToggle');
+
         const metaData = {
           field1: 'hello',
           field2: 10,
