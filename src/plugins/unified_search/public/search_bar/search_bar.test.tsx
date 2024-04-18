@@ -360,6 +360,8 @@ describe('SearchBar', () => {
         dateRange: { from: 'now-15m', to: 'now' },
         query: { language: 'kuery', query: 'response:200' },
       },
+      // isUpdate is true because the default value in state ({ from: 'now-15m', to: 'now' })
+      // is not equal with props for dateRange which is undefined
       true
     );
   });
