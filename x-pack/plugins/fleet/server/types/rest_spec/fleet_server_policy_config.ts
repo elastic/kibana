@@ -34,3 +34,5 @@ export const PutFleetServerHostRequestSchema = {
 };
 
 export const GetAllFleetServerHostRequestSchema = {};
+
+export const GetFleetServerStatusRequestSchema = {};

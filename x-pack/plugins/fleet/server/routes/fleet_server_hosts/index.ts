@@ -15,6 +15,7 @@ import {
   GetOneFleetServerHostRequestSchema,
   PostFleetServerHostRequestSchema,
   PutFleetServerHostRequestSchema,
+  GetFleetServerStatusRequestSchema,
 } from '../../types';
 
 import {
@@ -96,5 +97,19 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: PutFleetServerHostRequestSchema },
       },
       putFleetServerHostHandler
+    );
+  router.versioned
+    .get({
+      path: FLEET_SERVER_HOST_API_ROUTES.POLICY_STATUS_PATTERN,
+      fleetAuthz: (authz) => {
+        return authz.fleet.addAgents || authz.fleet.addFleetServers || authz.fleet.readSettings;
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetFleetServerStatusRequestSchema },
+      },
+      getFleetServerStatusHandler
     );
 };

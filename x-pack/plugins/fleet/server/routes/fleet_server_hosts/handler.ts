@@ -10,10 +10,16 @@ import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/serve
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
-import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
+import {
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  FLEET_SERVER_PACKAGE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../constants';
 
 import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
-import { agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
+import { getAgentStatusForAgentPolicy } from '../../services/agents';
+
 import {
   createFleetServerHost,
   deleteFleetServerHost,
@@ -26,6 +32,8 @@ import type {
   PostFleetServerHostRequestSchema,
   PutFleetServerHostRequestSchema,
 } from '../../types';
+
+import type { GetFleetServerStatusResponse } from '../../../common/types';
 
 async function checkFleetServerHostsWriteAPIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -166,11 +174,7 @@ export const putFleetServerHostHandler: RequestHandler<
   }
 };
 
-export const getAllFleetServerHostsHandler: RequestHandler<
-  TypeOf<typeof PutFleetServerHostRequestSchema.params>,
-  undefined,
-  TypeOf<typeof PutFleetServerHostRequestSchema.body>
-> = async (context, request, response) => {
+export const getAllFleetServerHostsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
   try {
     const res = await listFleetServerHosts(soClient);
@@ -182,6 +186,51 @@ export const getAllFleetServerHostsHandler: RequestHandler<
     };
 
     return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getFleetServerStatusHandler: RequestHandler = async (context, request, response) => {
+  const responseStatus: GetFleetServerStatusResponse = {
+    agent_policies: [],
+    has_active_fleet_server: false,
+  };
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+  try {
+    // Retrieve fleet server package policies
+    const fleetServerPackagePolicies = await packagePolicyService.list(soClient, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
+    });
+
+    // Extract associated agent policy IDs
+    const fleetServerAgentPolicyIds = [
+      ...new Set(fleetServerPackagePolicies.items.map((p) => p.policy_id)),
+    ];
+
+    // Find if there are any online or updating fleet servers
+    if (fleetServerAgentPolicyIds.length > 0) {
+      const agentStatusesRes = await getAgentStatusForAgentPolicy(
+        esClient,
+        soClient,
+        undefined,
+        fleetServerAgentPolicyIds.map((policyId) => `policy_id:${policyId}`).join(' or ')
+      );
+
+      responseStatus.has_active_fleet_server =
+        agentStatusesRes.online > 0 || agentStatusesRes.updating > 0;
+    }
+
+    // Retrieve agent policies
+    const agentPolicies = await agentPolicyService.getByIDs(soClient, fleetServerAgentPolicyIds);
+    responseStatus.agent_policies = agentPolicies.map((policy) => ({
+      id: policy.id,
+      name: policy.name,
+    }));
+
+    return response.ok({ body: responseStatus });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
