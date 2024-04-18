@@ -512,42 +512,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/context_menu/open_context_menu.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/plugins/home/public/application/application.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
-            "plugin": "serverless",
-            "path": "x-pack/plugins/serverless/public/plugin.tsx"
-          },
-          {
             "plugin": "spaces",
             "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
           },
@@ -778,18 +742,6 @@
           {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/management/mount_section.tsx"
           },
           {
             "plugin": "expressionXY",
@@ -1240,18 +1192,6 @@
             "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/application/index.tsx"
-          },
-          {
             "plugin": "osquery",
             "path": "x-pack/plugins/osquery/public/shared_components/osquery_results/osquery_result_wrapper.tsx"
           },
@@ -1314,18 +1254,6 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/index.tsx"
           },
           {
             "plugin": "painlessLab",
@@ -1396,18 +1324,6 @@
             "path": "x-pack/plugins/transform/public/app/app.tsx"
           },
           {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
-            "plugin": "profiling",
-            "path": "x-pack/plugins/observability_solution/profiling/public/app.tsx"
-          },
-          {
             "plugin": "apm",
             "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
           },
@@ -1432,42 +1348,6 @@
             "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/synthetics_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "ux",
-            "path": "x-pack/plugins/observability_solution/ux/public/application/ux_app.tsx"
-          },
-          {
             "plugin": "filesManagement",
             "path": "src/plugins/files_management/public/mount_management_section.tsx"
           },
@@ -1478,18 +1358,6 @@
           {
             "plugin": "filesManagement",
             "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
-          },
-          {
-            "plugin": "kibanaOverview",
-            "path": "src/plugins/kibana_overview/public/application.tsx"
           },
           {
             "plugin": "visDefaultEditor",
@@ -2253,26 +2121,6 @@
             "path": "src/plugins/visualizations/public/visualize_app/index.tsx"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/edition_modal/open_modal.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/plugins/saved_objects_tagging/public/components/assign_flyout/open_assign_flyout.tsx"
-          },
-          {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/shared_imports.ts"
           },
@@ -2371,14 +2219,6 @@
           {
             "plugin": "observabilityShared",
             "path": "x-pack/plugins/observability_solution/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
-          },
-          {
-            "plugin": "banners",
-            "path": "x-pack/plugins/banners/public/plugin.tsx"
           },
           {
             "plugin": "maps",
@@ -2633,54 +2473,6 @@
             "path": "x-pack/plugins/graph/public/application.tsx"
           },
           {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
-          },
-          {
-            "plugin": "exploratoryView",
-            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/header/add_to_case_action.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/hooks/use_request_error_handler.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/lib/alerts_toast.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/alerts/lib/alerts_toast.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
-            "plugin": "monitoring",
-            "path": "x-pack/plugins/monitoring/public/components/cluster/listing/listing.js"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/sourcerer/use_update_data_view.tsx"
           },
@@ -2733,90 +2525,6 @@
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/observability_solution/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
             "plugin": "dataViewManagement",
             "path": "src/plugins/data_view_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
           },
@@ -2863,14 +2571,6 @@
           {
             "plugin": "embeddable",
             "path": "src/plugins/embeddable/public/lib/test_samples/embeddables/contact_card/contact_card_exportable_embeddable_factory.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/tests/test_samples/hello_world_action.tsx"
-          },
-          {
-            "plugin": "uiActions",
-            "path": "src/plugins/ui_actions/public/tests/test_samples/hello_world_action.tsx"
           },
           {
             "plugin": "visTypeVislib",
