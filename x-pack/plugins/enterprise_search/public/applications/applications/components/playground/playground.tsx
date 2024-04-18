@@ -13,8 +13,8 @@ import { useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { EnterpriseSearchContentPageTemplate } from '../../../enterprise_search_content/components/layout/page_template';
 import { KibanaLogic } from '../../../shared/kibana';
+import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';
 
 export const Playground: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -32,7 +32,7 @@ export const Playground: React.FC = () => {
         indices: index ? [index] : [],
       }}
     >
-      <EnterpriseSearchContentPageTemplate
+      <EnterpriseSearchApplicationsPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.playground.breadcrumb', {
             defaultMessage: 'Playground',
@@ -48,9 +48,10 @@ export const Playground: React.FC = () => {
         restrictWidth={false}
         customPageSections
         bottomBorder="extended"
+        docLink="playground"
       >
         <searchPlayground.Playground />
-      </EnterpriseSearchContentPageTemplate>
+      </EnterpriseSearchApplicationsPageTemplate>
     </searchPlayground.PlaygroundProvider>
   );
 };

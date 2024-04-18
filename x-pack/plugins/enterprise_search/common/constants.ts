@@ -153,7 +153,7 @@ export const APPLICATIONS_PLUGIN = {
     defaultMessage: 'Applications',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
-    defaultMessage: 'Playground',
+    defaultMessage: 'Build',
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/applications',
