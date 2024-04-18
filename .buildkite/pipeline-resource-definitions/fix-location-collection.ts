@@ -12,7 +12,7 @@ import path from 'path';
 import { execSync } from 'child_process';
 
 const EXCLUDE_LIST = ['locations.yml', '_template/template.yml'];
-const REPO_FILES_BASE = 'https://github.com/elastic/kibana/blob/security/edr-workflows-mki';
+const REPO_FILES_BASE = 'https://github.com/elastic/kibana/blob/main';
 
 type BackstageLocationResource = object & {
   spec: { targets: string[] };
