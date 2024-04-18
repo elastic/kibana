@@ -29,13 +29,16 @@ export const getFormActions = (testBed: TestBed) => {
     component.update();
   };
 
-  const toggleVersionSwitch = () => {
-    act(() => {
-      form.toggleEuiSwitch('versionToggle');
+  const toggleSwitch = async (testSubject: string) => {
+    await act(async () => {
+      form.toggleEuiSwitch(testSubject);
     });
 
     component.update();
   };
+
+  const getToggleValue = (testSubject: string): boolean =>
+    find(testSubject).props()['aria-checked'];
 
   const toggleMetaSwitch = () => {
     act(() => {
@@ -49,9 +52,10 @@ export const getFormActions = (testBed: TestBed) => {
   };
 
   return {
+    getToggleValue,
     clickSubmitButton,
     clickShowRequestLink,
-    toggleVersionSwitch,
+    toggleSwitch,
     toggleMetaSwitch,
     setMetaField,
   };
