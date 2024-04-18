@@ -517,9 +517,8 @@ const adjustCommandsForSentinelOne = ({
   commandList: CommandDefinition[];
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
+  const isHostIsolationEnabled = featureFlags.responseActionsSentinelOneV1Enabled;
   const isGetFileFeatureEnabled = featureFlags.responseActionsSentinelOneGetFileEnabled;
-
-  // FIXME:PT need to check FF for isolate/release
 
   const disableCommand = (command: CommandDefinition) => {
     command.helpDisabled = true;
@@ -529,15 +528,23 @@ const adjustCommandsForSentinelOne = ({
   };
 
   return commandList.map((command) => {
+    const agentSupportsResponseAction =
+      command.name === 'status'
+        ? false
+        : isActionSupportedByAgentType(
+            'sentinel_one',
+            RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
+              command.name as ConsoleResponseActionCommands
+            ],
+            'manual'
+          );
+
     // If command is not supported by SentinelOne - disable it
     if (
-      command.name === 'status' ||
-      !isActionSupportedByAgentType(
-        'sentinel_one',
-        RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
-        'manual'
-      ) ||
-      (command.name === 'get-file' && !isGetFileFeatureEnabled)
+      !agentSupportsResponseAction ||
+      (command.name === 'get-file' && !isGetFileFeatureEnabled) ||
+      (command.name === 'isolate' && !isHostIsolationEnabled) ||
+      (command.name === 'release' && !isHostIsolationEnabled)
     ) {
       disableCommand(command);
     }
