@@ -38,9 +38,7 @@ import { inputsSelectors } from '../../../../../common/store';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { useTimelineEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
-import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import { DetailsPanel } from '../../../side_panel';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
 import {
