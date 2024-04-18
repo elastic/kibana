@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-plugin",
-  "owner": "@elastic/obs-knowledge-team",
+  "owner": "@elastic/obs-ai-assistant",
   "plugin": {
     "id": "observabilityAIAssistant",
     "server": true,
@@ -14,6 +14,9 @@
       "security",
       "taskManager",
       "dataViews",
+      "triggersActionsUi",
+      "ruleRegistry",
+      "alerting"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "optionalPlugins": ["cloud", "serverless"],

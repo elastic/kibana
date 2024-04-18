@@ -54,7 +54,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
                 <p>
                   <FormattedMessage
                     id="xpack.searchPlayground.chat.message.assistant.retrievalDocs"
-                    defaultMessage="retrieved"
+                    defaultMessage="Grounding answer based on"
                   />
                 </p>
               </EuiText>
@@ -65,7 +65,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
               >
                 <FormattedMessage
                   id="xpack.searchPlayground.chat.message.assistant.retrievalDocButton"
-                  defaultMessage="{count} {count, plural, one {document} other {documents}} sources"
+                  defaultMessage="{count} document sources"
                   values={{ count: retrievalDocs.length }}
                 />
               </EuiButtonEmpty>
@@ -88,9 +88,9 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({
         timestamp={
           createdAt &&
           i18n.translate('xpack.searchPlayground.chat.message.assistant.createdAt', {
-            defaultMessage: 'on {date}',
+            defaultMessage: 'at {time}',
             values: {
-              date: moment(createdAt).format('MMM DD, YYYY'),
+              time: moment(createdAt).format('HH:mm'),
             },
           })
         }

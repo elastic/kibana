@@ -33,7 +33,6 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
   const isPrebuilt = rule.params.immutable;
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
-  const setup = isPrebuilt ? '' : rule.params.setup;
   const actions = transformToActionFrequency(rule.actions, rule.throttle);
 
   return {
@@ -47,7 +46,6 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
       ruleId,
       relatedIntegrations,
       requiredFields,
-      setup,
       exceptionsList: [],
     },
     schedule: rule.schedule,

@@ -106,13 +106,14 @@ const loadDependencies = async (
   };
 };
 
-interface ConsoleWrapperProps extends Omit<EmbeddableConsoleDependencies, 'setDispatch'> {
+interface ConsoleWrapperProps
+  extends Omit<EmbeddableConsoleDependencies, 'setDispatch' | 'alternateView'> {
   onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
 }
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown } = props;
+  const { core, usageCollection, onKeyDown, isMonacoEnabled } = props;
 
   useEffect(() => {
     if (dependencies === null) {
@@ -164,6 +165,9 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             autocompleteInfo,
           },
           theme$,
+          config: {
+            isMonacoEnabled,
+          },
         }}
       >
         <RequestContextProvider>

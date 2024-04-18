@@ -28,13 +28,25 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
+export { fetch$, type FetchContext } from './interfaces/fetch/fetch';
 export {
-  apiCanAddNewPanel,
-  type CanAddNewPanel,
-  type PanelPackage,
-} from './interfaces/can_add_new_panel';
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/fetch/publishes_unified_search';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
+export {
+  apiHasLegacyLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  type HasLibraryTransforms,
+} from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSupportedTriggers,
@@ -67,16 +79,6 @@ export {
   type PublishesPhaseEvents,
 } from './interfaces/publishes_phase_events';
 export {
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch,
-  apiPublishesPartialUnifiedSearch,
-  apiPublishesWritableUnifiedSearch,
-  type PublishesTimeRange,
-  type PublishesUnifiedSearch,
-  type PublishesWritableUnifiedSearch,
-} from './interfaces/unified_search/publishes_unified_search';
-export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
-export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
@@ -106,12 +108,7 @@ export {
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
 export {
-  type HasLibraryTransforms,
-  apiHasLibraryTransforms,
-  type HasLegacyLibraryTransforms,
-  apiHasLegacyLibraryTransforms,
-} from './interfaces/has_library_transforms';
-export {
+  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,

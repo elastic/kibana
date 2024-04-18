@@ -35,3 +35,7 @@ export const ConsoleOutputLang: LangModuleType = {
   lexerRules: consoleOutputLexerRules,
   languageConfiguration: consoleOutputLanguageConfiguration,
 };
+
+export type { ParsedRequest } from './types';
+export { getParsedRequestsProvider } from './language';
+export { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';

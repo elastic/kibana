@@ -12,7 +12,6 @@ import {
   SerializedEvent,
 } from '@kbn/ui-actions-enhanced-plugin/public/dynamic_actions';
 import { BehaviorSubject } from 'rxjs';
-import { HasDynamicActions } from '../embeddables/interfaces/has_dynamic_actions';
 import { DynamicActionsSerializedState } from '../plugin';
 import {
   PanelNotificationsAction,
@@ -62,7 +61,7 @@ describe('PanelNotificationsAction', () => {
       const context = createContext([{}, {}] as SerializedEvent[]);
       const action = new PanelNotificationsAction();
 
-      (context.embeddable as HasDynamicActions).setDynamicActions({
+      (context.embeddable as PanelNotificationsActionApi).setDynamicActions({
         dynamicActions: { events: [{}, {}, {}] as SerializedEvent[] },
       });
 
@@ -108,7 +107,7 @@ describe('PanelNotificationsAction', () => {
       const context = createContext([{}, {}, {}] as SerializedEvent[]);
       const action = new PanelNotificationsAction();
 
-      (context.embeddable as HasDynamicActions).setDynamicActions({
+      (context.embeddable as PanelNotificationsActionApi).setDynamicActions({
         dynamicActions: { events: [{}, {}] as SerializedEvent[] },
       });
 
