@@ -125,6 +125,7 @@ describe('callAgentExecutor', () => {
         maxRetries: 0,
         request: mockRequest,
         streaming: false,
+        temperature: 0.2,
         llmType: 'openai',
       });
     });
@@ -163,6 +164,7 @@ describe('callAgentExecutor', () => {
         maxRetries: 0,
         request: mockRequest,
         streaming: true,
+        temperature: 0.2,
         llmType: 'openai',
       });
     });
