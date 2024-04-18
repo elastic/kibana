@@ -39,6 +39,7 @@ import {
   RuleTypeState,
   RuleAction,
   RuleAlertData,
+  RuleSystemAction,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
 } from '../../common';
@@ -55,6 +56,7 @@ import {
 } from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -124,7 +126,7 @@ export type Executable<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > = {
-  action: RuleAction;
+  action: RuleAction | RuleSystemAction;
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
@@ -174,4 +176,5 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }

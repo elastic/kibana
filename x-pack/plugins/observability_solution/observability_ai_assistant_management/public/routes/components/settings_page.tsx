@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { useAppContext } from '../../hooks/use_app_context';
-import { SettingsTab } from './settings_tab';
+import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';

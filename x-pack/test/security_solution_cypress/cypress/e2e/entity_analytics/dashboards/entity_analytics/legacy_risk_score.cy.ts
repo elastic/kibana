@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { updateDashboardTimeRange } from '../../../../tasks/entity_analytics';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 
@@ -37,7 +38,7 @@ import { getNewRule } from '../../../../objects/rule';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../../tasks/risk_scores';
 import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../../screens/common/filter_group';
 import { kqlSearch } from '../../../../tasks/security_header';
-import { setEndDate, updateDates } from '../../../../tasks/date_picker';
+import { setEndDate } from '../../../../tasks/date_picker';
 
 const TEST_USER_ALERTS = 1;
 const TEST_USER_NAME = 'test';
@@ -46,6 +47,7 @@ const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 const DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const DATE_BEFORE_ALERT_CREATION = moment().format(DATE_FORMAT);
 
+// https://github.com/elastic/kibana/issues/179686
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
@@ -166,8 +168,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         cy.get(HOSTS_TABLE_ROWS).should('have.length', 1);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/178914
-      describe.skip('With alerts data', () => {
+      describe('With alerts data', () => {
         before(() => {
           createRule(getNewRule());
         });
@@ -190,7 +191,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         it('filters the alerts count with time range', () => {
           setEndDate(DATE_BEFORE_ALERT_CREATION);
 
-          updateDates();
+          updateDashboardTimeRange();
 
           cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', 0);
         });
@@ -275,7 +276,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
         it('filters the alerts count with time range', () => {
           setEndDate(DATE_BEFORE_ALERT_CREATION);
-          updateDates();
+          updateDashboardTimeRange();
 
           cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', 0);
         });

@@ -66,6 +66,11 @@ export const SUPPORTED_TRAINED_MODELS = {
     description: 'Tiny/Dummy PyTorch model (zero_shot)',
     modelTypes: ['pytorch', 'zero_shot'],
   },
+  TINY_ELSER: {
+    name: 'pt_tiny_elser',
+    description: 'Tiny ELSER model',
+    modelTypes: ['pytorch'],
+  },
 } as const;
 export type SupportedTrainedModelNamesType =
   typeof SUPPORTED_TRAINED_MODELS[keyof typeof SUPPORTED_TRAINED_MODELS]['name'];
@@ -679,11 +684,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createAnomalyDetectionJob(jobConfig: Job, space?: string) {
       const jobId = jobConfig.job_id;
+
       log.debug(
         `Creating anomaly detection job with id '${jobId}' ${
           space ? `in space '${space}' ` : ''
         }...`
       );
+
+      if (await this.adJobExist(jobId)) {
+        log.debug('> Job already exists.');
+        return;
+      }
 
       const { body, status } = await kbnSupertest
         .put(`${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors/${jobId}`)

@@ -8,7 +8,7 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
-import { map, distinctUntilChanged, skip, startWith } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, startWith } from 'rxjs';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { FilterableEmbeddableInput } from './types';
 

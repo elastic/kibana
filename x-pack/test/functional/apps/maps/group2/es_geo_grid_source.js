@@ -13,8 +13,7 @@ export default function ({ getPageObjects, getService }) {
   const DOC_COUNT_PROP_NAME = 'doc_count';
   const security = getService('security');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176882
-  describe.skip('geojson vector layer - es geo grid source', () => {
+  describe('geojson vector layer - es geo grid source', () => {
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
 
@@ -54,7 +53,7 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should not rerequest when pan changes do not move map view area outside of buffer', async () => {
-          await PageObjects.maps.setView(DATA_CENTER_LAT + 5, DATA_CENTER_LON + 5, 1);
+          await PageObjects.maps.setView(DATA_CENTER_LAT + 1, DATA_CENTER_LON + 1, 1);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);
         });

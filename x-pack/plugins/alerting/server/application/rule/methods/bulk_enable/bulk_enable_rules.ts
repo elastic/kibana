@@ -73,6 +73,7 @@ export const bulkEnableRules = async <Params extends RuleParams = never>(
   params: BulkEnableRulesParams
 ): Promise<BulkEnableRulesResult<Params>> => {
   const { ids, filter } = getAndValidateCommonBulkOptions(params);
+  const actionsClient = await context.getActionsClient();
 
   try {
     bulkEnableRulesParamsSchema.validate(params);
@@ -121,7 +122,9 @@ export const bulkEnableRules = async <Params extends RuleParams = never>(
         logger: context.logger,
         ruleType,
         references,
-      }
+        omitGeneratedValues: false,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
 
     try {

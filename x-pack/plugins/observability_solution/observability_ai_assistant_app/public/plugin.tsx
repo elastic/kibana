@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
+import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -46,10 +47,10 @@ export class ObservabilityAIAssistantAppPlugin
   }
   setup(
     coreSetup: CoreSetup,
-    pluginsSetup: ObservabilityAIAssistantAppPluginSetupDependencies
+    _: ObservabilityAIAssistantAppPluginSetupDependencies
   ): ObservabilityAIAssistantAppPublicSetup {
     coreSetup.application.register({
-      id: 'observabilityAIAssistant',
+      id: AI_ASSISTANT_APP_ID,
       title: i18n.translate('xpack.observabilityAiAssistant.appTitle', {
         defaultMessage: 'Observability AI Assistant',
       }),

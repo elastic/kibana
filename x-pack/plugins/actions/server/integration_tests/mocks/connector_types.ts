@@ -29,4 +29,6 @@ export const connectorTypes: string[] = [
   '.bedrock',
   '.d3security',
   '.sentinelone',
+  '.observability-ai-assistant',
+  '.cases',
 ];

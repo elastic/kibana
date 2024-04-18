@@ -8,17 +8,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  MapEmbeddable,
-  MapEmbeddableInput,
-  MapEmbeddableOutput,
-} from '@kbn/maps-plugin/public';
+import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '@kbn/maps-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
-import {
-  ErrorEmbeddable,
-  ViewMode,
-  isErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable, ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -44,12 +36,9 @@ function EmbeddedMapComponent({
 }) {
   const [error, setError] = useState<boolean>();
 
-  const [embeddable, setEmbeddable] = useState<
-    MapEmbeddable | ErrorEmbeddable | undefined
-  >();
+  const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
 
-  const embeddableRoot: React.RefObject<HTMLDivElement> =
-    useRef<HTMLDivElement>(null);
+  const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const {
     embeddable: embeddablePlugin,
@@ -68,21 +57,15 @@ function EmbeddedMapComponent({
       if (!factory) {
         setError(true);
         notifications?.toasts.addDanger({
-          title: i18n.translate(
-            'xpack.apm.serviceOverview.embeddedMap.error.toastTitle',
-            {
-              defaultMessage: 'An error occurred when adding map embeddable',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.apm.serviceOverview.embeddedMap.error.toastDescription',
-            {
-              defaultMessage: `Embeddable factory with id "{embeddableFactoryId}" was not found.`,
-              values: {
-                embeddableFactoryId: MAP_SAVED_OBJECT_TYPE,
-              },
-            }
-          ),
+          title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastTitle', {
+            defaultMessage: 'An error occurred when adding map embeddable',
+          }),
+          text: i18n.translate('xpack.apm.serviceOverview.embeddedMap.error.toastDescription', {
+            defaultMessage: `Embeddable factory with id "{embeddableFactoryId}" was not found.`,
+            values: {
+              embeddableFactoryId: MAP_SAVED_OBJECT_TYPE,
+            },
+          }),
         });
         return;
       }
@@ -90,12 +73,9 @@ function EmbeddedMapComponent({
       const input: MapEmbeddableInput = {
         attributes: { title: '' },
         id: uuidv4(),
-        title: i18n.translate(
-          'xpack.apm.serviceOverview.embeddedMap.input.title',
-          {
-            defaultMessage: 'Latency by country',
-          }
-        ),
+        title: i18n.translate('xpack.apm.serviceOverview.embeddedMap.input.title', {
+          defaultMessage: 'Latency by country',
+        }),
         filters,
         viewMode: ViewMode.VIEW,
         mapCenter: { lat: 20.43425, lon: 0, zoom: 1.25 },
@@ -136,10 +116,7 @@ function EmbeddedMapComponent({
           maps,
           dataViewId: dataView.id,
         });
-        await Promise.all([
-          embeddable.setLayerList(layerList),
-          embeddable.reload(),
-        ]);
+        await Promise.all([embeddable.setLayerList(layerList), embeddable.reload()]);
       }
     };
 

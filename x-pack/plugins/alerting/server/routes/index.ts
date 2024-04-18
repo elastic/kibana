@@ -15,7 +15,7 @@ import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
-import { updateRuleRoute } from './update_rule';
+import { updateRuleRoute } from './rule/apis/update/update_rule_route';
 import { deleteRuleRoute } from './delete_rule';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './disable_rule';

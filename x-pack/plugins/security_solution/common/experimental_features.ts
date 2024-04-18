@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -45,11 +44,6 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
-
-  /**
-   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
-   */
-  assistantStreamingEnabled: false,
 
   /**
    * Enables the SOC trends timerange and stats on D&R page
@@ -123,6 +117,11 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
+   * Enables the Assistant Alerts Insights feature and API endpoint
+   */
+  assistantAlertsInsights: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -176,6 +175,16 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
+   * Enables alerts suppression for new terms rules
+   */
+  alertSuppressionForNewTermsRuleEnabled: false,
+
+  /**
+   * Enables alerts suppression for Eql rules with non-sequence queries
+   */
+  alertSuppressionForNonSequenceEqlRuleEnabled: false,
+
+  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: true,
@@ -202,6 +211,21 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Feb 20, 2024
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
+  /*
+   * Enables Discover components, UnifiedFieldList and UnifiedDataTable in Timeline.
+   */
+  unifiedComponentsInTimelineEnabled: false,
+
+  /*
+   * Disables date pickers and sourcerer in analyzer if needed.
+   *
+   */
+  analyzerDatePickersAndSourcererDisabled: false,
 
   /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
@@ -215,14 +239,19 @@ export const allowedExperimentalValues = Object.freeze({
   perFieldPrebuiltRulesDiffingEnabled: true,
 
   /**
-   * Disables discover esql tab within timeline
+   * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  timelineEsqlTabDisabled: false,
+  malwareOnWriteScanOptionAvailable: false,
 
   /**
-   * Disables date pickers and sourcerer in analyzer if needed.
+   *  Enables Security AI Assistant's Flyout mode
    */
-  analyzerDatePickersAndSourcererDisabled: false,
+  aiAssistantFlyoutMode: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

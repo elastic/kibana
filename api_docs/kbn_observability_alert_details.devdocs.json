@@ -159,7 +159,7 @@
         "label": "useAlertsHistory",
         "description": [],
         "signature": [
-          "({\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  queries,\n}: ",
+          "({\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  instanceId,\n}: ",
           "Props",
           ") => ",
           "UseAlertsHistory"
@@ -173,7 +173,7 @@
             "id": "def-common.useAlertsHistory.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  queries,\n}",
+            "label": "{\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  instanceId,\n}",
             "description": [],
             "signature": [
               "Props"

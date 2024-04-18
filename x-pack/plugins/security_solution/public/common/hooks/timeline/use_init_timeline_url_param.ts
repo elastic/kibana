@@ -16,6 +16,10 @@ import { URL_PARAM_KEY } from '../use_url_state';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
+  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineEnabled'
+  );
+
   const isEsqlTabDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
 
   const queryTimelineById = useQueryTimelineById();
@@ -33,10 +37,11 @@ export const useInitTimelineFromUrlParam = () => {
           timelineId: initialState.id,
           openTimeline: initialState.isOpen,
           savedSearchId: initialState.savedSearchId,
+          unifiedComponentsInTimelineEnabled,
         });
       }
     },
-    [isEsqlTabDisabled, queryTimelineById]
+    [isEsqlTabDisabled, queryTimelineById, unifiedComponentsInTimelineEnabled]
   );
 
   useEffect(() => {

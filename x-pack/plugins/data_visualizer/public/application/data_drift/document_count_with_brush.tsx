@@ -13,7 +13,7 @@ import type { BrushSettings } from '@kbn/aiops-components';
 import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import type { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { BarStyleAccessor } from '@elastic/charts';
 import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';

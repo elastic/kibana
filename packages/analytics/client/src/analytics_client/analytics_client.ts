@@ -23,7 +23,7 @@ import {
   skipWhile,
   takeUntil,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import type { LogMeta } from '@kbn/logging';
 import type { IShipper } from '../shippers';
 import type {

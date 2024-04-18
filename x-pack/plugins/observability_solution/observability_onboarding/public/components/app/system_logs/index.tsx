@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  createWizardContext,
-  Step,
-} from '../../../context/create_wizard_context';
+import { createWizardContext, Step } from '../../../context/create_wizard_context';
 import { InstallElasticAgent } from './install_elastic_agent';
 
 interface WizardState {
@@ -31,10 +28,9 @@ export type SystemLogsSteps = 'installElasticAgent';
 const steps: Record<SystemLogsSteps, Step> = {
   installElasticAgent: {
     component: InstallElasticAgent,
-    title: i18n.translate(
-      'xpack.observability_onboarding.systemLogs.installShipper.title',
-      { defaultMessage: 'Install shipper to collect system logs' }
-    ),
+    title: i18n.translate('xpack.observability_onboarding.systemLogs.installShipper.title', {
+      defaultMessage: 'Install shipper to collect system logs',
+    }),
   },
 };
 

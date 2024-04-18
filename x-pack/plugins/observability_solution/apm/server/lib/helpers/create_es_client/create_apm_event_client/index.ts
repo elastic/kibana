@@ -28,11 +28,7 @@ import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { Event } from '../../../../../typings/es_schemas/ui/event';
 import { withApmSpan } from '../../../../utils/with_apm_span';
-import {
-  callAsyncWithDebug,
-  getDebugBody,
-  getDebugTitle,
-} from '../call_async_with_debug';
+import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 import { ProcessorEventOfDocumentType } from '../document_type';
 import { getRequestBase, processorEventsToIndex } from './get_request_base';
@@ -72,19 +68,16 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
 type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
   InferSearchResponseOf<Event, TParams>;
 
-type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
-  InferSearchResponseOf<
-    TypeOfProcessorEvent<
-      TParams['apm'] extends { events: ProcessorEvent[] }
-        ? ValuesType<TParams['apm']['events']>
-        : TParams['apm'] extends { sources: ApmDataSource[] }
-        ? ProcessorEventOfDocumentType<
-            ValuesType<TParams['apm']['sources']>['documentType']
-          >
-        : never
-    >,
-    TParams
-  >;
+type TypedSearchResponse<TParams extends APMEventESSearchRequest> = InferSearchResponseOf<
+  TypeOfProcessorEvent<
+    TParams['apm'] extends { events: ProcessorEvent[] }
+      ? ValuesType<TParams['apm']['events']>
+      : TParams['apm'] extends { sources: ApmDataSource[] }
+      ? ProcessorEventOfDocumentType<ValuesType<TParams['apm']['sources']>['documentType']>
+      : never
+  >,
+  TParams
+>;
 
 interface TypedMSearchResponse<TParams extends APMEventESSearchRequest> {
   responses: Array<TypedSearchResponse<TParams>>;
@@ -187,9 +180,7 @@ export class APMEventClient {
       ignore_unavailable: true,
       preference: 'any',
       expand_wildcards: ['open' as const, 'hidden' as const],
-      ...(forceSyntheticSourceForThisRequest
-        ? { force_synthetic_source: true }
-        : {}),
+      ...(forceSyntheticSourceForThisRequest ? { force_synthetic_source: true } : {}),
     };
 
     return this.callAsyncWithDebug({
@@ -249,25 +240,24 @@ export class APMEventClient {
           indices: this.indices,
         });
 
-        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] =
-          [
-            {
-              index,
-              preference: 'any',
-              ...(this.includeFrozen ? { ignore_throttled: false } : {}),
-              ignore_unavailable: true,
-              expand_wildcards: ['open' as const, 'hidden' as const],
-            },
-            {
-              ...omit(params, 'apm', 'body'),
-              ...params.body,
-              query: {
-                bool: {
-                  filter: compact([params.body.query, ...filters]),
-                },
+        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+          {
+            index,
+            preference: 'any',
+            ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+            ignore_unavailable: true,
+            expand_wildcards: ['open' as const, 'hidden' as const],
+          },
+          {
+            ...omit(params, 'apm', 'body'),
+            ...params.body,
+            query: {
+              bool: {
+                filter: compact([params.body.query, ...filters]),
               },
             },
-          ];
+          },
+        ];
 
         return searchParams;
       })

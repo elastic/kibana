@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core-saved-objects-server';
+import { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';
@@ -34,15 +34,13 @@ function getRemovePreconfiguredConnectorsFromReferencesFn(
 }
 
 function getCorrespondingAction(
-  actions: SavedObjectAttribute,
+  actions: RawRuleAction | RawRuleAction[],
   connectorRef: string
 ): RawRuleAction | null {
   if (!Array.isArray(actions)) {
     return null;
   } else {
-    return actions.find(
-      (action) => (action as RawRuleAction)?.actionRef === connectorRef
-    ) as RawRuleAction;
+    return actions.find((action) => action.actionRef === connectorRef) ?? null;
   }
 }
 

@@ -47,7 +47,6 @@ export const fetchIndexInfo = async (
     {
       index,
       fields: '*',
-      // @ts-expect-error include_empty_fields missing from FieldCapsRequest
       include_empty_fields: false,
     },
     { signal: abortSignal, maxRetries: 0 }

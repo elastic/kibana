@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
 import { Providers } from './account_management_app';
 import { AccountManagementPage } from './account_management_page';
@@ -31,7 +31,6 @@ describe('<AccountManagementPage>', () => {
       },
     },
   };
-  const theme$ = themeServiceMock.createTheme$();
   let history = scopedHistoryMock.create();
   const authc = securityMock.createSetup().authc;
 
@@ -55,7 +54,6 @@ describe('<AccountManagementPage>', () => {
     const { findByRole } = render(
       <Providers
         services={coreStart}
-        theme$={theme$}
         history={history}
         authc={authc}
         securityApiClients={{

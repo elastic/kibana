@@ -6,33 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/deployment_details';
-import type { ToMountPointParams } from '@kbn/react-kibana-mount';
-import { MountPoint } from '@kbn/core-mount-utils-browser';
-import ReactDOM from 'react-dom';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
-
-const toMountPoint = (node: React.ReactNode, params: ToMountPointParams): MountPoint => {
-  const mount = (element: HTMLElement) => {
-    ReactDOM.render(<Fragment {...params}>{node}</Fragment>, element);
-    return () => ReactDOM.unmountComponentAtNode(element);
-  };
-
-  // only used for tests and snapshots serialization
-  if (process.env.NODE_ENV !== 'production') {
-    mount.__reactMount__ = node;
-  }
-
-  return mount;
-};
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {

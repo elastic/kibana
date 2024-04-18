@@ -45,8 +45,29 @@ export const fetchFields = async (
   return parseFieldsCapabilities(fieldCapabilities, indexDocs);
 };
 
-const getModelField = (field: string, indexDoc: any) => {
-  return get(indexDoc.doc, `_source.${[field.replace('.tokens', '.model_id')]}`);
+const getModelField = (field: string, indexDoc: any, nestedField: string | false) => {
+  // If the field is nested, we need to get the first occurrence as its an array
+  const path = nestedField ? field.replace(`${nestedField}.`, `${nestedField}[0].`) : field;
+  return get(indexDoc.doc, `_source.${[path.replace(/\.predicted_value|\.tokens/, '.model_id')]}`);
+};
+
+const isFieldNested = (field: string, fieldCapsResponse: FieldCapsResponse) => {
+  const parts = field.split('.');
+  const parents: string[] = [];
+  const { fields } = fieldCapsResponse;
+
+  // Iteratively construct parent strings
+  for (let i = parts.length - 1; i >= 1; i--) {
+    parents.push(parts.slice(0, i).join('.'));
+  }
+
+  // Check if any of the parents are nested
+  for (const parent of parents) {
+    if (fields[parent] && fields[parent].nested && fields[parent].nested.type === 'nested') {
+      return parent;
+    }
+  }
+  return false;
 };
 
 export const parseFieldsCapabilities = (
@@ -66,6 +87,11 @@ export const parseFieldsCapabilities = (
     return acc;
   }, {});
 
+  // metadata fields that are ignored
+  const shouldIgnoreField = (field: string) => {
+    return !field.endsWith('.model_id');
+  };
+
   const querySourceFields = Object.keys(fields).reduce<IndicesQuerySourceFields>(
     (acc: IndicesQuerySourceFields, fieldKey) => {
       const field = fields[fieldKey];
@@ -78,20 +104,25 @@ export const parseFieldsCapabilities = (
       for (const index of indicesPresentIn) {
         const indexDoc = indexDocs.find((x) => x.index === index);
         if ('rank_features' in field) {
+          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
+
           const elserModelField = {
             field: fieldKey,
-            model_id: getModelField(fieldKey, indexDoc),
-            nested: false,
+            model_id: getModelField(fieldKey, indexDoc, nestedField),
+            nested: !!isFieldNested(fieldKey, fieldCapsResponse),
+            indices: indicesPresentIn,
           };
           acc[index].elser_query_fields.push(elserModelField);
         } else if ('dense_vector' in field) {
+          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
           const denseVectorField = {
             field: fieldKey,
-            model_id: getModelField(fieldKey, indexDoc),
-            nested: false,
+            model_id: getModelField(fieldKey, indexDoc, nestedField),
+            nested: !!nestedField,
+            indices: indicesPresentIn,
           };
           acc[index].dense_vector_query_fields.push(denseVectorField);
-        } else if ('text' in field && field.text.searchable) {
+        } else if ('text' in field && field.text.searchable && shouldIgnoreField(fieldKey)) {
           acc[index].bm25_query_fields.push(fieldKey);
           acc[index].source_fields.push(fieldKey);
         }

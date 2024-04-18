@@ -6,27 +6,9 @@
     "id": "indexManagement",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "index_management"
-    ],
-    "requiredPlugins": [
-      "home",
-      "management",
-      "features",
-      "share"
-    ],
-    "optionalPlugins": [
-      "security",
-      "usageCollection",
-      "fleet",
-      "cloud",
-      "console"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "esUiShared",
-      "runtimeFields"
-    ]
+    "configPath": ["xpack", "index_management"],
+    "requiredPlugins": ["home", "management", "features", "share"],
+    "optionalPlugins": ["security", "usageCollection", "fleet", "cloud", "ml", "console"],
+    "requiredBundles": ["kibanaReact", "esUiShared", "runtimeFields"]
   }
 }

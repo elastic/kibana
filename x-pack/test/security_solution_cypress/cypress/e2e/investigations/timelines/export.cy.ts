@@ -19,7 +19,7 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { TIMELINE_CHECKBOX } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline';
+import { expectedExportedTimeline } from '../../../objects/timeline';
 import { closeToast } from '../../../tasks/common/toast';
 
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
@@ -30,11 +30,11 @@ describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
       method: 'POST',
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
-    createTimeline(getTimeline()).then((response) => {
+    createTimeline().then((response) => {
       cy.wrap(response).as('timelineResponse1');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId1');
     });
-    createTimeline(getTimeline()).then((response) => {
+    createTimeline().then((response) => {
       cy.wrap(response).as('timelineResponse2');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId2');
     });

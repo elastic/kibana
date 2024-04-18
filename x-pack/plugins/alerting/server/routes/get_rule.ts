@@ -9,12 +9,7 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import {
-  verifyAccessAndContext,
-  RewriteResponseCase,
-  rewriteRuleLastRun,
-  rewriteActionsRes,
-} from './lib';
+import { verifyAccessAndContext, rewriteRuleLastRun } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -22,12 +17,13 @@ import {
   INTERNAL_BASE_ALERTING_API_PATH,
   SanitizedRule,
 } from '../types';
+import { transformRuleActions } from './rule/transforms';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
+const rewriteBodyRes = ({
   alertTypeId,
   createdBy,
   updatedBy,
@@ -40,6 +36,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   mutedInstanceIds,
   executionStatus,
   actions,
+  systemActions,
   scheduledTaskId,
   snoozeSchedule,
   isSnoozedUntil,
@@ -47,7 +44,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   nextRun,
   viewInAppRelativeUrl,
   ...rest
-}) => ({
+}: SanitizedRule<RuleTypeParams>) => ({
   ...rest,
   rule_type_id: alertTypeId,
   created_by: createdBy,
@@ -66,7 +63,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: rewriteActionsRes(actions),
+  actions: transformRuleActions(actions, systemActions),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
   ...(viewInAppRelativeUrl ? { view_in_app_relative_url: viewInAppRelativeUrl } : {}),

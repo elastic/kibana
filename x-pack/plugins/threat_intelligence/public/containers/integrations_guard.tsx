@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiLoadingLogo } from '@elastic/eui';
-import React, { FC } from 'react';
+import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import React, { FC, memo } from 'react';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
 import { useIntegrations } from '../hooks/use_integrations';
 import { EmptyPage } from '../modules/empty_page/empty_page';
@@ -19,21 +19,28 @@ import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugi
  * If none are received, show the EmptyPage with a link to go install integrations.
  * While the indicators call and the integrations call are loading, display a loading screen.
  */
-export const IntegrationsGuard: FC = ({ children }) => {
+export const IntegrationsGuard: FC = memo(({ children }) => {
   const { isLoading: indicatorsTotalCountLoading, count: indicatorsTotalCount } =
     useIndicatorsTotalCount();
 
-  const { isLoading: integrationLoading, data: installedTIIntegrations } = useIntegrations();
+  const { isLoading: integrationLoading, data: installedTIIntegrations } = useIntegrations({
+    enabled: !indicatorsTotalCountLoading,
+  });
 
   if (integrationLoading || indicatorsTotalCountLoading) {
     return (
-      <SecuritySolutionPluginTemplateWrapper isEmptyState>
-        <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
-      </SecuritySolutionPluginTemplateWrapper>
+      <SecuritySolutionPluginTemplateWrapper
+        isEmptyState
+        emptyPageBody={
+          <EuiPageTemplate.EmptyPrompt color="transparent">
+            <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
+          </EuiPageTemplate.EmptyPrompt>
+        }
+      />
     );
   }
 
   // show indicators page if there are indicators, or if some ti integrations have been added
   const showIndicatorsPage = indicatorsTotalCount > 0 || (installedTIIntegrations || []).length > 0;
   return showIndicatorsPage ? <>{children}</> : <EmptyPage />;
-};
+});
