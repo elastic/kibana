@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export * from './actions';
-export * from './agent';
-export * from './artifacts_exception_list';
-export type { FeatureKeys } from './feature_usage';
+import type { AgentStatusRecords } from '../../../../../../common/endpoint/types';
+
+export interface AgentStatusClientInterface {
+  getAgentStatuses: (agentIds: string[]) => Promise<AgentStatusRecords>;
+}
