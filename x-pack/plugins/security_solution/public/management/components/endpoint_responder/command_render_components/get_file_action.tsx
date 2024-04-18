@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSendGetFileRequest } from '../../../hooks/response_actions/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../../common/api/endpoint';
@@ -22,9 +21,6 @@ export const GetFileActionResult = memo<
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
   const actionCreator = useSendGetFileRequest();
-  const isSentineloneOneGetFileEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneGetFileEnabled'
-  );
 
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
@@ -33,7 +29,7 @@ export const GetFileActionResult = memo<
 
     return endpointId
       ? {
-          agent_type: isSentineloneOneGetFileEnabled ? agentType : 'endpoint',
+          agent_type: agentType,
           endpoint_ids: [endpointId],
           comment: comment?.[0],
           parameters: {
@@ -45,7 +41,6 @@ export const GetFileActionResult = memo<
     command.args.args,
     command.commandDefinition?.meta?.agentType,
     command.commandDefinition?.meta?.endpointId,
-    isSentineloneOneGetFileEnabled,
   ]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({

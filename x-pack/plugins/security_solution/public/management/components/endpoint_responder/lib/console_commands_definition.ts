@@ -87,14 +87,18 @@ const capabilitiesAndPrivilegesValidator = (
     const responderCapability =
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
     let errorMessage = '';
-    if (!responderCapability) {
-      errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
-    }
-    if (responderCapability) {
-      if (!agentCapabilities.includes(responderCapability)) {
+
+    // We only validate Agent capabilities for the command for Endpoint agents
+    if (agentType === 'endpoint') {
+      if (!responderCapability) {
+        errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
+      }
+
+      if (responderCapability && !agentCapabilities.includes(responderCapability)) {
         errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       }
     }
+
     if (!getRbacControl({ commandName, privileges })) {
       errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
     }
@@ -131,22 +135,25 @@ const COMMENT_ARG_ABOUT = i18n.translate(
   { defaultMessage: 'A comment to go along with the action' }
 );
 
+export interface GetEndpointConsoleCommandsOptions {
+  endpointAgentId: string;
+  agentType: ResponseActionAgentType;
+  endpointCapabilities: ImmutableArray<string>;
+  endpointPrivileges: EndpointPrivileges;
+}
+
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
   agentType,
   endpointCapabilities,
   endpointPrivileges,
-}: {
-  endpointAgentId: string;
-  agentType: ResponseActionAgentType;
-  endpointCapabilities: ImmutableArray<string>;
-  endpointPrivileges: EndpointPrivileges;
-}): CommandDefinition[] => {
+}: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
 
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
+    // Agent capabilities is only validated for Endpoint agent types
     if (agentType !== 'endpoint') {
       return true;
     }
@@ -512,12 +519,13 @@ const adjustCommandsForSentinelOne = ({
   const featureFlags = ExperimentalFeaturesService.get();
   const isGetFileFeatureEnabled = featureFlags.responseActionsSentinelOneGetFileEnabled;
 
+  // FIXME:PT need to check FF for isolate/release
+
   const disableCommand = (command: CommandDefinition) => {
     command.helpDisabled = true;
     command.helpHidden = true;
-  };
-  const enableCommand = (command: CommandDefinition) => {
-    command.validate = undefined;
+    command.validate = () =>
+      UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', command.name as ConsoleResponseActionCommands);
   };
 
   return commandList.map((command) => {
@@ -528,15 +536,10 @@ const adjustCommandsForSentinelOne = ({
         'sentinel_one',
         RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command.name as ConsoleResponseActionCommands],
         'manual'
-      )
+      ) ||
+      (command.name === 'get-file' && !isGetFileFeatureEnabled)
     ) {
       disableCommand(command);
-    } else {
-      if (command.name === 'get-file' && !isGetFileFeatureEnabled) {
-        disableCommand(command);
-      } else {
-        enableCommand(command);
-      }
     }
 
     return command;
