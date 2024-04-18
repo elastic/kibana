@@ -6,8 +6,10 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import {
+  SUB_ACTION,
+  CROWDSTRIKE_CONNECTOR_ID,
+} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
