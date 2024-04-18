@@ -23,7 +23,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetEnrollmentSettingsRequestSchema.query>
 > = async (context, request, response) => {
-  const agentPolicyId = request.query?.agent_policy_id;
+  const agentPolicyId = request.query?.agentPolicyId;
   const settingsResponse: GetEnrollmentSettingsResponse = {
     fleet_server: {
       agent_policies: [],
@@ -94,7 +94,7 @@ const getFleetServerAgentPolicies = async (
   // Retrieve fleet server package policies
   const fleetServerPackagePolicies = await packagePolicyService.list(soClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE} ${
-      agentPolicyId ? `and policy_id:${agentPolicyId}` : ``
+      agentPolicyId ? `and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_id:${agentPolicyId}` : ``
     }`,
   });
 

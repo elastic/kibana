@@ -42,7 +42,7 @@ export const PutSettingsRequestSchema = {
 export const GetEnrollmentSettingsRequestSchema = {
   query: schema.maybe(
     schema.object({
-      agent_policy_id: schema.maybe(schema.string()),
+      agentPolicyId: schema.maybe(schema.string()),
     })
   ),
 };
