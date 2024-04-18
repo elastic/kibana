@@ -24,9 +24,7 @@ const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
       elasticsearch: { client },
     } = await context.core;
 
-    const hasPrivileges = await hasLogMonitoringPrivileges(
-      client.asCurrentUser
-    );
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
 
     return { hasPrivileges };
   },
@@ -50,12 +48,11 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     // for serverless we will use the latest published version, for statefull we will use
     // current Kibana version. If false, irrespective of fleet flags and logic, we are
     // explicitly deciding to not append the current version.
-    const includeCurrentVersion = kibanaVersion.endsWith('-SNAPSHOT')
-      ? false
-      : undefined;
+    const includeCurrentVersion = kibanaVersion.endsWith('-SNAPSHOT') ? false : undefined;
 
-    const elasticAgentVersion =
-      await agentClient.getLatestAgentAvailableVersion(includeCurrentVersion);
+    const elasticAgentVersion = await agentClient.getLatestAgentAvailableVersion(
+      includeCurrentVersion
+    );
 
     const kibanaUrl =
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
@@ -88,9 +85,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       }),
     ]),
   }),
-  async handler(
-    resources
-  ): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
+  async handler(resources): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
     const {
       context,
       params: {
@@ -103,13 +98,9 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
-    const { encoded: apiKeyEncoded } = await createShipperApiKey(
-      client.asCurrentUser,
-      name
-    );
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, name);
 
-    const generatedState =
-      type === 'systemLogs' ? { namespace: 'default' } : state;
+    const generatedState = type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     const { id } = await saveObservabilityOnboardingFlow({
