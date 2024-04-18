@@ -29,7 +29,7 @@ index_source_fields = {
 }
 
 def get_elasticsearch_results(query):
-  es_query =   {
+  es_query = {
     \\"query\\": {},
     \\"size\\": 10
   }

@@ -20,7 +20,7 @@ es_client = Elasticsearch(
       
 
 def build_query(query):
-  return   {
+  return {
     \\"query\\": {}
   }
 
