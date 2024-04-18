@@ -165,13 +165,18 @@ export const buildConstantsDefinitions = (
     sortText: 'A',
   }));
 
-export const buildValueDefinitions = (values: string[]): SuggestionRawDefinition[] =>
+export const buildValueDefinitions = (
+  values: string[],
+  detail?: string
+): SuggestionRawDefinition[] =>
   values.map((value) => ({
     label: `"${value}"`,
     text: `"${value}"`,
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
-      defaultMessage: 'Literal value',
-    }),
+    detail:
+      detail ??
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+        defaultMessage: 'Literal value',
+      }),
     kind: 'Value',
   }));
 
@@ -335,7 +340,12 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
       }
     } else {
       suggestions.push(
-        ...buildValueDefinitions([getNowRoundedByHour().toISOString().replace('.000Z', 'Z')])
+        ...buildValueDefinitions(
+          [getNowRoundedByHour().toISOString().replace('.000Z', 'Z')],
+          i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.todayDate', {
+            defaultMessage: "Today's date",
+          })
+        )
       );
     }
   }
@@ -343,6 +353,9 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
     suggestions.push(
       ...buildConstantsDefinitions([
         `to_datetime("${getNowRoundedByHour().toISOString().replace('.000Z', 'Z')}")`,
+        i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.todayAsDate', {
+          defaultMessage: 'Today as datetime',
+        }),
       ])
     );
   }
