@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
+import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
-import { ALERTS_URL_STORAGE_KEY } from './constants';
+import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { nonNullable } from '../../../../common/utils';
@@ -25,42 +28,60 @@ const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
   }
 );
 
-export type UrlSyncedAlertsSearchBarProps = Omit<
-  AlertsSearchBarProps,
-  'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
-> & {
+export interface UrlSyncedAlertsSearchBarProps
+  extends Omit<
+    AlertsSearchBarProps,
+    'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
+  > {
+  showFilterControls?: boolean;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
   onActiveFeatureFiltersChange?: (value: AlertConsumers[]) => void;
-};
+}
 
 /**
  * An abstraction over AlertsSearchBar that syncs the query state with the url
  */
 export const UrlSyncedAlertsSearchBar = ({
+  showFilterControls = false,
   onEsQueryChange,
   onActiveFeatureFiltersChange,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
+    http,
     data: { query: queryService },
-    notifications: { toasts },
+    notifications,
+    dataViews,
+    spaces,
   } = useKibana().services;
+  const { toasts } = notifications;
   const {
     timefilter: { timefilter: timeFilterService },
   } = queryService;
+  const [spaceId, setSpaceId] = useState<string>();
+
   const {
     kuery,
-    rangeFrom,
-    rangeTo,
-    filters,
     onKueryChange,
-    onRangeFromChange,
-    onRangeToChange,
+    filters,
     onFiltersChange,
+    controlFilters,
+    onControlFiltersChange,
+    rangeFrom,
+    onRangeFromChange,
+    rangeTo,
+    onRangeToChange,
+    filterControls,
     savedQuery,
     setSavedQuery,
     clearSavedQuery,
-  } = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY);
+  } = useAlertSearchBarStateContainer(ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY);
+
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
 
   useEffect(() => {
     try {
@@ -78,7 +99,7 @@ export const UrlSyncedAlertsSearchBar = ({
             from: rangeFrom,
           },
           kuery,
-          filters,
+          filters: [...filters, ...controlFilters],
         })
       );
     } catch (error) {
@@ -88,6 +109,7 @@ export const UrlSyncedAlertsSearchBar = ({
       onKueryChange('');
     }
   }, [
+    controlFilters,
     filters,
     kuery,
     onActiveFeatureFiltersChange,
@@ -110,17 +132,39 @@ export const UrlSyncedAlertsSearchBar = ({
   );
 
   return (
-    <AlertsSearchBar
-      rangeFrom={rangeFrom}
-      rangeTo={rangeTo}
-      query={kuery}
-      onQuerySubmit={onQueryChange}
-      filters={filters}
-      onFiltersUpdated={onFiltersChange}
-      savedQuery={savedQuery}
-      onSavedQueryUpdated={setSavedQuery}
-      onClearSavedQuery={clearSavedQuery}
-      {...rest}
-    />
+    <>
+      <AlertsSearchBar
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        query={kuery}
+        onQuerySubmit={onQueryChange}
+        filters={filters}
+        onFiltersUpdated={onFiltersChange}
+        savedQuery={savedQuery}
+        onSavedQueryUpdated={setSavedQuery}
+        onClearSavedQuery={clearSavedQuery}
+        {...rest}
+      />
+      {showFilterControls && (
+        <AlertFilterControls
+          dataViewSpec={{
+            id: 'unified-alerts-dv',
+            title: '.alerts-*',
+          }}
+          spaceId={spaceId}
+          chainingSystem="HIERARCHICAL"
+          controlsUrlState={filterControls}
+          filters={controlFilters}
+          onFiltersChange={onControlFiltersChange}
+          services={{
+            http,
+            notifications,
+            dataViews,
+            storage: Storage,
+          }}
+          ControlGroupRenderer={ControlGroupRenderer}
+        />
+      )}
+    </>
   );
 };
