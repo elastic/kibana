@@ -16,16 +16,17 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 
-const bulkRequestExample = `POST _bulk?pipeline=my-pipeline-name
-{ "index" : { "_index" : "books" } }
-{"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
-{ "index" : { "_index" : "books" } }
-{"name": "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585}
+const bulkRequestExample = `PUT my-data-stream/_bulk?pipeline=my-pipeline
+{ "create":{ } }
+{ "@timestamp": "2099-03-07T11:04:06.000Z", "my-keyword-field": "foo" }
+{ "create":{ } }
+{ "@timestamp": "2099-03-07T11:04:07.000Z", "my-keyword-field": "bar" }
 `;
 
-const singleRequestExample = `POST pipeline=my-pipeline-name
-{ "index" :
-  { "_index" : "books" }
+const singleRequestExample = `POST my-data-stream/_doc?pipeline=my-pipeline
+{
+  "@timestamp": "2099-03-07T11:04:05.000Z",
+  "my-keyword-field": "foo"
 }
 `;
 
