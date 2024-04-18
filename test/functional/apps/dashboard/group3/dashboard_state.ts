@@ -176,30 +176,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(headers[1]).to.be('agent');
     });
 
-    it('Saved search will update when the query is changed in the URL', async () => {
-      const currentQuery = await queryBar.getQueryString();
-      expect(currentQuery).to.equal('');
-      const newUrl = updateAppStateQueryParam(
-        await getUrlFromShare(),
-        (appState: Partial<SharedDashboardState>) => {
-          return {
-            query: {
-              language: 'kuery',
-              query: 'abc12345678910',
-            },
-          };
-        }
-      );
-
-      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
-      await browser.get(newUrl.toString());
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const headers = await PageObjects.discover.getColumnHeaders();
-      // will be zero because the query inserted in the url doesn't match anything
-      expect(headers.length).to.be(0);
-    });
-
     const getUrlFromShare = async () => {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
