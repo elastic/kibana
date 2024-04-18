@@ -12,7 +12,6 @@ const mockOddEqlEvent = {
   eql: { parentId: 'some-test-id', sequenceNumber: '1-0' },
 };
 
-
 const mockBuildingBlockAlert = {
   _id: 'test-eql-alert',
   eql: { parentId: 'some-test-id', sequenceNumber: '2-0' },
