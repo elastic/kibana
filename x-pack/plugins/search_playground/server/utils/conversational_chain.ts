@@ -7,7 +7,6 @@
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Document } from '@langchain/core/documents';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
@@ -16,6 +15,7 @@ import {
   experimental_StreamData,
   Message as VercelChatMessage,
 } from 'ai';
+import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from './render_template';
 
@@ -32,7 +32,7 @@ interface RAGOptions {
 }
 
 interface ConversationalChainOptions {
-  model: BaseChatModel;
+  model: BaseLanguageModel;
   prompt: string;
   rag?: RAGOptions;
 }

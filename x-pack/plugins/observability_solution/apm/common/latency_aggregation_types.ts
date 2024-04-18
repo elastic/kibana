@@ -22,6 +22,5 @@ export const latencyAggregationTypeRt = t.union([
 export const getLatencyAggregationType = (
   latencyAggregationType: string | null | undefined
 ): LatencyAggregationType => {
-  return (latencyAggregationType ??
-    LatencyAggregationType.avg) as LatencyAggregationType;
+  return (latencyAggregationType ?? LatencyAggregationType.avg) as LatencyAggregationType;
 };

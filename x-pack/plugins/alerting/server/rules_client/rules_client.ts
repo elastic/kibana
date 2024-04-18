@@ -12,6 +12,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions } from './types';
 import { cloneRule, CloneRuleParams } from '../application/rule/methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
+import { updateRule, UpdateRuleParams } from '../application/rule/methods/update';
 import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
 import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { get, GetParams } from './methods/get';
@@ -39,7 +40,6 @@ import { find, FindParams } from './methods/find';
 import { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import { deleteRule } from './methods/delete';
-import { update, UpdateOptions } from './methods/update';
 import {
   bulkDeleteRules,
   BulkDeleteRulesRequestBody,
@@ -132,8 +132,8 @@ export class RulesClient {
     get<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
     resolveRule<Params>(this.context, params);
-  public update = <Params extends RuleTypeParams = never>(params: UpdateOptions<Params>) =>
-    update<Params>(this.context, params);
+  public update = <Params extends RuleTypeParams = never>(params: UpdateRuleParams<Params>) =>
+    updateRule<Params>(this.context, params);
 
   public getAlertState = (params: GetAlertStateParams) => getAlertState(this.context, params);
   public getAlertSummary = (params: GetAlertSummaryParams) => getAlertSummary(this.context, params);
