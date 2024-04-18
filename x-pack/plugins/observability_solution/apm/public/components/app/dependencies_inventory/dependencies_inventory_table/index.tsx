@@ -19,14 +19,7 @@ import { DependenciesTable } from '../../../shared/dependencies_table';
 
 export function DependenciesInventoryTable() {
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      comparisonEnabled,
-      offset,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled, offset },
   } = useApmParams('/dependencies/inventory');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -46,10 +39,7 @@ export function DependenciesInventoryTable() {
             end,
             environment,
             numBuckets: 20,
-            offset:
-              comparisonEnabled && isTimeComparison(offset)
-                ? offset
-                : undefined,
+            offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             kuery,
           },
         },
@@ -101,12 +91,9 @@ export function DependenciesInventoryTable() {
     <DependenciesTable
       dependencies={dependencies}
       title={null}
-      nameColumnTitle={i18n.translate(
-        'xpack.apm.dependenciesInventory.dependencyTableColumn',
-        {
-          defaultMessage: 'Dependency',
-        }
-      )}
+      nameColumnTitle={i18n.translate('xpack.apm.dependenciesInventory.dependencyTableColumn', {
+        defaultMessage: 'Dependency',
+      })}
       status={status}
       compact={false}
       initialPageSize={25}
