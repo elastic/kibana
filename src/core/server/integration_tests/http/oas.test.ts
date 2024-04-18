@@ -38,7 +38,10 @@ beforeEach(async () => {
 let httpService: ReturnType<typeof createHttpService>;
 type ConfigServiceArgs = Parameters<typeof createConfigService>[0];
 async function startService(
-  args: { config?: ConfigServiceArgs; createRoutes?: (router: IRouter) => void } = {}
+  args: {
+    config?: ConfigServiceArgs;
+    createRoutes?: (getRouter: (pluginId?: symbol) => IRouter) => void;
+  } = {}
 ) {
   httpService = createHttpService({
     configService: createConfigService(args.config),
@@ -46,7 +49,7 @@ async function startService(
   await httpService.preboot(prebootDeps);
   const { server: innerServer, createRouter } = await httpService.setup(setupDeps);
   if (args.createRoutes) {
-    args.createRoutes(createRouter('/'));
+    args.createRoutes((pluginId) => createRouter('/', pluginId));
   }
   await httpService.start();
   return {
@@ -73,31 +76,89 @@ it('handles requests when enabled', async () => {
   expect(result.status).toBe(200);
 });
 
-it('can filter paths based on "pathStartsWith" query parameter', async () => {
-  const server = await startService({
-    config: { server: { oas: { enabled: true } } },
-    createRoutes: (router) => {
-      router.get({ path: '/api/include-test', validate: false }, (context, req, res) => res.ok());
-      router.post({ path: '/api/include-test', validate: false }, (context, req, res) => res.ok());
-      router.get({ path: '/api/include-test/{id}', validate: false }, (context, req, res) =>
-        res.ok()
-      );
-      router.get({ path: '/api/exclude-test', validate: false }, (context, req, res) => res.ok());
-    },
-  });
-  const result = await supertest(server.listener)
-    .get('/api/oas')
-    .query({ pathStartsWith: '/api/include-test' });
-  expect(result.status).toBe(200);
-  expect(result.body.paths['/api/exclude-test']).toBeUndefined();
-  expect(result.body.paths['/api/include-test']).not.toBeUndefined();
-  expect(result.body).toMatchObject({
-    paths: {
-      '/api/include-test': {
-        get: {},
-        post: {},
+it.each([
+  {
+    queryParam: { pathStartsWith: '/api/include-test' },
+    includes: {
+      paths: {
+        '/api/include-test': {
+          get: {},
+          post: {},
+        },
+        '/api/include-test/{id}': {},
       },
-      '/api/include-test/{id}': {},
     },
-  });
-});
+    excludes: {
+      paths: {
+        '/my-other-plugin': {},
+      },
+    },
+  },
+  {
+    queryParam: { pluginId: 'myPlugin' },
+    includes: {
+      paths: {
+        '/api/include-test': {
+          get: {},
+          post: {},
+        },
+        '/api/include-test/{id}': {},
+      },
+    },
+    excludes: {
+      paths: {
+        '/my-other-plugin': {},
+      },
+    },
+  },
+  {
+    queryParam: { pluginId: 'nonExistant' },
+    includes: {},
+    excludes: {
+      paths: {
+        '/my-include-test': {},
+        '/my-other-plugin': {},
+      },
+    },
+  },
+  {
+    queryParam: { pluginId: 'myOtherPlugin', pathStartsWith: '/api/my-other-plugin' },
+    includes: {
+      paths: {
+        '/api/my-other-plugin': {
+          get: {},
+          post: {},
+          put: {},
+        },
+      },
+    },
+    excludes: {
+      paths: {
+        '/my-include-test': {},
+      },
+    },
+  },
+])(
+  'can filter paths based on query params $queryParam',
+  async ({ queryParam, includes, excludes }) => {
+    const server = await startService({
+      config: { server: { oas: { enabled: true } } },
+      createRoutes: (getRouter) => {
+        const router1 = getRouter(Symbol('myPlugin'));
+        router1.get({ path: '/api/include-test', validate: false }, (_, __, res) => res.ok());
+        router1.post({ path: '/api/include-test', validate: false }, (_, __, res) => res.ok());
+        router1.get({ path: '/api/include-test/{id}', validate: false }, (_, __, res) => res.ok());
+        router1.get({ path: '/api/exclude-test', validate: false }, (_, __, res) => res.ok());
+
+        const router2 = getRouter(Symbol('myOtherPlugin'));
+        router2.get({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
+        router2.post({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
+        router2.put({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
+      },
+    });
+    const result = await supertest(server.listener).get('/api/oas').query(queryParam);
+    expect(result.status).toBe(200);
+    expect(result.body).toMatchObject(includes);
+    expect(result.body).not.toMatchObject(excludes);
+  }
+);

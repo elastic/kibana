@@ -167,6 +167,11 @@ export interface HttpServerSetupOptions {
   executionContext?: InternalExecutionContextSetup;
 }
 
+/** @internal */
+export interface GetRoutersOptions {
+  pluginId?: string;
+}
+
 export class HttpServer {
   private server?: Server;
   private config?: HttpConfig;
@@ -623,7 +628,7 @@ export class HttpServer {
     });
   }
 
-  public getRouters(): {
+  public getRouters({ pluginId }: GetRoutersOptions = {}): {
     routers: Router[];
     versionedRouters: CoreVersionedRouter[];
   } {
@@ -634,12 +639,21 @@ export class HttpServer {
       routers: [],
       versionedRouters: [],
     };
+    const pluginIdFilter = pluginId ? Symbol(pluginId).toString() : undefined;
+
     for (const router of this.registeredRouters) {
-      if ((router as Router).getRoutes({ excludeVersionedRoutes: true }).length > 0) {
+      const matchesIdFilter =
+        !pluginIdFilter || (router as Router).pluginId?.toString() === pluginIdFilter;
+
+      if (
+        matchesIdFilter &&
+        (router as Router).getRoutes({ excludeVersionedRoutes: true }).length > 0
+      ) {
         routers.routers.push(router as Router);
       }
+
       const versionedRouter = router.versioned as CoreVersionedRouter;
-      if (versionedRouter.getRoutes().length > 0) {
+      if (matchesIdFilter && versionedRouter.getRoutes().length > 0) {
         routers.versionedRouters.push(versionedRouter);
       }
     }

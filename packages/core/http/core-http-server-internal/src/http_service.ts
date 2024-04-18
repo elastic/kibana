@@ -184,6 +184,7 @@ export class HttpService
         const router = new Router<Context>(path, this.log, enhanceHandler, {
           isDev: this.env.mode.dev,
           versionedRouterOptions: getVersionedRouterOptions(config),
+          pluginId,
         });
         registerRouter(router);
         return router;
@@ -247,14 +248,15 @@ export class HttpService
       path: '/api/oas',
       method: 'GET',
       handler: async (req, h) => {
+        const pathStartsWith = req.query?.pathStartsWith;
+        const pluginId = req.query?.pluginId;
         return await firstValueFrom(
           of(1).pipe(
             HttpService.generateOasSemaphore.acquire(),
             mergeMap(async () => {
-              const pathStartsWith = req.query?.pathStartsWith;
               try {
                 // Potentially quite expensive
-                const result = generateOpenApiDocument(this.httpServer.getRouters(), {
+                const result = generateOpenApiDocument(this.httpServer.getRouters({ pluginId }), {
                   baseUrl,
                   title: 'Kibana HTTP APIs',
                   version: '0.0.0', // TODO get a better version here
