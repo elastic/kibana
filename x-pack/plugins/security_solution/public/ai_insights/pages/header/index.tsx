@@ -47,7 +47,6 @@ const HeaderComponent: React.FC<Props> = ({
           onConnectorSelected={noop}
           onConnectorIdSelected={onConnectorIdSelected}
           selectedConnectorId={connectorId}
-          showLabel={false}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
