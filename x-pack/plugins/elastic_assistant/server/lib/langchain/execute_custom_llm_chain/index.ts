@@ -140,7 +140,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 
   let traceData;
-  if (isStream && llmType !== 'bedrock') {
+  if (isStream) {
     let streamingSpan: Span | undefined;
     if (agent.isStarted()) {
       streamingSpan = agent.startSpan(`${DEFAULT_AGENT_EXECUTOR_ID} (Streaming)`) ?? undefined;

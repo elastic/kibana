@@ -21,7 +21,7 @@ import {
 import { DEFAULT_OPEN_AI_MODEL } from './constants';
 import { InvokeAIActionParamsSchema } from './types';
 
-const LLM_TYPE = 'openai';
+const LLM_TYPE = 'ActionsClientChatOpenAI';
 
 interface ActionsClientChatOpenAIParams {
   actions: ActionsPluginStart;
