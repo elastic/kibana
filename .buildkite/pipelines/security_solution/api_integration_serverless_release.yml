@@ -3,7 +3,7 @@ steps:
     key: test_execution
     depends_on: build_image
     steps:
-      - label: Running exception_workflows:qa:serverless:release
+      - label: Running integration tests for Serverless Exception Workflows
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:qa:serverless:release
         key: exception_workflows:qa:serverless:release
         agents:
