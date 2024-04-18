@@ -75,7 +75,7 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
   );
 
   const footer = (
-    <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <ManageKeysLink />
       </EuiFlexItem>
