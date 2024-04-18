@@ -164,6 +164,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     };
 
     let message = '';
+    let tokenParentRunId = '';
 
     executor
       .invoke(
@@ -175,8 +176,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         {
           callbacks: [
             {
-              handleLLMNewToken(payload) {
-                if (payload.length && !didEnd) {
+              handleLLMNewToken(payload, _idx, _runId, parentRunId) {
+                if (tokenParentRunId.length === 0 && !!parentRunId) {
+                  // set the parent run id as the parentRunId of the first token
+                  tokenParentRunId = parentRunId;
+                }
+                if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
                   push({ payload, type: 'content' });
                   // store message in case of error
                   message += payload;
@@ -186,6 +191,11 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                 // if parentRunId is undefined, this is the end of the stream
                 if (!parentRunId) {
                   handleStreamEnd(outputs.output);
+                  console.log('handleChainEnd', {
+                    doesOutputMatch: message === outputs.output,
+                    streamOutput: message,
+                    chainEndOutput: outputs.output,
+                  });
                 }
               },
             },
