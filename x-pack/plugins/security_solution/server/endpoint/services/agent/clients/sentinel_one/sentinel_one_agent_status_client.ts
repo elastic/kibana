@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { getPendingActionsSummary } from '../../..';
-import type { RawSentinelOneInfo, SentinelOneSearchResponse } from './types';
 import { catchAndWrapError } from '../../../../utils';
-import type { AgentStatusRecords } from '../../../../../../common/endpoint/types';
-import { HostStatus } from '../../../../../../common/endpoint/types';
+import { getPendingActionsSummary } from '../../..';
+import type { RawSentinelOneInfo } from './types';
+import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { AgentStatusClientError } from '../errors';
@@ -50,8 +49,8 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
     };
 
     try {
-      const response = (await esClient
-        .search(
+      const [searchResponse, allPendingActions] = await Promise.all([
+        esClient.search(
           {
             index: SENTINEL_ONE_AGENT_INDEX,
             from: 0,
@@ -81,10 +80,12 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
             _source: false,
           },
           { ignore: [404] }
-        )
-        .catch(catchAndWrapError)) as SentinelOneSearchResponse;
+        ),
 
-      const mostRecentAgentInfosByAgentId = response?.hits?.hits?.reduce<
+        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+      ]).catch(catchAndWrapError);
+
+      const mostRecentAgentInfosByAgentId = searchResponse?.hits?.hits?.reduce<
         Record<string, RawSentinelOneInfo>
       >((acc, hit) => {
         if (hit.fields?.['sentinel_one.agent.uuid'][0]) {
@@ -94,13 +95,6 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
 
         return acc;
       }, {});
-
-      const allPendingActions = await getPendingActionsSummary(
-        esClient,
-        metadataService,
-        this.log,
-        agentIds
-      );
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
         const agentInfo = mostRecentAgentInfosByAgentId[agentId].sentinel_one.agent;

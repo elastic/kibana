@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { catchAndWrapError } from '../../../../utils';
 import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
@@ -21,23 +22,19 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
 
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
-      const { data: hostInfoForAgents } = await metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        this.options.endpointService.getInternalFleetServices(),
-        {
-          page: 0,
-          pageSize: 1000,
-          kuery: agentIdsKql,
-        }
-      );
-
-      const allPendingActions = await getPendingActionsSummary(
-        esClient,
-        metadataService,
-        this.log,
-        agentIds
-      );
+      const [{ data: hostInfoForAgents }, allPendingActions] = await Promise.all([
+        metadataService.getHostMetadataList(
+          esClient,
+          soClient,
+          this.options.endpointService.getInternalFleetServices(),
+          {
+            page: 0,
+            pageSize: 1000,
+            kuery: agentIdsKql,
+          }
+        ),
+        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+      ]).catch(catchAndWrapError);
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {
         const agentMetadata = hostInfoForAgents.find(
