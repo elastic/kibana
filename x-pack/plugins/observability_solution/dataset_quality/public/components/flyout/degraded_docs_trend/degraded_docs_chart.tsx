@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
@@ -15,12 +15,13 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../../../utils';
-import { getLensAttributes } from './lens_attributes';
+import { useDegradedDocsChart } from '../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [
   'ACTION_CUSTOMIZE_PANEL',
   'ACTION_CONFIGURE_IN_LENS',
+  'ACTION_OPEN_IN_DISCOVER',
   'create-ml-ad-job-action',
 ];
 
@@ -41,30 +42,8 @@ export function DegradedDocsChart({
     services: { lens },
   } = useKibanaContextForPlugin();
 
-  const { euiTheme } = useEuiTheme();
-
-  const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
-  const [attributes, setAttributes] = useState<ReturnType<typeof getLensAttributes> | undefined>(
-    undefined
-  );
-
-  const handleChartLoading = useCallback((isLoading: boolean) => {
-    setIsChartLoading(isLoading);
-  }, []);
-
-  const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
-
-  useEffect(() => {
-    if (dataView) {
-      const lensAttributes = getLensAttributes(
-        euiTheme.colors.danger,
-        dataView,
-        breakdownDataViewField?.name
-      );
-
-      setAttributes(lensAttributes);
-    }
-  }, [lens, euiTheme.colors.danger, dataView, breakdownDataViewField]);
+  const { attributes, filterQuery, extraActions, isChartLoading, handleChartLoading } =
+    useDegradedDocsChart({ dataStream, breakdownDataViewField });
 
   return (
     <>
@@ -88,6 +67,7 @@ export function DegradedDocsChart({
               timeRange={timeRange}
               attributes={attributes!}
               withDefaultActions={true}
+              extraActions={extraActions}
               disableTriggers={false}
               lastReloadRequestTime={lastReloadTime}
               query={{

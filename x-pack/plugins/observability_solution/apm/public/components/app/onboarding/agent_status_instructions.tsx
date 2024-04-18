@@ -6,24 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiMarkdownFormat,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { EuiStepStatus } from '@elastic/eui/src/components/steps/step_number';
 
 function AgentStatusWarningCallout() {
   return (
     <EuiCallOut color="warning" data-test-subj="agentStatusWarningCallout">
-      {i18n.translate(
-        'xpack.apm.onboarding.agentStatus.warning.calloutMessage',
-        {
-          defaultMessage: 'No data has been received from agents yet',
-        }
-      )}
+      {i18n.translate('xpack.apm.onboarding.agentStatus.warning.calloutMessage', {
+        defaultMessage: 'No data has been received from agents yet',
+      })}
     </EuiCallOut>
   );
 }
@@ -31,12 +23,9 @@ function AgentStatusWarningCallout() {
 function AgentStatusSuccessCallout() {
   return (
     <EuiCallOut color="success" data-test-subj="agentStatusSuccessCallout">
-      {i18n.translate(
-        'xpack.apm.onboarding.agentStatus.success.calloutMessage',
-        {
-          defaultMessage: 'Data successfully received from one or more agents',
-        }
-      )}
+      {i18n.translate('xpack.apm.onboarding.agentStatus.success.calloutMessage', {
+        defaultMessage: 'Data successfully received from one or more agents',
+      })}
     </EuiCallOut>
   );
 }

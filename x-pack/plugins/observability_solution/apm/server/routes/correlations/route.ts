@@ -21,16 +21,9 @@ import {
   DurationFieldCandidatesResponse,
   fetchDurationFieldCandidates,
 } from './queries/fetch_duration_field_candidates';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
-import {
-  fetchFieldValuePairs,
-  FieldValuePairsResponse,
-} from './queries/fetch_field_value_pairs';
+import { fetchFieldValuePairs, FieldValuePairsResponse } from './queries/fetch_field_value_pairs';
 import {
   fetchSignificantCorrelations,
   SignificantCorrelationsResponse,
@@ -69,15 +62,7 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: {
-        serviceName,
-        transactionName,
-        transactionType,
-        start,
-        end,
-        environment,
-        kuery,
-      },
+      query: { serviceName, transactionName, transactionType, start, end, environment, kuery },
     } = resources.params;
 
     return fetchDurationFieldCandidates({
@@ -144,9 +129,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
       },
     } = resources.params;
 
-    const samplerShardSize = samplerShardSizeStr
-      ? parseInt(samplerShardSizeStr, 10)
-      : undefined;
+    const samplerShardSize = samplerShardSizeStr ? parseInt(samplerShardSizeStr, 10) : undefined;
     return fetchFieldValueFieldStats({
       apmEventClient,
       eventType: ProcessorEvent.transaction,
@@ -234,8 +217,7 @@ const fieldValuePairsTransactionsRoute = createApmServerRoute({
 });
 
 const significantCorrelationsTransactionsRoute = createApmServerRoute({
-  endpoint:
-    'POST /internal/apm/correlations/significant_correlations/transactions',
+  endpoint: 'POST /internal/apm/correlations/significant_correlations/transactions',
   params: t.type({
     body: t.intersection([
       t.partial({
