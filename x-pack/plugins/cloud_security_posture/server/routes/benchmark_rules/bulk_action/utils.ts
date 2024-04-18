@@ -59,7 +59,7 @@ export const getDetectionRules = async (
           filter: convertRuleTagsToMatchAllKQL(ruleTags),
           searchFields: ['tags'],
           page: 1,
-          per_page: 1,
+          perPage: 1,
         },
       });
     })
