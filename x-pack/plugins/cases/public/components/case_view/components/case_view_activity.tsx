@@ -7,7 +7,13 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
@@ -237,6 +243,9 @@ export const CaseViewActivity = ({
         ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={2} data-test-subj="case-view-page-sidebar">
+        <EuiScreenReaderOnly>
+          <h2>{i18n.CASE_SETTINGS}</h2>
+        </EuiScreenReaderOnly>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
           {caseAssignmentAuthorized ? (
             <>

@@ -7,6 +7,7 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import { once } from 'lodash';
 import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
@@ -24,6 +25,7 @@ import type {
   IRouter,
   RequestHandler,
   VersionedRouter,
+  RouteRegistrar,
 } from '@kbn/core-http-server';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
@@ -32,6 +34,7 @@ import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
+import { Method } from './versioned_router/types';
 
 export type ContextEnhancer<
   P,
@@ -131,18 +134,40 @@ export interface RouterOptions {
   };
 }
 
+/** @internal */
+export interface InternalRegistrarOptions {
+  isVersioned: boolean;
+}
+
+/** @internal */
+export type InternalRegistrar<M extends Method, C extends RequestHandlerContextBase> = <P, Q, B>(
+  route: RouteConfig<P, Q, B, M>,
+  handler: RequestHandler<P, Q, B, C, M>,
+  internalOpts?: InternalRegistrarOptions
+) => ReturnType<RouteRegistrar<M, C>>;
+
+/** @internal */
+export interface InternalRouterRoute extends RouterRoute {
+  readonly isVersioned: boolean;
+}
+
+/** @internal */
+interface InternalGetRoutesOptions {
+  excludeVersionedRoutes?: boolean;
+}
+
 /**
  * @internal
  */
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
   implements IRouter<Context>
 {
-  public routes: Array<Readonly<RouterRoute>> = [];
-  public get: IRouter<Context>['get'];
-  public post: IRouter<Context>['post'];
-  public delete: IRouter<Context>['delete'];
-  public put: IRouter<Context>['put'];
-  public patch: IRouter<Context>['patch'];
+  public routes: Array<Readonly<InternalRouterRoute>> = [];
+  public get: InternalRegistrar<'get', Context>;
+  public post: InternalRegistrar<'post', Context>;
+  public delete: InternalRegistrar<'delete', Context>;
+  public put: InternalRegistrar<'put', Context>;
+  public patch: InternalRegistrar<'patch', Context>;
 
   constructor(
     public readonly routerPath: string,
@@ -154,8 +179,12 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       <Method extends RouteMethod>(method: Method) =>
       <P, Q, B>(
         route: RouteConfig<P, Q, B, Method>,
-        handler: RequestHandler<P, Q, B, Context, Method>
+        handler: RequestHandler<P, Q, B, Context, Method>,
+        internalOptions: { isVersioned: boolean } = { isVersioned: false }
       ) => {
+        if (typeof route.validate === 'function') {
+          route = { ...route, validate: once(route.validate) };
+        }
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({
@@ -169,6 +198,9 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
+          /** Below is added for introspection */
+          validationSchemas: route.validate,
+          isVersioned: internalOptions.isVersioned,
         });
       };
 
@@ -179,7 +211,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.patch = buildMethod('patch');
   }
 
-  public getRoutes() {
+  public getRoutes({ excludeVersionedRoutes }: InternalGetRoutesOptions = {}) {
+    if (excludeVersionedRoutes) {
+      return this.routes.filter((route) => !route.isVersioned);
+    }
     return [...this.routes];
   }
 

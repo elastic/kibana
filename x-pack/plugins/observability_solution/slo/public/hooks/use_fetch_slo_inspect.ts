@@ -6,12 +6,12 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CreateSLOInput, SLOResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 
 interface SLOInspectResponse {
-  slo: SLOResponse;
+  slo: SLODefinitionResponse;
   pipeline: Record<string, any>;
   rollUpTransform: TransformPutTransformRequest;
   summaryTransform: TransformPutTransformRequest;

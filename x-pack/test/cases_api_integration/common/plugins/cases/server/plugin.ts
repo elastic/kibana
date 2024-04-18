@@ -11,6 +11,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import { FilesSetup } from '@kbn/files-plugin/server';
+import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
@@ -23,6 +24,7 @@ export interface FixtureSetupDeps {
 }
 
 export interface FixtureStartDeps {
+  actions: ActionsPluginsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   cases: CasesServerStart;
