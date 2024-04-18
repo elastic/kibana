@@ -18,7 +18,7 @@ describe('CaseConnector', () => {
   let services: ReturnType<typeof actionsMock.createServices>;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
   let service: TestCaseConnector;
-  let pushToServiceIncidentParamsSchema = {
+  const pushToServiceIncidentParamsSchema = {
     name: schema.string(),
     category: schema.nullable(schema.string()),
     foo: schema.arrayOf(schema.boolean()),

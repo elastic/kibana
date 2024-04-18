@@ -20,17 +20,17 @@ export const TestSecretsSchema = schema.object({
 export type TestConfig = TypeOf<typeof TestConfigSchema>;
 export type TestSecrets = TypeOf<typeof TestSecretsSchema>;
 
-export type GetIncidentResponse = {
+export interface GetIncidentResponse {
   id: string;
   title: string;
   description?: string;
   severity: number;
-};
+}
 
-export type Incident = {
+export interface Incident {
   name: string;
   category: string | null;
-};
+}
 
 interface ErrorSchema {
   errorMessage: string;
