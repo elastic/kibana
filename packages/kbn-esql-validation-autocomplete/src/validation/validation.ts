@@ -28,9 +28,7 @@ import {
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
-  extractSingleType,
-  getAllArrayTypes,
-  getAllArrayValues,
+  extractSingularType,
   getColumnHit,
   getCommandDefinition,
   getFunctionDefinition,
@@ -73,6 +71,7 @@ import {
   retrieveMetadataFields,
   retrieveFieldsFromStringSources,
 } from './resources';
+import { collapseWrongArgumentTypeMessages } from './helpers';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -470,66 +469,44 @@ function validateFunction(
         // few lines above
         return;
       }
-      // if the arg is an array of values, check each element
-      if (Array.isArray(outerArg) && isArrayType(argDef.type)) {
-        const extractedType = extractSingleType(argDef.type);
-        const everyArgInListMessages = outerArg
-          .map((arg) => {
-            return [
-              validateFunctionLiteralArg,
-              validateNestedFunctionArg,
-              validateFunctionColumnArg,
-            ].flatMap((validateFn) => {
-              return validateFn(
-                astFunction,
-                arg,
-                {
-                  ...argDef,
-                  constantOnly: forceConstantOnly || argDef.constantOnly,
-                  type: extractedType,
-                },
-                references,
-                parentCommand
-              );
-            });
-          })
-          .filter((ms) => ms.length);
-        if (everyArgInListMessages.length) {
-          failingSignature.push(
-            getMessageFromId({
-              messageId: 'wrongArgumentType',
-              values: {
-                name: astFunction.name,
-                argType: argDef.type,
-                value: `(${getAllArrayValues(outerArg).join(', ')})`,
-                givenType: `(${getAllArrayTypes(outerArg, parentCommand, references).join(', ')})`,
-              },
-              locations: {
-                min: (outerArg[0] as ESQLSingleAstItem).location.min,
-                max: (outerArg[outerArg.length - 1] as ESQLSingleAstItem).location.max,
-              },
-            })
-          );
-        }
-        return;
-      }
-      const wrappedArg = Array.isArray(outerArg) ? outerArg : [outerArg];
-      for (const actualArg of wrappedArg) {
-        const argValidationMessages = [
+
+      // check every element of the argument (may be an array of elements, or may be a single element)
+      const hasMultipleElements = Array.isArray(outerArg);
+      const argElements = hasMultipleElements ? outerArg : [outerArg];
+      const singularType = extractSingularType(argDef.type);
+      const messagesFromAllArgElements = argElements.flatMap((arg) => {
+        return [
           validateFunctionLiteralArg,
           validateNestedFunctionArg,
           validateFunctionColumnArg,
         ].flatMap((validateFn) => {
           return validateFn(
             astFunction,
-            actualArg,
-            { ...argDef, constantOnly: forceConstantOnly || argDef.constantOnly },
+            arg,
+            {
+              ...argDef,
+              type: singularType,
+              constantOnly: forceConstantOnly || argDef.constantOnly,
+            },
             references,
             parentCommand
           );
         });
-        failingSignature.push(...argValidationMessages);
-      }
+      });
+
+      const shouldCollapseMessages = isArrayType(argDef.type) && hasMultipleElements;
+      failingSignature.push(
+        ...(shouldCollapseMessages
+          ? collapseWrongArgumentTypeMessages(
+              messagesFromAllArgElements,
+              outerArg,
+              astFunction.name,
+              argDef.type,
+              parentCommand,
+              references
+            )
+          : messagesFromAllArgElements)
+      );
     });
     if (failingSignature.length) {
       failingSignatures.push(failingSignature);

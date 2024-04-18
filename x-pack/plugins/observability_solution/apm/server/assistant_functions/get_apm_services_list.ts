@@ -40,13 +40,11 @@ export function registerGetApmServicesListFunction({
           },
           start: {
             ...NON_EMPTY_STRING,
-            description:
-              'The start of the time range, in Elasticsearch date math, like `now`.',
+            description: 'The start of the time range, in Elasticsearch date math, like `now`.',
           },
           end: {
             ...NON_EMPTY_STRING,
-            description:
-              'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+            description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
           healthStatus: {
             type: 'array',
