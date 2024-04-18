@@ -68,6 +68,8 @@ import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
+import { set } from 'lodash';
+import { pop } from 'fp-ts/lib/ReadonlyRecord';
 
 export interface TextBasedLanguagesEditorProps {
   /** The aggregate type query */
@@ -160,6 +162,15 @@ let initialRender = true;
 let updateLinesFromModel = false;
 let lines = 1;
 
+const popover = document.createElement('div');
+popover.innerHTML = 'Custom Popover Content';
+popover.style.position = 'absolute';
+popover.style.background = '#fff';
+popover.style.border = '1px solid #ccc';
+popover.style.padding = '10px';
+popover.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+popover.style.zIndex = '1000'; // Ensure the popover appears above the editor
+
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
   onTextLangQueryChange,
@@ -250,6 +261,42 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
   }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+
+  const [popoverState, setPopoverState] = useState<any>({});
+  const popoverStateRef = useRef(popoverState);
+  popoverStateRef.current = popoverState;
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedIndexRef = useRef(selectedIndex);
+  selectedIndexRef.current = selectedIndex;
+
+  function showPopover(cursorPosition) {
+    // Calculate the position relative to the editor's viewport
+    const editorPosition = editor1.current!.getScrolledVisiblePosition(cursorPosition);
+    const editorCoords = editor1.current!.getDomNode()!.getBoundingClientRect();
+    const editorTop = editorCoords.top;
+    const editorLeft = editorCoords.left;
+
+    // Calculate the absolute position of the popover
+    const absoluteTop = editorPosition.top + 40;
+    const absoluteLeft = editorLeft + editorPosition.left;
+    setPopoverState({ top: absoluteTop, left: absoluteLeft });
+  }
+
+  const [integrations, setIntegrations] = useState([]);
+  const integrationsRef = useRef(integrations);
+  integrationsRef.current = integrations;
+
+  useEffect(async () => {
+    // fetch list of integrations
+    const route = '/api/fleet/epm/packages/installed';
+    const response = await core.http
+      .get(route, { query: null, version: '2023-10-31' })
+      .catch((error) => {
+        throw new Error(`Failed to fetch integrations": ${error}`);
+      });
+    console.log(response);
+    setIntegrations(response.items);
+  }, []);
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -395,6 +442,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           getRemoteIndicesList(dataViews),
           getIndicesList(dataViews),
         ]);
+        // showPopover(editor1.current?.getPosition());
         return [...localIndices, ...remoteIndices];
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -687,6 +735,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     codeEditorOptions.overviewRulerBorder = true;
   }
 
+  let i = 0;
   const editorPanel = (
     <>
       {isCodeEditorExpanded && (
@@ -938,6 +987,107 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           onEditorFocus();
                         });
 
+                        // Hide the popover
+                        function hidePopover() {
+                          setPopoverState({});
+                        }
+
+                        // if user types, check whether the cursor is after "FROM "
+                        // if so, show the popover
+                        editor.onDidChangeCursorPosition((e) => {
+                          const cursorPosition = e.position;
+                          const cursorLine = editor1
+                            .current!.getModel()
+                            ?.getLineContent(cursorPosition.lineNumber);
+
+                          const preCursorColumnContent = cursorLine?.substring(
+                            0,
+                            cursorPosition.column - 1
+                          );
+
+                          console.log(preCursorColumnContent);
+
+                          if (preCursorColumnContent?.trim().toLowerCase() == 'from') {
+                            showPopover(cursorPosition);
+                          } else {
+                            hidePopover();
+                          }
+                        });
+                        // surpress key up and key down
+                        editor.onKeyDown((e) => {
+                          if (popoverStateRef.current.top && popoverStateRef.current.left) {
+                            if (e.keyCode === 18 || e.keyCode === 16) {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }
+                            if (e.keyCode == 18) {
+                              setSelectedIndex((s) => s + 1);
+                            }
+                            if (e.keyCode == 16) {
+                              setSelectedIndex((s) => s - 1);
+                            }
+                            if (e.keyCode === 3) {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }
+                          }
+                        });
+                        editor.onKeyUp((e) => {
+                          if (popoverStateRef.current.top && popoverStateRef.current.left) {
+                            if (e.keyCode === 18 || e.keyCode === 16) {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }
+                            // on enter
+                            if (e.keyCode === 3) {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              let ii = 0;
+                              let dataStream = null;
+                              integrationsRef.current.forEach((integration) => {
+                                integration.dataStreams.forEach((ds) => {
+                                  if (ii === selectedIndexRef.current) {
+                                    dataStream = ds;
+                                  }
+                                  ii++;
+                                });
+                              });
+                              const fromPlusPattern = /from.+\| /;
+                              const strippedCode = code.replace(fromPlusPattern, '').trim();
+                              // add the data stream to the query
+                              const updatedCode = `from "${dataStream.name}" | ${strippedCode}`;
+                              if (code !== updatedCode) {
+                                setCode(updatedCode);
+                                onTextLangQueryChange({
+                                  [language]: updatedCode,
+                                } as AggregateQuery);
+                              }
+                            }
+                          }
+                        });
+
+                        // Register an event listener to show the popover when the editor is clicked
+                        // editor1.current!.onMouseDown(function (e) {
+                        //   if (e.target.type === monaco.editor.MouseTargetType.CONTENT_TEXT) {
+                        //     showPopover(e.target.position);
+                        //   }
+                        // });
+
+                        // // Register an event listener to hide the popover when the editor loses focus
+                        // editor1.current!.onDidBlurEditorText(function () {
+                        //   hidePopover();
+                        // });
+
+                        // // Register an event listener to hide the popover when the editor is scrolled
+                        // window.addEventListener('scroll', function () {
+                        //   hidePopover();
+                        // });
+
+                        // // Register an event listener to hide the popover when the editor is resized
+                        // window.addEventListener('resize', function () {
+                        //   hidePopover();
+                        // });
+
                         // on CMD/CTRL + Enter submit the query
                         editor.addCommand(
                           // eslint-disable-next-line no-bitwise
@@ -984,6 +1134,58 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
             </EuiOutsideClickDetector>
           )}
         </EuiResizeObserver>
+        {popoverState.top && popoverState.left && (
+          <div
+            id="sdfsd"
+            style={{
+              ...popoverState,
+
+              position: 'absolute',
+              background: '#fff',
+              border: '1px solid #ccc',
+              padding: '10px',
+              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+              zIndex: '1000',
+              height: 400,
+              overflow: 'auto',
+            }}
+          >
+            <ul>
+              {integrations.map((integration) => (
+                <li>
+                  {integration.title}
+                  <ul style={{ marginLeft: 20 }}>
+                    {integration.dataStreams.map((dataStream) => {
+                      i++;
+                      return (
+                        <li
+                          style={
+                            i - 1 === selectedIndex
+                              ? { backgroundColor: 'red' }
+                              : { cursor: 'pointer' }
+                          }
+                          onClick={() => {
+                            // strip from plus pattern from code:
+                            const fromPlusPattern = /from.+\| /;
+                            const strippedCode = code.replace(fromPlusPattern, '').trim();
+                            // add the data stream to the query
+                            const updatedCode = `from "${dataStream.name}" | ${strippedCode}`;
+                            if (code !== updatedCode) {
+                              setCode(updatedCode);
+                              onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
+                            }
+                          }}
+                        >
+                          {dataStream.title}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {!isCodeEditorExpanded && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
