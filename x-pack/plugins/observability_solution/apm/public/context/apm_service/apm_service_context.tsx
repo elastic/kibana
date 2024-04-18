@@ -40,21 +40,14 @@ export const APMServiceContext = createContext<APMServiceContextValue>({
   serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
 });
 
-export function ApmServiceContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ApmServiceContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
 
   const {
     path: { serviceName },
     query,
     query: { kuery, rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -77,14 +70,13 @@ export function ApmServiceContextProvider({
     numBuckets: 100,
   });
 
-  const { transactionTypes, status: transactionTypeStatus } =
-    useServiceTransactionTypesFetcher({
-      serviceName,
-      start,
-      end,
-      documentType: preferred?.source.documentType,
-      rollupInterval: preferred?.source.rollupInterval,
-    });
+  const { transactionTypes, status: transactionTypeStatus } = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+    documentType: preferred?.source.documentType,
+    rollupInterval: preferred?.source.rollupInterval,
+  });
 
   const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
@@ -157,9 +149,7 @@ export function getTransactionType({
   const defaultTransactionType = getDefaultTransactionType(agentName);
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
-  const currentTransactionType = transactionTypes.includes(
-    defaultTransactionType
-  )
+  const currentTransactionType = transactionTypes.includes(defaultTransactionType)
     ? defaultTransactionType
     : transactionTypes[0];
 

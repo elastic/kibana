@@ -95,18 +95,14 @@ function getEnvFromMetadata() {
   env[E2E_ARTIFACTS_ID] = getStringValue(E2E_ARTIFACTS_ID);
 
   env[E2E_CONCURRENCY] =
-    env[E2E_CONCURRENCY] > maxConcurrency
-      ? maxConcurrency
-      : env[E2E_CONCURRENCY];
+    env[E2E_CONCURRENCY] > maxConcurrency ? maxConcurrency : env[E2E_CONCURRENCY];
 
   return env;
 }
 
 function getIntValue(key, defaultValue) {
   let value = defaultValue;
-  const cli = execSync(
-    `buildkite-agent meta-data get '${key}' --default ${defaultValue} `
-  )
+  const cli = execSync(`buildkite-agent meta-data get '${key}' --default ${defaultValue} `)
     .toString()
     .trim();
 
@@ -118,7 +114,5 @@ function getIntValue(key, defaultValue) {
 }
 
 function getStringValue(key) {
-  return execSync(`buildkite-agent meta-data get '${key}' --default ''`)
-    .toString()
-    .trim();
+  return execSync(`buildkite-agent meta-data get '${key}' --default ''`).toString().trim();
 }

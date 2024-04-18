@@ -12,10 +12,7 @@ import { CsmSharedContext } from '../csm_shared_context';
 export function useDataView() {
   const { dataView } = useContext(CsmSharedContext);
 
-  const [dataViewTitle, setDataViewTitle] = useLocalStorage(
-    'uxAppDataViewTitle',
-    ''
-  );
+  const [dataViewTitle, setDataViewTitle] = useLocalStorage('uxAppDataViewTitle', '');
 
   const updatedDataViewTitle = dataView?.title;
 

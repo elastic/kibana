@@ -17,9 +17,7 @@ export function getFallbackKibanaUrl({ http }: CoreStart) {
     .slice(0, -1)}`;
 }
 
-export async function getFallbackESUrl(
-  esLegacyConfigService: EsLegacyConfigService
-) {
+export async function getFallbackESUrl(esLegacyConfigService: EsLegacyConfigService) {
   const config = await esLegacyConfigService.readConfig();
 
   return config.hosts;
