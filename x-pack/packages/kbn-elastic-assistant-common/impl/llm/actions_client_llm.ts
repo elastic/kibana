@@ -27,6 +27,7 @@ interface ActionsClientLlmParams {
   request: KibanaRequest;
   model?: string;
   temperature?: number;
+  timeout?: number;
   traceId?: string;
   traceOptions?: TraceOptions;
 }
@@ -37,6 +38,7 @@ export class ActionsClientLlm extends LLM {
   #logger: Logger;
   #request: KibanaRequest;
   #traceId: string;
+  #timeout?: number;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -54,6 +56,7 @@ export class ActionsClientLlm extends LLM {
     model,
     request,
     temperature,
+    timeout,
     traceOptions,
   }: ActionsClientLlmParams) {
     super({
@@ -66,6 +69,7 @@ export class ActionsClientLlm extends LLM {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
+    this.#timeout = timeout;
     this.model = model;
     this.temperature = temperature;
   }
@@ -98,6 +102,9 @@ export class ActionsClientLlm extends LLM {
         subActionParams: {
           model: this.model,
           messages: [assistantMessage], // the assistant message
+          // This timeout is large because LangChain prompts can be complicated and take a long time
+          // TODO put into constants file once merged: https://github.com/elastic/kibana/pull/181088
+          timeout: this.#timeout ?? 180000,
           ...(this.llmType === 'openai'
             ? { n: 1, stop: null, temperature: this.temperature ?? DEFAULT_OPEN_AI_TEMPERATURE }
             : { temperature: this.temperature ?? DEFAULT_TEMPERATURE, stopSequences: [] }),

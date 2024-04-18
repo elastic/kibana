@@ -33,6 +33,7 @@ interface ActionsClientChatOpenAIParams {
   maxRetries?: number;
   model?: string;
   signal?: AbortSignal;
+  timeout?: number;
 }
 
 /**
@@ -62,6 +63,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #actionResultData: string;
   #traceId: string;
   #signal?: AbortSignal;
+  #timeout?: number;
+
   constructor({
     actions,
     connectorId,
@@ -72,6 +75,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     maxRetries,
     model,
     signal,
+    timeout,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
@@ -90,6 +94,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
+    this.#timeout = timeout;
     this.#actionResultData = '';
     this.streaming = true;
     this.#signal = signal;
@@ -188,6 +193,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
             ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
           })),
           signal: this.#signal,
+          // This timeout is large because LangChain prompts can be complicated and take a long time
+          // TODO put into constants file once merged: https://github.com/elastic/kibana/pull/181088
+          timeout: this.#timeout ?? 300000,
         },
       },
       signal: this.#signal,
