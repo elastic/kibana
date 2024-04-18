@@ -179,6 +179,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
               handleLLMNewToken(payload, _idx, _runId, parentRunId) {
                 if (tokenParentRunId.length === 0 && !!parentRunId) {
                   // set the parent run id as the parentRunId of the first token
+                  // this is used to ensure that all tokens in the stream are from the same run
+                  // filtering out runs that are inside e.g. tool calls
                   tokenParentRunId = parentRunId;
                 }
                 if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
@@ -191,11 +193,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                 // if parentRunId is undefined, this is the end of the stream
                 if (!parentRunId) {
                   handleStreamEnd(outputs.output);
-                  console.log('handleChainEnd', {
-                    doesOutputMatch: message === outputs.output,
-                    streamOutput: message,
-                    chainEndOutput: outputs.output,
-                  });
                 }
               },
             },
