@@ -86,12 +86,27 @@ describe('correctCommonEsqlMistakes', () => {
   it(`escapes the column name if SORT uses an expression`, () => {
     expectQuery(
       'FROM logs-* \n| STATS COUNT(*) by service.name\n| SORT COUNT(*) DESC',
-      'FROM logs-*\n| STATS COUNT(*) by service.name\n| SORT `COUNT(*)` DESC'
+      'FROM logs-*\n| STATS COUNT(*) BY service.name\n| SORT `COUNT(*)` DESC'
     );
 
     expectQuery(
       'FROM logs-* \n| STATS COUNT(*) by service.name\n| SORT COUNT(*) DESC, @timestamp ASC',
-      'FROM logs-*\n| STATS COUNT(*) by service.name\n| SORT `COUNT(*)` DESC, @timestamp ASC'
+      'FROM logs-*\n| STATS COUNT(*) BY service.name\n| SORT `COUNT(*)` DESC, @timestamp ASC'
+    );
+  });
+
+  it(`handles complicated queries correctly`, () => {
+    expectQuery(
+      `FROM "postgres-logs*"
+      | GROK message "%{TIMESTAMP_ISO8601:timestamp} %{TZ} \[%{NUMBER:process_id}\]: \[%{NUMBER:log_line}\] user=%{USER:user},db=%{USER:database},app=\[%{DATA:application}\],client=%{IP:client_ip} LOG:  duration: %{NUMBER:duration:float} ms  statement: %{GREEDYDATA:statement}"
+      | EVAL "@timestamp" = TO_DATETIME(timestamp)
+      | WHERE statement LIKE 'SELECT%'
+      | STATS avg_duration = AVG(duration)`,
+      `FROM \`postgres-logs*\`
+    | GROK message "%{TIMESTAMP_ISO8601:timestamp} %{TZ} \[%{NUMBER:process_id}\]: \[%{NUMBER:log_line}\] user=%{USER:user},db=%{USER:database},app=\[%{DATA:application}\],client=%{IP:client_ip} LOG:  duration: %{NUMBER:duration:float} ms  statement: %{GREEDYDATA:statement}"
+    | EVAL @timestamp = TO_DATETIME(timestamp)
+    | WHERE statement LIKE "SELECT%"
+    | STATS avg_duration = AVG(duration)`
     );
   });
 });
