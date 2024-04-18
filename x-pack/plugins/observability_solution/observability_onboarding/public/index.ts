@@ -35,10 +35,6 @@ export interface ObservabilityOnboardingAppServices {
 export const plugin: PluginInitializer<
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart
-> = (ctx: PluginInitializerContext<ConfigSchema>) =>
-  new ObservabilityOnboardingPlugin(ctx);
+> = (ctx: PluginInitializerContext<ConfigSchema>) => new ObservabilityOnboardingPlugin(ctx);
 
-export type {
-  ObservabilityOnboardingPluginSetup,
-  ObservabilityOnboardingPluginStart,
-};
+export type { ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart };

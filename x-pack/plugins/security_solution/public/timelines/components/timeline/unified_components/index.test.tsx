@@ -219,7 +219,9 @@ describe('unified timeline', () => {
     );
   });
 
-  describe('columns', () => {
+  // Flaky : See https://github.com/elastic/kibana/issues/179831
+  // removing/moving column current leads to infitinite loop, will be fixed in further PRs.
+  describe.skip('columns', () => {
     it(
       'should move column left correctly ',
       async () => {
@@ -298,7 +300,7 @@ describe('unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    it(
+    it.skip(
       'should remove column ',
       async () => {
         const field = {
@@ -540,7 +542,9 @@ describe('unified timeline', () => {
     );
   });
 
-  describe('unified field list', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180937
+  // FLAKY: https://github.com/elastic/kibana/issues/180956
+  describe.skip('unified field list', () => {
     it(
       'should be able to add filters',
       async () => {

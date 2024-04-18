@@ -1,7 +1,7 @@
 EVAL
 
 Syntax
-EVAL column1 = value1[, ..., columnN = valueN]
+EVAL [column1 =] value1[, ..., [columnN =] valueN]
 Parameters
 columnX
 The column name.
@@ -25,4 +25,22 @@ FROM employees
 | SORT emp_no
 | KEEP first_name, last_name, height
 | EVAL height = height * 3.281
+```
+
+Specifying the output column name is optional. If not specified, the new column
+name is equal to the expression. The following query adds a column named
+height*3.281:
+```esql
+FROM employees
+| SORT emp_no
+| KEEP first_name, last_name, height
+| EVAL height * 3.281
+```
+
+Because this name contains special characters, it needs to be
+quoted with backticks (`) when using it in subsequent commands:
+```esql
+FROM employees
+| EVAL height * 3.281
+| STATS avg_height_feet = AVG(`height * 3.281`)
 ```
