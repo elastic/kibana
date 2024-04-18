@@ -75,14 +75,12 @@ export async function getAnomalyTimeseries({
   // If multiple ML jobs exist
   // find the first job with valid running datafeed that matches the preferred environment
   const preferredBucketSpan = mlJobs.find(
-    (j) =>
-      j.datafeedState !== undefined && j.environment === preferredEnvironment
+    (j) => j.datafeedState !== undefined && j.environment === preferredEnvironment
   )?.bucketSpan;
 
   const minBucketSize =
-    parseInterval(
-      preferredBucketSpan ?? `${FALLBACK_ML_BUCKET_SPAN}m`
-    )?.asSeconds() ?? FALLBACK_ML_BUCKET_SPAN * 60; // secs
+    parseInterval(preferredBucketSpan ?? `${FALLBACK_ML_BUCKET_SPAN}m`)?.asSeconds() ??
+    FALLBACK_ML_BUCKET_SPAN * 60; // secs
 
   // Expected bounds (aka ML model plots) are stored as points in time, in intervals of the predefined bucket_span,
   // so to query bounds that include start and end time
@@ -97,90 +95,87 @@ export async function getAnomalyTimeseries({
     // use the original job's bucket_span
     minBucketSize,
   });
-  const anomaliesResponse = await anomalySearch(
-    mlClient.mlSystem.mlAnomalySearch,
-    {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...apmMlAnomalyQuery({
-                serviceName,
-                transactionType,
-              }),
-              ...rangeQuery(extendedStart, extendedEnd, 'timestamp'),
-              ...apmMlJobsQuery(mlJobs),
-            ],
-          },
+  const anomaliesResponse = await anomalySearch(mlClient.mlSystem.mlAnomalySearch, {
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...apmMlAnomalyQuery({
+              serviceName,
+              transactionType,
+            }),
+            ...rangeQuery(extendedStart, extendedEnd, 'timestamp'),
+            ...apmMlJobsQuery(mlJobs),
+          ],
         },
-        aggs: {
-          by_timeseries_id: {
-            composite: {
-              size: 5000,
-              sources: asMutableArray([
-                {
-                  jobId: {
-                    terms: {
-                      field: 'job_id',
+      },
+      aggs: {
+        by_timeseries_id: {
+          composite: {
+            size: 5000,
+            sources: asMutableArray([
+              {
+                jobId: {
+                  terms: {
+                    field: 'job_id',
+                  },
+                },
+              },
+              {
+                detectorIndex: {
+                  terms: {
+                    field: 'detector_index',
+                  },
+                },
+              },
+              {
+                serviceName: {
+                  terms: {
+                    field: 'partition_field_value',
+                  },
+                },
+              },
+              {
+                transactionType: {
+                  terms: {
+                    field: 'by_field_value',
+                  },
+                },
+              },
+            ] as const),
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: 'timestamp',
+                fixed_interval: intervalString,
+                extended_bounds: {
+                  min: extendedStart,
+                  max: extendedEnd,
+                },
+              },
+              aggs: {
+                top_anomaly: {
+                  top_metrics: {
+                    metrics: asMutableArray([
+                      { field: 'record_score' },
+                      { field: 'actual' },
+                    ] as const),
+                    size: 1,
+                    sort: {
+                      record_score: 'desc',
                     },
                   },
                 },
-                {
-                  detectorIndex: {
-                    terms: {
-                      field: 'detector_index',
-                    },
+                model_lower: {
+                  min: {
+                    field: 'model_lower',
                   },
                 },
-                {
-                  serviceName: {
-                    terms: {
-                      field: 'partition_field_value',
-                    },
-                  },
-                },
-                {
-                  transactionType: {
-                    terms: {
-                      field: 'by_field_value',
-                    },
-                  },
-                },
-              ] as const),
-            },
-            aggs: {
-              timeseries: {
-                date_histogram: {
-                  field: 'timestamp',
-                  fixed_interval: intervalString,
-                  extended_bounds: {
-                    min: extendedStart,
-                    max: extendedEnd,
-                  },
-                },
-                aggs: {
-                  top_anomaly: {
-                    top_metrics: {
-                      metrics: asMutableArray([
-                        { field: 'record_score' },
-                        { field: 'actual' },
-                      ] as const),
-                      size: 1,
-                      sort: {
-                        record_score: 'desc',
-                      },
-                    },
-                  },
-                  model_lower: {
-                    min: {
-                      field: 'model_lower',
-                    },
-                  },
-                  model_upper: {
-                    max: {
-                      field: 'model_upper',
-                    },
+                model_upper: {
+                  max: {
+                    field: 'model_upper',
                   },
                 },
               },
@@ -188,8 +183,8 @@ export async function getAnomalyTimeseries({
           },
         },
       },
-    }
-  );
+    },
+  });
 
   const jobsById = keyBy(mlJobs, (job) => job.jobId);
 
@@ -218,15 +213,10 @@ export async function getAnomalyTimeseries({
         anomalies: bucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key as number,
           y:
-            (dateBucket.top_anomaly.top[0]?.metrics.record_score as
-              | number
-              | null
-              | undefined) ?? null,
+            (dateBucket.top_anomaly.top[0]?.metrics.record_score as number | null | undefined) ??
+            null,
           actual: divide(
-            (dateBucket.top_anomaly.top[0]?.metrics.actual as
-              | number
-              | null
-              | undefined) ?? null,
+            (dateBucket.top_anomaly.top[0]?.metrics.actual as number | null | undefined) ?? null,
             divider
           ),
         })),

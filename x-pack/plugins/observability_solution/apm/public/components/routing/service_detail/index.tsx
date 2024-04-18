@@ -6,10 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import qs from 'query-string';
@@ -56,11 +53,7 @@ function page({
 } {
   return {
     element: (
-      <ApmServiceTemplate
-        title={title}
-        selectedTab={tab}
-        searchBarOptions={searchBarOptions}
-      >
+      <ApmServiceTemplate title={title} selectedTab={tab} searchBarOptions={searchBarOptions}>
         {element}
       </ApmServiceTemplate>
     ),
@@ -70,17 +63,11 @@ function page({
 function RedirectNodesToMetrics() {
   const { query, path } = useApmParams('/services/{serviceName}/nodes');
   const search = qs.stringify(query);
-  return (
-    <Redirect
-      to={{ pathname: `/services/${path.serviceName}/metrics`, search }}
-    />
-  );
+  return <Redirect to={{ pathname: `/services/${path.serviceName}/metrics`, search }} />;
 }
 
 function RedirectNodeMetricsToMetricsDetails() {
-  const { query, path } = useApmParams(
-    '/services/{serviceName}/nodes/{serviceNodeName}/metrics'
-  );
+  const { query, path } = useApmParams('/services/{serviceName}/nodes/{serviceNodeName}/metrics');
   const search = qs.stringify(query);
   return (
     <Redirect

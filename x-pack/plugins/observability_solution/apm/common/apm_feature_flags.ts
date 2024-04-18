@@ -65,9 +65,9 @@ export type ApmFeatureFlags = {
   [TApmFeatureFlagName in keyof ApmFeatureFlagMap]: ValueOfApmFeatureFlag<TApmFeatureFlagName>;
 };
 
-export type ValueOfApmFeatureFlag<
-  TApmFeatureFlagName extends ApmFeatureFlagName
-> = t.OutputOf<ApmFeatureFlagMap[TApmFeatureFlagName]['type']>;
+export type ValueOfApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName> = t.OutputOf<
+  ApmFeatureFlagMap[TApmFeatureFlagName]['type']
+>;
 
 export function getApmFeatureFlags(): ApmFeatureFlags {
   return mapValues(apmFeatureFlagMap, (value, key) => value.default);
