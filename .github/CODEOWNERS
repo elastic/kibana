@@ -1085,13 +1085,12 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/**/test_suites/observability/slos/ @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/es_query_rule @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/burn_rate_rule @elastic/obs-ux-management-team
-
+/x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team
 
 # Elastic Stack Monitoring
-/x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
-/x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
-/x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
-/x-pack/test_serverless/**/test_suites/observability/infra/ @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
+/x-pack/test/functional/apps/monitoring @elastic/stack-monitoring
+/x-pack/test/api_integration/apis/monitoring @elastic/stack-monitoring
+/x-pack/test/api_integration/apis/monitoring_collection @elastic/stack-monitoring
 
 # Fleet
 /fleet_packages.json @elastic/fleet
