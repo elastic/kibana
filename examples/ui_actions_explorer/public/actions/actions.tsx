@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { OverlayStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   ActionExecutionContext,
   createAction,
@@ -102,15 +102,19 @@ function EditUserModal({
   );
 }
 
-export const createEditUserAction = (getOpenModal: () => Promise<OverlayStart['openModal']>) =>
+export const createEditUserAction = (getStartServices: () => Promise<CoreStart>) =>
   createAction<UserContext>({
     id: ACTION_EDIT_USER,
     type: ACTION_EDIT_USER,
     getIconType: () => 'pencil',
     getDisplayName: () => 'Edit user',
     execute: async ({ user, update }) => {
-      const overlay = (await getOpenModal())(
-        toMountPoint(<EditUserModal user={user} update={update} close={() => overlay.close()} />)
+      const { overlays, ...startServices } = await getStartServices();
+      const overlay = overlays.openModal(
+        toMountPoint(
+          <EditUserModal user={user} update={update} close={() => overlay.close()} />,
+          startServices
+        )
       );
     },
   });

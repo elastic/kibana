@@ -26,14 +26,9 @@ export async function mountManagementSection(
   { http, getStartServices, notifications }: CoreSetup<StartDependencies>,
   params: AppParams
 ) {
-  const { element, setBreadcrumbs, history, theme$, license } = params;
+  const { element, setBreadcrumbs, history, license } = params;
   const [coreStart, depsStart] = await getStartServices();
-  const {
-    docLinks,
-    application,
-    i18n: { Context: I18nContext },
-    executionContext,
-  } = coreStart;
+  const { docLinks, application, executionContext } = coreStart;
 
   documentationService.setup(docLinks);
   breadcrumbService.setup(setBreadcrumbs);
@@ -55,5 +50,5 @@ export async function mountManagementSection(
     license,
   };
 
-  return renderApp(element, I18nContext, services, { http }, { theme$ });
+  return renderApp(element, services, { ...coreStart, http });
 }

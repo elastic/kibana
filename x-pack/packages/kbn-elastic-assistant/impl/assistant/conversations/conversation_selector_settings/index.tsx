@@ -68,7 +68,10 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
     isDisabled,
     shouldDisableKeyboardShortcut = () => false,
   }) => {
-    const conversationTitles = useMemo(() => Object.keys(conversations), [conversations]);
+    const conversationTitles = useMemo(
+      () => Object.values(conversations).map((c) => c.title),
+      [conversations]
+    );
 
     const [conversationOptions, setConversationOptions] = useState<
       ConversationSelectorSettingsOption[]

@@ -33,6 +33,7 @@ const mockPromptContexts: Record<string, PromptContext> = {
 const defaultProps = {
   anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
   promptContexts: mockPromptContexts,
+  isFlyoutMode: false,
 };
 
 describe('ContextPills', () => {

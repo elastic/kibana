@@ -15,10 +15,7 @@ import {
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
-import {
-  getParsedFilterQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -46,10 +43,7 @@ import {
 } from '../../../../../common/rules/apm_rule_types';
 import { transactionErrorRateParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import {
-  asDecimalOrInteger,
-  getAlertUrlTransaction,
-} from '../../../../../common/utils/formatters';
+import { asDecimalOrInteger, getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
@@ -114,24 +108,14 @@ export function registerTransactionErrorRateRuleType({
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({
-        services,
-        spaceId,
-        params: ruleParams,
-        startedAt,
-        getTimeRange,
-      }) => {
+      executor: async ({ services, spaceId, params: ruleParams, startedAt, getTimeRange }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
           ruleParams.groupBy
         );
 
-        const {
-          getAlertUuid,
-          getAlertStartedDate,
-          savedObjectsClient,
-          scopedClusterClient,
-        } = services;
+        const { getAlertUuid, getAlertStartedDate, savedObjectsClient, scopedClusterClient } =
+          services;
 
         const indices = await getApmIndices(savedObjectsClient);
 
@@ -139,12 +123,9 @@ export function registerTransactionErrorRateRuleType({
         // to prevent (likely) unnecessary blocking request
         // in rule execution
         const searchAggregatedTransactions =
-          apmConfig.searchAggregatedTransactions !==
-          SearchAggregatedTransactionSetting.never;
+          apmConfig.searchAggregatedTransactions !== SearchAggregatedTransactionSetting.never;
 
-        const index = searchAggregatedTransactions
-          ? indices.metric
-          : indices.transaction;
+        const index = searchAggregatedTransactions ? indices.metric : indices.transaction;
 
         const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
           ? [
@@ -161,9 +142,7 @@ export function registerTransactionErrorRateRuleType({
             ]
           : [];
 
-        const { dateStart } = getTimeRange(
-          `${ruleParams.windowSize}${ruleParams.windowUnit}`
-        );
+        const { dateStart } = getTimeRange(`${ruleParams.windowSize}${ruleParams.windowUnit}`);
 
         const searchParams = {
           index,
@@ -180,21 +159,14 @@ export function registerTransactionErrorRateRuleType({
                       },
                     },
                   },
-                  ...getBackwardCompatibleDocumentTypeFilter(
-                    searchAggregatedTransactions
-                  ),
+                  ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
                   {
                     terms: {
-                      [EVENT_OUTCOME]: [
-                        EventOutcome.failure,
-                        EventOutcome.success,
-                      ],
+                      [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
                     },
                   },
                   ...termFilterQuery,
-                  ...getParsedFilterQuery(
-                    ruleParams.searchConfiguration?.query?.query as string
-                  ),
+                  ...getParsedFilterQuery(ruleParams.searchConfiguration?.query?.query as string),
                 ],
               },
             },
@@ -230,13 +202,10 @@ export function registerTransactionErrorRateRuleType({
         const results = [];
 
         for (const bucket of response.aggregations.series.buckets) {
-          const groupByFields = bucket.key.reduce(
-            (obj, bucketKey, bucketIndex) => {
-              obj[allGroupByFields[bucketIndex]] = bucketKey;
-              return obj;
-            },
-            {} as Record<string, string>
-          );
+          const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
+            obj[allGroupByFields[bucketIndex]] = bucketKey;
+            return obj;
+          }, {} as Record<string, string>);
 
           const bucketKey = bucket.key;
 
@@ -287,9 +256,7 @@ export function registerTransactionErrorRateRuleType({
 
           const relativeViewInAppUrl = getAlertUrlTransaction(
             groupByFields[SERVICE_NAME],
-            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
-              SERVICE_ENVIRONMENT
-            ],
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[SERVICE_ENVIRONMENT],
             groupByFields[TRANSACTION_TYPE]
           );
           const viewInAppUrl = addSpaceIdToPath(
@@ -297,8 +264,7 @@ export function registerTransactionErrorRateRuleType({
             spaceId,
             relativeViewInAppUrl
           );
-          const indexedStartedAt =
-            getAlertStartedDate(alertId) ?? startedAt.toISOString();
+          const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(alertId);
           const alertDetailsUrl = await getAlertUrl(
             alertUuid,
@@ -307,8 +273,7 @@ export function registerTransactionErrorRateRuleType({
             alertsLocator,
             basePath.publicBaseUrl
           );
-          const groupByActionVariables =
-            getGroupByActionVariables(groupByFields);
+          const groupByActionVariables = getGroupByActionVariables(groupByFields);
 
           alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
             alertDetailsUrl,

@@ -19,7 +19,6 @@ export const allowedExperimentalValues = Object.freeze({
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -87,6 +86,13 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV2Enabled: false,
 
   /**
+   * 8.15
+   * Enables use of agent status service to get agent status information
+   * for endpoint and third-party agents.
+   */
+  agentStatusClientEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -116,6 +122,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables new Set of filters on the Alerts page.
    */
   alertsPageFiltersEnabled: true,
+
+  /**
+   * Enables the Assistant Alerts Insights feature and API endpoint
+   */
+  assistantAlertsInsights: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -176,6 +187,11 @@ export const allowedExperimentalValues = Object.freeze({
   alertSuppressionForNewTermsRuleEnabled: false,
 
   /**
+   * Enables alerts suppression for Eql rules with non-sequence queries
+   */
+  alertSuppressionForNonSequenceEqlRuleEnabled: false,
+
+  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: true,
@@ -233,6 +249,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: false,
+
+  /**
+   *  Enables Security AI Assistant's Flyout mode
+   */
+  aiAssistantFlyoutMode: false,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

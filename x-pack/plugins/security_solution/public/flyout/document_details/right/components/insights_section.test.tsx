@@ -200,7 +200,7 @@ describe('<InsightsSection />', () => {
     expect(
       queryByTestId(`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}LeftSection`)
     ).not.toBeInTheDocument();
-    expect(queryByTestId(`${CORRELATIONS_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+    expect(getByTestId(`${CORRELATIONS_TEST_ID}LeftSection`)).toBeInTheDocument();
     expect(getByTestId(`${PREVALENCE_TEST_ID}LeftSection`)).toBeInTheDocument();
   });
 });
