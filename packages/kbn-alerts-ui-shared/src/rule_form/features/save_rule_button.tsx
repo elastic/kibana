@@ -37,7 +37,13 @@ export const SaveRuleButton: React.FC<SaveRuleButtonProps> = ({
   const validation = useValidation();
 
   const { isOverallValid } = validation;
-  const errorList = useMemo(() => flattenErrorObject(validation).join('; '), [validation]);
+  const errorList = useMemo(
+    () =>
+      flattenErrorObject(validation)
+        .map((error) => (error.endsWith('.') ? error.slice(-1) : error))
+        .join('; '),
+    [validation]
+  );
 
   const onClickSave = useCallback(async () => {
     setIsSaving(true);
