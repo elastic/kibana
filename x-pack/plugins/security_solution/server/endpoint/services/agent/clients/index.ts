@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export * from './actions';
-export * from './agent';
-export * from './artifacts_exception_list';
-export type { FeatureKeys } from './feature_usage';
+export * from './endpoint/endpoint_agent_status_client';
+export * from './sentinel_one/sentinel_one_agent_status_client';
+export * from './get_agent_status_client';
+
+export * from './lib/types';
