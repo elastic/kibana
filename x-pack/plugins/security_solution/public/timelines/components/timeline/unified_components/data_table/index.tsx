@@ -150,7 +150,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
-        console.log("EVENT DATA: ", eventData);
         const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'eventDetail',
           params: {
