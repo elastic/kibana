@@ -26,7 +26,7 @@ export function inferenceModelsApiProvider(httpService: HttpService) {
       return httpService.http<estypes.InferencePutModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_inference/${taskType}/${inferenceId}`,
         method: 'PUT',
-        body: JSON.stringify({ ...modelConfig }),
+        body: JSON.stringify(modelConfig),
         version: '1',
       });
     },
