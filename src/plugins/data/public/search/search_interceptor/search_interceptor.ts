@@ -66,7 +66,7 @@ import {
 import { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
-import { toPartialResponse } from './to_partial_response';
+import { toPartialResponseAfterTimeout } from './to_partial_response';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
@@ -514,11 +514,13 @@ export class SearchInterceptor {
           catchError((e) => {
             // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
             if (searchAbortController.isTimeout()) {
-              return from(this.runSearch(request, { ...options, retrieveResults: true })).pipe(
+              return from(
+                this.runSearch(request, { ...searchOptions, retrieveResults: true })
+              ).pipe(
                 tap(() =>
                   this.handleSearchError(e, request?.params?.body ?? {}, searchOptions, true)
                 ),
-                map(toPartialResponse)
+                map(toPartialResponseAfterTimeout)
               );
             }
             return throwError(

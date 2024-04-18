@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { toPartialResponse } from './to_partial_response';
+import { toPartialResponseAfterTimeout } from './to_partial_response';
 import { IEsSearchResponse } from '../../../common';
 
-describe('toPartialResponse', () => {
+describe('toPartialResponseAfterTimeout', () => {
   it('should transform a non-CCS response', () => {
     const response = {
       id: 'FnRKOG10dG5OUXItUTNGUE5HNW9iU1Eed3l6LUVycTVTVGl1LWtDSVdta2VkQToxODQ5NzQ3',
@@ -75,7 +75,7 @@ describe('toPartialResponse', () => {
       },
     };
 
-    const actual = toPartialResponse(response);
+    const actual = toPartialResponseAfterTimeout(response);
     expect(actual).toEqual(expected);
   });
 
@@ -198,7 +198,7 @@ describe('toPartialResponse', () => {
       },
     };
 
-    const actual = toPartialResponse(response);
+    const actual = toPartialResponseAfterTimeout(response);
     expect(actual).toEqual(expected);
   });
 });
