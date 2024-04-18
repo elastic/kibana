@@ -56,6 +56,8 @@ const agentPolicyGenerator: RunFn = async ({ flags, log }) => {
     url: flags.kibana as string,
     username: flags.username as string,
     password: flags.password as string,
+    noCertForSsl: true,
+    log,
   });
 
   const totalPoliciesCount = flags.count as unknown as number;
