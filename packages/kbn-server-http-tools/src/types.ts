@@ -20,12 +20,18 @@ export interface IHttpConfig {
   ssl: ISslConfig;
   shutdownTimeout: Duration;
   restrictInternalApis: boolean;
+  oas: IOasConfig;
 }
 
 export interface ICorsConfig {
   enabled: boolean;
   allowCredentials: boolean;
   allowOrigin: string[];
+}
+
+/** @experimental */
+export interface IOasConfig {
+  enabled: boolean;
 }
 
 export interface ISslConfig {
