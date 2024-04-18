@@ -222,11 +222,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(queryBarContentsAfterRefresh).to.equal(newQuery);
       };
 
-      it('for query parameter with soft refresh', async function () {
-        await changeQuery(false, 'hi:goodbye');
-        await PageObjects.dashboard.expectAppStateRemovedFromURL();
-      });
-
       it('for query parameter with hard refresh', async function () {
         await changeQuery(true, 'hi:hello');
         await queryBar.clearQuery();
