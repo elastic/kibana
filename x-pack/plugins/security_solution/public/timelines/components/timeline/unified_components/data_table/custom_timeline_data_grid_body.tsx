@@ -6,15 +6,18 @@
  */
 
 import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
+
+const IS_INTERSECTION_OBSERVER_ENABLED = true;
 
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
@@ -45,16 +48,18 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
 
     return (
       <>
-        {visibleRows.map((row, rowIndex) => (
-          <CustomDataGridSingleRow
-            rowData={row}
-            rowIndex={rowIndex}
-            key={rowIndex}
-            visibleColumns={visibleColumns}
-            Cell={Cell}
-            enabledRowRenderers={enabledRowRenderers}
-          />
-        ))}
+        {visibleRows.map((row, rowIndex) => {
+          return (
+            <CustomDataGridSingleRow
+              rowData={row}
+              rowIndex={rowIndex}
+              key={rowIndex}
+              visibleColumns={visibleColumns}
+              Cell={Cell}
+              enabledRowRenderers={enabledRowRenderers}
+            />
+          );
+        })}
       </>
     );
   }
@@ -73,6 +78,8 @@ const CustomGridRow = styled.div.attrs<{
 }))`
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
+  min-height: '40px';
+  width: 100%;
 `;
 
 /**
@@ -98,10 +105,38 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
 ) {
   const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell } = props;
 
+  const [intersectionEntry, setIntersectionEntry] = useState<IntersectionObserverEntry>({
+    isIntersecting: false,
+    intersectionRatio: 0,
+  });
+
+  const intersectionRef = useRef<HTMLDivElement | null>(null);
+
+  const observer = useRef<IntersectionObserver | null>(null);
+
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
   });
+
+  useEffect(() => {
+    if (intersectionRef.current && !observer.current) {
+      observer.current = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          setIntersectionEntry(entry);
+        });
+      });
+      observer.current.observe(intersectionRef.current);
+    }
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, []);
+
+  console.log({ rowIndex, intersectionEntry });
 
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
@@ -118,34 +153,46 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     [canShowRowRenderer]
   );
 
+  const isRowIntersecting =
+    intersectionEntry.isIntersecting && intersectionEntry.intersectionRatio > 0;
+
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
       key={rowIndex}
+      ref={intersectionRef}
     >
-      <CustomGridRowCellWrapper>
-        {visibleColumns.map((column, colIndex) => {
-          // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
-          if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
-            return (
-              <Cell
-                style={cellCustomStyle}
-                colIndex={colIndex}
-                visibleRowIndex={rowIndex}
-                key={`${rowIndex},${colIndex}`}
-              />
-            );
-          }
-          return null;
-        })}
-      </CustomGridRowCellWrapper>
-      {/* Timeline Expanded Row */}
-      {canShowRowRenderer ? (
-        <Cell
-          colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
-          visibleRowIndex={rowIndex}
-        />
-      ) : null}
+      <EuiSkeletonText
+        lines={2}
+        size="m"
+        isLoading={IS_INTERSECTION_OBSERVER_ENABLED && !isRowIntersecting}
+      >
+        <CustomGridRowCellWrapper>
+          {visibleColumns.map((column, colIndex) => {
+            // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
+            if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
+              return (
+                <>
+                  <Cell
+                    style={cellCustomStyle}
+                    colIndex={colIndex}
+                    visibleRowIndex={rowIndex}
+                    key={`${rowIndex},${colIndex}`}
+                  />
+                </>
+              );
+            }
+            return null;
+          })}
+        </CustomGridRowCellWrapper>
+        {/* Timeline Expanded Row */}
+        {canShowRowRenderer ? (
+          <Cell
+            colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
+            visibleRowIndex={rowIndex}
+          />
+        ) : null}
+      </EuiSkeletonText>
     </CustomGridRow>
   );
 });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { MutableRefObject, useCallback, useMemo, useRef } from 'react';
+import React, { MutableRefObject, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiDataGridRefProps,
   EuiLoadingSpinner,
@@ -77,35 +77,67 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
     disabledActionTypes,
   });
 
-  const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
-    if (loading) {
-      return fields?.length ? fields.map(() => loadingColumnActions) : emptyActions;
-    }
-    if (!triggerId || !columnsActions?.length || !fields?.length) {
-      return emptyActions;
-    }
+  // useEffect for changes in below vars
+  // columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef
+  //
 
-    // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
-    // It will eventually update to a consistent state
-    if (columnsActions.length !== fields.length) {
-      return emptyActions;
-    }
+  useEffect(() => {
+    console.log('columnsActions', columnsActions);
+  }, [columnsActions]);
 
-    return columnsActions.map((actions, columnIndex) =>
-      actions.map((action) =>
-        createColumnCellAction({
-          action,
-          field: fields[columnIndex],
-          getCellValue,
-          metadata,
-          triggerId,
-          dataGridRef,
-        })
-      )
-    );
-  }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
+  useEffect(() => {
+    console.log('fields', fields);
+  }, [fields]);
 
-  return columnsCellActions;
+  useEffect(() => {
+    console.log('getCellValue', getCellValue);
+  }, [getCellValue]);
+
+  useEffect(() => {
+    console.log('loading', loading);
+  }, [loading]);
+
+  useEffect(() => {
+    console.log('metadata', metadata);
+  }, [metadata]);
+
+  useEffect(() => {
+    console.log('triggerId', triggerId);
+  }, [triggerId]);
+
+  useEffect(() => {
+    console.log('dataGridRef', dataGridRef);
+  }, [dataGridRef]);
+
+  // const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
+  //   if (loading) {
+  //     return fields?.length ? fields.map(() => loadingColumnActions) : emptyActions;
+  //   }
+  //   if (!triggerId || !columnsActions?.length || !fields?.length) {
+  //     return emptyActions;
+  //   }
+  //
+  //   // Check for a temporary inconsistency because `useBulkLoadActions` takes one render loop before setting `loading` to true.
+  //   // It will eventually update to a consistent state
+  //   if (columnsActions.length !== fields.length) {
+  //     return emptyActions;
+  //   }
+  //
+  //   return columnsActions.map((actions, columnIndex) =>
+  //     actions.map((action) =>
+  //       createColumnCellAction({
+  //         action,
+  //         field: fields[columnIndex],
+  //         getCellValue,
+  //         metadata,
+  //         triggerId,
+  //         dataGridRef,
+  //       })
+  //     )
+  //   );
+  // }, [columnsActions, fields, getCellValue, loading, metadata, triggerId, dataGridRef]);
+
+  return useMemo(() => (fields ?? []).map(() => loadingColumnActions), [fields]);
 };
 
 interface CreateColumnCellActionParams
@@ -125,6 +157,8 @@ const createColumnCellAction = ({
   function ColumnCellAction({ Component, rowIndex, isExpanded }) {
     const nodeRef = useRef<HTMLAnchorElement | null>(null);
     const buttonRef = useRef<HTMLAnchorElement | null>(null);
+
+    console.log({ isExpanded });
 
     const actionContext: CellActionExecutionContext = useMemo(() => {
       const { name } = field;

@@ -25,6 +25,7 @@ import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { isEqual } from 'lodash';
 import { withDataView } from '../../../../common/components/with_data_view';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
@@ -223,16 +224,25 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
 
   const setAppState = useCallback(
     (newState: { columns: string[]; sort?: string[][] }) => {
-      if (newState.sort) {
-        onSort(newState.sort);
-      } else {
+      const { columns: newColumns, sort: newSort } = newState;
+      if (newSort) {
+        const isSortUnchanged =
+          newSort.length === sortingColumns.length && isEqual(newSort, sortingColumns);
+        console.log({ isSortUnchanged });
+
+        if (!isSortUnchanged) {
+          onSort(newSort);
+        }
+      }
+
+      if (newColumns) {
         const columnsStates = newState.columns.map((columnId) =>
           getColumnHeader(columnId, defaultUdtHeaders)
         );
         dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
       }
     },
-    [dispatch, onSort, timelineId]
+    [dispatch, onSort, timelineId, sortingColumns]
   );
 
   const {
@@ -242,8 +252,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onSetColumns,
   } = useColumns({
     capabilities,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    dataView: dataView!,
+    dataView,
     dataViews,
     setAppState,
     useNewFieldsApi: true,
@@ -307,16 +316,16 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const onDropFieldToTable = useCallback(() => {
     if (draggingFieldName) {
       onAddColumn(draggingFieldName);
-      onToggleColumn(draggingFieldName);
+      // onToggleColumn(draggingFieldName);
     }
-  }, [draggingFieldName, onAddColumn, onToggleColumn]);
+  }, [draggingFieldName, onAddColumn]);
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
       onAddColumn(field.name);
-      onToggleColumn(field.name);
+      // onToggleColumn(field.name);
     },
-    [onAddColumn, onToggleColumn]
+    [onAddColumn]
   );
 
   const onRemoveFieldFromWorkspace = useCallback(
@@ -350,23 +359,21 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
         sidebarPanel={
           <SidebarPanelFlexGroup gutterSize="none">
             <EuiFlexItem className="sidebarContainer">
-              {dataView ? (
-                <UnifiedFieldListSidebarContainer
-                  ref={unifiedFieldListContainerRef}
-                  showFieldList
-                  variant="responsive"
-                  getCreationOptions={getFieldsListCreationOptions}
-                  services={fieldListSidebarServices}
-                  dataView={dataView}
-                  fullWidth
-                  allFields={dataView.fields}
-                  workspaceSelectedFieldNames={columnIds}
-                  onAddFieldToWorkspace={onAddFieldToWorkspace}
-                  onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-                  onAddFilter={onAddFilter}
-                  onFieldEdited={wrappedOnFieldEdited}
-                />
-              ) : null}
+              <UnifiedFieldListSidebarContainer
+                ref={unifiedFieldListContainerRef}
+                showFieldList
+                variant="responsive"
+                getCreationOptions={getFieldsListCreationOptions}
+                services={fieldListSidebarServices}
+                dataView={dataView}
+                fullWidth
+                allFields={dataView.fields}
+                workspaceSelectedFieldNames={columnIds}
+                onAddFieldToWorkspace={onAddFieldToWorkspace}
+                onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+                onAddFilter={onAddFilter}
+                onFieldEdited={wrappedOnFieldEdited}
+              />
             </EuiFlexItem>
             <EuiHideFor sizes={HIDE_FOR_SIZES}>
               <StyledSplitFlexItem grow={false} className="thinBorderSplit" />

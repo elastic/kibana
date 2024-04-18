@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -339,6 +339,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       ),
       [tableRows, enabledRowRenderers]
     );
+
+    useEffect(() => {
+      console.log('changed sort', { sort });
+    }, [sort]);
 
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>

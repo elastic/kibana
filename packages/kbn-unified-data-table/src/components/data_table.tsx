@@ -684,6 +684,36 @@ export const UnifiedDataTable = ({
     [dataView, cellActionsMetadata]
   );
 
+  /*
+   *
+   *
+    cellActionsFields,
+    getCellValue,
+   cellActionsTriggerId,
+    dataGridRef,
+     allCellActionsMetadata,
+     */
+
+  useEffect(() => {
+    console.timeLog('changed cellActionsFields', cellActionsFields);
+  }, [cellActionsFields]);
+
+  useEffect(() => {
+    console.log('changed getCellValue', getCellValue);
+  }, [getCellValue]);
+
+  useEffect(() => {
+    console.log('changed cellActionsTriggerId', cellActionsTriggerId);
+  }, [cellActionsTriggerId]);
+
+  useEffect(() => {
+    console.log('changed dataGridRef', dataGridRef);
+  }, [dataGridRef]);
+
+  useEffect(() => {
+    console.log('changed allCellActionsMetadata', allCellActionsMetadata);
+  }, [allCellActionsMetadata]);
+
   const columnsCellActions = useDataGridColumnsCellActions({
     fields: cellActionsFields,
     getCellValue,
@@ -714,6 +744,38 @@ export const UnifiedDataTable = ({
     rowHeightState,
     onUpdateRowHeight,
   });
+
+  /*
+   *
+   *
+      columnsMeta,
+      columnsCellActions,
+      customGridColumnsConfiguration,
+      dataView,
+      dataViewFieldEditor,
+      defaultColumns,
+      displayedRows.length,
+      editField,
+      headerRowHeightLines,
+      isPlainRecord,
+      isSortEnabled,
+      onFilter,
+      settings,
+      showColumnTokens,
+      toastNotifications,
+      uiSettings,
+      valueToStringConverter,
+      visibleCellActions,
+      visibleColumns,
+      */
+
+  useEffect(() => {
+    console.log('changed columnsMeta', columnsMeta);
+  }, [columnsMeta]);
+
+  useEffect(() => {
+    console.timeLog('changed columnsCellActions', columnsCellActions);
+  }, [columnsCellActions]);
 
   const euiGridColumns = useMemo(
     () =>
@@ -964,6 +1026,10 @@ export const UnifiedDataTable = ({
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
+
+  useEffect(() => {
+    console.log('changed euiGridColumns', euiGridColumns);
+  }, [euiGridColumns]);
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
     return (
