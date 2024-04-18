@@ -11,9 +11,11 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_EXECUTION_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { RawAlertInstance } from '@kbn/alerting-state-types';
+import { get } from 'lodash';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
@@ -38,7 +40,7 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   runTimestamp,
   timestamp,
 }: BuildUpdatedRecoveredAlertOpts<AlertData>): Alert & AlertData => {
-  // Make sure that any alert fields that are updateable are flattened.
+  // Make sure that any alert fields that are updatable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
   const alertUpdates = {
@@ -51,6 +53,10 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     [ALERT_FLAPPING]: legacyRawAlert.meta?.flapping,
     // Set latest flapping history
     [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
+    // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
+    // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
+    // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
+    [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
   };
 
   // Clean the existing alert document so any nested fields that will be updated
