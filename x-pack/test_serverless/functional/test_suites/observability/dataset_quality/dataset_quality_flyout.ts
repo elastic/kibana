@@ -81,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         lastActivityText,
         `[data-test-subj=${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutFieldValue}]`
       );
+
       expect(lastActivityTextExists).to.eql(true);
     });
 
@@ -130,6 +131,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '[data-test-subj=datasetQualityFlyoutFieldValue]',
         apacheIntegrationId
       );
+
+      await PageObjects.datasetQuality.closeFlyout();
 
       expect(integrationNameElements.length).to.eql(1);
     });
