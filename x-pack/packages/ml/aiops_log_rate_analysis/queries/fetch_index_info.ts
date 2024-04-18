@@ -45,9 +45,19 @@ export const fetchIndexInfo = async (
   // Get all supported fields
   const respMapping = await esClient.fieldCaps(
     {
-      index,
       fields: '*',
+      filters: '-metadata',
       include_empty_fields: false,
+      index,
+      index_filter: {
+        range: {
+          [params.timeFieldName]: {
+            gte: params.deviationMin,
+            lte: params.deviationMax,
+          },
+        },
+      },
+      types: [...SUPPORTED_ES_FIELD_TYPES, ...SUPPORTED_ES_FIELD_TYPES_TEXT],
     },
     { signal: abortSignal, maxRetries: 0 }
   );
