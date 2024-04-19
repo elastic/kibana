@@ -39,9 +39,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "fips" do |fips|
     fips.vm.synced_folder '../../', '/home/vagrant/kibana', SharedFoldersEnableSymlinksCreate: false
-    fips.ssh.username = 'root'
-    fips.ssh.password = 'vagrant'
-    fips.ssh.insert_key = 'true'
     fips.vm.provider :virtualbox do |vb|
       vb.memory = 4096
       vb.cpus = 2
