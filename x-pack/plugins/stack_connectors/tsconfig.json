@@ -40,7 +40,6 @@
     "@kbn/cases-components",
     "@kbn/code-editor-mock",
     "@kbn/utility-types",
-    "@kbn/stack-connectors-plugin",
   ],
   "exclude": [
     "target/**/*",
