@@ -14,7 +14,7 @@
   block:
     - name: install nvm
       shell: >
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_ver }}/install.sh | bash"
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_ver }}/install.sh | bash
       args:
         executable: /bin/bash
         chdir: "$HOME"
