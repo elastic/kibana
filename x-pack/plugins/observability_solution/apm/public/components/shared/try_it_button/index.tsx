@@ -40,8 +40,7 @@ export function TryItButton({
   isLoading,
 }: Props) {
   const { core } = useApmPluginContext();
-  const canEditAdvancedSettings =
-    core.application.capabilities.advancedSettings?.save;
+  const canEditAdvancedSettings = core.application.capabilities.advancedSettings?.save;
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
@@ -119,13 +118,10 @@ export function TryItButton({
             {!canEditAdvancedSettings && (
               <>
                 <EuiSpacer size="s" />
-                {i18n.translate(
-                  'xpack.apm.tryItButton.euiButtonIcon.adminAccess',
-                  {
-                    defaultMessage:
-                      'Please ask your administrator to turn it on by enabling it in within settings.',
-                  }
-                )}
+                {i18n.translate('xpack.apm.tryItButton.euiButtonIcon.adminAccess', {
+                  defaultMessage:
+                    'Please ask your administrator to turn it on by enabling it in within settings.',
+                })}
               </>
             )}
           </>
@@ -139,11 +135,7 @@ export function TryItButton({
       <>
         {linkLabel && canEditAdvancedSettings && (
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="apmLink"
-              disabled={isLoading}
-              onClick={onClick}
-            >
+            <EuiLink data-test-subj="apmLink" disabled={isLoading} onClick={onClick}>
               {linkLabel}
             </EuiLink>
           </EuiFlexItem>

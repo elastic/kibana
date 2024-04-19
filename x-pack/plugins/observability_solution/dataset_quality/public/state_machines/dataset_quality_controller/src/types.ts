@@ -15,6 +15,7 @@ import {
   DataStreamDegradedDocsStatServiceResponse,
   DataStreamDetails,
   DataStreamStatServiceResponse,
+  IntegrationsResponse,
 } from '../../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
@@ -84,7 +85,7 @@ export type DefaultDatasetQualityControllerState = { type: string } & WithTableO
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
-  WithIntegrations;
+  Partial<WithIntegrations>;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -116,6 +117,10 @@ export type DatasetQualityControllerTypeState =
     }
   | {
       value: 'datasets.loaded';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'integrations.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
@@ -181,4 +186,5 @@ export type DatasetQualityControllerEvent =
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
+  | DoneInvokeEvent<IntegrationsResponse>
   | DoneInvokeEvent<Error>;
