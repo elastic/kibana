@@ -23,19 +23,18 @@ export function registerVisualizeESQLFunction({
       // With limit 0 I get only the columns, it is much more performant
       const performantQuery = `${query} | limit 0`;
       const coreContext = await resources.context.core;
-
-      const response = (await (
-        await coreContext
-      ).elasticsearch.client.asCurrentUser.transport.request({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query: performantQuery,
-          version: ESQL_LATEST_VERSION,
-        },
-      })) as ESQLSearchReponse;
-
       try {
+        const response = (await (
+          await coreContext
+        ).elasticsearch.client.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '_query',
+          body: {
+            query: performantQuery,
+            version: ESQL_LATEST_VERSION,
+          },
+        })) as ESQLSearchReponse;
+
         const columns =
           response.columns?.map(({ name, type }) => ({
             id: name,
