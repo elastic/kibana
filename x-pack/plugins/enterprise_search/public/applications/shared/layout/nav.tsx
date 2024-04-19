@@ -323,7 +323,7 @@ export const useEnterpriseSearchAnalyticsNav = (
 
   if (!navItems) return undefined;
 
-  const applicationsNav = navItems.find((item) => item.id === 'applications');
+  const applicationsNav = navItems.find((item) => item.id === 'build');
   const analyticsNav = applicationsNav?.items?.find((item) => item.id === 'analyticsCollections');
 
   if (!name || !paths || !analyticsNav) return navItems;
