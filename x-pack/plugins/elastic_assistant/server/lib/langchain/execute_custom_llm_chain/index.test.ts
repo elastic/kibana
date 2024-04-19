@@ -16,7 +16,7 @@ import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
-import { Stream } from 'stream';
+import { PassThrough, Stream } from 'stream';
 import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
@@ -49,6 +49,25 @@ jest.mock('../elasticsearch_store/elasticsearch_store', () => ({
   ElasticsearchStore: jest.fn().mockImplementation(() => ({
     asRetriever: jest.fn(),
     isModelInstalled: jest.fn().mockResolvedValue(true),
+  })),
+}));
+const mockStream = new PassThrough();
+const mockPush = jest.fn();
+jest.mock('@kbn/ml-response-stream/server', () => ({
+  streamFactory: jest.fn().mockImplementation(() => ({
+    DELIMITER: '\n',
+    end: jest.fn(),
+    push: mockPush,
+    responseWithHeaders: {
+      body: mockStream,
+      headers: {
+        'X-Accel-Buffering': 'no',
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        'Transfer-Encoding': 'chunked',
+      },
+    },
   })),
 }));
 
@@ -213,6 +232,56 @@ describe('callAgentExecutor', () => {
         },
         false
       );
+    });
+
+    it('does not streams token after handleStreamEnd has been called', async () => {
+      const mockInvokeWithChainCallback = jest.fn().mockImplementation((a, b, c, d, e, f, g) => {
+        b.callbacks[0].handleLLMNewToken('hi', {}, '123', '456');
+        b.callbacks[0].handleChainEnd({ output: 'hello' }, '123');
+        b.callbacks[0].handleLLMNewToken('hey', {}, '678', '456');
+        return Promise.resolve();
+      });
+      (initializeAgentExecutorWithOptions as jest.Mock).mockImplementation(
+        (_a, _b, { agentType }) => ({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          invoke: (props: any, more: any) =>
+            mockInvokeWithChainCallback({ ...props, agentType }, more),
+        })
+      );
+      const onLlmResponse = jest.fn();
+      await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
+
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'hi', type: 'content' });
+      expect(mockPush).not.toHaveBeenCalledWith({ payload: 'hey', type: 'content' });
+    });
+
+    it('only streams tokens with length from the root parentRunId', async () => {
+      const mockInvokeWithChainCallback = jest.fn().mockImplementation((a, b, c, d, e, f, g) => {
+        b.callbacks[0].handleLLMNewToken('', {}, '123', '456');
+
+        b.callbacks[0].handleLLMNewToken('hi', {}, '123', '456');
+        b.callbacks[0].handleLLMNewToken('hello', {}, '555', '666');
+        b.callbacks[0].handleLLMNewToken('hey', {}, '678', '456');
+        return Promise.resolve();
+      });
+      (initializeAgentExecutorWithOptions as jest.Mock).mockImplementation(
+        (_a, _b, { agentType }) => ({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          call: (props: any, more: any) => mockCall({ ...props, agentType }, more),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          invoke: (props: any, more: any) =>
+            mockInvokeWithChainCallback({ ...props, agentType }, more),
+        })
+      );
+      const onLlmResponse = jest.fn();
+      await callAgentExecutor({ ...defaultProps, onLlmResponse, isStream: true });
+
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'hi', type: 'content' });
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'hey', type: 'content' });
+      expect(mockPush).not.toHaveBeenCalledWith({ payload: 'hello', type: 'content' });
+      expect(mockPush).not.toHaveBeenCalledWith({ payload: '', type: 'content' });
     });
   });
 });
