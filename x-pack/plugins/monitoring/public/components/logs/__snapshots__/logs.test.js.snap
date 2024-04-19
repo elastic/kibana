@@ -274,7 +274,6 @@ exports[`Logs should render normally 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
   <EuiSpacer

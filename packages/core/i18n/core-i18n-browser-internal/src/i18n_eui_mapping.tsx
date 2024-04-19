@@ -38,10 +38,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Select all rows',
       description: 'ARIA and displayed label on a checkbox to select all table rows',
     }),
-    'euiBasicTable.selectThisRow': i18n.translate('core.euiBasicTable.selectThisRow', {
-      defaultMessage: 'Select this row',
-      description: 'ARIA and displayed label on a checkbox to select a single table row',
-    }),
+    'euiBasicTable.selectThisRow': ({ index }: EuiValues) =>
+      i18n.translate('core.euiBasicTable.selectThisRow', {
+        defaultMessage: 'Select row {index}',
+        values: { index },
+        description: 'ARIA and displayed label on a checkbox to select a single table row',
+      }),
     'euiBasicTable.tableCaptionWithPagination': ({ tableCaption, page, pageCount }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tableCaptionWithPagination', {
         defaultMessage: '{tableCaption}; Page {page} of {pageCount}.',
