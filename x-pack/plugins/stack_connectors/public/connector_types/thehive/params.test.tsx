@@ -19,14 +19,14 @@ describe('TheHiveParamsFields renders', () => {
       description: 'test description',
       tlp: 2,
       severity: 2,
-      tags: ["test1"],
-      externalId: null
+      tags: ['test1'],
+      externalId: null,
     },
     comments: [],
   };
   const actionParams: ExecutorParams = {
     subAction: SUB_ACTION.PUSH_TO_SERVICE,
-    subActionParams
+    subActionParams,
   };
   const connector: ActionConnector = {
     secrets: {},
@@ -99,9 +99,7 @@ describe('TheHiveParamsFields renders', () => {
         subAction: undefined,
       },
     };
-    render(
-      <TheHiveParamsFields {...newProps} />
-    );
+    render(<TheHiveParamsFields {...newProps} />);
     expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.PUSH_TO_SERVICE, 0);
   });
-})
+});

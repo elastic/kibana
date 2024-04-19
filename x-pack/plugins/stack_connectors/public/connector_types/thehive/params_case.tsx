@@ -6,16 +6,15 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { TextFieldWithMessageVariables, TextAreaWithMessageVariables, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  TextFieldWithMessageVariables,
+  TextAreaWithMessageVariables,
+  ActionParamsProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow, EuiSelect, EuiText, EuiComboBox } from '@elastic/eui';
+import { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
-import { ExecutorParams, ExecutorSubActionPushParams } from '@kbn/stack-connectors-plugin/common/thehive/types';
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-  EuiComboBox,
-} from '@elastic/eui';
 
 export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>> = ({
   actionParams,
@@ -30,12 +29,12 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
 
   const { incident, comments } = useMemo(
     () =>
-      actionParams.subActionParams as ExecutorSubActionPushParams ??
+      (actionParams.subActionParams as ExecutorSubActionPushParams) ??
       ({
         incident: {
           tlp: 2,
           severity: 2,
-          tags: []
+          tags: [],
         },
         comments: [],
       } as unknown as ExecutorSubActionPushParams),
@@ -47,9 +46,9 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
       const newProps =
         key !== 'comments'
           ? {
-            incident: { ...incident, [key]: value },
-            comments,
-          }
+              incident: { ...incident, [key]: value },
+              comments,
+            }
           : { incident, [key]: value };
       editAction('subActionParams', newProps, index);
     },
@@ -65,13 +64,16 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
 
   const onCreateOption = (searchValue: string) => {
     setSelected([...selectedOptions, { label: searchValue }]);
-    editSubActionProperty('tags', [...incident.tags ?? [], searchValue])
+    editSubActionProperty('tags', [...(incident.tags ?? []), searchValue]);
   };
 
   const onChange = (selectedOptions: Array<{ label: string }>) => {
     setSelected(selectedOptions);
-    editSubActionProperty('tags', selectedOptions.map((option) => option.label));
-  }
+    editSubActionProperty(
+      'tags',
+      selectedOptions.map((option) => option.label)
+    );
+  };
 
   return (
     <>
@@ -123,26 +125,19 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
           errors={errors['pushToServiceParam.incident.description'] as string[]}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.severity}
-        label={translations.SEVERITY_LABEL}
-      >
+      <EuiFormRow fullWidth error={errors.severity} label={translations.SEVERITY_LABEL}>
         <EuiSelect
           fullWidth
           data-test-subj="eventSeveritySelect"
           value={severity}
           options={severityOptions}
           onChange={(e) => {
-            editSubActionProperty('severity', parseInt(e.target.value))
+            editSubActionProperty('severity', parseInt(e.target.value));
             setSeverity(parseInt(e.target.value));
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.tlp}
-        label={translations.TLP_LABEL}>
+      <EuiFormRow fullWidth error={errors.tlp} label={translations.TLP_LABEL}>
         <EuiSelect
           fullWidth
           value={tlp}
@@ -154,10 +149,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={translations.TAGS_LABEL}
-      >
+      <EuiFormRow fullWidth label={translations.TAGS_LABEL}>
         <EuiComboBox
           data-test-subj="eventTags"
           fullWidth
@@ -178,5 +170,5 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         label={translations.COMMENTS_LABEL}
       />
     </>
-  )
-}
+  );
+};

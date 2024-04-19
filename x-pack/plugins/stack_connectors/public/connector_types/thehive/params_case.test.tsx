@@ -19,14 +19,14 @@ describe('TheHiveParamsFields renders', () => {
       description: 'test description',
       tlp: 2,
       severity: 2,
-      tags: ["test1"],
-      externalId: null
+      tags: ['test1'],
+      externalId: null,
     },
     comments: [],
   };
   const actionParams: ExecutorParams = {
     subAction: SUB_ACTION.PUSH_TO_SERVICE,
-    subActionParams
+    subActionParams,
   };
   const connector: ActionConnector = {
     secrets: {},
@@ -66,4 +66,4 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('eventSeveritySelect')).toHaveValue('2');
     expect(getByTestId('eventTlpSelect')).toHaveValue('2');
   });
-})
+});

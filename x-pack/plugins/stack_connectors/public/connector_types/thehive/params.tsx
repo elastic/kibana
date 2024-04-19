@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ActionParamsProps, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { eventActionOptions } from './constants';
 import { SUB_ACTION } from '../../../common/thehive/constants';
 import { ExecutorParams } from '../../../common/thehive/types';
@@ -22,9 +22,11 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
   index,
   errors,
   messageVariables,
-  executionMode
+  executionMode,
 }) => {
-  const [eventAction, setEventAction] = useState(actionParams.subAction ?? SUB_ACTION.PUSH_TO_SERVICE);
+  const [eventAction, setEventAction] = useState(
+    actionParams.subAction ?? SUB_ACTION.PUSH_TO_SERVICE
+  );
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
@@ -37,7 +39,7 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
           incident: {
             tlp: 2,
             severity: 2,
-            tags: []
+            tags: [],
           },
           comments: [],
         },
@@ -58,14 +60,13 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
           incident: {
             tlp: 2,
             severity: 2,
-            tags: []
+            tags: [],
           },
           comments: [],
         },
         index
       );
     }
-
   }, [actionParams]);
 
   useEffect(() => {
@@ -76,19 +77,19 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
     const subActionParams =
       eventActionType === SUB_ACTION.CREATE_ALERT
         ? {
-          tlp: 2,
-          severity: 2,
-          tags: [],
-          sourceRef: isTest ? undefined : '{{alert.uuid}}',
-        }
-        : {
-          incident: {
             tlp: 2,
             severity: 2,
             tags: [],
-          },
-          comments: [],
-        };
+            sourceRef: isTest ? undefined : '{{alert.uuid}}',
+          }
+        : {
+            incident: {
+              tlp: 2,
+              severity: 2,
+              tags: [],
+            },
+            comments: [],
+          };
 
     setEventAction(eventActionType);
     editAction('subActionParams', subActionParams, index);
@@ -96,10 +97,7 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
 
   return (
     <>
-      <EuiFormRow
-        fullWidth
-        label={translations.EVENT_ACTION_LABEL}
-      >
+      <EuiFormRow fullWidth label={translations.EVENT_ACTION_LABEL}>
         <EuiSelect
           fullWidth
           data-test-subj="eventActionSelect"
@@ -108,7 +106,7 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
           onChange={(e) => setEventActionType(e.target.value as SUB_ACTION)}
         />
       </EuiFormRow>
-      {eventAction === SUB_ACTION.PUSH_TO_SERVICE ?
+      {eventAction === SUB_ACTION.PUSH_TO_SERVICE ? (
         <TheHiveParamsCaseFields
           actionParams={actionParams}
           editAction={editAction}
@@ -116,7 +114,7 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
           errors={errors}
           messageVariables={messageVariables}
         />
-        :
+      ) : (
         <TheHiveParamsAlertFields
           actionParams={actionParams}
           editAction={editAction}
@@ -124,7 +122,7 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
           errors={errors}
           messageVariables={messageVariables}
         />
-      }
+      )}
     </>
   );
 };

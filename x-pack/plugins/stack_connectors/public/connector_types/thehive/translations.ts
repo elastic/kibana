@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const URL_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.thehive.urlFieldLabel',
-  {
-    defaultMessage: 'URL',
-  }
-);
+export const URL_LABEL = i18n.translate('xpack.stackConnectors.components.thehive.urlFieldLabel', {
+  defaultMessage: 'URL',
+});
 
 export const ORGANISATION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.organisationFieldLabel',
@@ -117,7 +114,7 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   {
     defaultMessage: 'Description is required.',
   }
-)
+);
 
 export const TYPE_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.thehive.requiredTypeText',

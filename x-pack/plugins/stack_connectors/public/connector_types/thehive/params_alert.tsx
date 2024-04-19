@@ -6,23 +6,21 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { TextFieldWithMessageVariables, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  TextFieldWithMessageVariables,
+  ActionParamsProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow, EuiSelect, EuiText, EuiComboBox } from '@elastic/eui';
+import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
-import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '@kbn/stack-connectors-plugin/common/thehive/types';
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-  EuiComboBox,
-} from '@elastic/eui';
 
 export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams>> = ({
   actionParams,
   editAction,
   index,
   errors,
-  messageVariables
+  messageVariables,
 }) => {
   const [severity, setSeverity] = useState(severityOptions[1].value);
   const [tlp, setTlp] = useState(tlpOptions[2].value);
@@ -30,7 +28,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
 
   const alert = useMemo(
     () =>
-      actionParams.subActionParams as ExecutorSubActionCreateAlertParams ??
+      (actionParams.subActionParams as ExecutorSubActionCreateAlertParams) ??
       ({
         tlp: 2,
         severity: 2,
@@ -41,13 +39,17 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
 
   const onCreateOption = (searchValue: string) => {
     setSelected([...selectedOptions, { label: searchValue }]);
-    editAction('subActionParams', { ...alert, tags: [...alert.tags ?? [], searchValue] }, index);
+    editAction('subActionParams', { ...alert, tags: [...(alert.tags ?? []), searchValue] }, index);
   };
 
   const onChange = (selectedOptions: Array<{ label: string }>) => {
     setSelected(selectedOptions);
-    editAction('subActionParams', { ...alert, tags: selectedOptions.map((option) => option.label) }, index);
-  }
+    editAction(
+      'subActionParams',
+      { ...alert, tags: selectedOptions.map((option) => option.label) },
+      index
+    );
+  };
 
   return (
     <>
@@ -182,10 +184,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           errors={(errors['createAlertParam.sourceRef'] ?? []) as string[]}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={translations.SEVERITY_LABEL}
-      >
+      <EuiFormRow fullWidth label={translations.SEVERITY_LABEL}>
         <EuiSelect
           fullWidth
           data-test-subj="alert-eventSeveritySelect"
@@ -197,9 +196,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={translations.TLP_LABEL}>
+      <EuiFormRow fullWidth label={translations.TLP_LABEL}>
         <EuiSelect
           fullWidth
           data-test-subj="alert-eventTlpSelect"
@@ -211,10 +208,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={translations.TAGS_LABEL}
-      >
+      <EuiFormRow fullWidth label={translations.TAGS_LABEL}>
         <EuiComboBox
           data-test-subj="alert-eventTags"
           fullWidth
@@ -226,5 +220,5 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         />
       </EuiFormRow>
     </>
-  )
-}
+  );
+};

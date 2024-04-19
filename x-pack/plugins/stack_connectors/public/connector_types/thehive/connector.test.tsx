@@ -32,7 +32,7 @@ describe('TheHiveActionConnectorFields renders', () => {
         <TheHiveConnectorFields
           readOnly={false}
           isEdit={false}
-          registerPreSubmitValidator={() => { }}
+          registerPreSubmitValidator={() => {}}
         />
       </ConnectorFormTestProvider>
     );
@@ -59,7 +59,7 @@ describe('TheHiveActionConnectorFields renders', () => {
           <TheHiveConnectorFields
             readOnly={false}
             isEdit={false}
-            registerPreSubmitValidator={() => { }}
+            registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
       );
@@ -92,7 +92,7 @@ describe('TheHiveActionConnectorFields renders', () => {
           <TheHiveConnectorFields
             readOnly={false}
             isEdit={false}
-            registerPreSubmitValidator={() => { }}
+            registerPreSubmitValidator={() => {}}
           />
         </ConnectorFormTestProvider>
       );

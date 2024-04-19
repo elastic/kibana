@@ -18,14 +18,14 @@ describe('TheHiveParamsFields renders', () => {
     description: 'description test',
     tlp: 2,
     severity: 2,
-    tags: ["test1"],
+    tags: ['test1'],
     source: 'source test',
     type: 'sourceType test',
-    sourceRef: 'sourceRef test'
-  }
+    sourceRef: 'sourceRef test',
+  };
   const actionParams: ExecutorParams = {
     subAction: SUB_ACTION.CREATE_ALERT,
-    subActionParams
+    subActionParams,
   };
   const connector: ActionConnector = {
     secrets: {},
@@ -67,4 +67,4 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('alert-eventSeveritySelect')).toHaveValue('2');
     expect(getByTestId('alert-eventTlpSelect')).toHaveValue('2');
   });
-})
+});

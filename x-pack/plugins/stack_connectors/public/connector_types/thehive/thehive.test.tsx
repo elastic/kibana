@@ -38,9 +38,9 @@ describe('thehive pushToService action params validation', () => {
         incident: {
           title: 'title {test}',
           description: 'test description',
-        }
+        },
       },
-      comments: []
+      comments: [],
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -63,9 +63,9 @@ describe('thehive pushToService action params validation', () => {
         incident: {
           title: '',
           description: '',
-        }
+        },
       },
-      comments: []
+      comments: [],
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -93,7 +93,7 @@ describe('thehive createAlert action params validation', () => {
         source: 'source test',
         sourceRef: 'source reference test',
       },
-      comments: []
+      comments: [],
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -119,7 +119,7 @@ describe('thehive createAlert action params validation', () => {
         source: '',
         sourceRef: '',
       },
-      comments: []
+      comments: [],
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({

@@ -13,10 +13,20 @@ import {
   SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { URL_LABEL, API_KEY_LABEL, ORGANISATION_LABEL, ORGANISATION_HELP_TEXT } from './translations';
+import {
+  URL_LABEL,
+  API_KEY_LABEL,
+  ORGANISATION_LABEL,
+  ORGANISATION_HELP_TEXT,
+} from './translations';
 
 const configFormSchema: ConfigFieldSchema[] = [
-  { id: 'organisation', label: ORGANISATION_LABEL, isRequired: false, helpText: ORGANISATION_HELP_TEXT },
+  {
+    id: 'organisation',
+    label: ORGANISATION_LABEL,
+    isRequired: false,
+    helpText: ORGANISATION_HELP_TEXT,
+  },
   { id: 'url', label: URL_LABEL, isUrlField: true },
 ];
 

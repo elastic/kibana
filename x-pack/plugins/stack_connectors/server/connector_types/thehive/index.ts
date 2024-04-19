@@ -28,7 +28,11 @@ export function getConnectorType(): TheHiveConnectorType {
     minimumLicenseRequired: 'gold',
     name: THEHIVE_TITLE,
     getService: (params) => new TheHiveConnector(params),
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId, UptimeConnectorFeatureId],
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      SecurityConnectorFeatureId,
+      UptimeConnectorFeatureId,
+    ],
     schema: {
       config: TheHiveConfigSchema,
       secrets: TheHiveSecretsSchema,

@@ -59,7 +59,9 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
     return `API Error: ${error.response?.data?.type} - ${error.response?.data?.message}`;
   }
 
-  public async createIncident(incident: ExecutorSubActionPushParams["incident"]): Promise<ExternalServiceIncidentResponse> {
+  public async createIncident(
+    incident: ExecutorSubActionPushParams['incident']
+  ): Promise<ExternalServiceIncidentResponse> {
     const res = await this.request({
       method: 'post',
       url: `${this.url}/api/${API_VERSION}/case`,
@@ -103,7 +105,7 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
     incident,
   }: {
     incidentId: string;
-    incident: ExecutorSubActionPushParams["incident"];
+    incident: ExecutorSubActionPushParams['incident'];
   }): Promise<ExternalServiceIncidentResponse> {
     await this.request({
       method: 'patch',
@@ -145,5 +147,4 @@ export class TheHiveConnector extends CaseConnector<TheHiveConfig, TheHiveSecret
       responseSchema: TheHiveCreateAlertResponseSchema,
     });
   }
-
 }

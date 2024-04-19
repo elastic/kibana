@@ -16,12 +16,14 @@ import {
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
 } from '../../../common/thehive/schema';
-import type { ExecutorSubActionPushParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
+import type {
+  ExecutorSubActionPushParams,
+  ExecutorSubActionCreateAlertParams,
+} from '../../../common/thehive/types';
 
 const mockTime = new Date('2024-04-03T09:10:30.000');
 
 describe('TheHiveConnector', () => {
-
   const connector = new TheHiveConnector({
     configurationUtilities: actionsConfigMock.create(),
     connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
@@ -63,10 +65,7 @@ describe('TheHiveConnector', () => {
         severity: 1,
         severityLabel: 'LOW',
         startDate: 1712128153029,
-        tags: [
-          'tag1',
-          'tag2'
-        ],
+        tags: ['tag1', 'tag2'],
         flag: false,
         tlp: 2,
         tlpLabel: 'AMBER',
@@ -100,12 +99,12 @@ describe('TheHiveConnector', () => {
           'manageComment',
           'manageAlert/reopen',
           'manageCase/update',
-          'manageCase/reopen'
+          'manageCase/reopen',
         ],
         extraData: {},
         newDate: 1712128153029,
-        timeToDetect: 0
-      }
+        timeToDetect: 0,
+      },
     };
 
     beforeEach(() => {
@@ -115,7 +114,7 @@ describe('TheHiveConnector', () => {
       jest.clearAllMocks();
     });
 
-    const incident: ExecutorSubActionPushParams["incident"] = {
+    const incident: ExecutorSubActionPushParams['incident'] = {
       title: 'title',
       description: 'description',
       severity: 1,
@@ -141,7 +140,7 @@ describe('TheHiveConnector', () => {
         id: '~172064',
         url: 'https://example.com/cases/~172064/details',
         title: 'title',
-        pushedDate: '2024-04-03T07:09:13.041Z'
+        pushedDate: '2024-04-03T07:09:13.041Z',
       });
     });
 
@@ -155,7 +154,7 @@ describe('TheHiveConnector', () => {
 
   describe('updateIncident', () => {
     const mockResponse = {
-      data: null
+      data: null,
     };
 
     beforeEach(() => {
@@ -165,7 +164,7 @@ describe('TheHiveConnector', () => {
       jest.clearAllMocks();
     });
 
-    const incident: ExecutorSubActionPushParams["incident"] = {
+    const incident: ExecutorSubActionPushParams['incident'] = {
       title: 'new title',
       description: 'new description',
       severity: 3,
@@ -191,7 +190,7 @@ describe('TheHiveConnector', () => {
         id: '~172064',
         url: 'https://example.com/cases/~172064/details',
         title: 'new title',
-        pushedDate: mockTime.toISOString()
+        pushedDate: mockTime.toISOString(),
       });
     });
 
@@ -199,9 +198,11 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.updateIncident({ incidentId: '~172064', incident })).rejects.toThrow('API Error');
+      await expect(connector.updateIncident({ incidentId: '~172064', incident })).rejects.toThrow(
+        'API Error'
+      );
     });
-  })
+  });
 
   describe('addComment', () => {
     const mockResponse = {
@@ -212,8 +213,8 @@ describe('TheHiveConnector', () => {
         createdAt: 1712158280100,
         message: 'test comment',
         isEdited: false,
-        extraData: {}
-      }
+        extraData: {},
+      },
     };
 
     beforeEach(() => {
@@ -224,7 +225,10 @@ describe('TheHiveConnector', () => {
     });
 
     it('TheHive API call is successful with correct parameters', async () => {
-      const response = await connector.addComment({ incidentId: '~172064', comment: 'test comment' });
+      const response = await connector.addComment({
+        incidentId: '~172064',
+        comment: 'test comment',
+      });
       expect(mockRequest).toBeCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         url: 'https://example.com/api/v1/case/~172064/comment',
@@ -239,7 +243,7 @@ describe('TheHiveConnector', () => {
       expect(response).toEqual({
         commentId: '~41156688',
         externalCommentId: '~41156688',
-        pushedDate: '2024-04-03T15:31:20.100Z'
+        pushedDate: '2024-04-03T15:31:20.100Z',
       });
     });
 
@@ -247,7 +251,9 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.addComment({ incidentId: '~172064', comment: 'test comment' })).rejects.toThrow('API Error');
+      await expect(
+        connector.addComment({ incidentId: '~172064', comment: 'test comment' })
+      ).rejects.toThrow('API Error');
     });
   });
 
@@ -264,10 +270,7 @@ describe('TheHiveConnector', () => {
         severity: 1,
         severityLabel: 'LOW',
         startDate: 1712128153029,
-        tags: [
-          'tag1',
-          'tag2'
-        ],
+        tags: ['tag1', 'tag2'],
         flag: false,
         tlp: 2,
         tlpLabel: 'AMBER',
@@ -301,12 +304,12 @@ describe('TheHiveConnector', () => {
           'manageComment',
           'manageAlert/reopen',
           'manageCase/update',
-          'manageCase/reopen'
+          'manageCase/reopen',
         ],
         extraData: {},
         newDate: 1712128153029,
-        timeToDetect: 0
-      }
+        timeToDetect: 0,
+      },
     };
 
     beforeEach(() => {
@@ -331,7 +334,7 @@ describe('TheHiveConnector', () => {
         id: '~172064',
         url: 'https://example.com/cases/~172064/details',
         title: 'title',
-        pushedDate: mockTime.toISOString()
+        pushedDate: mockTime.toISOString(),
       });
     });
 
@@ -358,10 +361,7 @@ describe('TheHiveConnector', () => {
         severity: 1,
         severityLabel: 'LOW',
         date: 1712161128964,
-        tags: [
-          'tag1',
-          'tag2'
-        ],
+        tags: ['tag1', 'tag2'],
         tlp: 2,
         tlpLabel: 'AMBER',
         pap: 2,
@@ -373,8 +373,8 @@ describe('TheHiveConnector', () => {
         stage: 'New',
         extraData: {},
         newDate: 1712161128967,
-        timeToDetect: 0
-      }
+        timeToDetect: 0,
+      },
     };
 
     beforeEach(() => {
@@ -417,5 +417,4 @@ describe('TheHiveConnector', () => {
       await expect(connector.createAlert(alert)).rejects.toThrow('API Error');
     });
   });
-
 });

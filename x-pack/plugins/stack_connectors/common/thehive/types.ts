@@ -20,7 +20,9 @@ export type TheHiveSecrets = TypeOf<typeof TheHiveSecretsSchema>;
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-export type ExecutorSubActionCreateAlertParams = TypeOf<typeof ExecutorSubActionCreateAlertParamsSchema>;
+export type ExecutorSubActionCreateAlertParams = TypeOf<
+  typeof ExecutorSubActionCreateAlertParamsSchema
+>;
 
 export type TheHiveFailureResponse = TypeOf<typeof TheHiveFailureResponseSchema>;
 
