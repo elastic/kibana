@@ -17,7 +17,7 @@ steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_image_metadata.sh
     label: "Upload runtime info"
     key: upload_runtime_info
-    # depends_on: build_image
+    depends_on: build_image
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
