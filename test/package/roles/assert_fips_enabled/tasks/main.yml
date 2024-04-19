@@ -1,5 +1,5 @@
 - name: register kibana node getFips
-  command: /usr/share/kibana/node/bin/node --enable-fips --openssl-config=/usr/share/kibana/config/nodejs.cnf -p 'crypto.getFips()'
+  command: "{{ kibana_dist_path }}/node/bin/node --enable-fips --openssl-config={{ kibana_dist_path }}/config/nodejs.cnf -p 'crypto.getFips()'"
   register: kibana_node_fips
 
 - debug:
