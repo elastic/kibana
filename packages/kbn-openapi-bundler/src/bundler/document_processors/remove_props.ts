@@ -20,7 +20,7 @@ export function createRemovePropsProcessor(propNames: string[]): DocumentNodePro
       }
 
       for (const propName of propNames) {
-        if (!node[propName]) {
+        if (!Object.hasOwn(node, propName)) {
           continue;
         }
 
