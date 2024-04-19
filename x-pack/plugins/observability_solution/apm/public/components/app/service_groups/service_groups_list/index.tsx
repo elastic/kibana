@@ -36,10 +36,7 @@ export function ServiceGroupsList() {
     data = { serviceGroups: [] },
     status,
     refetch,
-  } = useFetcher(
-    (callApmApi) => callApmApi('GET /internal/apm/service-groups'),
-    []
-  );
+  } = useFetcher((callApmApi) => callApmApi('GET /internal/apm/service-groups'), []);
 
   const { serviceGroups } = data;
 
@@ -57,20 +54,13 @@ export function ServiceGroupsList() {
 
   const filteredItems = isEmpty(filter)
     ? serviceGroups
-    : serviceGroups.filter((item) =>
-        item.groupName.toLowerCase().includes(filter.toLowerCase())
-      );
+    : serviceGroups.filter((item) => item.groupName.toLowerCase().includes(filter.toLowerCase()));
 
   const sortedItems = sortBy(filteredItems, (item) =>
-    apmServiceGroupsSortType === 'alphabetical'
-      ? item.groupName.toLowerCase()
-      : item.updatedAt
+    apmServiceGroupsSortType === 'alphabetical' ? item.groupName.toLowerCase() : item.updatedAt
   );
 
-  const items =
-    apmServiceGroupsSortType === 'recently_added'
-      ? sortedItems.reverse()
-      : sortedItems;
+  const items = apmServiceGroupsSortType === 'recently_added' ? sortedItems.reverse() : sortedItems;
 
   const clearFilterCallback = useCallback(() => {
     setFilter('');
@@ -99,11 +89,7 @@ export function ServiceGroupsList() {
             <EuiFlexItem>
               <EuiFormControlLayout
                 fullWidth
-                clear={
-                  !isEmpty(filter)
-                    ? { onClick: clearFilterCallback }
-                    : undefined
-                }
+                clear={!isEmpty(filter) ? { onClick: clearFilterCallback } : undefined}
               >
                 <EuiFieldText
                   data-test-subj="apmServiceGroupsListFieldText"
@@ -111,18 +97,14 @@ export function ServiceGroupsList() {
                   fullWidth
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  placeholder={i18n.translate(
-                    'xpack.apm.servicesGroups.filter',
-                    { defaultMessage: 'Filter groups' }
-                  )}
+                  placeholder={i18n.translate('xpack.apm.servicesGroups.filter', {
+                    defaultMessage: 'Filter groups',
+                  })}
                 />
               </EuiFormControlLayout>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Sort
-                type={apmServiceGroupsSortType}
-                onChange={setServiceGroupsSortType}
-              />
+              <Sort type={apmServiceGroupsSortType} onChange={setServiceGroupsSortType} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -136,25 +118,18 @@ export function ServiceGroupsList() {
                       <EuiFlexGroup gutterSize="s">
                         <EuiFlexItem grow={false}>
                           <EuiText style={{ fontWeight: 'bold' }} size="s">
-                            {i18n.translate(
-                              'xpack.apm.serviceGroups.groupsCount',
-                              {
-                                defaultMessage:
-                                  '{servicesCount} {servicesCount, plural, =0 {groups} one {group} other {groups}}',
-                                values: { servicesCount: filteredItems.length },
-                              }
-                            )}
+                            {i18n.translate('xpack.apm.serviceGroups.groupsCount', {
+                              defaultMessage:
+                                '{servicesCount} {servicesCount, plural, =0 {groups} one {group} other {groups}}',
+                              values: { servicesCount: filteredItems.length },
+                            })}
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiText color="subdued" size="s">
-                        {i18n.translate(
-                          'xpack.apm.serviceGroups.listDescription',
-                          {
-                            defaultMessage:
-                              'Displayed service counts reflect the last 24 hours.',
-                          }
-                        )}
+                        {i18n.translate('xpack.apm.serviceGroups.listDescription', {
+                          defaultMessage: 'Displayed service counts reflect the last 24 hours.',
+                        })}
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -165,11 +140,7 @@ export function ServiceGroupsList() {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="flexStart"
-                gutterSize="s"
-              >
+              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <div>
                     <BetaBadge />
@@ -181,10 +152,9 @@ export function ServiceGroupsList() {
                     href="https://ela.st/feedback-service-groups"
                     target="_blank"
                   >
-                    {i18n.translate(
-                      'xpack.apm.serviceGroups.beta.feedback.link',
-                      { defaultMessage: 'Give feedback' }
-                    )}
+                    {i18n.translate('xpack.apm.serviceGroups.beta.feedback.link', {
+                      defaultMessage: 'Give feedback',
+                    })}
                   </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -211,10 +181,9 @@ export function ServiceGroupsList() {
                     }
                     body={
                       <p>
-                        {i18n.translate(
-                          'xpack.apm.serviceGroups.filtered.emptyPrompt.message',
-                          { defaultMessage: 'No groups found for this filter' }
-                        )}
+                        {i18n.translate('xpack.apm.serviceGroups.filtered.emptyPrompt.message', {
+                          defaultMessage: 'No groups found for this filter',
+                        })}
                       </p>
                     }
                   />
@@ -224,21 +193,17 @@ export function ServiceGroupsList() {
                   iconType="addDataApp"
                   title={
                     <h2>
-                      {i18n.translate(
-                        'xpack.apm.serviceGroups.data.emptyPrompt.noServiceGroups',
-                        { defaultMessage: 'No service groups' }
-                      )}
+                      {i18n.translate('xpack.apm.serviceGroups.data.emptyPrompt.noServiceGroups', {
+                        defaultMessage: 'No service groups',
+                      })}
                     </h2>
                   }
                   body={
                     <p>
-                      {i18n.translate(
-                        'xpack.apm.serviceGroups.data.emptyPrompt.message',
-                        {
-                          defaultMessage:
-                            'Start grouping and organising your services and your application. Learn more about Service groups or create a group.',
-                        }
-                      )}
+                      {i18n.translate('xpack.apm.serviceGroups.data.emptyPrompt.message', {
+                        defaultMessage:
+                          'Start grouping and organising your services and your application. Learn more about Service groups or create a group.',
+                      })}
                     </p>
                   }
                   actions={<ServiceGroupSaveButton />}

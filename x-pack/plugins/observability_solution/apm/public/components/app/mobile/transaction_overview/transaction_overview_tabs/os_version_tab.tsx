@@ -21,20 +21,16 @@ function OSVersionTab({
   comparisonEnabled,
   offset,
 }: TabContentProps) {
-  const {
-    mainStatistics,
-    mainStatisticsStatus,
-    detailedStatistics,
-    detailedStatisticsStatus,
-  } = useMobileStatisticsFetcher({
-    field: HOST_OS_VERSION,
-    environment,
-    kuery,
-    start,
-    end,
-    comparisonEnabled,
-    offset,
-  });
+  const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
+    useMobileStatisticsFetcher({
+      field: HOST_OS_VERSION,
+      environment,
+      kuery,
+      start,
+      end,
+      comparisonEnabled,
+      offset,
+    });
 
   return (
     <StatsList
@@ -51,11 +47,8 @@ function OSVersionTab({
 export const osVersionTab = {
   dataTestSubj: 'apmOsVersionTab',
   key: 'os_version_tab',
-  label: i18n.translate(
-    'xpack.apm.mobile.transactions.overview.tabs.os.version',
-    {
-      defaultMessage: 'OS version',
-    }
-  ),
+  label: i18n.translate('xpack.apm.mobile.transactions.overview.tabs.os.version', {
+    defaultMessage: 'OS version',
+  }),
   component: OSVersionTab,
 };

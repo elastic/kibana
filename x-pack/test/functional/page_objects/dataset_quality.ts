@@ -40,7 +40,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
   const euiSelectable = getService('selectable');
   const retry = getService('retry');
   const find = getService('find');
-  const browser = getService('browser');
 
   const selectors = {
     datasetQualityTable: '[data-test-subj="datasetQualityTable"]',
@@ -49,6 +48,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetSearchInput: '[placeholder="Filter datasets"]',
     showFullDatasetNamesSwitch: 'button[aria-label="Show full dataset names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive datasets"]',
+    superDatePickerApplyButton: '.euiQuickSelect__applyButton',
   };
 
   const testSubjectSelectors = {
@@ -74,6 +74,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
     euiFlyoutCloseButton: 'euiFlyoutCloseButton',
+    unifiedHistogramBreakdownSelectorButton: 'unifiedHistogramBreakdownSelectorButton',
+    unifiedHistogramBreakdownSelectorSelectorSearch:
+      'unifiedHistogramBreakdownSelectorSelectorSearch',
+    unifiedHistogramBreakdownSelectorSelectable: 'unifiedHistogramBreakdownSelectorSelectable',
   };
 
   return {
@@ -203,24 +207,27 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     async openDatasetFlyout(datasetName: string) {
       const cols = await this.parseDatasetTable();
-
       const datasetNameCol = cols['Dataset Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-
       const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
         (dName) => dName === datasetName
       );
-
       const expanderColumn = cols['0'];
       let expanderButtons: WebElementWrapper[];
-
       await retry.try(async () => {
         expanderButtons = await expanderColumn.getCellChildren(
           `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
         );
         expect(expanderButtons.length).to.be.greaterThan(0);
 
-        await expanderButtons[testDatasetRowIndex].click(); // Click "Open"
+        // Check if 'title' attribute is "Expand" or "Collapse"
+        const isCollapsed =
+          (await expanderButtons[testDatasetRowIndex].getAttribute('title')) === 'Expand';
+
+        // Open if collapsed
+        if (isCollapsed) {
+          await expanderButtons[testDatasetRowIndex].click();
+        }
       });
     },
 
@@ -293,10 +300,23 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await timeUnitSelect.focus();
       await timeUnitSelect.type(unit);
 
-      await browser.pressKeys(browser.keys.ENTER);
+      (await datePickerQuickMenu.findByCssSelector(selectors.superDatePickerApplyButton)).click();
 
-      // Close the date picker quick menu
-      return testSubjects.click(testSubjectSelectors.superDatePickerToggleQuickMenuButton);
+      return testSubjects.missingOrFail(testSubjectSelectors.superDatePickerQuickMenu);
+    },
+
+    /**
+     * Selects a breakdown field from the unified histogram breakdown selector
+     * @param fieldText The text of the field to select. Use 'No breakdown' to clear the selection
+     */
+    async selectBreakdownField(fieldText: string) {
+      return euiSelectable.searchAndSelectOption(
+        testSubjectSelectors.unifiedHistogramBreakdownSelectorButton,
+        testSubjectSelectors.unifiedHistogramBreakdownSelectorSelectable,
+        testSubjectSelectors.unifiedHistogramBreakdownSelectorSelectorSearch,
+        fieldText,
+        fieldText
+      );
     },
   };
 }
