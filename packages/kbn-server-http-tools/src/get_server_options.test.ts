@@ -35,6 +35,7 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
     allowOrigin: ['*'],
     ...parts.cors,
   },
+  oas: { enabled: false },
   ssl: {
     enabled: false,
     ...parts.ssl,
