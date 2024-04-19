@@ -7,10 +7,7 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  METRICSET_INTERVAL,
-  METRICSET_NAME,
-} from '../../../../common/es_fields/apm';
+import { METRICSET_INTERVAL, METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { termQuery } from '../../../../common/utils/term_query';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../spans/get_is_using_service_destination_metrics';
@@ -22,10 +19,7 @@ const defaultRollupIntervals = [
   RollupInterval.SixtyMinutes,
 ];
 
-function getDefaultFilter(
-  metricsetName: string,
-  rollupInterval: RollupInterval
-) {
+function getDefaultFilter(metricsetName: string, rollupInterval: RollupInterval) {
   return [
     ...termQuery(METRICSET_NAME, metricsetName),
     ...termQuery(METRICSET_INTERVAL, rollupInterval),
@@ -93,19 +87,16 @@ const documentTypeConfigMap = {
 type DocumentTypeConfigOf<TApmDocumentType extends ApmDocumentType> =
   typeof documentTypeConfigMap[TApmDocumentType];
 
-export function getConfigForDocumentType<
-  TApmDocumentType extends ApmDocumentType
->(docType: TApmDocumentType): DocumentTypeConfigOf<TApmDocumentType> {
+export function getConfigForDocumentType<TApmDocumentType extends ApmDocumentType>(
+  docType: TApmDocumentType
+): DocumentTypeConfigOf<TApmDocumentType> {
   return documentTypeConfigMap[docType];
 }
 
-export type ProcessorEventOfDocumentType<
-  TApmDocumentType extends ApmDocumentType
-> = DocumentTypeConfigOf<TApmDocumentType>['processorEvent'];
+export type ProcessorEventOfDocumentType<TApmDocumentType extends ApmDocumentType> =
+  DocumentTypeConfigOf<TApmDocumentType>['processorEvent'];
 
-export function getProcessorEventForDocumentType<
-  TApmDocumentType extends ApmDocumentType
->(
+export function getProcessorEventForDocumentType<TApmDocumentType extends ApmDocumentType>(
   documentType: TApmDocumentType
 ): ProcessorEventOfDocumentType<TApmDocumentType> {
   return getConfigForDocumentType(documentType).processorEvent;

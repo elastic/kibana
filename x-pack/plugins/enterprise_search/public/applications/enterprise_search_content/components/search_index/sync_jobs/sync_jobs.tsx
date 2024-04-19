@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
-import { type } from 'io-ts';
 import { useActions, useValues } from 'kea';
 
 import { EuiButtonGroup } from '@elastic/eui';
@@ -25,11 +24,19 @@ import { SyncJobsViewLogic } from './sync_jobs_view_logic';
 export const SyncJobs: React.FC = () => {
   const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
   const { productFeatures } = useValues(KibanaLogic);
-  const [selectedSyncJobCategory, setSelectedSyncJobCategory] = useState<string>('content');
   const shouldShowAccessSyncs =
     productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
-  const { connectorId, syncJobsPagination: pagination, syncJobs } = useValues(SyncJobsViewLogic);
-  const { fetchSyncJobs } = useActions(SyncJobsViewLogic);
+  const {
+    connectorId,
+    syncJobsPagination: pagination,
+    syncJobs,
+    cancelSyncJobLoading,
+    syncJobToCancel,
+    selectedSyncJobCategory,
+    syncTriggeredLocally,
+  } = useValues(SyncJobsViewLogic);
+  const { fetchSyncJobs, cancelSyncJob, setCancelSyncJob, setSelectedSyncJobCategory } =
+    useActions(SyncJobsViewLogic);
 
   useEffect(() => {
     if (connectorId) {
@@ -37,10 +44,10 @@ export const SyncJobs: React.FC = () => {
         connectorId,
         from: pagination.pageIndex * (pagination.pageSize || 0),
         size: pagination.pageSize ?? 10,
-        type: selectedSyncJobCategory as 'access_control' | 'content',
+        type: selectedSyncJobCategory,
       });
     }
-  }, [connectorId, selectedSyncJobCategory, type]);
+  }, [connectorId, selectedSyncJobCategory]);
 
   return (
     <>
@@ -56,7 +63,9 @@ export const SyncJobs: React.FC = () => {
           )}
           idSelected={selectedSyncJobCategory}
           onChange={(optionId) => {
-            setSelectedSyncJobCategory(optionId);
+            if (optionId === 'content' || optionId === 'access_control') {
+              setSelectedSyncJobCategory(optionId);
+            }
           }}
           options={[
             {
@@ -79,6 +88,7 @@ export const SyncJobs: React.FC = () => {
       )}
       {selectedSyncJobCategory === 'content' ? (
         <SyncJobsTable
+          isLoading={syncTriggeredLocally}
           onPaginate={({ page: { index, size } }) => {
             if (connectorId) {
               fetchSyncJobs({
@@ -92,9 +102,18 @@ export const SyncJobs: React.FC = () => {
           pagination={pagination}
           syncJobs={syncJobs}
           type="content"
+          cancelConfirmModalProps={{
+            isLoading: cancelSyncJobLoading,
+            onConfirmCb: (syncJobId: string) => {
+              cancelSyncJob({ syncJobId });
+            },
+            setSyncJobIdToCancel: setCancelSyncJob,
+            syncJobIdToCancel: syncJobToCancel ?? undefined,
+          }}
         />
       ) : (
         <SyncJobsTable
+          isLoading={syncTriggeredLocally}
           onPaginate={({ page: { index, size } }) => {
             if (connectorId) {
               fetchSyncJobs({
@@ -104,6 +123,14 @@ export const SyncJobs: React.FC = () => {
                 type: 'access_control',
               });
             }
+          }}
+          cancelConfirmModalProps={{
+            isLoading: cancelSyncJobLoading,
+            onConfirmCb: (syncJobId: string) => {
+              cancelSyncJob({ syncJobId });
+            },
+            setSyncJobIdToCancel: setCancelSyncJob,
+            syncJobIdToCancel: syncJobToCancel ?? undefined,
           }}
           pagination={pagination}
           syncJobs={syncJobs}

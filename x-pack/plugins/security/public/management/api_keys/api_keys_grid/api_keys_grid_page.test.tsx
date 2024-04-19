@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { APIKeysGridPage } from './api_keys_grid_page';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
@@ -33,7 +33,6 @@ describe('APIKeysGridPage', () => {
   const consoleWarnMock = jest.spyOn(console, 'error').mockImplementation();
 
   let coreStart: ReturnType<typeof coreMock.createStart>;
-  const theme$ = themeServiceMock.createTheme$();
   const { authc } = securityMock.createSetup();
 
   beforeEach(() => {
@@ -139,12 +138,12 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText, queryByTestId, getByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
 
-    expect(await queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
+    expect(queryByTestId('apiKeysCreateTableButton')).not.toBeInTheDocument();
 
     expect(await findByText(/Loading API keys/)).not.toBeInTheDocument();
 
@@ -171,7 +170,7 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
@@ -195,7 +194,7 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
@@ -222,7 +221,7 @@ describe('APIKeysGridPage', () => {
     };
 
     const { findByText } = render(
-      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+      <Providers services={coreStart} authc={authc} history={history}>
         <APIKeysGridPage />
       </Providers>
     );
@@ -255,7 +254,7 @@ describe('APIKeysGridPage', () => {
       };
 
       const { findByText, queryByText } = render(
-        <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+        <Providers services={coreStart} authc={authc} history={history}>
           <APIKeysGridPage />
         </Providers>
       );

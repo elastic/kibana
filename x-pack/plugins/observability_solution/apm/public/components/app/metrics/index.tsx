@@ -44,10 +44,7 @@ export function Metrics() {
     );
   }
 
-  if (
-    !isAWSLambda &&
-    (isJavaAgentName(agentName) || isJRubyAgentName(agentName, runtimeName))
-  ) {
+  if (!isAWSLambda && (isJavaAgentName(agentName) || isJRubyAgentName(agentName, runtimeName))) {
     return <JvmMetricsOverview />;
   }
 

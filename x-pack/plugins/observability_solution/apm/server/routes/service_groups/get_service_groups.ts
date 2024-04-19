@@ -23,11 +23,9 @@ export async function getServiceGroups({
     page: 1,
     perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
   });
-  return result.saved_objects.map(
-    ({ id, attributes, updated_at: upatedAt }) => ({
-      id,
-      updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
-      ...attributes,
-    })
-  );
+  return result.saved_objects.map(({ id, attributes, updated_at: upatedAt }) => ({
+    id,
+    updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
+    ...attributes,
+  }));
 }

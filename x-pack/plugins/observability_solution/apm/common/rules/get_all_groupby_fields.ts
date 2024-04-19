@@ -7,11 +7,7 @@
 
 import { union } from 'lodash';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../es_fields/apm';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME, TRANSACTION_TYPE } from '../es_fields/apm';
 
 export const getAllGroupByFields = (
   ruleType: string,
@@ -22,11 +18,7 @@ export const getAllGroupByFields = (
   switch (ruleType) {
     case ApmRuleType.TransactionDuration:
     case ApmRuleType.TransactionErrorRate:
-      predefinedGroupByFields = [
-        SERVICE_NAME,
-        SERVICE_ENVIRONMENT,
-        TRANSACTION_TYPE,
-      ];
+      predefinedGroupByFields = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE];
       break;
     case ApmRuleType.ErrorCount:
       predefinedGroupByFields = [SERVICE_NAME, SERVICE_ENVIRONMENT];

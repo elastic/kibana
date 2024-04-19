@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 
 import { ExceptionItemCardConditions } from '.';
+import { MockedShowValueListModal } from '../../mocks/value_list_modal.mock';
 
 interface TestEntry {
   field: string;
@@ -94,6 +95,7 @@ describe('ExceptionItemCardConditions', () => {
           },
         ]}
         dataTestSubj="exceptionItemConditions"
+        showValueListModal={MockedShowValueListModal}
       />
     );
     expect(wrapper.getByTestId('exceptionItemConditionsOs')).toHaveTextContent('OSIS Linux');
@@ -243,6 +245,7 @@ describe('ExceptionItemCardConditions', () => {
             type: 'nested',
           },
         ]}
+        showValueListModal={MockedShowValueListModal}
         dataTestSubj="exceptionItemConditions"
       />
     );
@@ -331,6 +334,7 @@ describe('ExceptionItemCardConditions', () => {
             type: 'list',
           },
         ]}
+        showValueListModal={MockedShowValueListModal}
         dataTestSubj="exceptionItemConditions"
       />
     );

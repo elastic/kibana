@@ -18,9 +18,5 @@ export const EnterpriseGuard: FC = memo(({ children }) => {
     return <>{children}</>;
   }
 
-  return (
-    <SecuritySolutionPluginTemplateWrapper isEmptyState>
-      <Paywall />
-    </SecuritySolutionPluginTemplateWrapper>
-  );
+  return <SecuritySolutionPluginTemplateWrapper isEmptyState emptyPageBody={<Paywall />} />;
 });

@@ -24,10 +24,7 @@ import {
 } from '@kbn/maps-plugin/common';
 
 import { useMemo } from 'react';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
