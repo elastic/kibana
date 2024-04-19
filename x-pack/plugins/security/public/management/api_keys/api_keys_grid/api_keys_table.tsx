@@ -358,7 +358,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
                     onSelectionChange: setSelectedItems,
                   }
             }
-            isSelectable={canManageOwnApiKeys}
             sorting={{
               sort: {
                 field: sortingOptions.field,
