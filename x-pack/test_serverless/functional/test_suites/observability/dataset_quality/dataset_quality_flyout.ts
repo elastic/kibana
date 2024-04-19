@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality flyout', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/180994
+  describe.skip('Dataset quality flyout', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
@@ -80,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         lastActivityText,
         `[data-test-subj=${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutFieldValue}]`
       );
+
       expect(lastActivityTextExists).to.eql(true);
     });
 
@@ -129,6 +131,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '[data-test-subj=datasetQualityFlyoutFieldValue]',
         apacheIntegrationId
       );
+
+      await PageObjects.datasetQuality.closeFlyout();
 
       expect(integrationNameElements.length).to.eql(1);
     });

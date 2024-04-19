@@ -12,9 +12,7 @@ const EXCLUDED_FIELDS = ['error.exception.stacktrace', 'span.stacktrace'];
 
 export const getSectionsFromFields = (fields: Record<string, any>) => {
   const rows = Object.keys(fields)
-    .filter(
-      (field) => !EXCLUDED_FIELDS.some((excluded) => field.startsWith(excluded))
-    )
+    .filter((field) => !EXCLUDED_FIELDS.some((excluded) => field.startsWith(excluded)))
     .sort()
     .map((field) => {
       return {
@@ -24,22 +22,20 @@ export const getSectionsFromFields = (fields: Record<string, any>) => {
       };
     });
 
-  const sections = Object.values(groupBy(rows, 'section')).map(
-    (rowsForSection) => {
-      const first = rowsForSection[0];
+  const sections = Object.values(groupBy(rows, 'section')).map((rowsForSection) => {
+    const first = rowsForSection[0];
 
-      const section: SectionDescriptor = {
-        key: first.section,
-        label: first.section.toLowerCase(),
-        properties: rowsForSection.map((row) => ({
-          field: row.field,
-          value: row.value,
-        })),
-      };
+    const section: SectionDescriptor = {
+      key: first.section,
+      label: first.section.toLowerCase(),
+      properties: rowsForSection.map((row) => ({
+        field: row.field,
+        value: row.value,
+      })),
+    };
 
-      return section;
-    }
-  );
+    return section;
+  });
 
   const [labelSections, otherSections] = partition(
     sections,
@@ -49,10 +45,7 @@ export const getSectionsFromFields = (fields: Record<string, any>) => {
   return [...labelSections, ...otherSections];
 };
 
-export const filterSectionsByTerm = (
-  sections: SectionDescriptor[],
-  searchTerm: string
-) => {
+export const filterSectionsByTerm = (sections: SectionDescriptor[], searchTerm: string) => {
   if (!searchTerm) {
     return sections;
   }
@@ -62,9 +55,7 @@ export const filterSectionsByTerm = (
       const filteredProps = properties.filter(({ field, value }) => {
         return (
           field.toLowerCase().includes(searchTerm) ||
-          value.some((val: string | number) =>
-            String(val).toLowerCase().includes(searchTerm)
-          )
+          value.some((val: string | number) => String(val).toLowerCase().includes(searchTerm))
         );
       });
       return { ...section, properties: filteredProps };
