@@ -36,7 +36,6 @@ import './_index.scss';
 import { EmbeddedConsoleResizeButton, getCurrentConsoleMaxSize } from './console_resize_button';
 
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
-const CONSOLE_HEIGHT_STORAGE_KEY = 'sense:embeddedConsoleHeight';
 
 const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
@@ -46,11 +45,17 @@ const ConsoleWrapper = dynamic(async () => ({
   default: (await import('./console_wrapper')).ConsoleWrapper,
 }));
 
-const getInitialConsoleHeight = (euiTheme: EuiThemeComputed) => {
-  const localStorageHeight = localStorage.getItem(CONSOLE_HEIGHT_STORAGE_KEY);
-  if (localStorageHeight) {
+const getInitialConsoleHeight = (
+  getConsoleHeight: EmbeddableConsoleDependencies['getConsoleHeight'],
+  euiTheme: EuiThemeComputed
+) => {
+  const lastHeight = getConsoleHeight();
+  if (lastHeight) {
     try {
-      return parseInt(localStorageHeight, 10);
+      const value = parseInt(lastHeight, 10);
+      if (!isNaN(value) && value > 0) {
+        return value;
+      }
     } catch {
       // ignore bad local storage value
     }
@@ -64,10 +69,14 @@ export const EmbeddableConsole = ({
   setDispatch,
   alternateView,
   isMonacoEnabled,
+  getConsoleHeight,
+  setConsoleHeight,
 }: EmbeddableConsoleDependencies) => {
   const { euiTheme } = useEuiTheme();
   const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
-  const [consoleHeight, setConsoleHeight] = useState<number>(getInitialConsoleHeight(euiTheme));
+  const [consoleHeight, setConsoleHeightState] = useState<number>(
+    getInitialConsoleHeight(getConsoleHeight, euiTheme)
+  );
 
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
@@ -95,8 +104,8 @@ export const EmbeddableConsole = ({
       '--embedded-console-height': `${consoleHeight}px`,
       '--embedded-console-bottom': `-${consoleHeight}px`,
     });
-    localStorage.setItem(CONSOLE_HEIGHT_STORAGE_KEY, consoleHeight.toString());
-  }, [consoleHeight, setGlobalCSSVariables]);
+    setConsoleHeight(consoleHeight.toString());
+  }, [consoleHeight, setGlobalCSSVariables, setConsoleHeight]);
 
   const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
   const showConsole =
@@ -153,7 +162,7 @@ export const EmbeddableConsole = ({
               {isOpen && (
                 <EmbeddedConsoleResizeButton
                   consoleHeight={consoleHeight}
-                  setConsoleHeight={setConsoleHeight}
+                  setConsoleHeight={setConsoleHeightState}
                 />
               )}
 

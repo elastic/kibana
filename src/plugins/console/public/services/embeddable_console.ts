@@ -11,10 +11,15 @@ import {
   EmbeddedConsoleAction as EmbeddableConsoleAction,
   EmbeddedConsoleView,
 } from '../types/embeddable_console';
+import { Storage } from '.';
+
+const CONSOLE_HEIGHT_KEY = 'embeddedConsoleHeight';
 
 export class EmbeddableConsoleInfo {
   private _dispatch: Dispatch<EmbeddableConsoleAction> | null = null;
   private _alternateView: EmbeddedConsoleView | undefined;
+
+  constructor(private readonly storage: Storage) {}
 
   public get alternateView(): EmbeddedConsoleView | undefined {
     return this._alternateView;
@@ -37,5 +42,13 @@ export class EmbeddableConsoleInfo {
 
   public registerAlternateView(view: EmbeddedConsoleView | null) {
     this._alternateView = view ?? undefined;
+  }
+
+  public getConsoleHeight(): string | undefined {
+    return this.storage.get(CONSOLE_HEIGHT_KEY, undefined);
+  }
+
+  public setConsoleHeight(value: string) {
+    this.storage.set(CONSOLE_HEIGHT_KEY, value);
   }
 }
