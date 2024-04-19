@@ -29,7 +29,6 @@ shared_components.schema.yaml:
   components:
     schemas:
       TestSchema2:
-        x-inline: false
         type: object
         properties:
           field1:

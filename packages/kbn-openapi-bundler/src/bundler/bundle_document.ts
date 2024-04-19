@@ -72,7 +72,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     createSkipInternalPathProcessor('/internal'),
     createModifyPartialProcessor(),
     createModifyRequiredProcessor(),
-    createRemovePropsProcessor([X_MODIFY, X_CODEGEN_ENABLED]),
+    createRemovePropsProcessor([X_INLINE, X_MODIFY, X_CODEGEN_ENABLED]),
     bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);
@@ -81,7 +81,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     removeUnusedComponentsProcessor.removeUnusedComponents(resolvedDocument.document.components);
   }
 
-  // If document.paths were removed by processors skip the document
+  // If document.paths was removed by processors skip the document
   if (!hasPaths(resolvedDocument.document as MaybeObjectWithPaths)) {
     throw new SkipException(
       resolvedDocument.absolutePath,

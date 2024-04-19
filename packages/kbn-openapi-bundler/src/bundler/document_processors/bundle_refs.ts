@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Document, ResolvedRef, TraverseDocumentContext, RefNode } from '../types';
+import { Document, ResolvedRef, TraverseDocumentContext, RefNode, DocumentNode } from '../types';
 import { hasProp } from '../../utils/has_prop';
 import { isChildContext } from '../is_child_context';
-import { inlineRef } from './utils/inline_ref';
 import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
+import { inlineRef } from './utils/inline_ref';
 
 /**
  * Node processor to bundle and conditionally dereference document references.
@@ -24,21 +24,27 @@ import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
  */
 export class BundleRefProcessor {
   private refs: ResolvedRef[] = [];
+  private nodesToInline = new Set<Readonly<DocumentNode>>();
 
   constructor(private inliningPropName: string) {}
+
+  enter(node: Readonly<DocumentNode>): boolean {
+    if (hasProp(node, this.inliningPropName, true)) {
+      this.nodesToInline.add(node);
+    }
+
+    return false;
+  }
 
   ref(node: RefNode, resolvedRef: ResolvedRef, context: TraverseDocumentContext): void {
     if (!resolvedRef.pointer.startsWith('/components/schemas')) {
       throw new Error(`$ref pointer must start with "/components/schemas"`);
     }
 
-    if (
-      hasProp(node, this.inliningPropName, true) ||
-      hasProp(resolvedRef.refNode, this.inliningPropName, true)
-    ) {
+    if (this.nodesToInline.has(node) || this.nodesToInline.has(resolvedRef.refNode)) {
       inlineRef(node, resolvedRef);
 
-      delete node[this.inliningPropName];
+      // removeInliningPropName(node, this.inliningPropName);
     } else {
       const rootDocument = this.extractRootDocument(context);
 
