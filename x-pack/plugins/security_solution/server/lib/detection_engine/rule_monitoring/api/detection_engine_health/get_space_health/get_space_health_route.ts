@@ -16,7 +16,6 @@ import type {
   GetSpaceHealthResponse,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  TOP_N_RULES_LIMIT,
   GET_SPACE_HEALTH_URL,
   GetSpaceHealthRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -110,7 +109,7 @@ const handleSpaceHealthRequest = async (args: HandleSpaceHealthRequestArgs) => {
 
     const spaceHealthParameters = {
       interval: params.interval,
-      num_of_top_rules: TOP_N_RULES_LIMIT,
+      num_of_top_rules: params.num_of_top_rules,
     };
     const spaceHealth = await healthClient.calculateSpaceHealth(spaceHealthParameters);
 

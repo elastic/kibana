@@ -15,7 +15,6 @@ import type {
   GetClusterHealthResponse,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  TOP_N_RULES_LIMIT,
   GET_CLUSTER_HEALTH_URL,
   GetClusterHealthRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -109,7 +108,7 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
 
     const clusterHealthParameters = {
       interval: params.interval,
-      num_of_top_rules: TOP_N_RULES_LIMIT,
+      num_of_top_rules: params.num_of_top_rules,
     };
     const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 

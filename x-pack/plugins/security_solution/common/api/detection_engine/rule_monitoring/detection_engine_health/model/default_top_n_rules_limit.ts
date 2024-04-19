@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const TOP_N_RULES_LIMIT = 10;
+export const DEFAULT_TOP_N_RULES_LIMIT = 10;

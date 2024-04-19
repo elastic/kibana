@@ -10,6 +10,7 @@ import type {
   GetSpaceHealthRequest,
   GetSpaceHealthRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { DEFAULT_TOP_N_RULES_LIMIT } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { validateHealthInterval } from '../health_interval';
 
 export const validateGetSpaceHealthRequest = (
@@ -20,6 +21,7 @@ export const validateGetSpaceHealthRequest = (
 
   return {
     interval,
+    num_of_top_rules: body.num_of_top_rules ?? DEFAULT_TOP_N_RULES_LIMIT,
     debug: body.debug ?? false,
     requestReceivedAt: now.utc().toISOString(),
   };
