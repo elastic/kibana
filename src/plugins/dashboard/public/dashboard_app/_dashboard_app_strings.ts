@@ -237,6 +237,15 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  tour: {
+    title: i18n.translate('dashboard.topNav.filterTour.tourTitle', {
+      defaultMessage: 'We made changes to the filters logic',
+    }),
+    description: i18n.translate('dashboard.topNav.filterTour.tourDescription', {
+      defaultMessage:
+        'When a dashboard contains more than one dataview, filter(s) will be ignored for visualizations where the dataview does not contain the filtering field. You can change this in Advanced Settings.',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>
@@ -263,3 +272,19 @@ export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
     defaultMessage: 'Add time slider control',
   });
+
+export const filterTourStrings = {
+  title: i18n.translate('dashboard.topNav.filterTour.tourTitle', {
+    defaultMessage: 'We made changes to the filters logic',
+  }),
+  description: i18n.translate('dashboard.topNav.filterTour.tourDescription', {
+    defaultMessage:
+      'When a dashboard contains more than one dataview, filter(s) will be ignored for visualizations where the dataview does not contain the filtering field.',
+  }),
+  tourOptOut: i18n.translate('dashboard.topNav.filterTour.tourOptOutCheckboxLabel', {
+    defaultMessage: "Don't show again",
+  }),
+  closeButton: i18n.translate('dashboard.topNav.filterTour.closeButtonLabel', {
+    defaultMessage: 'Dismiss',
+  }),
+};
