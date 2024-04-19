@@ -262,8 +262,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/178690
-      describe.skip('Modal', () => {
+      describe('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -292,7 +291,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('options-filter-popover-button-owner');
 
           for (const [, currentCaseId] of createdCases.entries()) {
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+            await cases.casesTable.getCaseById(currentCaseId);
           }
 
           await closeModal();
@@ -304,16 +303,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
             await cases.casesTable.filterByOwner(owner);
             await cases.casesTable.waitForTableToFinishLoading();
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
 
+            await cases.casesTable.getCaseById(currentCaseId);
             /**
-             * We ensure that the other cases are not shown
+             * The select button matched the query of the
+             * [data-test-subj*="cases-table-row-" query
              */
-            for (const otherCaseId of createdCases.values()) {
-              if (otherCaseId !== currentCaseId) {
-                await testSubjects.missingOrFail(`cases-table-row-${otherCaseId}`);
-              }
-            }
+            await cases.casesTable.validateCasesTableHasNthRows(2);
 
             await closeModal();
           }
@@ -323,15 +319,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await openModal();
 
           let popupAlreadyOpen = false;
+
           for (const [owner] of createdCases.entries()) {
             await cases.casesTable.filterByOwner(owner, { popupAlreadyOpen });
             popupAlreadyOpen = true;
           }
+
           await cases.casesTable.waitForTableToFinishLoading();
 
           for (const caseId of createdCases.values()) {
-            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+            await cases.casesTable.getCaseById(caseId);
           }
+
           await closeModal();
         });
 
@@ -340,7 +339,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
 
             await cases.casesTable.waitForTableToFinishLoading();
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+            await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
             await cases.common.expectToasterToContain('has been updated');
