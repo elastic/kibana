@@ -10,9 +10,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects, getService } = providerContext;
+  const { getPageObjects } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
-  const kibanaServer = getService('kibanaServer');
 
   describe('Test adding Cloud Security Posture Integrations KSPM K8S', function () {
     this.tags(['cloud_security_posture_cis_integration_kspm_k8s']);
@@ -21,10 +20,6 @@ export default function (providerContext: FtrProviderContext) {
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
       await cisIntegration.navigateToAddIntegrationKspmPage();
-    });
-
-    afterEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('KSPM K8S', () => {

@@ -21,9 +21,8 @@ const CREDENTIALS_JSON_TEST_ID = 'credentials_json_test_id';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects, getService } = providerContext;
+  const { getPageObjects } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
-  const kibanaServer = getService('kibanaServer');
 
   describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_gcp']);
@@ -35,10 +34,6 @@ export default function (providerContext: FtrProviderContext) {
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
 
       await cisIntegration.navigateToAddIntegrationCspmPage();
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('CIS_GCP Organization', () => {

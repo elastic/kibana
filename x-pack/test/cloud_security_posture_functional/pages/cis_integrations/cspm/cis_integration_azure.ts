@@ -33,9 +33,8 @@ export const CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects, getService } = providerContext;
+  const { getPageObjects } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
-  const kibanaServer = getService('kibanaServer');
 
   describe('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_azure']);
@@ -47,10 +46,6 @@ export default function (providerContext: FtrProviderContext) {
       cisIntegrationAzure = pageObjects.cisAddIntegration.cisAzure;
 
       await cisIntegration.navigateToAddIntegrationCspmPage();
-    });
-
-    afterEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Azure Organization ARM Template', () => {
