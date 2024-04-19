@@ -32,6 +32,7 @@ import { getD3SecurityConnectorType } from './d3security';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
+import { getCrowdStrikeConnectorType } from './crowdstrike';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -73,5 +74,8 @@ export function registerConnectorTypes({
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());
+  }
+  if (ExperimentalFeaturesService.get().crowdstrikeConnectorOn) {
+    connectorTypeRegistry.register(getCrowdStrikeConnectorType());
   }
 }

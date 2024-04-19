@@ -79,13 +79,12 @@ function getServiceMapServiceNodeInfoForTimeRange({
 
     const minutes = (end - start) / 1000 / 60;
     const numBuckets = 20;
-    const { intervalString, bucketSize } =
-      getBucketSizeForAggregatedTransactions({
-        start,
-        end,
-        searchAggregatedTransactions,
-        numBuckets,
-      });
+    const { intervalString, bucketSize } = getBucketSizeForAggregatedTransactions({
+      start,
+      end,
+      searchAggregatedTransactions,
+      numBuckets,
+    });
     const taskParams = {
       environment,
       filter,
@@ -101,13 +100,12 @@ function getServiceMapServiceNodeInfoForTimeRange({
       offsetInMs,
     };
 
-    const [failedTransactionsRate, transactionStats, cpuUsage, memoryUsage] =
-      await Promise.all([
-        getFailedTransactionsRateStats(taskParams),
-        getTransactionStats(taskParams),
-        getCpuStats(taskParams),
-        getMemoryStats(taskParams),
-      ]);
+    const [failedTransactionsRate, transactionStats, cpuUsage, memoryUsage] = await Promise.all([
+      getFailedTransactionsRateStats(taskParams),
+      getTransactionStats(taskParams),
+      getCpuStats(taskParams),
+      getMemoryStats(taskParams),
+    ]);
     return {
       failedTransactionsRate,
       transactionStats,
@@ -169,9 +167,7 @@ async function getTransactionStats({
   intervalString,
   offsetInMs,
 }: TaskParameters): Promise<NodeStats['transactionStats']> {
-  const durationField = getDurationFieldForTransactions(
-    searchAggregatedTransactions
-  );
+  const durationField = getDurationFieldForTransactions(searchAggregatedTransactions);
 
   const params = {
     apm: {
@@ -184,9 +180,7 @@ async function getTransactionStats({
         bool: {
           filter: [
             ...filter,
-            ...getBackwardCompatibleDocumentTypeFilter(
-              searchAggregatedTransactions
-            ),
+            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
             {
               terms: {
                 [TRANSACTION_TYPE]: defaultTransactionTypes,
@@ -216,10 +210,7 @@ async function getTransactionStats({
     params
   );
 
-  const throughputValue = sumBy(
-    response.aggregations?.timeseries.buckets,
-    'doc_count'
-  );
+  const throughputValue = sumBy(response.aggregations?.timeseries.buckets, 'doc_count');
 
   return {
     latency: {
@@ -249,40 +240,34 @@ async function getCpuStats({
   end,
   offsetInMs,
 }: TaskParameters): Promise<NodeStats['cpuUsage']> {
-  const response = await apmEventClient.search(
-    'get_avg_cpu_usage_for_service_map_node',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...filter,
-              { exists: { field: METRIC_SYSTEM_CPU_PERCENT } },
-            ],
-          },
+  const response = await apmEventClient.search('get_avg_cpu_usage_for_service_map_node', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [...filter, { exists: { field: METRIC_SYSTEM_CPU_PERCENT } }],
         },
-        aggs: {
-          avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-          timeseries: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: intervalString,
-              min_doc_count: 0,
-              extended_bounds: { min: start, max: end },
-            },
-            aggs: {
-              cpuAvg: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-            },
+      },
+      aggs: {
+        avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
+          aggs: {
+            cpuAvg: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return {
     value: response.aggregations?.avgCpuUsage.value ?? null,
@@ -309,37 +294,34 @@ function getMemoryStats({
       additionalFilters: ESFilter[];
       script: typeof cgroupMemory.script | typeof systemMemory.script;
     }): Promise<NodeStats['memoryUsage']> => {
-      const response = await apmEventClient.search(
-        'get_avg_memory_for_service_map_node',
-        {
-          apm: {
-            events: [ProcessorEvent.metric],
-          },
-          body: {
-            track_total_hits: false,
-            size: 0,
-            query: {
-              bool: {
-                filter: [...filter, ...additionalFilters],
-              },
+      const response = await apmEventClient.search('get_avg_memory_for_service_map_node', {
+        apm: {
+          events: [ProcessorEvent.metric],
+        },
+        body: {
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [...filter, ...additionalFilters],
             },
-            aggs: {
-              avgMemoryUsage: { avg: { script } },
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: intervalString,
-                  min_doc_count: 0,
-                  extended_bounds: { min: start, max: end },
-                },
-                aggs: {
-                  memoryAvg: { avg: { script } },
-                },
+          },
+          aggs: {
+            avgMemoryUsage: { avg: { script } },
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: { min: start, max: end },
+              },
+              aggs: {
+                memoryAvg: { avg: { script } },
               },
             },
           },
-        }
-      );
+        },
+      });
       return {
         value: response.aggregations?.avgMemoryUsage.value ?? null,
         timeseries: response.aggregations?.timeseries.buckets.map((bucket) => ({
@@ -390,9 +372,7 @@ export async function getServiceMapServiceNodeInfo({
 
   const [currentPeriod, previousPeriod] = await Promise.all([
     getServiceMapServiceNodeInfoForTimeRange(commonProps),
-    offset
-      ? getServiceMapServiceNodeInfoForTimeRange({ ...commonProps, offset })
-      : undefined,
+    offset ? getServiceMapServiceNodeInfoForTimeRange({ ...commonProps, offset }) : undefined,
   ]);
 
   return { currentPeriod, previousPeriod };

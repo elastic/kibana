@@ -23,10 +23,9 @@ export function SystemLogs({ children }: Props) {
   useBreadcrumbs(
     [
       {
-        text: i18n.translate(
-          'xpack.observability_onboarding.breadcrumbs.systemLogs',
-          { defaultMessage: 'System logs' }
-        ),
+        text: i18n.translate('xpack.observability_onboarding.breadcrumbs.systemLogs', {
+          defaultMessage: 'System logs',
+        }),
       },
     ],
     breadcrumbsApp
@@ -44,23 +43,16 @@ export function SystemLogs({ children }: Props) {
           <EuiSpacer size="l" />
           <EuiFlexGroup direction="row">
             <EuiFlexItem grow={false}>
-              <EuiTitle
-                size="l"
-                data-test-subj="obltOnboardingSystemLogsFilePageHeader"
-              >
+              <EuiTitle size="l" data-test-subj="obltOnboardingSystemLogsFilePageHeader">
                 <h1>
-                  {i18n.translate(
-                    'xpack.observability_onboarding.title.collectSystemLogs',
-                    { defaultMessage: 'Install shipper to collect system logs' }
-                  )}
+                  {i18n.translate('xpack.observability_onboarding.title.collectSystemLogs', {
+                    defaultMessage: 'Install shipper to collect system logs',
+                  })}
                 </h1>
               </EuiTitle>
             </EuiFlexItem>
             {isServerless && (
-              <EuiFlexItem
-                grow={false}
-                css={{ position: 'absolute', right: 10 }}
-              >
+              <EuiFlexItem grow={false} css={{ position: 'absolute', right: 10 }}>
                 <ObservabilityOnboardingHeaderActionMenu />
               </EuiFlexItem>
             )}
