@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const { body } = await supertest
             .post('/internal/security/api_key/_query')
-            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .send(requestBody)
             .expect(200);
 
