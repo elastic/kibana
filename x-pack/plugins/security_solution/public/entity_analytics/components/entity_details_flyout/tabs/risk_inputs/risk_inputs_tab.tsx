@@ -176,13 +176,12 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <RiskInputsUtilityBar riskInputs={selectedItems} />
       <EuiInMemoryTable
-        compressed={true}
+        compressed
         loading={loadingRiskScore || alerts.loading}
         items={alerts.data || []}
         columns={inputColumns}
         sorting
         selection={euiTableSelectionProps}
-        isSelectable
         itemId="_id"
       />
       <EuiSpacer size="s" />
