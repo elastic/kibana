@@ -6,6 +6,40 @@
       - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
+- name: find kibana node version
+  set_fact:
+    node_version: "{{ lookup('file', kibana_src_path + '/.node-version') | regex_replace('^(.*)$', '\\1') }}"
+
+- name: install and setup nvm
+  block:
+    - name: install nvm
+      shell: >
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_ver }}/install.sh | bash"
+      args:
+        executable: /bin/bash
+        chdir: "$HOME"
+        creates: "$HOME/.nvm/nvm.sh"
+
+    - name: setup nvm for vagrant user
+      lineinfile:
+        path: ~/.profile
+        line: source ~/.nvm/nvm.sh
+        create: yes
+      become_flags: -i
+
+- name: install kibana node version
+  command: nvm install {{ node_version }}
+  args:
+    executable: /bin/bash
+    chdir: "$HOME"
+
+# - name: install yarn?
+# - name: install git?
+# - name: pull source?
+# /var/log/kibana
+# es temp dir
+# sudo / yum broken
+
 - name: "ensure {{ kibana_dist_path }} dir exists"
   become: yes
   file:

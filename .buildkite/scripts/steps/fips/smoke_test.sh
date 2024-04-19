@@ -23,7 +23,7 @@ cd /home/vagrant/kibana
 
 for config in "${configs[@]}"; do
   set +e
-  /usr/share/kibana/node/bin/node /home/vagrant/kibana/scripts/functional_tests \
+  node /home/vagrant/kibana/scripts/functional_tests \
     --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config"
