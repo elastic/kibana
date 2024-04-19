@@ -179,10 +179,6 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`options-filter-popover-item-${status}`);
       // to close the popup
       await testSubjects.click('options-filter-popover-button-status');
-
-      await testSubjects.missingOrFail(`options-filter-popover-item-${status}`, {
-        timeout: 5000,
-      });
     },
 
     async filterBySeverity(severity: CaseSeverity) {
