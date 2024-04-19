@@ -47,7 +47,7 @@ export class SamlSessionManager {
 
   constructor(options: SamlSessionManagerOptions, rolesFilename?: string) {
     this.isCloud = options.isCloud;
-    // if the filename is overwritten, respect the passed file name. Otherwise use default.
+    // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
     const rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
     console.log(`Using the file ${rolesFile} for the role users`);
     this.userRoleFilePath = resolve(REPO_ROOT, '.ftr', rolesFile);

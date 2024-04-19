@@ -40,7 +40,6 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
-
 let log: ToolingLog;
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
@@ -221,9 +220,7 @@ export const cli = () => {
         return process.exit(1);
       }
 
-      const PROXY_URL = process.env.PROXY_URL 
-        ? process.env.PROXY_URL 
-        : undefined;
+      const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
 
       const API_KEY = process.env.CLOUD_QA_API_KEY
         ? process.env.CLOUD_QA_API_KEY
@@ -298,14 +295,16 @@ ${JSON.stringify(argv, null, 2)}
       const isOpen = argv._.includes('open');
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
-      // KIBANA_MKI_USE_LATEST_COMMIT === 1 means that we are overriding the image for the periodic pipeline execution.
+
+      // if KIBANA_MKI_IMAGE_COMMIT exists and has a value, it means that we are overriding the image for the periodic pipeline execution.
       // We don't override the image when executing the tests on the second quality gate.
-      // if (
-      //   !process.env.KIBANA_MKI_USE_LATEST_COMMIT ||
-      //   process.env.KIBANA_MKI_USE_LATEST_COMMIT !== '1'
-      // ) {
-      //   cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless';
-      // }
+      if (!process.env.KIBANA_MKI_IMAGE_COMMIT) {
+        log.info(
+          'KIBANA_MKI_IMAGE_COMMIT is not provided, so @serverlessQA --@skipInServerless tags will run.'
+        );
+        cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless';
+      }
+
       const tier: string = argv.tier;
       const endpointAddon: boolean = argv.endpointAddon;
       const cloudAddon: boolean = argv.cloudAddon;
@@ -370,6 +369,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       }
 
       const failedSpecFilePaths: string[] = [];
+
       const runSpecs = (filePaths: string[]) =>
         pMap(
           filePaths,
@@ -402,8 +402,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               context.addCleanupTask(() => {
                 let command: string;
-                if (PROXY_URL) {
-                  command = `curl DELETE ${PROXY_URL}/projects/${project.id}`
+                if (cloudHandler instanceof ProxyHandler) {
+                  command = `curl DELETE ${PROXY_URL}/projects/${project.id}`;
                 } else {
                   command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
                 }
@@ -444,10 +444,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ELASTICSEARCH_URL: project.es_url,
                 ELASTICSEARCH_USERNAME: credentials.username,
                 ELASTICSEARCH_PASSWORD: credentials.password,
-                
+
                 // Used in order to handle the correct role_users file loading.
                 PROXY_ORG: PROXY_URL ? project.proxy_org_name : undefined,
-                
+
                 KIBANA_URL: project.kb_url,
                 KIBANA_USERNAME: credentials.username,
                 KIBANA_PASSWORD: credentials.password,

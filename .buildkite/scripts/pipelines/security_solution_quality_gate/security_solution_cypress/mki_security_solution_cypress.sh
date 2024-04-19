@@ -30,16 +30,5 @@ QA_CONSOLE_URL=$(vault_get security-solution-quality-gate qa_console_url)
 PROXY_URL=$(vault_get security-solution-quality-gate-temp proxy_url)
 BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
-PROXY_URL=$PROXY_URL  QA_CONSOLE_URL=$QA_CONSOLE_URL BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
-
-if [ -v $KIBANA_MKI_IMAGE_COMMIT ]; then
-    PROXY_URL=$PROXY_URL QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_IMAGE_COMMIT=$KIBANA_MKI_IMAGE_COMMIT BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
-else
-    PROXY_URL=$PROXY_URL QA_CONSOLE_URL=$QA_CONSOLE_URL BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
-fi
-
-# if [ -z "${KIBANA_MKI_USE_LATEST_COMMIT+x}" ] || [ "$KIBANA_MKI_USE_LATEST_COMMIT" = "0" ]; then
-#     QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_USE_LATEST_COMMIT=0 BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
-# else
-#     PROXY_URL=$PROXY_URL QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_USE_LATEST_COMMIT=1 BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
-# fi
+echo "--- Triggering Kibana tests for $1"
+PROXY_URL=$PROXY_URL QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_IMAGE_COMMIT=$KIBANA_MKI_IMAGE_COMMIT BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
