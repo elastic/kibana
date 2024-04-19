@@ -180,7 +180,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('query', async () => {
           const requestBody = {
-            query: {},
+            query: {
+              bool: { must: [{ match: { invalidated: { query: false, operator: 'and' } } }] },
+            },
+            sort: { field: 'creation', direction: 'desc' },
+            from: 0,
+            size: 1,
           };
 
           const { body } = await supertest
