@@ -132,9 +132,17 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
 
+    const doc = document?.fields
+      ? Object.keys(document?._source).reduce((acc, key) => {
+          const fld = document?.fields[key];
+          acc[key] = fld.length === 1 ? fld[0] : fld;
+          return acc;
+        }, {} as Record<string, unknown>)
+      : {};
+
     const response = await getFieldPreview({
       index: currentDocIndex,
-      document: document?._source!,
+      document: doc,
       context: (parentName ? 'composite_field' : `${type!}_field`) as PainlessExecuteContext,
       script: previewScript,
     });
@@ -288,7 +296,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       fields: fields.map((field) => {
         const nextValue =
           script === null && Boolean(document)
-            ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
+            ? get(document?.fields, name ?? '') ?? get(document?._source, name ?? '') // When there is no script we try to read the value from _source/fields
             : field?.value;
 
         const formattedValue = controller.valueFormatter({ value: nextValue, type, format });

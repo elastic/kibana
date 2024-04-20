@@ -9,7 +9,7 @@
 export interface EsDoc {
   _id: string;
   _index: string;
-  _source: TestDoc;
+  fields: TestDoc;
 }
 
 export interface TestDoc {
@@ -40,7 +40,7 @@ export const mockDocuments: EsDoc[] = [
   {
     _id: '001',
     _index: 'testIndex',
-    _source: {
+    fields: {
       title: 'First doc - title',
       subTitle: 'First doc - subTitle',
       description: 'First doc - description',
@@ -49,7 +49,7 @@ export const mockDocuments: EsDoc[] = [
   {
     _id: '002',
     _index: 'testIndex',
-    _source: {
+    fields: {
       title: 'Second doc - title',
       subTitle: 'Second doc - subTitle',
       description: 'Second doc - description',
@@ -58,7 +58,7 @@ export const mockDocuments: EsDoc[] = [
   {
     _id: '003',
     _index: 'testIndex',
-    _source: {
+    fields: {
       title: 'Third doc - title',
       subTitle: 'Third doc - subTitle',
       description: 'Third doc - description',
