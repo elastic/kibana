@@ -133,9 +133,7 @@ export const mountWithProvider = async (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
-      children: React.ReactNode;
-    }>;
+    wrappingComponent?: (props: { children: React.ReactNode }) => React.ReactElement;
     wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
@@ -154,9 +152,7 @@ const getMountWithProviderParams = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
-      children: React.ReactNode;
-    }>;
+    wrappingComponent?: (props: { children: React.ReactNode }) => React.ReactElement;
     wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }

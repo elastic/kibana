@@ -26,7 +26,7 @@ const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 export const LogAnalysisSetupFlyout = ({
   allowedModules = moduleIds,
 }: {
-  allowedModules?: ModuleId[];
+  allowedModules?: readonly ModuleId[];
 }) => {
   const { closeFlyout, flyoutView, showModuleList, showModuleSetup } =
     useLogAnalysisSetupFlyoutStateContext();
@@ -96,6 +96,7 @@ const LogAnalysisSetupFlyoutSubPage = ({
   children,
   onViewModuleList,
 }: {
+  children: React.ReactNode;
   onViewModuleList?: () => void;
 }) => (
   <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">

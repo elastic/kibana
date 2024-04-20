@@ -17,6 +17,7 @@ export const AppWrapper = ({
   children,
 }: {
   chromeVisible$: Observable<boolean>;
+  children: React.ReactNode;
 }) => {
   const visible = useObservable(chromeVisible$);
   return (

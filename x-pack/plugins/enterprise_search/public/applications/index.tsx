@@ -40,7 +40,7 @@ import { mountLicensingLogic } from './shared/licensing';
  */
 
 export const renderApp = (
-  App: React.FC<InitialAppData>,
+  App: (props: InitialAppData) => React.ReactElement,
   {
     params,
     core,
@@ -92,7 +92,7 @@ export const renderApp = (
   const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
-  const EmptyContext = ({ children }) => <>{children}</>;
+  const EmptyContext = ({ children }: { children: React.ReactNode }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });

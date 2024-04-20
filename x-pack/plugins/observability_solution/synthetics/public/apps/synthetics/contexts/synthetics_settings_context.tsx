@@ -42,6 +42,7 @@ export interface SyntheticsAppProps {
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
+  children?: React.ReactNode;
 }
 
 export interface SyntheticsSettingsContextValues {

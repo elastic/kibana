@@ -28,7 +28,7 @@ export const LoadingOverlayWrapper = ({
   );
 };
 
-const Overlay = ({ children }) => (
+const Overlay = ({ children }: { children: React.ReactNode }) => (
   <OverlayDiv>{children ? children : <EuiLoadingSpinner size="xl" />}</OverlayDiv>
 );
 

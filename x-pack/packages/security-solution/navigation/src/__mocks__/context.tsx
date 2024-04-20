@@ -10,7 +10,7 @@ import { mockCoreStart } from '../../mocks/context';
 
 const navigationContext = createContext<CoreStart | null>(mockCoreStart);
 
-export const NavigationProvider = ({ children }) => (
+export const NavigationProvider = ({ children }: { children: React.ReactNode }) => (
   <navigationContext.Provider value={mockCoreStart}>{children}</navigationContext.Provider>
 );
 

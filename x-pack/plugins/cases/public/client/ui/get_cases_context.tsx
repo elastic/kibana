@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { ReactNode } from 'react';
+import type { ReactNode, PropsWithChildren } from 'react';
 import React, { lazy, Suspense } from 'react';
 import type { CasesContextProps } from '../../components/cases_context';
 
@@ -59,7 +59,10 @@ export const getCasesContextLazy = ({
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
 >): (() => React.FC<GetCasesContextProps>) => {
-  const CasesProviderLazyWrapperWithRegistry = ({ children, ...props }: GetCasesContextProps) => (
+  const CasesProviderLazyWrapperWithRegistry = ({
+    children,
+    ...props
+  }: PropsWithChildren<GetCasesContextProps>) => (
     <CasesProviderLazyWrapper
       {...props}
       externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}

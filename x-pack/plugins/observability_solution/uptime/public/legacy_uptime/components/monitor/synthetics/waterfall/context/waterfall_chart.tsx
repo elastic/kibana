@@ -45,6 +45,7 @@ export interface IWaterfallContext {
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
+  children: React.ReactNode;
   totalNetworkRequests: number;
   highlightedNetworkRequests: number;
   fetchedNetworkRequests: number;

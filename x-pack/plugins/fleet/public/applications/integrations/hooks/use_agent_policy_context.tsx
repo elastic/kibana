@@ -16,7 +16,7 @@ interface AgentPolicyContextValue {
 
 const AgentPolicyContext = createContext<AgentPolicyContextValue>({ getId: () => undefined });
 
-export const AgentPolicyContextProvider = ({ children }) => {
+export const AgentPolicyContextProvider = ({ children }: { children: React.ReactNode }) => {
   const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
   const ref = useRef<undefined | string>(maybeState?.forAgentPolicyId);
 

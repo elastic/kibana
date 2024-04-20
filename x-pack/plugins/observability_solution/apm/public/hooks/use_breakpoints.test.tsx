@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { EuiProvider } from '@elastic/eui';
 import { useBreakpoints } from './use_breakpoints';
 
-const wrapper = ({ children }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiProvider
     modify={{
       // set in apm/public/application/index.tsx

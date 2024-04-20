@@ -35,7 +35,11 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
   };
 }
 
-const getContextProvider: () => React.FC =
+const getContextProvider: () => ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => React.ReactElement =
   () =>
   ({ children }) =>
     <>{children}</>;

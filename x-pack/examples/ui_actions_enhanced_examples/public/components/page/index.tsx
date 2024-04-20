@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
   title?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const Page = ({ title = 'Untitled', children }: PageProps) => {

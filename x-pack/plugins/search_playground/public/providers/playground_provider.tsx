@@ -14,6 +14,7 @@ const queryClient = new QueryClient({});
 
 export interface PlaygroundProviderProps {
   defaultValues?: Partial<Pick<ChatForm, ChatFormFields.indices>>;
+  children: React.ReactNode;
 }
 
 export const PlaygroundProvider = ({ children, defaultValues }: PlaygroundProviderProps) => {

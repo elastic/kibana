@@ -29,6 +29,7 @@ export const MockIndexPatternsKibanaContextProvider = ({
   mockIndexPatterns,
 }: {
   asyncDelay: number;
+  children: React.ReactNode;
   mockIndexPatterns: MockIndexPatternSpec[];
 }) => {
   const indexPatterns = useMemo(

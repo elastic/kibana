@@ -23,6 +23,7 @@ export const ContentClientProvider = ({
   children,
 }: {
   contentClient: ContentClient;
+  children: React.ReactNode;
 }) => {
   return (
     <ContentClientContext.Provider value={contentClient}>

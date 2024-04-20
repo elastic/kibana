@@ -31,6 +31,7 @@ import './phase.scss';
 import { PhaseTitle } from './phase_title';
 
 interface Props {
+  children?: React.ReactNode;
   phase: PhaseType;
   /**
    * Settings that should always be visible on the phase when it is enabled.

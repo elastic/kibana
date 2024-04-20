@@ -10,6 +10,7 @@ import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
 export interface Props {
   title: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const Section = ({ title, children }: Props) => {

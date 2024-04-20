@@ -39,6 +39,7 @@ interface ProgressControlProps {
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
+  children: React.ReactNode;
 }
 
 /**

@@ -24,7 +24,7 @@ import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
 import { QueryBar } from '../../query_bar/components/query_bar';
 
-const IndicatorsPageProviders = ({ children }) => (
+const IndicatorsPageProviders = ({ children }: { children: React.ReactNode }) => (
   <IndicatorsFilters>
     <FieldTypesProvider>
       <InspectorProvider>

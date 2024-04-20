@@ -63,6 +63,7 @@ export const IntegrationsAppContext = memo(
     theme$,
     fleetStatus,
   }: {
+    children: React.ReactNode;
     basepath: string;
     startServices: FleetStartServices;
     config: FleetConfigType;

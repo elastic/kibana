@@ -37,7 +37,7 @@ import { CreatePackagePolicyBottomBar } from '.';
 const CentralTitle = styled('h1')`
   text-align: center;
 `;
-const PaddedCentralTitle = ({ children }) => (
+const PaddedCentralTitle = ({ children }: { children: React.ReactNode }) => (
   <>
     <EuiSpacer size={'s'} />
     <EuiTitle size="l">
@@ -64,7 +64,7 @@ const CenteredEuiImage = (props: EuiImageProps) => (
   </div>
 );
 
-const ResponsiveStepGroup = ({ children }) => {
+const ResponsiveStepGroup = ({ children }: { children: React.ReactNode }) => {
   const isScreenSmall = useIsWithinMaxBreakpoint('s');
 
   return (

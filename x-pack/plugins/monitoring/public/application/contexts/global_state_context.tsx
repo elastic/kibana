@@ -17,6 +17,7 @@ interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartServices['notifications']['toasts'];
   uiSettings: MonitoringStartServices['uiSettings'];
+  children: React.ReactNode;
 }
 
 export interface State {

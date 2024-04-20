@@ -60,7 +60,7 @@ export const ExpandedRow = ({ category, displayExamples = true }: ExpandedRowPro
   );
 };
 
-const Section = ({ title, children }: { title: string }) => {
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => {
   return (
     <>
       <EuiText size="s">

@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogEntryTime } from '@kbn/logs-shared-plugin/common';
 import classNames from 'classnames';
-import * as React from 'react';
+import React from 'react';
 
 interface LogSearchButtonsProps {
   className?: string;

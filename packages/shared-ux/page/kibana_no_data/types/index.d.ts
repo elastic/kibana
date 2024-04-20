@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { PropsWithChildren } from 'react';
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import {
@@ -29,7 +30,9 @@ export interface Services {
 /**
  * A list of Services that are consumed by this component..
  */
-export type KibanaNoDataPageServices = Services & NoDataCardServices & NoDataViewsPromptServices;
+export type KibanaNoDataPageServices = PropsWithChildren<
+  Services & NoDataCardServices & NoDataViewsPromptServices
+>;
 
 export interface KibanaDependencies {
   dataViews: {
@@ -43,9 +46,9 @@ export interface KibanaDependencies {
  * An interface containing a collection of Kibana plugins and services required to
  * render this component and its dependencies.
  */
-export type KibanaNoDataPageKibanaDependencies = KibanaDependencies &
-  NoDataViewsPromptKibanaDependencies &
-  NoDataCardKibanaDependencies;
+export type KibanaNoDataPageKibanaDependencies = PropsWithChildren<
+  KibanaDependencies & NoDataViewsPromptKibanaDependencies & NoDataCardKibanaDependencies
+>;
 
 /**
  * Props for `KibanaNoDataPage`.

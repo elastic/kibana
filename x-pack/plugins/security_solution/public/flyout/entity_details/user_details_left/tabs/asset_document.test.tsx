@@ -61,7 +61,7 @@ describe('AssetDocumentTab', () => {
     const { getByTestId, getByTitle } = render(
       <TestProviders>
         <RightPanelContext.Provider value={mockContextValue}>
-          <AssetDocumentTab path={{ tab: 'table' }} />
+          <AssetDocumentTab />
         </RightPanelContext.Provider>
       </TestProviders>
     );

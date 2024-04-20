@@ -28,7 +28,7 @@ describe('Tags', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 
-  const MockHookWrapperComponent = ({ children }) => {
+  const MockHookWrapperComponent = ({ children }: { children: React.ReactNode }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { tags: [] },
       schema: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, PropsWithChildren } from 'react';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { TelemetryEvents } from '../../types';
@@ -25,7 +25,7 @@ export const DataQualityProvider = ({
   toasts,
   isILMAvailable,
   telemetryEvents,
-}: DataQualityProviderProps) => {
+}: PropsWithChildren<DataQualityProviderProps>) => {
   const value = useMemo(
     () => ({
       httpFetch,

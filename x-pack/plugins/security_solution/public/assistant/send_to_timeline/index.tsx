@@ -39,6 +39,7 @@ import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
+  children: React.ReactNode;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
   timeRange?: TimeRange;

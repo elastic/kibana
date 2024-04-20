@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { EuiConfirmModal } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';

@@ -112,7 +112,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
-    const CloudContextProvider = ({ children }) => {
+    const CloudContextProvider = ({ children }: { children: React.ReactNode }) => {
       return (
         <>
           {this.contextProviders.reduce(

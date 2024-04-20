@@ -16,6 +16,7 @@ import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
+  extraButtons?: React.ReactNode;
 }
 
 const RESULTS_PER_PAGE = 20;

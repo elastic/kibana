@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 
@@ -32,7 +32,7 @@ export const createSpacesReactContext = <Services extends Partial<CoreStart>>(
     spacesDataPromise,
     services,
   };
-  const Provider = ({ children }) =>
+  const Provider = ({ children }: { children: React.ReactNode }) =>
     createElement(context.Provider as React.ComponentType<any>, { value, children });
 
   return {

@@ -31,7 +31,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AllTheProviders = ({ children }) => {
+const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <KibanaThemeProvider theme$={core.theme.theme$}>
       <KibanaContextProvider services={{ ...core, ...services }}>

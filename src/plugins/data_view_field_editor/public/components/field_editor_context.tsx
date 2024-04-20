@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import type {
@@ -67,7 +67,7 @@ export const FieldEditorProvider = ({
   children,
   fieldName$,
   subfields$,
-}: Context) => {
+}: PropsWithChildren<Context>) => {
   const ctx = useMemo<Context>(
     () => ({
       dataView,

@@ -12,6 +12,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 interface Props {
   isOptional: boolean;
+  children: React.ReactNode;
 }
 export const Description = memo(({ children, isOptional }: Props) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.title', {

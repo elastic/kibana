@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 import type { FieldInputServices, FieldInputKibanaDependencies } from './types';
 
 const FieldInputContext = React.createContext<FieldInputServices | null>(null);
@@ -14,7 +14,10 @@ const FieldInputContext = React.createContext<FieldInputServices | null>(null);
 /**
  * React Provider that provides services to a {@link FieldInput} component and its dependents.
  */
-export const FieldInputProvider = ({ children, ...services }: FieldInputServices) => {
+export const FieldInputProvider = ({
+  children,
+  ...services
+}: PropsWithChildren<FieldInputServices>) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
   const { showDanger, validateChange } = services;
@@ -33,7 +36,7 @@ export const FieldInputKibanaProvider = ({
   children,
   notifications: { toasts },
   settings: { client },
-}: FieldInputKibanaDependencies) => {
+}: PropsWithChildren<FieldInputKibanaDependencies>) => {
   return (
     <FieldInputContext.Provider
       value={{

@@ -25,7 +25,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: TriggersAndActionsUiServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: (props: { children: React.ReactElement }) => React.ReactElement | null;
 }
 
 export const createAppMockRenderer = (

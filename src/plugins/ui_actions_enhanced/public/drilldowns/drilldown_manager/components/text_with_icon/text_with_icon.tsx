@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import {
   EuiTextColor,
   EuiTextColorProps,
@@ -22,6 +22,7 @@ export interface TextWithIconProps {
   icon?: string;
   iconColor?: string;
   iconTooltip?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const TextWithIcon = ({

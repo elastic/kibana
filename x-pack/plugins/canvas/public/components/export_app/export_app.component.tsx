@@ -6,7 +6,6 @@
  */
 
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 // @ts-expect-error untyped local
 import { WorkpadPage } from '../workpad_page';
@@ -52,13 +51,4 @@ export const ExportApp = ({ workpad, selectedPageIndex, initializeWorkpad }: Pro
       </div>
     </div>
   );
-};
-
-ExportApp.propTypes = {
-  workpad: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    pages: PropTypes.array.isRequired,
-  }).isRequired,
-  selectedPageIndex: PropTypes.number.isRequired,
-  initializeWorkpad: PropTypes.func.isRequired,
 };

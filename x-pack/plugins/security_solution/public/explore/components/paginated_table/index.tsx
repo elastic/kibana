@@ -120,7 +120,7 @@ export interface BasicTableProps<T> {
   pageOfItems: unknown[];
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
-  sorting?: SortingBasicTable;
+  sorting?: SortingBasicTable | null;
   split?: boolean;
   stackHeader?: boolean;
   totalCount: number;

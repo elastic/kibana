@@ -59,7 +59,13 @@ export interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
-export const PageLoader = ({ context, children }: { context: RouteResolverContext }) => {
+export const PageLoader = ({
+  context,
+  children,
+}: {
+  context: RouteResolverContext;
+  children: React.ReactNode;
+}) => {
   const isLoading = !context.initialized;
 
   if (context?.resolvedComponent) {

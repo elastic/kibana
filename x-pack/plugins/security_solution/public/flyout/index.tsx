@@ -65,7 +65,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: DocumentDetailsIsolateHostPanelKey,
     component: (props) => (
       <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
-        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
+        <IsolateHostPanel />
       </IsolateHostPanelProvider>
     ),
   },

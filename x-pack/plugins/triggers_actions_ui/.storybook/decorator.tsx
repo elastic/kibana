@@ -27,6 +27,7 @@ interface StorybookContextDecoratorProps {
   context: Parameters<DecoratorFn>[1];
   servicesApplicationOverride?: Partial<ApplicationStart>;
   servicesOverride?: Partial<KibanaServices>;
+  children: React.ReactNode;
 }
 
 const queryClient = new QueryClient();

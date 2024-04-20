@@ -25,6 +25,7 @@ interface SortedLogs {
 interface LogAccordionProps {
   logs: SortedLogs[];
   isError?: boolean;
+  children?: React.ReactNode;
 }
 
 const CustomWarning = ({ message }: { message: string }) => (

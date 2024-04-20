@@ -175,7 +175,7 @@ export const SummaryStep = ({ setCurrentStep, isCurrentStep }: StepProps) => {
           )}
 
           <EuiHorizontalRule />
-          {showJobAssignWarning && <NewJobAwaitingNodeWarning jobType="anomaly-detector" />}
+          {showJobAssignWarning && <NewJobAwaitingNodeWarning />}
           <EuiFlexGroup>
             {progress < 100 && (
               <Fragment>

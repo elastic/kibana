@@ -16,6 +16,7 @@ export interface FormLabelProps {
    * Name of target form field.
    */
   for: string;
+  children?: React.ReactNode;
 }
 
 /**

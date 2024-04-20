@@ -13,6 +13,7 @@ import type { Validation } from '../../../../common/job_validator';
 
 interface Props {
   validation: Validation;
+  children: React.ReactNode;
 }
 
 export const Description = memo(({ children, validation }: Props) => {

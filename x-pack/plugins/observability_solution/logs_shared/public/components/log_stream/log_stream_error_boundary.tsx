@@ -15,6 +15,7 @@ export const LogStreamErrorBoundary = ({
   children,
   resetOnChange = null,
 }: {
+  children: React.ReactNode;
   resetOnChange: any;
 }) => {
   return (

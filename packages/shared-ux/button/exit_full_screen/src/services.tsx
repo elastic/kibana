@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 
 import type {
   Services,
@@ -22,7 +22,7 @@ const ExitFullScreenButtonContext = React.createContext<Services | null>(null);
 export const ExitFullScreenButtonProvider = ({
   children,
   ...services
-}: ExitFullScreenButtonServices) => {
+}: PropsWithChildren<ExitFullScreenButtonServices>) => {
   return (
     <ExitFullScreenButtonContext.Provider value={services}>
       {children}
@@ -36,7 +36,7 @@ export const ExitFullScreenButtonProvider = ({
 export const ExitFullScreenButtonKibanaProvider = ({
   children,
   ...services
-}: ExitFullScreenButtonKibanaDependencies) => {
+}: PropsWithChildren<ExitFullScreenButtonKibanaDependencies>) => {
   return (
     <ExitFullScreenButtonContext.Provider
       value={{

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { LazyExoticComponent, ReactElement, ReactNode } from 'react';
 import { CustomIntegration } from '../common';
 
 export interface CustomIntegrationsSetup {
@@ -14,8 +15,8 @@ export interface CustomIntegrationsSetup {
 }
 
 export interface CustomIntegrationsStart {
-  ContextProvider: React.FC;
-  languageClientsUiComponents: Record<string, React.FC>;
+  ContextProvider: ({ children }: { children: ReactNode }) => ReactElement;
+  languageClientsUiComponents: Record<string, LazyExoticComponent<() => ReactElement>>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

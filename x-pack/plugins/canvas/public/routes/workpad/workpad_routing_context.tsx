@@ -46,7 +46,7 @@ export const WorkpadRoutingContext = createContext<WorkpadRoutingContextType>(
   basicWorkpadRoutingContext
 );
 
-export const WorkpadRoutingContextComponent = ({ children }) => {
+export const WorkpadRoutingContextComponent = ({ children }: { children: React.ReactNode }) => {
   const routingContext = useRoutingContext();
 
   return (

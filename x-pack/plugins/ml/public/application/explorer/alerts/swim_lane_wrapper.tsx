@@ -52,6 +52,7 @@ export interface SwimLaneWrapperProps {
   selection?: AppStateSelectedCells | null;
   swimlaneContainerWidth?: number;
   swimLaneData: SwimlaneData;
+  children: React.ReactNode;
 }
 
 /**

@@ -71,6 +71,7 @@ const InactiveAgentsTourStep = ({
   isOpen,
   setInactiveAgentsCalloutHasBeenDismissed,
 }: {
+  children: React.ReactNode;
   isOpen: boolean;
   setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
 }) => (

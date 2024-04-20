@@ -70,6 +70,7 @@ const CollapsablePanel = ({
 }: {
   id: string;
   title: React.ReactNode;
+  children: React.ReactNode;
   'data-test-subj'?: string;
 }) => {
   const arrowProps = useMemo<EuiAccordionProps['arrowProps']>(() => {

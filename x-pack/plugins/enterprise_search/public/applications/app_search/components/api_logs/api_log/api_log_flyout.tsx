@@ -124,7 +124,7 @@ export const ApiLogFlyout = () => {
   );
 };
 
-export const ApiLogHeading = ({ children }) => (
+export const ApiLogHeading = ({ children }: { children: React.ReactNode }) => (
   <EuiTitle size="xs">
     <h3>{children}</h3>
   </EuiTitle>

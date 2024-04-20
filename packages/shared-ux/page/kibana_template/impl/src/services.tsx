@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 import {
   NoDataConfigPageProvider,
@@ -24,7 +24,7 @@ import {
 export const KibanaPageTemplateProvider = ({
   children,
   ...services
-}: KibanaPageTemplateServices) => {
+}: PropsWithChildren<KibanaPageTemplateServices>) => {
   return <NoDataConfigPageProvider {...services}>{children}</NoDataConfigPageProvider>;
 };
 
@@ -34,7 +34,7 @@ export const KibanaPageTemplateProvider = ({
 export const KibanaPageTemplateKibanaProvider = ({
   children,
   ...dependencies
-}: KibanaPageTemplateKibanaDependencies) => {
+}: PropsWithChildren<KibanaPageTemplateKibanaDependencies>) => {
   return (
     <NoDataConfigPageKibanaProvider {...dependencies}>{children}</NoDataConfigPageKibanaProvider>
   );

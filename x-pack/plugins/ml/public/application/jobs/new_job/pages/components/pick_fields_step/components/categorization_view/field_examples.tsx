@@ -72,6 +72,6 @@ export const FieldExamples = ({ fieldExamples }: Props) => {
   );
 };
 
-const Token = ({ children }) => (
+const Token = ({ children }: { children: React.ReactNode }) => (
   <span style={{ backgroundColor: TOKEN_HIGHLIGHT_COLOR }}>{children}</span>
 );

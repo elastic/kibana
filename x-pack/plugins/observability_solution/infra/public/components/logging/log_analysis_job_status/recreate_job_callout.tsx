@@ -15,6 +15,7 @@ export const RecreateJobCallout = ({
   onRecreateMlJob,
   title,
 }: {
+  children: React.ReactNode;
   hasSetupCapabilities?: boolean;
   onRecreateMlJob: () => void;
   title?: React.ReactNode;

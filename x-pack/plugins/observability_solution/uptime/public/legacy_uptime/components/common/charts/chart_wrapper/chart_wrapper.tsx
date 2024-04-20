@@ -9,6 +9,7 @@ import React, { HTMLAttributes } from 'react';
 import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {
+  children: React.ReactNode;
   /**
    * Height for the chart
    */

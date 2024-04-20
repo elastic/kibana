@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 
 import {
   FormProvider,
@@ -68,7 +68,7 @@ const SettingsApplicationContext = React.createContext<Services | null>(null);
 export const SettingsApplicationProvider = ({
   children,
   ...services
-}: SettingsApplicationServices) => {
+}: PropsWithChildren<SettingsApplicationServices>) => {
   // Destructure the services to avoid a type-widening inclusion of unrelated services.
   const {
     saveChanges,
@@ -117,7 +117,7 @@ export const SettingsApplicationProvider = ({
 export const SettingsApplicationKibanaProvider = ({
   children,
   ...dependencies
-}: SettingsApplicationKibanaDependencies) => {
+}: PropsWithChildren<SettingsApplicationKibanaDependencies>) => {
   const {
     docLinks,
     notifications,

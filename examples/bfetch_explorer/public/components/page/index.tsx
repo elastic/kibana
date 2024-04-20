@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
   title?: React.ReactNode;
   sidebar?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const Page = ({ title = 'Untitled', sidebar, children }: PageProps) => {

@@ -8,7 +8,7 @@
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';

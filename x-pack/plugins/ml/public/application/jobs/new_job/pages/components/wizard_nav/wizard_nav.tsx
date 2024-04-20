@@ -22,6 +22,7 @@ interface StepsNavProps {
   nextActive?: boolean;
   previous?(): void;
   next?(): void;
+  children?: React.ReactNode;
 }
 
 export const WizardNav = ({

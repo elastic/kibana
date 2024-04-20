@@ -16,7 +16,7 @@ import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analy
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 
-export const LogsPageProviders = ({ children }) => {
+export const LogsPageProviders = ({ children }: { children: React.ReactNode }) => {
   const {
     services: {
       notifications: { toasts: toastsService },

@@ -30,7 +30,7 @@ export const calendarListRouteFactory = (
   title: i18n.translate('xpack.ml.settings.calendarList.docTitle', {
     defaultMessage: 'Calendars',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),

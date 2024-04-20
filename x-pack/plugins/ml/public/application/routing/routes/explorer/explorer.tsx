@@ -38,7 +38,7 @@ export const explorerRouteFactory = (
   title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
     defaultMessage: 'Anomaly Explorer',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),

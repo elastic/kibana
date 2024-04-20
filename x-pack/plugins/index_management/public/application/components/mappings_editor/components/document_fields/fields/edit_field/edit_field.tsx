@@ -52,10 +52,10 @@ export interface Props {
   kibanaVersion: SemVer;
 }
 
-// The default FormWrapper is the <EuiForm />, which wrapps the form with
+// The default FormWrapper is the <EuiForm />, which wraps the form with
 // a <div>. We can't have a div as first child of the Flyout as it breaks
-// the height calculaction and does not render the footer position correctly.
-const FormWrapper = ({ children }) => <>{children}</>;
+// the height calculation and does not render the footer position correctly.
+const FormWrapper = ({ children }: { children?: React.ReactNode }) => <>{children}</>;
 
 export const EditField = React.memo(
   ({ form, field, allFields, exitEdit, updateField, kibanaVersion }: Props) => {

@@ -115,7 +115,7 @@ export const ExpressionEditor = (
   );
 };
 
-export const SourceStatusWrapper = ({ children }) => {
+export const SourceStatusWrapper = ({ children }: { children: React.ReactNode }) => {
   const { load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
 
   return (

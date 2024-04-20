@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState, ReactElement } from 'react';
+import React, { useCallback, useMemo, useState, ReactElement, PropsWithChildren } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
@@ -69,7 +69,7 @@ const StyledExpressionRow = euiStyled(EuiFlexGroup)`
 `;
 
 // eslint-disable-next-line react/function-component-definition
-export const ExpressionRow = (props: ExpressionRowProps) => {
+export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
   const {
     dataView,
     children,
@@ -208,6 +208,7 @@ export const ExpressionRow = (props: ExpressionRowProps) => {
   );
 };
 
+// eslint-disable-next-line react/function-component-definition
 const ThresholdElement = ({
   updateComparator,
   updateThreshold,
@@ -222,7 +223,6 @@ const ThresholdElement = ({
   isMetricPct: boolean;
   comparator: MetricExpression['comparator'];
   errors: IErrorObject;
-  // eslint-disable-next-line react/function-component-definition;
 }) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));

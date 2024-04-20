@@ -50,6 +50,7 @@ export const StorybookContext = ({
   children: storyChildren,
 }: {
   storyContext?: Parameters<DecoratorFn>[1];
+  children: React.ReactNode;
 }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();

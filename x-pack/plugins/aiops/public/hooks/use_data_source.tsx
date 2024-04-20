@@ -33,6 +33,7 @@ export interface DataSourceContextProviderProps {
   savedSearchId?: string;
   /** Output resolves data view objects */
   onChange?: (update: { dataViews: DataView[] }) => void;
+  children: React.ReactNode;
 }
 
 /**

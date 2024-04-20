@@ -48,7 +48,7 @@ const queryClient = new QueryClient();
 describe('Transform: useIndexData()', () => {
   test('dataView set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
-    const wrapper = ({ children }) => (
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={queryClient}>
         <IntlProvider locale="en">
           <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>

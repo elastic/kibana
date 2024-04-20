@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import type { OnboardingHubStepLinkClickedParams } from '../../../../lib/telemetry/events/onboarding/types';
 import type {
@@ -26,7 +27,10 @@ export interface StepContextType {
 
 const StepContext = React.createContext<StepContextType | null>(null);
 
-export const StepContextProvider = ({ children, ...others }: StepContextType) => {
+export const StepContextProvider = ({
+  children,
+  ...others
+}: PropsWithChildren<StepContextType>) => {
   return <StepContext.Provider value={others}>{children}</StepContext.Provider>;
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { getAlertsSingleMetricConfig } from './configurations/alerts_configs/single_metric_config';
 import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';

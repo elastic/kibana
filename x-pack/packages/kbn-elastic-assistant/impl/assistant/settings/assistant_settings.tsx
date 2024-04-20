@@ -84,14 +84,8 @@ export const AssistantSettings = React.memo(
     conversations,
     isFlyoutMode,
   }: Props) => {
-    const {
-      actionTypeRegistry,
-      modelEvaluatorEnabled,
-      http,
-      toasts,
-      selectedSettingsTab,
-      setSelectedSettingsTab,
-    } = useAssistantContext();
+    const { modelEvaluatorEnabled, http, toasts, selectedSettingsTab, setSelectedSettingsTab } =
+      useAssistantContext();
 
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();
@@ -312,7 +306,6 @@ export const AssistantSettings = React.memo(
               >
                 {selectedSettingsTab === CONVERSATIONS_TAB && (
                   <ConversationSettings
-                    actionTypeRegistry={actionTypeRegistry}
                     defaultConnector={defaultConnector}
                     conversationSettings={conversationSettings}
                     setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}

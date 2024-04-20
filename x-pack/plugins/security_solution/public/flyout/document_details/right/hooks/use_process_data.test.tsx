@@ -60,7 +60,7 @@ const panelContextValue = {
   getFieldsData: jest.fn().mockReturnValue('test'),
 } as unknown as RightPanelContext;
 
-const ProviderComponent = ({ children }) => (
+const ProviderComponent = ({ children }: { children: React.ReactNode }) => (
   <RightPanelContext.Provider value={panelContextValue}>{children}</RightPanelContext.Provider>
 );
 

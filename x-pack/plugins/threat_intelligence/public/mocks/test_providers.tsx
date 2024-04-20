@@ -138,7 +138,7 @@ export const mockedServices = {
   },
 };
 
-export const TestProvidersComponent = ({ children }) => (
+export const TestProvidersComponent = ({ children }: { children?: React.ReactNode }) => (
   <MemoryRouter>
     <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
       <QueryClientProvider client={new QueryClient()}>

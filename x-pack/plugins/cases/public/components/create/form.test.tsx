@@ -60,6 +60,7 @@ describe('CreateCaseForm', () => {
     children,
     testProviderProps = {},
   }: {
+    children: React.ReactNode;
     testProviderProps?: unknown;
   }) => {
     const { form } = useForm<FormProps>({

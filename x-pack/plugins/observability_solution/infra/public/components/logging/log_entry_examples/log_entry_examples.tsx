@@ -13,6 +13,7 @@ import { LogEntryExampleMessagesFailureIndicator } from './log_entry_examples_fa
 import { LogEntryExampleMessagesLoadingIndicator } from './log_entry_examples_loading_indicator';
 
 interface Props {
+  children: React.ReactNode;
   isLoading: boolean;
   hasFailedLoading: boolean;
   hasResults: boolean;

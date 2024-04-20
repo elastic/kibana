@@ -49,6 +49,7 @@ const LogRateAnalysisStateContext = createContext<LogRateAnalysisState | undefin
 interface LogRateAnalysisStateProviderProps {
   /** The parameters to be used to trigger an analysis. */
   initialAnalysisStart?: InitialAnalysisStart;
+  children: React.ReactNode;
 }
 
 /**

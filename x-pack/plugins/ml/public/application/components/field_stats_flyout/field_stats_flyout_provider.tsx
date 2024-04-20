@@ -34,6 +34,7 @@ export const FieldStatsFlyoutProvider = ({
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
   disablePopulatedFields?: boolean;
+  children?: React.ReactNode;
 }) => {
   const {
     services: {

@@ -17,6 +17,7 @@ export const ProjectNavigation = ({
   toggleSideNav,
 }: {
   toggleSideNav: (isVisible: boolean) => void;
+  children: React.ReactNode;
 }) => {
   const isMounted = useRef(false);
   const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);

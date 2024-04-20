@@ -17,7 +17,13 @@ export const ReloadContext = React.createContext<ReloadContextValue>({
   refreshTimestamp: Date.now(),
 });
 
-export const ReloadContextProvider = ({ reload$, children }: { reload$: Observable<number> }) => {
+export const ReloadContextProvider = ({
+  reload$,
+  children,
+}: {
+  reload$: Observable<number>;
+  children: React.ReactNode;
+}) => {
   const refreshTimestamp = useObservable(reload$, Date.now());
   return <ReloadContext.Provider value={{ refreshTimestamp }}>{children}</ReloadContext.Provider>;
 };

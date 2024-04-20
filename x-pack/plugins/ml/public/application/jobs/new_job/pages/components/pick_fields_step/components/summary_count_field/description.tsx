@@ -14,6 +14,7 @@ import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {
   validation: Validation;
+  children: React.ReactNode;
 }
 
 export const Description = memo(({ children, validation }: Props) => {

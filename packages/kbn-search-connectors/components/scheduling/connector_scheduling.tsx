@@ -30,6 +30,7 @@ import { ConnectorContentScheduling } from './full_content';
 interface SchedulePanelProps {
   description: string;
   title: string;
+  children: React.ReactNode;
 }
 export const SchedulePanel = ({ title, description, children }: SchedulePanelProps) => {
   return (

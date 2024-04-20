@@ -15,7 +15,7 @@ export const FieldTypesContext = createContext<FieldTypesContextValue | undefine
 /**
  * Exposes mapped field types for threat intel shared use
  */
-export const FieldTypesProvider = ({ children }) => {
+export const FieldTypesProvider = ({ children }: { children: React.ReactNode }) => {
   const { indexPattern } = useSourcererDataView();
 
   // field name to field type map to allow the cell_renderer to format dates

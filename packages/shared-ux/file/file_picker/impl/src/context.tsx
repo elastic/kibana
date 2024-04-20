@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, useMemo, useEffect } from 'react';
+import React, { PropsWithChildren, createContext, useContext, useMemo, useEffect } from 'react';
 import { useFilesContext, FilesContextValue } from '@kbn/shared-ux-file-context';
 import { FileJSON } from '@kbn/shared-ux-file-types';
 import { FilePickerState, createFilePickerState } from './file_picker_state';
@@ -36,7 +36,7 @@ export const FilePickerContext = ({
   multiple,
   children,
   uploadMeta,
-}: FilePickerContextProps) => {
+}: PropsWithChildren<FilePickerContextProps>) => {
   const filesContext = useFilesContext();
   const { client } = filesContext;
   const state = useMemo(

@@ -51,7 +51,7 @@ export const EnterpriseSearchContent = (props: InitialAppData) => {
       );
     }
 
-    return <EnterpriseSearchContentConfigured {...(props as Required<InitialAppData>)} />;
+    return <EnterpriseSearchContentConfigured />;
   };
 
   return (

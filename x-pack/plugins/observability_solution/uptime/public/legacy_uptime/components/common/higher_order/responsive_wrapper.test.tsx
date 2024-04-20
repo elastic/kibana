@@ -14,7 +14,7 @@ interface Prop {
 }
 
 describe('ResponsiveWrapper HOC', () => {
-  let WrappedByHOC;
+  let WrappedByHOC: ReturnType<typeof withResponsiveWrapper<Prop>>;
   beforeEach(() => {
     WrappedByHOC = withResponsiveWrapper<Prop>(() => <div>Should be responsive</div>);
   });

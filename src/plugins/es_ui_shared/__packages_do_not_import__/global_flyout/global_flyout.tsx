@@ -39,7 +39,7 @@ const DEFAULT_FLYOUT_PROPS = {
   maxWidth: 500,
 };
 
-export const GlobalFlyoutProvider = ({ children }) => {
+export const GlobalFlyoutProvider = ({ children }: { children: React.ReactNode }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [activeContent, setActiveContent] = useState<Content<any> | undefined>(undefined);
 

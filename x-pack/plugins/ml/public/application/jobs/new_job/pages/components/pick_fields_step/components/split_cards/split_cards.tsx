@@ -18,6 +18,7 @@ interface Props {
   numberOfDetectors: number;
   jobType: JOB_TYPE;
   animate?: boolean;
+  children: React.ReactNode;
 }
 
 interface Panel {

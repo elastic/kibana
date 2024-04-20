@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-export const InfinityIconSvg = (props) => {
+export const InfinityIconSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
       viewBox="0 0 16 16"

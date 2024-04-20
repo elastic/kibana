@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -171,10 +170,4 @@ export const AssetManager = (props: Props) => {
       </EuiModalFooter>
     </EuiModal>
   );
-};
-
-AssetManager.propTypes = {
-  assets: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
 };

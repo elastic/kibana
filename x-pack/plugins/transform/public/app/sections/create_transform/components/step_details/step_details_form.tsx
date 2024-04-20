@@ -73,8 +73,8 @@ interface StepDetailsFormProps {
   stepDefineState: StepDefineExposedState;
 }
 
-export const StepDetailsForm = React.memo(
-  ({ overrides = {}, onChange, searchItems, stepDefineState }: StepDetailsFormProps) => {
+export const StepDetailsForm = React.memo<StepDetailsFormProps>(
+  ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
     const { application, i18n: i18nStart, theme } = useAppDependencies();
     const { capabilities } = application;
     const toastNotifications = useToastNotifications();

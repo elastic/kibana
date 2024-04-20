@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';

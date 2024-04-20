@@ -14,6 +14,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 export interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
+  children: React.ReactNode;
 }
 
 export const HeaderPortal = ({ children, setHeaderActionMenu, theme$ }: Props) => {

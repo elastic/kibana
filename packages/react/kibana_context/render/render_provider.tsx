@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 import {
   KibanaRootContextProvider,
@@ -24,7 +24,7 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
 export const KibanaRenderContextProvider = ({
   children,
   ...props
-}: KibanaRenderContextProviderProps) => {
+}: PropsWithChildren<KibanaRenderContextProviderProps>) => {
   return (
     <KibanaRootContextProvider globalStyles={false} {...props}>
       <KibanaErrorBoundaryProvider analytics={props.analytics}>

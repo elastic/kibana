@@ -16,8 +16,8 @@ export interface ResultTypeSelectorProps {
   onChange: (value: MlAnomalyResultType) => void;
 }
 
-export const ResultTypeSelector = React.memo(
-  ({ value: selectedResultType = [], onChange, availableOption }: ResultTypeSelectorProps) => {
+export const ResultTypeSelector = React.memo<ResultTypeSelectorProps>(
+  ({ value: selectedResultType = [], onChange, availableOption }) => {
     const resultTypeOptions = useMemo(() => {
       return [
         {

@@ -692,6 +692,7 @@ export const UsernameWithIcon = ({ username }: UsernameWithIconProps) => (
 
 export interface TimeToolTipProps {
   timestamp: number;
+  children?: React.ReactNode;
 }
 
 export const TimeToolTip = ({ timestamp, children }: TimeToolTipProps) => {

@@ -14,6 +14,7 @@ export interface LayoutProps {
   pageTitle?: string;
   border?: boolean;
   subHeader?: ReactNode;
+  children?: React.ReactNode;
 }
 
 export const DefaultPageLayout = ({

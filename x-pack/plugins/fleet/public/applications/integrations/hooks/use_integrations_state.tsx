@@ -18,7 +18,7 @@ const IntegrationsStateContext = createContext<IntegrationsStateContextValue>({
   getFromIntegrations: () => undefined,
 });
 
-export const IntegrationsStateContextProvider = ({ children }) => {
+export const IntegrationsStateContextProvider = ({ children }: { children: React.ReactNode }) => {
   const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
   const fromIntegrationsRef = useRef<undefined | string>(maybeState?.fromIntegrations);
 

@@ -13,7 +13,7 @@ import { MlPageControlsContext } from '../ml_page/ml_page';
 /**
  * Component for setting the page header content.
  */
-export const MlPageHeader = ({ children }) => {
+export const MlPageHeader = ({ children }: { children: React.ReactNode }) => {
   const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
 
   useEffect(() => {

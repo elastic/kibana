@@ -12,6 +12,7 @@ interface Props {
   hasData: boolean;
   height?: string;
   loading?: boolean;
+  children: React.ReactNode;
 }
 
 export const LoadingWrapper = ({ hasData, loading = false, height, children }: Props) => {

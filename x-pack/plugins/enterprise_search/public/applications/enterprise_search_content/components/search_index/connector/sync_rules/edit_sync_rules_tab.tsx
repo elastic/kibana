@@ -12,7 +12,13 @@ import { i18n } from '@kbn/i18n';
 
 import { ConnectorSyncRulesForm } from './connector_sync_form';
 
-export const EditSyncRulesTab = ({ children, revertAction }: { revertAction: () => void }) => {
+export const EditSyncRulesTab = ({
+  children,
+  revertAction,
+}: {
+  revertAction: () => void;
+  children: React.ReactNode;
+}) => {
   return (
     <>
       <EuiSpacer />

@@ -98,7 +98,7 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider = ({ children }) => {
+export const ChangePointDetectionControlsContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { dataView } = useDataSource();
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
@@ -126,7 +126,7 @@ export const ChangePointDetectionControlsContextProvider = ({ children }) => {
   );
 };
 
-export const ChangePointDetectionContextProvider = ({ children }) => {
+export const ChangePointDetectionContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,

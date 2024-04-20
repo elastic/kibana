@@ -38,6 +38,7 @@ export const FleetStatusProvider = ({
   defaultFleetStatus,
   children,
 }: {
+  children: React.ReactNode;
   defaultFleetStatus?: FleetStatusProviderProps;
 }) => {
   const config = useConfig();

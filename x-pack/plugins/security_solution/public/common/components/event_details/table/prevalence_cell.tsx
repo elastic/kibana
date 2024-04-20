@@ -18,14 +18,14 @@ import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevale
 /**
  * Renders a Prevalence cell based on a regular alert prevalence query
  */
-const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
+const PrevalenceCell = ({
   data,
   eventId,
   fieldFromBrowserField,
   linkValue,
   scopeId,
   values,
-}) => {
+}: AlertSummaryRow['description']) => {
   const { loading, count } = useAlertPrevalence({
     field: data.field,
     isActiveTimelines: scopeId === TimelineId.active,

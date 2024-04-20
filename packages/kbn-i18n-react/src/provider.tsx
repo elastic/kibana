@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { PropsWithChildren } from 'react';
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
@@ -21,7 +20,7 @@ import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
 
-export const I18nProvider = ({ children }: PropsWithChildren) => (
+export const I18nProvider = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider
     locale={i18n.getLocale()}
     messages={i18n.getTranslation().messages}

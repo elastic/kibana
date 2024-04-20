@@ -28,7 +28,7 @@ jest.mock('../../hooks/use_kibana', () => ({
   })),
 }));
 
-const Wrapper = ({ children }) => {
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <IntlProvider locale="en">{children}</IntlProvider>

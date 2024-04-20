@@ -16,6 +16,7 @@ export const UptimeDataViewContextProvider = ({
   children,
   dataViews,
 }: {
+  children: React.ReactNode;
   dataViews: DataViewsPublicPluginStart;
 }) => {
   const { settings, data: indexStatus } = useHasData();

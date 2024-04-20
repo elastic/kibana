@@ -10,6 +10,7 @@ import type { Tracker } from '../types';
 
 interface TelemetryProviderProps {
   tracker?: Tracker;
+  children: React.ReactNode;
 }
 
 const TelemetryContext = createContext<{ tracker?: Tracker } | null>(null);

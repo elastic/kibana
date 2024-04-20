@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { CountUntil } from '../../../../components/count_until';
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
 import { Sidebar } from '../../sidebar';
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Props {}
 
 export const PageCountUntil = () => {
   const { plugins } = useDeps();

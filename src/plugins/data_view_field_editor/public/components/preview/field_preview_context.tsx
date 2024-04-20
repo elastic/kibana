@@ -68,6 +68,7 @@ export const FieldPreviewProvider = ({
   children,
 }: {
   controller: PreviewController;
+  children: React.ReactNode;
 }) => {
   const {
     dataView,

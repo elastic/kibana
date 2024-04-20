@@ -45,7 +45,7 @@ import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
-  component: React.FC;
+  component: (props: React.PropsWithChildren<{}>) => React.ReactElement;
   dataTestSubj: string;
   title: string;
 };

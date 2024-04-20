@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo, useCallback } from 'react';
+import React, { PropsWithChildren, useContext, useMemo, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -52,7 +52,7 @@ export interface Services {
   DateFormatterComp?: DateFormatter;
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
-  TagList: FC<TagListProps>;
+  TagList: (props: TagListProps) => React.ReactElement | null;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
@@ -65,7 +65,7 @@ const TableListViewContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const TableListViewProvider = ({ children, ...services }: Services) => {
+export const TableListViewProvider = ({ children, ...services }: PropsWithChildren<Services>) => {
   return <TableListViewContext.Provider value={services}>{children}</TableListViewContext.Provider>;
 };
 
@@ -162,7 +162,7 @@ export interface TableListViewKibanaDependencies {
 export const TableListViewKibanaProvider = ({
   children,
   ...services
-}: TableListViewKibanaDependencies) => {
+}: PropsWithChildren<TableListViewKibanaDependencies>) => {
   const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
 
   const searchQueryParser = useMemo(() => {

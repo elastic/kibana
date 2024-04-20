@@ -23,7 +23,7 @@ const hideFullErrorMessage = i18n.translate(
   }
 );
 
-export const ToastWithCircuitBreakerContent = ({ children }) => {
+export const ToastWithCircuitBreakerContent = ({ children }: { children: React.ReactNode }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const onToggleShowDetails = useCallback(() => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { useDrilldownManager } from '../context';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
 

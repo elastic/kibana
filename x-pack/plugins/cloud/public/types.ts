@@ -11,7 +11,7 @@ export interface CloudStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
-  CloudContextProvider: FC<{}>;
+  CloudContextProvider: ({ children }: { children: React.ReactNode }) => React.ReactElement;
   /**
    * `true` when Kibana is running on Elastic Cloud.
    */

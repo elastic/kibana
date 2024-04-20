@@ -23,6 +23,7 @@ interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
+  children: React.ReactNode;
 }
 
 export const TimeSeriesExplorerPage = ({

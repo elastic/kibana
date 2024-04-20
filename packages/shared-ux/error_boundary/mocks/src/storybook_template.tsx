@@ -16,7 +16,7 @@ import {
   EuiPageTemplate,
 } from '@elastic/eui';
 
-export const Template = ({ children }) => {
+export const Template = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <EuiHeader position="fixed">

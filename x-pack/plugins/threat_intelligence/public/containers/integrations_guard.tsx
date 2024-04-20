@@ -19,7 +19,7 @@ import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugi
  * If none are received, show the EmptyPage with a link to go install integrations.
  * While the indicators call and the integrations call are loading, display a loading screen.
  */
-export const IntegrationsGuard = memo(({ children }) => {
+export const IntegrationsGuard = memo(({ children }: { children: React.ReactNode }) => {
   const { isLoading: indicatorsTotalCountLoading, count: indicatorsTotalCount } =
     useIndicatorsTotalCount();
 

@@ -16,6 +16,7 @@ export const SyntheticsDataViewContextProvider = ({
   children,
   dataViews,
 }: {
+  children: React.ReactNode;
   dataViews: DataViewsPublicPluginStart;
 }) => {
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {

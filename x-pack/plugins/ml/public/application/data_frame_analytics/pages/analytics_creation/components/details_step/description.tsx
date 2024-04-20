@@ -12,7 +12,7 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-export const Description = memo(({ children }) => {
+export const Description = memo(({ children }: { children: React.ReactNode }) => {
   const {
     services: { docLinks },
   } = useMlKibana();

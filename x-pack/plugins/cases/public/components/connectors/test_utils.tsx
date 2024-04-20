@@ -10,6 +10,7 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { EuiButton } from '@elastic/eui';
 
 interface MockFormWrapperComponentProps {
+  children: React.ReactNode;
   fields?: Record<string, unknown>;
 }
 

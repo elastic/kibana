@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, PropsWithChildren } from 'react';
 import type { ChatVariant } from '../../common/types';
 
 export interface ChatConfig {
@@ -27,7 +27,10 @@ export interface CloudChatServices {
 
 const ServicesContext = createContext<CloudChatServices>({});
 
-export const ServicesProvider = ({ children, ...services }: CloudChatServices) => (
+export const ServicesProvider = ({
+  children,
+  ...services
+}: PropsWithChildren<CloudChatServices>) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
 );
 

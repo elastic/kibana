@@ -24,7 +24,7 @@ import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
-const ViewLogInContext = ({ children }) => {
+const ViewLogInContext = ({ children }: { children: React.ReactNode }) => {
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewReference } = useLogViewContext();
 
@@ -47,6 +47,7 @@ const LogEntriesStateProvider = ({
   children,
   logStreamPageState,
 }: {
+  children: React.ReactNode;
   logStreamPageState: InitializedLogStreamPageState;
 }) => {
   const { logViewReference } = useLogViewContext();
@@ -77,6 +78,7 @@ const LogHighlightsState = ({
   children,
   logStreamPageState,
 }: {
+  children: React.ReactNode;
   logStreamPageState: InitializedLogStreamPageState;
 }) => {
   const { logViewReference, logView } = useLogViewContext();
@@ -103,6 +105,7 @@ export const LogStreamPageContentProviders = ({
   logStreamPageState,
   logStreamPageCallbacks,
 }: {
+  children: React.ReactNode;
   logStreamPageState: InitializedLogStreamPageState;
   logStreamPageCallbacks: LogStreamPageCallbacks;
 }) => {

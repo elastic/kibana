@@ -13,6 +13,7 @@ const PolicyStatusContext = createContext<undefined>(undefined);
 
 interface PolicyStatusContextProviderProps {
   config: ClientConfigType;
+  children: React.ReactNode;
 }
 
 export const PolicyStatusContextProvider = ({

@@ -16,21 +16,19 @@ import type {
 } from '../../containers/types';
 
 export interface CustomFieldType<T extends CaseUICustomField> {
-  Configure: React.FC;
-  View: React.FC<{
-    customField?: T;
-  }>;
-  Edit: React.FC<{
+  Configure: (props: {}) => React.ReactElement | null;
+  View: (props: { customField?: T }) => React.ReactElement | null;
+  Edit: (props: {
     customField?: T;
     customFieldConfiguration: CasesConfigurationUICustomField;
     onSubmit: (customField: T) => void;
     isLoading: boolean;
     canUpdate: boolean;
-  }>;
-  Create: React.FC<{
+  }) => React.ReactElement | null;
+  Create: (props: {
     customFieldConfiguration: CasesConfigurationUICustomField;
     isLoading: boolean;
-  }>;
+  }) => React.ReactElement | null;
 }
 
 export interface CustomFieldFactoryFilterOption {

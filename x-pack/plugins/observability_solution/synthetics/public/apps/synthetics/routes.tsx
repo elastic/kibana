@@ -51,7 +51,7 @@ import { CertificatesPage } from './components/certificates/certificates';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
-  component: React.FC;
+  component: (props: React.PropsWithChildren<{}>) => React.ReactElement | null;
   dataTestSubj: string;
   title: string;
 };

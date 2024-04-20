@@ -21,6 +21,7 @@ interface StartChatPanelProps {
   title: string;
   description: string | React.ReactNode;
   isValid?: boolean;
+  children: React.ReactNode;
 }
 
 export const StartChatPanel = ({ title, description, children, isValid }: StartChatPanelProps) => (

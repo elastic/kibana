@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { Toast } from '@kbn/core/public';
 
 export interface ToastInput {

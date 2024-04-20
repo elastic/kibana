@@ -57,6 +57,7 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
   dataView: DataViewBase;
+  children?: React.ReactNode;
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`

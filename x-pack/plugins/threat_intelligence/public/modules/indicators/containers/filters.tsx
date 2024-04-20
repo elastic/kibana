@@ -16,7 +16,7 @@ import {
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.
  */
-export const IndicatorsFilters = ({ children }) => {
+export const IndicatorsFilters = ({ children }: { children: React.ReactNode }) => {
   const securityContext = useSecurityContext();
 
   const {

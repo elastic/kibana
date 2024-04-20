@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, PropsWithChildren } from 'react';
 import { CustomIntegrationsFindService } from './find';
 import { CustomIntegrationsPlatformService } from './platform';
 
@@ -32,7 +32,7 @@ const CustomIntegrationsServicesContext = createContext<CustomIntegrationsServic
 export const CustomIntegrationsServicesProvider = ({
   children,
   ...services
-}: CustomIntegrationsServices) => (
+}: PropsWithChildren<CustomIntegrationsServices>) => (
   <CustomIntegrationsServicesContext.Provider value={services}>
     {children}
   </CustomIntegrationsServicesContext.Provider>

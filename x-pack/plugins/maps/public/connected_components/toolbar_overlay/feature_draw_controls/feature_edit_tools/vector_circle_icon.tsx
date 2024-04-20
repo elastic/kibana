@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-export const VectorCircleIcon = (props) => (
+export const VectorCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width="16"
     height="16"

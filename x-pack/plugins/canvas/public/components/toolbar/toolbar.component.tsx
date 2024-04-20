@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useContext, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -147,12 +146,4 @@ export const Toolbar = ({
       </div>
     </div>
   );
-};
-
-Toolbar.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  selectedElement: PropTypes.object,
-  selectedPageNumber: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  workpadName: PropTypes.string.isRequired,
 };

@@ -187,7 +187,13 @@ export const WizardSteps = ({ currentStep, setCurrentStep }: Props) => {
   );
 };
 
-const Title = ({ 'data-test-subj': dataTestSubj, children }: { 'data-test-subj': string }) => {
+const Title = ({
+  'data-test-subj': dataTestSubj,
+  children,
+}: {
+  'data-test-subj': string;
+  children: React.ReactNode;
+}) => {
   return (
     <Fragment>
       <EuiTitle size="s">

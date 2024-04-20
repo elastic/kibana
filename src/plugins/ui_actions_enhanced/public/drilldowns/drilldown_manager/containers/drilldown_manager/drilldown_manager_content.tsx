@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { CreateDrilldownForm } from '../create_drilldown_form';
 import { Tabs } from '../tabs';
 import { useDrilldownManager } from '../context';

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 
-export const PanelContent = (props) => {
+export const PanelContent = (props: { children?: React.ReactNode }) => {
   const { registerContent } = useFlyoutPanelContext();
 
   useEffect(() => {

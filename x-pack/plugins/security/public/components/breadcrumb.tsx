@@ -54,6 +54,7 @@ export const Breadcrumb = ({ children, ...breadcrumb }: BreadcrumbProps) => {
 
 export interface BreadcrumbsProviderProps {
   onChange?: BreadcrumbsChangeHandler;
+  children: React.ReactNode;
 }
 
 export type BreadcrumbsChangeHandler = (breadcrumbs: BreadcrumbProps[]) => void;
@@ -114,6 +115,7 @@ export const BreadcrumbsProvider = ({ children, onChange }: BreadcrumbsProviderP
 
 export interface InnerBreadcrumbProps {
   breadcrumb: BreadcrumbProps;
+  children: React.ReactNode;
 }
 
 export const InnerBreadcrumb = ({ breadcrumb, children }: InnerBreadcrumbProps) => {

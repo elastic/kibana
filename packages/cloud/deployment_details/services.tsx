@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 
 export interface DeploymentDetailsContextValue {
   cloudId?: string;
@@ -25,7 +25,7 @@ const DeploymentDetailsContext = React.createContext<DeploymentDetailsContextVal
 export const DeploymentDetailsProvider = ({
   children,
   ...services
-}: DeploymentDetailsContextValue) => {
+}: PropsWithChildren<DeploymentDetailsContextValue>) => {
   return (
     <DeploymentDetailsContext.Provider value={services}>
       {children}
@@ -78,7 +78,7 @@ export interface DeploymentDetailsKibanaDependencies {
 export const DeploymentDetailsKibanaProvider = ({
   children,
   ...services
-}: DeploymentDetailsKibanaDependencies) => {
+}: PropsWithChildren<DeploymentDetailsKibanaDependencies>) => {
   const {
     core: {
       application: { navigateToUrl },

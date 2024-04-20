@@ -34,6 +34,7 @@ import './personal_dashboard_layout.scss';
 interface LayoutProps {
   isLoading?: boolean;
   pageChrome?: BreadcrumbTrail;
+  children?: React.ReactNode;
 }
 
 export const PersonalDashboardLayout = ({ children, isLoading, pageChrome }: LayoutProps) => {

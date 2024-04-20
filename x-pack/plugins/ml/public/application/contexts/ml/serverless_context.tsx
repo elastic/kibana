@@ -31,6 +31,7 @@ interface Props {
   mlFeatures: MlFeatures;
   showMLNavMenu?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
+  children: React.ReactNode;
 }
 
 export const EnabledFeaturesContextProvider = ({

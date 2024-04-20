@@ -8,7 +8,7 @@
 import React from 'react';
 import { useSecurityContext } from '../hooks/use_security_context';
 
-export const FiltersGlobal = ({ children }) => {
+export const FiltersGlobal = ({ children }: { children: React.ReactNode }) => {
   const contextValue = useSecurityContext();
 
   const Component = contextValue.getFiltersGlobalComponent();

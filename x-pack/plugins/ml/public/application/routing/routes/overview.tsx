@@ -31,7 +31,7 @@ export const overviewRouteFactory = (
     defaultMessage: 'Overview',
   }),
   enableDatePicker: true,
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {

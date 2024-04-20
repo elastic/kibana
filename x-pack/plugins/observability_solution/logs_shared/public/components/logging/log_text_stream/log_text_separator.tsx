@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 /**
  * Create a separator with a text on the right side
  */
-export const LogTextSeparator = ({ children }) => {
+export const LogTextSeparator = ({ children }: { children: React.ReactNode }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>

@@ -68,7 +68,7 @@ const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const queryClient = new QueryClient();
 
-export const WithPermissionsAndSetup = memo(({ children }) => {
+export const WithPermissionsAndSetup = memo(({ children }: { children: React.ReactNode }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
@@ -177,6 +177,7 @@ export const FleetAppContext = memo(
     theme$,
     fleetStatus,
   }: {
+    children: React.ReactNode;
     startServices: FleetStartServices;
     config: FleetConfigType;
     history: AppMountParameters['history'];

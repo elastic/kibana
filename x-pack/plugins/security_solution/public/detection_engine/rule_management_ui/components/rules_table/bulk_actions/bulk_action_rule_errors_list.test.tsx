@@ -14,7 +14,7 @@ import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
-const Wrapper = ({ children }) => {
+const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <IntlProvider locale="en">
       <>{children}</>

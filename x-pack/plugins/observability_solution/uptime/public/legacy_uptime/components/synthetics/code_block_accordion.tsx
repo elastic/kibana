@@ -10,6 +10,7 @@ import React from 'react';
 
 interface Props {
   buttonContent: string;
+  children: React.ReactNode;
   id?: string;
   language: 'html' | 'javascript';
   overflowHeight: number;

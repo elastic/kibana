@@ -52,6 +52,7 @@ const OverviewPanel = euiStyled(EuiPanel)`
 
 interface OverviewCardProps {
   title: string;
+  children: React.ReactNode;
 }
 
 export const OverviewCard = ({ title, children }: OverviewCardProps) => (
@@ -76,6 +77,7 @@ ClampedContent.displayName = 'ClampedContent';
 
 type OverviewCardWithActionsProps = OverviewCardProps & {
   contextId: string;
+  children: React.ReactNode;
   enrichedFieldInfo: EnrichedFieldInfo;
   dataTestSubj?: string;
 };

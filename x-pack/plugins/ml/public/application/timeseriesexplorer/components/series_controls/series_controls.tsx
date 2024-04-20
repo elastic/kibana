@@ -79,6 +79,7 @@ interface SeriesControlsProps {
   selectedEntities?: MlEntity;
   selectedJobId: JobId;
   setFunctionDescription: (func: string) => void;
+  children?: React.ReactNode;
 }
 
 /**

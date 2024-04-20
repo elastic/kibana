@@ -15,7 +15,7 @@ import { resetMonitorLastRunAction } from '../../state';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 import { useSyntheticsRefreshContext } from '../../contexts';
 
-export const MonitorPendingWrapper = ({ children }) => {
+export const MonitorPendingWrapper = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const currentLocation = useLocation();

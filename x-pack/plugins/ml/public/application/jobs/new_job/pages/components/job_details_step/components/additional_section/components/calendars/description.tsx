@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
-export const Description = memo(({ children }) => {
+export const Description = memo(({ children }: { children: React.ReactNode }) => {
   const {
     services: { docLinks },
   } = useMlKibana();

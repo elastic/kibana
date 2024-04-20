@@ -39,7 +39,7 @@ export const BuilderLogicButtons = ({
   onAndClicked,
   onNestedClicked,
   onOrClicked,
-}: BuilderLogicButtonsProps) => (
+}: BuilderLogicButtonsProps): React.ReactElement => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <MyEuiButton

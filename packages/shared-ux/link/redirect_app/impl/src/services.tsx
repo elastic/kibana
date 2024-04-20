@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
@@ -19,7 +19,10 @@ const RedirectAppLinksContext = React.createContext<RedirectAppLinksServices | n
 /**
  * Contextual services Provider.
  */
-export const RedirectAppLinksProvider = ({ children, ...services }: RedirectAppLinksServices) => {
+export const RedirectAppLinksProvider = ({
+  children,
+  ...services
+}: PropsWithChildren<RedirectAppLinksServices>) => {
   const { navigateToUrl, currentAppId } = services;
   return (
     <RedirectAppLinksContext.Provider value={{ navigateToUrl, currentAppId }}>
@@ -34,7 +37,7 @@ export const RedirectAppLinksProvider = ({ children, ...services }: RedirectAppL
 export const RedirectAppLinksKibanaProvider = ({
   children,
   coreStart,
-}: RedirectAppLinksKibanaDependencies) => {
+}: PropsWithChildren<RedirectAppLinksKibanaDependencies>) => {
   const { navigateToUrl, currentAppId$ } = coreStart.application;
   const currentAppId = useObservable(currentAppId$, undefined);
 

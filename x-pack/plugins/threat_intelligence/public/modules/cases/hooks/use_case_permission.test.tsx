@@ -17,7 +17,7 @@ const casesServiceMock = casesPluginMock.createStartContract();
 
 const getProviderComponent =
   (mockedServices: unknown) =>
-  ({ children }: { children: ReactNode }) =>
+  ({ children }: { children?: ReactNode }) =>
     (
       <TestProvidersComponent>
         <KibanaContext.Provider value={{ services: mockedServices } as any}>

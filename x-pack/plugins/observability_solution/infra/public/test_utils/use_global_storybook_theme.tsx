@@ -32,6 +32,7 @@ export const GlobalStorybookThemeProviders = ({
   children,
   storyContext,
 }: {
+  children: React.ReactNode;
   storyContext: StoryContext;
 }) => {
   const { theme, theme$ } = useGlobalStorybookTheme(storyContext);

@@ -28,6 +28,7 @@ export const submitForm = async (form: FormHook) => {
 
 export interface FormWrapperProps {
   formConfig?: FormConfig<any>;
+  children: React.ReactNode;
 }
 
 export const FormWrapper = ({ formConfig, children }: FormWrapperProps) => {

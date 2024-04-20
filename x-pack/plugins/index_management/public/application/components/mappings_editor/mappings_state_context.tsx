@@ -13,7 +13,7 @@ import { State, Dispatch } from './types';
 const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
-export const StateProvider = ({ children }) => {
+export const StateProvider = ({ children }: { children: React.ReactNode }) => {
   const initialState: State = {
     isValid: true,
     configuration: {

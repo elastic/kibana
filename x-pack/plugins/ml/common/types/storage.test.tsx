@@ -30,7 +30,7 @@ const mockStorage: Storage = {
   clear: jest.fn(),
 };
 
-const Provider = ({ children }) => {
+const Provider = ({ children }: { children: React.ReactNode }) => {
   return (
     <StorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
       {children}

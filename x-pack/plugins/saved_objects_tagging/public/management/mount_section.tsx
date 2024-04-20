@@ -29,13 +29,14 @@ const RedirectToHomeIfUnauthorized = ({
   children,
 }: {
   applications: ApplicationStart;
+  children: React.ReactElement;
 }) => {
   const allowed = applications.capabilities?.management?.kibana?.tags ?? false;
   if (!allowed) {
     applications.navigateToApp('home');
     return null;
   }
-  return children! as React.ReactElement;
+  return children;
 };
 
 export const mountSection = async ({

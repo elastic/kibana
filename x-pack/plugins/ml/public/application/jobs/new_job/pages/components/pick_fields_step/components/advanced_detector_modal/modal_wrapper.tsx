@@ -23,6 +23,7 @@ interface Props {
   onCreateClick(): void;
   closeModal(): void;
   saveEnabled: boolean;
+  children: React.ReactNode;
 }
 
 export const ModalWrapper = ({ onCreateClick, closeModal, saveEnabled, children }: Props) => {

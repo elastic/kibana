@@ -24,6 +24,7 @@ export const InternalApiClientProvider = ({
 }: {
   apiClient: ReportingAPIClient;
   http: HttpSetup;
+  children: React.ReactNode;
 }) => {
   return (
     <InternalApiClientContext.Provider value={{ http, apiClient }}>

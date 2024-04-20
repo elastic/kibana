@@ -376,6 +376,7 @@ const DiffModeEntry = ({
 }: Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
   entryDiffMode: DocumentDiffMode;
   disabled?: boolean;
+  children: React.ReactNode;
 }) => {
   const { euiTheme } = useEuiTheme();
 

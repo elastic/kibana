@@ -25,7 +25,7 @@ const defaultContext: SyntheticsRefreshContext = {
 
 export const SyntheticsRefreshContext = createContext(defaultContext);
 
-export const SyntheticsRefreshContextProvider = ({ children }) => {
+export const SyntheticsRefreshContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshPaused = useSelector(selectRefreshPaused);

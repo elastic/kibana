@@ -26,6 +26,7 @@ import { alertingFrameworkHealth } from '../lib/rule_api/health';
 interface Props {
   inFlyout?: boolean;
   waitForCheck: boolean;
+  children: React.ReactNode;
 }
 
 interface HealthStatus {

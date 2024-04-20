@@ -136,7 +136,7 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
 
 const customStore = createMockStore();
 
-const TestProviderWrapperWithCustomStore = ({ children }) => {
+const TestProviderWrapperWithCustomStore = ({ children }: { children: React.ReactNode }) => {
   return <TestProviders store={customStore}>{children}</TestProviders>;
 };
 

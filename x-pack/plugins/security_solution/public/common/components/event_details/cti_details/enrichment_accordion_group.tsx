@@ -39,10 +39,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   }
 `;
 
-const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
-  fieldName,
-  value,
-}) => {
+const ThreatDetailsDescription = ({ fieldName, value }: ThreatDetailsRow['description']) => {
   const tooltipChild = fieldName.match(REFERENCE) ? (
     <EuiLink href={value} target="_blank">
       {value}
@@ -95,10 +92,13 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
       },
     }));
 
-const EnrichmentAccordion: React.FC<{
+const EnrichmentAccordion = ({
+  enrichment,
+  index,
+}: {
   enrichment: CtiEnrichment;
   index: number;
-}> = ({ enrichment, index }) => {
+}) => {
   const {
     id = `threat-details-item`,
     field,
@@ -132,9 +132,7 @@ const EnrichmentAccordion: React.FC<{
   );
 };
 
-export const EnrichmentAccordionGroup: React.FC<{ enrichments: CtiEnrichment[] }> = ({
-  enrichments,
-}) => (
+export const EnrichmentAccordionGroup = ({ enrichments }: { enrichments: CtiEnrichment[] }) => (
   <>
     {enrichments
       .sort((a, b) => getFirstSeen(b) - getFirstSeen(a))

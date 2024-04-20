@@ -13,7 +13,7 @@ import unified from 'unified';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { parsingPlugins, processingPlugins, platinumOnlyPluginTokens } from './plugins';
-import { MarkdownLink } from './markdown_link';
+import { MarkdownLink, MarkdownLinkProps } from './markdown_link';
 import { useKibana } from '../../lib/kibana';
 import { useLicense } from '../../hooks/use_license';
 import * as i18n from './translations';
@@ -27,7 +27,7 @@ interface Props {
 const MarkdownRendererComponent = ({ children, disableLinks, textSize = 'm' }: Props) => {
   const MarkdownLinkProcessingComponent = useMemo(
     // eslint-disable-next-line react/display-name
-    () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
+    () => (props: MarkdownLinkProps) => <MarkdownLink {...props} disableLinks={disableLinks} />,
     [disableLinks]
   );
   // Deep clone of the processing plugins to prevent affecting the markdown editor.

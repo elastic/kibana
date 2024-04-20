@@ -27,6 +27,7 @@ interface OverviewPanelProps {
   rightPanelContent?: React.ReactNode;
   title: string;
   overviewPanelProps?: Partial<EuiPanelProps>;
+  children?: React.ReactNode;
 }
 
 export const OverviewPanel = ({

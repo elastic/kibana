@@ -17,6 +17,7 @@ import { Observable } from 'rxjs';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +26,8 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+
+import { InitialAppData } from '../../common/types';
 
 import { AppSearch } from './app_search';
 import { EnterpriseSearchOverview } from './enterprise_search_overview';
@@ -83,7 +86,7 @@ describe('renderApp', () => {
    * Helper for automatically mounting and unmounting future tests
    */
   let unmount: any;
-  const mount = (App: React.FC) => {
+  const mount = (App: (props: InitialAppData) => React.ReactElement) => {
     unmount = renderApp(App, kibanaDeps, pluginData);
   };
 

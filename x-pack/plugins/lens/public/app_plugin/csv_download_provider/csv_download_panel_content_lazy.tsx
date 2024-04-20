@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import { lazy, Suspense } from 'react';
 import type { DownloadPanelContentProps } from './csv_download_panel_content';
 
@@ -16,7 +16,7 @@ const LazyComponent = lazy(() =>
   }))
 );
 
-export const PanelSpinner = (props) => {
+export const PanelSpinner = () => {
   return (
     <>
       <EuiSpacer />

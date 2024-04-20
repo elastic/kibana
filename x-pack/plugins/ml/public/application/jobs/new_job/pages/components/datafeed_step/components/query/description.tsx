@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 
-export const Description = memo(({ children }) => {
+export const Description = memo(({ children }: { children: React.ReactNode }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.datafeedStep.query.title', {
     defaultMessage: 'Elasticsearch query',
   });

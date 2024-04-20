@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import * as React from 'react';
+import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { v4 as uuidv4 } from 'uuid';
 import { withBulkRuleOperations, ComponentOpts } from './with_bulk_rule_api_operations';

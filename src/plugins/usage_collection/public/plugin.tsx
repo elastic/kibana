@@ -74,7 +74,11 @@ export interface UsageCollectionSetup {
      * }
      * ```
      */
-    ApplicationUsageTrackingProvider: React.FC;
+    ApplicationUsageTrackingProvider: ({
+      children,
+    }: {
+      children?: React.ReactNode;
+    }) => React.ReactElement | null;
   };
 
   /** Report whenever a UI event occurs for UI counters to report it **/
@@ -130,9 +134,9 @@ export class UsageCollectionPlugin
 
     return {
       components: {
-        ApplicationUsageTrackingProvider: (props) => (
+        ApplicationUsageTrackingProvider: ({ children }) => (
           <ApplicationUsageContext.Provider value={applicationUsageTracker}>
-            {props.children}
+            {children}
           </ApplicationUsageContext.Provider>
         ),
       },

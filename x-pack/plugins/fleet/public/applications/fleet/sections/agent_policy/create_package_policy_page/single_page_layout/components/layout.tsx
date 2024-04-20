@@ -44,6 +44,7 @@ export const CreatePackagePolicySinglePageLayout = memo(
     'data-test-subj': dataTestSubj,
     tabs = [],
   }: {
+    children: React.ReactNode;
     from: EditPackagePolicyFrom;
     cancelUrl: string;
     onCancel?: React.ReactEventHandler;

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-export const Description = memo(({ children }) => {
+export const Description = memo(({ children }: { children: React.ReactNode }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.geoField.title', {
     defaultMessage: 'Geo field',
   });

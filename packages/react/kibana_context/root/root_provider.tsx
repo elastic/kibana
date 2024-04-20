@@ -8,7 +8,7 @@
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
 import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 
@@ -38,7 +38,7 @@ export const KibanaRootContextProvider = ({
   children,
   i18n,
   ...props
-}: KibanaRootContextProviderProps) => (
+}: PropsWithChildren<KibanaRootContextProviderProps>) => (
   <KibanaEuiProvider {...props}>
     <i18n.Context>{children}</i18n.Context>
   </KibanaEuiProvider>

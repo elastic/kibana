@@ -11,6 +11,7 @@ import { EuiTitle, EuiSpacer, EuiSplitPanel, EuiCodeBlock } from '@elastic/eui';
 export interface PanelWithCodeBlockProps {
   title: string;
   code: string;
+  children: React.ReactNode;
 }
 
 export const PanelWithCodeBlock = ({ title, code, children }: PanelWithCodeBlockProps) => (

@@ -9,6 +9,7 @@ import React from 'react';
 import { ReactRouterEuiLink } from './react_router_helpers';
 
 interface DetailPageLinkProps {
+  children?: React.ReactNode;
   /**
    * MonitorId to be used to redirect to detail page
    */

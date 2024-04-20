@@ -21,6 +21,7 @@ export const MonitorForm = ({
   readOnly = false,
   canUsePublicLocations,
 }: {
+  children: React.ReactNode;
   defaultValues?: SyntheticsMonitor;
   space?: string;
   readOnly?: boolean;

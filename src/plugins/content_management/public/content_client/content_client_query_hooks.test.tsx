@@ -24,7 +24,7 @@ const setup = () => {
   });
   const contentClient = new ContentClient(() => crudClient, contentTypeRegistry);
 
-  const Wrapper = ({ children }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <ContentClientProvider contentClient={contentClient}>{children}</ContentClientProvider>
   );
 

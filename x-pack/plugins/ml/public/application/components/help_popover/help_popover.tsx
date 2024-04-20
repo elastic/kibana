@@ -28,6 +28,7 @@ export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['on
 interface HelpPopoverProps {
   anchorPosition?: EuiPopoverProps['anchorPosition'];
   title?: string;
+  children: React.ReactNode;
 }
 
 export const HelpPopover = ({ anchorPosition, children, title }: HelpPopoverProps) => {

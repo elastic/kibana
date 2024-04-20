@@ -53,7 +53,7 @@ const createEmptyErrors = (): Errors => ({
   other: {},
 });
 
-export const FormErrorsProvider = ({ children }) => {
+export const FormErrorsProvider = ({ children }: { children: React.ReactNode }) => {
   const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
 

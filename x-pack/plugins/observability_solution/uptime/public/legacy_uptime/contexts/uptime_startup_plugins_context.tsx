@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, PropsWithChildren } from 'react';
 import { ClientPluginsStart } from '../../plugin';
 
 export const UptimeStartupPluginsContext = createContext<Partial<ClientPluginsStart>>({});
@@ -13,7 +13,7 @@ export const UptimeStartupPluginsContext = createContext<Partial<ClientPluginsSt
 export const UptimeStartupPluginsContextProvider = ({
   children,
   ...props
-}: Partial<ClientPluginsStart>) => (
+}: PropsWithChildren<Partial<ClientPluginsStart>>) => (
   <UptimeStartupPluginsContext.Provider value={{ ...props }} children={children} />
 );
 

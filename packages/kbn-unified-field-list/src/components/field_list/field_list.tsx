@@ -26,6 +26,7 @@ export interface FieldListProps {
   prepend?: React.ReactNode;
   append?: React.ReactNode;
   className?: string;
+  children?: React.ReactNode;
 }
 
 /**

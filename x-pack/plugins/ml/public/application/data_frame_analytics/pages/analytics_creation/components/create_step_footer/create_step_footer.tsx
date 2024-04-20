@@ -119,7 +119,7 @@ export const CreateStepFooter = ({ jobId, jobType, showProgress }: Props) => {
 
   return (
     <>
-      {showJobAssignWarning && <NewJobAwaitingNodeWarning jobType="data-frame-analytics" />}
+      {showJobAssignWarning && <NewJobAwaitingNodeWarning />}
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           {showProgress && (

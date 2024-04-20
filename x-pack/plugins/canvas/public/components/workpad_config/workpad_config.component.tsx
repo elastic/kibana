@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiFieldText,
   EuiFieldNumber,
@@ -219,15 +218,4 @@ export const WorkpadConfig = (props: Props) => {
       </div>
     </div>
   );
-};
-
-WorkpadConfig.propTypes = {
-  size: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  css: PropTypes.string,
-  variables: PropTypes.array,
-  setSize: PropTypes.func.isRequired,
-  setName: PropTypes.func.isRequired,
-  setWorkpadCSS: PropTypes.func.isRequired,
-  setWorkpadVariables: PropTypes.func.isRequired,
 };

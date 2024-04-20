@@ -35,7 +35,7 @@ export const dataDriftRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
     defaultMessage: 'Data Drift',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {

@@ -13,6 +13,7 @@ import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 export interface CoreProvidersProps {
   core: CoreStart;
   theme$: AppMountParameters['theme$'];
+  children?: React.ReactNode;
 }
 
 export const CoreProviders = ({ children, core, theme$ }: CoreProvidersProps) => {

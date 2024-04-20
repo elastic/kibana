@@ -17,6 +17,7 @@ export const EnabledFeaturesContext = createContext({
 
 export const EnabledFeaturesContextProvider = (props: {
   enabledFeatures: TransformEnabledFeatures;
+  children: React.ReactNode;
 }) => {
   const { children, enabledFeatures } = props;
   return (
@@ -31,6 +32,7 @@ export const ExperimentalFeaturesContext = createContext<ExperimentalFeatures>({
 });
 export const ExperimentalFeaturesContextProvider = (props: {
   experimentalFeatures: ExperimentalFeatures;
+  children: React.ReactNode;
 }) => {
   const { children, experimentalFeatures } = props;
   return (

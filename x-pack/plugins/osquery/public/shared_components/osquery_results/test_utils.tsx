@@ -77,4 +77,6 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
     },
   } as unknown as ReturnType<typeof useKibana>);
 
-export const mockCasesContext = (props) => <>{props?.children ?? null}</>;
+export const mockCasesContext = (props: { children?: React.ReactNode }) => (
+  <>{props?.children ?? null}</>
+);

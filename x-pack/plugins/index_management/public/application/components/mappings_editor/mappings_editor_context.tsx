@@ -10,7 +10,7 @@ import React from 'react';
 import { StateProvider } from './mappings_state_context';
 import { ConfigProvider } from './config_context';
 
-export const MappingsEditorProvider = ({ children }) => {
+export const MappingsEditorProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <StateProvider>
       <ConfigProvider>{children}</ConfigProvider>

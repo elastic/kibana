@@ -58,7 +58,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
   }
 
   public start(core: CoreStart) {
-    const CloudChatContextProvider = ({ children }) => {
+    const CloudChatContextProvider = ({ children }: { children: React.ReactNode }) => {
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
       const chatConfig = useObservable(this.chatConfig$, undefined);

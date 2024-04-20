@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 import {
   RedirectAppLinksProvider,
   RedirectAppLinksKibanaProvider,
@@ -23,7 +23,10 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NoDataCardProvider = ({ children, ...services }: NoDataCardServices) => {
+export const NoDataCardProvider = ({
+  children,
+  ...services
+}: PropsWithChildren<NoDataCardServices>) => {
   const { addBasePath, canAccessFleet } = services;
 
   return (
@@ -39,7 +42,7 @@ export const NoDataCardProvider = ({ children, ...services }: NoDataCardServices
 export const NoDataCardKibanaProvider = ({
   children,
   ...dependencies
-}: NoDataCardKibanaDependencies) => {
+}: PropsWithChildren<NoDataCardKibanaDependencies>) => {
   const value: Services = {
     addBasePath: dependencies.coreStart.http.basePath.prepend,
     canAccessFleet: dependencies.coreStart.application.capabilities.navLinks.integrations,

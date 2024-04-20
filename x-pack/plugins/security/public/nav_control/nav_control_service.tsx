@@ -140,6 +140,7 @@ export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   services: CoreStart;
   securityApiClients: SecurityApiClients;
+  children: React.ReactNode;
 }
 
 export const Providers = ({ authc, services, securityApiClients, children }: ProvidersProps) => (

@@ -7,6 +7,7 @@
 
 import { alertComment } from '../../../containers/mock';
 import { renderHook } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
@@ -22,7 +23,7 @@ const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTyp
 
 describe('use cases add to new case flyout hook', () => {
   const dispatch = jest.fn();
-  let wrapper;
+  let wrapper: (props: PropsWithChildren<{}>) => React.ReactElement;
   beforeEach(() => {
     dispatch.mockReset();
     wrapper = ({ children }) => {

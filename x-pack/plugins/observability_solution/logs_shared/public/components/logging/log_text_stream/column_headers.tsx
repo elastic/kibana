@@ -110,6 +110,7 @@ export const LogColumnHeader = ({
   columnWidth,
   'data-test-subj': dataTestSubj,
 }: {
+  children: React.ReactNode;
   columnWidth: LogEntryColumnWidth;
   'data-test-subj'?: string;
 }) => (

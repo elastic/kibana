@@ -17,6 +17,7 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 interface SecurityRoutePageWrapperProps {
   pageName: SecurityPageName;
   redirectOnMissing?: boolean;
+  children: React.ReactNode;
 }
 
 /**

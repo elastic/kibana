@@ -22,6 +22,7 @@ interface Props {
   iconType?: IconType;
   subtitle: string;
   title: string;
+  children?: React.ReactNode;
 }
 export const AnalyticsSection = ({ title, subtitle, iconType, children }: Props) => (
   <section>

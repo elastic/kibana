@@ -67,7 +67,19 @@ module.exports = {
                 message: 'Using SFC is deprecated since React@18.',
               },
               'React.SFC': {
+                message: 'Using SFC is deprecated since React@18.',
+              },
+              FC: {
                 message: 'Using FC is deprecated since React@18.',
+              },
+              'React.FC': {
+                message: 'Using FC is deprecated since React@18.',
+              },
+              VFC: {
+                message: 'Using VFC is deprecated since React@18.',
+              },
+              'React.VFC': {
+                message: 'Using VFC is deprecated since React@18.',
               },
               StatelessComponent: {
                 message: 'Using FunctionComponent is deprecated since React@18.',

@@ -31,6 +31,7 @@ const VirtualizedRow = ({
   onHeightChange,
 }: {
   index: number;
+  children: React.ReactNode;
   onHeightChange: (index: number, size: number) => void;
   style: any;
 }) => {

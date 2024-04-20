@@ -626,6 +626,7 @@ const FieldPanel = ({
 interface FieldsControlsProps {
   fieldConfig: FieldConfig;
   onChange: (update: FieldConfig) => void;
+  children: React.ReactNode;
 }
 
 /**

@@ -26,7 +26,7 @@ describe('Category', () => {
   let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
-  const FormComponent = ({ children }) => {
+  const FormComponent = ({ children }: { children: React.ReactNode }) => {
     const { form } = useForm<FormProps>({ onSubmit });
 
     return (

@@ -13,7 +13,7 @@ import {
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { Services } from './types';
 
-export const ServicesProvider = ({ services, children }: { services: Services }) => {
+export const ServicesProvider = ({ services, children }: { services: Services; children: React.ReactNode }) => {
   return (
     <KibanaContextProvider services={services}>
       <NavigationProvider core={services}>{children}</NavigationProvider>

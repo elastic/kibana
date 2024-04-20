@@ -14,6 +14,7 @@ import './upload_dropzone.scss';
 export interface Props {
   disabled?: boolean;
   onDrop?: (files: FileList) => void;
+  children: React.ReactNode;
 }
 
 export const UploadDropzone = ({ onDrop = () => {}, disabled, children }: Props) => {

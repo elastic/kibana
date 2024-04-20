@@ -174,7 +174,7 @@ export const FormattedTokens = ({ category }: Props) => {
   );
 };
 
-const WrapInText = ({ children }) => (
+const WrapInText = ({ children }: { children: React.ReactNode }) => (
   <EuiText css={{ fontWeight: 'bold' }} size="s">
     {children}
   </EuiText>

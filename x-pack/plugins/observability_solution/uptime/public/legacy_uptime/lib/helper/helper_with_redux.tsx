@@ -29,6 +29,7 @@ export const MountWithReduxProvider = ({
   store,
   useRealStore,
 }: {
+  children: React.ReactNode;
   state?: AppState;
   useRealStore?: boolean;
   store?: Store;

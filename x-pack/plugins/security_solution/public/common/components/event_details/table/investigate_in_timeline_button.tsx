@@ -25,6 +25,7 @@ import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeli
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 
 export interface InvestigateInTimelineButtonProps {
+  children?: React.ReactNode;
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;

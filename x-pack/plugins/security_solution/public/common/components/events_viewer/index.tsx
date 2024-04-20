@@ -97,7 +97,7 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;
-  renderCellValue: React.FC<CellValueElementProps>;
+  renderCellValue: (props: CellValueElementProps) => React.ReactElement;
   rowRenderers: RowRenderer[];
   additionalFilters?: React.ReactNode;
   hasCrudPermissions?: boolean;

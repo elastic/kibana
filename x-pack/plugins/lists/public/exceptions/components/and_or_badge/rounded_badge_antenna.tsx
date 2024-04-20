@@ -41,7 +41,7 @@ const BottomAntenna = styled(EuiFlexItem)`
   }
 `;
 
-export const RoundedBadgeAntenna = ({ type }: { type: AndOr }) => (
+export const RoundedBadgeAntenna = ({ type }: { type: AndOr }): React.ReactElement => (
   <EuiFlexGroup
     className="andBadgeContainer"
     gutterSize="none"

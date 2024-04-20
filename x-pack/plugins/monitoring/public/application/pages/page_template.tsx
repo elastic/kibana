@@ -40,6 +40,7 @@ export interface PageTemplateProps {
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
   product?: string;
+  children?: React.ReactNode;
 }
 
 export const PageTemplate = ({

@@ -20,6 +20,7 @@ export interface LandingLinkIconProps {
   item: NavigationLink;
   urlState?: string;
   onLinkClick?: (id: string) => void;
+  children?: React.ReactNode;
 }
 
 const useLinkIconStyles = () => {

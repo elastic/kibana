@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -80,7 +81,8 @@ export const RuntimeMappingsEditor = memo(
         />
       </div>
     );
-  }
+  },
+  (prevProps, nextProps) => isEqual(pickProps(prevProps), pickProps(nextProps))
 );
 
 function pickProps(props: Props) {

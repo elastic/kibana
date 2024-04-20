@@ -18,6 +18,7 @@ import {
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
+  children: React.ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;

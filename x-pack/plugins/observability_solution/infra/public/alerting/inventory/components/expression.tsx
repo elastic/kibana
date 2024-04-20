@@ -419,6 +419,7 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setRuleParams(id: number, params: Partial<InventoryMetricConditions>): void;
   fields: DerivedIndexPattern['fields'];
+  children?: React.ReactNode;
 }
 
 const NonCollapsibleExpressionCss = css`

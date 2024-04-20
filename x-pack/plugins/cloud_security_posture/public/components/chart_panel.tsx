@@ -24,6 +24,7 @@ interface ChartPanelProps {
   isError?: boolean;
   rightSideItems?: ReactNode[];
   styles?: React.CSSProperties;
+  children: React.ReactNode;
 }
 
 const Loading = () => (

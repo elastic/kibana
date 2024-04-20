@@ -53,7 +53,7 @@ export const FloatingActions = ({
         trigger: panelHoverTrigger,
       };
       const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
-        .filter((action): action is Action & { MenuItem: React.FC } => {
+        .filter((action): action is Action & { MenuItem: () => React.ReactElement } => {
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));

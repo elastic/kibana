@@ -26,6 +26,7 @@ export interface UnifiedDataTableFooterProps {
   onFetchMoreRecords?: () => void;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  children?: React.ReactNode;
 }
 
 export const UnifiedDataTableFooter = (props: UnifiedDataTableFooterProps) => {

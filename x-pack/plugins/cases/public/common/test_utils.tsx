@@ -45,6 +45,7 @@ export const createQueryWithMarkup =
     });
 
 interface FormTestComponentProps {
+  children: React.ReactNode;
   formDefaultValue?: Record<string, unknown>;
   onSubmit?: jest.Mock;
   schema?: FormSchema<Record<string, unknown>>;

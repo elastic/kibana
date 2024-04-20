@@ -6,7 +6,7 @@
  */
 
 import { scaleTime } from 'd3-scale';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';

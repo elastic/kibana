@@ -52,6 +52,7 @@ export const CapabilitiesWrapper = ({
   children,
   requiredCapabilities,
 }: {
+  children: React.ReactNode;
   requiredCapabilities: TransformCapability | TransformCapability[];
 }) => {
   const capabilities = useTransformCapabilities();

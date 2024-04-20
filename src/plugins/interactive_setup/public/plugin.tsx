@@ -49,6 +49,7 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
 export interface ProvidersProps {
   services: CoreStart;
   defaultCode?: string;
+  children: React.ReactNode;
 }
 
 export const Providers = ({ defaultCode, services, children }: ProvidersProps) => (

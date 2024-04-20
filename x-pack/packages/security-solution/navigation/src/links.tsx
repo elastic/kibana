@@ -100,7 +100,7 @@ export const useGetLinkProps = (): GetLinkProps => {
  */
 export const withLink = <T extends Partial<LinkProps>>(
   Component: React.ComponentType<T>
-): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
+): ((props: Omit<T, keyof LinkProps> & WrappedLinkProps) => React.ReactElement | null) =>
   React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
     const { onClick, href } = getLink({

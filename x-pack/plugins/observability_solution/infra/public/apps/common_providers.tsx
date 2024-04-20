@@ -31,6 +31,7 @@ export const CommonInfraProviders = ({
   storage,
   theme$,
 }: {
+  children: React.ReactNode;
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
@@ -53,6 +54,7 @@ export const CommonInfraProviders = ({
 };
 
 export interface CoreProvidersProps {
+  children?: React.ReactNode;
   core: CoreStart;
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
@@ -93,6 +95,12 @@ export const CoreProviders = ({
   );
 };
 
-const DataUIProviders = ({ appName, children, storage }: { appName: string; storage: Storage }) => (
-  <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>
-);
+const DataUIProviders = ({
+  appName,
+  children,
+  storage,
+}: {
+  appName: string;
+  children: React.ReactNode;
+  storage: Storage;
+}) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;

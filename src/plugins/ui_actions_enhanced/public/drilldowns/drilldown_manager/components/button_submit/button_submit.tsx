@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiButton } from '@elastic/eui';
 
 export interface ButtonSubmitProps {
   disabled?: boolean;
   onClick: () => void;
+  children: React.ReactNode;
 }
 
 export const ButtonSubmit = ({ disabled, onClick, children }: ButtonSubmitProps) => {

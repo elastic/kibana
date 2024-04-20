@@ -47,7 +47,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const ContextWrapper = ({ children }) => (
+const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}

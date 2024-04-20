@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import {
@@ -46,7 +46,7 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SampleDataTabProvider = ({ children, ...services }: SampleDataTabServices) => {
+export const SampleDataTabProvider = ({ children, ...services }: PropsWithChildren<SampleDataTabServices>) => {
   const { fetchSampleDataSets, notifyError, logClick } = services;
 
   return (
@@ -89,7 +89,7 @@ export type SampleDataTabKibanaDependencies = KibanaDependencies & SampleDataCar
 export const SampleDataTabKibanaProvider = ({
   children,
   ...dependencies
-}: SampleDataTabKibanaDependencies) => {
+}: PropsWithChildren<SampleDataTabKibanaDependencies>) => {
   const { coreStart, trackUiMetric } = dependencies;
   const { http, notifications } = coreStart;
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';

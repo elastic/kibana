@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context, Dispatch, SetStateAction } from 'react';
+import React, {
+  createContext,
+  useContext,
+  Context,
+  Dispatch,
+  SetStateAction,
+  PropsWithChildren,
+} from 'react';
 import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import {
   WaterfallData,
@@ -76,7 +83,7 @@ export const WaterfallProvider = ({
   setShowCustomMarks,
   query,
   setQuery,
-}: IWaterfallContext) => {
+}: PropsWithChildren<IWaterfallContext>) => {
   return (
     <WaterfallContext.Provider
       value={{

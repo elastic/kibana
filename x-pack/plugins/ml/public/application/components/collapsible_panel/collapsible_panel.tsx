@@ -24,6 +24,7 @@ export interface CollapsiblePanelProps {
 
   header: React.ReactElement;
   headerItems?: React.ReactElement[];
+  children: React.ReactNode;
 }
 
 export const CollapsiblePanel = ({

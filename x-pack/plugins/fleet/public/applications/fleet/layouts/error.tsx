@@ -26,6 +26,7 @@ export const ErrorLayout = ({
   isAddIntegrationsPath,
   children,
 }: {
+  children: React.ReactNode;
   isAddIntegrationsPath: boolean;
 }) => (
   <EuiErrorBoundary>

@@ -110,7 +110,7 @@ const ExportWorkpadRouteComponent = ({ route: { match } }: { route: WorkpadRoute
   );
 };
 
-export const ExportRouteManager = ({ children }) => {
+export const ExportRouteManager = ({ children }: { children: React.ReactNode }) => {
   const params = useParams<WorkpadPageRouteParams>();
   usePageSync();
 
@@ -123,7 +123,7 @@ export const ExportRouteManager = ({ children }) => {
   return <>{children}</>;
 };
 
-export const WorkpadHistoryManager = ({ children }) => {
+export const WorkpadHistoryManager = ({ children }: { children: React.ReactNode }) => {
   useRestoreHistory();
   useWorkpadHistory();
   usePageSync();

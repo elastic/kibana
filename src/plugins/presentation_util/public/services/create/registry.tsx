@@ -58,7 +58,7 @@ export class PluginServiceRegistry<
 
     // Collect and combine Context.Provider elements from each Service Provider into a single
     // Functional Component.
-    const provider = ({ children }) => (
+    const provider = ({ children }: { children?: React.ReactNode }) => (
       <>
         {values.reduceRight((acc, serviceProvider) => {
           return <serviceProvider.Provider>{acc}</serviceProvider.Provider>;

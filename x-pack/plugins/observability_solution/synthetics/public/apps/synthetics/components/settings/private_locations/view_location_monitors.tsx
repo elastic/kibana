@@ -62,7 +62,13 @@ export const ViewLocationMonitors = ({
   );
 };
 
-const ViewLocationMonitorsButton = ({ href, children }: { href: string }) => {
+const ViewLocationMonitorsButton = ({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) => {
   return (
     <EuiButton data-test-subj="syntheticsViewLocationMonitorsButton" href={href}>
       {children}

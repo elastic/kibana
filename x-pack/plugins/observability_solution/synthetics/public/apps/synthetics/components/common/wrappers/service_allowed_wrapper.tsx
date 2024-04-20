@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { useSyntheticsServiceAllowed } from '../../../hooks/use_service_allowed';
 
-export const ServiceAllowedWrapper = ({ children }) => {
+export const ServiceAllowedWrapper = ({ children }: { children: React.ReactNode }) => {
   const { isAllowed, signupUrl, loading } = useSyntheticsServiceAllowed();
 
   if (loading) {

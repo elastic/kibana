@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface DetailPageLinkProps {
   configId: string;
+  children: React.ReactNode;
 }
 
 export const MonitorPageLink = ({ children, configId }: DetailPageLinkProps) => {

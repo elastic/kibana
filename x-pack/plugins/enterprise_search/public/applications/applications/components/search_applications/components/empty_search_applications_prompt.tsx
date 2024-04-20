@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const EmptySearchApplicationsPrompt = ({ children }) => {
+export const EmptySearchApplicationsPrompt = ({ children }: { children: React.ReactNode }) => {
   return (
     <EuiEmptyPrompt
       iconType="aggregate"

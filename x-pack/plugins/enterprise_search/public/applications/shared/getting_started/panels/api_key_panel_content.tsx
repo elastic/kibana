@@ -29,6 +29,7 @@ interface ApiKeyPanelContent {
   openApiKeyModal: () => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const ApiKeyPanelContent = ({ apiKeys, openApiKeyModal }: ApiKeyPanelContent) => {
   return (
     <EuiPanel>

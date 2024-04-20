@@ -16,7 +16,7 @@ import { useToasts } from '../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<string> = ({ children }) => {
+const wrapper = ({ children }: { children?: React.ReactNode }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

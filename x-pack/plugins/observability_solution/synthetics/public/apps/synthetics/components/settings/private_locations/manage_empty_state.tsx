@@ -19,6 +19,7 @@ export const ManageEmptyState = ({
   showNeedAgentPolicy = true,
   showEmptyLocations = true,
 }: {
+  children: React.ReactNode;
   privateLocations: PrivateLocation[];
   setIsAddingNew?: (val: boolean) => void;
   showNeedAgentPolicy?: boolean;

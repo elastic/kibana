@@ -20,7 +20,7 @@ import { getSourcererScopeId } from '../../../../helpers';
 
 const style = { flexGrow: 0 };
 
-export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
+export const SummaryValueCell = ({
   data,
   eventId,
   fieldFromBrowserField,
@@ -29,7 +29,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   scopeId,
   values,
   isReadOnly,
-}) => {
+}: AlertSummaryRow['description']) => {
   const hoverActionsEnabled = hasHoverOrRowActions(data.field);
 
   return (

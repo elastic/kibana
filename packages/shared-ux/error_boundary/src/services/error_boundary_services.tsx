@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, PropsWithChildren } from 'react';
 
 import { KibanaErrorBoundaryProviderDeps, KibanaErrorBoundaryServices } from '../../types';
 import { KibanaErrorService } from './error_service';
@@ -21,7 +21,7 @@ export const KibanaErrorBoundaryDepsProvider = ({
   children,
   onClickRefresh,
   errorService,
-}: KibanaErrorBoundaryServices) => (
+}: PropsWithChildren<KibanaErrorBoundaryServices>) => (
   <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>
 );
 
@@ -33,7 +33,7 @@ export const KibanaErrorBoundaryDepsProvider = ({
 export const KibanaErrorBoundaryProvider = ({
   children,
   analytics,
-}: KibanaErrorBoundaryProviderDeps) => {
+}: PropsWithChildren<KibanaErrorBoundaryProviderDeps>) => {
   const parentContext = useContext(Context);
   const value: KibanaErrorBoundaryServices = useMemo(() => {
     // FIXME: analytics dep is optional - know when not to overwrite

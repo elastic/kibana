@@ -8,7 +8,7 @@
 
 /* eslint @elastic/eui/href-or-on-click:0 */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';

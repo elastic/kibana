@@ -242,7 +242,7 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding = ({ children }) => {
+const WrapperWithPadding = ({ children }: { children: React.ReactNode }) => {
   const padding = useEuiPaddingSize('s');
 
   return (

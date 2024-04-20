@@ -9,6 +9,7 @@ import React from 'react';
 import { ReactRouterEuiButtonEmpty } from './react_router_helpers';
 
 interface StepDetailLinkProps {
+  children: React.ReactNode;
   /**
    * The ID of the check group (the journey run)
    */

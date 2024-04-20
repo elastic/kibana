@@ -20,6 +20,7 @@ interface DetectorTitleProps {
     value: string | null;
   };
   deleteDetector?: (dtrIds: number) => void;
+  children?: React.ReactNode;
 }
 
 export const DetectorTitle = ({

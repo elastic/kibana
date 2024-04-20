@@ -78,6 +78,7 @@ export const CasesProvider = ({
 
   queryClient = casesQueryClient,
 }: {
+  children: React.ReactNode;
   value: CasesContextProps;
   queryClient?: QueryClient;
 }) => {

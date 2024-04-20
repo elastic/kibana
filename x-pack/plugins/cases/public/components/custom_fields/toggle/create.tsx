@@ -11,10 +11,10 @@ import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const CreateComponent: CustomFieldType<CaseCustomFieldToggle>['Create'] = ({
+const CreateComponent = ({
   customFieldConfiguration,
   isLoading,
-}) => {
+}: React.ComponentProps<CustomFieldType<CaseCustomFieldToggle>['Create']>) => {
   const { key, label, defaultValue } = customFieldConfiguration;
 
   return (

@@ -20,6 +20,8 @@ interface AddAnalyticsCollectionForm {
   formId: string;
 }
 
+// TODO: Update @typescript-eslint
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const AddAnalyticsCollectionForm = ({
   formId,
   collectionNameField,

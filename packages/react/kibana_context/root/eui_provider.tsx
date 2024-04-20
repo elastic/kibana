@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, PropsWithChildren } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
@@ -61,7 +61,7 @@ export const KibanaEuiProvider = ({
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   children,
-}: KibanaEuiProviderProps) => {
+}: PropsWithChildren<KibanaEuiProviderProps>) => {
   const theme = useObservable(theme$, defaultTheme);
   const themeColorMode = useMemo(() => getColorMode(theme), [theme]);
 

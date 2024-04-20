@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 import {
   NoDataViewsPromptProvider,
   NoDataViewsPromptKibanaProvider,
@@ -25,7 +25,10 @@ const KibanaNoDataPageContext = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component.
  */
-export const KibanaNoDataPageProvider = ({ children, ...services }: KibanaNoDataPageServices) => {
+export const KibanaNoDataPageProvider = ({
+  children,
+  ...services
+}: PropsWithChildren<KibanaNoDataPageServices>) => {
   const { hasESData, hasUserDataView } = services;
 
   return (
@@ -43,7 +46,7 @@ export const KibanaNoDataPageProvider = ({ children, ...services }: KibanaNoData
 export const KibanaNoDataPageKibanaProvider = ({
   children,
   ...dependencies
-}: KibanaNoDataPageKibanaDependencies) => {
+}: PropsWithChildren<KibanaNoDataPageKibanaDependencies>) => {
   const { dataViews } = dependencies;
   const value: Services = {
     hasESData: dataViews.hasData.hasESData,

@@ -95,8 +95,8 @@ const SummaryStat = memo(
     value,
     color,
     isSmall = false,
-    ...commonProps
   }: {
+    children: React.ReactNode;
     value: number;
     color?: EuiBadgeProps['color'];
     isSmall?: boolean;
