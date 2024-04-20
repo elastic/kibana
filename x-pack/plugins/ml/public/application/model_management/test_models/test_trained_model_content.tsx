@@ -24,11 +24,13 @@ interface ContentProps {
   externalPipelineConfig?: estypes.IngestPipeline;
 }
 
-export const TestTrainedModelContent: FC<ContentProps> = ({
-  model,
-  handlePipelineConfigUpdate,
-  externalPipelineConfig,
-}) => {
+export const TestTrainedModelContent = (
+  {
+    model,
+    handlePipelineConfigUpdate,
+    externalPipelineConfig
+  }: ContentProps
+) => {
   const [deploymentId, setDeploymentId] = useState<string>(model.deployment_ids[0]);
   const mediumPadding = useEuiPaddingSize('m');
 

@@ -16,7 +16,7 @@ const LazyComponent = lazy(() =>
   }))
 );
 
-export const PanelSpinner: React.FC = (props) => {
+export const PanelSpinner = (props) => {
   return (
     <>
       <EuiSpacer />
@@ -30,7 +30,7 @@ export const PanelSpinner: React.FC = (props) => {
   );
 };
 
-export const DownloadPanelContent: FC<Omit<DownloadPanelContentProps, 'intl'>> = (props) => {
+export const DownloadPanelContent = (props: Omit<DownloadPanelContentProps, 'intl'>) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />

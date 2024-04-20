@@ -43,13 +43,15 @@ export interface Props {
   onClose: () => void;
 }
 
-export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
-  pipeline,
-  onClose,
-  onEditClick,
-  onCloneClick,
-  onDeleteClick,
-}) => {
+export const PipelineDetailsFlyout = (
+  {
+    pipeline,
+    onClose,
+    onEditClick,
+    onCloneClick,
+    onDeleteClick
+  }: Props
+) => {
   const [showPopover, setShowPopover] = useState(false);
   const actionMenuItems = [
     /**

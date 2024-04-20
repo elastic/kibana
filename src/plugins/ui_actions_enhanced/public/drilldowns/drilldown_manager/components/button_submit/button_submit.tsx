@@ -14,7 +14,13 @@ export interface ButtonSubmitProps {
   onClick: () => void;
 }
 
-export const ButtonSubmit: React.FC<ButtonSubmitProps> = ({ disabled, onClick, children }) => {
+export const ButtonSubmit = (
+  {
+    disabled,
+    onClick,
+    children
+  }: ButtonSubmitProps
+) => {
   return (
     <EuiButton
       fill

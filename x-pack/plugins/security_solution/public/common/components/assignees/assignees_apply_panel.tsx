@@ -36,57 +36,61 @@ export interface AssigneesApplyPanelProps {
 /**
  * The popover to allow selection of users from a list
  */
-export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
-  ({ searchInputId, assignedUserIds, onApply }) => {
-    /**
-     * We use `selectedUserIds` to keep track of currently selected user ids,
-     * whereas `assignedUserIds` holds actually assigned user ids.
-     */
-    const [selectedUserIds, setSelectedUserIds] =
-      useState<AssigneesIdsSelection[]>(assignedUserIds);
+export const AssigneesApplyPanel = memo((
+  {
+    searchInputId,
+    assignedUserIds,
+    onApply
+  }: AssigneesApplyPanelProps
+) => {
+  /**
+   * We use `selectedUserIds` to keep track of currently selected user ids,
+   * whereas `assignedUserIds` holds actually assigned user ids.
+   */
+  const [selectedUserIds, setSelectedUserIds] =
+    useState<AssigneesIdsSelection[]>(assignedUserIds);
 
-    const assigneesToUpdate = useMemo<AlertAssignees>(() => {
-      const updatedIds = removeNoAssigneesSelection(selectedUserIds);
-      const assigneesToAddArray = updatedIds.filter((uid) => !assignedUserIds.includes(uid));
-      const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
-      return {
-        add: assigneesToAddArray,
-        remove: assigneesToRemoveArray,
-      };
-    }, [assignedUserIds, selectedUserIds]);
+  const assigneesToUpdate = useMemo<AlertAssignees>(() => {
+    const updatedIds = removeNoAssigneesSelection(selectedUserIds);
+    const assigneesToAddArray = updatedIds.filter((uid) => !assignedUserIds.includes(uid));
+    const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
+    return {
+      add: assigneesToAddArray,
+      remove: assigneesToRemoveArray,
+    };
+  }, [assignedUserIds, selectedUserIds]);
 
-    const isDirty = useMemo(
-      () => assigneesToUpdate.add.length || assigneesToUpdate.remove.length,
-      [assigneesToUpdate]
-    );
+  const isDirty = useMemo(
+    () => assigneesToUpdate.add.length || assigneesToUpdate.remove.length,
+    [assigneesToUpdate]
+  );
 
-    const handleSelectionChange = useCallback((userIds: AssigneesIdsSelection[]) => {
-      setSelectedUserIds(userIds);
-    }, []);
+  const handleSelectionChange = useCallback((userIds: AssigneesIdsSelection[]) => {
+    setSelectedUserIds(userIds);
+  }, []);
 
-    const handleApplyButtonClick = useCallback(async () => {
-      onApply(assigneesToUpdate);
-    }, [assigneesToUpdate, onApply]);
+  const handleApplyButtonClick = useCallback(async () => {
+    onApply(assigneesToUpdate);
+  }, [assigneesToUpdate, onApply]);
 
-    return (
-      <div data-test-subj={ASSIGNEES_APPLY_PANEL_TEST_ID}>
-        <AssigneesSelectable
-          searchInputId={searchInputId}
-          assignedUserIds={assignedUserIds}
-          onSelectionChange={handleSelectionChange}
-        />
-        <EuiButton
-          data-test-subj={ASSIGNEES_APPLY_BUTTON_TEST_ID}
-          fullWidth
-          size="s"
-          onClick={handleApplyButtonClick}
-          isDisabled={!isDirty}
-        >
-          {i18n.ASSIGNEES_APPLY_BUTTON}
-        </EuiButton>
-      </div>
-    );
-  }
-);
+  return (
+    <div data-test-subj={ASSIGNEES_APPLY_PANEL_TEST_ID}>
+      <AssigneesSelectable
+        searchInputId={searchInputId}
+        assignedUserIds={assignedUserIds}
+        onSelectionChange={handleSelectionChange}
+      />
+      <EuiButton
+        data-test-subj={ASSIGNEES_APPLY_BUTTON_TEST_ID}
+        fullWidth
+        size="s"
+        onClick={handleApplyButtonClick}
+        isDisabled={!isDirty}
+      >
+        {i18n.ASSIGNEES_APPLY_BUTTON}
+      </EuiButton>
+    </div>
+  );
+});
 
 AssigneesApplyPanel.displayName = 'AssigneesPanel';

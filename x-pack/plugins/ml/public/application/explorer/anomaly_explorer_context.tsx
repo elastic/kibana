@@ -52,7 +52,7 @@ export function useAnomalyExplorerContext() {
 /**
  * Anomaly Explorer Context Provider.
  */
-export const AnomalyExplorerContextProvider: FC = ({ children }) => {
+export const AnomalyExplorerContextProvider = ({ children }) => {
   const [, , anomalyExplorerUrlStateService] = useExplorerUrlState();
 
   const timefilter = useTimefilter();

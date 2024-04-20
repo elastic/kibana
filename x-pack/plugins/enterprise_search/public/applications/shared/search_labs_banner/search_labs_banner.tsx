@@ -27,7 +27,7 @@ import { HttpLogic } from '../http';
 
 import { SearchLabsLogo } from './search_labs_logo';
 
-export const SearchLabsBanner: React.FC = () => {
+export const SearchLabsBanner = () => {
   const { http } = useValues(HttpLogic);
   const backgroundImagePath = http.basePath.prepend(
     '/plugins/enterpriseSearch/assets/images/search_labs_banner_background.svg'

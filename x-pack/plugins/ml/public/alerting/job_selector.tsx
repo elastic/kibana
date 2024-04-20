@@ -45,17 +45,19 @@ export interface JobSelectorControlProps {
   options?: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export const JobSelectorControl: FC<JobSelectorControlProps> = ({
-  jobsAndGroupIds,
-  onChange,
-  adJobsApiService,
-  errors,
-  multiSelect = false,
-  label,
-  allowSelectAll = false,
-  createJobUrl,
-  options: defaultOptions,
-}) => {
+export const JobSelectorControl = (
+  {
+    jobsAndGroupIds,
+    onChange,
+    adJobsApiService,
+    errors,
+    multiSelect = false,
+    label,
+    allowSelectAll = false,
+    createJobUrl,
+    options: defaultOptions
+  }: JobSelectorControlProps
+) => {
   const {
     services: {
       notifications: { toasts },

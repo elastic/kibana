@@ -20,12 +20,14 @@ interface Props {
   showAnonymized?: boolean;
 }
 
-const ActionableSummaryComponent: React.FC<Props> = ({
-  insight,
-  promptContextId,
-  replacements,
-  showAnonymized = false,
-}) => {
+const ActionableSummaryComponent = (
+  {
+    insight,
+    promptContextId,
+    replacements,
+    showAnonymized = false
+  }: Props
+) => {
   const entitySummaryMarkdownWithReplacements = useMemo(
     () =>
       Object.entries(replacements ?? {}).reduce(

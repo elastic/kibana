@@ -28,7 +28,13 @@ interface Props {
 // Number of tags displayed before "+ N more" is displayed
 const MAX_TAGS_TO_DISPLAY = 3;
 
-export const Tags: React.FunctionComponent<Props> = ({ tags, color, size }) => {
+export const Tags = (
+  {
+    tags,
+    color,
+    size
+  }: Props
+) => {
   return (
     <>
       <Wrapped>

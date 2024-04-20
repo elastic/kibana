@@ -116,26 +116,28 @@ interface Props {
   dataView: DataView;
 }
 
-const UnifiedTimelineComponent: React.FC<Props> = ({
-  columns,
-  activeTab,
-  timelineId,
-  itemsPerPage,
-  itemsPerPageOptions,
-  rowRenderers,
-  sort,
-  events,
-  refetch,
-  dataLoadingState,
-  totalCount,
-  onEventClosed,
-  showExpandedDetails,
-  expandedDetail,
-  onChangePage,
-  updatedAt,
-  isTextBasedQuery,
-  dataView,
-}) => {
+const UnifiedTimelineComponent = (
+  {
+    columns,
+    activeTab,
+    timelineId,
+    itemsPerPage,
+    itemsPerPageOptions,
+    rowRenderers,
+    sort,
+    events,
+    refetch,
+    dataLoadingState,
+    totalCount,
+    onEventClosed,
+    showExpandedDetails,
+    expandedDetail,
+    onChangePage,
+    updatedAt,
+    isTextBasedQuery,
+    dataView
+  }: Props
+) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
 

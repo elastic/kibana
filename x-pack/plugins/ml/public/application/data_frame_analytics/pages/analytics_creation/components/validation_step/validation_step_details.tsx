@@ -21,11 +21,17 @@ import type { State } from '../../../analytics_management/hooks/use_create_analy
 import { ANALYTICS_STEPS } from '../../page';
 import type { ValidationSummary } from './validation_step_wrapper';
 
-export const ValidationStepDetails: FC<{
-  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
-  state: State;
-  validationSummary: ValidationSummary;
-}> = ({ setCurrentStep, state, validationSummary }) => {
+export const ValidationStepDetails = (
+  {
+    setCurrentStep,
+    state,
+    validationSummary
+  }: {
+    setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
+    state: State;
+    validationSummary: ValidationSummary;
+  }
+) => {
   const { isJobCreated } = state;
   const detailsFirstCol = [
     {

@@ -24,9 +24,14 @@ interface MountSectionParams {
   title: string;
 }
 
-const RedirectToHomeIfUnauthorized: FC<{
-  applications: ApplicationStart;
-}> = ({ applications, children }) => {
+const RedirectToHomeIfUnauthorized = (
+  {
+    applications,
+    children
+  }: {
+    applications: ApplicationStart;
+  }
+) => {
   const allowed = applications.capabilities?.management?.kibana?.tags ?? false;
   if (!allowed) {
     applications.navigateToApp('home');

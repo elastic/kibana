@@ -19,7 +19,7 @@ export const ENTITIES_TAB_ID = 'entity';
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
-export const EntitiesDetails: React.FC = () => {
+export const EntitiesDetails = () => {
   const { getFieldsData, scopeId } = useLeftPanelContext();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));

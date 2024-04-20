@@ -18,43 +18,43 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav: FC<StepsNavProps> = ({
-  previous,
-  previousActive = true,
-  next,
-  nextActive = true,
-}) => (
-  <EuiFlexGroup>
-    <EuiFlexItem />
-    {previous && (
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          disabled={!previousActive}
-          onClick={previous}
-          iconType="arrowLeft"
-          size="s"
-          data-test-subj="transformWizardNavButtonPrevious"
-        >
-          {i18n.translate('xpack.transform.wizard.previousStepButton', {
-            defaultMessage: 'Previous',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    )}
-    {next && (
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          disabled={!nextActive}
-          onClick={next}
-          iconType="arrowRight"
-          size="s"
-          data-test-subj="transformWizardNavButtonNext"
-        >
-          {i18n.translate('xpack.transform.wizard.nextStepButton', {
-            defaultMessage: 'Next',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+export const WizardNav = (
+  {
+    previous,
+    previousActive = true,
+    next,
+    nextActive = true
+  }: StepsNavProps
+) => (<EuiFlexGroup>
+  <EuiFlexItem />
+  {previous && (
+    <EuiFlexItem grow={false}>
+      <EuiButton
+        disabled={!previousActive}
+        onClick={previous}
+        iconType="arrowLeft"
+        size="s"
+        data-test-subj="transformWizardNavButtonPrevious"
+      >
+        {i18n.translate('xpack.transform.wizard.previousStepButton', {
+          defaultMessage: 'Previous',
+        })}
+      </EuiButton>
+    </EuiFlexItem>
+  )}
+  {next && (
+    <EuiFlexItem grow={false}>
+      <EuiButton
+        disabled={!nextActive}
+        onClick={next}
+        iconType="arrowRight"
+        size="s"
+        data-test-subj="transformWizardNavButtonNext"
+      >
+        {i18n.translate('xpack.transform.wizard.nextStepButton', {
+          defaultMessage: 'Next',
+        })}
+      </EuiButton>
+    </EuiFlexItem>
+  )}
+</EuiFlexGroup>);

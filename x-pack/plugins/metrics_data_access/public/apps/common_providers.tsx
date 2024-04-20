@@ -15,7 +15,13 @@ export interface CoreProvidersProps {
   theme$: AppMountParameters['theme$'];
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({ children, core, theme$ }) => {
+export const CoreProviders = (
+  {
+    children,
+    core,
+    theme$
+  }: CoreProvidersProps
+) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core);
 
   return (

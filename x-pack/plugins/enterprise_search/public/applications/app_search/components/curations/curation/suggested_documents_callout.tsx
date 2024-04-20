@@ -17,7 +17,7 @@ import { SuggestionsCallout } from '../components/suggestions_callout';
 
 import { CurationLogic } from '.';
 
-export const SuggestedDocumentsCallout: React.FC = () => {
+export const SuggestedDocumentsCallout = () => {
   const {
     curation: { suggestion, queries },
   } = useValues(CurationLogic);

@@ -30,7 +30,11 @@ enum TAB {
   RAW,
 }
 
-export const TextInputForm: FC<Props> = ({ inferrer }) => {
+export const TextInputForm = (
+  {
+    inferrer
+  }: Props
+) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 

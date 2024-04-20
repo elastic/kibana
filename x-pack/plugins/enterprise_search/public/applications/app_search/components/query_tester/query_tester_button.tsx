@@ -13,7 +13,7 @@ import { QUERY_TESTER_TITLE } from './i18n';
 
 import { QueryTesterFlyout } from '.';
 
-export const QueryTesterButton: React.FC = () => {
+export const QueryTesterButton = () => {
   const [isQueryTesterOpen, setIsQueryTesterOpen] = useState(false);
   return (
     <>

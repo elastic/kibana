@@ -388,7 +388,12 @@ const iconWrapperCss = css`
   }
 `;
 
-export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) => {
+export const ExternalServiceColumn = (
+  {
+    theCase,
+    connectors
+  }: Props
+) => {
   const { triggersActionsUi } = useKibana().services;
   const { actions } = useApplicationCapabilities();
 

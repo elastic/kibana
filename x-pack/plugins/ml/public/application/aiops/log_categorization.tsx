@@ -17,7 +17,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 
-export const LogCategorizationPage: FC = () => {
+export const LogCategorizationPage = () => {
   const { services } = useMlKibana();
   const { showNodeInfo } = useEnabledFeatures();
 

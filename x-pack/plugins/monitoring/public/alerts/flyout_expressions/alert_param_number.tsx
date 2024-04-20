@@ -15,7 +15,7 @@ interface Props {
   errors: string[];
   setRuleParams: (property: string, value: number) => void;
 }
-export const AlertParamNumber: React.FC<Props> = (props: Props) => {
+export const AlertParamNumber = (props: Props) => {
   const { name, details, setRuleParams, errors } = props;
   const [value, setValue] = useState(props.value);
   return (

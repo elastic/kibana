@@ -26,7 +26,7 @@ interface PropsUI {
   locators: LocatorClient;
 }
 
-const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
+const InspectInConsoleButtonUi = (props: PropsUI) => {
   const { csvConfig, job, searchSourceStart, locators } = props;
 
   const { title: jobTitle, pagingStrategy } = job;
@@ -70,7 +70,7 @@ interface Props {
   config: ClientConfigType;
 }
 
-export const InspectInConsoleButton: React.FC<Props> = (props) => {
+export const InspectInConsoleButton = (props: Props) => {
   const { config, job } = props;
   const { services } = useKibana<KibanaContext>();
   const { application, data, share } = services;

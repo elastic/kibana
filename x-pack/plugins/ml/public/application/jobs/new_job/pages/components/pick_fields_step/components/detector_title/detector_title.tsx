@@ -23,14 +23,16 @@ interface DetectorTitleProps {
   deleteDetector?: (dtrIds: number) => void;
 }
 
-export const DetectorTitle: FC<DetectorTitleProps> = ({
-  index,
-  agg,
-  field,
-  byField,
-  deleteDetector,
-  children,
-}) => {
+export const DetectorTitle = (
+  {
+    index,
+    agg,
+    field,
+    byField,
+    deleteDetector,
+    children
+  }: DetectorTitleProps
+) => {
   const splitField = children === false && byField !== undefined ? byField.field : null;
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">

@@ -19,7 +19,7 @@ export type ThreatIntelLinkPanelProps = Pick<
   allTiDataSources: TiDataSources[];
 };
 
-const ThreatIntelLinkPanelComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
+const ThreatIntelLinkPanelComponent = (props: ThreatIntelLinkPanelProps) => {
   const { allTiDataSources } = props;
   const isThreatIntelModuleEnabled = allTiDataSources.length > 0;
   return isThreatIntelModuleEnabled ? (

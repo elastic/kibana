@@ -37,22 +37,24 @@ interface CasesTableProps {
   isLoadingColumns: boolean;
 }
 
-export const CasesTable: FunctionComponent<CasesTableProps> = ({
-  columns,
-  data,
-  goToCreateCase,
-  isCasesLoading,
-  isCommentUpdating,
-  isDataEmpty,
-  isSelectorView,
-  onChange,
-  pagination,
-  selection,
-  sorting,
-  tableRef,
-  tableRowProps,
-  isLoadingColumns,
-}) => {
+export const CasesTable = (
+  {
+    columns,
+    data,
+    goToCreateCase,
+    isCasesLoading,
+    isCommentUpdating,
+    isDataEmpty,
+    isSelectorView,
+    onChange,
+    pagination,
+    selection,
+    sorting,
+    tableRef,
+    tableRowProps,
+    isLoadingColumns
+  }: CasesTableProps
+) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const { euiTheme } = useEuiTheme();

@@ -24,12 +24,14 @@ interface Props {
   isLoadingFeatures?: boolean;
 }
 
-export const FeatureStatesFormField: FunctionComponent<Props> = ({
-  isLoadingFeatures = false,
-  featuresOptions,
-  selectedOptions,
-  onUpdateFormSettings,
-}) => {
+export const FeatureStatesFormField = (
+  {
+    isLoadingFeatures = false,
+    featuresOptions,
+    selectedOptions,
+    onUpdateFormSettings
+  }: Props
+) => {
   const { i18n } = useServices();
 
   const optionsList = useMemo(() => {

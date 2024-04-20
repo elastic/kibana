@@ -68,11 +68,17 @@ export function getInfluencersItems(
   return items;
 }
 
-export const DetailsItems: FC<{
-  anomaly: MlAnomaliesTableRecord;
-  filter: EntityCellFilter;
-  modelPlotEnabled: boolean;
-}> = ({ anomaly, filter, modelPlotEnabled }) => {
+export const DetailsItems = (
+  {
+    anomaly,
+    filter,
+    modelPlotEnabled
+  }: {
+    anomaly: MlAnomaliesTableRecord;
+    filter: EntityCellFilter;
+    modelPlotEnabled: boolean;
+  }
+) => {
   const source = anomaly.source;
 
   // TODO - when multivariate analyses are more common,
@@ -329,7 +335,13 @@ export const DetailsItems: FC<{
   );
 };
 
-export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> = ({ anomaly }) => {
+export const AnomalyExplanationDetails = (
+  {
+    anomaly
+  }: {
+    anomaly: MlAnomaliesTableRecord;
+  }
+) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -605,7 +617,13 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
   );
 };
 
-const RecordScore: FC<{ score: number }> = ({ score }) => {
+const RecordScore = (
+  {
+    score
+  }: {
+    score: number;
+  }
+) => {
   return (
     <div
       css={{
@@ -732,7 +750,13 @@ function getImpactTooltip(
   return impactTooltips[type].medium;
 }
 
-const ImpactVisual: FC<{ score: number }> = ({ score }) => {
+const ImpactVisual = (
+  {
+    score
+  }: {
+    score: number;
+  }
+) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();

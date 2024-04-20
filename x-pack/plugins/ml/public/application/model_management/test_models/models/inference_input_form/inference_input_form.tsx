@@ -18,7 +18,12 @@ interface Props {
   inputType: INPUT_TYPE;
 }
 
-export const InferenceInputForm: FC<Props> = ({ inferrer, inputType }) => {
+export const InferenceInputForm = (
+  {
+    inferrer,
+    inputType
+  }: Props
+) => {
   return inputType === INPUT_TYPE.TEXT ? (
     <TextInputForm inferrer={inferrer} />
   ) : (

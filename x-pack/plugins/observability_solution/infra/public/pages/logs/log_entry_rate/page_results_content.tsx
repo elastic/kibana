@@ -48,10 +48,15 @@ export const PAGINATION_DEFAULTS = {
   pageSize: 25,
 };
 
-export const LogEntryRateResultsContent: React.FunctionComponent<{
-  pageTitle: string;
-  idFormats: IdFormatByJobType | null;
-}> = ({ pageTitle, idFormats }) => {
+export const LogEntryRateResultsContent = (
+  {
+    pageTitle,
+    idFormats
+  }: {
+    pageTitle: string;
+    idFormats: IdFormatByJobType | null;
+  }
+) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 

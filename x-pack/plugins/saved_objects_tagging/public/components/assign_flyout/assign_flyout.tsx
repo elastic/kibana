@@ -40,14 +40,16 @@ const getObjectStatus = (object: AssignableObject, assignedTags: string[]): Assi
   return assignedCount === 0 ? 'none' : assignedCount === assignedTags.length ? 'full' : 'partial';
 };
 
-export const AssignFlyout: FC<AssignFlyoutProps> = ({
-  tagIds,
-  tagCache,
-  allowedTypes,
-  notifications,
-  assignmentService,
-  onClose,
-}) => {
+export const AssignFlyout = (
+  {
+    tagIds,
+    tagCache,
+    allowedTypes,
+    notifications,
+    assignmentService,
+    onClose
+  }: AssignFlyoutProps
+) => {
   const [results, setResults] = useState<AssignableObject[]>([]);
   const [query, setQuery] = useState<Query>(Query.parse(''));
   const [initialStatus, setInitialStatus] = useState<AssignmentStatusMap>({});

@@ -20,12 +20,12 @@ interface FormTestProviderProps {
   connectorServices?: ConnectorServices;
 }
 
-const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
+const FormTestProviderComponent = ({
   children,
   defaultValue,
   onSubmit,
   connectorServices = { validateEmailAddresses: jest.fn() },
-}) => {
+}: FormTestProviderProps) => {
   const { form } = useForm({ defaultValue });
   const { submit } = form;
 

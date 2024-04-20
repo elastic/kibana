@@ -22,7 +22,11 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
-export const ConstantKeywordType: FunctionComponent<Props> = ({ field }) => {
+export const ConstantKeywordType = (
+  {
+    field
+  }: Props
+) => {
   return (
     <>
       <BasicParametersSection>

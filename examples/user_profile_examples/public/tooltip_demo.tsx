@@ -11,7 +11,7 @@ import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-compo
 import { EuiCommentList, EuiComment } from '@elastic/eui';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
-export const ToolTipDemo: FunctionComponent = () => {
+export const ToolTipDemo = () => {
   const userProfile: UserProfile<{ avatar: UserProfileAvatarData }> = {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
     enabled: true,

@@ -275,11 +275,17 @@ export const DiscoverTourProvider = ({
   );
 };
 
-export const DiscoverTourStepFooterAction: React.FC<{
-  isLastStep: boolean;
-  onNextTourStep: DiscoverTourContextProps['onNextTourStep'];
-  onFinishTour: DiscoverTourContextProps['onFinishTour'];
-}> = ({ isLastStep, onNextTourStep, onFinishTour }) => {
+export const DiscoverTourStepFooterAction = (
+  {
+    isLastStep,
+    onNextTourStep,
+    onFinishTour
+  }: {
+    isLastStep: boolean;
+    onNextTourStep: DiscoverTourContextProps['onNextTourStep'];
+    onFinishTour: DiscoverTourContextProps['onFinishTour'];
+  }
+) => {
   const actionButtonProps: Partial<EuiButtonProps> = {
     size: 's',
     color: 'success',

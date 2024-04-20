@@ -27,12 +27,14 @@ interface Props {
   response?: string;
 }
 
-export const RequestFlyout: FunctionComponent<Props> = ({
-  onClose,
-  requestBody,
-  response,
-  links,
-}) => {
+export const RequestFlyout = (
+  {
+    onClose,
+    requestBody,
+    response,
+    links
+  }: Props
+) => {
   return (
     <EuiFlyout onClose={onClose} maxWidth={640}>
       <EuiFlyoutHeader>

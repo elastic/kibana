@@ -35,16 +35,18 @@ export interface ExportModalProps {
   onIncludeReferenceChange: (newIncludeReference: boolean) => void;
 }
 
-export const ExportModal: FC<ExportModalProps> = ({
-  onCancel,
-  onExport,
-  onSelectedOptionsChange,
-  options,
-  filteredItemCount,
-  selectedOptions,
-  includeReferences,
-  onIncludeReferenceChange,
-}) => {
+export const ExportModal = (
+  {
+    onCancel,
+    onExport,
+    onSelectedOptionsChange,
+    options,
+    filteredItemCount,
+    selectedOptions,
+    includeReferences,
+    onIncludeReferenceChange
+  }: ExportModalProps
+) => {
   return (
     <EuiModal onClose={onCancel}>
       <EuiModalHeader>

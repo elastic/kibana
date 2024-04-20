@@ -42,21 +42,23 @@ export function getGettingStartedStep(props: QuickStartCreateForm): EuiStepProps
   };
 }
 
-const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> = ({
-  fleetServerHosts,
-  fleetServerHost: selectedFleetServerHost,
-  setFleetServerHost,
-  status,
-  error,
-  inputs,
-  submit,
-  onClose,
-}) => {
+const GettingStartedStepContent = (
+  {
+    fleetServerHosts,
+    fleetServerHost: selectedFleetServerHost,
+    setFleetServerHost,
+    status,
+    error,
+    inputs,
+    submit,
+    onClose
+  }: QuickStartCreateForm
+) => {
   const { getHref } = useLink();
 
   if (status === 'success') {
     return (
-      <EuiCallOut
+      (<EuiCallOut
         color="success"
         iconType="check"
         title={i18n.translate(
@@ -74,17 +76,17 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
                 // eslint-disable-next-line @elastic/eui/href-or-on-click
-                <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
+                (<EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                     defaultMessage="Fleet Settings"
                   />
-                </EuiButtonEmpty>
+                </EuiButtonEmpty>)
               ),
             }}
           />
         </EuiText>
-      </EuiCallOut>
+      </EuiCallOut>)
     );
   }
 

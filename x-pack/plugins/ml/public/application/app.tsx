@@ -52,14 +52,16 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({
-  coreStart,
-  deps,
-  appMountParams,
-  isServerless,
-  mlFeatures,
-  experimentalFeatures,
-}) => {
+const App = (
+  {
+    coreStart,
+    deps,
+    appMountParams,
+    isServerless,
+    mlFeatures,
+    experimentalFeatures
+  }: AppProps
+) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,

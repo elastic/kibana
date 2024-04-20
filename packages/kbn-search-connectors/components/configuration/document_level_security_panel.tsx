@@ -16,9 +16,11 @@ export interface DocumentLevelSecurityPanelProps {
   toggleSwitch: JSX.Element;
 }
 
-export const DocumentLevelSecurityPanel: React.FC<DocumentLevelSecurityPanelProps> = ({
-  toggleSwitch,
-}) => {
+export const DocumentLevelSecurityPanel = (
+  {
+    toggleSwitch
+  }: DocumentLevelSecurityPanelProps
+) => {
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false}>
       <EuiSplitPanel.Inner>

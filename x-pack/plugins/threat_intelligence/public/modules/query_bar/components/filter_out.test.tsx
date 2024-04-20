@@ -83,7 +83,7 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
   });
 
   it('should render one Component (for EuiDataGrid use)', () => {
-    const mockComponent: FunctionComponent = () => (
+    const mockComponent = () => (
       <EuiButtonIcon
         aria-label={'test'}
         iconType="plusInCircle"

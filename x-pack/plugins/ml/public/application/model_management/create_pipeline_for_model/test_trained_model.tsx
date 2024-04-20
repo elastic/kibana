@@ -23,11 +23,13 @@ interface ContentProps {
   externalPipelineConfig?: estypes.IngestPipeline;
 }
 
-export const TestTrainedModel: FC<ContentProps> = ({
-  model,
-  handlePipelineConfigUpdate,
-  externalPipelineConfig,
-}) => {
+export const TestTrainedModel = (
+  {
+    model,
+    handlePipelineConfigUpdate,
+    externalPipelineConfig
+  }: ContentProps
+) => {
   const {
     services: {
       docLinks: { links },

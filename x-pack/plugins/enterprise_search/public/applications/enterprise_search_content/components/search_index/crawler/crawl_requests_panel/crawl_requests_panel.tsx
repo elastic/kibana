@@ -41,7 +41,7 @@ const CRAWLER_LOGS_DISCOVER_RECORD = {
   sort: [['@timestamp', 'desc']],
 };
 
-export const CrawlRequestsPanel: React.FC = () => {
+export const CrawlRequestsPanel = () => {
   const { data } = useValues(CrawlerLogic);
   const {
     services: { discover },

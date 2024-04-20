@@ -34,7 +34,7 @@ const appServices = {
   history,
 };
 
-export const ProcessorsEditorWithDeps: React.FunctionComponent<Props> = (props) => {
+export const ProcessorsEditorWithDeps = (props: Props) => {
   return (
     <KibanaContextProvider services={appServices}>
       <ProcessorsEditorContextProvider {...props}>

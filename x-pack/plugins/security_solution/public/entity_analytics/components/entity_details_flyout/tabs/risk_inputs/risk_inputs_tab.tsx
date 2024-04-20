@@ -202,10 +202,15 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
 RiskInputsTab.displayName = 'RiskInputsTab';
 
-const ContextsSection: React.FC<{
-  riskScore?: UserRiskScore | HostRiskScore;
-  loading: boolean;
-}> = ({ riskScore, loading }) => {
+const ContextsSection = (
+  {
+    riskScore,
+    loading
+  }: {
+    riskScore?: UserRiskScore | HostRiskScore;
+    loading: boolean;
+  }
+) => {
   const criticality = useMemo(() => {
     if (!riskScore) {
       return undefined;
@@ -312,7 +317,12 @@ interface ExtraAlertsMessageProps {
   riskScore?: UserRiskScore | HostRiskScore;
   alerts: UseRiskContributingAlertsResult;
 }
-const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, alerts }) => {
+const ExtraAlertsMessage = (
+  {
+    riskScore,
+    alerts
+  }: ExtraAlertsMessageProps
+) => {
   const totals = !riskScore
     ? { count: 0, score: 0 }
     : isUserRiskScore(riskScore)

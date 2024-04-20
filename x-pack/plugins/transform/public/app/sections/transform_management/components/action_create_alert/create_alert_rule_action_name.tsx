@@ -24,7 +24,11 @@ export const crateAlertRuleActionNameText = i18n.translate(
   }
 );
 
-export const CreateAlertRuleActionName: FC<CreateAlertRuleActionProps> = ({ disabled }) => {
+export const CreateAlertRuleActionName = (
+  {
+    disabled
+  }: CreateAlertRuleActionProps
+) => {
   if (disabled) {
     return (
       <EuiToolTip

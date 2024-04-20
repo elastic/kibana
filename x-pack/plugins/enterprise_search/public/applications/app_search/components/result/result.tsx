@@ -41,17 +41,19 @@ interface Props {
 
 const RESULT_CUTOFF = 5;
 
-export const Result: React.FC<Props> = ({
-  result,
-  isMetaEngine,
-  showScore = false,
-  shouldLinkToDetailPage = false,
-  schemaForTypeHighlights,
-  actions = [],
-  dragHandleProps,
-  resultPosition,
-  showClick = false,
-}) => {
+export const Result = (
+  {
+    result,
+    isMetaEngine,
+    showScore = false,
+    shouldLinkToDetailPage = false,
+    schemaForTypeHighlights,
+    actions = [],
+    dragHandleProps,
+    resultPosition,
+    showClick = false
+  }: Props
+) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const ID = 'id';

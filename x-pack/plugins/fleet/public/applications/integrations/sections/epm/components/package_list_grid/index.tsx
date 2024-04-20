@@ -71,27 +71,29 @@ export interface PackageListGridProps {
   showSearchTools?: boolean;
 }
 
-export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
-  isLoading,
-  controls,
-  title,
-  list,
-  searchTerm,
-  setSearchTerm,
-  selectedCategory,
-  setCategory,
-  categories,
-  availableSubCategories,
-  setSelectedSubCategory,
-  selectedSubCategory,
-  setUrlandReplaceHistory,
-  setUrlandPushHistory,
-  showMissingIntegrationMessage = false,
-  callout,
-  showCardLabels = true,
-  showControls = true,
-  showSearchTools = true,
-}) => {
+export const PackageListGrid = (
+  {
+    isLoading,
+    controls,
+    title,
+    list,
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setCategory,
+    categories,
+    availableSubCategories,
+    setSelectedSubCategory,
+    selectedSubCategory,
+    setUrlandReplaceHistory,
+    setUrlandPushHistory,
+    showMissingIntegrationMessage = false,
+    callout,
+    showCardLabels = true,
+    showControls = true,
+    showSearchTools = true
+  }: PackageListGridProps
+) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
   const [isPopoverOpen, setPopover] = useState(false);

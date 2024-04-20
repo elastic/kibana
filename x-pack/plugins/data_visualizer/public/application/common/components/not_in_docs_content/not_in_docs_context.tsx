@@ -11,7 +11,7 @@ import { EuiIcon, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const NotInDocsContent: FC = () => (
+export const NotInDocsContent = () => (
   <Fragment>
     <EuiText textAlign="center">
       <EuiIcon type="warning" />

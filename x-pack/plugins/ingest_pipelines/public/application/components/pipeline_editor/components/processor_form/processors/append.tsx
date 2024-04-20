@@ -80,7 +80,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Append: FunctionComponent = () => {
+export const Append = () => {
   const [{ fields }] = useFormData({ watch: ['fields.value'] });
   return (
     <>

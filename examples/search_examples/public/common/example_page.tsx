@@ -21,7 +21,7 @@ interface NavProps {
   basePath: IBasePath;
 }
 
-const SideNav: React.FC<NavProps> = ({ exampleLinks, basePath }: NavProps) => {
+const SideNav = ({ exampleLinks, basePath }: NavProps) => {
   const navItems = exampleLinks.map((example) => ({
     id: example.path,
     name: example.title,
@@ -49,7 +49,7 @@ interface Props {
   basePath: IBasePath;
 }
 
-export const SearchExamplePage: React.FC<Props> = ({
+export const SearchExamplePage = ({
   children,
   exampleLinks,
   basePath,

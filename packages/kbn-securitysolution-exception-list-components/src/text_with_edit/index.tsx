@@ -18,13 +18,15 @@ interface TextWithEditProps {
   onEdit?: () => void;
 }
 
-const TextWithEditComponent: FC<TextWithEditProps> = ({
-  isReadonly,
-  dataTestSubj,
-  text,
-  onEdit,
-  textCss,
-}) => {
+const TextWithEditComponent = (
+  {
+    isReadonly,
+    dataTestSubj,
+    text,
+    onEdit,
+    textCss
+  }: TextWithEditProps
+) => {
   return (
     <EuiFlexGroup css={textWithEditContainerCss}>
       <EuiFlexItem grow={10}>

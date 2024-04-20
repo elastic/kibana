@@ -32,7 +32,7 @@ import { AddDomainFormErrors } from './add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './add_domain_form_submit_button';
 import { AddDomainLogic } from './add_domain_logic';
 
-export const AddDomainFlyout: React.FC = () => {
+export const AddDomainFlyout = () => {
   const { isFlyoutVisible } = useValues(AddDomainLogic);
   const { closeFlyout } = useActions(AddDomainLogic);
 

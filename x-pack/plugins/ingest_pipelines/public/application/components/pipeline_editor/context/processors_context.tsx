@@ -61,12 +61,14 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
 }
 
-export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
-  value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
-  onUpdate,
-  onFlyoutOpen,
-  children,
-}) => {
+export const PipelineProcessorsContextProvider = (
+  {
+    value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
+    onUpdate,
+    onFlyoutOpen,
+    children
+  }: Props
+) => {
   const initRef = useRef(false);
 
   const [mode, setMode] = useState<EditorMode>(() => ({

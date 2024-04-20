@@ -23,12 +23,14 @@ interface Props {
   'aria-label'?: string;
 }
 
-export const ChartWrapper: FC<Props> = ({
-  loading = false,
-  height = '100%',
-  children,
-  ...rest
-}) => {
+export const ChartWrapper = (
+  {
+    loading = false,
+    height = '100%',
+    children,
+    ...rest
+  }: Props
+) => {
   const opacity = loading === true ? 0.3 : 1;
 
   return (

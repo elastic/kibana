@@ -44,7 +44,7 @@ const ADD_GROUP_LABEL = i18n.translate(
   }
 );
 
-export const AddGroupModal: React.FC<{}> = () => {
+export const AddGroupModal = () => {
   const { closeNewGroupModal, saveNewGroup, setNewGroupName } = useActions(GroupsLogic);
   const { newGroupNameErrors, newGroupName } = useValues(GroupsLogic);
   const isInvalid = newGroupNameErrors.length > 0;

@@ -60,24 +60,26 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
 }
 
-const TopNComponent: React.FC<Props> = ({
-  combinedQueries,
-  defaultView,
-  deleteQuery,
-  filters,
-  field,
-  from,
-  indexPattern,
-  options,
-  paddingSize,
-  query,
-  showLegend,
-  setAbsoluteRangeDatePickerTarget,
-  setQuery,
-  scopeId,
-  to,
-  toggleTopN,
-}) => {
+const TopNComponent = (
+  {
+    combinedQueries,
+    defaultView,
+    deleteQuery,
+    filters,
+    field,
+    from,
+    indexPattern,
+    options,
+    paddingSize,
+    query,
+    showLegend,
+    setAbsoluteRangeDatePickerTarget,
+    setQuery,
+    scopeId,
+    to,
+    toggleTopN
+  }: Props
+) => {
   const [view, setView] = useState<TimelineEventsType>(defaultView);
   const onViewSelected = useCallback(
     (value: string) => setView(value as TimelineEventsType),

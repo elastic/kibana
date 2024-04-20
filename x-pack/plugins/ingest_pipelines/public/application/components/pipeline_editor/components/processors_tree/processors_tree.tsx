@@ -46,7 +46,7 @@ export interface Props {
  * This component is the public interface to our optimised tree rendering private components and
  * also contains top-level state concerns for an instance of the component
  */
-export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
+export const ProcessorsTree = memo((props: Props) => {
   const { processors, baseSelector, onAction, movingProcessor } = props;
   // These refs are created here so they can be shared with all
   // recursively rendered trees. Their values should come from react-virtualized
@@ -82,7 +82,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
   }, [movingProcessor, onAction]);
 
   return (
-    <EuiFlexGroup
+    (<EuiFlexGroup
       data-test-subj={props['data-test-subj']}
       direction="column"
       gutterSize="none"
@@ -110,7 +110,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
         >
           {!processors.length && (
             // We want to make this dropzone the max length of its container
-            <EuiFlexItem style={{ width: '100%' }}>
+            (<EuiFlexItem style={{ width: '100%' }}>
               <DropZoneButton
                 data-test-subj="dropButtonEmptyTree"
                 isVisible={Boolean(movingProcessor)}
@@ -126,7 +126,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
                   });
                 }}
               />
-            </EuiFlexItem>
+            </EuiFlexItem>)
           )}
           <EuiFlexItem grow={false}>
             <AddProcessorButton
@@ -138,6 +138,6 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGroup>)
   );
 });

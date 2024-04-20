@@ -13,7 +13,11 @@ interface PopoverFooterProps {
   isMac: boolean;
 }
 
-export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
+export const PopoverFooter = (
+  {
+    isMac
+  }: PopoverFooterProps
+) => {
   return (
     <EuiFlexGroup
       alignItems="center"

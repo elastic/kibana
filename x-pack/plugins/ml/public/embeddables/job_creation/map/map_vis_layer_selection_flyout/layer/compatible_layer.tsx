@@ -41,7 +41,13 @@ interface Props {
   layerIndex: number;
 }
 
-export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) => {
+export const CompatibleLayer = (
+  {
+    embeddable,
+    layer,
+    layerIndex
+  }: Props
+) => {
   const [selectedSplitField, setSelectedSplitField] = useState<string | null>(null);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | undefined>();
 

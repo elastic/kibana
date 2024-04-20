@@ -23,7 +23,7 @@ import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelli
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */
-export const ThreatIntelligenceOverview: FC = () => {
+export const ThreatIntelligenceOverview = () => {
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 

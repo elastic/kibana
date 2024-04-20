@@ -25,7 +25,7 @@ export const NotAuthorizedSection = ({ title, message }: Props) => (
   <EuiEmptyPrompt iconType="securityApp" title={<h2>{title}</h2>} body={<p>{message}</p>} />
 );
 
-const MissingCapabilities: FC = () => (
+const MissingCapabilities = () => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
       <EuiPageTemplate.EmptyPrompt color="danger">
@@ -48,9 +48,14 @@ const MissingCapabilities: FC = () => (
   </EuiFlexGroup>
 );
 
-export const CapabilitiesWrapper: FC<{
-  requiredCapabilities: TransformCapability | TransformCapability[];
-}> = ({ children, requiredCapabilities }) => {
+export const CapabilitiesWrapper = (
+  {
+    children,
+    requiredCapabilities
+  }: {
+    requiredCapabilities: TransformCapability | TransformCapability[];
+  }
+) => {
   const capabilities = useTransformCapabilities();
 
   const hasCapabilities = toArray(requiredCapabilities).every((c) => capabilities[c]);

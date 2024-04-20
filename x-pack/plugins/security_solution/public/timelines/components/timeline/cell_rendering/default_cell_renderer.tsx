@@ -20,21 +20,23 @@ const StyledContent = styled.div<{ $isDetails: boolean }>`
   margin: 0 auto;
 `;
 
-export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
-  data,
-  ecsData,
-  eventId,
-  header,
-  isDetails,
-  isDraggable,
-  isTimeline,
-  linkValues,
-  rowRenderers,
-  scopeId,
-  truncate,
-  asPlainText,
-  context,
-}) => {
+export const DefaultCellRenderer = (
+  {
+    data,
+    ecsData,
+    eventId,
+    header,
+    isDetails,
+    isDraggable,
+    isTimeline,
+    linkValues,
+    rowRenderers,
+    scopeId,
+    truncate,
+    asPlainText,
+    context
+  }: CellValueElementProps
+) => {
   const asPlainTextDefault = useMemo(() => {
     return (
       getLinkColumnDefinition(header.id, header.type, header.linkField) !== undefined && !isTimeline

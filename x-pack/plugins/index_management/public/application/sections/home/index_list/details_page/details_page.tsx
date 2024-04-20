@@ -23,9 +23,12 @@ import { loadIndex } from '../../../../services';
 import { DetailsPageError } from './details_page_error';
 import { DetailsPageContent } from './details_page_content';
 
-export const DetailsPage: FunctionComponent<
-  RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
-> = ({ location: { search }, history }) => {
+export const DetailsPage = (
+  {
+    location: { search },
+    history
+  }: RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
+) => {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
   const tab: IndexDetailsTabId = queryParams.get('tab') ?? IndexDetailsSection.Overview;

@@ -18,17 +18,19 @@ export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevelWithUnassigned, str
   unassigned: euiLightVars.euiColorMediumShade,
 };
 
-export const AssetCriticalityBadge: React.FC<{
-  criticalityLevel?: CriticalityLevelWithUnassigned;
-  style?: React.CSSProperties;
-  className?: string;
-  dataTestSubj?: string;
-}> = ({
-  criticalityLevel = 'unassigned',
-  style,
-  dataTestSubj = 'asset-criticality-badge',
-  className,
-}) => {
+export const AssetCriticalityBadge = (
+  {
+    criticalityLevel = 'unassigned',
+    style,
+    dataTestSubj = 'asset-criticality-badge',
+    className
+  }: {
+    criticalityLevel?: CriticalityLevelWithUnassigned;
+    style?: React.CSSProperties;
+    className?: string;
+    dataTestSubj?: string;
+  }
+) => {
   return (
     <EuiHealth
       data-test-subj={dataTestSubj}

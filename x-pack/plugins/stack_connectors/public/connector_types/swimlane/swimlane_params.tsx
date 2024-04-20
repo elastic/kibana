@@ -15,13 +15,15 @@ import {
 import * as i18n from './translations';
 import { SwimlaneActionConnector, SwimlaneActionParams, SwimlaneConnectorType } from './types';
 
-const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneActionParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  messageVariables,
-  actionConnector,
-}) => {
+const SwimlaneParamsFields = (
+  {
+    actionParams,
+    editAction,
+    index,
+    messageVariables,
+    actionConnector
+  }: ActionParamsProps<SwimlaneActionParams>
+) => {
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??

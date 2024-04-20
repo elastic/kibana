@@ -24,7 +24,7 @@ const KEY = 'investigation';
  * Second section of the overview tab in details flyout.
  * It contains investigation guide (alerts only) and highlighted fields
  */
-export const InvestigationSection: FC = memo(() => {
+export const InvestigationSection = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 

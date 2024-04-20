@@ -52,16 +52,18 @@ interface CreateOrEditModalProps {
   setField: <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => void;
 }
 
-export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
-  onClose,
-  onSubmit,
-  onNameChange,
-  validation,
-  isValidating,
-  setField,
-  tag,
-  mode,
-}) => {
+export const CreateOrEditModal = (
+  {
+    onClose,
+    onSubmit,
+    onNameChange,
+    validation,
+    isValidating,
+    setField,
+    tag,
+    mode
+  }: CreateOrEditModalProps
+) => {
   const optionalMessageId = htmlIdGenerator()();
   const ifMounted = useIfMounted();
   const [submitting, setSubmitting] = useState<boolean>(false);

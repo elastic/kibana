@@ -40,7 +40,7 @@ import { KibanaLogic } from '../kibana';
 
 import { EndpointIcon } from './endpoint_icon';
 
-export const EndpointsHeaderAction: React.FC = ({ children }) => {
+export const EndpointsHeaderAction = ({ children }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const { cloud, esConfig, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);

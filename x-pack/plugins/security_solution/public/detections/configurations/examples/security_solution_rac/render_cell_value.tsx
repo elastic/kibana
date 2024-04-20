@@ -24,23 +24,23 @@ const reason =
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps
-> = ({
-  columnId,
-  data,
-  eventId,
-  header,
-  isDetails,
-  isExpandable,
-  isExpanded,
-  linkValues,
-  rowIndex,
-  colIndex,
-  setCellProps,
-  key,
-  scopeId,
-}) => {
+export const RenderCellValue = (
+  {
+    columnId,
+    data,
+    eventId,
+    header,
+    isDetails,
+    isExpandable,
+    isExpanded,
+    linkValues,
+    rowIndex,
+    colIndex,
+    setCellProps,
+    key,
+    scopeId
+  }: EuiDataGridCellValueElementProps & CellValueElementProps
+) => {
   const value =
     useGetMappedNonEcsValue({
       data,

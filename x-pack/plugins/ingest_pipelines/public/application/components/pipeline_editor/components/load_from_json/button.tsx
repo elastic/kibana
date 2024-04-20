@@ -21,7 +21,11 @@ const i18nTexts = {
   }),
 };
 
-export const LoadFromJsonButton: FunctionComponent<Props> = ({ onDone }) => {
+export const LoadFromJsonButton = (
+  {
+    onDone
+  }: Props
+) => {
   return (
     <ModalProvider onDone={onDone}>
       {(openModal) => {

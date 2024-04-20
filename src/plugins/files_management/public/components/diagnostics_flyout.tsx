@@ -40,7 +40,11 @@ interface Props {
   onClose: () => void;
 }
 
-export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
+export const DiagnosticsFlyout = (
+  {
+    onClose
+  }: Props
+) => {
   const { filesClient } = useFilesManagementContext();
   const { status, refetch, data, isLoading, error } = useQuery(['filesDiagnostics'], async () => {
     return filesClient.getMetrics();

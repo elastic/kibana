@@ -23,7 +23,11 @@ interface CloneActionNameProps {
   disabled: boolean;
 }
 
-export const CloneActionName: FC<CloneActionNameProps> = ({ disabled }) => {
+export const CloneActionName = (
+  {
+    disabled
+  }: CloneActionNameProps
+) => {
   if (disabled) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>

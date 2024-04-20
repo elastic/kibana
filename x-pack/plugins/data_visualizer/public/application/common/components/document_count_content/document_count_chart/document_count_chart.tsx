@@ -42,14 +42,16 @@ export function LoadingSpinner() {
   );
 }
 
-export const DocumentCountChart: FC<Props> = ({
-  width,
-  chartPoints,
-  timeRangeEarliest,
-  timeRangeLatest,
-  interval,
-  loading,
-}) => {
+export const DocumentCountChart = (
+  {
+    width,
+    chartPoints,
+    timeRangeEarliest,
+    timeRangeLatest,
+    interval,
+    loading
+  }: Props
+) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
   } = useDataVisualizerKibana();

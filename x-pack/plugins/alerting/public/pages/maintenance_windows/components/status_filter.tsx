@@ -11,7 +11,12 @@ import { CustomComponentProps } from '@elastic/eui/src/components/search_bar/fil
 import { STATUS_OPTIONS } from '../constants';
 import * as i18n from '../translations';
 
-export const StatusFilter: React.FC<CustomComponentProps> = React.memo(({ query, onChange }) => {
+export const StatusFilter = React.memo((
+  {
+    query,
+    onChange
+  }: CustomComponentProps
+) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

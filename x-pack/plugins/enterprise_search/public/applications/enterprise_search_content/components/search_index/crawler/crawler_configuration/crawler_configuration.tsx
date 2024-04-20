@@ -29,7 +29,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 
 import { CrawlerConfigurationLogic } from './crawler_configuration_logic';
 
-export const CrawlerConfiguration: React.FC = () => {
+export const CrawlerConfiguration = () => {
   const { htmlExtraction } = useValues(IndexViewLogic);
   const { status } = useValues(CrawlerConfigurationLogic);
   const { updateHtmlExtraction } = useActions(CrawlerConfigurationLogic);

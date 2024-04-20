@@ -19,6 +19,10 @@ export interface KibanaThemeProviderProps {
 }
 
 /** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme */
-export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => (
-  <KbnThemeProvider {...{ theme: { theme$ }, modify }}>{children}</KbnThemeProvider>
-);
+export const KibanaThemeProvider = (
+  {
+    theme$,
+    modify,
+    children
+  }: KibanaThemeProviderProps
+) => (<KbnThemeProvider {...{ theme: { theme$ }, modify }}>{children}</KbnThemeProvider>);

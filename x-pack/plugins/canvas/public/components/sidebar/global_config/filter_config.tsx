@@ -8,6 +8,6 @@
 import React, { FC } from 'react';
 import { WorkpadFilters } from '../../workpad_filters';
 
-export const FilterConfig: FC = () => {
+export const FilterConfig = () => {
   return <WorkpadFilters />;
 };

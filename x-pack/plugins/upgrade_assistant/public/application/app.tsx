@@ -30,7 +30,7 @@ import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from 
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
-const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
+const AppHandlingClusterUpgradeState = () => {
   const {
     services: { api, core },
   } = useAppContext();

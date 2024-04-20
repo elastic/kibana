@@ -16,7 +16,7 @@ import { ContentWrapper } from './content_wrapper';
 
 const VIDEO_CONTENT_HEIGHT = 320;
 
-const VideoComponent: React.FC = () => {
+const VideoComponent = () => {
   const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
   const ref = React.useRef<HTMLIFrameElement>(null);
   const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);

@@ -10,7 +10,7 @@ import React, { FunctionComponent } from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 import { colors } from './common_styles';
 
-export const IconChartTagcloud: FunctionComponent = ({
+export const IconChartTagcloud = ({
   title,
   titleId,
   ...props

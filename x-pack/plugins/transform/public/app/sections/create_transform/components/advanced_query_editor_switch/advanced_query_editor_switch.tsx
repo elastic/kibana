@@ -16,25 +16,28 @@ import { defaultSearch } from '../step_define';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
-  advancedSourceEditor: {
-    actions: {
-      setAdvancedSourceEditorSwitchModalVisible,
-      setSourceConfigUpdated,
-      toggleAdvancedSourceEditor,
+export const AdvancedQueryEditorSwitch = (
+  {
+    advancedSourceEditor: {
+      actions: {
+        setAdvancedSourceEditorSwitchModalVisible,
+        setSourceConfigUpdated,
+        toggleAdvancedSourceEditor,
+      },
+      state: {
+        isAdvancedSourceEditorEnabled,
+        isAdvancedSourceEditorSwitchModalVisible,
+        sourceConfigUpdated,
+        advancedEditorSourceConfigLastApplied,
+        advancedEditorSourceConfig,
+      },
     },
-    state: {
-      isAdvancedSourceEditorEnabled,
-      isAdvancedSourceEditorSwitchModalVisible,
-      sourceConfigUpdated,
-      advancedEditorSourceConfigLastApplied,
-      advancedEditorSourceConfig,
-    },
-  },
-  searchBar: {
-    actions: { setSearchQuery },
-  },
-}) => {
+
+    searchBar: {
+      actions: { setSearchQuery },
+    }
+  }: StepDefineFormHook
+) => {
   // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {
     if (reset === true) {

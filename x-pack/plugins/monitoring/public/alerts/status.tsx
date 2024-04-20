@@ -22,7 +22,7 @@ interface Props {
   showOnlyCount?: boolean;
   stateFilter?: (state: AlertState) => boolean;
 }
-export const AlertsStatus: React.FC<Props> = (props: Props) => {
+export const AlertsStatus = (props: Props) => {
   const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 

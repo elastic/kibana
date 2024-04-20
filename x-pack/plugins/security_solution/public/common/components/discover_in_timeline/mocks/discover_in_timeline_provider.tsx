@@ -16,7 +16,11 @@ type Props = PropsWithChildren<{}>;
 
 jest.mock('../use_discover_in_timeline_actions');
 
-export const MockDiscoverInTimelineContext: FC<Props> = ({ children }) => {
+export const MockDiscoverInTimelineContext = (
+  {
+    children
+  }: Props
+) => {
   const discoverStateContainer = useRef(discoverPluginMock.getDiscoverStateMock({}));
 
   const setDiscoverStateContainer = useCallback((stateContainer: DiscoverStateContainer) => {

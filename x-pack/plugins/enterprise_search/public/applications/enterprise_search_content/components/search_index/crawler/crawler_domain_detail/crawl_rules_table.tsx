@@ -112,14 +112,16 @@ const DEFAULT_DESCRIPTION = (
   </p>
 );
 
-export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
-  description = DEFAULT_DESCRIPTION,
-  domainId,
-  indexName,
-  crawlRules,
-  defaultCrawlRule,
-  title,
-}) => {
+export const CrawlRulesTable = (
+  {
+    description = DEFAULT_DESCRIPTION,
+    domainId,
+    indexName,
+    crawlRules,
+    defaultCrawlRule,
+    title
+  }: CrawlRulesTableProps
+) => {
   const { updateCrawlRules } = useActions(CrawlerDomainDetailLogic);
 
   const columns: Array<InlineEditableTableColumn<ItemWithAnID>> = [

@@ -27,11 +27,13 @@ interface ValidationStepPanelProps {
   action?: React.ReactNode;
 }
 
-export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
-  step,
-  label,
-  action,
-}) => {
+export const ValidationStepPanel = (
+  {
+    step,
+    label,
+    action
+  }: ValidationStepPanelProps
+) => {
   const showErrorMessage = step.state === 'invalid' || step.state === 'warning';
 
   return (

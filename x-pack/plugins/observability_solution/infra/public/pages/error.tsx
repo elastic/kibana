@@ -21,7 +21,11 @@ interface Props {
   message: string;
 }
 
-export const Error: React.FC<Props> = ({ message }) => {
+export const Error = (
+  {
+    message
+  }: Props
+) => {
   return (
     <ColumnarPage>
       <DetailPageContent>
@@ -31,7 +35,13 @@ export const Error: React.FC<Props> = ({ message }) => {
   );
 };
 
-export const ErrorPageBody: React.FC<{ message: string }> = ({ message }) => {
+export const ErrorPageBody = (
+  {
+    message
+  }: {
+    message: string;
+  }
+) => {
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} bottomBorder={false} grow={false}>
       <EuiPageTemplate.Header>

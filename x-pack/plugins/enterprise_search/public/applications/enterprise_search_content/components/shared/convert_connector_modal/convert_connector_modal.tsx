@@ -17,7 +17,7 @@ import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 
 import { ConvertConnectorLogic } from '../../search_index/connector/native_connector_configuration/convert_connector_logic';
 
-export const ConvertConnectorModal: React.FC = () => {
+export const ConvertConnectorModal = () => {
   const { convertConnector, hideModal } = useActions(ConvertConnectorLogic);
   const { isLoading } = useValues(ConvertConnectorLogic);
   return (

@@ -9,12 +9,19 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
-export const DataSearchProgress: React.FC<{
-  label?: React.ReactNode;
-  maxValue?: number;
-  onCancel?: () => void;
-  value?: number;
-}> = ({ label, maxValue, onCancel, value }) => {
+export const DataSearchProgress = (
+  {
+    label,
+    maxValue,
+    onCancel,
+    value
+  }: {
+    label?: React.ReactNode;
+    maxValue?: number;
+    onCancel?: () => void;
+    value?: number;
+  }
+) => {
   const valueText = useMemo(
     () =>
       Number.isFinite(maxValue) && Number.isFinite(value) ? `${value} / ${maxValue}` : undefined,

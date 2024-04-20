@@ -64,7 +64,7 @@ const tagConfig: FieldConfig = {
   type: FIELD_TYPES.TEXT,
 };
 
-export const CommonProcessorFields: FunctionComponent = () => {
+export const CommonProcessorFields = () => {
   const suggestionProvider = PainlessLang.getSuggestionProvider('processor_conditional');
 
   return (

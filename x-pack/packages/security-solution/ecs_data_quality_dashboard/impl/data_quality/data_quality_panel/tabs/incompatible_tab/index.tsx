@@ -59,20 +59,22 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const IncompatibleTabComponent: React.FC<Props> = ({
-  addSuccessToast,
-  addToNewCaseDisabled,
-  docsCount,
-  formatBytes,
-  formatNumber,
-  ilmPhase,
-  indexName,
-  isAssistantEnabled,
-  onAddToNewCase,
-  partitionedFieldMetadata,
-  patternDocsCount,
-  sizeInBytes,
-}) => {
+const IncompatibleTabComponent = (
+  {
+    addSuccessToast,
+    addToNewCaseDisabled,
+    docsCount,
+    formatBytes,
+    formatNumber,
+    ilmPhase,
+    indexName,
+    isAssistantEnabled,
+    onAddToNewCase,
+    partitionedFieldMetadata,
+    patternDocsCount,
+    sizeInBytes
+  }: Props
+) => {
   const { isILMAvailable } = useDataQualityContext();
   const body = useMemo(() => <EmptyPromptBody body={i18n.INCOMPATIBLE_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.INCOMPATIBLE_EMPTY_TITLE} />, []);

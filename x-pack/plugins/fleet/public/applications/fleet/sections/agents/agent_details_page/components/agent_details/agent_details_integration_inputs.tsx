@@ -63,11 +63,17 @@ const StyledEuiTreeView = styled(EuiTreeView)`
   }
 `;
 
-export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
-  agent: Agent;
-  packagePolicy: PackagePolicy;
-  'data-test-subj'?: string;
-}> = memo(({ agent, packagePolicy, 'data-test-subj': dataTestSubj }) => {
+export const AgentDetailsIntegrationInputs = memo((
+  {
+    agent,
+    packagePolicy,
+    'data-test-subj': dataTestSubj
+  }: {
+    agent: Agent;
+    packagePolicy: PackagePolicy;
+    'data-test-subj'?: string;
+  }
+) => {
   const { getHref } = useLink();
 
   const inputStatusMap = useMemo(

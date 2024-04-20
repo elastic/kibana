@@ -16,16 +16,18 @@ const strings = {
     }),
 };
 
-export const CanvasLoading: FC<{ msg?: string }> = ({
-  msg = `${strings.getLoadingLabel()}...`,
-}) => (
-  <div className="canvasContainer--loading">
-    <EuiPanel>
-      <EuiLoadingChart size="m" />
-      <EuiSpacer size="s" />
-      <EuiText color="default" size="s">
-        <p>{msg}</p>
-      </EuiText>
-    </EuiPanel>
-  </div>
-);
+export const CanvasLoading = (
+  {
+    msg = `${strings.getLoadingLabel()}...`
+  }: {
+    msg?: string;
+  }
+) => (<div className="canvasContainer--loading">
+  <EuiPanel>
+    <EuiLoadingChart size="m" />
+    <EuiSpacer size="s" />
+    <EuiText color="default" size="s">
+      <p>{msg}</p>
+    </EuiText>
+  </EuiPanel>
+</div>);

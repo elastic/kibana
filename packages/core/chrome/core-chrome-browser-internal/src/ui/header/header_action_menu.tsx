@@ -34,7 +34,11 @@ export const useHeaderActionMenuMounter = (
   return mounter;
 };
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
+export const HeaderActionMenu = (
+  {
+    mounter
+  }: HeaderActionMenuProps
+) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 

@@ -9,7 +9,7 @@
 import React, { FunctionComponent } from 'react';
 import { EuiSkeletonText, EuiPageSection } from '@elastic/eui';
 
-export const EditorContentSpinner: FunctionComponent = () => {
+export const EditorContentSpinner = () => {
   return (
     <EuiPageSection className="conApp__editor__spinner">
       <EuiSkeletonText lines={10} />

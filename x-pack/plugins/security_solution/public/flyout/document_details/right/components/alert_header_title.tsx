@@ -27,7 +27,7 @@ import { FlyoutTitle } from '../../../shared/components/flyout_title';
 /**
  * Alert details flyout right section header
  */
-export const AlertHeaderTitle: FC = memo(() => {
+export const AlertHeaderTitle = memo(() => {
   const {
     dataFormattedForFieldBrowser,
     eventId,

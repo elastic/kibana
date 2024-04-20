@@ -26,7 +26,13 @@ interface Props {
   embeddable: LensApi;
 }
 
-export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
+export const CompatibleLayer = (
+  {
+    layer,
+    layerIndex,
+    embeddable
+  }: Props
+) => {
   const {
     services: {
       data,

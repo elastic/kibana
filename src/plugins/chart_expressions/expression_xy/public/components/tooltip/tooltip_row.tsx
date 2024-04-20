@@ -12,7 +12,12 @@ export interface TooltipData {
   value?: string;
 }
 
-export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
+export const TooltipRow = (
+  {
+    label,
+    value
+  }: TooltipData
+) => {
   return label && value ? (
     <tr>
       <td className="detailedTooltip__label">

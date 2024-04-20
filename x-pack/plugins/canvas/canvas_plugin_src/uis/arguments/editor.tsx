@@ -27,7 +27,14 @@ interface EditorArgProps {
   renderError: (err?: string | Error) => void;
 }
 
-const EditorArg: FC<EditorArgProps> = ({ argValue, typeInstance, onValueChange, renderError }) => {
+const EditorArg = (
+  {
+    argValue,
+    typeInstance,
+    onValueChange,
+    renderError
+  }: EditorArgProps
+) => {
   const [value, setValue] = useState(argValue);
   const prevValue = usePrevious(value);
 

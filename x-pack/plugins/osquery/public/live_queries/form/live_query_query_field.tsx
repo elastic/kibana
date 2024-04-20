@@ -38,10 +38,12 @@ export interface LiveQueryQueryFieldProps {
   disabled?: boolean;
 }
 
-const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
-  disabled,
-  handleSubmitForm,
-}) => {
+const LiveQueryQueryFieldComponent = (
+  {
+    disabled,
+    handleSubmitForm
+  }: LiveQueryQueryFieldProps
+) => {
   const { formState, watch, resetField } = useFormContext<LiveQueryFormFields>();
   const [advancedContentState, setAdvancedContentState] = useState<EuiAccordionProps['forceState']>(
     () => (isEmpty(formState.defaultValues?.ecs_mapping) ? 'closed' : 'open')

@@ -30,7 +30,11 @@ interface Props {
   setIsValid: (na: boolean) => void;
 }
 
-export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
+export const CategorizationDetectors = (
+  {
+    setIsValid
+  }: Props
+) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
 

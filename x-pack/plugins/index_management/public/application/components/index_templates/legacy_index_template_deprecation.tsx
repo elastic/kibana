@@ -18,10 +18,12 @@ interface Props {
   showCta?: boolean;
 }
 
-export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = ({
-  history,
-  showCta,
-}) => {
+export const LegacyIndexTemplatesDeprecation = (
+  {
+    history,
+    showCta
+  }: Props
+) => {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.idxMgmt.legacyIndexTemplatesDeprecation.title', {

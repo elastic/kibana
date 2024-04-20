@@ -27,12 +27,14 @@ interface InitializeClientPanelContentProps {
   setSelectedLanguage: (selectedLanguage: LanguageDefinition) => void;
 }
 
-export const InitializeClientPanelContent: React.FC<InitializeClientPanelContentProps> = ({
-  assetBasePath,
-  codeArgs,
-  selectedLanguage,
-  setSelectedLanguage,
-}) => {
+export const InitializeClientPanelContent = (
+  {
+    assetBasePath,
+    codeArgs,
+    selectedLanguage,
+    setSelectedLanguage
+  }: InitializeClientPanelContentProps
+) => {
   const { services } = useKibana<KibanaDeps>();
   return (
     <CodeBox

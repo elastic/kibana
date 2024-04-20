@@ -26,7 +26,12 @@ interface Props {
 /**
  * Component for rendering a set of buttons for switching between the Anomaly Detection results views.
  */
-export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) => {
+export const AnomalyResultsViewSelector = (
+  {
+    viewId,
+    selectedJobs
+  }: Props
+) => {
   const mounted = useRef(false);
   const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();

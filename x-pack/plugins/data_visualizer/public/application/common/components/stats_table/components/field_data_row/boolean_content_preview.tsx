@@ -13,7 +13,11 @@ import { getTFPercentage } from '../../utils';
 import { ColumnChart } from './column_chart';
 import type { FieldDataRowProps } from '../../types';
 
-export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
+export const BooleanContentPreview = (
+  {
+    config
+  }: FieldDataRowProps
+) => {
   const chartData = useMemo(() => {
     const results = getTFPercentage(config);
     if (results) {

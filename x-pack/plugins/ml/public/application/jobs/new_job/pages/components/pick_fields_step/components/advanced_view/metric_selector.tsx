@@ -25,14 +25,16 @@ interface Props {
 
 const MAX_WIDTH = 560;
 
-export const MetricSelector: FC<Props> = ({
-  payload,
-  fields,
-  aggs,
-  detectorChangeHandler,
-  closeModal,
-  showModal,
-}) => {
+export const MetricSelector = (
+  {
+    payload,
+    fields,
+    aggs,
+    detectorChangeHandler,
+    closeModal,
+    showModal
+  }: Props
+) => {
   return (
     <Fragment>
       <EuiFlexGroup style={{ maxWidth: MAX_WIDTH }}>

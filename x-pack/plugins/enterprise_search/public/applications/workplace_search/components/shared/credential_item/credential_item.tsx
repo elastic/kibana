@@ -44,12 +44,14 @@ interface CredentialItemProps {
 
 const inputSelectAll = (e: React.MouseEvent<HTMLInputElement>) => e.currentTarget.select();
 
-export const CredentialItem: React.FC<CredentialItemProps> = ({
-  label,
-  value,
-  testSubj,
-  hideCopy,
-}) => {
+export const CredentialItem = (
+  {
+    label,
+    value,
+    testSubj,
+    hideCopy
+  }: CredentialItemProps
+) => {
   const [isVisible, setIsVisible] = useState(false);
 
   const SHOW_CREDENTIAL_TOOLTIP = i18n.translate(

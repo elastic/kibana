@@ -23,7 +23,12 @@ const defaultEditorOptions = {
   lineNumbers: 'off',
 };
 
-export const XJsonEditor: FunctionComponent<Props> = ({ field, editorProps }) => {
+export const XJsonEditor = (
+  {
+    field,
+    editorProps
+  }: Props
+) => {
   const { value, setValue } = field;
   const { xJson, setXJson, convertToJson } = useXJsonMode(value);
 

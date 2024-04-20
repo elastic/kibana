@@ -17,11 +17,13 @@ interface Props {
   setRuleParams: (key: string, value: any) => void;
 }
 
-export const StatusExpressionSelect: React.FC<Props> = ({
-  ruleParams,
-  hasFilters,
-  setRuleParams,
-}) => {
+export const StatusExpressionSelect = (
+  {
+    ruleParams,
+    hasFilters,
+    setRuleParams
+  }: Props
+) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(ruleParams.shouldCheckStatus ?? true);
 
   useEffect(() => {

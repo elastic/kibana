@@ -20,11 +20,13 @@ interface Props {
   hideCloseJobModalVisible(): void;
   forceCloseJob(): void;
 }
-export const CloseJobConfirm: FC<Props> = ({
-  combinedJobState,
-  hideCloseJobModalVisible,
-  forceCloseJob,
-}) => {
+export const CloseJobConfirm = (
+  {
+    combinedJobState,
+    hideCloseJobModalVisible,
+    forceCloseJob
+  }: Props
+) => {
   return (
     <EuiConfirmModal
       title={

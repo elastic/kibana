@@ -18,7 +18,7 @@ import { AnalyticsOverview } from './components/analytics_overview/analytics_ove
 
 import { ROOT_PATH, COLLECTION_VIEW_PATH } from './routes';
 
-export const Analytics: React.FC<InitialAppData> = (props) => {
+export const Analytics = (props: InitialAppData) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 

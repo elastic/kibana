@@ -20,7 +20,11 @@ export interface TotalFieldsCountProps {
   fieldsCountStats?: TotalFieldsStats;
 }
 
-export const TotalFieldsCount: FC<TotalFieldsCountProps> = ({ fieldsCountStats }) => {
+export const TotalFieldsCount = (
+  {
+    fieldsCountStats
+  }: TotalFieldsCountProps
+) => {
   if (
     !fieldsCountStats ||
     fieldsCountStats.visibleFieldsCount === undefined ||

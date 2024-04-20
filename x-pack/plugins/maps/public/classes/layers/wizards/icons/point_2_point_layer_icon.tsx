@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-export const Point2PointLayerIcon: FunctionComponent = () => (
+export const Point2PointLayerIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="49"

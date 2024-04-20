@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useApiErrorMessage } from '../state_management/selectors/api_error_message';
 
-export const EditTransformApiErrorCallout: FC = () => {
+export const EditTransformApiErrorCallout = () => {
   const apiErrorMessage = useApiErrorMessage();
 
   if (apiErrorMessage === undefined) return null;

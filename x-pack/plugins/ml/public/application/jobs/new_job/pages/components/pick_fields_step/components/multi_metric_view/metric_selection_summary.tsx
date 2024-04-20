@@ -16,7 +16,7 @@ import { getChartSettings, defaultChartSettings } from '../../../charts/common/s
 import { ChartGrid } from './chart_grid';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
-export const MultiMetricDetectorsSummary: FC = () => {
+export const MultiMetricDetectorsSummary = () => {
   const {
     jobCreator: jc,
     chartLoader,

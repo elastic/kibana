@@ -77,210 +77,215 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 }
 
 const empty: ActionConnector[] = [];
-export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
-  ({ connectors, isLoadingConnectors, withSteps, draftStorageKey }) => {
-    const { owner } = useCasesContext();
-    const { isSubmitting } = useFormContext();
-    const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-    const { euiTheme } = useEuiTheme();
-    const availableOwners = useAvailableCasesOwners();
-    const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
+export const CreateCaseFormFields = React.memo((
+  {
+    connectors,
+    isLoadingConnectors,
+    withSteps,
+    draftStorageKey
+  }: CreateCaseFormFieldsProps
+) => {
+  const { owner } = useCasesContext();
+  const { isSubmitting } = useFormContext();
+  const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
+  const { euiTheme } = useEuiTheme();
+  const availableOwners = useAvailableCasesOwners();
+  const canShowCaseSolutionSelection = !owner.length && availableOwners.length > 1;
 
-    const firstStep = useMemo(
-      () => ({
-        title: i18n.STEP_ONE_TITLE,
-        children: (
-          <>
-            <Title isLoading={isSubmitting} />
-            {caseAssignmentAuthorized ? (
-              <div css={containerCss(euiTheme)}>
-                <Assignees isLoading={isSubmitting} />
-              </div>
-            ) : null}
+  const firstStep = useMemo(
+    () => ({
+      title: i18n.STEP_ONE_TITLE,
+      children: (
+        <>
+          <Title isLoading={isSubmitting} />
+          {caseAssignmentAuthorized ? (
             <div css={containerCss(euiTheme)}>
-              <Tags isLoading={isSubmitting} />
+              <Assignees isLoading={isSubmitting} />
             </div>
-            <div css={containerCss(euiTheme)}>
-              <Category isLoading={isSubmitting} />
-            </div>
-            <div css={containerCss(euiTheme)}>
-              <Severity isLoading={isSubmitting} />
-            </div>
-            {canShowCaseSolutionSelection && (
-              <div css={containerCss(euiTheme, true)}>
-                <CreateCaseOwnerSelector
-                  availableOwners={availableOwners}
-                  isLoading={isSubmitting}
-                />
-              </div>
-            )}
+          ) : null}
+          <div css={containerCss(euiTheme)}>
+            <Tags isLoading={isSubmitting} />
+          </div>
+          <div css={containerCss(euiTheme)}>
+            <Category isLoading={isSubmitting} />
+          </div>
+          <div css={containerCss(euiTheme)}>
+            <Severity isLoading={isSubmitting} />
+          </div>
+          {canShowCaseSolutionSelection && (
             <div css={containerCss(euiTheme, true)}>
-              <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
+              <CreateCaseOwnerSelector
+                availableOwners={availableOwners}
+                isLoading={isSubmitting}
+              />
             </div>
-            <div css={containerCss(euiTheme)}>
-              <CustomFields isLoading={isSubmitting} />
-            </div>
-            <div css={containerCss(euiTheme)} />
-          </>
-        ),
-      }),
-      [
-        isSubmitting,
-        euiTheme,
-        caseAssignmentAuthorized,
-        canShowCaseSolutionSelection,
-        availableOwners,
-        draftStorageKey,
-      ]
-    );
-
-    const secondStep = useMemo(
-      () => ({
-        title: i18n.STEP_TWO_TITLE,
-        children: (
-          <div>
-            <SyncAlertsToggle isLoading={isSubmitting} />
+          )}
+          <div css={containerCss(euiTheme, true)}>
+            <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
           </div>
-        ),
-      }),
-      [isSubmitting]
-    );
-
-    const thirdStep = useMemo(
-      () => ({
-        title: i18n.STEP_THREE_TITLE,
-        children: (
-          <div>
-            <Connector
-              connectors={connectors}
-              isLoadingConnectors={isLoadingConnectors}
-              isLoading={isSubmitting}
-            />
+          <div css={containerCss(euiTheme)}>
+            <CustomFields isLoading={isSubmitting} />
           </div>
-        ),
-      }),
-      [connectors, isLoadingConnectors, isSubmitting]
-    );
+          <div css={containerCss(euiTheme)} />
+        </>
+      ),
+    }),
+    [
+      isSubmitting,
+      euiTheme,
+      caseAssignmentAuthorized,
+      canShowCaseSolutionSelection,
+      availableOwners,
+      draftStorageKey,
+    ]
+  );
 
-    const allSteps = useMemo(
-      () => [firstStep, ...(isSyncAlertsEnabled ? [secondStep] : []), thirdStep],
-      [isSyncAlertsEnabled, firstStep, secondStep, thirdStep]
-    );
+  const secondStep = useMemo(
+    () => ({
+      title: i18n.STEP_TWO_TITLE,
+      children: (
+        <div>
+          <SyncAlertsToggle isLoading={isSubmitting} />
+        </div>
+      ),
+    }),
+    [isSubmitting]
+  );
 
-    return (
-      <>
-        {isSubmitting && (
-          <EuiLoadingSpinner
-            css={css`
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              z-index: 99;
-            `}
-            data-test-subj="create-case-loading-spinner"
-            size="xl"
+  const thirdStep = useMemo(
+    () => ({
+      title: i18n.STEP_THREE_TITLE,
+      children: (
+        <div>
+          <Connector
+            connectors={connectors}
+            isLoadingConnectors={isLoadingConnectors}
+            isLoading={isSubmitting}
           />
-        )}
-        {withSteps ? (
-          <EuiSteps
-            headingElement="h2"
-            steps={allSteps}
-            data-test-subj={'case-creation-form-steps'}
-          />
-        ) : (
-          <>
-            {firstStep.children}
-            {isSyncAlertsEnabled && secondStep.children}
-            {thirdStep.children}
-          </>
-        )}
-      </>
-    );
-  }
-);
+        </div>
+      ),
+    }),
+    [connectors, isLoadingConnectors, isSubmitting]
+  );
+
+  const allSteps = useMemo(
+    () => [firstStep, ...(isSyncAlertsEnabled ? [secondStep] : []), thirdStep],
+    [isSyncAlertsEnabled, firstStep, secondStep, thirdStep]
+  );
+
+  return (
+    <>
+      {isSubmitting && (
+        <EuiLoadingSpinner
+          css={css`
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 99;
+          `}
+          data-test-subj="create-case-loading-spinner"
+          size="xl"
+        />
+      )}
+      {withSteps ? (
+        <EuiSteps
+          headingElement="h2"
+          steps={allSteps}
+          data-test-subj={'case-creation-form-steps'}
+        />
+      ) : (
+        <>
+          {firstStep.children}
+          {isSyncAlertsEnabled && secondStep.children}
+          {thirdStep.children}
+        </>
+      )}
+    </>
+  );
+});
 
 CreateCaseFormFields.displayName = 'CreateCaseFormFields';
 
-export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
-  ({
+export const CreateCaseForm = React.memo((
+  {
     withSteps = true,
     afterCaseCreated,
     onCancel,
     onSuccess,
     timelineIntegration,
     attachments,
-    initialValue,
-  }) => {
-    const { owner } = useCasesContext();
-    const draftStorageKey = getMarkdownEditorStorageKey({
-      appId: owner[0],
-      caseId: 'createCase',
-      commentId: 'description',
+    initialValue
+  }: CreateCaseFormProps
+) => {
+  const { owner } = useCasesContext();
+  const draftStorageKey = getMarkdownEditorStorageKey({
+    appId: owner[0],
+    caseId: 'createCase',
+    commentId: 'description',
+  });
+
+  const handleOnConfirmationCallback = (): void => {
+    onCancel();
+    removeItemFromSessionStorage(draftStorageKey);
+  };
+
+  const { showConfirmationModal, onOpenModal, onConfirmModal, onCancelModal } =
+    useCancelCreationAction({
+      onConfirmationCallback: handleOnConfirmationCallback,
     });
 
-    const handleOnConfirmationCallback = (): void => {
-      onCancel();
-      removeItemFromSessionStorage(draftStorageKey);
-    };
+  const handleOnSuccess = (theCase: CaseUI): void => {
+    removeItemFromSessionStorage(draftStorageKey);
+    return onSuccess(theCase);
+  };
 
-    const { showConfirmationModal, onOpenModal, onConfirmModal, onCancelModal } =
-      useCancelCreationAction({
-        onConfirmationCallback: handleOnConfirmationCallback,
-      });
-
-    const handleOnSuccess = (theCase: CaseUI): void => {
-      removeItemFromSessionStorage(draftStorageKey);
-      return onSuccess(theCase);
-    };
-
-    return (
-      <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-        <FormContext
-          afterCaseCreated={afterCaseCreated}
-          onSuccess={handleOnSuccess}
-          attachments={attachments}
-          initialValue={initialValue}
-        >
-          <CreateCaseFormFields
-            connectors={empty}
-            isLoadingConnectors={false}
-            withSteps={withSteps}
-            draftStorageKey={draftStorageKey}
-          />
-          <div>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="l"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="create-case-cancel"
-                  iconType="cross"
-                  onClick={onOpenModal}
-                  size="s"
-                >
-                  {i18n.CANCEL}
-                </EuiButtonEmpty>
-                {showConfirmationModal && (
-                  <CancelCreationConfirmationModal
-                    title={i18n.MODAL_TITLE}
-                    onConfirm={onConfirmModal}
-                    onCancel={onCancelModal}
-                  />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SubmitCaseButton />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-          <InsertTimeline fieldName={descriptionFieldName} />
-        </FormContext>
-      </CasesTimelineIntegrationProvider>
-    );
-  }
-);
+  return (
+    <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
+      <FormContext
+        afterCaseCreated={afterCaseCreated}
+        onSuccess={handleOnSuccess}
+        attachments={attachments}
+        initialValue={initialValue}
+      >
+        <CreateCaseFormFields
+          connectors={empty}
+          isLoadingConnectors={false}
+          withSteps={withSteps}
+          draftStorageKey={draftStorageKey}
+        />
+        <div>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="l"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="create-case-cancel"
+                iconType="cross"
+                onClick={onOpenModal}
+                size="s"
+              >
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+              {showConfirmationModal && (
+                <CancelCreationConfirmationModal
+                  title={i18n.MODAL_TITLE}
+                  onConfirm={onConfirmModal}
+                  onCancel={onCancelModal}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitCaseButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+        <InsertTimeline fieldName={descriptionFieldName} />
+      </FormContext>
+    </CasesTimelineIntegrationProvider>
+  );
+});
 
 CreateCaseForm.displayName = 'CreateCaseForm';

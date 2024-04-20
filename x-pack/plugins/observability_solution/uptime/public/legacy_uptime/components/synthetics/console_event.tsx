@@ -14,7 +14,11 @@ interface Props {
   event: JourneyStep;
 }
 
-export const ConsoleEvent: FC<Props> = ({ event }) => {
+export const ConsoleEvent = (
+  {
+    event
+  }: Props
+) => {
   const {
     colors: { danger },
   } = useContext(UptimeThemeContext);

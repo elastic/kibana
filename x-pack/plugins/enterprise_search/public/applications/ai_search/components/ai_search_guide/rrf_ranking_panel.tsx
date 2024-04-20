@@ -66,7 +66,7 @@ const steps: EuiContainedStepProps[] = [
   },
 ];
 
-export const RrfRankingPanel: React.FC = () => (
+export const RrfRankingPanel = () => (
   <>
     <EuiSpacer />
     <EuiFlexGroup direction="column">

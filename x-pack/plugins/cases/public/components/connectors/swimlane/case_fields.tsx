@@ -12,7 +12,11 @@ import * as i18n from './translations';
 import type { ConnectorFieldsProps } from '../types';
 import { connectorValidator } from './validator';
 
-const SwimlaneFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
+const SwimlaneFieldsComponent = (
+  {
+    connector
+  }: ConnectorFieldsProps
+) => {
   const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   return (

@@ -26,14 +26,16 @@ interface DataTableColumnHeaderProps {
   showColumnTokens?: boolean;
 }
 
-export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
-  columnDisplayName,
-  showColumnTokens,
-  columnName,
-  columnsMeta,
-  dataView,
-  headerRowHeight,
-}) => {
+export const DataTableColumnHeader = (
+  {
+    columnDisplayName,
+    showColumnTokens,
+    columnName,
+    columnsMeta,
+    dataView,
+    headerRowHeight
+  }: DataTableColumnHeaderProps
+) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && (
@@ -48,9 +50,9 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   );
 };
 
-const DataTableColumnToken: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
-> = (props) => {
+const DataTableColumnToken = (
+  props: Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
+) => {
   const { columnName, columnsMeta, dataView } = props;
   const columnToken = useMemo(
     () => getRenderedToken({ columnName, columnsMeta, dataView }),
@@ -62,9 +64,11 @@ const DataTableColumnToken: React.FC<
   ) : null;
 };
 
-const DataTableColumnTitle: React.FC<Pick<DataTableColumnHeaderProps, 'columnDisplayName'>> = ({
-  columnDisplayName,
-}) => {
+const DataTableColumnTitle = (
+  {
+    columnDisplayName
+  }: Pick<DataTableColumnHeaderProps, 'columnDisplayName'>
+) => {
   return <span data-test-subj="unifiedDataTableColumnTitle">{columnDisplayName}</span>;
 };
 
@@ -84,7 +88,7 @@ function getRenderedToken({
     const columnMeta = columnsMeta[columnName];
     const columnIconType = getTextBasedColumnIconType(columnMeta);
     return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
-      <FieldIcon type={columnIconType} css={fieldIconCss} />
+      (<FieldIcon type={columnIconType} css={fieldIconCss} />)
     ) : null;
   }
 

@@ -100,14 +100,16 @@ interface ExplorerQueryBarProps {
   dataViews?: DataView[];
 }
 
-export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
-  filterActive,
-  filterPlaceHolder,
-  indexPattern,
-  queryString,
-  updateLanguage,
-  dataViews = [],
-}) => {
+export const ExplorerQueryBar = (
+  {
+    filterActive,
+    filterPlaceHolder,
+    indexPattern,
+    queryString,
+    updateLanguage,
+    dataViews = []
+  }: ExplorerQueryBarProps
+) => {
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
   const {

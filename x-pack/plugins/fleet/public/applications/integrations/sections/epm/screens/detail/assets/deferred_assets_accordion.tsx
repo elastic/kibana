@@ -29,11 +29,13 @@ interface Props {
   forceRefreshAssets?: () => void;
 }
 
-export const DeferredAssetsSection: FunctionComponent<Props> = ({
-  deferredInstallations,
-  packageInfo,
-  forceRefreshAssets,
-}) => {
+export const DeferredAssetsSection = (
+  {
+    deferredInstallations,
+    packageInfo,
+    forceRefreshAssets
+  }: Props
+) => {
   const authz = useAuthz();
 
   const deferredTransforms = deferredInstallations.filter(

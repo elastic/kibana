@@ -38,14 +38,16 @@ export interface Props {
   border?: 'left' | 'right';
 }
 
-export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
-  children,
-  width,
-  className = '',
-  backgroundColor,
-  border,
-  ...rest
-}) => {
+export const Panel = (
+  {
+    children,
+    width,
+    className = '',
+    backgroundColor,
+    border,
+    ...rest
+  }: Props & React.HTMLProps<HTMLDivElement>
+) => {
   const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({
     hasContent: false,
     hasFooter: false,

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HelpPopover } from '../../../../../components/help_popover/help_popover';
 
-export const MulticlassConfusionMatrixHelpPopover: FC = () => {
+export const MulticlassConfusionMatrixHelpPopover = () => {
   return (
     <HelpPopover
       anchorPosition="upCenter"

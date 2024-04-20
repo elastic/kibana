@@ -13,10 +13,15 @@ import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { useHasRequiredIndicesPermissions } from '../hooks';
 
-export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' | 'create' }> = ({
-  indexName,
-  docsType,
-}) => {
+export const IndexPermissionsCallout = (
+  {
+    indexName,
+    docsType
+  }: {
+    indexName: string;
+    docsType: 'start' | 'create';
+  }
+) => {
   const {
     services: {
       docLinks: {

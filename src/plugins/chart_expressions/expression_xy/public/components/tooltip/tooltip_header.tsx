@@ -17,7 +17,13 @@ interface Props {
   xDomain?: XDomain;
 }
 
-export const TooltipHeader: FC<Props> = ({ value, formatter, xDomain }) => {
+export const TooltipHeader = (
+  {
+    value,
+    formatter,
+    xDomain
+  }: Props
+) => {
   const renderEndzoneHeader =
     xDomain && typeof value === 'number' ? isEndzoneBucket(value, xDomain) : undefined;
 

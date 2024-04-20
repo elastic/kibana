@@ -29,7 +29,13 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
 /**
  * Pure component for rendering the tooltip content with a custom layout across the ML plugin.
  */
-export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData }) => {
+export const FormattedTooltip = (
+  {
+    tooltipData
+  }: {
+    tooltipData: TooltipData;
+  }
+) => {
   return (
     <div className="mlChartTooltip">
       {tooltipData.length > 0 && tooltipData[0].skipHeader === undefined && (
@@ -77,7 +83,13 @@ export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData
 /**
  * Tooltip component bundled with the {@link ChartTooltipService}
  */
-const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) => {
+const Tooltip = React.memo((
+  {
+    service
+  }: {
+    service: ChartTooltipService;
+  }
+) => {
   const [tooltipData, setData] = useState<TooltipData>([]);
   const refCallback = useRef<ChildrenArg['triggerRef']>();
 
@@ -149,7 +161,11 @@ interface MlTooltipComponentProps {
   children: (tooltipService: ChartTooltipService) => React.ReactElement;
 }
 
-export const MlTooltipComponent: FC<MlTooltipComponentProps> = ({ children }) => {
+export const MlTooltipComponent = (
+  {
+    children
+  }: MlTooltipComponentProps
+) => {
   const service = useMemo(() => new ChartTooltipService(), []);
 
   return (

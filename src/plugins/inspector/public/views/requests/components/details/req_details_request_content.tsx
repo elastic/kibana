@@ -30,11 +30,13 @@ interface RequestDetailsRequestContentProps {
   json: string;
 }
 
-export const RequestDetailsRequestContent: React.FC<RequestDetailsRequestContentProps> = ({
-  requestParams,
-  indexPattern,
-  json,
-}) => {
+export const RequestDetailsRequestContent = (
+  {
+    requestParams,
+    indexPattern,
+    json
+  }: RequestDetailsRequestContentProps
+) => {
   const { services } = useKibana<InspectorKibanaServices>();
 
   function getValue(): string {

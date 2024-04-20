@@ -35,7 +35,11 @@ interface Props {
   phase: PhaseExceptDelete;
 }
 
-export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
+export const PhaseFooter = (
+  {
+    phase
+  }: Props
+) => {
   const {
     isDeletePhaseEnabled,
     setDeletePhaseEnabled: setValue,

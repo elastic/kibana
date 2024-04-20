@@ -56,9 +56,13 @@ function createMockServices(): LensAppServices {
 }
 
 function mountWithServices(component: React.ReactElement) {
-  const WrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => {
+  const WrappingComponent = (
+    {
+      children
+    }: {
+      children: React.ReactNode;
+    }
+  ) => {
     return (
       <I18nProvider>
         <KibanaContextProvider services={createMockServices()}>{children}</KibanaContextProvider>

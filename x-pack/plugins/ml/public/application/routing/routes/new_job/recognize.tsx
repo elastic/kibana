@@ -52,7 +52,11 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location }) => {
+const PageWrapper = (
+  {
+    location
+  }: PageProps
+) => {
   const { id } = parse(location.search, { sort: false });
   const {
     services: {
@@ -76,7 +80,11 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
   );
 };
 
-const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
+const CheckViewOrCreateWrapper = (
+  {
+    location
+  }: PageProps
+) => {
   const {
     services: {
       notifications: { toasts },

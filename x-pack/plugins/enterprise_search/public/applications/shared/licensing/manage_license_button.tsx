@@ -17,7 +17,7 @@ import { EuiButtonTo } from '../react_router_helpers';
 
 import { LicensingLogic } from './licensing_logic';
 
-export const ManageLicenseButton: React.FC<EuiButtonProps> = (props) => {
+export const ManageLicenseButton = (props: EuiButtonProps) => {
   const { canManageLicense } = useValues(LicensingLogic);
 
   return canManageLicense ? (

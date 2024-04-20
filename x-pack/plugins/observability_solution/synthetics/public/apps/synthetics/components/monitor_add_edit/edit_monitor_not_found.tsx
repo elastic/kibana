@@ -13,7 +13,7 @@ import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { deletePackagePolicy } from '../../state/monitor_management/api';
 import { MonitorNotFoundPage } from '../monitor_details/monitor_not_found_page';
 
-export const EditMonitorNotFound: React.FC = () => {
+export const EditMonitorNotFound = () => {
   return (
     <>
       <LeftoverIntegrationFound />
@@ -23,7 +23,7 @@ export const EditMonitorNotFound: React.FC = () => {
   );
 };
 
-const LeftoverIntegrationFound: React.FC = () => {
+const LeftoverIntegrationFound = () => {
   const { packagePolicyId } = useGetUrlParams();
   const updateUrlParams = useUrlParams()[1];
 

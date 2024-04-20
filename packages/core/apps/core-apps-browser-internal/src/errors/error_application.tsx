@@ -23,7 +23,12 @@ interface Props {
   children?: ReactChild;
 }
 
-const ErrorPage: React.FC<Props> = ({ title, children }) => {
+const ErrorPage = (
+  {
+    title,
+    children
+  }: Props
+) => {
   title =
     title ??
     i18n.translate('core.application.appRenderError.defaultTitle', {
@@ -42,7 +47,15 @@ const ErrorPage: React.FC<Props> = ({ title, children }) => {
   );
 };
 
-const ErrorApp: React.FC<{ basePath: IBasePath; history: History }> = ({ basePath, history }) => {
+const ErrorApp = (
+  {
+    basePath,
+    history
+  }: {
+    basePath: IBasePath;
+    history: History;
+  }
+) => {
   const [currentLocation, setCurrentLocation] = useState(history.location);
   useLayoutEffect(() => {
     return history.listen((location) => setCurrentLocation(location));

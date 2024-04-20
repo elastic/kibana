@@ -35,13 +35,15 @@ interface Props {
   showButtonTitle?: boolean;
 }
 
-export const AddMessageVariables: React.FunctionComponent<Props> = ({
-  buttonTitle,
-  messageVariables,
-  paramsProperty,
-  onSelectEventHandler,
-  showButtonTitle = false,
-}) => {
+export const AddMessageVariables = (
+  {
+    buttonTitle,
+    messageVariables,
+    paramsProperty,
+    onSelectEventHandler,
+    showButtonTitle = false
+  }: Props
+) => {
   const [isShowAllPressed, setIsShowAllPressed] = useState(false);
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 

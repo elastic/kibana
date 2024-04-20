@@ -44,7 +44,12 @@ interface GenerateApiKeyModalProps {
   onClose(): void;
 }
 
-export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexName, onClose }) => {
+export const GenerateApiKeyModal = (
+  {
+    indexName,
+    onClose
+  }: GenerateApiKeyModalProps
+) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);

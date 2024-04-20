@@ -16,7 +16,11 @@ export interface CreateDrilldownFormProps {
   state: DrilldownState;
 }
 
-export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ state }) => {
+export const CreateDrilldownForm = (
+  {
+    state
+  }: CreateDrilldownFormProps
+) => {
   const drilldowns = useDrilldownManager();
   const name = state.useName();
   const triggers = state.useTriggers();

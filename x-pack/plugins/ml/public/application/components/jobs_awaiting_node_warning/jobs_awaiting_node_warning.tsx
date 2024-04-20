@@ -17,7 +17,11 @@ interface Props {
   jobCount: number;
 }
 
-export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
+export const JobsAwaitingNodeWarning = (
+  {
+    jobCount
+  }: Props
+) => {
   const { showNodeInfo } = useEnabledFeatures();
   if (showNodeInfo === false || lazyMlNodesAvailable() === false || jobCount === 0) {
     return null;

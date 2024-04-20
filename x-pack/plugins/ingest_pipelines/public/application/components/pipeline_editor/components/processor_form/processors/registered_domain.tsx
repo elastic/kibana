@@ -14,7 +14,7 @@ import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { SerializerFunc } from '../../../../../../shared_imports';
 
-export const RegisteredDomain: FunctionComponent = () => {
+export const RegisteredDomain = () => {
   return (
     <>
       <FieldNameField

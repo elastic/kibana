@@ -91,7 +91,7 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
   };
 };
 
-export const Dissect: FunctionComponent = () => {
+export const Dissect = () => {
   const { services } = useKibana();
   const fieldsConfig = getFieldsConfig(services.documentation.getDissectKeyModifiersUrl());
 

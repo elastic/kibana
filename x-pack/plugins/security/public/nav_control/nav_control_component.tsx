@@ -67,12 +67,14 @@ interface SecurityNavControlProps {
   buildFlavour: BuildFlavor;
 }
 
-export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
-  editProfileUrl,
-  logoutUrl,
-  userMenuLinks$,
-  buildFlavour,
-}) => {
+export const SecurityNavControl = (
+  {
+    editProfileUrl,
+    logoutUrl,
+    userMenuLinks$,
+    buildFlavour
+  }: SecurityNavControlProps
+) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

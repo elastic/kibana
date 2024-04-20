@@ -10,9 +10,13 @@ import type { UserInfoWithAvatar } from './types';
 import { CaseUserAvatar } from './user_avatar';
 import { UserToolTip } from './user_tooltip';
 
-const HoverableAvatarComponent: React.FC<{
-  userInfo?: UserInfoWithAvatar;
-}> = ({ userInfo }) => {
+const HoverableAvatarComponent = (
+  {
+    userInfo
+  }: {
+    userInfo?: UserInfoWithAvatar;
+  }
+) => {
   return (
     <UserToolTip userInfo={userInfo}>
       <CaseUserAvatar size={'m'} userInfo={userInfo} />

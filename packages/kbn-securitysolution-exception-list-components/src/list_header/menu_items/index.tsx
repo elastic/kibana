@@ -24,17 +24,19 @@ interface MenuItemsProps {
   onDuplicateList: () => void;
 }
 
-const MenuItemsComponent: FC<MenuItemsProps> = ({
-  dataTestSubj,
-  linkedRules,
-  securityLinkAnchorComponent,
-  isReadonly,
-  canUserEditList = true,
-  onDeleteList,
-  onManageRules,
-  onExportList,
-  onDuplicateList,
-}) => {
+const MenuItemsComponent = (
+  {
+    dataTestSubj,
+    linkedRules,
+    securityLinkAnchorComponent,
+    isReadonly,
+    canUserEditList = true,
+    onDeleteList,
+    onManageRules,
+    onExportList,
+    onDuplicateList
+  }: MenuItemsProps
+) => {
   const referencedLinks = useMemo(
     () =>
       generateLinkedRulesMenuItems({

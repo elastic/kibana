@@ -49,8 +49,8 @@ interface AutocompleteFieldWildcardProps {
   'aria-label'?: string;
 }
 
-export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildcardProps> = memo(
-  ({
+export const AutocompleteFieldWildcardComponent = memo((
+  {
     autocompleteService,
     placeholder,
     rowLabel,
@@ -66,220 +66,220 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     onError,
     onWarning,
     warning,
-    'aria-label': ariaLabel,
-  }): JSX.Element => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [touched, setIsTouched] = useState(false);
-    const [error, setError] = useState<string | undefined>(undefined);
-    const [showSpacesWarning, setShowSpacesWarning] = useState<boolean>(false);
-    const [isLoadingSuggestions, , suggestions] = useFieldValueAutocomplete({
-      autocompleteService,
-      fieldValue: selectedValue,
-      indexPattern,
-      operatorType: OperatorTypeEnum.WILDCARD,
-      query: searchQuery,
-      selectedField,
-    });
-    const getLabel = useCallback((option: string): string => option, []);
-    const optionsMemo = useMemo((): string[] => {
-      const valueAsStr = String(selectedValue);
-      return selectedValue != null && selectedValue.trim() !== ''
-        ? uniq([valueAsStr, ...suggestions])
-        : suggestions;
-    }, [suggestions, selectedValue]);
-    const selectedOptionsMemo = useMemo((): string[] => {
-      const valueAsStr = String(selectedValue);
-      return selectedValue ? [valueAsStr] : [];
-    }, [selectedValue]);
+    'aria-label': ariaLabel
+  }: AutocompleteFieldWildcardProps
+): JSX.Element => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [touched, setIsTouched] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [showSpacesWarning, setShowSpacesWarning] = useState<boolean>(false);
+  const [isLoadingSuggestions, , suggestions] = useFieldValueAutocomplete({
+    autocompleteService,
+    fieldValue: selectedValue,
+    indexPattern,
+    operatorType: OperatorTypeEnum.WILDCARD,
+    query: searchQuery,
+    selectedField,
+  });
+  const getLabel = useCallback((option: string): string => option, []);
+  const optionsMemo = useMemo((): string[] => {
+    const valueAsStr = String(selectedValue);
+    return selectedValue != null && selectedValue.trim() !== ''
+      ? uniq([valueAsStr, ...suggestions])
+      : suggestions;
+  }, [suggestions, selectedValue]);
+  const selectedOptionsMemo = useMemo((): string[] => {
+    const valueAsStr = String(selectedValue);
+    return selectedValue ? [valueAsStr] : [];
+  }, [selectedValue]);
 
-    const handleSpacesWarning = useCallback(
-      (param: string | undefined) => {
-        if (!param) return setShowSpacesWarning(false);
-        setShowSpacesWarning(!!paramContainsSpace(param));
-      },
-      [setShowSpacesWarning]
-    );
-    const handleError = useCallback(
-      (err: string | undefined): void => {
-        setError((existingErr): string | undefined => {
-          const oldErr = existingErr != null;
-          const newErr = err != null;
-          if (oldErr !== newErr && onError != null) {
-            onError(newErr);
-          }
-
-          return err;
-        });
-      },
-      [setError, onError]
-    );
-
-    const handleWarning = useCallback(
-      (warn: Warning | undefined): void => {
-        onWarning(warn !== undefined);
-      },
-      [onWarning]
-    );
-
-    const { comboOptions, labels, selectedComboOptions } = useMemo(
-      (): GetGenericComboBoxPropsReturn =>
-        getGenericComboBoxProps<string>({
-          getLabel,
-          options: optionsMemo,
-          selectedOptions: selectedOptionsMemo,
-        }),
-      [optionsMemo, selectedOptionsMemo, getLabel]
-    );
-
-    const handleValuesChange = useCallback(
-      (newOptions: EuiComboBoxOptionOption[]): void => {
-        const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
-        handleError(undefined);
-        handleSpacesWarning(newValue);
-        setShowSpacesWarning(false);
-
-        onChange(newValue ?? '');
-      },
-      [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
-    );
-
-    const handleSearchChange = useCallback(
-      (searchVal: string): void => {
-        if (searchVal.trim() !== '' && selectedField != null) {
-          const err = paramIsValid(searchVal, selectedField, isRequired, touched);
-          handleError(err);
-          handleWarning(warning);
-          if (!err) handleSpacesWarning(searchVal);
-
-          setSearchQuery(searchVal);
+  const handleSpacesWarning = useCallback(
+    (param: string | undefined) => {
+      if (!param) return setShowSpacesWarning(false);
+      setShowSpacesWarning(!!paramContainsSpace(param));
+    },
+    [setShowSpacesWarning]
+  );
+  const handleError = useCallback(
+    (err: string | undefined): void => {
+      setError((existingErr): string | undefined => {
+        const oldErr = existingErr != null;
+        const newErr = err != null;
+        if (oldErr !== newErr && onError != null) {
+          onError(newErr);
         }
-      },
-      [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
-    );
 
-    const handleCreateOption = useCallback(
-      (option: string): boolean | undefined => {
-        const err = paramIsValid(option, selectedField, isRequired, touched);
+        return err;
+      });
+    },
+    [setError, onError]
+  );
+
+  const handleWarning = useCallback(
+    (warn: Warning | undefined): void => {
+      onWarning(warn !== undefined);
+    },
+    [onWarning]
+  );
+
+  const { comboOptions, labels, selectedComboOptions } = useMemo(
+    (): GetGenericComboBoxPropsReturn =>
+      getGenericComboBoxProps<string>({
+        getLabel,
+        options: optionsMemo,
+        selectedOptions: selectedOptionsMemo,
+      }),
+    [optionsMemo, selectedOptionsMemo, getLabel]
+  );
+
+  const handleValuesChange = useCallback(
+    (newOptions: EuiComboBoxOptionOption[]): void => {
+      const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+      handleError(undefined);
+      handleSpacesWarning(newValue);
+      setShowSpacesWarning(false);
+
+      onChange(newValue ?? '');
+    },
+    [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
+  );
+
+  const handleSearchChange = useCallback(
+    (searchVal: string): void => {
+      if (searchVal.trim() !== '' && selectedField != null) {
+        const err = paramIsValid(searchVal, selectedField, isRequired, touched);
         handleError(err);
         handleWarning(warning);
+        if (!err) handleSpacesWarning(searchVal);
 
-        if (err != null) {
-          // Explicitly reject the user's input
-          setShowSpacesWarning(false);
-          return false;
-        }
+        setSearchQuery(searchVal);
+      }
+    },
+    [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
+  );
 
-        handleSpacesWarning(option);
-        onChange(option);
-        return undefined;
-      },
-      [
-        isRequired,
-        handleSpacesWarning,
-        onChange,
-        selectedField,
-        touched,
-        handleError,
-        handleWarning,
-        warning,
-      ]
-    );
-
-    const setIsTouchedValue = useCallback((): void => {
-      setIsTouched(true);
-
-      const err = paramIsValid(selectedValue, selectedField, isRequired, true);
+  const handleCreateOption = useCallback(
+    (option: string): boolean | undefined => {
+      const err = paramIsValid(option, selectedField, isRequired, touched);
       handleError(err);
       handleWarning(warning);
-    }, [
-      setIsTouched,
-      handleError,
-      selectedValue,
-      selectedField,
+
+      if (err != null) {
+        // Explicitly reject the user's input
+        setShowSpacesWarning(false);
+        return false;
+      }
+
+      handleSpacesWarning(option);
+      onChange(option);
+      return undefined;
+    },
+    [
       isRequired,
+      handleSpacesWarning,
+      onChange,
+      selectedField,
+      touched,
+      handleError,
       handleWarning,
       warning,
-    ]);
+    ]
+  );
 
-    const inputPlaceholder = useMemo((): string => {
-      if (isLoading || isLoadingSuggestions) {
-        return i18n.LOADING;
-      } else if (selectedField == null) {
-        return i18n.SELECT_FIELD_FIRST;
-      } else {
-        return placeholder;
-      }
-    }, [isLoading, selectedField, isLoadingSuggestions, placeholder]);
+  const setIsTouchedValue = useCallback((): void => {
+    setIsTouched(true);
 
-    const isLoadingState = useMemo(
-      (): boolean => isLoading || isLoadingSuggestions,
-      [isLoading, isLoadingSuggestions]
-    );
+    const err = paramIsValid(selectedValue, selectedField, isRequired, true);
+    handleError(err);
+    handleWarning(warning);
+  }, [
+    setIsTouched,
+    handleError,
+    selectedValue,
+    selectedField,
+    isRequired,
+    handleWarning,
+    warning,
+  ]);
 
-    useEffect((): void => {
-      setError(undefined);
-      if (onError != null) {
-        onError(false);
-      }
-      handleSpacesWarning(selectedValue);
+  const inputPlaceholder = useMemo((): string => {
+    if (isLoading || isLoadingSuggestions) {
+      return i18n.LOADING;
+    } else if (selectedField == null) {
+      return i18n.SELECT_FIELD_FIRST;
+    } else {
+      return placeholder;
+    }
+  }, [isLoading, selectedField, isLoadingSuggestions, placeholder]);
 
-      onWarning(false);
-    }, [selectedField, selectedValue, onError, onWarning, handleSpacesWarning]);
+  const isLoadingState = useMemo(
+    (): boolean => isLoading || isLoadingSuggestions,
+    [isLoading, isLoadingSuggestions]
+  );
 
-    const defaultInput = useMemo((): JSX.Element => {
-      return (
-        <EuiFormRow
-          label={rowLabel}
-          error={error}
-          helpText={warning || (showSpacesWarning && i18n.FIELD_SPACE_WARNING)}
+  useEffect((): void => {
+    setError(undefined);
+    if (onError != null) {
+      onError(false);
+    }
+    handleSpacesWarning(selectedValue);
+
+    onWarning(false);
+  }, [selectedField, selectedValue, onError, onWarning, handleSpacesWarning]);
+
+  const defaultInput = useMemo((): JSX.Element => {
+    return (
+      <EuiFormRow
+        label={rowLabel}
+        error={error}
+        helpText={warning || (showSpacesWarning && i18n.FIELD_SPACE_WARNING)}
+        isInvalid={selectedField != null && error != null}
+        data-test-subj="valuesAutocompleteWildcardLabel"
+        fullWidth
+      >
+        <EuiComboBox
+          placeholder={inputPlaceholder}
+          isDisabled={isDisabled || !selectedField}
+          isLoading={isLoadingState}
+          isClearable={isClearable}
+          options={comboOptions}
+          selectedOptions={selectedComboOptions}
+          onChange={handleValuesChange}
+          singleSelection={SINGLE_SELECTION}
+          onSearchChange={handleSearchChange}
+          onCreateOption={handleCreateOption}
           isInvalid={selectedField != null && error != null}
-          data-test-subj="valuesAutocompleteWildcardLabel"
+          onBlur={setIsTouchedValue}
+          sortMatchesBy="startsWith"
+          data-test-subj="valuesAutocompleteWildcard"
+          style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
           fullWidth
-        >
-          <EuiComboBox
-            placeholder={inputPlaceholder}
-            isDisabled={isDisabled || !selectedField}
-            isLoading={isLoadingState}
-            isClearable={isClearable}
-            options={comboOptions}
-            selectedOptions={selectedComboOptions}
-            onChange={handleValuesChange}
-            singleSelection={SINGLE_SELECTION}
-            onSearchChange={handleSearchChange}
-            onCreateOption={handleCreateOption}
-            isInvalid={selectedField != null && error != null}
-            onBlur={setIsTouchedValue}
-            sortMatchesBy="startsWith"
-            data-test-subj="valuesAutocompleteWildcard"
-            style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
-            fullWidth
-            async
-            aria-label={ariaLabel}
-          />
-        </EuiFormRow>
-      );
-    }, [
-      rowLabel,
-      error,
-      warning,
-      showSpacesWarning,
-      selectedField,
-      inputPlaceholder,
-      isDisabled,
-      isLoadingState,
-      isClearable,
-      comboOptions,
-      selectedComboOptions,
-      handleValuesChange,
-      handleSearchChange,
-      handleCreateOption,
-      setIsTouchedValue,
-      fieldInputWidth,
-      ariaLabel,
-    ]);
+          async
+          aria-label={ariaLabel}
+        />
+      </EuiFormRow>
+    );
+  }, [
+    rowLabel,
+    error,
+    warning,
+    showSpacesWarning,
+    selectedField,
+    inputPlaceholder,
+    isDisabled,
+    isLoadingState,
+    isClearable,
+    comboOptions,
+    selectedComboOptions,
+    handleValuesChange,
+    handleSearchChange,
+    handleCreateOption,
+    setIsTouchedValue,
+    fieldInputWidth,
+    ariaLabel,
+  ]);
 
-    return defaultInput;
-  }
-);
+  return defaultInput;
+});
 
 AutocompleteFieldWildcardComponent.displayName = 'AutocompleteFieldWildcard';

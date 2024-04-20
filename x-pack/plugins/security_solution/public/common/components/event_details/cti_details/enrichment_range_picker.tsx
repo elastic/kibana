@@ -27,7 +27,13 @@ export interface RangePickerProps {
   loading: boolean;
 }
 
-export const EnrichmentRangePicker: React.FC<RangePickerProps> = ({ range, setRange, loading }) => {
+export const EnrichmentRangePicker = (
+  {
+    range,
+    setRange,
+    loading
+  }: RangePickerProps
+) => {
   const [startDate, setStartDate] = useState<moment.Moment | null>(
     range.from === DEFAULT_EVENT_ENRICHMENT_FROM ? moment().subtract(30, 'd') : moment(range.from)
   );

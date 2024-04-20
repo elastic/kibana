@@ -42,7 +42,11 @@ interface AvailableSourcesListProps {
   sources: SourceDataItem[];
 }
 
-export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
+export const AvailableSourcesList = (
+  {
+    sources
+  }: AvailableSourcesListProps
+) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const getSourceCard = ({

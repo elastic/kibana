@@ -17,20 +17,22 @@ interface Props {
   metadata: RenderingMetadata;
 }
 
-export const Template: FunctionComponent<Props> = ({
-  metadata: {
-    uiPublicUrl,
-    locale,
-    darkMode,
-    stylesheetPaths,
-    scriptPaths,
-    injectedMetadata,
-    i18n,
-    bootstrapScriptUrl,
-    strictCsp,
-    customBranding,
-  },
-}) => {
+export const Template = (
+  {
+    metadata: {
+      uiPublicUrl,
+      locale,
+      darkMode,
+      stylesheetPaths,
+      scriptPaths,
+      injectedMetadata,
+      i18n,
+      bootstrapScriptUrl,
+      strictCsp,
+      customBranding,
+    }
+  }: Props
+) => {
   const title = customBranding.pageTitle ?? 'Elastic';
   const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
   const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;

@@ -14,17 +14,17 @@ interface IncludeCitationsFieldProps {
   onChange: (value: boolean) => void;
 }
 
-export const IncludeCitationsField: React.FC<IncludeCitationsFieldProps> = ({
-  checked,
-  onChange,
-}) => (
-  <EuiFormRow>
-    <EuiSwitch
-      label={i18n.translate('xpack.searchPlayground.sidebar.citationsField.label', {
-        defaultMessage: 'Include citations',
-      })}
-      checked={checked}
-      onChange={(e) => onChange(e.target.checked)}
-    />
-  </EuiFormRow>
-);
+export const IncludeCitationsField = (
+  {
+    checked,
+    onChange
+  }: IncludeCitationsFieldProps
+) => (<EuiFormRow>
+  <EuiSwitch
+    label={i18n.translate('xpack.searchPlayground.sidebar.citationsField.label', {
+      defaultMessage: 'Include citations',
+    })}
+    checked={checked}
+    onChange={(e) => onChange(e.target.checked)}
+  />
+</EuiFormRow>);

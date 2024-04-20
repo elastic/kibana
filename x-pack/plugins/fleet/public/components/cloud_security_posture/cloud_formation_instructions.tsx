@@ -21,11 +21,13 @@ interface Props {
   fleetServerHost: string;
 }
 
-export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
-  enrollmentAPIKey,
-  cloudSecurityIntegration,
-  fleetServerHost,
-}) => {
+export const CloudFormationInstructions = (
+  {
+    enrollmentAPIKey,
+    cloudSecurityIntegration,
+    fleetServerHost
+  }: Props
+) => {
   const { cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
     enrollmentAPIKey,
     cloudFormationProps: cloudSecurityIntegration?.cloudFormationProps,

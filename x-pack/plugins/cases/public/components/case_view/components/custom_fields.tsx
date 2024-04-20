@@ -20,12 +20,14 @@ interface Props {
   onSubmit: (customField: CaseUICustomField) => void;
 }
 
-const CustomFieldsComponent: React.FC<Props> = ({
-  isLoading,
-  customFields,
-  customFieldsConfiguration,
-  onSubmit,
-}) => {
+const CustomFieldsComponent = (
+  {
+    isLoading,
+    customFields,
+    customFieldsConfiguration,
+    onSubmit
+  }: Props
+) => {
   const { permissions } = useCasesContext();
   const sortedCustomFieldsConfiguration = useMemo(
     () => sortCustomFieldsByLabel(customFieldsConfiguration),

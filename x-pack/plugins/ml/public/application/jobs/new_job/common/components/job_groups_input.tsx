@@ -21,63 +21,68 @@ export interface JobGroupsInputProps {
   validation: Validation;
 }
 
-export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
-  ({ existingGroups, selectedGroups, onChange, validation }) => {
-    const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
-      label: g,
-      color: tabColor(g),
-    }));
+export const JobGroupsInput = memo((
+  {
+    existingGroups,
+    selectedGroups,
+    onChange,
+    validation
+  }: JobGroupsInputProps
+) => {
+  const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
+    label: g,
+    color: tabColor(g),
+  }));
 
-    const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>((g) => ({
-      label: g,
-      color: tabColor(g),
-    }));
+  const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>((g) => ({
+    label: g,
+    color: tabColor(g),
+  }));
 
-    function onChangeCallback(optionsIn: EuiComboBoxOptionOption[]) {
-      onChange(optionsIn.map((g) => g.label));
-    }
-
-    function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
-      const normalizedSearchValue = input.trim().toLowerCase();
-
-      if (!normalizedSearchValue) {
-        return;
-      }
-
-      const newGroup: EuiComboBoxOptionOption = {
-        label: input,
-        color: tabColor(input),
-      };
-
-      if (
-        flattenedOptions.findIndex(
-          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
-        ) === -1
-      ) {
-        options.push(newGroup);
-      }
-
-      onChangeCallback([...selectedOptions, newGroup]);
-    }
-
-    return (
-      <Description validation={validation}>
-        <EuiComboBox
-          placeholder={i18n.translate(
-            'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
-            {
-              defaultMessage: 'Select or create groups',
-            }
-          )}
-          options={options}
-          selectedOptions={selectedOptions}
-          onChange={onChangeCallback}
-          onCreateOption={onCreateGroup}
-          isClearable={true}
-          isInvalid={!validation.valid}
-          data-test-subj="mlJobWizardComboBoxJobGroups"
-        />
-      </Description>
-    );
+  function onChangeCallback(optionsIn: EuiComboBoxOptionOption[]) {
+    onChange(optionsIn.map((g) => g.label));
   }
-);
+
+  function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
+    const normalizedSearchValue = input.trim().toLowerCase();
+
+    if (!normalizedSearchValue) {
+      return;
+    }
+
+    const newGroup: EuiComboBoxOptionOption = {
+      label: input,
+      color: tabColor(input),
+    };
+
+    if (
+      flattenedOptions.findIndex(
+        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
+      ) === -1
+    ) {
+      options.push(newGroup);
+    }
+
+    onChangeCallback([...selectedOptions, newGroup]);
+  }
+
+  return (
+    <Description validation={validation}>
+      <EuiComboBox
+        placeholder={i18n.translate(
+          'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
+          {
+            defaultMessage: 'Select or create groups',
+          }
+        )}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={onChangeCallback}
+        onCreateOption={onCreateGroup}
+        isClearable={true}
+        isInvalid={!validation.valid}
+        data-test-subj="mlJobWizardComboBoxJobGroups"
+      />
+    </Description>
+  );
+});

@@ -14,7 +14,7 @@ import { SYNONYMS_DOCS_URL } from '../../../routes';
 
 import { SynonymModal, SynonymIcon } from '.';
 
-export const EmptyState: React.FC = () => {
+export const EmptyState = () => {
   return (
     <>
       <EuiEmptyPrompt

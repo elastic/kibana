@@ -16,7 +16,7 @@ import { i18nTexts } from '../i18n_texts';
 import { useFilePickerContext } from '../context';
 import { FileCard } from './file_card';
 
-export const FileGrid: FunctionComponent = () => {
+export const FileGrid = () => {
   const { state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const files = useObservable(state.files$, []);

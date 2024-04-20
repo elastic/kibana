@@ -31,7 +31,11 @@ type OnSuccessCallback = (
   snapshotsDeleted: Array<{ snapshot: string; repository: string }>
 ) => void;
 
-export const SnapshotDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const SnapshotDeleteProvider = (
+  {
+    children
+  }: Props
+) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
 

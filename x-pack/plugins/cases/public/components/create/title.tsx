@@ -14,20 +14,22 @@ interface Props {
   isLoading: boolean;
 }
 
-const TitleComponent: React.FC<Props> = ({ isLoading }) => (
-  <CommonUseField
-    path="title"
-    componentProps={{
-      idAria: 'caseTitle',
-      'data-test-subj': 'caseTitle',
-      euiFieldProps: {
-        autoFocus: true,
-        fullWidth: true,
-        disabled: isLoading,
-      },
-    }}
-  />
-);
+const TitleComponent = (
+  {
+    isLoading
+  }: Props
+) => (<CommonUseField
+  path="title"
+  componentProps={{
+    idAria: 'caseTitle',
+    'data-test-subj': 'caseTitle',
+    euiFieldProps: {
+      autoFocus: true,
+      fullWidth: true,
+      disabled: isLoading,
+    },
+  }}
+/>);
 
 TitleComponent.displayName = 'TitleComponent';
 

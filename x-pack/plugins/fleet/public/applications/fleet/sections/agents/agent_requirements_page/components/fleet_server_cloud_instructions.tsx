@@ -23,7 +23,13 @@ import { useFleetStatus, useStartServices } from '../../../../hooks';
 
 const REFRESH_INTERVAL = 10000;
 
-export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploymentUrl }) => {
+export const CloudInstructions = (
+  {
+    deploymentUrl
+  }: {
+    deploymentUrl: string;
+  }
+) => {
   const { docLinks } = useStartServices();
 
   const { refetch } = useFleetStatus();

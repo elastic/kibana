@@ -39,11 +39,17 @@ type EuiSelectableOptionWithMlModelData = EuiSelectableOption & {
   data: MlModel;
 };
 
-export const DeployModelButton: React.FC<{
-  onClick: () => void;
-  modelId: string;
-  disabled: boolean;
-}> = ({ onClick, modelId, disabled }) => {
+export const DeployModelButton = (
+  {
+    onClick,
+    modelId,
+    disabled
+  }: {
+    onClick: () => void;
+    modelId: string;
+    disabled: boolean;
+  }
+) => {
   return (
     <EuiButton
       onClick={onClick}
@@ -71,7 +77,7 @@ export const DeployModelButton: React.FC<{
   );
 };
 
-export const ModelDeployingButton: React.FC = () => {
+export const ModelDeployingButton = () => {
   return (
     <EuiButton disabled color="primary" size="s">
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
@@ -91,11 +97,17 @@ export const ModelDeployingButton: React.FC = () => {
   );
 };
 
-export const StartModelButton: React.FC<{
-  onClick: () => void;
-  modelId: string;
-  disabled: boolean;
-}> = ({ onClick, modelId, disabled }) => {
+export const StartModelButton = (
+  {
+    onClick,
+    modelId,
+    disabled
+  }: {
+    onClick: () => void;
+    modelId: string;
+    disabled: boolean;
+  }
+) => {
   return (
     <EuiButton
       onClick={onClick}
@@ -123,7 +135,7 @@ export const StartModelButton: React.FC<{
   );
 };
 
-export const ModelStartingButton: React.FC = () => {
+export const ModelStartingButton = () => {
   return (
     <EuiButton disabled color="success" size="s">
       <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
@@ -143,7 +155,7 @@ export const ModelStartingButton: React.FC = () => {
   );
 };
 
-export const NoModelSelected: React.FC = () => (
+export const NoModelSelected = () => (
   <EuiPanel
     color="subdued"
     style={{
@@ -161,7 +173,7 @@ export const NoModelSelected: React.FC = () => (
   </EuiPanel>
 );
 
-export const SelectedModel: React.FC<MlModel> = (model) => {
+export const SelectedModel = (model: MlModel) => {
   const { createModel, startModel } = useActions(ModelSelectLogic);
   const { areActionButtonsDisabled } = useValues(ModelSelectLogic);
 
@@ -286,7 +298,7 @@ export const SelectedModel: React.FC<MlModel> = (model) => {
   );
 };
 
-export const ModelSelect: React.FC = () => {
+export const ModelSelect = () => {
   const {
     addInferencePipelineModal: { configuration, indexName },
     ingestionMethod,

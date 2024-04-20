@@ -82,29 +82,31 @@ const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
 
 EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWrapper';
 
-const StatefulEventComponent: React.FC<Props> = ({
-  actionsColumnWidth,
-  containerRef,
-  columnHeaders,
-  event,
-  eventIdToNoteIds,
-  isEventViewer = false,
-  isEventPinned = false,
-  lastFocusedAriaColindex,
-  loadingEventIds,
-  onRowSelected,
-  refetch,
-  renderCellValue,
-  rowRenderers,
-  onRuleChange,
-  ariaRowindex,
-  selectedEventIds,
-  showCheckboxes,
-  tabType,
-  timelineId,
-  leadingControlColumns,
-  trailingControlColumns,
-}) => {
+const StatefulEventComponent = (
+  {
+    actionsColumnWidth,
+    containerRef,
+    columnHeaders,
+    event,
+    eventIdToNoteIds,
+    isEventViewer = false,
+    isEventPinned = false,
+    lastFocusedAriaColindex,
+    loadingEventIds,
+    onRowSelected,
+    refetch,
+    renderCellValue,
+    rowRenderers,
+    onRuleChange,
+    ariaRowindex,
+    selectedEventIds,
+    showCheckboxes,
+    tabType,
+    timelineId,
+    leadingControlColumns,
+    trailingControlColumns
+  }: Props
+) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 

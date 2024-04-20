@@ -19,10 +19,12 @@ const RedirectAppLinksContext = React.createContext<RedirectAppLinksServices | n
 /**
  * Contextual services Provider.
  */
-export const RedirectAppLinksProvider: FC<RedirectAppLinksServices> = ({
-  children,
-  ...services
-}) => {
+export const RedirectAppLinksProvider = (
+  {
+    children,
+    ...services
+  }: RedirectAppLinksServices
+) => {
   const { navigateToUrl, currentAppId } = services;
   return (
     <RedirectAppLinksContext.Provider value={{ navigateToUrl, currentAppId }}>
@@ -34,10 +36,12 @@ export const RedirectAppLinksProvider: FC<RedirectAppLinksServices> = ({
 /**
  * Kibana-specific contextual services Provider.
  */
-export const RedirectAppLinksKibanaProvider: FC<RedirectAppLinksKibanaDependencies> = ({
-  children,
-  coreStart,
-}) => {
+export const RedirectAppLinksKibanaProvider = (
+  {
+    children,
+    coreStart
+  }: RedirectAppLinksKibanaDependencies
+) => {
   const { navigateToUrl, currentAppId$ } = coreStart.application;
   const currentAppId = useObservable(currentAppId$, undefined);
 

@@ -23,7 +23,7 @@ import { AssetsAndObjects } from './assets_and_objects';
 import { Frequency } from './frequency';
 import { Synchronization } from './synchronization';
 
-export const SynchronizationRouter: React.FC = () => (
+export const SynchronizationRouter = () => (
   <Routes>
     <Route exact path={getSourcesPath(SOURCE_SYNCHRONIZATION_PATH, true)}>
       <Synchronization />

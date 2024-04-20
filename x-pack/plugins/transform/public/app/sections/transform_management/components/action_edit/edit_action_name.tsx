@@ -22,7 +22,7 @@ export const editActionNameText = i18n.translate(
   }
 );
 
-export const EditActionName: FC = () => {
+export const EditActionName = () => {
   const { canCreateTransform } = useTransformCapabilities();
 
   if (!canCreateTransform) {

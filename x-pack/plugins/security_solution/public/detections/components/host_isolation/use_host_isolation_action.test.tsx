@@ -31,7 +31,7 @@ describe('useHostIsolationAction', () => {
   ])('works with %s hook', (name, hook) => {
     const createReactQueryWrapper = () => {
       const queryClient = new QueryClient();
-      const wrapper: React.FC = ({ children }) => (
+      const wrapper = ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       );
       return wrapper;

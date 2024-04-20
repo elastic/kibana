@@ -36,12 +36,14 @@ const useLinkIconStyles = () => {
   };
 };
 
-export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(function LandingLinkIcon({
-  item,
-  urlState,
-  onLinkClick,
-  children,
-}) {
+export const LandingLinkIcon = React.memo(function LandingLinkIcon(
+  {
+    item,
+    urlState,
+    onLinkClick,
+    children
+  }: LandingLinkIconProps
+) {
   const styles = useLinkIconStyles();
   const { title, description, landingIcon, isBeta, betaOptions } = item;
 
@@ -83,11 +85,13 @@ export const LandingLinkIcon: React.FC<LandingLinkIconProps> = React.memo(functi
 const linkIconContainerStyles = css`
   min-width: 22em;
 `;
-export const LandingLinksIcons: React.FC<LandingLinksIconsProps> = ({
-  items,
-  urlState,
-  onLinkClick,
-}) => {
+export const LandingLinksIcons = (
+  {
+    items,
+    urlState,
+    onLinkClick
+  }: LandingLinksIconsProps
+) => {
   return (
     <EuiFlexGroup gutterSize="xl" wrap>
       {items.map((item) => (

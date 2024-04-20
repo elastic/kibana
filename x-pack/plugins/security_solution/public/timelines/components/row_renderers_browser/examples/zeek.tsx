@@ -11,7 +11,7 @@ import { demoTimelineData } from '../../../../common/demo_data/timeline';
 import { zeekRowRenderer } from '../../timeline/body/renderers/zeek/zeek_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const ZeekExampleComponent: React.FC = () => (
+const ZeekExampleComponent = () => (
   <>
     {zeekRowRenderer.renderRow({
       data: demoTimelineData[13].ecs,

@@ -18,7 +18,12 @@ interface Props {
   form: FormHook;
 }
 
-export const Form: FunctionComponent<Props> = ({ form, children }) => {
+export const Form = (
+  {
+    form,
+    children
+  }: Props
+) => {
   return (
     <LibForm form={form}>
       <ConfigurationProvider>

@@ -52,14 +52,16 @@ const ChartFlexItem = styled(EuiFlexItem)<{ $minChartHeight: number }>`
   min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
 `;
 
-const AlertsTreemapComponent: React.FC<Props> = ({
-  addFilter,
-  data,
-  maxBuckets,
-  minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
-  stackByField0,
-  stackByField1,
-}: Props) => {
+const AlertsTreemapComponent = (
+  {
+    addFilter,
+    data,
+    maxBuckets,
+    minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
+    stackByField0,
+    stackByField1
+  }: Props
+) => {
   const { theme, baseTheme } = useThemes();
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,

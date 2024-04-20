@@ -34,7 +34,13 @@ interface Props {
   onDismiss: () => void;
 }
 
-export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss }) => {
+export const DetailsFlyout = (
+  {
+    files,
+    file,
+    onDismiss
+  }: Props
+) => {
   return (
     <EuiFlyout onClose={onDismiss}>
       <EuiFlyoutHeader>

@@ -25,7 +25,11 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const ApmInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ApmInstancesPage = (
+  {
+    clusters
+  }: ComponentProps
+) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();

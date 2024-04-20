@@ -37,17 +37,19 @@ type Props = TooltipInfo & {
   layers: CommonXYDataLayerConfig[];
 };
 
-export const Tooltip: FC<Props> = ({
-  header,
-  values,
-  fieldFormats,
-  titles = {},
-  formatFactory,
-  formattedDatatables,
-  splitAccessors,
-  xDomain,
-  layers,
-}) => {
+export const Tooltip = (
+  {
+    header,
+    values,
+    fieldFormats,
+    titles = {},
+    formatFactory,
+    formattedDatatables,
+    splitAccessors,
+    xDomain,
+    layers
+  }: Props
+) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
 
   if (!pickedValue) {

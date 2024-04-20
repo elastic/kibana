@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 
-export const CreateIndexCallout: React.FC = () => {
+export const CreateIndexCallout = () => {
   const {
     services: { application, share },
   } = useKibana();

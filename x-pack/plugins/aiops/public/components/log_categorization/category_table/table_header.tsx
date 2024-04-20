@@ -20,12 +20,14 @@ interface Props {
   openInDiscover: (mode: QueryMode) => void;
 }
 
-export const TableHeader: FC<Props> = ({
-  categoriesCount,
-  selectedCategoriesCount,
-  labels,
-  openInDiscover,
-}) => {
+export const TableHeader = (
+  {
+    categoriesCount,
+    selectedCategoriesCount,
+    labels,
+    openInDiscover
+  }: Props
+) => {
   const euiTheme = useEuiTheme();
   return (
     <>

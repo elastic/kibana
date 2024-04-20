@@ -61,23 +61,25 @@ interface ProviderProps {
   activeStep?: JourneyStep;
 }
 
-export const WaterfallProvider: React.FC<ProviderProps> = ({
-  children,
-  data,
-  markerItems,
-  onElementClick,
-  onProjectionClick,
-  onSidebarClick,
-  showOnlyHighlightedNetworkRequests,
-  sidebarItems,
-  legendItems,
-  metadata,
-  renderTooltipItem,
-  totalNetworkRequests,
-  highlightedNetworkRequests,
-  fetchedNetworkRequests,
-  activeStep,
-}) => {
+export const WaterfallProvider = (
+  {
+    children,
+    data,
+    markerItems,
+    onElementClick,
+    onProjectionClick,
+    onSidebarClick,
+    showOnlyHighlightedNetworkRequests,
+    sidebarItems,
+    legendItems,
+    metadata,
+    renderTooltipItem,
+    totalNetworkRequests,
+    highlightedNetworkRequests,
+    fetchedNetworkRequests,
+    activeStep
+  }: ProviderProps
+) => {
   return (
     <WaterfallContext.Provider
       value={{

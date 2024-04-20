@@ -13,10 +13,12 @@ interface SidebarSectionProps {
   showHorizontalRule?: boolean;
 }
 
-const SidebarSectionComponent: React.FC<SidebarSectionProps> = ({
-  children,
-  showHorizontalRule = true,
-}) => {
+const SidebarSectionComponent = (
+  {
+    children,
+    showHorizontalRule = true
+  }: SidebarSectionProps
+) => {
   return (
     <>
       {children}

@@ -54,216 +54,219 @@ interface Props {
   dataStreams?: string[];
 }
 
-export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ dataStreams, componentTemplate }) => {
-    const { name } = componentTemplate;
+export const StepReview = React.memo((
+  {
+    dataStreams,
+    componentTemplate
+  }: Props
+) => {
+  const { name } = componentTemplate;
 
-    const serializedComponentTemplate = serializeComponentTemplate(
-      stripEmptyFields(componentTemplate, {
-        types: ['string'],
-      }) as ComponentTemplateDeserialized
-    );
+  const serializedComponentTemplate = serializeComponentTemplate(
+    stripEmptyFields(componentTemplate, {
+      types: ['string'],
+    }) as ComponentTemplateDeserialized
+  );
 
-    const {
-      template: serializedTemplate,
-      _meta: serializedMeta,
-      version: serializedVersion,
-    } = serializedComponentTemplate;
+  const {
+    template: serializedTemplate,
+    _meta: serializedMeta,
+    version: serializedVersion,
+  } = serializedComponentTemplate;
 
-    const isFleetDatastreamsVisible =
-      Boolean(dataStreams?.length) && componentTemplate._meta?.managed_by === MANAGED_BY_FLEET;
+  const isFleetDatastreamsVisible =
+    Boolean(dataStreams?.length) && componentTemplate._meta?.managed_by === MANAGED_BY_FLEET;
 
-    const SummaryTab = () => (
-      <div data-test-subj="summaryTab">
-        <EuiSpacer size="m" />
+  const SummaryTab = () => (
+    <div data-test-subj="summaryTab">
+      <EuiSpacer size="m" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiDescriptionList textStyle="reverse">
-              {/* Version */}
-              {typeof serializedVersion !== 'undefined' && (
-                <>
-                  <EuiDescriptionListTitle>
-                    <FormattedMessage
-                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
-                      defaultMessage="Version"
-                    />
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>{serializedVersion}</EuiDescriptionListDescription>
-                </>
-              )}
-
-              {/* Index settings */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.settingsLabel"
-                  defaultMessage="Index settings"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(serializedTemplate?.settings)}
-              </EuiDescriptionListDescription>
-
-              {/* Mappings */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.mappingLabel"
-                  defaultMessage="Mappings"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(serializedTemplate?.mappings)}
-              </EuiDescriptionListDescription>
-
-              {/* Aliases */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.aliasesLabel"
-                  defaultMessage="Aliases"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getDescriptionText(serializedTemplate?.aliases)}
-              </EuiDescriptionListDescription>
-
-              {/* Data retention */}
-              <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataRetentionLabel"
-                  defaultMessage="Data retention"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {getLifecycleValue(serializedTemplate?.lifecycle, INFINITE_AS_ICON)}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiFlexItem>
-          {isFleetDatastreamsVisible && dataStreams && (
-            <EuiFlexItem>
-              {/* Datastream mappings */}
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepReview.summaryTab.datastreamsLabel"
-                defaultMessage="Mappings will immediately be applied to the following datastreams:"
-              />
-              <EuiSpacer size="s" />
-              <EuiText>
-                <ul>
-                  {dataStreams.map((dataStream) => (
-                    <li key={dataStream}>
-                      <EuiCode>{dataStream}</EuiCode>
-                    </li>
-                  ))}
-                </ul>
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            {/* Metadata */}
-            {serializedMeta && (
-              <EuiDescriptionList textStyle="reverse">
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList textStyle="reverse">
+            {/* Version */}
+            {typeof serializedVersion !== 'undefined' && (
+              <>
                 <EuiDescriptionListTitle>
                   <FormattedMessage
-                    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.metaLabel"
-                    defaultMessage="Metadata"
+                    id="xpack.idxMgmt.templateForm.stepReview.summaryTab.versionLabel"
+                    defaultMessage="Version"
                   />
                 </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>
-                  <EuiCodeBlock language="json">
-                    {JSON.stringify(serializedMeta, null, 2)}
-                  </EuiCodeBlock>
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
+                <EuiDescriptionListDescription>{serializedVersion}</EuiDescriptionListDescription>
+              </>
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
 
-    const RequestTab = () => {
-      const endpoint = `PUT _component_template/${name || '<componentTemplateName>'}`;
-      const templateString = JSON.stringify(serializedComponentTemplate, null, 2);
-      const request = `${endpoint}\n${templateString}`;
-
-      // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
-      // levels. This way we prevent that happening for very large requests.
-      const language = request.length < 60000 ? 'json' : undefined;
-
-      return (
-        <div data-test-subj="requestTab">
-          <EuiSpacer size="m" />
-
-          <EuiText>
-            <p>
+            {/* Index settings */}
+            <EuiDescriptionListTitle>
               <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateForm.stepReview.requestTab.descriptionText"
-                defaultMessage="This request will create the following component template."
+                id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.settingsLabel"
+                defaultMessage="Index settings"
               />
-            </p>
-          </EuiText>
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getDescriptionText(serializedTemplate?.settings)}
+            </EuiDescriptionListDescription>
 
-          <EuiSpacer size="m" />
+            {/* Mappings */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.mappingLabel"
+                defaultMessage="Mappings"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getDescriptionText(serializedTemplate?.mappings)}
+            </EuiDescriptionListDescription>
 
-          <EuiCodeBlock language={language} isCopyable>
-            {request}
-          </EuiCodeBlock>
+            {/* Aliases */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.aliasesLabel"
+                defaultMessage="Aliases"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getDescriptionText(serializedTemplate?.aliases)}
+            </EuiDescriptionListDescription>
 
-          {isFleetDatastreamsVisible && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.componentTemplateForm.stepReview.requestTab.datastreamNote"
-                    defaultMessage="Datastreams using that template need to be updated with aditionnal requests."
-                  />
-                </p>
-              </EuiText>
-            </>
+            {/* Data retention */}
+            <EuiDescriptionListTitle>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataRetentionLabel"
+                defaultMessage="Data retention"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription>
+              {getLifecycleValue(serializedTemplate?.lifecycle, INFINITE_AS_ICON)}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </EuiFlexItem>
+        {isFleetDatastreamsVisible && dataStreams && (
+          <EuiFlexItem>
+            {/* Datastream mappings */}
+            <FormattedMessage
+              id="xpack.idxMgmt.templateForm.stepReview.summaryTab.datastreamsLabel"
+              defaultMessage="Mappings will immediately be applied to the following datastreams:"
+            />
+            <EuiSpacer size="s" />
+            <EuiText>
+              <ul>
+                {dataStreams.map((dataStream) => (
+                  <li key={dataStream}>
+                    <EuiCode>{dataStream}</EuiCode>
+                  </li>
+                ))}
+              </ul>
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          {/* Metadata */}
+          {serializedMeta && (
+            <EuiDescriptionList textStyle="reverse">
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.metaLabel"
+                  defaultMessage="Metadata"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiCodeBlock language="json">
+                  {JSON.stringify(serializedMeta, null, 2)}
+                </EuiCodeBlock>
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
           )}
-        </div>
-      );
-    };
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+
+  const RequestTab = () => {
+    const endpoint = `PUT _component_template/${name || '<componentTemplateName>'}`;
+    const templateString = JSON.stringify(serializedComponentTemplate, null, 2);
+    const request = `${endpoint}\n${templateString}`;
+
+    // Beyond a certain point, highlighting the syntax will bog down performance to unacceptable
+    // levels. This way we prevent that happening for very large requests.
+    const language = request.length < 60000 ? 'json' : undefined;
 
     return (
-      <div data-test-subj="stepReview">
-        <EuiTitle>
-          <h2 data-test-subj="title">
+      <div data-test-subj="requestTab">
+        <EuiSpacer size="m" />
+
+        <EuiText>
+          <p>
             <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepReview.stepTitle"
-              defaultMessage="Review details for '{templateName}'"
-              values={{ templateName: name }}
+              id="xpack.idxMgmt.componentTemplateForm.stepReview.requestTab.descriptionText"
+              defaultMessage="This request will create the following component template."
             />
-          </h2>
-        </EuiTitle>
+          </p>
+        </EuiText>
 
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
 
-        <EuiTabbedContent
-          data-test-subj="content"
-          tabs={[
-            {
-              id: 'summary',
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplateForm.stepReview.summaryTabTitle',
-                {
-                  defaultMessage: 'Summary',
-                }
-              ),
-              content: <SummaryTab />,
-            },
-            {
-              id: 'request',
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplateForm.stepReview.requestTabTitle',
-                {
-                  defaultMessage: 'Request',
-                }
-              ),
-              content: <RequestTab />,
-            },
-          ]}
-        />
+        <EuiCodeBlock language={language} isCopyable>
+          {request}
+        </EuiCodeBlock>
+
+        {isFleetDatastreamsVisible && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateForm.stepReview.requestTab.datastreamNote"
+                  defaultMessage="Datastreams using that template need to be updated with aditionnal requests."
+                />
+              </p>
+            </EuiText>
+          </>
+        )}
       </div>
     );
-  }
-);
+  };
+
+  return (
+    <div data-test-subj="stepReview">
+      <EuiTitle>
+        <h2 data-test-subj="title">
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepReview.stepTitle"
+            defaultMessage="Review details for '{templateName}'"
+            values={{ templateName: name }}
+          />
+        </h2>
+      </EuiTitle>
+
+      <EuiSpacer size="l" />
+
+      <EuiTabbedContent
+        data-test-subj="content"
+        tabs={[
+          {
+            id: 'summary',
+            name: i18n.translate(
+              'xpack.idxMgmt.componentTemplateForm.stepReview.summaryTabTitle',
+              {
+                defaultMessage: 'Summary',
+              }
+            ),
+            content: <SummaryTab />,
+          },
+          {
+            id: 'request',
+            name: i18n.translate(
+              'xpack.idxMgmt.componentTemplateForm.stepReview.requestTabTitle',
+              {
+                defaultMessage: 'Request',
+              }
+            ),
+            content: <RequestTab />,
+          },
+        ]}
+      />
+    </div>
+  );
+});

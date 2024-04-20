@@ -58,12 +58,14 @@ export interface ChangePointDetectionAppStateProps {
   showFrozenDataTierChoice?: boolean;
 }
 
-export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
-  dataView,
-  savedSearch,
-  appDependencies,
-  showFrozenDataTierChoice = true,
-}) => {
+export const ChangePointDetectionAppState = (
+  {
+    dataView,
+    savedSearch,
+    appDependencies,
+    showFrozenDataTierChoice = true
+  }: ChangePointDetectionAppStateProps
+) => {
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,

@@ -68,7 +68,7 @@ const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const queryClient = new QueryClient();
 
-export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
+export const WithPermissionsAndSetup = memo(({ children }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
@@ -165,18 +165,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
  * and no routes defined
  */
-export const FleetAppContext: React.FC<{
-  startServices: FleetStartServices;
-  config: FleetConfigType;
-  history: AppMountParameters['history'];
-  kibanaVersion: string;
-  extensions: UIExtensionsStorage;
-  theme$: AppMountParameters['theme$'];
-  /** For testing purposes only */
-  routerHistory?: History<any>;
-  fleetStatus?: FleetStatusProviderProps;
-}> = memo(
-  ({
+export const FleetAppContext = memo((
+  {
     children,
     startServices,
     config,
@@ -185,50 +175,60 @@ export const FleetAppContext: React.FC<{
     extensions,
     routerHistory,
     theme$,
-    fleetStatus,
-  }) => {
-    const darkModeObservable = useObservable(theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
-
-    return (
-      <RedirectAppLinks
-        coreStart={{
-          application: startServices.application,
-        }}
-      >
-        <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
-            <EuiErrorBoundary>
-              <ConfigContext.Provider value={config}>
-                <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <KibanaThemeProvider theme$={theme$}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={false} />
-                        <UIExtensionsContext.Provider value={extensions}>
-                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                            <Router history={history}>
-                              <PackageInstallProvider
-                                notifications={startServices.notifications}
-                                theme$={theme$}
-                              >
-                                <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                              </PackageInstallProvider>
-                            </Router>
-                          </FleetStatusProvider>
-                        </UIExtensionsContext.Provider>
-                      </QueryClientProvider>
-                    </EuiThemeProvider>
-                  </KibanaThemeProvider>
-                </KibanaVersionContext.Provider>
-              </ConfigContext.Provider>
-            </EuiErrorBoundary>
-          </KibanaContextProvider>
-        </startServices.i18n.Context>
-      </RedirectAppLinks>
-    );
+    fleetStatus
+  }: {
+    startServices: FleetStartServices;
+    config: FleetConfigType;
+    history: AppMountParameters['history'];
+    kibanaVersion: string;
+    extensions: UIExtensionsStorage;
+    theme$: AppMountParameters['theme$'];
+    /** For testing purposes only */
+    routerHistory?: History<any>;
+    fleetStatus?: FleetStatusProviderProps;
   }
-);
+) => {
+  const darkModeObservable = useObservable(theme$);
+  const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+
+  return (
+    <RedirectAppLinks
+      coreStart={{
+        application: startServices.application,
+      }}
+    >
+      <startServices.i18n.Context>
+        <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
+          <EuiErrorBoundary>
+            <ConfigContext.Provider value={config}>
+              <KibanaVersionContext.Provider value={kibanaVersion}>
+                <KibanaThemeProvider theme$={theme$}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <QueryClientProvider client={queryClient}>
+                      <ReactQueryDevtools initialIsOpen={false} />
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                          <Router history={history}>
+                            <PackageInstallProvider
+                              notifications={startServices.notifications}
+                              theme$={theme$}
+                            >
+                              <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                            </PackageInstallProvider>
+                          </Router>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </QueryClientProvider>
+                  </EuiThemeProvider>
+                </KibanaThemeProvider>
+              </KibanaVersionContext.Provider>
+            </ConfigContext.Provider>
+          </EuiErrorBoundary>
+        </KibanaContextProvider>
+      </startServices.i18n.Context>
+    </RedirectAppLinks>
+  );
+});
 
 const FleetTopNav = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
@@ -263,122 +263,117 @@ export const AppRoutes = memo(
 
     const authz = useAuthz();
 
-    return (
-      <>
-        <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
+    return (<>
+      <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
+      <Routes>
+        <Route path={FLEET_ROUTING_PATHS.agents}>
+          {authz.fleet.readAgents ? (
+            <AgentsApp />
+          ) : (
+            <ErrorLayout isAddIntegrationsPath={false}>
+              <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents Read" />
+            </ErrorLayout>
+          )}
+        </Route>
 
-        <Routes>
-          <Route path={FLEET_ROUTING_PATHS.agents}>
-            {authz.fleet.readAgents ? (
-              <AgentsApp />
-            ) : (
-              <ErrorLayout isAddIntegrationsPath={false}>
-                <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents Read" />
-              </ErrorLayout>
-            )}
-          </Route>
+        <Route path={FLEET_ROUTING_PATHS.policies}>
+          {authz.fleet.readAgentPolicies ? (
+            <AgentPolicyApp />
+          ) : (
+            <ErrorLayout isAddIntegrationsPath={false}>
+              <PermissionsError
+                error="MISSING_PRIVILEGES"
+                requiredFleetRole="Agent policies Read"
+              />
+            </ErrorLayout>
+          )}
+        </Route>
 
-          <Route path={FLEET_ROUTING_PATHS.policies}>
-            {authz.fleet.readAgentPolicies ? (
-              <AgentPolicyApp />
-            ) : (
-              <ErrorLayout isAddIntegrationsPath={false}>
-                <PermissionsError
-                  error="MISSING_PRIVILEGES"
-                  requiredFleetRole="Agent policies Read"
-                />
-              </ErrorLayout>
-            )}
-          </Route>
-
-          <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
+        <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
+          {authz.fleet.allAgents ? (
+            <EnrollmentTokenListPage />
+          ) : (
+            <ErrorLayout isAddIntegrationsPath={false}>
+              <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
+            </ErrorLayout>
+          )}
+        </Route>
+        {agentTamperProtectionEnabled && (
+          <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
             {authz.fleet.allAgents ? (
-              <EnrollmentTokenListPage />
+              <UninstallTokenListPage />
             ) : (
               <ErrorLayout isAddIntegrationsPath={false}>
                 <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
               </ErrorLayout>
             )}
           </Route>
-          {agentTamperProtectionEnabled && (
-            <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
-              {authz.fleet.allAgents ? (
-                <UninstallTokenListPage />
-              ) : (
-                <ErrorLayout isAddIntegrationsPath={false}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
-                </ErrorLayout>
-              )}
-            </Route>
+        )}
+        <Route path={FLEET_ROUTING_PATHS.data_streams}>
+          <DataStreamApp />
+        </Route>
+
+        <Route path={FLEET_ROUTING_PATHS.settings}>
+          {authz.fleet.readSettings ? (
+            <SettingsApp />
+          ) : (
+            <ErrorLayout isAddIntegrationsPath={false}>
+              <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Settings Read" />
+            </ErrorLayout>
           )}
-          <Route path={FLEET_ROUTING_PATHS.data_streams}>
-            <DataStreamApp />
-          </Route>
+        </Route>
 
-          <Route path={FLEET_ROUTING_PATHS.settings}>
-            {authz.fleet.readSettings ? (
-              <SettingsApp />
-            ) : (
-              <ErrorLayout isAddIntegrationsPath={false}>
-                <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Settings Read" />
-              </ErrorLayout>
-            )}
-          </Route>
+        {/* TODO: Move this route to the Integrations app */}
+        <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+          <CreatePackagePolicyPage />
+        </Route>
 
-          {/* TODO: Move this route to the Integrations app */}
-          <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-            <CreatePackagePolicyPage />
-          </Route>
+        <Route
+          render={({ location }) => {
+            // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+            const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+            if (!shouldRedirectHash) {
+              // Redirect to the first authorized tab
+              const redirectTo = authz.fleet.readAgents
+                ? FLEET_ROUTING_PATHS.agents
+                : authz.fleet.readAgentPolicies
+                ? FLEET_ROUTING_PATHS.policies
+                : FLEET_ROUTING_PATHS.settings;
 
-          <Route
-            render={({ location }) => {
-              // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
-              const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
-              if (!shouldRedirectHash) {
-                // Redirect to the first authorized tab
-                const redirectTo = authz.fleet.readAgents
-                  ? FLEET_ROUTING_PATHS.agents
-                  : authz.fleet.readAgentPolicies
-                  ? FLEET_ROUTING_PATHS.policies
-                  : FLEET_ROUTING_PATHS.settings;
+              return <Redirect to={redirectTo} />;
+            }
+            const pathname = location.hash.replace(/^#(\/fleet)?/, '');
 
-                return <Redirect to={redirectTo} />;
-              }
-              const pathname = location.hash.replace(/^#(\/fleet)?/, '');
-
-              return (
-                <Redirect
-                  to={{
-                    ...location,
-                    pathname,
-                    hash: undefined,
-                  }}
-                />
-              );
-            }}
+            return (
+              <Redirect
+                to={{
+                  ...location,
+                  pathname,
+                  hash: undefined,
+                }}
+              />
+            );
+          }}
+        />
+      </Routes>
+      {flyoutContext.isEnrollmentFlyoutOpen && (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            defaultMode={
+              fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
+                ? 'managed'
+                : 'standalone'
+            }
+            isIntegrationFlow={true}
+            onClose={() => flyoutContext.closeEnrollmentFlyout()}
           />
-        </Routes>
-
-        {flyoutContext.isEnrollmentFlyoutOpen && (
-          <EuiPortal>
-            <AgentEnrollmentFlyout
-              defaultMode={
-                fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
-                  ? 'managed'
-                  : 'standalone'
-              }
-              isIntegrationFlow={true}
-              onClose={() => flyoutContext.closeEnrollmentFlyout()}
-            />
-          </EuiPortal>
-        )}
-
-        {flyoutContext.isFleetServerFlyoutOpen && (
-          <EuiPortal>
-            <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
-          </EuiPortal>
-        )}
-      </>
-    );
+        </EuiPortal>
+      )}
+      {flyoutContext.isFleetServerFlyoutOpen && (
+        <EuiPortal>
+          <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+        </EuiPortal>
+      )}
+    </>);
   }
 );

@@ -12,7 +12,11 @@ interface Props {
   loading: string;
 }
 
-const LoadingEmptyPromptComponent: React.FC<Props> = ({ loading }) => {
+const LoadingEmptyPromptComponent = (
+  {
+    loading
+  }: Props
+) => {
   const icon = useMemo(() => <EuiLoadingSpinner size="xxl" />, []);
 
   return (

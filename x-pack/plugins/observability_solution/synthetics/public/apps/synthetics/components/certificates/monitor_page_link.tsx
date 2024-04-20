@@ -13,7 +13,12 @@ interface DetailPageLinkProps {
   configId: string;
 }
 
-export const MonitorPageLink: FC<DetailPageLinkProps> = ({ children, configId }) => {
+export const MonitorPageLink = (
+  {
+    children,
+    configId
+  }: DetailPageLinkProps
+) => {
   const basePath = useKibana().services.http?.basePath.get();
   return (
     <EuiLink

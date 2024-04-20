@@ -41,7 +41,11 @@ interface DiscoverTabContentProps {
   timelineId: string;
 }
 
-export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) => {
+export const DiscoverTabContent = (
+  {
+    timelineId
+  }: DiscoverTabContentProps
+) => {
   const history = useHistory();
   const {
     services: {

@@ -21,10 +21,12 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
  * The `KibanaRenderContextProvider` provides the necessary context for an out-of-current
  * React render, such as using `ReactDOM.render()`.
  */
-export const KibanaRenderContextProvider: FC<KibanaRenderContextProviderProps> = ({
-  children,
-  ...props
-}) => {
+export const KibanaRenderContextProvider = (
+  {
+    children,
+    ...props
+  }: KibanaRenderContextProviderProps
+) => {
   return (
     <KibanaRootContextProvider globalStyles={false} {...props}>
       <KibanaErrorBoundaryProvider analytics={props.analytics}>

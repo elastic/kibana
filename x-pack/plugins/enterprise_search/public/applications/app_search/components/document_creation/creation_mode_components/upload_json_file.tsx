@@ -24,7 +24,7 @@ import { DocumentCreationLogic } from '..';
 import { CANCEL_BUTTON_LABEL, CONTINUE_BUTTON_LABEL } from '../../../../shared/constants';
 import { AppLogic } from '../../../app_logic';
 
-export const UploadJsonFileTabContent: React.FC = () => {
+export const UploadJsonFileTabContent = () => {
   const {
     configuredLimits: {
       engine: { maxDocumentByteSize },
@@ -60,7 +60,7 @@ export const UploadJsonFileTabContent: React.FC = () => {
   );
 };
 
-export const UploadJsonFileFooterContent: React.FC = () => {
+export const UploadJsonFileFooterContent = () => {
   const { fileInput, isUploading } = useValues(DocumentCreationLogic);
   const { onSubmitFile, closeDocumentCreation } = useActions(DocumentCreationLogic);
 

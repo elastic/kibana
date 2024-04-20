@@ -32,7 +32,12 @@ interface Props {
   setFormState: ActionDispatchers['setFormState'];
 }
 
-export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
+export const AdditionalSection = (
+  {
+    formState,
+    setFormState
+  }: Props
+) => {
   const [additionalExpanded, setAdditionalExpanded] = useState<boolean>(false);
   const { _meta: formMeta } = formState;
 

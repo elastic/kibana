@@ -18,11 +18,13 @@ interface IngestionPanelProps {
   assetBasePath: string;
 }
 
-export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
-  additionalIngestionPanel,
-  docLinks,
-  assetBasePath,
-}) => {
+export const IngestionsPanel = (
+  {
+    additionalIngestionPanel,
+    docLinks,
+    assetBasePath
+  }: IngestionPanelProps
+) => {
   const panels = [
     {
       description: i18n.translate(

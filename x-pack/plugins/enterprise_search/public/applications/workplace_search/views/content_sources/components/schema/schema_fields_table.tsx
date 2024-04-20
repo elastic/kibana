@@ -29,7 +29,7 @@ import {
 } from './constants';
 import { SchemaLogic } from './schema_logic';
 
-export const SchemaFieldsTable: React.FC = () => {
+export const SchemaFieldsTable = () => {
   const { updateExistingFieldType } = useActions(SchemaLogic);
 
   const { filteredSchemaFields, filterValue } = useValues(SchemaLogic);

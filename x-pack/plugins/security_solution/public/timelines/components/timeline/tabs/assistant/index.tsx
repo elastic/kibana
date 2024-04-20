@@ -15,19 +15,22 @@ const AssistantTabContainer = styled.div`
   width: 100%;
 `;
 
-const AssistantTab: React.FC<{
-  shouldRefocusPrompt: boolean;
-  setConversationTitle: Dispatch<SetStateAction<string>>;
-}> = memo(({ shouldRefocusPrompt, setConversationTitle }) => (
-  <AssistantTabContainer>
-    <Assistant
-      conversationTitle={TIMELINE_CONVERSATION_TITLE}
-      embeddedLayout
-      setConversationTitle={setConversationTitle}
-      shouldRefocusPrompt={shouldRefocusPrompt}
-    />
-  </AssistantTabContainer>
-));
+const AssistantTab = memo((
+  {
+    shouldRefocusPrompt,
+    setConversationTitle
+  }: {
+    shouldRefocusPrompt: boolean;
+    setConversationTitle: Dispatch<SetStateAction<string>>;
+  }
+) => (<AssistantTabContainer>
+  <Assistant
+    conversationTitle={TIMELINE_CONVERSATION_TITLE}
+    embeddedLayout
+    setConversationTitle={setConversationTitle}
+    shouldRefocusPrompt={shouldRefocusPrompt}
+  />
+</AssistantTabContainer>));
 
 AssistantTab.displayName = 'AssistantTab';
 

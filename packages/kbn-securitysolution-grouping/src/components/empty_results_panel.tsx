@@ -20,9 +20,13 @@ const heights = {
   short: 250,
 };
 
-export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }> = ({
-  height = 'tall',
-}) => {
+export const EmptyGroupingComponent = (
+  {
+    height = 'tall'
+  }: {
+    height?: keyof typeof heights;
+  }
+) => {
   return (
     <EuiPanel color="subdued" data-test-subj="empty-results-panel">
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">

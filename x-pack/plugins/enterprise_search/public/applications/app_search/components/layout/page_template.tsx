@@ -14,9 +14,14 @@ import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { useAppSearchNav } from './nav';
 
-export const AppSearchPageTemplate: React.FC<
-  Omit<PageTemplateProps, 'useEndpointHeaderActions'>
-> = ({ children, pageChrome, pageViewTelemetry, ...pageTemplateProps }) => {
+export const AppSearchPageTemplate = (
+  {
+    children,
+    pageChrome,
+    pageViewTelemetry,
+    ...pageTemplateProps
+  }: Omit<PageTemplateProps, 'useEndpointHeaderActions'>
+) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}

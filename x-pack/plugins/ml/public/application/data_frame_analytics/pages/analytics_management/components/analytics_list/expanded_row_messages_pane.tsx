@@ -21,7 +21,12 @@ interface Props {
   dataTestSubj: string;
 }
 
-export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }) => {
+export const ExpandedRowMessagesPane = (
+  {
+    analyticsId,
+    dataTestSubj
+  }: Props
+) => {
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

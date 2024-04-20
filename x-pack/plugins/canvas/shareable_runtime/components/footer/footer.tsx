@@ -32,7 +32,12 @@ export interface Props {
 /**
  * The Footer of the Shareable Canvas Workpad.
  */
-export const FooterComponent: FC<Props> = ({ isAutohide = false, isHidden = false }) => {
+export const FooterComponent = (
+  {
+    isAutohide = false,
+    isHidden = false
+  }: Props
+) => {
   const { root, title } = css;
 
   return (
@@ -58,7 +63,11 @@ export const FooterComponent: FC<Props> = ({ isAutohide = false, isHidden = fals
 /**
  * A store-connected container for the `Footer` component.
  */
-export const Footer: FC<Pick<Props, 'isHidden'>> = ({ isHidden = false }) => {
+export const Footer = (
+  {
+    isHidden = false
+  }: Pick<Props, 'isHidden'>
+) => {
   const [{ workpad, settings }] = useCanvasShareableState();
 
   if (!workpad) {

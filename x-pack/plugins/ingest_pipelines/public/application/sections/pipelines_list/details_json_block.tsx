@@ -12,7 +12,11 @@ export interface Props {
   json: Record<string, any>;
 }
 
-export const PipelineDetailsJsonBlock: FunctionComponent<Props> = ({ json }) => {
+export const PipelineDetailsJsonBlock = (
+  {
+    json
+  }: Props
+) => {
   // Hack so copied-to-clipboard value updates as content changes
   // Related issue: https://github.com/elastic/eui/issues/3321
   const uuid = useRef(0);

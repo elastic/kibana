@@ -37,7 +37,13 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+export const ResetJobModal = (
+  {
+    setShowFunction,
+    unsetShowFunction,
+    refreshJobs
+  }: Props
+) => {
   const [resetting, setResetting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);

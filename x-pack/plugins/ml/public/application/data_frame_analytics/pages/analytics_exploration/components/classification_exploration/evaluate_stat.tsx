@@ -18,28 +18,28 @@ interface Props {
   tooltipContent: string;
 }
 
-export const EvaluateStat: FC<Props> = ({
-  isLoading,
-  title,
-  description,
-  dataTestSubj,
-  tooltipContent,
-}) => (
-  <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
-    <EuiFlexItem grow={false}>
-      <EuiStat
-        reverse
-        isLoading={isLoading}
-        title={title !== null ? Math.round(title * 1000) / 1000 : EMPTY_STAT}
-        description={description}
-        titleSize="xs"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiIconTip
-        anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
-        content={tooltipContent}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const EvaluateStat = (
+  {
+    isLoading,
+    title,
+    description,
+    dataTestSubj,
+    tooltipContent
+  }: Props
+) => (<EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
+  <EuiFlexItem grow={false}>
+    <EuiStat
+      reverse
+      isLoading={isLoading}
+      title={title !== null ? Math.round(title * 1000) / 1000 : EMPTY_STAT}
+      description={description}
+      titleSize="xs"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiIconTip
+      anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
+      content={tooltipContent}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>);

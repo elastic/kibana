@@ -17,7 +17,12 @@ interface Props {
 
 export const fieldName = 'description';
 
-const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey }) => {
+const DescriptionComponent = (
+  {
+    isLoading,
+    draftStorageKey
+  }: Props
+) => {
   const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
   const editorRef = useRef<Record<string, unknown>>();
   const disabledUiPlugins = [LensPluginId];

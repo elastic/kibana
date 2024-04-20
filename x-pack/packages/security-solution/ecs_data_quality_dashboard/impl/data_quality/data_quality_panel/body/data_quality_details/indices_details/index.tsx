@@ -67,56 +67,56 @@ export interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const IndicesDetailsComponent: React.FC<Props> = ({
-  addSuccessToast,
-  canUserCreateAndReadCases,
-  endDate,
-  formatBytes,
-  formatNumber,
-  getGroupByFieldsOnClick,
-  ilmPhases,
-  isAssistantEnabled,
-  openCreateCaseFlyout,
-  patternIndexNames,
-  patternRollups,
-  patterns,
-  selectedIndex,
-  setSelectedIndex,
-  startDate,
-  theme,
-  baseTheme,
-  updatePatternIndexNames,
-  updatePatternRollup,
-}) => (
-  <div data-test-subj="indicesDetails">
-    {patterns.map((pattern, i) => (
-      <EuiFlexItem grow={false} key={pattern}>
-        <Pattern
-          addSuccessToast={addSuccessToast}
-          canUserCreateAndReadCases={canUserCreateAndReadCases}
-          endDate={endDate}
-          formatBytes={formatBytes}
-          formatNumber={formatNumber}
-          getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-          ilmPhases={ilmPhases}
-          indexNames={patternIndexNames[pattern]}
-          isAssistantEnabled={isAssistantEnabled}
-          openCreateCaseFlyout={openCreateCaseFlyout}
-          pattern={pattern}
-          patternRollup={patternRollups[pattern]}
-          selectedIndex={selectedIndex}
-          setSelectedIndex={setSelectedIndex}
-          startDate={startDate}
-          theme={theme}
-          baseTheme={baseTheme}
-          updatePatternIndexNames={updatePatternIndexNames}
-          updatePatternRollup={updatePatternRollup}
-        />
-        {patterns[i + 1] && <EuiSpacer data-test-subj="bodyPatternSpacer" size="s" />}
-      </EuiFlexItem>
-    ))}
-  </div>
-);
+const IndicesDetailsComponent = (
+  {
+    addSuccessToast,
+    canUserCreateAndReadCases,
+    endDate,
+    formatBytes,
+    formatNumber,
+    getGroupByFieldsOnClick,
+    ilmPhases,
+    isAssistantEnabled,
+    openCreateCaseFlyout,
+    patternIndexNames,
+    patternRollups,
+    patterns,
+    selectedIndex,
+    setSelectedIndex,
+    startDate,
+    theme,
+    baseTheme,
+    updatePatternIndexNames,
+    updatePatternRollup
+  }: Props
+) => (<div data-test-subj="indicesDetails">
+  {patterns.map((pattern, i) => (
+    <EuiFlexItem grow={false} key={pattern}>
+      <Pattern
+        addSuccessToast={addSuccessToast}
+        canUserCreateAndReadCases={canUserCreateAndReadCases}
+        endDate={endDate}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
+        getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+        ilmPhases={ilmPhases}
+        indexNames={patternIndexNames[pattern]}
+        isAssistantEnabled={isAssistantEnabled}
+        openCreateCaseFlyout={openCreateCaseFlyout}
+        pattern={pattern}
+        patternRollup={patternRollups[pattern]}
+        selectedIndex={selectedIndex}
+        setSelectedIndex={setSelectedIndex}
+        startDate={startDate}
+        theme={theme}
+        baseTheme={baseTheme}
+        updatePatternIndexNames={updatePatternIndexNames}
+        updatePatternRollup={updatePatternRollup}
+      />
+      {patterns[i + 1] && <EuiSpacer data-test-subj="bodyPatternSpacer" size="s" />}
+    </EuiFlexItem>
+  ))}
+</div>);
 
 IndicesDetailsComponent.displayName = 'IndicesDetailsComponent';
 

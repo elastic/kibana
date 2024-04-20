@@ -33,7 +33,7 @@ import {
 
 import './json_flyout.scss';
 
-export const JsonFlyout: React.FC = () => {
+export const JsonFlyout = () => {
   const { activeJsonTab } = useValues(DocumentCreationLogic);
   const { setActiveJsonTab } = useActions(DocumentCreationLogic);
 

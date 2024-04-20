@@ -29,7 +29,7 @@ export interface SubmitErrorCalloutProps {
   defaultTitle: React.ReactNode;
 }
 
-export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (props) => {
+export const SubmitErrorCallout = (props: SubmitErrorCalloutProps) => {
   const error = props.error as IHttpFetchError<ResponseErrorBody>;
 
   if (

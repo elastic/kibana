@@ -69,14 +69,16 @@ const Spinner = styled(EuiLoadingSpinner)`
 
 const singleSelection = { asPlainText: true };
 
-export const EqlQueryBarFooter: FC<Props> = ({
-  errors,
-  isLoading,
-  isSizeOptionDisabled,
-  optionsData,
-  optionsSelected,
-  onOptionsChange,
-}) => {
+export const EqlQueryBarFooter = (
+  {
+    errors,
+    isLoading,
+    isSizeOptionDisabled,
+    optionsData,
+    optionsSelected,
+    onOptionsChange
+  }: Props
+) => {
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 100);
   const debounceSize = useRef<Cancelable & SizeVoidFunc>();

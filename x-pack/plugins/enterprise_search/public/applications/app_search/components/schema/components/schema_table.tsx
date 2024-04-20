@@ -30,7 +30,7 @@ import { EngineLogic } from '../../engine';
 
 import { SchemaLogic } from '../schema_logic';
 
-export const SchemaTable: React.FC = () => {
+export const SchemaTable = () => {
   const {
     myRole: { canManageEngines },
   } = useValues(AppLogic);

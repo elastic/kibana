@@ -55,13 +55,15 @@ const defaultEntities = {
  * @param handleDuplicates
  * @constructor
  */
-export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
-  entityTypes = defaultEntities,
-  multiSelect = true,
-  selectedOptions,
-  onSelectionChange,
-  handleDuplicates = false,
-}) => {
+export const MlEntitySelector = (
+  {
+    entityTypes = defaultEntities,
+    multiSelect = true,
+    selectedOptions,
+    onSelectionChange,
+    handleDuplicates = false
+  }: MlEntitySelectorProps
+) => {
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
   const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();

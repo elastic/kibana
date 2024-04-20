@@ -14,12 +14,14 @@ import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 
 import { useWorkplaceSearchNav } from './nav';
 
-export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
-  children,
-  pageChrome,
-  pageViewTelemetry,
-  ...pageTemplateProps
-}) => {
+export const WorkplaceSearchPageTemplate = (
+  {
+    children,
+    pageChrome,
+    pageViewTelemetry,
+    ...pageTemplateProps
+  }: PageTemplateProps
+) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       restrictWidth

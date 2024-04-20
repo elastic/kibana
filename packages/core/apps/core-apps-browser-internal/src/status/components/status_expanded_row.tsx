@@ -14,7 +14,11 @@ interface StatusExpandedRowProps {
   status: FormattedStatus;
 }
 
-export const StatusExpandedRow: FC<StatusExpandedRowProps> = ({ status }) => {
+export const StatusExpandedRow = (
+  {
+    status
+  }: StatusExpandedRowProps
+) => {
   const { original } = status;
   const statusAsString = useMemo(() => JSON.stringify(original, null, 2), [original]);
 

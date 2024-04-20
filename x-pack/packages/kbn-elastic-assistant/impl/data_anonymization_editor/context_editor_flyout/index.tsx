@@ -24,12 +24,14 @@ interface ContextEditorFlyoutComponentProps {
   isDataAnonymizable: boolean;
 }
 
-const ContextEditorFlyoutComponent: React.FC<ContextEditorFlyoutComponentProps> = ({
-  selectedPromptContext,
-  currentReplacements,
-  onListUpdated,
-  isDataAnonymizable,
-}) => {
+const ContextEditorFlyoutComponent = (
+  {
+    selectedPromptContext,
+    currentReplacements,
+    onListUpdated,
+    isDataAnonymizable
+  }: ContextEditorFlyoutComponentProps
+) => {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [showRealValues, setShowRealValues] = useState<boolean>(false);
   const openEditModal = useCallback(() => setEditModalVisible(true), []);

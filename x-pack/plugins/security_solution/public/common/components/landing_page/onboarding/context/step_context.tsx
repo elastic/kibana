@@ -26,7 +26,7 @@ export interface StepContextType {
 
 const StepContext = React.createContext<StepContextType | null>(null);
 
-export const StepContextProvider: React.FC<StepContextType> = ({ children, ...others }) => {
+export const StepContextProvider = ({ children, ...others }: StepContextType) => {
   return <StepContext.Provider value={others}>{children}</StepContext.Provider>;
 };
 

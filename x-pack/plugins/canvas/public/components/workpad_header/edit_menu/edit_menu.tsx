@@ -120,7 +120,7 @@ const mergeProps = (
   };
 };
 
-export const EditMenuWithContext: FC<ComponentProps> = (props) => {
+export const EditMenuWithContext = (props: ComponentProps) => {
   const { undo, redo } = useContext(WorkpadRoutingContext);
 
   return <Component {...props} undoHistory={undo} redoHistory={redo} />;

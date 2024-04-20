@@ -195,7 +195,12 @@ export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string
   breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
+const PageWrapper = (
+  {
+    location,
+    jobType
+  }: WizardPageProps
+) => {
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );

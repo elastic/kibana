@@ -38,7 +38,7 @@ import { CrawlCustomSettingsFlyoutMultipleCrawlTabs } from './crawl_custom_setti
 import { CrawlCustomSettingsFlyoutMultiCrawlScheduling } from './crawl_custom_settings_flyout_mutli_crawl';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps } from './crawl_custom_settings_flyout_seed_urls_panel';
 
-export const CrawlCustomSettingsFlyout: React.FC = () => {
+export const CrawlCustomSettingsFlyout = () => {
   const {
     isDataLoading,
     isFormSubmitting,

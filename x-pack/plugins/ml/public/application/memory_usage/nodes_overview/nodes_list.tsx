@@ -50,7 +50,11 @@ export interface NodesListProps {
   compactView?: boolean;
 }
 
-export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
+export const NodesList = (
+  {
+    compactView = false
+  }: NodesListProps
+) => {
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const refresh = useRefresh();

@@ -50,7 +50,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
 /**
  * Visualize view displayed in the document details expandable flyout left section
  */
-export const VisualizeTab: FC = memo(() => {
+export const VisualizeTab = memo(() => {
   const { eventId, indexName, scopeId } = useLeftPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();

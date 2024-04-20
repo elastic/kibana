@@ -40,7 +40,11 @@ const createDateFormatter = (format: string, tz: string) => (date: string) => {
   return m.isValid() ? m.format(format) : NA;
 };
 
-export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
+export const ReportInfoFlyoutContent = (
+  {
+    info
+  }: Props
+) => {
   const {
     services: { uiSettings, docLinks },
   } = useKibana();

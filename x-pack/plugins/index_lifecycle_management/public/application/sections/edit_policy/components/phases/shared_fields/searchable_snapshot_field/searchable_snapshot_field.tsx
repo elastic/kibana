@@ -82,10 +82,12 @@ const geti18nTexts = (
   }
 };
 
-export const SearchableSnapshotField: FunctionComponent<Props> = ({
-  phase,
-  canBeDisabled = true,
-}) => {
+export const SearchableSnapshotField = (
+  {
+    phase,
+    canBeDisabled = true
+  }: Props
+) => {
   const {
     services: { cloud, docLinks, getUrlForApp },
   } = useKibana();

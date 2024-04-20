@@ -19,7 +19,13 @@ export interface Props {
   initializeWorkpad: () => void;
 }
 
-export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWorkpad }) => {
+export const ExportApp = (
+  {
+    workpad,
+    selectedPageIndex,
+    initializeWorkpad
+  }: Props
+) => {
   const { id, pages, height, width } = workpad;
   const activePage = pages[selectedPageIndex];
   const pageElementCount = activePage.elements.length;

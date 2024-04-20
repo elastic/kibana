@@ -41,7 +41,7 @@ export const analyticsSourceSelectionRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
 
   return (

@@ -16,9 +16,12 @@ interface UserRowProps {
   showEmail?: boolean;
 }
 
-export const UserRow: React.FC<UserRowProps> = ({ user: { name, email }, showEmail }) => (
-  <EuiTableRow>
-    <EuiTableRowCell>{name}</EuiTableRowCell>
-    <EuiTableRowCell>{showEmail && <span>{email}</span>}</EuiTableRowCell>
-  </EuiTableRow>
-);
+export const UserRow = (
+  {
+    user: { name, email },
+    showEmail
+  }: UserRowProps
+) => (<EuiTableRow>
+  <EuiTableRowCell>{name}</EuiTableRowCell>
+  <EuiTableRowCell>{showEmail && <span>{email}</span>}</EuiTableRowCell>
+</EuiTableRow>);

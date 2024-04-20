@@ -21,13 +21,15 @@ const STATIC_PATH_PAGE_IDS = Object.fromEntries(
   Object.values(cloudPosturePages).map(({ id }) => [id, true])
 );
 
-export const CspRoute: React.FC<CspRouteProps> = ({
-  id,
-  children,
-  component: Component,
-  disabled = false,
-  ...cspRouteProps
-}) => {
+export const CspRoute = (
+  {
+    id,
+    children,
+    component: Component,
+    disabled = false,
+    ...cspRouteProps
+  }: CspRouteProps
+) => {
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
   if (disabled) {

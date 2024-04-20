@@ -29,7 +29,7 @@ import { AuditLogsModalLogic } from './audit_logs_modal_logic';
 
 import './audit_logs_modal.scss';
 
-export const AuditLogsModal: React.FC = () => {
+export const AuditLogsModal = () => {
   const auditLogsModalLogic = AuditLogsModalLogic();
   const { isModalVisible, engineName } = useValues(auditLogsModalLogic);
   const { hideModal } = useActions(auditLogsModalLogic);

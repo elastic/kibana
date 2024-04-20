@@ -50,8 +50,8 @@ interface Props {
   value?: string[] | string | null;
 }
 
-export const ShowTopNButton: React.FC<Props> = React.memo(
-  ({
+export const ShowTopNButton = React.memo((
+  {
     className,
     Component,
     enablePopOver,
@@ -70,125 +70,125 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     scopeId,
     title,
     value,
-    globalFilters,
-  }) => {
-    const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
-      ? SourcererScopeName.timeline
-      : scopeId != null && isDetectionsAlertsTable(scopeId)
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-    const { browserFields, indexPattern } = useSourcererDataView(activeScope);
+    globalFilters
+  }: Props
+) => {
+  const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
+    ? SourcererScopeName.timeline
+    : scopeId != null && isDetectionsAlertsTable(scopeId)
+    ? SourcererScopeName.detections
+    : SourcererScopeName.default;
+  const { browserFields, indexPattern } = useSourcererDataView(activeScope);
 
-    const icon = iconType ?? 'visBarVertical';
-    const side = iconSide ?? 'left';
-    const buttonTitle = title ?? SHOW_TOP(field);
-    const basicButton = useMemo(
-      () =>
-        Component ? (
-          <Component
-            aria-label={buttonTitle}
-            className={className}
-            data-test-subj="show-top-field"
-            icon={icon}
-            iconType={icon}
-            iconSide={side}
-            flush={flush}
-            onClick={onClick}
-            title={buttonTitle}
-          >
-            {buttonTitle}
-          </Component>
-        ) : (
-          <EuiButtonIcon
-            aria-label={buttonTitle}
-            className="securitySolution__hoverActionButton"
-            data-test-subj="show-top-field"
-            iconSize="s"
-            iconType={icon}
-            onClick={onClick}
-          />
-        ),
-      [Component, buttonTitle, className, flush, icon, onClick, side]
-    );
-
-    const button = useMemo(
-      () =>
-        showTooltip && !showTopN ? (
-          <EuiToolTip
-            content={
-              <TooltipWithKeyboardShortcut
-                additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-                  field,
-                  value,
-                })}
-                content={buttonTitle}
-                shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
-                showShortcut={ownFocus}
-              />
-            }
-          >
-            {basicButton}
-          </EuiToolTip>
-        ) : (
-          basicButton
-        ),
-      [basicButton, buttonTitle, field, ownFocus, showTooltip, showTopN, value]
-    );
-
-    const topNPannel = useMemo(
-      () => (
-        <StatefulTopN
-          browserFields={browserFields}
-          field={field}
-          indexPattern={indexPattern}
-          onFilterAdded={onFilterAdded}
-          paddingSize={paddingSize}
-          showLegend={showLegend}
-          scopeId={scopeId ?? undefined}
-          toggleTopN={onClick}
-          globalFilters={globalFilters}
+  const icon = iconType ?? 'visBarVertical';
+  const side = iconSide ?? 'left';
+  const buttonTitle = title ?? SHOW_TOP(field);
+  const basicButton = useMemo(
+    () =>
+      Component ? (
+        <Component
+          aria-label={buttonTitle}
+          className={className}
+          data-test-subj="show-top-field"
+          icon={icon}
+          iconType={icon}
+          iconSide={side}
+          flush={flush}
+          onClick={onClick}
+          title={buttonTitle}
+        >
+          {buttonTitle}
+        </Component>
+      ) : (
+        <EuiButtonIcon
+          aria-label={buttonTitle}
+          className="securitySolution__hoverActionButton"
+          data-test-subj="show-top-field"
+          iconSize="s"
+          iconType={icon}
+          onClick={onClick}
         />
       ),
-      [
-        browserFields,
-        field,
-        indexPattern,
-        onFilterAdded,
-        paddingSize,
-        showLegend,
-        scopeId,
-        onClick,
-        globalFilters,
-      ]
-    );
+    [Component, buttonTitle, className, flush, icon, onClick, side]
+  );
 
-    if (isExpandable) {
-      return (
-        <>
-          {basicButton}
-          {showTopN && topNPannel}
-        </>
-      );
-    }
-
-    return showTopN ? (
-      enablePopOver ? (
-        <EuiPopover
-          button={basicButton}
-          isOpen={showTopN}
-          closePopover={onClick}
-          panelClassName="withHoverActions__popover"
-          data-test-subj="showTopNContainer"
+  const button = useMemo(
+    () =>
+      showTooltip && !showTopN ? (
+        <EuiToolTip
+          content={
+            <TooltipWithKeyboardShortcut
+              additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+                field,
+                value,
+              })}
+              content={buttonTitle}
+              shortcut={SHOW_TOP_N_KEYBOARD_SHORTCUT}
+              showShortcut={ownFocus}
+            />
+          }
         >
-          {topNPannel}
-        </EuiPopover>
+          {basicButton}
+        </EuiToolTip>
       ) : (
-        topNPannel
-      )
-    ) : (
-      button
+        basicButton
+      ),
+    [basicButton, buttonTitle, field, ownFocus, showTooltip, showTopN, value]
+  );
+
+  const topNPannel = useMemo(
+    () => (
+      <StatefulTopN
+        browserFields={browserFields}
+        field={field}
+        indexPattern={indexPattern}
+        onFilterAdded={onFilterAdded}
+        paddingSize={paddingSize}
+        showLegend={showLegend}
+        scopeId={scopeId ?? undefined}
+        toggleTopN={onClick}
+        globalFilters={globalFilters}
+      />
+    ),
+    [
+      browserFields,
+      field,
+      indexPattern,
+      onFilterAdded,
+      paddingSize,
+      showLegend,
+      scopeId,
+      onClick,
+      globalFilters,
+    ]
+  );
+
+  if (isExpandable) {
+    return (
+      <>
+        {basicButton}
+        {showTopN && topNPannel}
+      </>
     );
   }
-);
+
+  return showTopN ? (
+    enablePopOver ? (
+      <EuiPopover
+        button={basicButton}
+        isOpen={showTopN}
+        closePopover={onClick}
+        panelClassName="withHoverActions__popover"
+        data-test-subj="showTopNContainer"
+      >
+        {topNPannel}
+      </EuiPopover>
+    ) : (
+      topNPannel
+    )
+  ) : (
+    button
+  );
+});
 
 ShowTopNButton.displayName = 'ShowTopNButton';

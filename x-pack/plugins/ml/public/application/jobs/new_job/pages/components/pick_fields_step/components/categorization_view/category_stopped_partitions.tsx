@@ -18,7 +18,7 @@ import type { CategorizationJobCreator } from '../../../../../common/job_creator
 import { ml } from '../../../../../../../services/ml_api_service';
 
 const NUMBER_OF_PREVIEW = 5;
-export const CategoryStoppedPartitions: FC = () => {
+export const CategoryStoppedPartitions = () => {
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);

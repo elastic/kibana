@@ -12,7 +12,7 @@ import React from 'react';
 import { ActionsPlaceholder } from '../actions/actions_placeholder';
 import { Title } from '../title';
 
-const LoadingPlaceholderComponent: React.FC = () => (
+const LoadingPlaceholderComponent = () => (
   <EuiPanel data-test-subj="loadingPlaceholder" hasBorder={true}>
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={true}>

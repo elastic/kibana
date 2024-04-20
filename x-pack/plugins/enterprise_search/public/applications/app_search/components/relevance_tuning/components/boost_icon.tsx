@@ -16,7 +16,11 @@ interface Props {
   type: BoostType;
 }
 
-export const BoostIcon: React.FC<Props> = ({ type }) => {
+export const BoostIcon = (
+  {
+    type
+  }: Props
+) => {
   return (
     <EuiToken
       iconType={BOOST_TYPE_TO_ICON_MAP[type]}

@@ -38,17 +38,19 @@ interface Params {
   appId: string;
 }
 
-export const AppRouter: FunctionComponent<Props> = ({
-  history,
-  analytics,
-  mounters,
-  theme$,
-  setAppLeaveHandler,
-  setAppActionMenu,
-  appStatuses$,
-  setIsMounting,
-  hasCustomBranding$,
-}) => {
+export const AppRouter = (
+  {
+    history,
+    analytics,
+    mounters,
+    theme$,
+    setAppLeaveHandler,
+    setAppActionMenu,
+    appStatuses$,
+    setIsMounting,
+    hasCustomBranding$
+  }: Props
+) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
     () => (appPath: string) => new CoreScopedHistory(history, appPath),

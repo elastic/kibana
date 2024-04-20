@@ -12,7 +12,11 @@ import { useConnectorScheduling } from '../../../hooks/api/use_update_connector_
 interface ConnectorSchedulingPanels {
   connector: Connector;
 }
-export const ConnectorScheduling: React.FC<ConnectorSchedulingPanels> = ({ connector }) => {
+export const ConnectorScheduling = (
+  {
+    connector
+  }: ConnectorSchedulingPanels
+) => {
   const [hasChanges, setHasChanges] = useState<boolean>(false);
   const { isLoading, mutate } = useConnectorScheduling(connector.id);
   const hasIncrementalSyncFeature = connector?.features?.incremental_sync ?? false;

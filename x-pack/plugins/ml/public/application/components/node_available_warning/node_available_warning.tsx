@@ -12,7 +12,7 @@ import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_ch
 import { getCloudDeploymentId, isCloud, isCloudTrial } from '../../services/ml_server_info';
 import { Warning } from './warning';
 
-export const NodeAvailableWarning: FC = () => {
+export const NodeAvailableWarning = () => {
   if (mlNodesAvailable() === true || permissionToViewMlNodeCount() === false) {
     return null;
   }

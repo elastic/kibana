@@ -22,7 +22,12 @@ interface Props {
   features: FeatureCatalogueEntry[];
 }
 
-export const AddData: FC<Props> = ({ addBasePath, features }) => {
+export const AddData = (
+  {
+    addBasePath,
+    features
+  }: Props
+) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();

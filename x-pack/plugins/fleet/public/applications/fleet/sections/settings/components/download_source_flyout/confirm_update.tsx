@@ -19,42 +19,42 @@ interface ConfirmDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
-  downloadSource,
-  agentCount,
-  agentPolicyCount,
-}) => (
-  <FormattedMessage
-    id="xpack.fleet.settings.updateDownloadSourceModal.confirmModalText"
-    data-test-subj="editDownloadSourcesConfirmModal.confirmModalText"
-    defaultMessage="This action will update {downloadSourceName} agent binary source. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      downloadSourceName: <strong>{downloadSource.name}</strong>,
-      agents: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.updateDownloadSourceModal.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.updateDownloadSourceModal.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
-  />
-);
+const ConfirmDescription = (
+  {
+    downloadSource,
+    agentCount,
+    agentPolicyCount
+  }: ConfirmDescriptionProps
+) => (<FormattedMessage
+  id="xpack.fleet.settings.updateDownloadSourceModal.confirmModalText"
+  data-test-subj="editDownloadSourcesConfirmModal.confirmModalText"
+  defaultMessage="This action will update {downloadSourceName} agent binary source. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
+  values={{
+    downloadSourceName: <strong>{downloadSource.name}</strong>,
+    agents: (
+      <strong>
+        <FormattedMessage
+          id="xpack.fleet.settings.updateDownloadSourceModal.agentsCount"
+          defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      </strong>
+    ),
+    policies: (
+      <strong>
+        <FormattedMessage
+          id="xpack.fleet.settings.updateDownloadSourceModal.agentPolicyCount"
+          defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
+          values={{
+            agentPolicyCount,
+          }}
+        />
+      </strong>
+    ),
+  }}
+/>);
 
 export async function confirmUpdate(
   downloadSource: DownloadSource,

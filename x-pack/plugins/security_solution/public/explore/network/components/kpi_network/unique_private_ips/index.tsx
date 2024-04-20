@@ -51,7 +51,12 @@ export const uniquePrivateIpsStatItems: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
+const NetworkKpiUniquePrivateIpsComponent = (
+  {
+    from,
+    to
+  }: NetworkKpiProps
+) => {
   return <KpiBaseComponent id={ID} statItems={uniquePrivateIpsStatItems} from={from} to={to} />;
 };
 

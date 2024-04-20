@@ -52,7 +52,7 @@ import {
 } from '../../../constants';
 import { SettingsLogic } from '../settings_logic';
 
-export const OauthApplication: React.FC = () => {
+export const OauthApplication = () => {
   const { setOauthApplication, updateOauthApplication } = useActions(SettingsLogic);
   const { oauthApplication } = useValues(SettingsLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);

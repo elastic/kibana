@@ -91,15 +91,17 @@ export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
 
 ItemDetailsPropertySummary.displayName = 'ItemPropertySummary';
 
-export const ItemDetailsAction: FC<PropsForButton<EuiButtonProps>> = memo(
-  ({ children, className = '', ...rest }) => (
-    <div>
-      <EuiButton className={`eui-fullWidth ${className}`} {...rest}>
-        {children}
-      </EuiButton>
-    </div>
-  )
-);
+export const ItemDetailsAction = memo((
+  {
+    children,
+    className = '',
+    ...rest
+  }: PropsForButton<EuiButtonProps>
+) => (<div>
+  <EuiButton className={`eui-fullWidth ${className}`} {...rest}>
+    {children}
+  </EuiButton>
+</div>));
 
 ItemDetailsAction.displayName = 'ItemDetailsAction';
 

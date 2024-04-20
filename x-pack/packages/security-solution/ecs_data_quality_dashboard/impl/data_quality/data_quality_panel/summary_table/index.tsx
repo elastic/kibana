@@ -45,21 +45,23 @@ export interface Props {
   toggleExpanded: (indexName: string) => void;
 }
 
-const SummaryTableComponent: React.FC<Props> = ({
-  formatBytes,
-  formatNumber,
-  getTableColumns,
-  itemIdToExpandedRowMap,
-  items,
-  pageIndex,
-  pageSize,
-  pattern,
-  setPageIndex,
-  setPageSize,
-  setSorting,
-  sorting,
-  toggleExpanded,
-}) => {
+const SummaryTableComponent = (
+  {
+    formatBytes,
+    formatNumber,
+    getTableColumns,
+    itemIdToExpandedRowMap,
+    items,
+    pageIndex,
+    pageSize,
+    pattern,
+    setPageIndex,
+    setPageSize,
+    setSorting,
+    sorting,
+    toggleExpanded
+  }: Props
+) => {
   const { isILMAvailable } = useDataQualityContext();
   const columns = useMemo(
     () =>

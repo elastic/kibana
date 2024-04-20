@@ -17,7 +17,12 @@ interface Props {
   fields: ConnectorTypeFields['fields'];
 }
 
-const ConnectorFieldsFormPreviewComponent: React.FC<Props> = ({ connector, fields }) => {
+const ConnectorFieldsFormPreviewComponent = (
+  {
+    connector,
+    fields
+  }: Props
+) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {

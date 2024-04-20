@@ -39,7 +39,7 @@ const strings = {
 const defaultStops = [0, 1];
 const MIN_STOPS = 2;
 
-export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
+export const StopsPalettePicker = (props: StopsPalettePickerProps) => {
   const { palette, onChange } = props;
   const stops = useMemo(
     () => (!palette?.stops || !palette.stops.length ? defaultStops : palette.stops),

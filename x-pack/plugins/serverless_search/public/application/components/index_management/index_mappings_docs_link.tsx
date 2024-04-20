@@ -20,9 +20,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { IndexContent } from '@kbn/index-management';
 
-const IndexMappingsDocsLink: FunctionComponent<{ docLinks: CoreStart['docLinks'] }> = ({
-  docLinks,
-}) => {
+const IndexMappingsDocsLink = (
+  {
+    docLinks
+  }: {
+    docLinks: CoreStart['docLinks'];
+  }
+) => {
   return (
     <EuiPanel grow={false} paddingSize="l">
       <EuiFlexGroup alignItems="center" gutterSize="s">

@@ -82,15 +82,19 @@ const advancedEditorsSidebarWidth = '220px';
 type PopulatedFields = Set<string>;
 const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
 
-export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
-  <>
-    <EuiSpacer size="m" />
-    <EuiTitle size="xs">
-      <span>{title}</span>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-  </>
-);
+export const ConfigSectionTitle = (
+  {
+    title
+  }: {
+    title: string;
+  }
+) => (<>
+  <EuiSpacer size="m" />
+  <EuiTitle size="xs">
+    <span>{title}</span>
+  </EuiTitle>
+  <EuiSpacer size="s" />
+</>);
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -98,7 +102,7 @@ export interface StepDefineFormProps {
   searchItems: SearchItems;
 }
 
-export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
+export const StepDefineForm = React.memo((props: StepDefineFormProps) => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = props;
   const { dataView } = searchItems;

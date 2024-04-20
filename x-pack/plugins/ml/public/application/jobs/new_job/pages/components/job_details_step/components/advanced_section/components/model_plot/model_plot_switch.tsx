@@ -15,7 +15,7 @@ import { Description } from './description';
 import { MMLCallout } from '../mml_callout';
 import { isCategorizationJobCreator } from '../../../../../../../common/job_creator';
 
-export const ModelPlotSwitch: FC = () => {
+export const ModelPlotSwitch = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [modelPlotEnabled, setModelPlotEnabled] = useState(jobCreator.modelPlot);
   const [enabled, setEnabled] = useState(false);

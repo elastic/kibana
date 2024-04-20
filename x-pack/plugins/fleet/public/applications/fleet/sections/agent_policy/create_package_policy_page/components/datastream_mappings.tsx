@@ -65,9 +65,13 @@ function useComponentTemplates(dataStream: { dataset: string; type: string }) {
   };
 }
 
-export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
-  PackagePolicyEditorDatastreamMappingsProps
-> = ({ packageInputStream, packageInfo, customDataset }) => {
+export const PackagePolicyEditorDatastreamMappings = (
+  {
+    packageInputStream,
+    packageInfo,
+    customDataset
+  }: PackagePolicyEditorDatastreamMappingsProps
+) => {
   const dataStream = customDataset
     ? { ...packageInputStream.data_stream, dataset: customDataset }
     : packageInputStream.data_stream;

@@ -23,11 +23,13 @@ export interface CreateEngineMenuItemProps {
   isHiddenIndex?: boolean;
 }
 
-export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
-  indexName,
-  ingestionMethod,
-  isHiddenIndex,
-}) => {
+export const CreateEngineMenuItem = (
+  {
+    indexName,
+    ingestionMethod,
+    isHiddenIndex
+  }: CreateEngineMenuItemProps
+) => {
   const searchApplicationCreationPath = !indexName
     ? `${APPLICATIONS_PLUGIN.URL}${SEARCH_APPLICATION_CREATION_PATH}`
     : generateEncodedPath(

@@ -20,12 +20,14 @@ interface LinkToListDetailsProps {
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
 
-const LinkToListDetailsComponent: FC<LinkToListDetailsProps> = ({
-  linkTitle,
-  listId,
-  external,
-  dataTestSubj,
-}) => {
+const LinkToListDetailsComponent = (
+  {
+    linkTitle,
+    listId,
+    external,
+    dataTestSubj
+  }: LinkToListDetailsProps
+) => {
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}

@@ -15,7 +15,7 @@ import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_co
 /*
  * React component for a checkbox element to toggle charts display.
  */
-export const CheckboxShowCharts: FC = () => {
+export const CheckboxShowCharts = () => {
   const { chartsStateService } = useAnomalyExplorerContext();
 
   const showCharts = useObservable(

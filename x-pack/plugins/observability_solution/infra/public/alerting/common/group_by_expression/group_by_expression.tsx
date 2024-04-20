@@ -35,12 +35,14 @@ const EVERYTHING_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const GroupByExpression: React.FC<Props> = ({
-  selectedGroups = [],
-  fields,
-  label,
-  onChange,
-}) => {
+export const GroupByExpression = (
+  {
+    selectedGroups = [],
+    fields,
+    label,
+    onChange
+  }: Props
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const expressionValue = useMemo(() => {

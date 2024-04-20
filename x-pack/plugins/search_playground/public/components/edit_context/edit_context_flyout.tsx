@@ -34,7 +34,11 @@ interface EditContextFlyoutProps {
   onClose: () => void;
 }
 
-export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose }) => {
+export const EditContextFlyout = (
+  {
+    onClose
+  }: EditContextFlyoutProps
+) => {
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);

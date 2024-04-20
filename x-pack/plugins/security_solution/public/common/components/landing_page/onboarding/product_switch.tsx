@@ -27,11 +27,17 @@ const switches: Switch[] = [
   },
 ];
 
-const ProductSwitchComponent: React.FC<{
-  onProductSwitchChanged: (item: Switch) => void;
-  activeProducts: Set<ProductLine>;
-  euiTheme: EuiThemeComputed;
-}> = ({ onProductSwitchChanged, activeProducts, euiTheme }) => {
+const ProductSwitchComponent = (
+  {
+    onProductSwitchChanged,
+    activeProducts,
+    euiTheme
+  }: {
+    onProductSwitchChanged: (item: Switch) => void;
+    activeProducts: Set<ProductLine>;
+    euiTheme: EuiThemeComputed;
+  }
+) => {
   const switchNodes = useMemo(
     () =>
       switches.map((item) => (

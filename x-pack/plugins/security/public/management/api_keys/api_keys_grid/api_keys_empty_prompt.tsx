@@ -21,11 +21,13 @@ export interface ApiKeysEmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
-  error,
-  readOnly,
-  children,
-}) => {
+export const ApiKeysEmptyPrompt = (
+  {
+    error,
+    readOnly,
+    children
+  }: ApiKeysEmptyPromptProps
+) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
 

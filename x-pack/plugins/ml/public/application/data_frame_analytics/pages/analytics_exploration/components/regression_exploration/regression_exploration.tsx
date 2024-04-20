@@ -19,14 +19,16 @@ interface Props {
   jobId: string;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId }) => (
-  <ExplorationPageWrapper
-    jobId={jobId}
-    title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
-      defaultMessage: 'Destination index for regression job ID {jobId}',
-      values: { jobId },
-    })}
-    EvaluatePanel={EvaluatePanel}
-    FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
-  />
-);
+export const RegressionExploration = (
+  {
+    jobId
+  }: Props
+) => (<ExplorationPageWrapper
+  jobId={jobId}
+  title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
+    defaultMessage: 'Destination index for regression job ID {jobId}',
+    values: { jobId },
+  })}
+  EvaluatePanel={EvaluatePanel}
+  FeatureImportanceSummaryPanel={FeatureImportanceSummaryPanel}
+/>);

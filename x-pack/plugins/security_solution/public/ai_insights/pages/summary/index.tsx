@@ -20,39 +20,39 @@ interface Props {
   showAnonymized: boolean;
 }
 
-const SummaryComponent: React.FC<Props> = ({
-  alertsCount,
-  insightsCount,
-  lastUpdated,
-  onToggleShowAnonymized,
-  showAnonymized,
-}) => (
-  <EuiFlexGroup data-test-subj="summary" justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
-      <SummaryCount
-        alertsCount={alertsCount}
-        lastUpdated={lastUpdated}
-        insightsCount={insightsCount}
+const SummaryComponent = (
+  {
+    alertsCount,
+    insightsCount,
+    lastUpdated,
+    onToggleShowAnonymized,
+    showAnonymized
+  }: Props
+) => (<EuiFlexGroup data-test-subj="summary" justifyContent="spaceBetween">
+  <EuiFlexItem grow={false}>
+    <SummaryCount
+      alertsCount={alertsCount}
+      lastUpdated={lastUpdated}
+      insightsCount={insightsCount}
+    />
+    <EuiSpacer size="l" />
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiToolTip
+      content={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
+      data-test-subj="toggleAnonymizedToolTip"
+    >
+      <EuiButtonIcon
+        aria-label={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
+        css={css`
+          border-radius: 50%;
+        `}
+        data-test-subj="toggleAnonymized"
+        iconType={showAnonymized ? 'eye' : 'eyeClosed'}
+        onClick={onToggleShowAnonymized}
       />
-      <EuiSpacer size="l" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip
-        content={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
-        data-test-subj="toggleAnonymizedToolTip"
-      >
-        <EuiButtonIcon
-          aria-label={showAnonymized ? SHOW_REAL_VALUES : SHOW_ANONYMIZED_LABEL}
-          css={css`
-            border-radius: 50%;
-          `}
-          data-test-subj="toggleAnonymized"
-          iconType={showAnonymized ? 'eye' : 'eyeClosed'}
-          onClick={onToggleShowAnonymized}
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+    </EuiToolTip>
+  </EuiFlexItem>
+</EuiFlexGroup>);
 
 export const Summary = React.memo(SummaryComponent);

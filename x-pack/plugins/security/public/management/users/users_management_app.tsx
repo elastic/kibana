@@ -137,20 +137,20 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
-  services,
-  history,
-  authc,
-  onChange,
-  children,
-}) => (
-  <KibanaRenderContextProvider {...services}>
-    <KibanaContextProvider services={services}>
-      <AuthenticationProvider authc={authc}>
-        <Router history={history}>
-          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-        </Router>
-      </AuthenticationProvider>
-    </KibanaContextProvider>
-  </KibanaRenderContextProvider>
-);
+export const Providers = (
+  {
+    services,
+    history,
+    authc,
+    onChange,
+    children
+  }: ProvidersProps
+) => (<KibanaRenderContextProvider {...services}>
+  <KibanaContextProvider services={services}>
+    <AuthenticationProvider authc={authc}>
+      <Router history={history}>
+        <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+      </Router>
+    </AuthenticationProvider>
+  </KibanaContextProvider>
+</KibanaRenderContextProvider>);

@@ -19,9 +19,11 @@ export interface AnomalyDetectionAlertsOverviewChart {
   seriesType?: 'bar_stacked' | 'line';
 }
 
-export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverviewChart> = ({
-  seriesType = 'line',
-}) => {
+export const AnomalyDetectionAlertsOverviewChart = (
+  {
+    seriesType = 'line'
+  }: AnomalyDetectionAlertsOverviewChart
+) => {
   const {
     services: {
       lens: { EmbeddableComponent },

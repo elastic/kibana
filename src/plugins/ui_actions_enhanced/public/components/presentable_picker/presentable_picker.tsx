@@ -28,11 +28,13 @@ const firefoxBugFix = {
 
 const sort = (f1: Item, f2: Item): number => f2.order - f1.order;
 
-export const PresentablePicker: React.FC<PresentablePickerProps> = ({
-  items,
-  context,
-  onSelect,
-}) => {
+export const PresentablePicker = (
+  {
+    items,
+    context,
+    onSelect
+  }: PresentablePickerProps
+) => {
   /**
    * Make sure items with incompatible license are at the end.
    */

@@ -15,7 +15,7 @@ import type {
   CategorizationJobCreator,
 } from '../../../../../common/job_creator';
 
-export const CategorizationPerPartitionSwitch: FC = () => {
+export const CategorizationPerPartitionSwitch = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(

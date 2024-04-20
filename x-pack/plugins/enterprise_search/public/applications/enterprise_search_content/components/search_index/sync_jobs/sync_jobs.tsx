@@ -21,7 +21,7 @@ import { IndexViewLogic } from '../index_view_logic';
 
 import { SyncJobsViewLogic } from './sync_jobs_view_logic';
 
-export const SyncJobs: React.FC = () => {
+export const SyncJobs = () => {
   const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
   const { productFeatures } = useValues(KibanaLogic);
   const shouldShowAccessSyncs =

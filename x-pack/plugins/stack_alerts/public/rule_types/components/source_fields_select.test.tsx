@@ -11,9 +11,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SourceFields } from './source_fields_select';
 import { SourceField } from '../es_query/types';
 
-const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
-  <I18nProvider>{children}</I18nProvider>
-));
+const AppWrapper = React.memo((
+  {
+    children
+  }: {
+    children: React.ReactElement;
+  }
+) => (<I18nProvider>{children}</I18nProvider>));
 
 describe('SourceFields', () => {
   afterEach(() => {

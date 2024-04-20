@@ -17,7 +17,7 @@ import { FlyoutLoading } from '../../../shared/components/flyout_loading';
  * Investigation guide displayed in the left panel.
  * Renders a message saying the guide hasn't been set up or the full investigation guide.
  */
-export const InvestigationGuide: React.FC = () => {
+export const InvestigationGuide = () => {
   const { dataFormattedForFieldBrowser, isPreview } = useLeftPanelContext();
 
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({

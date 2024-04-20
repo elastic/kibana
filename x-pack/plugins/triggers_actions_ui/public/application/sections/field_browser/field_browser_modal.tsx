@@ -85,24 +85,26 @@ export type FieldBrowserModalProps = Pick<
  * This component has no internal state, but it uses lifecycle methods to
  * set focus to the search input, scroll to the selected category, etc
  */
-const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
-  appliedFilterInput,
-  columnIds,
-  filteredBrowserFields,
-  filterSelectedEnabled,
-  isSearching,
-  onFilterSelectedChange,
-  onToggleColumn,
-  onResetColumns,
-  setSelectedCategoryIds,
-  onSearchInputChange,
-  onHide,
-  options,
-  restoreFocusTo,
-  searchInput,
-  selectedCategoryIds,
-  width = FIELD_BROWSER_WIDTH,
-}) => {
+const FieldBrowserModalComponent = (
+  {
+    appliedFilterInput,
+    columnIds,
+    filteredBrowserFields,
+    filterSelectedEnabled,
+    isSearching,
+    onFilterSelectedChange,
+    onToggleColumn,
+    onResetColumns,
+    setSelectedCategoryIds,
+    onSearchInputChange,
+    onHide,
+    options,
+    restoreFocusTo,
+    searchInput,
+    selectedCategoryIds,
+    width = FIELD_BROWSER_WIDTH
+  }: FieldBrowserModalProps
+) => {
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
     setTimeout(() => {

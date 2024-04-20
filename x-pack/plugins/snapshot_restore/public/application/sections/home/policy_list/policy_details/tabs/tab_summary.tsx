@@ -33,7 +33,11 @@ interface Props {
   policy: SlmPolicy;
 }
 
-export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
+export const TabSummary = (
+  {
+    policy
+  }: Props
+) => {
   const { i18n, history } = useServices();
 
   const {

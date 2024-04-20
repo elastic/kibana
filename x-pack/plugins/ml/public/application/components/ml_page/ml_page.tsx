@@ -49,7 +49,13 @@ export const MlPageControlsContext = createContext<{
  * Main page component of the ML App
  * @constructor
  */
-export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps }) => {
+export const MlPage = React.memo((
+  {
+    pageDeps
+  }: {
+    pageDeps: PageDependencies;
+  }
+) => {
   const navigateToPath = useNavigateToPath();
   const {
     services: {
@@ -163,7 +169,12 @@ interface CommonPageWrapperProps {
   headerPortal: HtmlPortalNode;
 }
 
-const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, routeList }) => {
+const CommonPageWrapper = React.memo((
+  {
+    pageDeps,
+    routeList
+  }: CommonPageWrapperProps
+) => {
   const {
     services: { application },
   } = useMlKibana();
@@ -171,7 +182,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
      * avoiding full page reload **/
-    <RedirectAppLinks coreStart={{ application }}>
+    (<RedirectAppLinks coreStart={{ application }}>
       <EuiPageSection restrictWidth={false}>
         <Routes>
           {routeList.map((route) => {
@@ -194,6 +205,6 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
           <Redirect to="/overview" />
         </Routes>
       </EuiPageSection>
-    </RedirectAppLinks>
+    </RedirectAppLinks>)
   );
 });

@@ -40,8 +40,8 @@ interface Props {
   taskType?: SupportedPytorchTasksType;
 }
 
-export const PipelineDetails: FC<Props> = memo(
-  ({
+export const PipelineDetails = memo((
+  {
     handlePipelineConfigUpdate,
     modelId,
     pipelineName,
@@ -49,136 +49,136 @@ export const PipelineDetails: FC<Props> = memo(
     pipelineDescription,
     initialPipelineConfig,
     setHasUnsavedChanges,
-    taskType,
-  }) => {
-    const [isProcessorConfigValid, setIsProcessorConfigValid] = useState<boolean>(true);
-    const [processorConfigError, setProcessorConfigError] = useState<string | undefined>();
+    taskType
+  }: Props
+) => {
+  const [isProcessorConfigValid, setIsProcessorConfigValid] = useState<boolean>(true);
+  const [processorConfigError, setProcessorConfigError] = useState<string | undefined>();
 
-    const {
-      currentContext: { pipelineConfig },
-    } = useTestTrainedModelsContext();
-    const [processorConfigString, setProcessorConfigString] = useState<string>(
-      JSON.stringify(initialPipelineConfig ?? {}, null, 2)
+  const {
+    currentContext: { pipelineConfig },
+  } = useTestTrainedModelsContext();
+  const [processorConfigString, setProcessorConfigString] = useState<string>(
+    JSON.stringify(initialPipelineConfig ?? {}, null, 2)
+  );
+  const [editProcessorConfig, setEditProcessorConfig] = useState<boolean>(false);
+
+  const updateProcessorConfig = () => {
+    const invalidProcessorConfigMessage = validatePipelineProcessors(
+      JSON.parse(processorConfigString),
+      taskType
     );
-    const [editProcessorConfig, setEditProcessorConfig] = useState<boolean>(false);
-
-    const updateProcessorConfig = () => {
-      const invalidProcessorConfigMessage = validatePipelineProcessors(
-        JSON.parse(processorConfigString),
-        taskType
-      );
-      if (invalidProcessorConfigMessage === undefined) {
-        handlePipelineConfigUpdate({ initialPipelineConfig: JSON.parse(processorConfigString) });
-        setHasUnsavedChanges(false);
-        setEditProcessorConfig(false);
-        setProcessorConfigError(undefined);
-      } else {
-        setHasUnsavedChanges(true);
-        setIsProcessorConfigValid(false);
-        setProcessorConfigError(invalidProcessorConfigMessage);
-      }
-    };
-
-    const handleProcessorConfigChange = (json: string) => {
-      setProcessorConfigString(json);
-      const valid = isValidJson(json);
-      setIsProcessorConfigValid(valid);
-    };
-
-    const resetProcessorConfig = () => {
-      setProcessorConfigString(JSON.stringify(pipelineConfig, null, 2));
-      setIsProcessorConfigValid(true);
+    if (invalidProcessorConfigMessage === undefined) {
+      handlePipelineConfigUpdate({ initialPipelineConfig: JSON.parse(processorConfigString) });
+      setHasUnsavedChanges(false);
+      setEditProcessorConfig(false);
       setProcessorConfigError(undefined);
-    };
+    } else {
+      setHasUnsavedChanges(true);
+      setIsProcessorConfigValid(false);
+      setProcessorConfigError(invalidProcessorConfigMessage);
+    }
+  };
 
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={3}>
-          <PipelineDetailsTitle modelId={modelId} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiPanel hasBorder={false} hasShadow={false}>
-            {/* NAME */}
-            <EuiForm component="form">
-              {/* NAME  and DESCRIPTION */}
-              <PipelineNameAndDescription
-                pipelineName={pipelineName}
-                pipelineDescription={pipelineDescription}
-                pipelineNameError={pipelineNameError}
-                handlePipelineConfigUpdate={handlePipelineConfigUpdate}
-              />
-              {/* PROCESSOR CONFIGURATION */}
-              <EuiFormRow
-                fullWidth
-                labelAppend={
-                  <EuiFlexGroup gutterSize="xs" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditButton"
-                        iconType="pencil"
-                        size="xs"
-                        onClick={() => {
-                          const editingState = !editProcessorConfig;
-                          if (editingState === false) {
-                            setProcessorConfigError(undefined);
-                            setIsProcessorConfigValid(true);
-                            setHasUnsavedChanges(false);
-                          }
-                          setEditProcessorConfig(editingState);
-                        }}
-                      >
-                        {editProcessorConfig ? CANCEL_EDIT_MESSAGE : EDIT_MESSAGE}
+  const handleProcessorConfigChange = (json: string) => {
+    setProcessorConfigString(json);
+    const valid = isValidJson(json);
+    setIsProcessorConfigValid(valid);
+  };
+
+  const resetProcessorConfig = () => {
+    setProcessorConfigString(JSON.stringify(pipelineConfig, null, 2));
+    setIsProcessorConfigValid(true);
+    setProcessorConfigError(undefined);
+  };
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={3}>
+        <PipelineDetailsTitle modelId={modelId} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <EuiPanel hasBorder={false} hasShadow={false}>
+          {/* NAME */}
+          <EuiForm component="form">
+            {/* NAME  and DESCRIPTION */}
+            <PipelineNameAndDescription
+              pipelineName={pipelineName}
+              pipelineDescription={pipelineDescription}
+              pipelineNameError={pipelineNameError}
+              handlePipelineConfigUpdate={handlePipelineConfigUpdate}
+            />
+            {/* PROCESSOR CONFIGURATION */}
+            <EuiFormRow
+              fullWidth
+              labelAppend={
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditButton"
+                      iconType="pencil"
+                      size="xs"
+                      onClick={() => {
+                        const editingState = !editProcessorConfig;
+                        if (editingState === false) {
+                          setProcessorConfigError(undefined);
+                          setIsProcessorConfigValid(true);
+                          setHasUnsavedChanges(false);
+                        }
+                        setEditProcessorConfig(editingState);
+                      }}
+                    >
+                      {editProcessorConfig ? CANCEL_EDIT_MESSAGE : EDIT_MESSAGE}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {editProcessorConfig ? (
+                      <SaveChangesButton
+                        onClick={updateProcessorConfig}
+                        disabled={isProcessorConfigValid === false}
+                      />
+                    ) : null}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {editProcessorConfig ? (
+                      <EuiButtonEmpty size="xs" onClick={resetProcessorConfig}>
+                        {i18n.translate(
+                          'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.resetInferenceConfigButton',
+                          { defaultMessage: 'Reset' }
+                        )}
                       </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {editProcessorConfig ? (
-                        <SaveChangesButton
-                          onClick={updateProcessorConfig}
-                          disabled={isProcessorConfigValid === false}
-                        />
-                      ) : null}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {editProcessorConfig ? (
-                        <EuiButtonEmpty size="xs" onClick={resetProcessorConfig}>
-                          {i18n.translate(
-                            'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.resetInferenceConfigButton',
-                            { defaultMessage: 'Reset' }
-                          )}
-                        </EuiButtonEmpty>
-                      ) : null}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                error={processorConfigError}
-                isInvalid={processorConfigError !== undefined}
-                data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditor"
-              >
-                {editProcessorConfig ? (
-                  <CodeEditor
-                    height={300}
-                    languageId="json"
-                    options={{
-                      automaticLayout: true,
-                      lineNumbers: 'off',
-                      tabSize: 2,
-                    }}
-                    value={processorConfigString}
-                    onChange={handleProcessorConfigChange}
-                  />
-                ) : (
-                  <EuiCodeBlock
-                    isCopyable={true}
-                    data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigBlock"
-                  >
-                    {processorConfigString}
-                  </EuiCodeBlock>
-                )}
-              </EuiFormRow>
-            </EuiForm>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+                    ) : null}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              error={processorConfigError}
+              isInvalid={processorConfigError !== undefined}
+              data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigEditor"
+            >
+              {editProcessorConfig ? (
+                <CodeEditor
+                  height={300}
+                  languageId="json"
+                  options={{
+                    automaticLayout: true,
+                    lineNumbers: 'off',
+                    tabSize: 2,
+                  }}
+                  value={processorConfigString}
+                  onChange={handleProcessorConfigChange}
+                />
+              ) : (
+                <EuiCodeBlock
+                  isCopyable={true}
+                  data-test-subj="mlTrainedModelsInferencePipelineInferenceConfigBlock"
+                >
+                  {processorConfigString}
+                </EuiCodeBlock>
+              )}
+            </EuiFormRow>
+          </EuiForm>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});

@@ -15,18 +15,20 @@ import { SwitchModal } from '../switch_modal';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const AdvancedPivotEditorSwitch: FC<StepDefineFormHook> = ({
-  advancedPivotEditor: {
-    actions: { setAdvancedEditorSwitchModalVisible, toggleAdvancedEditor },
-    state: {
-      advancedEditorConfig,
-      advancedEditorConfigLastApplied,
-      isAdvancedEditorSwitchModalVisible,
-      isAdvancedPivotEditorEnabled,
-      isAdvancedPivotEditorApplyButtonEnabled,
-    },
-  },
-}) => {
+export const AdvancedPivotEditorSwitch = (
+  {
+    advancedPivotEditor: {
+      actions: { setAdvancedEditorSwitchModalVisible, toggleAdvancedEditor },
+      state: {
+        advancedEditorConfig,
+        advancedEditorConfigLastApplied,
+        isAdvancedEditorSwitchModalVisible,
+        isAdvancedPivotEditorEnabled,
+        isAdvancedPivotEditorApplyButtonEnabled,
+      },
+    }
+  }: StepDefineFormHook
+) => {
   return (
     <EuiFormRow>
       <EuiFlexGroup gutterSize="none">

@@ -127,10 +127,12 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
-export const ModelsList: FC<Props> = ({
-  pageState: pageStateExternal,
-  updatePageState: updatePageStateExternal,
-}) => {
+export const ModelsList = (
+  {
+    pageState: pageStateExternal,
+    updatePageState: updatePageStateExternal
+  }: Props
+) => {
   const {
     services: {
       application: { capabilities },

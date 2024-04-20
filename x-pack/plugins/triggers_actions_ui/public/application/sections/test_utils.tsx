@@ -51,17 +51,21 @@ export const createAppMockRenderer = (
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
-    <I18nProvider>
-      <KibanaRenderContextProvider {...core}>
-        <KibanaContextProvider services={services}>
-          <QueryClientProvider client={queryClient} context={queryClientContext}>
-            {children}
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </KibanaRenderContextProvider>
-    </I18nProvider>
-  ));
+  const AppWrapper = React.memo((
+    {
+      children
+    }: {
+      children: React.ReactElement;
+    }
+  ) => (<I18nProvider>
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient} context={queryClientContext}>
+          {children}
+        </QueryClientProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
+  </I18nProvider>));
 
   AppWrapper.displayName = 'AppWrapper';
 

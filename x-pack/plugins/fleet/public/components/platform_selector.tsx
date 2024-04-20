@@ -46,23 +46,25 @@ interface Props {
   onCopy?: () => void;
 }
 
-export const PlatformSelector: React.FunctionComponent<Props> = ({
-  linuxCommand,
-  macCommand,
-  windowsCommand,
-  linuxDebCommand,
-  linuxRpmCommand,
-  k8sCommand,
-  hasK8sIntegration,
-  cloudSecurityIntegration,
-  hasK8sIntegrationMultiPage,
-  isManaged,
-  enrollToken,
-  hasFleetServer,
-  fleetServerHost,
-  fullCopyButton,
-  onCopy,
-}) => {
+export const PlatformSelector = (
+  {
+    linuxCommand,
+    macCommand,
+    windowsCommand,
+    linuxDebCommand,
+    linuxRpmCommand,
+    k8sCommand,
+    hasK8sIntegration,
+    cloudSecurityIntegration,
+    hasK8sIntegrationMultiPage,
+    isManaged,
+    enrollToken,
+    hasFleetServer,
+    fleetServerHost,
+    fullCopyButton,
+    onCopy
+  }: Props
+) => {
   const getInitialPlatform = useCallback(() => {
     if (
       hasK8sIntegration ||

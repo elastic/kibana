@@ -43,15 +43,17 @@ export interface ExtendedFeatureImportance extends FeatureImportance {
   absImportance: number;
 }
 
-export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
-  baseline,
-  featureImportance,
-  predictedValue,
-  topClasses,
-  analysisType,
-  predictionFieldName,
-  predictedProbability,
-}) => {
+export const DecisionPathPopover = (
+  {
+    baseline,
+    featureImportance,
+    predictedValue,
+    topClasses,
+    analysisType,
+    predictionFieldName,
+    predictedProbability
+  }: DecisionPathPopoverProps
+) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
   const {
     services: { docLinks },

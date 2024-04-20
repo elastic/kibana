@@ -35,11 +35,13 @@ const allChecksButtonContent = i18n.translate(
   }
 );
 
-export const ExamplesValidCallout: FC<Props> = ({
-  overallValidStatus,
-  validationChecks,
-  categorizationAnalyzer,
-}) => {
+export const ExamplesValidCallout = (
+  {
+    overallValidStatus,
+    validationChecks,
+    categorizationAnalyzer
+  }: Props
+) => {
   const analyzerUsed = <AnalyzerUsed categorizationAnalyzer={categorizationAnalyzer} />;
 
   let color: EuiCallOutProps['color'] = 'success';
@@ -87,9 +89,13 @@ export const ExamplesValidCallout: FC<Props> = ({
   );
 };
 
-const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
-  categorizationAnalyzer,
-}) => {
+const AnalyzerUsed = (
+  {
+    categorizationAnalyzer
+  }: {
+    categorizationAnalyzer: CategorizationAnalyzer;
+  }
+) => {
   let analyzer: string | null = null;
 
   if (
@@ -119,9 +125,13 @@ const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
   );
 };
 
-const AllValidationChecks: FC<{ validationChecks: FieldExampleCheck[] }> = ({
-  validationChecks,
-}) => {
+const AllValidationChecks = (
+  {
+    validationChecks
+  }: {
+    validationChecks: FieldExampleCheck[];
+  }
+) => {
   const list: EuiListGroupItemProps[] = Object.keys(VALIDATION_CHECK_DESCRIPTION).map((k, i) => {
     const failedCheck = validationChecks.find((vc) => vc.id === i);
     if (

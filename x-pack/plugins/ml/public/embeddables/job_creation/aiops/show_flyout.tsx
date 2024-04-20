@@ -29,14 +29,16 @@ export async function showPatternAnalysisToADJobFlyout(
   dashboardService: DashboardStart,
   lens?: LensPublicStart
 ): Promise<void> {
-  const Comp: FC<FlyoutComponentProps> = ({ onClose }) => (
-    <CreateCategorizationJobFlyout
-      dataView={dataView}
-      field={field}
-      query={query}
-      timeRange={timeRange}
-      onClose={onClose}
-    />
-  );
+  const Comp = (
+    {
+      onClose
+    }: FlyoutComponentProps
+  ) => (<CreateCategorizationJobFlyout
+    dataView={dataView}
+    field={field}
+    query={query}
+    timeRange={timeRange}
+    onClose={onClose}
+  />);
   return createFlyout(Comp, coreStart, share, data, dashboardService, lens);
 }

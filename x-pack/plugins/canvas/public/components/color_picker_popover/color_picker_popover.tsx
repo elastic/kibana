@@ -18,7 +18,7 @@ export interface Props extends ColorPickerProps {
   ariaLabel?: string;
 }
 
-export const ColorPickerPopover: FC<Props> = (props: Props) => {
+export const ColorPickerPopover = (props: Props) => {
   const { value, anchorPosition, ariaLabel, ...rest } = props;
   const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <EuiLink

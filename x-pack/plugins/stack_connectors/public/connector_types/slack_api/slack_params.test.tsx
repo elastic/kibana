@@ -302,7 +302,7 @@ describe('SlackParamsFields renders', () => {
 
   test('show the Channel ID label when using the new attribute "channelIds" in subActionParams', async () => {
     const mockEditFunc = jest.fn();
-    const WrappedComponent: React.FunctionComponent = () => {
+    const WrappedComponent = () => {
       return (
         <IntlProvider locale="en">
           <SlackParamsFields

@@ -41,14 +41,16 @@ export interface DeleteConfirmModalProps {
   showPlainSpinner?: boolean;
 }
 
-export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
-  isDeleting,
-  onConfirm,
-  onCancel,
-  selectedObjects,
-  allowedTypes,
-  showPlainSpinner,
-}) => {
+export const DeleteConfirmModal = (
+  {
+    isDeleting,
+    onConfirm,
+    onCancel,
+    selectedObjects,
+    allowedTypes,
+    showPlainSpinner
+  }: DeleteConfirmModalProps
+) => {
   const hiddenObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
   }, [selectedObjects]);

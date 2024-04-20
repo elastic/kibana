@@ -29,7 +29,7 @@ const i18nTexts = {
   },
 };
 
-export const MaxIndexSizeField: FunctionComponent = () => {
+export const MaxIndexSizeField = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 400 }}>

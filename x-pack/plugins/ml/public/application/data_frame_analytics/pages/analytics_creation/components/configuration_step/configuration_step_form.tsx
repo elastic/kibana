@@ -108,13 +108,15 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   return runtimeOptions;
 }
 
-export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
-  actions,
-  isClone,
-  state,
-  setCurrentStep,
-  sourceDataViewTitle,
-}) => {
+export const ConfigurationStepForm = (
+  {
+    actions,
+    isClone,
+    state,
+    setCurrentStep,
+    sourceDataViewTitle
+  }: ConfigurationStepProps
+) => {
   const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 

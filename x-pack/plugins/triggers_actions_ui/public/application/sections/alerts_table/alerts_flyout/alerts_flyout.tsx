@@ -45,16 +45,18 @@ interface AlertsFlyoutProps {
   onPaginate: (pageIndex: number) => void;
   id?: string;
 }
-export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
-  alert,
-  alertsTableConfiguration,
-  flyoutIndex,
-  alertsCount,
-  isLoading,
-  onClose,
-  onPaginate,
-  id,
-}: AlertsFlyoutProps) => {
+export const AlertsFlyout = (
+  {
+    alert,
+    alertsTableConfiguration,
+    flyoutIndex,
+    alertsCount,
+    isLoading,
+    onClose,
+    onPaginate,
+    id
+  }: AlertsFlyoutProps
+) => {
   const {
     header: Header,
     body: Body,

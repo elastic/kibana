@@ -18,7 +18,7 @@ import { CustomSourceIcon } from './custom_source_icon';
 import { DisplaySettingsLogic } from './display_settings_logic';
 import { TitleField } from './title_field';
 
-export const ExampleResultDetailCard: React.FC = () => {
+export const ExampleResultDetailCard = () => {
   const {
     sourceName,
     searchResultConfig: { titleField, urlField, color, detailFields },

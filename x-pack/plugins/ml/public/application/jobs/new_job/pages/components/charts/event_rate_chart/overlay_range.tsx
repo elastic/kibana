@@ -20,7 +20,15 @@ interface Props {
   showMarker?: boolean;
 }
 
-export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMarker = true }) => {
+export const OverlayRange = (
+  {
+    overlayKey,
+    start,
+    end,
+    color,
+    showMarker = true
+  }: Props
+) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (

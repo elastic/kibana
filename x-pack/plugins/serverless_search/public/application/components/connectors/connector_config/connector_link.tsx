@@ -19,11 +19,13 @@ interface ConnectorLinkElasticsearchProps {
   status: ConnectorStatus;
 }
 
-export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProps> = ({
-  connectorId,
-  serviceType,
-  status,
-}) => {
+export const ConnectorLinkElasticsearch = (
+  {
+    connectorId,
+    serviceType,
+    status
+  }: ConnectorLinkElasticsearchProps
+) => {
   const assetBasePath = useAssetBasePath();
 
   return (

@@ -30,14 +30,16 @@ export interface UrlDrilldownCollectConfigProps {
   variablesHelpDocsLink?: string;
 }
 
-export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps> = ({
-  config,
-  variables,
-  exampleUrl,
-  onConfig,
-  syntaxHelpDocsLink,
-  variablesHelpDocsLink,
-}) => {
+export const UrlDrilldownCollectConfig = (
+  {
+    config,
+    variables,
+    exampleUrl,
+    onConfig,
+    syntaxHelpDocsLink,
+    variablesHelpDocsLink
+  }: UrlDrilldownCollectConfigProps
+) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [isPristine, setIsPristine] = React.useState(true);
   const urlTemplate = config.url.template ?? '';

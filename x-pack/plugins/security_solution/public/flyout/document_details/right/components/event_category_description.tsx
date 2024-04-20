@@ -16,7 +16,7 @@ import { EVENT_CATEGORY_DESCRIPTION_TEST_ID } from './test_ids';
 /**
  * Displays the category description of an event document.
  */
-export const EventCategoryDescription: React.FC = () => {
+export const EventCategoryDescription = () => {
   const { getFieldsData } = useRightPanelContext();
   const eventCategories = useMemo(
     () => getFieldArray(getFieldsData('event.category')),

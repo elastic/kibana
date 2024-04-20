@@ -101,7 +101,13 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
   },
 };
 
-export const NewIndexCard: React.FC<NewIndexCardProps> = ({ disabled, onSelect, type }) => {
+export const NewIndexCard = (
+  {
+    disabled,
+    onSelect,
+    type
+  }: NewIndexCardProps
+) => {
   if (!METHOD_CARD_OPTIONS[type]) {
     return null;
   }

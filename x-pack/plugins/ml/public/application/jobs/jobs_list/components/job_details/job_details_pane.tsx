@@ -33,7 +33,13 @@ interface Section {
 
 // fix for the annotation label being hidden inside the bounds of the chart container
 
-const SectionItem: FC<{ item: Item }> = ({ item }) => {
+const SectionItem = (
+  {
+    item
+  }: {
+    item: Item;
+  }
+) => {
   const { euiTheme } = useEuiTheme();
   const fontSize = euiTheme.size.m;
 
@@ -51,7 +57,13 @@ const SectionItem: FC<{ item: Item }> = ({ item }) => {
   );
 };
 
-const Section: FC<{ section: Section }> = ({ section }) => {
+const Section = (
+  {
+    section
+  }: {
+    section: Section;
+  }
+) => {
   const { euiTheme } = useEuiTheme();
   if (section.items.length === 0) {
     return <div />;
@@ -113,10 +125,15 @@ const Section: FC<{ section: Section }> = ({ section }) => {
   );
 };
 
-export const JobDetailsPane: FC<{ sections: any[]; 'data-test-subj': string }> = ({
-  sections,
-  ...props
-}) => {
+export const JobDetailsPane = (
+  {
+    sections,
+    ...props
+  }: {
+    sections: any[];
+    'data-test-subj': string;
+  }
+) => {
   return (
     <>
       <EuiSpacer size="s" />

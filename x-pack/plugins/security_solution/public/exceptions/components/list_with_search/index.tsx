@@ -29,11 +29,13 @@ interface ListWithSearchComponentProps {
   refreshExceptions?: boolean;
 }
 
-const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
-  list,
-  isReadOnly,
-  refreshExceptions,
-}) => {
+const ListWithSearchComponent = (
+  {
+    list,
+    isReadOnly,
+    refreshExceptions
+  }: ListWithSearchComponentProps
+) => {
   const {
     listName,
     exceptions,

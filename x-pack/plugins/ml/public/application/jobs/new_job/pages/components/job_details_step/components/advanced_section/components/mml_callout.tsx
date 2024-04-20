@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../job_creator_context';
 
-export const MMLCallout: FC = () => {
+export const MMLCallout = () => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [highCardinality, setHighCardinality] = useState<number | null>(null);
 

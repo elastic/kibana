@@ -27,47 +27,46 @@ interface Props {
   pattern: string;
 }
 
-const PatternLabelComponent: React.FC<Props> = ({
-  ilmExplainPhaseCounts,
-  incompatible,
-  indices,
-  indicesChecked,
-  pattern,
-}) => (
-  <>
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <ResultContainer>
-          {showResult({
-            incompatible,
-            indices,
-            indicesChecked,
-          }) && (
-            <EuiToolTip content={getResultToolTip(incompatible)}>
-              <EuiIcon
-                color={getResultIconColor(incompatible)}
-                type={getResultIcon(incompatible)}
-              />
-            </EuiToolTip>
-          )}
-        </ResultContainer>
-      </EuiFlexItem>
+const PatternLabelComponent = (
+  {
+    ilmExplainPhaseCounts,
+    incompatible,
+    indices,
+    indicesChecked,
+    pattern
+  }: Props
+) => (<>
+  <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexItem grow={false}>
+      <ResultContainer>
+        {showResult({
+          incompatible,
+          indices,
+          indicesChecked,
+        }) && (
+          <EuiToolTip content={getResultToolTip(incompatible)}>
+            <EuiIcon
+              color={getResultIconColor(incompatible)}
+              type={getResultIcon(incompatible)}
+            />
+          </EuiToolTip>
+        )}
+      </ResultContainer>
+    </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={i18n.PATTERN_OR_INDEX_TOOLTIP}>
-          <EuiTitle size="s">
-            <h2>{pattern}</h2>
-          </EuiTitle>
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-
-    <EuiSpacer size="xs" />
-    {ilmExplainPhaseCounts && (
-      <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
-    )}
-  </>
-);
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={i18n.PATTERN_OR_INDEX_TOOLTIP}>
+        <EuiTitle size="s">
+          <h2>{pattern}</h2>
+        </EuiTitle>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer size="xs" />
+  {ilmExplainPhaseCounts && (
+    <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />
+  )}
+</>);
 
 PatternLabelComponent.displayName = 'PatternLabelComponent';
 

@@ -20,19 +20,21 @@ import type { DeleteAction } from './use_delete_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-export const DeleteActionModal: FC<DeleteAction> = ({
-  closeModal,
-  deleteAndCloseModal,
-  deleteDestIndex,
-  deleteDataView,
-  dataViewExists,
-  items,
-  shouldForceDelete,
-  toggleDeleteIndex,
-  toggleDeleteDataView,
-  userCanDeleteIndex,
-  userCanDeleteDataView,
-}) => {
+export const DeleteActionModal = (
+  {
+    closeModal,
+    deleteAndCloseModal,
+    deleteDestIndex,
+    deleteDataView,
+    dataViewExists,
+    items,
+    shouldForceDelete,
+    toggleDeleteIndex,
+    toggleDeleteDataView,
+    userCanDeleteIndex,
+    userCanDeleteDataView
+  }: DeleteAction
+) => {
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
   const isBulkAction = items.length > 1;
 

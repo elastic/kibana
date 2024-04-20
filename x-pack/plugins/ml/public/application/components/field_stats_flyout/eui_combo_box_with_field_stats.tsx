@@ -25,9 +25,12 @@ export const optionCss = css`
   }
 `;
 
-export const EuiComboBoxWithFieldStats: FC<
-  EuiComboBoxProps<string | number | string[] | undefined>
-> = ({ options, ...restProps }) => {
+export const EuiComboBoxWithFieldStats = (
+  {
+    options,
+    ...restProps
+  }: EuiComboBoxProps<string | number | string[] | undefined>
+) => {
   const { renderOption } = useFieldStatsTrigger();
   const comboBoxOptions: EuiComboBoxOptionOption[] = useMemo(
     () =>

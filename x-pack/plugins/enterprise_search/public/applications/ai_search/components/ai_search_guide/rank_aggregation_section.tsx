@@ -18,7 +18,7 @@ import { AISearchGuideAccordion } from './ai_search_guide_accordion';
 import { LinearCombinationPanel } from './linear_combination_panel';
 import { RrfRankingPanel } from './rrf_ranking_panel';
 
-export const RankAggregationSection: React.FC = () => {
+export const RankAggregationSection = () => {
   const [currentExpandedId, setCurrentExpandedId] = useState<string | undefined>(undefined);
 
   return (

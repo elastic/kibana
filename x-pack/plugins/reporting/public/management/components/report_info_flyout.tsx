@@ -36,7 +36,13 @@ interface Props {
   job: Job;
 }
 
-export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, job }) => {
+export const ReportInfoFlyout = (
+  {
+    config,
+    onClose,
+    job
+  }: Props
+) => {
   const isMounted = useMountedState();
   const { apiClient } = useInternalApiClient();
 

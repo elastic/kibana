@@ -31,15 +31,17 @@ interface TagManagementPageParams {
   assignableTypes: string[];
 }
 
-export const TagManagementPage: FC<TagManagementPageParams> = ({
-  setBreadcrumbs,
-  core,
-  tagClient,
-  tagCache,
-  assignmentService,
-  capabilities,
-  assignableTypes,
-}) => {
+export const TagManagementPage = (
+  {
+    setBreadcrumbs,
+    core,
+    tagClient,
+    tagCache,
+    assignmentService,
+    capabilities,
+    assignableTypes
+  }: TagManagementPageParams
+) => {
   const { application, http, ...startServices } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);

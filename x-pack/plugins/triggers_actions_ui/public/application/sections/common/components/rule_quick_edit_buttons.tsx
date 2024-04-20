@@ -35,20 +35,22 @@ export type ComponentOpts = {
   updateRulesToBulkEdit: (props: UpdateRulesToBulkEditProps) => void;
 } & BulkOperationsComponentOpts;
 
-export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
-  selectedItems,
-  isAllSelected = false,
-  getFilter,
-  onPerformingAction = noop,
-  onActionPerformed = noop,
-  bulkEditAction,
-  isEnablingRules = false,
-  isDisablingRules = false,
-  isBulkEditing = false,
-  updateRulesToBulkEdit,
-  onEnable,
-  onDisable,
-}: ComponentOpts) => {
+export const RuleQuickEditButtons = (
+  {
+    selectedItems,
+    isAllSelected = false,
+    getFilter,
+    onPerformingAction = noop,
+    onActionPerformed = noop,
+    bulkEditAction,
+    isEnablingRules = false,
+    isDisablingRules = false,
+    isBulkEditing = false,
+    updateRulesToBulkEdit,
+    onEnable,
+    onDisable
+  }: ComponentOpts
+) => {
   const {
     notifications: { toasts },
   } = useKibana().services;

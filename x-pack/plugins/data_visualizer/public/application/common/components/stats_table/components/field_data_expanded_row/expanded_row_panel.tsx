@@ -16,7 +16,14 @@ interface Props {
   grow?: EuiFlexItemProps['grow'];
   className?: string;
 }
-export const ExpandedRowPanel: FC<Props> = ({ children, dataTestSubj, grow, className }) => {
+export const ExpandedRowPanel = (
+  {
+    children,
+    dataTestSubj,
+    grow,
+    className
+  }: Props
+) => {
   return (
     <EuiPanel
       data-test-subj={dataTestSubj}

@@ -41,10 +41,12 @@ interface Props {
   navigateToOverviewPage: () => void;
 }
 
-export const NoDeprecationsPrompt: FunctionComponent<Props> = ({
-  deprecationType,
-  navigateToOverviewPage,
-}) => {
+export const NoDeprecationsPrompt = (
+  {
+    deprecationType,
+    navigateToOverviewPage
+  }: Props
+) => {
   return (
     <EuiPageTemplate.EmptyPrompt
       iconType="check"

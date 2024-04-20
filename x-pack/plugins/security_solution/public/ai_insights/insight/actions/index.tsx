@@ -22,7 +22,13 @@ interface Props {
   replacements?: Replacements;
 }
 
-const ActionsComponent: React.FC<Props> = ({ insight, promptContextId, replacements }) => {
+const ActionsComponent = (
+  {
+    insight,
+    promptContextId,
+    replacements
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
 
   return (

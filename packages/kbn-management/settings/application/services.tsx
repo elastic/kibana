@@ -65,10 +65,12 @@ const SettingsApplicationContext = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
-  children,
-  ...services
-}) => {
+export const SettingsApplicationProvider = (
+  {
+    children,
+    ...services
+  }: SettingsApplicationServices
+) => {
   // Destructure the services to avoid a type-widening inclusion of unrelated services.
   const {
     saveChanges,
@@ -114,10 +116,12 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const SettingsApplicationKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: SettingsApplicationKibanaDependencies
+) => {
   const {
     docLinks,
     notifications,

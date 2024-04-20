@@ -23,7 +23,7 @@ const ExtendedFlyoutWrapper = styled.div`
 /**
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
  */
-export const ResponseDetails: React.FC = () => {
+export const ResponseDetails = () => {
   const { searchHit, dataAsNestedObject, isPreview } = useLeftPanelContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'

@@ -28,7 +28,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { ConnectorNameAndDescriptionForm } from './connector_name_and_description_form';
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
-export const ConnectorNameAndDescription: React.FC = () => {
+export const ConnectorNameAndDescription = () => {
   const { index } = useValues(IndexViewLogic);
   const {
     isEditing,

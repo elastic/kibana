@@ -38,7 +38,11 @@ export interface IndexDetailOverviewProps {
   index: Index;
 }
 
-export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = ({ index }) => {
+export const IndexDetailOverview = (
+  {
+    index
+  }: IndexDetailOverviewProps
+) => {
   const [aliasesFlyoutOpen, setAliasesFlyoutOpen] = React.useState<boolean>(false);
   const { data, isLoading, isError } = useIndex(index.name);
   const indexAliases =

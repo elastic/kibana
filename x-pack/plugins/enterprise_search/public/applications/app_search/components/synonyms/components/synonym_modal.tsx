@@ -33,7 +33,7 @@ import { MultiInputRows } from '../../multi_input_rows';
 
 import { SYNONYM_CREATE_TITLE, SYNONYM_UPDATE_TITLE, DELETE_CONFIRMATION } from '../constants';
 
-export const SynonymModal: React.FC = () => {
+export const SynonymModal = () => {
   const { isModalOpen, modalLoading, activeSynonymSet } = useValues(SynonymsLogic);
   const { closeModal, createSynonymSet, updateSynonymSet, deleteSynonymSet } =
     useActions(SynonymsLogic);

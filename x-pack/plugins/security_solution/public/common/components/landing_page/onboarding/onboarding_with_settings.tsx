@@ -11,9 +11,13 @@ import { useAvailableSteps } from './hooks/use_available_steps';
 import { useProductTypes } from './hooks/use_product_types';
 import { Onboarding } from './onboarding';
 
-const OnboardingWithSettingsComponent: React.FC<{ indicesExist?: boolean }> = ({
-  indicesExist,
-}) => {
+const OnboardingWithSettingsComponent = (
+  {
+    indicesExist
+  }: {
+    indicesExist?: boolean;
+  }
+) => {
   const productTypes = useProductTypes();
   const onboardingSteps = useAvailableSteps();
   const spaceId = useSpaceId();

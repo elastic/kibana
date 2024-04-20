@@ -17,12 +17,14 @@ export interface Props {
   dataTestSubj?: string;
 }
 
-const StatusStatsComponent: React.FC<Props> = ({
-  caseCount,
-  caseStatus,
-  isLoading,
-  dataTestSubj,
-}) => {
+const StatusStatsComponent = (
+  {
+    caseCount,
+    caseStatus,
+    isLoading,
+    dataTestSubj
+  }: Props
+) => {
   const statusStats = useMemo(
     () => [
       {

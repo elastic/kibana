@@ -32,7 +32,7 @@ import { ConnectorViewLogic } from '../../../connector_detail/connector_view_log
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
-export const SyncsContextMenu: React.FC = () => {
+export const SyncsContextMenu = () => {
   const { config, productFeatures } = useValues(KibanaLogic);
   const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
     useValues(IndexViewLogic);

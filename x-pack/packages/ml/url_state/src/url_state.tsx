@@ -91,7 +91,7 @@ export const urlStateStore = createContext<UrlState>({
 
 export const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC = ({ children }) => {
+export const UrlStateProvider = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 

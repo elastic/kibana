@@ -50,15 +50,17 @@ interface Props {
   sourceIndex?: string;
 }
 
-export const ReviewAndCreatePipeline: FC<Props> = ({
-  highlightTargetField = false,
-  inferencePipeline,
-  modelType,
-  pipelineName,
-  pipelineCreated,
-  pipelineError,
-  sourceIndex,
-}) => {
+export const ReviewAndCreatePipeline = (
+  {
+    highlightTargetField = false,
+    inferencePipeline,
+    modelType,
+    pipelineName,
+    pipelineCreated,
+    pipelineError,
+    sourceIndex
+  }: Props
+) => {
   const {
     services: {
       application,

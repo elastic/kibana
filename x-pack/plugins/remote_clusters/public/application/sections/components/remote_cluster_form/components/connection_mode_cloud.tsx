@@ -33,7 +33,7 @@ export interface Props {
   areErrorsVisible: boolean;
 }
 
-export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
+export const ConnectionModeCloud = (props: Props) => {
   const { fields, fieldsErrors, areErrorsVisible, onFieldsChange } = props;
   const { cloudRemoteAddress, serverName, proxySocketConnections, cloudAdvancedOptionsEnabled } =
     fields;

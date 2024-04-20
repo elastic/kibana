@@ -31,7 +31,13 @@ interface SitemapsTableProps {
   items: Sitemap[];
 }
 
-export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, engineName, items }) => {
+export const SitemapsTable = (
+  {
+    domain,
+    engineName,
+    items
+  }: SitemapsTableProps
+) => {
   const { updateSitemaps } = useActions(CrawlerSingleDomainLogic);
   const field = 'url';
 

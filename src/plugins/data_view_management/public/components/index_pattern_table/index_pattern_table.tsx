@@ -70,7 +70,11 @@ interface Props extends RouteComponentProps {
   showCreateDialog?: boolean;
 }
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent = (
+  {
+    children
+  }: SpacesContextProps
+) => <>{children}</>;
 
 export const IndexPatternTable = ({
   history,

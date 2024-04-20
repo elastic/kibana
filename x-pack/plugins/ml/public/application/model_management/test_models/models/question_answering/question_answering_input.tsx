@@ -16,9 +16,13 @@ import { TextInput } from '../text_input';
 import type { QuestionAnsweringInference } from './question_answering_inference';
 import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
-const QuestionInput: FC<{
-  inferrer: QuestionAnsweringInference;
-}> = ({ inferrer }) => {
+const QuestionInput = (
+  {
+    inferrer
+  }: {
+    inferrer: QuestionAnsweringInference;
+  }
+) => {
   const questionText = useObservable(inferrer.getQuestionText$(), inferrer.getQuestionText());
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 

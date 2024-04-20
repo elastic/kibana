@@ -31,32 +31,36 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange, commit }) => (
-  <form
-    onSubmit={(e) => {
-      e.preventDefault();
-      commit(value);
-    }}
-    className="canvasAdvancedFilter"
-  >
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem>
-        <input
-          type="text"
-          className="canvasAdvancedFilter__input"
-          placeholder={strings.getInputPlaceholder()}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <button className="canvasAdvancedFilter__button" type="submit">
-          {strings.getApplyButtonLabel()}
-        </button>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </form>
-);
+export const AdvancedFilter = (
+  {
+    value = '',
+    onChange,
+    commit
+  }: Props
+) => (<form
+  onSubmit={(e) => {
+    e.preventDefault();
+    commit(value);
+  }}
+  className="canvasAdvancedFilter"
+>
+  <EuiFlexGroup gutterSize="xs">
+    <EuiFlexItem>
+      <input
+        type="text"
+        className="canvasAdvancedFilter__input"
+        placeholder={strings.getInputPlaceholder()}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <button className="canvasAdvancedFilter__button" type="submit">
+        {strings.getApplyButtonLabel()}
+      </button>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</form>);
 
 AdvancedFilter.defaultProps = {
   value: '',

@@ -21,12 +21,14 @@ interface ViewResultsInDiscoverActionProps {
   mode?: string;
 }
 
-const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
-  actionId,
-  buttonType,
-  endDate,
-  startDate,
-}) => {
+const ViewResultsInDiscoverActionComponent = (
+  {
+    actionId,
+    buttonType,
+    endDate,
+    startDate
+  }: ViewResultsInDiscoverActionProps
+) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;

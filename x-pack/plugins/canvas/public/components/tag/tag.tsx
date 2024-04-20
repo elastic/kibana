@@ -24,12 +24,14 @@ interface Props {
   type?: 'health' | 'badge';
 }
 
-export const Tag: FunctionComponent<Props> = ({
-  name,
-  color = '#666666',
-  type = 'health',
-  ...rest
-}) => {
+export const Tag = (
+  {
+    name,
+    color = '#666666',
+    type = 'health',
+    ...rest
+  }: Props
+) => {
   switch (type) {
     case 'health':
       return (

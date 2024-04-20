@@ -25,7 +25,11 @@ interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) => {
+const QueriesFieldComponent = (
+  {
+    euiFieldProps
+  }: QueriesFieldProps
+) => {
   const {
     field: { value: fieldValue },
   } = useController<{ queries: PackQueryFormData[] }, 'queries'>({

@@ -47,7 +47,11 @@ export const ToolbarSettingsComponent = ({ isAutohide, onSetAutohide }: Props) =
 /**
  * A store-connected container for the `ToolbarSettings` component.
  */
-export const ToolbarSettings: FC<Pick<Props, 'onSetAutohide'>> = ({ onSetAutohide }) => {
+export const ToolbarSettings = (
+  {
+    onSetAutohide
+  }: Pick<Props, 'onSetAutohide'>
+) => {
   const [{ settings }, dispatch] = useCanvasShareableState();
 
   const { toolbar } = settings;

@@ -28,7 +28,13 @@ interface Props {
   onTagsUpdated: (tagsToAdd: string[], tagsToRemove: string[], hasCompleted?: boolean) => void;
 }
 
-export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdated }: Props) => {
+export const TagOptions = (
+  {
+    tagName,
+    isTagHovered,
+    onTagsUpdated
+  }: Props
+) => {
   const [tagOptionsVisible, setTagOptionsVisible] = useState<boolean>(false);
   const [tagOptionsButton, setTagOptionsButton] = useState<HTMLElement>();
   const [tagMenuButtonVisible, setTagMenuButtonVisible] = useState<boolean>(isTagHovered);

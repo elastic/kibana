@@ -25,7 +25,11 @@ interface Props {
   connectorIntervals: GenerationInterval[];
 }
 
-const InfoPopoverBodyComponent: React.FC<Props> = ({ connectorIntervals }) => {
+const InfoPopoverBodyComponent = (
+  {
+    connectorIntervals
+  }: Props
+) => {
   const { theme } = useKibana().services;
   const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);
 

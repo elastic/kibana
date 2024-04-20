@@ -146,14 +146,16 @@ const useBulkActionsToMenuPanelMapper = (
   return bulkActionsPanels;
 };
 
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({
-  totalItems,
-  panels,
-  alerts,
-  setIsBulkActionsLoading,
-  clearSelection,
-  refresh,
-}) => {
+const BulkActionsComponent = (
+  {
+    totalItems,
+    panels,
+    alerts,
+    setIsBulkActionsLoading,
+    clearSelection,
+    refresh
+  }: BulkActionsProps
+) => {
   const {
     bulkActions: [{ rowSelection, isAllSelected }, updateSelectedRows],
   } = useContext(AlertsTableContext);

@@ -44,7 +44,7 @@ export const analyticsJobsListRouteFactory = (
   enableDatePicker: true,
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
   return (
     <PageLoader context={context}>

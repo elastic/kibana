@@ -29,7 +29,12 @@ interface IEuiReactRouterProps {
   to: string;
 }
 
-export const ReactRouterHelperForEui: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
+export const ReactRouterHelperForEui = (
+  {
+    to,
+    children
+  }: IEuiReactRouterProps
+) => {
   const history = useHistory();
 
   const onClick = (event: React.MouseEvent) => {
@@ -53,23 +58,29 @@ type TEuiReactRouterLinkProps = EuiLinkAnchorProps & IEuiReactRouterProps;
 type TEuiReactRouterButtonProps = EuiButtonProps & IEuiReactRouterProps;
 type TEuiReactRouterButtonEmptyProps = EuiButtonEmptyProps & IEuiReactRouterProps;
 
-export const ReactRouterEuiLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
-  <ReactRouterHelperForEui to={to}>
-    <EuiLink data-test-subj="syntheticsReactRouterEuiLinkLink" {...rest} />
-  </ReactRouterHelperForEui>
-);
+export const ReactRouterEuiLink = (
+  {
+    to,
+    ...rest
+  }: TEuiReactRouterLinkProps
+) => (<ReactRouterHelperForEui to={to}>
+  <EuiLink data-test-subj="syntheticsReactRouterEuiLinkLink" {...rest} />
+</ReactRouterHelperForEui>);
 
-export const ReactRouterEuiButton: React.FC<TEuiReactRouterButtonProps> = ({ to, ...rest }) => (
-  <ReactRouterHelperForEui to={to}>
-    <EuiButton data-test-subj="syntheticsReactRouterEuiButtonButton" {...rest} />
-  </ReactRouterHelperForEui>
-);
+export const ReactRouterEuiButton = (
+  {
+    to,
+    ...rest
+  }: TEuiReactRouterButtonProps
+) => (<ReactRouterHelperForEui to={to}>
+  <EuiButton data-test-subj="syntheticsReactRouterEuiButtonButton" {...rest} />
+</ReactRouterHelperForEui>);
 
-export const ReactRouterEuiButtonEmpty: React.FC<TEuiReactRouterButtonEmptyProps> = ({
-  to,
-  ...rest
-}) => (
-  <ReactRouterHelperForEui to={to}>
-    <EuiButtonEmpty data-test-subj="syntheticsReactRouterEuiButtonEmptyButton" {...rest} />
-  </ReactRouterHelperForEui>
-);
+export const ReactRouterEuiButtonEmpty = (
+  {
+    to,
+    ...rest
+  }: TEuiReactRouterButtonEmptyProps
+) => (<ReactRouterHelperForEui to={to}>
+  <EuiButtonEmpty data-test-subj="syntheticsReactRouterEuiButtonEmptyButton" {...rest} />
+</ReactRouterHelperForEui>);

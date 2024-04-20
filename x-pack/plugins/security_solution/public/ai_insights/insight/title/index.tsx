@@ -18,7 +18,12 @@ interface Props {
   title: string;
 }
 
-const TitleComponent: React.FC<Props> = ({ isLoading, title }) => {
+const TitleComponent = (
+  {
+    isLoading,
+    title
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
 
   return (

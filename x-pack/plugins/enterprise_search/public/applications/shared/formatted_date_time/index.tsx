@@ -14,14 +14,17 @@ interface Props {
   hideTime?: boolean;
 }
 
-export const FormattedDateTime: React.FC<Props> = ({ date, hideTime = false }) => (
-  <>
-    <FormattedDate value={date} year="numeric" month="short" day="numeric" />
-    {!hideTime && (
-      <>
-        {' '}
-        <FormattedTime value={date} />
-      </>
-    )}
-  </>
-);
+export const FormattedDateTime = (
+  {
+    date,
+    hideTime = false
+  }: Props
+) => (<>
+  <FormattedDate value={date} year="numeric" month="short" day="numeric" />
+  {!hideTime && (
+    <>
+      {' '}
+      <FormattedTime value={date} />
+    </>
+  )}
+</>);

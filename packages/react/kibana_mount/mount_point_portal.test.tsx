@@ -143,10 +143,15 @@ describe('MountPointPortal', () => {
   });
 
   it('updates the content of the portal element when the content of MountPointPortal changes', async () => {
-    const Wrapper: FC<{
-      setMount: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
-      portalContent: string;
-    }> = ({ setMount, portalContent }) => {
+    const Wrapper = (
+      {
+        setMount,
+        portalContent
+      }: {
+        setMount: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
+        portalContent: string;
+      }
+    ) => {
       return (
         <MountPointPortal setMountPoint={setMount}>
           <div>{portalContent}</div>

@@ -24,7 +24,12 @@ interface Props {
   setAdditionalExpanded: (a: boolean) => void;
 }
 
-export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditionalExpanded }) => {
+export const AdditionalSection = (
+  {
+    additionalExpanded,
+    setAdditionalExpanded
+  }: Props
+) => {
   return (
     <Fragment>
       <EuiSpacer />

@@ -25,7 +25,7 @@ interface Props {
   alert: CommonAlert;
   alertState?: CommonAlertState;
 }
-export const AlertPanel: React.FC<Props> = (props: Props) => {
+export const AlertPanel = (props: Props) => {
   const { alert, alertState } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 

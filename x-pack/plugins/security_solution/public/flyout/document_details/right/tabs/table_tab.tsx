@@ -82,7 +82,7 @@ export const getColumns: ColumnsProvider = ({
 /**
  * Table view displayed in the document details expandable flyout right section
  */
-export const TableTab: FC = memo(() => {
+export const TableTab = memo(() => {
   const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useRightPanelContext();
 
   return (

@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AddDomainLogic } from './add_domain_logic';
 import { AddDomainValidation } from './add_domain_validation';
 
-export const AddDomainForm: React.FC = () => {
+export const AddDomainForm = () => {
   const { setAddDomainFormInputValue, startDomainValidation } = useActions(AddDomainLogic);
 
   const { addDomainFormInputValue, displayValidation, entryPointValue } = useValues(AddDomainLogic);

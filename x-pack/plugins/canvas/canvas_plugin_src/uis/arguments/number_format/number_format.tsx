@@ -28,20 +28,20 @@ export interface Props extends ArgumentProps {
   argId: string;
 }
 
-export const NumberFormatArgInput: FunctionComponent<Props> = ({
-  numberFormats,
-  onValueChange,
-  argValue,
-  argId,
-}) => (
-  <FormatSelect
-    argId={argId}
-    argValue={argValue}
-    formatOptions={numberFormats}
-    onValueChange={onValueChange}
-    defaultCustomFormat="0.0a"
-  />
-);
+export const NumberFormatArgInput = (
+  {
+    numberFormats,
+    onValueChange,
+    argValue,
+    argId
+  }: Props
+) => (<FormatSelect
+  argId={argId}
+  argValue={argValue}
+  formatOptions={numberFormats}
+  onValueChange={onValueChange}
+  defaultCustomFormat="0.0a"
+/>);
 
 NumberFormatArgInput.propTypes = {
   numberFormats: PropTypes.arrayOf(

@@ -131,7 +131,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Redact: FunctionComponent = () => {
+export const Redact = () => {
   return (
     <>
       <FieldNameField

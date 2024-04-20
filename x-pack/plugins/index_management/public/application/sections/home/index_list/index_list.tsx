@@ -14,7 +14,11 @@ import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/
 import { useAppContext } from '../../../app_context';
 import { IndexTable } from './index_table';
 
-export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const IndexList = (
+  {
+    history
+  }: RouteComponentProps
+) => {
   const {
     core: { executionContext },
   } = useAppContext();

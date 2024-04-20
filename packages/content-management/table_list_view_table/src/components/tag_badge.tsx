@@ -22,7 +22,12 @@ export interface Props {
 /**
  * The badge representation of a Tag, which is the default display to be used for them.
  */
-export const TagBadge: FC<Props> = ({ tag, onClick }) => {
+export const TagBadge = (
+  {
+    tag,
+    onClick
+  }: Props
+) => {
   return (
     <EuiBadge
       color={tag.color}

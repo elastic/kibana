@@ -30,7 +30,7 @@ const i18nTexts = {
   },
 };
 
-export const WarmPhase: FunctionComponent = () => {
+export const WarmPhase = () => {
   const {
     isUsingSearchableSnapshotInHotPhase,
     isUsingDownsampleInHotPhase,

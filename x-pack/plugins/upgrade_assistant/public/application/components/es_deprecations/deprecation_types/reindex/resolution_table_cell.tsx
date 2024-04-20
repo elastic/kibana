@@ -76,7 +76,7 @@ const i18nTexts = {
   ),
 };
 
-export const ReindexResolutionCell: React.FunctionComponent = () => {
+export const ReindexResolutionCell = () => {
   const { reindexState } = useReindexContext();
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
 

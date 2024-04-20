@@ -34,7 +34,7 @@ import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
-export const AnalyticsCollectionView: React.FC = () => {
+export const AnalyticsCollectionView = () => {
   useMountedLogic(AnalyticsCollectionToolbarLogic);
   useMountedLogic(AnalyticsCollectionDataViewLogic);
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);

@@ -12,7 +12,7 @@ import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui'
 import { proxySettingsUrl } from '../../../../services/documentation';
 import { Props } from './connection_mode';
 
-export const ProxyConnection: FunctionComponent<Props> = (props) => {
+export const ProxyConnection = (props: Props) => {
   const { fields, fieldsErrors, areErrorsVisible, onFieldsChange } = props;
   const { proxyAddress, serverName, proxySocketConnections } = fields;
   const { proxyAddress: proxyAddressError } = fieldsErrors;

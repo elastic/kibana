@@ -23,7 +23,7 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
-export const ChangePointDetectionPage: FC = () => {
+export const ChangePointDetectionPage = () => {
   const { services } = useMlKibana();
   const { showNodeInfo } = useEnabledFeatures();
 

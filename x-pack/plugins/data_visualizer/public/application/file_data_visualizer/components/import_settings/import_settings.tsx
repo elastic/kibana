@@ -38,26 +38,28 @@ interface Props {
   results: FindFileStructureResponse;
 }
 
-export const ImportSettings: FC<Props> = ({
-  index,
-  dataView,
-  initialized,
-  onIndexChange,
-  createDataView,
-  onCreateDataViewChange,
-  onDataViewChange,
-  indexSettingsString,
-  mappingsString,
-  pipelineString,
-  onIndexSettingsStringChange,
-  onMappingsStringChange,
-  onPipelineStringChange,
-  indexNameError,
-  dataViewNameError,
-  combinedFields,
-  onCombinedFieldsChange,
-  results,
-}) => {
+export const ImportSettings = (
+  {
+    index,
+    dataView,
+    initialized,
+    onIndexChange,
+    createDataView,
+    onCreateDataViewChange,
+    onDataViewChange,
+    indexSettingsString,
+    mappingsString,
+    pipelineString,
+    onIndexSettingsStringChange,
+    onMappingsStringChange,
+    onPipelineStringChange,
+    indexNameError,
+    dataViewNameError,
+    combinedFields,
+    onCombinedFieldsChange,
+    results
+  }: Props
+) => {
   const {
     services: {
       application: { capabilities },

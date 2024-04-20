@@ -35,10 +35,12 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ],
 });
 
-const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-}) => {
+const TeamsActionFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => {
   const { docLinks } = useKibana().services;
 
   return (

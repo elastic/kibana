@@ -33,10 +33,12 @@ export interface AdvancedOptionsSectionProps {
   inputs: OutputFormInputsType;
 }
 
-export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSectionProps> = ({
-  enabled,
-  inputs,
-}) => {
+export const AdvancedOptionsSection = (
+  {
+    enabled,
+    inputs
+  }: AdvancedOptionsSectionProps
+) => {
   const {
     diskQueueEnabledInput,
     diskQueuePathInput,

@@ -25,15 +25,17 @@ interface ScriptingHelpFlyoutProps {
   onClose: () => void;
 }
 
-export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
-  isVisible = false,
-  onClose = () => {},
-  indexPattern,
-  lang,
-  name,
-  script,
-  executeScript,
-}) => {
+export const ScriptingHelpFlyout = (
+  {
+    isVisible = false,
+    onClose = () => {},
+    indexPattern,
+    lang,
+    name,
+    script,
+    executeScript
+  }: ScriptingHelpFlyoutProps
+) => {
   const tabs = [
     {
       id: 'syntax',

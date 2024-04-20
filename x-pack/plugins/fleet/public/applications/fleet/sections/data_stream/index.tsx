@@ -13,7 +13,7 @@ import { DefaultLayout } from '../../layouts';
 
 import { DataStreamListPage } from './list_page';
 
-export const DataStreamApp: React.FunctionComponent = () => {
+export const DataStreamApp = () => {
   return (
     <Routes>
       <Route path={FLEET_ROUTING_PATHS.data_streams}>

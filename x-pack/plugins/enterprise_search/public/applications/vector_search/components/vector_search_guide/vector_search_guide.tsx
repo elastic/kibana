@@ -76,11 +76,11 @@ const QUERY_SNIPPET = `POST /image-index/_search
   "fields": [ "title", "file-type" ]
 }`;
 
-export const VectorSearchGuide: React.FC = () => {
+export const VectorSearchGuide = () => {
   const { application } = useValues(KibanaLogic);
 
   return (
-    <EnterpriseSearchVectorSearchPageTemplate
+    (<EnterpriseSearchVectorSearchPageTemplate
       restrictWidth
       pageHeader={{
         description: (
@@ -246,6 +246,6 @@ export const VectorSearchGuide: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EnterpriseSearchVectorSearchPageTemplate>
+    </EnterpriseSearchVectorSearchPageTemplate>)
   );
 };

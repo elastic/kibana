@@ -20,7 +20,11 @@ import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { Wizard } from './components/wizard';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const CreateTransformSection: FC<Props> = ({ match }) => {
+export const CreateTransformSection = (
+  {
+    match
+  }: Props
+) => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);

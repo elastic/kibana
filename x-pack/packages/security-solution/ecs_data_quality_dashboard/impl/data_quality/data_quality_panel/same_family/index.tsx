@@ -15,7 +15,7 @@ const SameFamilyBadge = styled(EuiBadge)`
 
 import * as i18n from './translations';
 
-const SameFamilyComponent: React.FC = () => (
+const SameFamilyComponent = () => (
   <SameFamilyBadge data-test-subj="sameFamily" color="warning">
     {i18n.SAME_FAMILY}
   </SameFamilyBadge>

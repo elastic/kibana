@@ -28,17 +28,21 @@ const strings = {
     }),
 };
 
-export const WorkpadStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) => (
-  <EuiText size="s">
-    <p>{strings.getStepDescription()}</p>
-    <EuiSpacer size="s" />
-    <EuiButton
-      onClick={() => {
-        onDownload('share');
-      }}
-      size="s"
-    >
-      {strings.getDownloadLabel()}
-    </EuiButton>
-  </EuiText>
-);
+export const WorkpadStep = (
+  {
+    onDownload
+  }: {
+    onDownload: OnDownloadFn;
+  }
+) => (<EuiText size="s">
+  <p>{strings.getStepDescription()}</p>
+  <EuiSpacer size="s" />
+  <EuiButton
+    onClick={() => {
+      onDownload('share');
+    }}
+    size="s"
+  >
+    {strings.getDownloadLabel()}
+  </EuiButton>
+</EuiText>);

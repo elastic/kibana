@@ -91,7 +91,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
 /**
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
-export const HighlightedFields: FC = () => {
+export const HighlightedFields = () => {
   const { dataFormattedForFieldBrowser, scopeId, isPreview } = useRightPanelContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { loading, rule: maybeRule } = useRuleWithFallback(ruleId);

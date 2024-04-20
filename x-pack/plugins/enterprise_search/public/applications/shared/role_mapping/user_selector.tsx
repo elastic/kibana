@@ -53,20 +53,22 @@ interface Props {
   handleUsernameSelectChange(username: string): void;
 }
 
-export const UserSelector: React.FC<Props> = ({
-  isNewUser,
-  smtpSettingsPresent,
-  userFormUserIsExisting,
-  elasticsearchUsers,
-  elasticsearchUser,
-  roleTypes,
-  roleType,
-  setUserExisting,
-  setElasticsearchUsernameValue,
-  setElasticsearchEmailValue,
-  handleRoleChange,
-  handleUsernameSelectChange,
-}) => {
+export const UserSelector = (
+  {
+    isNewUser,
+    smtpSettingsPresent,
+    userFormUserIsExisting,
+    elasticsearchUsers,
+    elasticsearchUser,
+    roleTypes,
+    roleType,
+    setUserExisting,
+    setElasticsearchUsernameValue,
+    setElasticsearchEmailValue,
+    handleRoleChange,
+    handleUsernameSelectChange
+  }: Props
+) => {
   const roleOptions = roleTypes.map((role) => ({ id: role, text: role }));
   const usernameOptions = elasticsearchUsers.map(({ username }) => ({
     id: username,

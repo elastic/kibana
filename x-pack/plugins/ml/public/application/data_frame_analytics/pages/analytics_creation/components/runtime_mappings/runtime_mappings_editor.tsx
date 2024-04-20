@@ -23,68 +23,67 @@ interface Props {
   xJsonMode: XJsonModeType;
 }
 
-export const RuntimeMappingsEditor: FC<Props> = memo(
-  ({
+export const RuntimeMappingsEditor = memo((
+  {
     convertToJson,
     xJsonMode,
     setAdvancedRuntimeMappingsConfig,
     setIsRuntimeMappingsEditorApplyButtonEnabled,
     advancedEditorRuntimeMappingsLastApplied,
-    advancedRuntimeMappingsConfig,
-  }) => {
-    return (
-      <div data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor">
-        <CodeEditor
-          height={250}
-          languageId={'json'}
-          onChange={(d: string) => {
-            setAdvancedRuntimeMappingsConfig(d);
+    advancedRuntimeMappingsConfig
+  }: Props
+) => {
+  return (
+    <div data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor">
+      <CodeEditor
+        height={250}
+        languageId={'json'}
+        onChange={(d: string) => {
+          setAdvancedRuntimeMappingsConfig(d);
 
-            // Disable the "Apply"-Button if the config hasn't changed.
-            if (advancedEditorRuntimeMappingsLastApplied === d) {
-              setIsRuntimeMappingsEditorApplyButtonEnabled(false);
-              return;
-            }
+          // Disable the "Apply"-Button if the config hasn't changed.
+          if (advancedEditorRuntimeMappingsLastApplied === d) {
+            setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+            return;
+          }
 
-            // Enable Apply button so user can remove previously created runtime field
-            if (d === '') {
-              setIsRuntimeMappingsEditorApplyButtonEnabled(true);
-              return;
-            }
+          // Enable Apply button so user can remove previously created runtime field
+          if (d === '') {
+            setIsRuntimeMappingsEditorApplyButtonEnabled(true);
+            return;
+          }
 
-            // Try to parse the string passed on from the editor.
-            // If parsing fails, the "Apply"-Button will be disabled
-            try {
-              const parsedJson = JSON.parse(convertToJson(d));
-              setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
-            } catch (e) {
-              setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+          // Try to parse the string passed on from the editor.
+          // If parsing fails, the "Apply"-Button will be disabled
+          try {
+            const parsedJson = JSON.parse(convertToJson(d));
+            setIsRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
+          } catch (e) {
+            setIsRuntimeMappingsEditorApplyButtonEnabled(false);
+          }
+        }}
+        options={{
+          ariaLabel: i18n.translate(
+            'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
+            {
+              defaultMessage: 'Advanced runtime editor',
             }
-          }}
-          options={{
-            ariaLabel: i18n.translate(
-              'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
-              {
-                defaultMessage: 'Advanced runtime editor',
-              }
-            ),
-            automaticLayout: true,
-            fontSize: 12,
-            scrollBeyondLastLine: false,
-            quickSuggestions: true,
-            minimap: {
-              enabled: false,
-            },
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-          value={advancedRuntimeMappingsConfig}
-        />
-      </div>
-    );
-  },
-  (prevProps, nextProps) => isEqual(pickProps(prevProps), pickProps(nextProps))
-);
+          ),
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+        }}
+        value={advancedRuntimeMappingsConfig}
+      />
+    </div>
+  );
+});
 
 function pickProps(props: Props) {
   return [props.advancedEditorRuntimeMappingsLastApplied, props.advancedRuntimeMappingsConfig];

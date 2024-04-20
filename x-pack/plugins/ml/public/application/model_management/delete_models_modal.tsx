@@ -33,7 +33,12 @@ interface DeleteModelsModalProps {
   onClose: (refreshList?: boolean) => void;
 }
 
-export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose }) => {
+export const DeleteModelsModal = (
+  {
+    models,
+    onClose
+  }: DeleteModelsModalProps
+) => {
   const trainedModelsApiService = useTrainedModelsApiService();
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 

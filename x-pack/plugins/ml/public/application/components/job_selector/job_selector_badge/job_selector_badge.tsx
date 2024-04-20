@@ -20,13 +20,15 @@ interface JobSelectorBadgeProps {
   removeId?: Function;
 }
 
-export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
-  icon,
-  id,
-  isGroup = false,
-  numJobs,
-  removeId,
-}) => {
+export const JobSelectorBadge = (
+  {
+    icon,
+    id,
+    isGroup = false,
+    numJobs,
+    removeId
+  }: JobSelectorBadgeProps
+) => {
   const color = isGroup ? tabColor(id) : 'hollow';
   let props = { color } as EuiBadgeProps;
   let jobCount;

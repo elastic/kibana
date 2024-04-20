@@ -95,7 +95,7 @@ const getBatchReindexLink = (docLinks: DocLinksStart) => {
   );
 };
 
-const RemoteClustersAppLink: React.FunctionComponent = () => {
+const RemoteClustersAppLink = () => {
   const {
     plugins: { share },
   } = useAppContext();

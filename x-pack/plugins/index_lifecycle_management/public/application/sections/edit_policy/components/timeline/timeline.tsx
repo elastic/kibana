@@ -120,129 +120,133 @@ interface Props {
  * Display a timeline given ILM policy phase information. This component is re-usable and memo-ized
  * and should not rely directly on any application-specific context.
  */
-export const Timeline: FunctionComponent<Props> = memo(
-  ({ hasDeletePhase, isUsingRollover, ...phasesMinAge }) => {
-    const absoluteTimings: AbsoluteTimings = {
-      hot: { min_age: phasesMinAge.hotPhaseMinAge },
-      warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,
-      cold: phasesMinAge.coldPhaseMinAge ? { min_age: phasesMinAge.coldPhaseMinAge } : undefined,
-      frozen: phasesMinAge.frozenPhaseMinAge
-        ? { min_age: phasesMinAge.frozenPhaseMinAge }
-        : undefined,
-      delete: phasesMinAge.deletePhaseMinAge
-        ? { min_age: phasesMinAge.deletePhaseMinAge }
-        : undefined,
-    };
+export const Timeline = memo((
+  {
+    hasDeletePhase,
+    isUsingRollover,
+    ...phasesMinAge
+  }: Props
+) => {
+  const absoluteTimings: AbsoluteTimings = {
+    hot: { min_age: phasesMinAge.hotPhaseMinAge },
+    warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,
+    cold: phasesMinAge.coldPhaseMinAge ? { min_age: phasesMinAge.coldPhaseMinAge } : undefined,
+    frozen: phasesMinAge.frozenPhaseMinAge
+      ? { min_age: phasesMinAge.frozenPhaseMinAge }
+      : undefined,
+    delete: phasesMinAge.deletePhaseMinAge
+      ? { min_age: phasesMinAge.deletePhaseMinAge }
+      : undefined,
+  };
 
-    const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
+  const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
 
-    const widths = calculateWidths(phaseAgeInMilliseconds);
+  const widths = calculateWidths(phaseAgeInMilliseconds);
 
-    const getDurationInPhaseContent = (phase: PhaseExceptDelete): string | React.ReactNode =>
-      phaseAgeInMilliseconds.phases[phase] === Infinity ? (
-        <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
-      ) : null;
+  const getDurationInPhaseContent = (phase: PhaseExceptDelete): string | React.ReactNode =>
+    phaseAgeInMilliseconds.phases[phase] === Infinity ? (
+      <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
+    ) : null;
 
-    const { docLinks } = useKibana().services;
+  const { docLinks } = useKibana().services;
 
-    return (
-      <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>{i18nTexts.title}</h2>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            {i18nTexts.description}
-            &nbsp;
-            <LearnMoreLink
-              docPath={docLinks.links.elasticsearch.ilmPhaseTransitions}
-              text={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
-                  defaultMessage="Learn about timing"
-                />
-              }
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <div
-            className="ilmTimeline"
-            ref={(el) => {
-              if (el) {
-                el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
-                el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
-                el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
-                el.style.setProperty('--ilm-timeline-frozen-phase-width', widths.frozen ?? null);
-              }
-            }}
-          >
-            <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
-              <EuiFlexItem>
-                <div className="ilmTimeline__phasesContainer">
-                  {/* These are the actual color bars for the timeline */}
+  return (
+    <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
+      <EuiFlexItem>
+        <EuiTitle size="s">
+          <h2>{i18nTexts.title}</h2>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          {i18nTexts.description}
+          &nbsp;
+          <LearnMoreLink
+            docPath={docLinks.links.elasticsearch.ilmPhaseTransitions}
+            text={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                defaultMessage="Learn about timing"
+              />
+            }
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <div
+          className="ilmTimeline"
+          ref={(el) => {
+            if (el) {
+              el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
+              el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
+              el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
+              el.style.setProperty('--ilm-timeline-frozen-phase-width', widths.frozen ?? null);
+            }
+          }}
+        >
+          <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem>
+              <div className="ilmTimeline__phasesContainer">
+                {/* These are the actual color bars for the timeline */}
+                <div
+                  data-test-subj="ilmTimelinePhase-hot"
+                  className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
+                >
+                  <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
+                  <TimelinePhaseText
+                    phaseName={i18nTexts.hotPhase}
+                    durationInPhase={getDurationInPhaseContent('hot')}
+                  />
+                </div>
+                {exists(phaseAgeInMilliseconds.phases.warm) && (
                   <div
-                    data-test-subj="ilmTimelinePhase-hot"
-                    className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
+                    data-test-subj="ilmTimelinePhase-warm"
+                    className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
                   >
-                    <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
+                    <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
                     <TimelinePhaseText
-                      phaseName={i18nTexts.hotPhase}
-                      durationInPhase={getDurationInPhaseContent('hot')}
+                      phaseName={i18nTexts.warmPhase}
+                      durationInPhase={getDurationInPhaseContent('warm')}
                     />
                   </div>
-                  {exists(phaseAgeInMilliseconds.phases.warm) && (
-                    <div
-                      data-test-subj="ilmTimelinePhase-warm"
-                      className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
-                    >
-                      <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
-                      <TimelinePhaseText
-                        phaseName={i18nTexts.warmPhase}
-                        durationInPhase={getDurationInPhaseContent('warm')}
-                      />
-                    </div>
-                  )}
-                  {exists(phaseAgeInMilliseconds.phases.cold) && (
-                    <div
-                      data-test-subj="ilmTimelinePhase-cold"
-                      className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
-                    >
-                      <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
-                      <TimelinePhaseText
-                        phaseName={i18nTexts.coldPhase}
-                        durationInPhase={getDurationInPhaseContent('cold')}
-                      />
-                    </div>
-                  )}
-                  {exists(phaseAgeInMilliseconds.phases.frozen) && (
-                    <div
-                      data-test-subj="ilmTimelinePhase-frozen"
-                      className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
-                    >
-                      <div className="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar" />
-                      <TimelinePhaseText
-                        phaseName={i18nTexts.frozenPhase}
-                        durationInPhase={getDurationInPhaseContent('frozen')}
-                      />
-                    </div>
-                  )}
+                )}
+                {exists(phaseAgeInMilliseconds.phases.cold) && (
+                  <div
+                    data-test-subj="ilmTimelinePhase-cold"
+                    className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
+                  >
+                    <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
+                    <TimelinePhaseText
+                      phaseName={i18nTexts.coldPhase}
+                      durationInPhase={getDurationInPhaseContent('cold')}
+                    />
+                  </div>
+                )}
+                {exists(phaseAgeInMilliseconds.phases.frozen) && (
+                  <div
+                    data-test-subj="ilmTimelinePhase-frozen"
+                    className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
+                  >
+                    <div className="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar" />
+                    <TimelinePhaseText
+                      phaseName={i18nTexts.frozenPhase}
+                      durationInPhase={getDurationInPhaseContent('frozen')}
+                    />
+                  </div>
+                )}
+              </div>
+            </EuiFlexItem>
+            {hasDeletePhase && (
+              <EuiFlexItem grow={false}>
+                <div
+                  data-test-subj="ilmTimelinePhase-delete"
+                  className="ilmTimeline__deleteIconContainer"
+                >
+                  <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />
                 </div>
               </EuiFlexItem>
-              {hasDeletePhase && (
-                <EuiFlexItem grow={false}>
-                  <div
-                    data-test-subj="ilmTimelinePhase-delete"
-                    className="ilmTimeline__deleteIconContainer"
-                  >
-                    <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />
-                  </div>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+            )}
+          </EuiFlexGroup>
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});

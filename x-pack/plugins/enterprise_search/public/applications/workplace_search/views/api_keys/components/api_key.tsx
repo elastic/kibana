@@ -18,7 +18,14 @@ interface Props {
   text: React.ReactNode;
 }
 
-export const ApiKey: React.FC<Props> = ({ copy, toggleIsHidden, isHidden, text }) => {
+export const ApiKey = (
+  {
+    copy,
+    toggleIsHidden,
+    isHidden,
+    text
+  }: Props
+) => {
   const hideIcon = isHidden ? 'eye' : 'eyeClosed';
   const hideIconLabel = isHidden ? SHOW_API_KEY_LABEL : HIDE_API_KEY_LABEL;
 

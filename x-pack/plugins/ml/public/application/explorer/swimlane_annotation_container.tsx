@@ -29,12 +29,14 @@ interface SwimlaneAnnotationContainerProps {
   tooltipService: ChartTooltipService;
 }
 
-export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> = ({
-  chartWidth,
-  domain,
-  annotationsData,
-  tooltipService,
-}) => {
+export const SwimlaneAnnotationContainer = (
+  {
+    chartWidth,
+    domain,
+    annotationsData,
+    tooltipService
+  }: SwimlaneAnnotationContainerProps
+) => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
   const { euiTheme } = useCurrentThemeVars();
 

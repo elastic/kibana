@@ -158,7 +158,7 @@ interface SingleBrushProps {
  * @param props SingleBrushProps component props
  * @returns The SingleBrush component.
  */
-export const SingleBrush: FC<SingleBrushProps> = (props) => {
+export const SingleBrush = (props: SingleBrushProps) => {
   const {
     id: brushId = '',
     windowParameters,

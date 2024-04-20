@@ -15,21 +15,25 @@ interface ExtraActionsButtonProps {
   showTooltip: boolean;
 }
 
-export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick, showTooltip }) =>
-  showTooltip ? (
-    <EuiToolTip content={SHOW_MORE_ACTIONS}>
-      <EuiButtonIcon
-        data-test-subj="showExtraActionsButton"
-        aria-label={SHOW_MORE_ACTIONS}
-        iconType="boxesHorizontal"
-        onClick={onClick}
-      />
-    </EuiToolTip>
-  ) : (
+export const ExtraActionsButton = (
+  {
+    onClick,
+    showTooltip
+  }: ExtraActionsButtonProps
+) => showTooltip ? (
+  <EuiToolTip content={SHOW_MORE_ACTIONS}>
     <EuiButtonIcon
       data-test-subj="showExtraActionsButton"
       aria-label={SHOW_MORE_ACTIONS}
       iconType="boxesHorizontal"
       onClick={onClick}
     />
-  );
+  </EuiToolTip>
+) : (
+  <EuiButtonIcon
+    data-test-subj="showExtraActionsButton"
+    aria-label={SHOW_MORE_ACTIONS}
+    iconType="boxesHorizontal"
+    onClick={onClick}
+  />
+);

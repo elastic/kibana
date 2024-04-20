@@ -40,7 +40,12 @@ export interface ViewTypeSelectorProps {
   onChange: (update: ChangePointDetectionViewType) => void;
 }
 
-export const ViewTypeSelector: FC<ViewTypeSelectorProps> = ({ value, onChange }) => {
+export const ViewTypeSelector = (
+  {
+    value,
+    onChange
+  }: ViewTypeSelectorProps
+) => {
   return (
     <EuiFormRow
       fullWidth

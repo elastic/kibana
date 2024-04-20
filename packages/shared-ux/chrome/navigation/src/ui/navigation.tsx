@@ -45,7 +45,13 @@ export interface Props {
   panelContentProvider?: PanelContentProvider;
 }
 
-const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
+const NavigationComp = (
+  {
+    navigationTree$,
+    dataTestSubj,
+    panelContentProvider
+  }: Props
+) => {
   const { activeNodes$ } = useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);

@@ -47,11 +47,13 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const PreviewActionsComponent: React.FC<ActionProps> = ({
-  ariaRowindex,
-  columnValues,
-  onEventDetailsPanelOpened,
-}) => {
+const PreviewActionsComponent = (
+  {
+    ariaRowindex,
+    columnValues,
+    onEventDetailsPanelOpened
+  }: ActionProps
+) => {
   return (
     <ActionsContainer>
       <div key="expand-event">

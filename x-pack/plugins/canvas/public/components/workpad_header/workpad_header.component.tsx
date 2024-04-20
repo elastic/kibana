@@ -66,15 +66,17 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const WorkpadHeader: FC<Props> = ({
-  isWriteable,
-  canUserWrite,
-  commit,
-  onSetWriteable = () => {},
-  renderEmbedPanel,
-  elements,
-  addElement,
-}) => {
+export const WorkpadHeader = (
+  {
+    isWriteable,
+    canUserWrite,
+    commit,
+    onSetWriteable = () => {},
+    renderEmbedPanel,
+    elements,
+    addElement
+  }: Props
+) => {
   const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const hideEmbedPanel = () => setEmbedPanelVisible(false);
   const showEmbedPanel = () => setEmbedPanelVisible(true);

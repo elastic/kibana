@@ -33,7 +33,12 @@ interface ExpandedRowDetailsPaneProps {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, onAlertEdit }) => {
+export const ExpandedRowDetailsPane = (
+  {
+    item,
+    onAlertEdit
+  }: ExpandedRowDetailsPaneProps
+) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
 
   let displayStats = {};

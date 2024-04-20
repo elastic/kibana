@@ -68,18 +68,23 @@ interface EventDetailsPanelProps {
 
 const useAssistantNoop = () => ({ promptContextId: undefined });
 
-const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
-  browserFields,
-  entityType = 'events', // Default to events so only alerts have to pass entityType in
-  expandedEvent,
-  handleOnEventClosed,
-  isDraggable,
-  isFlyoutView,
-  runtimeMappings,
-  tabType,
-  scopeId,
-  isReadOnly,
-}) => {
+const EventDetailsPanelComponent = (
+  {
+    browserFields,
+
+    // Default to events so only alerts have to pass entityType in
+    entityType = 'events',
+
+    expandedEvent,
+    handleOnEventClosed,
+    isDraggable,
+    isFlyoutView,
+    runtimeMappings,
+    tabType,
+    scopeId,
+    isReadOnly
+  }: EventDetailsPanelProps
+) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
   const useAssistant = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;

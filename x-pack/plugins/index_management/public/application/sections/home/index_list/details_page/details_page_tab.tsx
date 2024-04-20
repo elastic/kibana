@@ -18,7 +18,13 @@ interface Props {
   tab: IndexDetailsTabId;
   index: Index;
 }
-export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, index }) => {
+export const DetailsPageTab = (
+  {
+    tabs,
+    tab,
+    index
+  }: Props
+) => {
   const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab);
   const {
     core: { getUrlForApp },

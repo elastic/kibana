@@ -12,12 +12,19 @@ import { useKibanaIndexPatternTitles } from '../../../hooks/use_kibana_index_pat
 
 type IndexPatternOption = EuiComboBoxOptionOption<string>;
 
-export const IndexPatternSelector: React.FC<{
-  indexPatternId: string | undefined;
-  isLoading: boolean;
-  isReadOnly: boolean;
-  onChangeIndexPatternId: (indexPatternId: string | undefined) => void;
-}> = ({ indexPatternId, isLoading, isReadOnly, onChangeIndexPatternId }) => {
+export const IndexPatternSelector = (
+  {
+    indexPatternId,
+    isLoading,
+    isReadOnly,
+    onChangeIndexPatternId
+  }: {
+    indexPatternId: string | undefined;
+    isLoading: boolean;
+    isReadOnly: boolean;
+    onChangeIndexPatternId: (indexPatternId: string | undefined) => void;
+  }
+) => {
   const {
     indexPatternTitles: availableIndexPatterns,
     latestIndexPatternTitlesRequest,

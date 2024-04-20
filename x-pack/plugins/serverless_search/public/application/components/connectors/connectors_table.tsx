@@ -48,7 +48,7 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { EDIT_CONNECTOR_PATH } from '../../constants';
 import { DeleteConnectorModal } from './delete_connector_modal';
 
-export const ConnectorsTable: React.FC = () => {
+export const ConnectorsTable = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [query, setQuery] = useState<string>('');
@@ -288,7 +288,13 @@ export const ConnectorsTable: React.FC = () => {
   );
 };
 
-const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connector }) => {
+const DeleteConnectorModalAction = (
+  {
+    connector
+  }: {
+    connector: Connector;
+  }
+) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   return (

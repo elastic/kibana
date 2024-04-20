@@ -31,13 +31,15 @@ const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAtt
   ...providedDefaults,
 });
 
-export const CreateTagModal: FC<CreateTagModalProps> = ({
-  defaultValues,
-  tagClient,
-  notifications,
-  onClose,
-  onSave,
-}) => {
+export const CreateTagModal = (
+  {
+    defaultValues,
+    tagClient,
+    notifications,
+    onClose,
+    onSave
+  }: CreateTagModalProps
+) => {
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(
     getDefaultAttributes(defaultValues)
   );

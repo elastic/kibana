@@ -19,12 +19,14 @@ interface Props {
   showAnonymized?: boolean;
 }
 
-const TabsComponent: React.FC<Props> = ({
-  insight,
-  promptContextId,
-  replacements,
-  showAnonymized = false,
-}) => {
+const TabsComponent = (
+  {
+    insight,
+    promptContextId,
+    replacements,
+    showAnonymized = false
+  }: Props
+) => {
   const tabs = useMemo(
     () => getTabs({ insight, promptContextId, replacements, showAnonymized }),
     [insight, promptContextId, replacements, showAnonymized]

@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
 import { getDeleteDomainConfirmationMessage } from '../utils';
 
-export const DeleteDomainPanel: React.FC = ({}) => {
+export const DeleteDomainPanel = ({}) => {
   const { domain } = useValues(CrawlerSingleDomainLogic);
   const { deleteDomain } = useActions(CrawlerSingleDomainLogic);
 

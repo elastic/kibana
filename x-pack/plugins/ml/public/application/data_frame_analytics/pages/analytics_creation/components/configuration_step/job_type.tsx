@@ -60,7 +60,12 @@ const jobDetails: JobDetails = {
   },
 };
 
-export const JobType: FC<Props> = ({ type, setFormState }) => {
+export const JobType = (
+  {
+    type,
+    setFormState
+  }: Props
+) => {
   const [selectedCard, setSelectedCard] = useState<any>({});
 
   return (

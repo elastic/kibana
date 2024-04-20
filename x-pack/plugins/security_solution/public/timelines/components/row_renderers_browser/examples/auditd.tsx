@@ -12,7 +12,7 @@ import { createGenericAuditRowRenderer } from '../../timeline/body/renderers/aud
 import { CONNECTED_USING } from '../../timeline/body/renderers/auditd/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const AuditdExampleComponent: React.FC = () => {
+const AuditdExampleComponent = () => {
   const auditdRowRenderer = createGenericAuditRowRenderer({
     actionName: 'connected-to',
     text: CONNECTED_USING,

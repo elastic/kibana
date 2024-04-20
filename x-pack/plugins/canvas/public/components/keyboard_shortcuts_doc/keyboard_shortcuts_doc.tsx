@@ -79,39 +79,41 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
     };
   });
 
-export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
-  <EuiFlyout
-    closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
-    size="s"
-    onClose={onClose}
-  >
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="s">
-        <h2>{strings.getTitle()}</h2>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      {Object.values(keymap).map((namespace: ShortcutNameSpace) => {
-        const { displayName, ...shortcuts } = namespace;
-        return (
-          <div key={getId('shortcuts')} className="canvasKeyboardShortcut">
-            <EuiTitle size="xs">
-              <h4>{displayName}</h4>
-            </EuiTitle>
-            <EuiHorizontalRule margin="s" />
-            <EuiDescriptionList
-              textStyle="reverse"
-              type="column"
-              listItems={getDescriptionListItems(Object.values(shortcuts) as ShortcutMap[])}
-              compressed
-            />
-            <EuiSpacer />
-          </div>
-        );
-      })}
-    </EuiFlyoutBody>
-  </EuiFlyout>
-);
+export const KeyboardShortcutsDoc = (
+  {
+    onClose
+  }: Props
+) => (<EuiFlyout
+  closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
+  size="s"
+  onClose={onClose}
+>
+  <EuiFlyoutHeader hasBorder>
+    <EuiTitle size="s">
+      <h2>{strings.getTitle()}</h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    {Object.values(keymap).map((namespace: ShortcutNameSpace) => {
+      const { displayName, ...shortcuts } = namespace;
+      return (
+        <div key={getId('shortcuts')} className="canvasKeyboardShortcut">
+          <EuiTitle size="xs">
+            <h4>{displayName}</h4>
+          </EuiTitle>
+          <EuiHorizontalRule margin="s" />
+          <EuiDescriptionList
+            textStyle="reverse"
+            type="column"
+            listItems={getDescriptionListItems(Object.values(shortcuts) as ShortcutMap[])}
+            compressed
+          />
+          <EuiSpacer />
+        </div>
+      );
+    })}
+  </EuiFlyoutBody>
+</EuiFlyout>);
 
 KeyboardShortcutsDoc.propTypes = {
   onClose: PropTypes.func.isRequired,

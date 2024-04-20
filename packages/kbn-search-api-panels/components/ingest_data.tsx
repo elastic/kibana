@@ -34,19 +34,21 @@ interface IngestDataProps {
   additionalIngestionPanel?: React.ReactNode;
 }
 
-export const IngestData: React.FC<IngestDataProps> = ({
-  codeSnippet,
-  selectedLanguage,
-  setSelectedLanguage,
-  docLinks,
-  assetBasePath,
-  application,
-  consolePlugin,
-  sharePlugin,
-  languages,
-  consoleRequest,
-  additionalIngestionPanel,
-}) => {
+export const IngestData = (
+  {
+    codeSnippet,
+    selectedLanguage,
+    setSelectedLanguage,
+    docLinks,
+    assetBasePath,
+    application,
+    consolePlugin,
+    sharePlugin,
+    languages,
+    consoleRequest,
+    additionalIngestionPanel
+  }: IngestDataProps
+) => {
   return (
     <OverviewPanel
       description={i18n.translate('searchApiPanels.welcomeBanner.ingestData.description', {

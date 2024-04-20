@@ -74,14 +74,16 @@ const DisplayActionsHeader = () => {
   );
 };
 
-const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
-  ruleId,
-  isUpdateView = false,
-  actionMessageParams,
-  summaryActionMessageParams,
-  ruleType,
-  form,
-}) => {
+const StepRuleActionsComponent = (
+  {
+    ruleId,
+    isUpdateView = false,
+    actionMessageParams,
+    summaryActionMessageParams,
+    ruleType,
+    form
+  }: StepRuleActionsProps
+) => {
   const {
     services: { application },
   } = useKibana();
@@ -150,10 +152,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 
 export const StepRuleActions = memo(StepRuleActionsComponent);
 
-const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
-  addPadding,
-  defaultValues: ruleActionsData,
-}) => {
+const StepRuleActionsReadOnlyComponent = (
+  {
+    addPadding,
+    defaultValues: ruleActionsData
+  }: StepRuleActionsReadOnlyProps
+) => {
   const {
     services: { triggersActionsUi },
   } = useKibana();

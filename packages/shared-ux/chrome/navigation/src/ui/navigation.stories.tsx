@@ -36,7 +36,7 @@ interface Props {
   children?: React.ReactNode | (({ isCollapsed }: { isCollapsed: boolean }) => React.ReactNode);
 }
 
-const NavigationWrapper: FC<Props & Partial<EuiCollapsibleNavBetaProps>> = (props) => {
+const NavigationWrapper = (props: Props & Partial<EuiCollapsibleNavBetaProps>) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const onCollapseToggle = (nextIsCollapsed: boolean) => {

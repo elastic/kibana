@@ -26,7 +26,7 @@ export interface Props {
   areErrorsVisible: boolean;
 }
 
-export const ConnectionMode: FunctionComponent<Props> = (props) => {
+export const ConnectionMode = (props: Props) => {
   const { fields, onFieldsChange } = props;
   const { mode } = fields;
   const { isCloudEnabled } = useAppContext();

@@ -94,10 +94,12 @@ const calculateTotalMeanImportance = (featureClass: ClassificationTotalFeatureIm
   );
 };
 
-export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps> = ({
-  totalFeatureImportance,
-  jobConfig,
-}) => {
+export const FeatureImportanceSummaryPanel = (
+  {
+    totalFeatureImportance,
+    jobConfig
+  }: FeatureImportanceSummaryPanelProps
+) => {
   const {
     services: { docLinks },
   } = useMlKibana();

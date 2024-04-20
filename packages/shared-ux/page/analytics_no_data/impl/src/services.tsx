@@ -23,10 +23,12 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
-  children,
-  ...services
-}) => {
+export const AnalyticsNoDataPageProvider = (
+  {
+    children,
+    ...services
+  }: AnalyticsNoDataPageServices
+) => {
   const { kibanaGuideDocLink, customBranding, getHttp, prependBasePath, pageFlavor } = services;
 
   return (
@@ -41,10 +43,12 @@ export const AnalyticsNoDataPageProvider: FC<AnalyticsNoDataPageServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const AnalyticsNoDataPageKibanaProvider: FC<AnalyticsNoDataPageKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const AnalyticsNoDataPageKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: AnalyticsNoDataPageKibanaDependencies
+) => {
   const value: Services = {
     kibanaGuideDocLink: dependencies.coreStart.docLinks.links.kibana.guide,
     customBranding: {

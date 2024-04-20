@@ -23,7 +23,14 @@ interface Props {
   deploymentId: string | null;
 }
 
-export const Warning: FC<Props> = ({ size, isCloud, isCloudTrial, deploymentId }) => {
+export const Warning = (
+  {
+    size,
+    isCloud,
+    isCloudTrial,
+    deploymentId
+  }: Props
+) => {
   return (
     <>
       <EuiCallOut

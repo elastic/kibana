@@ -47,13 +47,15 @@ export interface Props {
   value?: string;
 }
 
-export const ColorManager: FC<Props> = ({
-  hasButtons = false,
-  onAddColor,
-  onChange,
-  onRemoveColor,
-  value = '',
-}) => {
+export const ColorManager = (
+  {
+    hasButtons = false,
+    onAddColor,
+    onChange,
+    onRemoveColor,
+    value = ''
+  }: Props
+) => {
   const tc = tinycolor(value);
   const validColor = tc.isValid();
 

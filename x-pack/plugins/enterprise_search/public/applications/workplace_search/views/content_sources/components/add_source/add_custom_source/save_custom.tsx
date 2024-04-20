@@ -41,7 +41,11 @@ interface SaveCustomProps {
   sourceData: SourceDataItem;
 }
 
-export const SaveCustom: React.FC<SaveCustomProps> = ({ sourceData }) => {
+export const SaveCustom = (
+  {
+    sourceData
+  }: SaveCustomProps
+) => {
   const { newCustomSource } = useValues(AddCustomSourceLogic);
   const { isOrganization } = useValues(AppLogic);
   const { serviceType, baseServiceType, name, categories = [] } = sourceData;

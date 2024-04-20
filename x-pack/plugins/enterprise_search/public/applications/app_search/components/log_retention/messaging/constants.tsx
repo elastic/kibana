@@ -65,7 +65,12 @@ interface Props {
   minAgeDays?: LogRetentionPolicy['minAgeDays'];
 }
 
-export const NoLogging: React.FC<Props> = ({ type, disabledAt }) => {
+export const NoLogging = (
+  {
+    type,
+    disabledAt
+  }: Props
+) => {
   return (
     <>
       <FormattedMessage
@@ -93,18 +98,23 @@ export const NoLogging: React.FC<Props> = ({ type, disabledAt }) => {
   );
 };
 
-export const CustomPolicy: React.FC<Props> = ({ type }) => (
-  <FormattedMessage
-    id="xpack.enterpriseSearch.appSearch.logRetention.customPolicy"
-    defaultMessage="You have a custom {logsType} log retention policy."
-    values={{ logsType: CAPITALIZATION_MAP[type].lowercase }}
-  />
-);
+export const CustomPolicy = (
+  {
+    type
+  }: Props
+) => (<FormattedMessage
+  id="xpack.enterpriseSearch.appSearch.logRetention.customPolicy"
+  defaultMessage="You have a custom {logsType} log retention policy."
+  values={{ logsType: CAPITALIZATION_MAP[type].lowercase }}
+/>);
 
-export const DefaultPolicy: React.FC<Props> = ({ type, minAgeDays }) => (
-  <FormattedMessage
-    id="xpack.enterpriseSearch.appSearch.logRetention.defaultPolicy"
-    defaultMessage="Your {logsType} logs are being stored for at least {minAgeDays, plural, one {# day} other {# days}}."
-    values={{ logsType: CAPITALIZATION_MAP[type].lowercase, minAgeDays }}
-  />
-);
+export const DefaultPolicy = (
+  {
+    type,
+    minAgeDays
+  }: Props
+) => (<FormattedMessage
+  id="xpack.enterpriseSearch.appSearch.logRetention.defaultPolicy"
+  defaultMessage="Your {logsType} logs are being stored for at least {minAgeDays, plural, one {# day} other {# days}}."
+  values={{ logsType: CAPITALIZATION_MAP[type].lowercase, minAgeDays }}
+/>);

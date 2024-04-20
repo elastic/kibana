@@ -119,7 +119,12 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) => {
+export const ElementMenu = (
+  {
+    elements,
+    addElement
+  }: Props
+) => {
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 

@@ -19,12 +19,14 @@ interface Props {
   [key: string]: any;
 }
 
-export const SectionLoading: React.FunctionComponent<Props> = ({
-  inline,
-  'data-test-subj': dataTestSubj,
-  children,
-  ...rest
-}) => {
+export const SectionLoading = (
+  {
+    inline,
+    'data-test-subj': dataTestSubj,
+    children,
+    ...rest
+  }: Props
+) => {
   if (inline) {
     return (
       <EuiFlexGroup

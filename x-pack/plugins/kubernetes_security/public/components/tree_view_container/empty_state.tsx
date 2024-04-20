@@ -21,7 +21,7 @@ const wrapperStyle: CSSObject = {
   height: 262,
 };
 
-export const EmptyState: React.FC = () => {
+export const EmptyState = () => {
   return (
     <EuiPanel color="subdued" data-test-subj={TREE_EMPTY_STATE}>
       <EuiFlexGroup css={wrapperStyle} alignItems="center" justifyContent="center">

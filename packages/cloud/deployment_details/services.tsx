@@ -22,10 +22,12 @@ const DeploymentDetailsContext = React.createContext<DeploymentDetailsContextVal
 /**
  * Abstract external service Provider.
  */
-export const DeploymentDetailsProvider: FC<DeploymentDetailsContextValue> = ({
-  children,
-  ...services
-}) => {
+export const DeploymentDetailsProvider = (
+  {
+    children,
+    ...services
+  }: DeploymentDetailsContextValue
+) => {
   return (
     <DeploymentDetailsContext.Provider value={services}>
       {children}
@@ -75,10 +77,12 @@ export interface DeploymentDetailsKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const DeploymentDetailsKibanaProvider: FC<DeploymentDetailsKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const DeploymentDetailsKibanaProvider = (
+  {
+    children,
+    ...services
+  }: DeploymentDetailsKibanaDependencies
+) => {
   const {
     core: {
       application: { navigateToUrl },

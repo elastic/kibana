@@ -46,20 +46,22 @@ export interface TestPipelineConfig {
   verbose?: boolean;
 }
 
-export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
-  handleTestPipeline,
-  resetTestOutput,
-  isRunningTest,
-  cachedVerbose,
-  cachedDocuments,
-  testOutput,
-  form,
-  validateAndTestPipeline,
-  selectedTab,
-  setSelectedTab,
-  testingError,
-  onClose,
-}) => {
+export const TestPipelineFlyout = (
+  {
+    handleTestPipeline,
+    resetTestOutput,
+    isRunningTest,
+    cachedVerbose,
+    cachedDocuments,
+    testOutput,
+    form,
+    validateAndTestPipeline,
+    selectedTab,
+    setSelectedTab,
+    testingError,
+    onClose
+  }: Props
+) => {
   let tabContent;
 
   if (selectedTab === 'output') {

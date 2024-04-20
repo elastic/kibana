@@ -20,7 +20,12 @@ interface Props {
   children(props: ChildrenProps): ReactElement;
 }
 
-export const HiddenText: React.FC<Props> = ({ text, children }) => {
+export const HiddenText = (
+  {
+    text,
+    children
+  }: Props
+) => {
   const [isHidden, toggleIsHidden] = useState(true);
 
   const hiddenLabel = i18n.translate('xpack.enterpriseSearch.hiddenText', {

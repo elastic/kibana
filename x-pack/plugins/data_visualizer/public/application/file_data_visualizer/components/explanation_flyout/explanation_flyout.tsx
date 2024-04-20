@@ -27,7 +27,12 @@ interface Props {
   results: FindFileStructureResponse;
   closeFlyout(): void;
 }
-export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
+export const ExplanationFlyout = (
+  {
+    results,
+    closeFlyout
+  }: Props
+) => {
   const explanation = results.explanation!;
   return (
     <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'}>
@@ -60,25 +65,29 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
   );
 };
 
-const Content: FC<{ explanation: string[] }> = ({ explanation }) => (
-  <>
-    <EuiText size={'s'}>
-      <FormattedMessage
-        id="xpack.dataVisualizer.file.explanationFlyout.content"
-        defaultMessage="The logical steps that have produced the analysis results."
-      />
+const Content = (
+  {
+    explanation
+  }: {
+    explanation: string[];
+  }
+) => (<>
+  <EuiText size={'s'}>
+    <FormattedMessage
+      id="xpack.dataVisualizer.file.explanationFlyout.content"
+      defaultMessage="The logical steps that have produced the analysis results."
+    />
 
-      <EuiSpacer size="l" />
-      <EuiSubSteps>
-        <ul style={{ wordBreak: 'break-word' }}>
-          {explanation.map((e, i) => (
-            <li key={i}>
-              {e}
-              <EuiSpacer size="s" />
-            </li>
-          ))}
-        </ul>
-      </EuiSubSteps>
-    </EuiText>
-  </>
-);
+    <EuiSpacer size="l" />
+    <EuiSubSteps>
+      <ul style={{ wordBreak: 'break-word' }}>
+        {explanation.map((e, i) => (
+          <li key={i}>
+            {e}
+            <EuiSpacer size="s" />
+          </li>
+        ))}
+      </ul>
+    </EuiSubSteps>
+  </EuiText>
+</>);

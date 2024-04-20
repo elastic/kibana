@@ -17,64 +17,64 @@ interface ConfirmDeployAgentPolicyModalProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyModalProps> = ({
-  onConfirm,
-  onCancel,
-  agentCount,
-  agentPolicyCount,
-}) => (
-  <EuiConfirmModal
-    title={
-      <FormattedMessage
-        id="xpack.osquery.agentPolicy.confirmModalTitle"
-        defaultMessage="Save and deploy changes"
-      />
-    }
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={
-      <FormattedMessage
-        id="xpack.osquery.agentPolicy.confirmModalCancelButtonLabel"
-        defaultMessage="Cancel"
-      />
-    }
-    confirmButtonText={
-      <FormattedMessage
-        id="xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel"
-        defaultMessage="Save and deploy changes"
-      />
-    }
-    buttonColor="primary"
-  >
-    <EuiCallOut
-      iconType="iInCircle"
-      title={i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutTitle', {
-        defaultMessage:
-          'This action will update {agentCount, plural, one {# agent} other {# agents}}',
-        values: {
-          agentCount,
-        },
-      })}
-    >
-      <div className="eui-textBreakWord">
-        <FormattedMessage
-          id="xpack.osquery.agentPolicy.confirmModalCalloutDescription"
-          defaultMessage="Fleet has detected that the selected {agentPolicyCount, plural, one {agent policy} other {agent policies}}, is already in use by
-            some of your agents. As a result of this action, Fleet will deploy updates to all agents
-            that use this {agentPolicyCount, plural, one {agent policy} other {agent policies}}."
-          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-          values={{
-            agentPolicyCount,
-          }}
-        />
-      </div>
-    </EuiCallOut>
-    <EuiSpacer size="l" />
+const ConfirmDeployAgentPolicyModalComponent = (
+  {
+    onConfirm,
+    onCancel,
+    agentCount,
+    agentPolicyCount
+  }: ConfirmDeployAgentPolicyModalProps
+) => (<EuiConfirmModal
+  title={
     <FormattedMessage
-      id="xpack.osquery.agentPolicy.confirmModalDescription"
-      defaultMessage="Are you sure you wish to continue?"
+      id="xpack.osquery.agentPolicy.confirmModalTitle"
+      defaultMessage="Save and deploy changes"
     />
-  </EuiConfirmModal>
-);
+  }
+  onCancel={onCancel}
+  onConfirm={onConfirm}
+  cancelButtonText={
+    <FormattedMessage
+      id="xpack.osquery.agentPolicy.confirmModalCancelButtonLabel"
+      defaultMessage="Cancel"
+    />
+  }
+  confirmButtonText={
+    <FormattedMessage
+      id="xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel"
+      defaultMessage="Save and deploy changes"
+    />
+  }
+  buttonColor="primary"
+>
+  <EuiCallOut
+    iconType="iInCircle"
+    title={i18n.translate('xpack.osquery.agentPolicy.confirmModalCalloutTitle', {
+      defaultMessage:
+        'This action will update {agentCount, plural, one {# agent} other {# agents}}',
+      values: {
+        agentCount,
+      },
+    })}
+  >
+    <div className="eui-textBreakWord">
+      <FormattedMessage
+        id="xpack.osquery.agentPolicy.confirmModalCalloutDescription"
+        defaultMessage="Fleet has detected that the selected {agentPolicyCount, plural, one {agent policy} other {agent policies}}, is already in use by
+          some of your agents. As a result of this action, Fleet will deploy updates to all agents
+          that use this {agentPolicyCount, plural, one {agent policy} other {agent policies}}."
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+        values={{
+          agentPolicyCount,
+        }}
+      />
+    </div>
+  </EuiCallOut>
+  <EuiSpacer size="l" />
+  <FormattedMessage
+    id="xpack.osquery.agentPolicy.confirmModalDescription"
+    defaultMessage="Are you sure you wish to continue?"
+  />
+</EuiConfirmModal>);
 
 export const ConfirmDeployAgentPolicyModal = React.memo(ConfirmDeployAgentPolicyModalComponent);

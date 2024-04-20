@@ -59,15 +59,17 @@ export interface Props {
   history: ScopedHistory;
 }
 
-export const ComponentTable: FunctionComponent<Props> = ({
-  componentTemplates,
-  defaultFilter,
-  onReloadClick,
-  onDeleteClick,
-  onEditClick,
-  onCloneClick,
-  history,
-}) => {
+export const ComponentTable = (
+  {
+    componentTemplates,
+    defaultFilter,
+    onReloadClick,
+    onDeleteClick,
+    onEditClick,
+    onCloneClick,
+    history
+  }: Props
+) => {
   const { trackMetric } = useComponentTemplatesContext();
 
   // By default, we want to show all the component templates that are not deprecated.

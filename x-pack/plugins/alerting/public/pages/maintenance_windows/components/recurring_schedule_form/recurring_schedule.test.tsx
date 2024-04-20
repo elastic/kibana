@@ -25,10 +25,14 @@ const initialValue: FormProps = {
 describe('RecurringSchedule', () => {
   let appMockRenderer: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC<{ iv?: FormProps }> = ({
-    children,
-    iv = initialValue,
-  }) => {
+  const MockHookWrapperComponent = (
+    {
+      children,
+      iv = initialValue
+    }: {
+      iv?: FormProps;
+    }
+  ) => {
     const { form } = useForm<FormProps>({
       defaultValue: iv,
       options: { stripEmptyFields: false },

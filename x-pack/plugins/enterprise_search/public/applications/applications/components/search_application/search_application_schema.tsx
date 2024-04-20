@@ -47,7 +47,13 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 
-const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaField }) => {
+const SchemaFieldDetails = (
+  {
+    schemaField
+  }: {
+    schemaField: SchemaField;
+  }
+) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const notInAllIndices = schemaField.indices.some((i) => i.type === 'unmapped');
 
@@ -152,7 +158,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
   );
 };
 
-export const SearchApplicationSchema: React.FC = () => {
+export const SearchApplicationSchema = () => {
   const [onlyShowConflicts, setOnlyShowConflicts] = useState<boolean>(false);
   const { isLoadingSearchApplicationSchema, schemaFields, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic

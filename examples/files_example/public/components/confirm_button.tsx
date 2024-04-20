@@ -16,12 +16,14 @@ interface Props {
   disabled: boolean;
 }
 
-export const ConfirmButtonIcon: FunctionComponent<Props> = ({
-  label,
-  confirmationText,
-  onConfirm,
-  disabled,
-}) => {
+export const ConfirmButtonIcon = (
+  {
+    label,
+    confirmationText,
+    onConfirm,
+    disabled
+  }: Props
+) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   return showConfirm ? (

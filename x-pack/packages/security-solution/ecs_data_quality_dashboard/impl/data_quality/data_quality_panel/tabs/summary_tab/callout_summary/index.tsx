@@ -42,21 +42,23 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const CalloutSummaryComponent: React.FC<Props> = ({
-  addSuccessToast,
-  addToNewCaseDisabled,
-  docsCount,
-  formatBytes,
-  formatNumber,
-  ilmPhase,
-  indexName,
-  isAssistantEnabled,
-  onAddToNewCase,
-  partitionedFieldMetadata,
-  pattern,
-  patternDocsCount,
-  sizeInBytes,
-}) => {
+const CalloutSummaryComponent = (
+  {
+    addSuccessToast,
+    addToNewCaseDisabled,
+    docsCount,
+    formatBytes,
+    formatNumber,
+    ilmPhase,
+    indexName,
+    isAssistantEnabled,
+    onAddToNewCase,
+    partitionedFieldMetadata,
+    pattern,
+    patternDocsCount,
+    sizeInBytes
+  }: Props
+) => {
   const { isILMAvailable } = useDataQualityContext();
   const markdownComments: string[] = useMemo(
     () =>

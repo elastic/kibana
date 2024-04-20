@@ -20,7 +20,7 @@ const IndexMappingWithContext = dynamic<ComponentType<IndexMappingWithContextPro
   import('./index_mapping_with_context').then((mod) => ({ default: mod.IndexMappingWithContext }))
 );
 
-export const IndexMapping: React.FC<IndexMappingWithContextProps> = (props) => {
+export const IndexMapping = (props: IndexMappingWithContextProps) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <IndexMappingWithContext {...props} />

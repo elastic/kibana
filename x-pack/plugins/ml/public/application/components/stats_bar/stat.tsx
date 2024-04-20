@@ -19,7 +19,11 @@ interface StatProps {
   stat: StatsBarStat;
 }
 
-export const Stat: FC<StatProps> = ({ stat }) => {
+export const Stat = (
+  {
+    stat
+  }: StatProps
+) => {
   const { euiTheme } = useEuiTheme();
   return (
     <span css={{ marginRight: euiTheme.size.s }}>

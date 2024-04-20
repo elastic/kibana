@@ -14,7 +14,12 @@ export interface PageProps {
   title?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+export const Page = (
+  {
+    title = 'Untitled',
+    children
+  }: PageProps
+) => {
   return (
     <>
       <EuiPageTemplate.Header>

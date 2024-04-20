@@ -69,7 +69,7 @@ const StyledExpressionRow = euiStyled(EuiFlexGroup)`
 `;
 
 // eslint-disable-next-line react/function-component-definition
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow = (props: ExpressionRowProps) => {
   const {
     dataView,
     children,
@@ -208,15 +208,24 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 };
 
-const ThresholdElement: React.FC<{
-  updateComparator: (c?: string) => void;
-  updateThreshold: (t?: number[]) => void;
-  threshold: MetricExpression['threshold'];
-  isMetricPct: boolean;
-  comparator: MetricExpression['comparator'];
-  errors: IErrorObject;
-  // eslint-disable-next-line react/function-component-definition
-}> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
+const ThresholdElement = (
+  {
+    updateComparator,
+    updateThreshold,
+    threshold,
+    isMetricPct,
+    comparator,
+    errors
+  }: {
+    updateComparator: (c?: string) => void;
+    updateThreshold: (t?: number[]) => void;
+    threshold: MetricExpression['threshold'];
+    isMetricPct: boolean;
+    comparator: MetricExpression['comparator'];
+    errors: IErrorObject
+    // eslint-disable-next-line react/function-component-definition;
+  }
+) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;

@@ -14,7 +14,11 @@ interface PopoverPlaceholderProps {
   basePath: string;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath }) => {
+export const PopoverPlaceholder = (
+  {
+    basePath
+  }: PopoverPlaceholderProps
+) => {
   const { colorMode } = useEuiTheme();
 
   return (

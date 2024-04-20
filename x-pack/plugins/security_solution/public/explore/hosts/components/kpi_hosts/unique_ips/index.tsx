@@ -48,7 +48,12 @@ export const uniqueIpsStatItems: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({ from, to }) => {
+const HostsKpiUniqueIpsComponent = (
+  {
+    from,
+    to
+  }: HostsKpiProps
+) => {
   return <KpiBaseComponent from={from} id={ID} statItems={uniqueIpsStatItems} to={to} />;
 };
 

@@ -16,12 +16,14 @@ interface Props {
   actions?: JSX.Element;
 }
 
-export const SectionError: React.FunctionComponent<Props> = ({
-  title,
-  error,
-  actions,
-  ...rest
-}) => {
+export const SectionError = (
+  {
+    title,
+    error,
+    actions,
+    ...rest
+  }: Props
+) => {
   const {
     error: errorString,
     cause, // wrapEsError() on the server adds a "cause" array

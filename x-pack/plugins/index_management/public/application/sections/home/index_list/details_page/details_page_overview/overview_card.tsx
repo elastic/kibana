@@ -23,12 +23,14 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export const OverviewCard: FunctionComponent<Props> = ({
-  title,
-  content: { left: contentLeft, right: contentRight },
-  footer: { left: footerLeft, right: footerRight } = {},
-  'data-test-subj': dataTestSubj,
-}) => {
+export const OverviewCard = (
+  {
+    title,
+    content: { left: contentLeft, right: contentRight },
+    footer: { left: footerLeft, right: footerRight } = {},
+    'data-test-subj': dataTestSubj
+  }: Props
+) => {
   return (
     <EuiFlexItem>
       <EuiSplitPanel.Outer grow hasBorder={true} data-test-subj={dataTestSubj}>

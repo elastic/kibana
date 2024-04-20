@@ -24,17 +24,21 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const SimpleTemplate: FunctionComponent<Props> = ({ getArgValue, setArgValue, workpad }) => (
-  <div style={{ fontSize: 0 }}>
-    <ColorPickerPopover
-      value={getArgValue('backgroundColor')}
-      onChange={(color) => setArgValue('backgroundColor', color)}
-      colors={workpad.colors}
-      anchorPosition="leftCenter"
-      ariaLabel={strings.getDisplayName()}
-    />
-  </div>
-);
+export const SimpleTemplate = (
+  {
+    getArgValue,
+    setArgValue,
+    workpad
+  }: Props
+) => (<div style={{ fontSize: 0 }}>
+  <ColorPickerPopover
+    value={getArgValue('backgroundColor')}
+    onChange={(color) => setArgValue('backgroundColor', color)}
+    colors={workpad.colors}
+    anchorPosition="leftCenter"
+    ariaLabel={strings.getDisplayName()}
+  />
+</div>);
 
 SimpleTemplate.displayName = 'ContainerStyleArgSimpleInput';
 

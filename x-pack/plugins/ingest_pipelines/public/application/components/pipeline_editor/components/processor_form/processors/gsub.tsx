@@ -64,7 +64,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Gsub: FunctionComponent = () => {
+export const Gsub = () => {
   return (
     <>
       <FieldNameField

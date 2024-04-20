@@ -27,7 +27,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-export const EnterpriseSearchOverviewHeaderActions: React.FC = () => {
+export const EnterpriseSearchOverviewHeaderActions = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // TODO change it with actual value
   // TODO make this conditional only for users on cloud, as on-prem users will not have a deployment id to show.

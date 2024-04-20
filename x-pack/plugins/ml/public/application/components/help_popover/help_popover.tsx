@@ -12,7 +12,13 @@ import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import './help_popover.scss';
 
-export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {
+export const HelpPopoverButton = (
+  {
+    onClick
+  }: {
+    onClick: EuiLinkButtonProps['onClick'];
+  }
+) => {
   return (
     <EuiButtonIcon
       className="mlHelpPopover__buttonIcon"
@@ -31,7 +37,13 @@ interface HelpPopoverProps {
   title?: string;
 }
 
-export const HelpPopover: FC<HelpPopoverProps> = ({ anchorPosition, children, title }) => {
+export const HelpPopover = (
+  {
+    anchorPosition,
+    children,
+    title
+  }: HelpPopoverProps
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (

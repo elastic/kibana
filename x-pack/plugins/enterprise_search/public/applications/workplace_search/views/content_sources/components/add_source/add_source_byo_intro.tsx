@@ -41,7 +41,7 @@ import { AddSourceHeader } from './add_source_header';
 
 import './add_source.scss';
 
-export const AddSourceBYOIntro: React.FC = () => {
+export const AddSourceBYOIntro = () => {
   const { name, categories = [], serviceType } = staticGenericExternalSourceData;
   const { isOrganization } = useValues(AppLogic);
 

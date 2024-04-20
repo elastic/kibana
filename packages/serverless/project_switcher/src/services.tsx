@@ -17,18 +17,25 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const ProjectSwitcherProvider: FC<Services> = ({ children, ...services }) => {
+export const ProjectSwitcherProvider = (
+  {
+    children,
+    ...services
+  }: Services
+) => {
   return <Context.Provider value={services}>{children}</Context.Provider>;
 };
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const ProjectSwitcherKibanaProvider: FC<KibanaDependencies> = ({
-  children,
-  coreStart,
-  projectChangeAPIUrl,
-}) => {
+export const ProjectSwitcherKibanaProvider = (
+  {
+    children,
+    coreStart,
+    projectChangeAPIUrl
+  }: KibanaDependencies
+) => {
   const value: Services = {
     setProjectType: (projectType) => {
       coreStart.http

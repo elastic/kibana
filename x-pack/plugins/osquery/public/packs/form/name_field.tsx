@@ -13,7 +13,11 @@ interface NameFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const NameFieldComponent: React.FC<NameFieldProps> = ({ euiFieldProps }) => {
+const NameFieldComponent = (
+  {
+    euiFieldProps
+  }: NameFieldProps
+) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },

@@ -17,7 +17,11 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const GeoSettings: FC<Props> = ({ setIsValid }) => {
+export const GeoSettings = (
+  {
+    setIsValid
+  }: Props
+) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xl">

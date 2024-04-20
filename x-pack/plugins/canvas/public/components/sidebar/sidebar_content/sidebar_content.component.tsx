@@ -45,7 +45,7 @@ const strings = {
     }),
 };
 
-const MultiElementSidebar: React.FC = () => (
+const MultiElementSidebar = () => (
   <Fragment>
     <SidebarHeader title={strings.getMultiElementSidebarTitle()} />
     <EuiSpacer />
@@ -53,7 +53,7 @@ const MultiElementSidebar: React.FC = () => (
   </Fragment>
 );
 
-const GroupedElementSidebar: React.FC = () => (
+const GroupedElementSidebar = () => (
   <Fragment>
     <SidebarHeader title={strings.getGroupedElementSidebarTitle()} />
     <EuiSpacer />
@@ -61,19 +61,23 @@ const GroupedElementSidebar: React.FC = () => (
   </Fragment>
 );
 
-const SingleElementSidebar: React.FC<{ selectedElementId: string | null }> = ({
-  selectedElementId,
-}) => (
-  <Fragment>
-    <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
-    <ElementSettings selectedElementId={selectedElementId} />
-  </Fragment>
-);
+const SingleElementSidebar = (
+  {
+    selectedElementId
+  }: {
+    selectedElementId: string | null;
+  }
+) => (<Fragment>
+  <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
+  <ElementSettings selectedElementId={selectedElementId} />
+</Fragment>);
 
-export const SidebarContent: React.FC<SidebarContentProps> = ({
-  selectedToplevelNodes,
-  selectedElementId,
-}) => {
+export const SidebarContent = (
+  {
+    selectedToplevelNodes,
+    selectedElementId
+  }: SidebarContentProps
+) => {
   if (selectedToplevelNodes.length > 1) {
     return <MultiElementSidebar />;
   }

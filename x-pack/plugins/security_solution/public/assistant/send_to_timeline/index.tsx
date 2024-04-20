@@ -46,15 +46,17 @@ export interface SendToTimelineButtonProps {
   isDisabled?: boolean;
 }
 
-export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonProps> = ({
-  asEmptyButton,
-  children,
-  dataProviders,
-  filters,
-  timeRange,
-  keepDataView,
-  ...rest
-}) => {
+export const SendToTimelineButton = (
+  {
+    asEmptyButton,
+    children,
+    dataProviders,
+    filters,
+    timeRange,
+    keepDataView,
+    ...rest
+  }: SendToTimelineButtonProps
+) => {
   const dispatch = useDispatch();
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();

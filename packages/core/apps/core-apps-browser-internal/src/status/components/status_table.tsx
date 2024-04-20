@@ -32,7 +32,11 @@ const collapseLabel = i18n.translate(
   { defaultMessage: 'Collapse' }
 );
 
-export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) => {
+export const StatusTable = (
+  {
+    statuses
+  }: StatusTableProps
+) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactElement>
   >({});

@@ -22,12 +22,14 @@ interface InvestigateInTimelineActionProps {
   onInvestigateInTimelineAlertClick?: () => void;
 }
 
-const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
-  ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
-  ecsRowData,
-  buttonType,
-  onInvestigateInTimelineAlertClick,
-}) => {
+const InvestigateInTimelineActionComponent = (
+  {
+    ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
+    ecsRowData,
+    buttonType,
+    onInvestigateInTimelineAlertClick
+  }: InvestigateInTimelineActionProps
+) => {
   const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
     ecsRowData,
     onInvestigateInTimelineAlertClick,

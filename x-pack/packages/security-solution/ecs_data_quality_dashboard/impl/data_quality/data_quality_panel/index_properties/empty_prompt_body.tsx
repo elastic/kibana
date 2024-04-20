@@ -11,9 +11,11 @@ interface Props {
   body: string;
 }
 
-const EmptyPromptBodyComponent: React.FC<Props> = ({ body }) => (
-  <p data-test-subj="emptyPromptBody">{body}</p>
-);
+const EmptyPromptBodyComponent = (
+  {
+    body
+  }: Props
+) => (<p data-test-subj="emptyPromptBody">{body}</p>);
 
 EmptyPromptBodyComponent.displayName = 'EmptyPromptBodyComponent';
 

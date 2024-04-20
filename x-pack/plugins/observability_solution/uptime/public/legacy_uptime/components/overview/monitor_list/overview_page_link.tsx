@@ -21,11 +21,13 @@ interface OverviewPageLinkProps {
   pagination: string;
 }
 
-export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
-  dataTestSubj,
-  direction,
-  pagination,
-}) => {
+export const OverviewPageLink = (
+  {
+    dataTestSubj,
+    direction,
+    pagination
+  }: OverviewPageLinkProps
+) => {
   const [, updateUrlParams] = useUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 

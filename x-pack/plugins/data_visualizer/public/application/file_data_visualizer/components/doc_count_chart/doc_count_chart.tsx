@@ -22,11 +22,17 @@ const FINISHED_CHECKS = 3;
 const ERROR_ATTEMPTS = 3;
 const BACK_FILL_BUCKETS = 8;
 
-export const DocCountChart: FC<{
-  statuses: Statuses;
-  dataStart: DataPublicPluginStart;
-  importer: IImporter;
-}> = ({ statuses, dataStart, importer }) => {
+export const DocCountChart = (
+  {
+    statuses,
+    dataStart,
+    importer
+  }: {
+    statuses: Statuses;
+    dataStart: DataPublicPluginStart;
+    importer: IImporter;
+  }
+) => {
   const { services } = useDataVisualizerKibana();
   const { uiSettings } = services;
   const timeBuckets = useTimeBuckets(uiSettings);

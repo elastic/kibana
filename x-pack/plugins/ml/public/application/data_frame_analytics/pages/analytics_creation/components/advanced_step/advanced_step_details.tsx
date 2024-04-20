@@ -30,10 +30,15 @@ export interface ListItems {
   description: string | JSX.Element;
 }
 
-export const AdvancedStepDetails: FC<{
-  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
-  state: State;
-}> = ({ setCurrentStep, state }) => {
+export const AdvancedStepDetails = (
+  {
+    setCurrentStep,
+    state
+  }: {
+    setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
+    state: State;
+  }
+) => {
   const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,

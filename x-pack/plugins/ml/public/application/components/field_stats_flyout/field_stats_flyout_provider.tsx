@@ -21,20 +21,22 @@ import { FieldStatsFlyout } from './field_stats_flyout';
 import { MLFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields_cache_manager';
 
-export const FieldStatsFlyoutProvider: FC<{
-  dataView: DataView;
-  fieldStatsServices: FieldStatsServices;
-  timeRangeMs?: TimeRangeMs;
-  dslQuery?: FieldStatsProps['dslQuery'];
-  disablePopulatedFields?: boolean;
-}> = ({
-  dataView,
-  fieldStatsServices,
-  timeRangeMs,
-  dslQuery,
-  disablePopulatedFields = false,
-  children,
-}) => {
+export const FieldStatsFlyoutProvider = (
+  {
+    dataView,
+    fieldStatsServices,
+    timeRangeMs,
+    dslQuery,
+    disablePopulatedFields = false,
+    children
+  }: {
+    dataView: DataView;
+    fieldStatsServices: FieldStatsServices;
+    timeRangeMs?: TimeRangeMs;
+    dslQuery?: FieldStatsProps['dslQuery'];
+    disablePopulatedFields?: boolean;
+  }
+) => {
   const {
     services: {
       data: { search },

@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-export const VectorLineIcon: FunctionComponent = (props) => (
+export const VectorLineIcon = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"

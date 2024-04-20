@@ -27,7 +27,11 @@ export interface AppProps {
   onSuccess?(): void;
 }
 
-export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
+export const App = (
+  {
+    onSuccess
+  }: AppProps
+) => {
   const [page, setPage] = useState<'token' | 'manual' | 'success'>('token');
   const [cluster, setCluster] =
     useState<Omit<ClusterConfigurationFormProps, 'onCancel' | 'onSuccess'>>();

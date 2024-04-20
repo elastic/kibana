@@ -26,49 +26,58 @@ interface MultipleAlertsProps extends SingleAlertProps {
   totalAlerts: number;
 }
 
-const RuleLink: React.FC<SingleAlertProps> = memo(
-  ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData, actionId }) => {
-    const onLinkClick = useCallback(
-      (ev) => {
-        ev.preventDefault();
-        if (onRuleDetailsClick) onRuleDetailsClick(ruleId, ev);
-      },
-      [ruleId, onRuleDetailsClick]
-    );
+const RuleLink = memo((
+  {
+    onRuleDetailsClick,
+    getRuleDetailsHref,
+    ruleId,
+    ruleName,
+    loadingAlertData,
+    actionId
+  }: SingleAlertProps
+) => {
+  const onLinkClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      if (onRuleDetailsClick) onRuleDetailsClick(ruleId, ev);
+    },
+    [ruleId, onRuleDetailsClick]
+  );
 
-    const ruleDetailsHref = getRuleDetailsHref?.(ruleId);
-    const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
+  const ruleDetailsHref = getRuleDetailsHref?.(ruleId);
+  const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
 
-    if (loadingAlertData) {
-      return <EuiLoadingSpinner size="m" data-test-subj={`alert-loading-spinner-${actionId}`} />;
-    }
-
-    if (!isEmpty(ruleId) && ruleDetailsHref != null) {
-      return (
-        <LinkAnchor
-          onClick={onLinkClick}
-          href={ruleDetailsHref}
-          data-test-subj={`alert-rule-link-${actionId}`}
-        >
-          {finalRuleName}
-        </LinkAnchor>
-      );
-    }
-
-    return <>{finalRuleName}</>;
+  if (loadingAlertData) {
+    return <EuiLoadingSpinner size="m" data-test-subj={`alert-loading-spinner-${actionId}`} />;
   }
-);
+
+  if (!isEmpty(ruleId) && ruleDetailsHref != null) {
+    return (
+      <LinkAnchor
+        onClick={onLinkClick}
+        href={ruleDetailsHref}
+        data-test-subj={`alert-rule-link-${actionId}`}
+      >
+        {finalRuleName}
+      </LinkAnchor>
+    );
+  }
+
+  return <>{finalRuleName}</>;
+});
 
 RuleLink.displayName = 'RuleLink';
 
-const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
-  actionId,
-  getRuleDetailsHref,
-  loadingAlertData = false,
-  onRuleDetailsClick,
-  ruleId,
-  ruleName,
-}) => {
+const SingleAlertCommentEventComponent = (
+  {
+    actionId,
+    getRuleDetailsHref,
+    loadingAlertData = false,
+    onRuleDetailsClick,
+    ruleId,
+    ruleName
+  }: SingleAlertProps
+) => {
   return (
     <span data-test-subj={`single-alert-user-action-${actionId}`}>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
@@ -88,15 +97,17 @@ SingleAlertCommentEventComponent.displayName = 'SingleAlertCommentEvent';
 
 export const SingleAlertCommentEvent = memo(SingleAlertCommentEventComponent);
 
-const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
-  actionId,
-  getRuleDetailsHref,
-  loadingAlertData = false,
-  onRuleDetailsClick,
-  ruleId,
-  ruleName,
-  totalAlerts,
-}) => {
+const MultipleAlertsCommentEventComponent = (
+  {
+    actionId,
+    getRuleDetailsHref,
+    loadingAlertData = false,
+    onRuleDetailsClick,
+    ruleId,
+    ruleName,
+    totalAlerts
+  }: MultipleAlertsProps
+) => {
   return (
     <span data-test-subj={`multiple-alerts-user-action-${actionId}`}>
       {`${i18n.MULTIPLE_ALERTS_COMMENT_LABEL_TITLE(totalAlerts)}`}{' '}

@@ -82,7 +82,13 @@ interface Props {
   boosts?: Boost[];
 }
 
-export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
+export const Boosts = (
+  {
+    name,
+    type,
+    boosts = []
+  }: Props
+) => {
   const { addBoost } = useActions(RelevanceTuningLogic);
 
   const selectOptions = useMemo(

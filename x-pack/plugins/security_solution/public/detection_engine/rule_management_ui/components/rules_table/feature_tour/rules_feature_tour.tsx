@@ -58,7 +58,7 @@ const stepsConfig: EuiStatelessTourStep[] = [
   },
 ];
 
-export const RuleFeatureTour: FC = () => {
+export const RuleFeatureTour = () => {
   const { storage } = useKibana().services;
 
   const restoredState = useMemo<EuiTourState>(

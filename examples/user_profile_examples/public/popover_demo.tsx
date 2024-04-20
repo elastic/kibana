@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiFilterGroup, EuiFilterButton, EuiSpacer, EuiTitle } 
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
-export const PopoverDemo: FunctionComponent = () => {
+export const PopoverDemo = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<UserProfileWithAvatar[]>([
     {

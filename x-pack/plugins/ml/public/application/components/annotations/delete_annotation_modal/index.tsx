@@ -18,11 +18,13 @@ interface Props {
   isVisible: boolean;
 }
 
-export const DeleteAnnotationModal: React.FC<Props> = ({
-  cancelAction,
-  deleteAction,
-  isVisible,
-}) => {
+export const DeleteAnnotationModal = (
+  {
+    cancelAction,
+    deleteAction,
+    isVisible
+  }: Props
+) => {
   return (
     <Fragment>
       {isVisible === true && (

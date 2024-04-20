@@ -181,34 +181,36 @@ const PANEL_STYLE = {
   width: '500px',
 };
 
-export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
-  legendOptions,
-  mode,
-  onDisplayChange,
-  position,
-  location,
-  onLocationChange = noop,
-  verticalAlignment,
-  horizontalAlignment,
-  floatingColumns,
-  onAlignmentChange = noop,
-  onFloatingColumnsChange = noop,
-  onPositionChange,
-  renderNestedLegendSwitch,
-  nestedLegend,
-  onNestedLegendChange = noop,
-  valueInLegend,
-  onValueInLegendChange = noop,
-  renderValueInLegendSwitch,
-  groupPosition = 'right',
-  maxLines,
-  onMaxLinesChange = noop,
-  shouldTruncate,
-  onTruncateLegendChange = noop,
-  legendSize,
-  onLegendSizeChange,
-  showAutoLegendSizeOption,
-}) => {
+export const LegendSettingsPopover = (
+  {
+    legendOptions,
+    mode,
+    onDisplayChange,
+    position,
+    location,
+    onLocationChange = noop,
+    verticalAlignment,
+    horizontalAlignment,
+    floatingColumns,
+    onAlignmentChange = noop,
+    onFloatingColumnsChange = noop,
+    onPositionChange,
+    renderNestedLegendSwitch,
+    nestedLegend,
+    onNestedLegendChange = noop,
+    valueInLegend,
+    onValueInLegendChange = noop,
+    renderValueInLegendSwitch,
+    groupPosition = 'right',
+    maxLines,
+    onMaxLinesChange = noop,
+    shouldTruncate,
+    onTruncateLegendChange = noop,
+    legendSize,
+    onLegendSizeChange,
+    showAutoLegendSizeOption
+  }: LegendSettingsPopoverProps
+) => {
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.legendLabel', {

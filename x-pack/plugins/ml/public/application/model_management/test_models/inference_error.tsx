@@ -14,7 +14,11 @@ interface Props {
   errorText: string | null;
 }
 
-export const ErrorMessage: FC<Props> = ({ errorText }) => {
+export const ErrorMessage = (
+  {
+    errorText
+  }: Props
+) => {
   return errorText === null ? null : (
     <>
       <EuiCallOut

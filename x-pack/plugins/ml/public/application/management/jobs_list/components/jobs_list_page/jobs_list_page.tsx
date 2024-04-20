@@ -43,7 +43,11 @@ import type { MlSavedObjectType } from '../../../../../../common/types/saved_obj
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent = (
+  {
+    children
+  }: SpacesContextProps
+) => <>{children}</>;
 
 interface Props {
   coreStart: CoreStart;
@@ -57,17 +61,19 @@ interface Props {
   mlFeatures: MlFeatures;
 }
 
-export const JobsListPage: FC<Props> = ({
-  coreStart,
-  share,
-  history,
-  spacesApi,
-  data,
-  usageCollection,
-  fieldFormats,
-  isServerless,
-  mlFeatures,
-}) => {
+export const JobsListPage = (
+  {
+    coreStart,
+    share,
+    history,
+    spacesApi,
+    data,
+    usageCollection,
+    fieldFormats,
+    isServerless,
+    mlFeatures
+  }: Props
+) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);

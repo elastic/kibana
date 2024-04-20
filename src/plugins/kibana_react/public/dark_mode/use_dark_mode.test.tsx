@@ -29,7 +29,7 @@ describe('useDarkMode', () => {
     container = null;
   });
 
-  const TestConsumer: React.FC = () => {
+  const TestConsumer = () => {
     const darkMode = useDarkMode();
     return <div>{String(darkMode)}</div>;
   };

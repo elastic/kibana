@@ -12,11 +12,17 @@ import { PROGRESS_TRACKER_LABEL } from './translations';
 import { useProgressBarStyles } from './styles/progress_bar.style';
 import type { ProductTier } from './configs';
 
-const ProgressComponent: React.FC<{
-  productTier: ProductTier | undefined;
-  totalActiveSteps: number | null;
-  totalStepsLeft: number | null;
-}> = ({ productTier, totalActiveSteps, totalStepsLeft }) => {
+const ProgressComponent = (
+  {
+    productTier,
+    totalActiveSteps,
+    totalStepsLeft
+  }: {
+    productTier: ProductTier | undefined;
+    totalActiveSteps: number | null;
+    totalStepsLeft: number | null;
+  }
+) => {
   const stepsDone =
     totalActiveSteps != null && totalStepsLeft != null ? totalActiveSteps - totalStepsLeft : null;
   const { textStyle } = useProgressBarStyles();

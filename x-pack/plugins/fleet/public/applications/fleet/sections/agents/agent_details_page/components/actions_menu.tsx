@@ -27,12 +27,19 @@ import { ExperimentalFeaturesService } from '../../../../services';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 
-export const AgentDetailsActionMenu: React.FunctionComponent<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-  assignFlyoutOpenByDefault?: boolean;
-  onCancelReassign?: () => void;
-}> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
+export const AgentDetailsActionMenu = memo((
+  {
+    agent,
+    assignFlyoutOpenByDefault = false,
+    onCancelReassign,
+    agentPolicy
+  }: {
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+    assignFlyoutOpenByDefault?: boolean;
+    onCancelReassign?: () => void;
+  }
+) => {
   const authz = useAuthz();
   const hasFleetAllPrivileges = authz.fleet.allAgents;
   const refreshAgent = useAgentRefresh();

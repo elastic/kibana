@@ -90,12 +90,14 @@ interface Props {
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
-export const DataFrameAnalyticsList: FC<Props> = ({
-  isMlEnabledInSpace = true,
-  blockRefresh = false,
-  pageState,
-  updatePageState,
-}) => {
+export const DataFrameAnalyticsList = (
+  {
+    isMlEnabledInSpace = true,
+    blockRefresh = false,
+    pageState,
+    updatePageState
+  }: Props
+) => {
   const navigateToPath = useNavigateToPath();
 
   const searchQueryText = pageState.queryText ?? '';

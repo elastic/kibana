@@ -16,9 +16,11 @@ import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types'
 interface ResearchConfigurationProps {
   nativeConnector: ConnectorDefinition;
 }
-export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
-  nativeConnector,
-}) => {
+export const ResearchConfiguration = (
+  {
+    nativeConnector
+  }: ResearchConfigurationProps
+) => {
   const { docsUrl, externalDocsUrl, name } = nativeConnector;
 
   return (

@@ -34,15 +34,17 @@ interface Props {
   loading?: boolean;
 }
 
-export const AnomalyChart: FC<Props> = ({
-  chartType,
-  chartData = [],
-  modelData,
-  anomalyData,
-  height,
-  width,
-  loading = false,
-}) => {
+export const AnomalyChart = (
+  {
+    chartType,
+    chartData = [],
+    modelData,
+    anomalyData,
+    height,
+    width,
+    loading = false
+  }: Props
+) => {
   const data = chartType === CHART_TYPE.SCATTER ? flattenData(chartData) : chartData;
   const xDomain = getXRange(data);
   return (

@@ -25,7 +25,14 @@ interface Props {
   onChange(id: string): void;
 }
 
-export const RoleSelector: React.FC<Props> = ({ label, roleType, roleOptions, onChange }) => {
+export const RoleSelector = (
+  {
+    label,
+    roleType,
+    roleOptions,
+    onChange
+  }: Props
+) => {
   const options = roleOptions.map(({ id, description, disabled }) => ({
     id,
     label: <RoleOptionLabel label={id} description={description} />,

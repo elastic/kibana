@@ -107,7 +107,13 @@ type ProgressMessageProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'timestamp' | 'position' | 'isStreaming'
 >;
-const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, isStreaming }) => {
+const ProgressMessage = (
+  {
+    timestamp,
+    position,
+    isStreaming
+  }: ProgressMessageProps
+) => {
   const formattedTimestamp =
     isStreaming && position === 'end' ? (
       <FormattedRelative units="second" value={timestamp} updateInterval={1} />
@@ -143,40 +149,46 @@ const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, 
   );
 };
 
-const ProgressSpinner: React.FC<{ kind: 'streaming' | 'loading' }> = ({ kind }) => (
-  <>
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="l" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s">
-        {kind === 'streaming' ? (
-          <FormattedMessage
-            id="xpack.logsShared.logs.streamingNewEntriesText"
-            defaultMessage="Streaming new entries"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.logsShared.logs.loadingNewEntriesText"
-            defaultMessage="Loading new entries"
-          />
-        )}
-      </EuiText>
-    </EuiFlexItem>
-  </>
-);
+const ProgressSpinner = (
+  {
+    kind
+  }: {
+    kind: 'streaming' | 'loading';
+  }
+) => (<>
+  <EuiFlexItem grow={false}>
+    <EuiLoadingSpinner size="l" />
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiText size="s">
+      {kind === 'streaming' ? (
+        <FormattedMessage
+          id="xpack.logsShared.logs.streamingNewEntriesText"
+          defaultMessage="Streaming new entries"
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.logsShared.logs.loadingNewEntriesText"
+          defaultMessage="Loading new entries"
+        />
+      )}
+    </EuiText>
+  </EuiFlexItem>
+</>);
 
 type ProgressCtaProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'position' | 'startDateExpression' | 'endDateExpression' | 'onExtendRange' | 'onStreamStart'
 >;
-const ProgressCta: React.FC<ProgressCtaProps> = ({
-  position,
-  startDateExpression,
-  endDateExpression,
-  onExtendRange,
-  onStreamStart,
-}) => {
+const ProgressCta = (
+  {
+    position,
+    startDateExpression,
+    endDateExpression,
+    onExtendRange,
+    onStreamStart
+  }: ProgressCtaProps
+) => {
   const rangeEdge = position === 'start' ? startDateExpression : endDateExpression;
 
   if (rangeEdge === 'now' && position === 'end') {
@@ -212,7 +224,15 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
   );
 };
 
-const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amount, unit }) => {
+const ProgressExtendMessage = (
+  {
+    amount,
+    unit
+  }: {
+    amount: number;
+    unit: Unit;
+  }
+) => {
   switch (unit) {
     case 'ms':
       return (

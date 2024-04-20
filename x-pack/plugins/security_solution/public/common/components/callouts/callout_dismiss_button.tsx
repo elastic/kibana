@@ -18,11 +18,13 @@ export interface CallOutDismissButtonProps {
   onClick?: (message: CallOutMessage) => void;
 }
 
-export const CallOutDismissButton: FC<CallOutDismissButtonProps> = ({
-  message,
-  text,
-  onClick = noop,
-}) => {
+export const CallOutDismissButton = (
+  {
+    message,
+    text,
+    onClick = noop
+  }: CallOutDismissButtonProps
+) => {
   const { type } = message;
   const buttonColor = type;
   const buttonText = text ?? i18n.DISMISS_BUTTON;

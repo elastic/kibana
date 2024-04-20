@@ -43,7 +43,7 @@ export const analyticsJobExplorationRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
 
   const [globalState] = useUrlState('_g');

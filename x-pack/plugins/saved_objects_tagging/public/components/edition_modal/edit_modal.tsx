@@ -28,13 +28,15 @@ const getAttributes = (tag: Tag): TagAttributes => {
   return attributes;
 };
 
-export const EditTagModal: FC<EditTagModalProps> = ({
-  tag,
-  onSave,
-  onClose,
-  tagClient,
-  notifications,
-}) => {
+export const EditTagModal = (
+  {
+    tag,
+    onSave,
+    onClose,
+    tagClient,
+    notifications
+  }: EditTagModalProps
+) => {
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
   const { validation, setValidation, onNameChange, isValidating, validation$ } = useValidation({
     tagAttributes,

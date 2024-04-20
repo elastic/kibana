@@ -50,14 +50,16 @@ export interface Props {
 /**
  * The small preview of the page shown within the `Scrubber`.
  */
-export const PagePreviewComponent: FC<Props> = ({
-  height,
-  index,
-  onClick,
-  page,
-  workpadHeight,
-  workpadWidth,
-}) => {
+export const PagePreviewComponent = (
+  {
+    height,
+    index,
+    onClick,
+    page,
+    workpadHeight,
+    workpadWidth
+  }: Props
+) => {
   const scale = height / workpadHeight;
 
   const transform = {
@@ -86,7 +88,12 @@ export const PagePreviewComponent: FC<Props> = ({
 /**
  * A store-connected container for the `PagePreview` component.
  */
-export const PagePreview: FC<Pick<Props, 'index' | 'height'>> = ({ index, height }) => {
+export const PagePreview = (
+  {
+    index,
+    height
+  }: Pick<Props, 'index' | 'height'>
+) => {
   const [{ workpad }, dispatch] = useCanvasShareableState();
 
   if (!workpad) {

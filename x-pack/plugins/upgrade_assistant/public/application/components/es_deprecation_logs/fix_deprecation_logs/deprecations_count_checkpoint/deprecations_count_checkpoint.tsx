@@ -56,10 +56,12 @@ interface Props {
   setCheckpoint: (value: string) => void;
 }
 
-export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
-  checkpoint,
-  setCheckpoint,
-}) => {
+export const DeprecationsCountCheckpoint = (
+  {
+    checkpoint,
+    setCheckpoint
+  }: Props
+) => {
   const [isDeletingCache, setIsDeletingCache] = useState(false);
   const {
     services: {

@@ -10,11 +10,13 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ActionConnectorFieldsProps } from '../../../types';
 
-const TestConnectorError: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-  registerPreSubmitValidator,
-}) => {
+const TestConnectorError = (
+  {
+    readOnly,
+    isEdit,
+    registerPreSubmitValidator
+  }: ActionConnectorFieldsProps
+) => {
   const preSubmitValidator = useCallback(async () => {
     return {
       message: <>{'Error on pre submit validator'}</>,

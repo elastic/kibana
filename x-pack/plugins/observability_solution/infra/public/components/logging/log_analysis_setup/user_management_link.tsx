@@ -11,7 +11,7 @@ import React from 'react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (props) => {
+export const UserManagementLink = (props: EuiButtonProps) => {
   const {
     services: {
       application: { capabilities },

@@ -25,6 +25,6 @@ type CommonProps = Pick<
 
 export type Props = CommonProps;
 
-export const ContentEditorFlyoutContentContainer: FC<Props> = (props) => {
+export const ContentEditorFlyoutContentContainer = (props: Props) => {
   return <ContentEditorFlyoutContent {...props} />;
 };

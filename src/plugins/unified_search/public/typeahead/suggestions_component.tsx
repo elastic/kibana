@@ -160,11 +160,13 @@ export default class SuggestionsComponent extends PureComponent<SuggestionsCompo
   });
 }
 
-const ResizableSuggestionsListDiv: React.FC<{
-  inputContainer: HTMLElement;
-  suggestionsSize?: SuggestionsListSize;
-  children: (rect: DOMRect) => ReactNode;
-}> = React.memo((props) => {
+const ResizableSuggestionsListDiv = React.memo((
+  props: {
+    inputContainer: HTMLElement;
+    suggestionsSize?: SuggestionsListSize;
+    children: (rect: DOMRect) => ReactNode;
+  }
+) => {
   const inputContainer = props.inputContainer;
 
   const [{ documentHeight }, { pageYOffset }, containerRect] = useDimensions(inputContainer);

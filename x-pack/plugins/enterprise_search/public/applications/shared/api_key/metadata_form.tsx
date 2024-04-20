@@ -19,11 +19,13 @@ interface MetadataFormProps {
   error?: React.ReactNode | React.ReactNode[];
 }
 
-export const MetadataForm: React.FC<MetadataFormProps> = ({
-  metadata,
-  onChangeMetadata,
-  error,
-}) => {
+export const MetadataForm = (
+  {
+    metadata,
+    onChangeMetadata,
+    error
+  }: MetadataFormProps
+) => {
   return (
     <div data-test-subj="create-api-metadata-code-editor-container">
       <EuiLink

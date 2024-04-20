@@ -20,7 +20,7 @@ export const ApplicationUsageContext = createContext<IApplicationUsageTracker | 
  * @param props {@link TrackApplicationViewProps}
  * @constructor
  */
-export const TrackApplicationView: FC<TrackApplicationViewProps> = (props) => {
+export const TrackApplicationView = (props: TrackApplicationViewProps) => {
   return (
     <ApplicationUsageContext.Consumer>
       {(value) => {

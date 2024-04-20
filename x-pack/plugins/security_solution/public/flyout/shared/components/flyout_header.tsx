@@ -16,7 +16,12 @@ interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader>
 /**
  * Wrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding using a EuiPanel.
  */
-export const FlyoutHeader: FC<FlyoutHeaderProps> = memo(({ children, ...flyoutHeaderProps }) => {
+export const FlyoutHeader = memo((
+  {
+    children,
+    ...flyoutHeaderProps
+  }: FlyoutHeaderProps
+) => {
   return (
     <EuiFlyoutHeader hasBorder {...flyoutHeaderProps}>
       <EuiPanel hasShadow={false} color="transparent">

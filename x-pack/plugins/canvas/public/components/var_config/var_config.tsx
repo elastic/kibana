@@ -97,13 +97,15 @@ const strings = {
     }),
 };
 
-export const VarConfig: FC<Props> = ({
-  variables,
-  onCopyVar,
-  onDeleteVar,
-  onAddVar,
-  onEditVar,
-}) => {
+export const VarConfig = (
+  {
+    variables,
+    onCopyVar,
+    onDeleteVar,
+    onAddVar,
+    onEditVar
+  }: Props
+) => {
   const [panelMode, setPanelMode] = useState<PanelMode>(PanelMode.List);
   const [selectedVar, setSelectedVar] = useState<CanvasVariable | null>(null);
 

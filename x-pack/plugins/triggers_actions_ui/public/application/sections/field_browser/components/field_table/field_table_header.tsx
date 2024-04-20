@@ -24,11 +24,13 @@ export interface FieldTableHeaderProps {
   onFilterSelectedChange: (enabled: boolean) => void;
 }
 
-const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
-  fieldCount,
-  filterSelectedEnabled,
-  onFilterSelectedChange,
-}) => {
+const FieldTableHeaderComponent = (
+  {
+    fieldCount,
+    filterSelectedEnabled,
+    onFilterSelectedChange
+  }: FieldTableHeaderProps
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopover = useCallback(() => {

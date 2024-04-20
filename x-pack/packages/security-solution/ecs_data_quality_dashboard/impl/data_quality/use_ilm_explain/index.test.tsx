@@ -22,19 +22,22 @@ const mockTelemetryEvents = {
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
 const { toasts } = notificationServiceMock.createSetupContract();
-const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: boolean }> = ({
-  children,
-  isILMAvailable = true,
-}) => (
-  <DataQualityProvider
-    httpFetch={mockHttpFetch}
-    telemetryEvents={mockTelemetryEvents}
-    isILMAvailable={isILMAvailable}
-    toasts={toasts}
-  >
-    {children}
-  </DataQualityProvider>
-);
+const ContextWrapper = (
+  {
+    children,
+    isILMAvailable = true
+  }: {
+    children: React.ReactNode;
+    isILMAvailable: boolean;
+  }
+) => (<DataQualityProvider
+  httpFetch={mockHttpFetch}
+  telemetryEvents={mockTelemetryEvents}
+  isILMAvailable={isILMAvailable}
+  toasts={toasts}
+>
+  {children}
+</DataQualityProvider>);
 
 const pattern = 'packetbeat-*';
 

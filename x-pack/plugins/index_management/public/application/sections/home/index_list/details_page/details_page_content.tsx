@@ -83,14 +83,16 @@ interface Props {
   fetchIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
 }
-export const DetailsPageContent: FunctionComponent<Props> = ({
-  index,
-  tab,
-  history,
-  search,
-  fetchIndexDetails,
-  navigateToIndicesList,
-}) => {
+export const DetailsPageContent = (
+  {
+    index,
+    tab,
+    history,
+    search,
+    fetchIndexDetails,
+    navigateToIndicesList
+  }: Props
+) => {
   const {
     config: { enableIndexStats },
     plugins: { console: consolePlugin },

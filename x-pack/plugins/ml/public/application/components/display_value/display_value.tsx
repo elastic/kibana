@@ -11,7 +11,13 @@ import { EuiToolTip } from '@elastic/eui';
 
 const MAX_CHARS = 12;
 
-export const DisplayValue: FC<{ value: any }> = ({ value }) => {
+export const DisplayValue = (
+  {
+    value
+  }: {
+    value: any;
+  }
+) => {
   const length = String(value).length;
 
   if (length <= MAX_CHARS) {

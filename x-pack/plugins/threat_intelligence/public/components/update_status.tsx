@@ -16,20 +16,23 @@ interface UpdateStatusProps {
   isUpdating: boolean;
 }
 
-export const UpdateStatus: React.FC<UpdateStatusProps> = ({ isUpdating, updatedAt }) => (
-  <EuiFlexGroup>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued" data-test-subj="updateStatus">
-        {isUpdating ? (
-          UPDATING
-        ) : (
-          <>
-            {UPDATED}
-            &nbsp;
-            <FormattedRelative value={new Date(updatedAt)} />
-          </>
-        )}
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const UpdateStatus = (
+  {
+    isUpdating,
+    updatedAt
+  }: UpdateStatusProps
+) => (<EuiFlexGroup>
+  <EuiFlexItem grow={false}>
+    <EuiText size="xs" color="subdued" data-test-subj="updateStatus">
+      {isUpdating ? (
+        UPDATING
+      ) : (
+        <>
+          {UPDATED}
+          &nbsp;
+          <FormattedRelative value={new Date(updatedAt)} />
+        </>
+      )}
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>);

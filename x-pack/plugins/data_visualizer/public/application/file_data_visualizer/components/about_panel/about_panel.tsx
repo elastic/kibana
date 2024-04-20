@@ -37,7 +37,7 @@ const aboutPanelContentStyle = css({
   },
 });
 
-export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
+export const AboutPanel = ({ onFilePickerChange, hasPermissionToImport }: Props) => {
   return (
     <EuiPageTemplate.Section alignment="center" data-test-subj="dataVisualizerPageFileUpload">
       <EuiFlexGroup gutterSize="xl">
@@ -67,7 +67,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
   );
 };
 
-export const LoadingPanel: FC = () => {
+export const LoadingPanel = () => {
   return (
     <EuiPageTemplate.Section alignment="center" data-test-subj="dataVisualizerPageFileLoading">
       <EuiPageTemplate.EmptyPrompt

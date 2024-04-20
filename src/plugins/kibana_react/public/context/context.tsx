@@ -29,7 +29,7 @@ export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<
 export const withKibana = <Props extends { kibana: KibanaReactContextValue<{}> }>(
   type: React.ComponentType<Props>
 ): React.FC<Omit<Props, 'kibana'>> => {
-  const EnhancedType: React.FC<Omit<Props, 'kibana'>> = (props: Omit<Props, 'kibana'>) => {
+  const EnhancedType = (props: Omit<Props, 'kibana'>) => {
     const kibana = useKibana();
     return React.createElement(type, { ...props, kibana } as Props);
   };
@@ -45,10 +45,14 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
     notifications: createNotifications(services),
   };
 
-  const Provider: React.FC<{ services?: Services }> = ({
-    services: newServices = {},
-    children,
-  }) => {
+  const Provider = (
+    {
+      services: newServices = {},
+      children
+    }: {
+      services?: Services;
+    }
+  ) => {
     const oldValue = useKibana();
     const { value: newValue } = useMemo(
       () => createKibanaReactContext({ ...services, ...oldValue.services, ...newServices }),

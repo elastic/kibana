@@ -25,14 +25,16 @@ function convertToEuiOptions(values: string[]) {
   return values.map((v) => ({ value: v, label: v }));
 }
 
-export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
-  label,
-  errors,
-  onChange,
-  selectedOptions,
-  options,
-  allowSelectAll = false,
-}) => {
+export const TransformSelectorControl = (
+  {
+    label,
+    errors,
+    onChange,
+    selectedOptions,
+    options,
+    allowSelectAll = false
+  }: TransformSelectorControlProps
+) => {
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = ((selectionUpdate) => {
     if (!selectionUpdate?.length) {
       onChange([]);

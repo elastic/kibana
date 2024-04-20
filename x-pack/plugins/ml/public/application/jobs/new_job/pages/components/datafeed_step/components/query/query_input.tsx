@@ -15,7 +15,13 @@ import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 
 const EDITOR_HEIGHT = '400px';
 
-export const QueryInput: FC<{ setIsValidQuery(v: boolean): void }> = ({ setIsValidQuery }) => {
+export const QueryInput = (
+  {
+    setIsValidQuery
+  }: {
+    setIsValidQuery(v: boolean): void;
+  }
+) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
   const [queryString, setQueryString] = useState(JSON.stringify(jobCreator.query, null, 2));

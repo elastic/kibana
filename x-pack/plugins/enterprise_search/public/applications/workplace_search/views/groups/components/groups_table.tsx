@@ -46,7 +46,7 @@ const SOURCES_TABLE_HEADER = i18n.translate(
   }
 );
 
-export const GroupsTable: React.FC<{}> = () => {
+export const GroupsTable = () => {
   const { setActivePage } = useActions(GroupsLogic);
   const {
     groupsMeta: {

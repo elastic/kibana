@@ -19,7 +19,11 @@ interface ConnectorConfigFieldsProps {
   connector: Connector;
 }
 
-export const ConnectorConfigFields: React.FC<ConnectorConfigFieldsProps> = ({ connector }) => {
+export const ConnectorConfigFields = (
+  {
+    connector
+  }: ConnectorConfigFieldsProps
+) => {
   const { data, isLoading, isSuccess, mutate, reset } = useEditConnectorConfiguration(connector.id);
   const { queryKey } = useConnector(connector.id);
   const queryClient = useQueryClient();

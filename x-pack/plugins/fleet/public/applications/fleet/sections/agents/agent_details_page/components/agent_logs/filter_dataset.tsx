@@ -15,10 +15,15 @@ import { useStartServices } from '../../../../../hooks';
 
 import { AGENT_LOG_INDEX_PATTERN, DATASET_FIELD, AGENT_DATASET } from './constants';
 
-export const DatasetFilter: React.FunctionComponent<{
-  selectedDatasets: string[];
-  onToggleDataset: (dataset: string) => void;
-}> = memo(({ selectedDatasets, onToggleDataset }) => {
+export const DatasetFilter = memo((
+  {
+    selectedDatasets,
+    onToggleDataset
+  }: {
+    selectedDatasets: string[];
+    onToggleDataset: (dataset: string) => void;
+  }
+) => {
   const { unifiedSearch, data } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);

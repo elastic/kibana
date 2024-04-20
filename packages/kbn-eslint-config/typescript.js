@@ -64,20 +64,16 @@ module.exports = {
           '@typescript-eslint/ban-types': ['error', {
             types: {
               SFC: {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'FC'
+                message: 'Using SFC is deprecated since React@18.',
               },
               'React.SFC': {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'React.FC'
+                message: 'Using FC is deprecated since React@18.',
               },
               StatelessComponent: {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'FunctionComponent'
+                message: 'Using FunctionComponent is deprecated since React@18.',
               },
               'React.StatelessComponent': {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'React.FunctionComponent'
+                message: 'Using FunctionComponent is deprecated since React@18.',
               },
               // used in the codebase in the wild
               '{}': false,

@@ -39,15 +39,17 @@ interface Props {
   status: string;
 }
 
-const StatusComponent: React.FC<Props> = ({ status }) => (
-  <StatusContainer>
-    <EuiIcon
-      className={STATUS_CLASS_NAME}
-      color={getBadgeColorFromStatus(status)}
-      data-test-subj="status-icon"
-      type={getIconTypeFromStatus(status)}
-    />
-  </StatusContainer>
-);
+const StatusComponent = (
+  {
+    status
+  }: Props
+) => (<StatusContainer>
+  <EuiIcon
+    className={STATUS_CLASS_NAME}
+    color={getBadgeColorFromStatus(status)}
+    data-test-subj="status-icon"
+    type={getIconTypeFromStatus(status)}
+  />
+</StatusContainer>);
 
 export const Status = React.memo(StatusComponent);

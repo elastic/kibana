@@ -42,14 +42,16 @@ export interface PageTemplateProps {
   product?: string;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({
-  title,
-  pageTitle,
-  tabs,
-  getPageData,
-  product,
-  children,
-}) => {
+export const PageTemplate = (
+  {
+    title,
+    pageTitle,
+    tabs,
+    getPageData,
+    product,
+    children
+  }: PageTemplateProps
+) => {
   useTitle('', title);
 
   const { currentTimerange } = useMonitoringTimeContainerContext();

@@ -14,13 +14,15 @@ import { AdvancedStepForm } from './advanced_step_form';
 import { AdvancedStepDetails } from './advanced_step_details';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const AdvancedStep: FC<CreateAnalyticsStepProps> = ({
-  actions,
-  state,
-  step,
-  setCurrentStep,
-  stepActivated,
-}) => {
+export const AdvancedStep = (
+  {
+    actions,
+    state,
+    step,
+    setCurrentStep,
+    stepActivated
+  }: CreateAnalyticsStepProps
+) => {
   const showForm = step === ANALYTICS_STEPS.ADVANCED;
   const showDetails = step !== ANALYTICS_STEPS.ADVANCED && stepActivated === true;
 

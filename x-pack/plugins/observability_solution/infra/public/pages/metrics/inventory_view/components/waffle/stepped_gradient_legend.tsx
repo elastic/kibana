@@ -20,7 +20,13 @@ interface Props {
   formatter: InfraFormatter;
 }
 type TickValue = 0 | 1;
-export const SteppedGradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) => {
+export const SteppedGradientLegend = (
+  {
+    legend,
+    bounds,
+    formatter
+  }: Props
+) => {
   return (
     <LegendContainer>
       <TickLabel value={1} bounds={bounds} formatter={formatter} />

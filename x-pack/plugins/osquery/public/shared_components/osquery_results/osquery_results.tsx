@@ -19,11 +19,13 @@ import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
 
-const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
-  ruleName,
-  actionItems,
-  ecsData,
-}) => {
+const OsqueryActionResultsComponent = (
+  {
+    ruleName,
+    actionItems,
+    ecsData
+  }: OsqueryActionResultsProps
+) => {
   const { read } = useKibana().services.application.capabilities.osquery;
 
   return !read ? (
@@ -57,20 +59,20 @@ type OsqueryActionResultsWrapperProps = {
   services: CoreStart & StartPlugins;
 } & OsqueryActionResultsProps;
 
-const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
-  services,
-  ...restProps
-}) => (
-  <KibanaThemeProvider theme$={services.theme.theme$}>
-    <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <OsqueryActionResults {...restProps} />
-        </QueryClientProvider>
-      </EuiErrorBoundary>
-    </KibanaContextProvider>
-  </KibanaThemeProvider>
-);
+const OsqueryActionResultsWrapperComponent = (
+  {
+    services,
+    ...restProps
+  }: OsqueryActionResultsWrapperProps
+) => (<KibanaThemeProvider theme$={services.theme.theme$}>
+  <KibanaContextProvider services={services}>
+    <EuiErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <OsqueryActionResults {...restProps} />
+      </QueryClientProvider>
+    </EuiErrorBoundary>
+  </KibanaContextProvider>
+</KibanaThemeProvider>);
 
 const OsqueryActionResultsWrapper = React.memo(OsqueryActionResultsWrapperComponent);
 

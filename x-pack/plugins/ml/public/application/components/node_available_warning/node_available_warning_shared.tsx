@@ -17,7 +17,12 @@ interface Props {
   size?: EuiCallOutProps['size'];
 }
 
-export const MlNodeAvailableWarningShared: FC<Props> = ({ nodeAvailableCallback, size }) => {
+export const MlNodeAvailableWarningShared = (
+  {
+    nodeAvailableCallback,
+    size
+  }: Props
+) => {
   const { mlNodesAvailable, isCloud, deploymentId, isCloudTrial } = useMlNodeAvailableCheck();
 
   useEffect(

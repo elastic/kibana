@@ -159,10 +159,12 @@ export const LogEntryRatePageContent = memo(() => {
   }
 });
 
-const AnomaliesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
-  children,
-  ...rest
-}) => {
+const AnomaliesPageTemplate = (
+  {
+    children,
+    ...rest
+  }: LazyObservabilityPageTemplateProps
+) => {
   const { logViewStatus } = useLogViewContext();
   return (
     <LogsPageTemplate

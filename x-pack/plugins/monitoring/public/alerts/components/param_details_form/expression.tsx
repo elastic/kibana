@@ -35,7 +35,7 @@ export interface Props {
   expressionConfig?: ExpressionConfig;
 }
 
-export const Expression: React.FC<Props> = (props) => {
+export const Expression = (props: Props) => {
   const { ruleParams, paramDetails, setRuleParams, errors, config, dataViews } = props;
 
   const { derivedIndexPattern } = useDerivedIndexPattern(dataViews, config);

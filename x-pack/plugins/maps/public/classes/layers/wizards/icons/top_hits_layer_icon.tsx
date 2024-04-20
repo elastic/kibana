@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-export const TopHitsLayerIcon: FunctionComponent = () => (
+export const TopHitsLayerIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="49" height="25" fill="none" viewBox="0 0 49 25">
     <circle cx="24.939" cy="12.409" r="2.182" className="mapLayersWizardIcon__highlight" />
     <circle cx="35.849" cy="12.409" r="2.182" className="mapLayersWizardIcon__highlight" />

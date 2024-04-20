@@ -20,7 +20,7 @@ import { MetaEnginesSchemaTable, MetaEnginesConflictsTable } from '../components
 import { SCHEMA_TITLE } from '../constants';
 import { MetaEngineSchemaLogic } from '../schema_meta_engine_logic';
 
-export const MetaEngineSchema: React.FC = () => {
+export const MetaEngineSchema = () => {
   const { loadSchema } = useActions(MetaEngineSchemaLogic);
   const { dataLoading, hasConflicts, conflictingFieldsCount } = useValues(MetaEngineSchemaLogic);
 

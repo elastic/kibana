@@ -30,12 +30,15 @@ interface MatchParams {
   name: string;
 }
 
-export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  history,
-}) => {
+export const ComponentTemplateEdit = (
+  {
+    match: {
+      params: { name },
+    },
+
+    history
+  }: RouteComponentProps<MatchParams>
+) => {
   const { api } = useComponentTemplatesContext();
   const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);

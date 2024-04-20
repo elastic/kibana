@@ -20,7 +20,13 @@ interface Props {
   name: string;
 }
 
-export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
+export const ValueBoostForm = (
+  {
+    boost,
+    index,
+    name
+  }: Props
+) => {
   const { updateBoostValue } = useActions(RelevanceTuningLogic);
   const values = boost.value;
 

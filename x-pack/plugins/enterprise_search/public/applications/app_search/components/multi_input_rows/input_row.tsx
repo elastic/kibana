@@ -21,35 +21,35 @@ interface Props {
 
 import './input_row.scss';
 
-export const InputRow: React.FC<Props> = ({
-  value,
-  placeholder,
-  autoFocus,
-  onChange,
-  onDelete,
-  disableDelete,
-  deleteLabel,
-}) => (
-  <EuiFlexGroup className="inputRow" alignItems="center" responsive={false} gutterSize="s">
-    <EuiFlexItem>
-      <EuiFieldText
-        fullWidth
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        autoFocus={autoFocus}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="trash"
-        color="danger"
-        onClick={onDelete}
-        isDisabled={disableDelete}
-        aria-label={deleteLabel}
-        title={deleteLabel}
-        data-test-subj="deleteInputRowButton"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const InputRow = (
+  {
+    value,
+    placeholder,
+    autoFocus,
+    onChange,
+    onDelete,
+    disableDelete,
+    deleteLabel
+  }: Props
+) => (<EuiFlexGroup className="inputRow" alignItems="center" responsive={false} gutterSize="s">
+  <EuiFlexItem>
+    <EuiFieldText
+      fullWidth
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      autoFocus={autoFocus}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiButtonIcon
+      iconType="trash"
+      color="danger"
+      onClick={onDelete}
+      isDisabled={disableDelete}
+      aria-label={deleteLabel}
+      title={deleteLabel}
+      data-test-subj="deleteInputRowButton"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>);

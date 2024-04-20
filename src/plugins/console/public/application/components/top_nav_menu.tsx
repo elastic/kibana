@@ -22,7 +22,12 @@ interface Props {
   items: TopNavMenuItem[];
 }
 
-export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
+export const TopNavMenu = (
+  {
+    items,
+    disabled
+  }: Props
+) => {
   return (
     <EuiTabs size="s">
       {items.map((item, idx) => {

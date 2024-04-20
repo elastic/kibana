@@ -13,7 +13,7 @@ interface ItemTemplateProps extends PageTemplateProps {
   id: string;
   pageType: string;
 }
-export const ItemTemplate: React.FC<ItemTemplateProps> = (props) => {
+export const ItemTemplate = (props: ItemTemplateProps) => {
   const { pageType, id, ...rest } = props;
   const tabs: TabMenuItem[] = [
     {

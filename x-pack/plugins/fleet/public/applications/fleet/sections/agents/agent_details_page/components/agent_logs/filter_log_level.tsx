@@ -14,10 +14,15 @@ import { AGENT_LOG_LEVELS } from '../../../../../../../../common/constants';
 
 const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 
-export const LogLevelFilter: React.FunctionComponent<{
-  selectedLevels: string[];
-  onToggleLevel: (level: string) => void;
-}> = memo(({ selectedLevels, onToggleLevel }) => {
+export const LogLevelFilter = memo((
+  {
+    selectedLevels,
+    onToggleLevel
+  }: {
+    selectedLevels: string[];
+    onToggleLevel: (level: string) => void;
+  }
+) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);

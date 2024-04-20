@@ -43,7 +43,7 @@ import {
 
 import './analytics.scss';
 
-export const Analytics: React.FC = () => {
+export const Analytics = () => {
   const {
     totalQueries,
     totalQueriesNoResults,
@@ -211,10 +211,14 @@ export const Analytics: React.FC = () => {
   );
 };
 
-export const ViewAllButton: React.FC<{ to: string }> = ({ to }) => (
-  <EuiButtonEmptyTo to={to} size="s" iconType="eye">
-    {i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.viewAllButtonLabel', {
-      defaultMessage: 'View all',
-    })}
-  </EuiButtonEmptyTo>
-);
+export const ViewAllButton = (
+  {
+    to
+  }: {
+    to: string;
+  }
+) => (<EuiButtonEmptyTo to={to} size="s" iconType="eye">
+  {i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.viewAllButtonLabel', {
+    defaultMessage: 'View all',
+  })}
+</EuiButtonEmptyTo>);

@@ -26,13 +26,15 @@ interface RuleStatusFailedCallOutProps {
   status?: RuleExecutionStatus | null;
 }
 
-const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> = ({
-  ruleName,
-  dataSources,
-  date,
-  message,
-  status,
-}) => {
+const RuleStatusFailedCallOutComponent = (
+  {
+    ruleName,
+    dataSources,
+    date,
+    message,
+    status
+  }: RuleStatusFailedCallOutProps
+) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
   const getPromptContext = useCallback(

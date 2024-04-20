@@ -24,13 +24,15 @@ export interface OsqueryActionProps {
   onSuccess?: () => void;
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
-  agentId,
-  formType = 'simple',
-  defaultValues,
-  hideAgentsField,
-  onSuccess,
-}) => {
+const OsqueryActionComponent = (
+  {
+    agentId,
+    formType = 'simple',
+    defaultValues,
+    hideAgentsField,
+    onSuccess
+  }: OsqueryActionProps
+) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
   const { osqueryAvailable, agentFetched, isLoading, policyFetched, policyLoading, agentData } =

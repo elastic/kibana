@@ -15,7 +15,12 @@ export interface PanelHeaderItems {
   compressed?: boolean;
 }
 
-export const PanelHeaderItems: FC<PanelHeaderItems> = ({ headerItems, compressed = false }) => {
+export const PanelHeaderItems = (
+  {
+    headerItems,
+    compressed = false
+  }: PanelHeaderItems
+) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (

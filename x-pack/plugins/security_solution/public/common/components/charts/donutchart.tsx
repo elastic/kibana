@@ -94,15 +94,17 @@ export const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
 `;
 
-const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
-  children,
-  dataExists,
-  donutTextWrapperClassName,
-  donutTextWrapperStyles,
-  isChartEmbeddablesEnabled,
-  label,
-  title,
-}) => {
+const DonutChartWrapperComponent = (
+  {
+    children,
+    dataExists,
+    donutTextWrapperClassName,
+    donutTextWrapperStyles,
+    isChartEmbeddablesEnabled,
+    label,
+    title
+  }: DonutChartWrapperProps
+) => {
   const { euiTheme } = useEuiTheme();
   const emptyLabelStyle = useMemo(
     () => ({

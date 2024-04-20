@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-export const PanelSpinner: React.FC = () => {
+export const PanelSpinner = () => {
   return (
     <>
       <EuiSpacer />

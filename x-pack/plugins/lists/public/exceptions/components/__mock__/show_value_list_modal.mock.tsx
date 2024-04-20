@@ -6,4 +6,4 @@
  */
 import React from 'react';
 
-export const MockedShowValueListModal: React.FC = () => <></>;
+export const MockedShowValueListModal = () => <></>;

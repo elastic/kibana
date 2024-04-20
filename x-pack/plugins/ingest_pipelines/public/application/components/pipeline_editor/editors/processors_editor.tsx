@@ -9,6 +9,6 @@ import React, { FunctionComponent } from 'react';
 
 import { PipelineProcessorsEditor } from '../components';
 
-export const ProcessorsEditor: FunctionComponent = () => {
+export const ProcessorsEditor = () => {
   return <PipelineProcessorsEditor stateSlice="processors" />;
 };

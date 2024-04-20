@@ -37,10 +37,15 @@ const StyledLineClamp = styled.div<{ lineClampHeight: number }>`
   height: ${({ lineClampHeight }) => lineClampHeight}em;
 `;
 
-const LineClampComponent: React.FC<{
-  children: ReactNode;
-  lineClampHeight?: number;
-}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT }) => {
+const LineClampComponent = (
+  {
+    children,
+    lineClampHeight = LINE_CLAMP_HEIGHT
+  }: {
+    children: ReactNode;
+    lineClampHeight?: number;
+  }
+) => {
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
   const [isOverflow, descriptionRef] = useIsOverflow(children);
 

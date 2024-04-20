@@ -40,13 +40,15 @@ export type Props = EuiDescribedFormGroupProps & {
   fieldNotices?: React.ReactNode;
 };
 
-export const DescribedFormRow: FunctionComponent<Props> = ({
-  children,
-  switchProps,
-  description,
-  fieldNotices,
-  ...restDescribedFormProps
-}) => {
+export const DescribedFormRow = (
+  {
+    children,
+    switchProps,
+    description,
+    fieldNotices,
+    ...restDescribedFormProps
+  }: Props
+) => {
   if (
     switchProps &&
     !(typeof switchProps.checked === 'boolean' || typeof switchProps.initialValue === 'boolean')

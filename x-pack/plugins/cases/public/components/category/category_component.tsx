@@ -18,57 +18,63 @@ export interface CategoryComponentProps {
   isInvalid?: boolean;
 }
 
-export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
-  ({ isLoading, onChange, category, availableCategories, isInvalid = false }) => {
-    const options = useMemo(() => {
-      return availableCategories.map((label: string) => ({
-        label,
-      }));
-    }, [availableCategories]);
+export const CategoryComponent = React.memo((
+  {
+    isLoading,
+    onChange,
+    category,
+    availableCategories,
+    isInvalid = false
+  }: CategoryComponentProps
+) => {
+  const options = useMemo(() => {
+    return availableCategories.map((label: string) => ({
+      label,
+    }));
+  }, [availableCategories]);
 
-    const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-      category != null ? [{ label: category }] : []
-    );
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    category != null ? [{ label: category }] : []
+  );
 
-    const onComboChange = useCallback(
-      (currentOptions: Array<EuiComboBoxOptionOption<string>>) => {
-        const value = currentOptions[0]?.label;
+  const onComboChange = useCallback(
+    (currentOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      const value = currentOptions[0]?.label;
 
-        setSelectedOptions(currentOptions);
-        onChange(value);
-      },
-      [onChange]
-    );
+      setSelectedOptions(currentOptions);
+      onChange(value);
+    },
+    [onChange]
+  );
 
-    const onCreateOption = (searchValue: string) => {
-      const normalizedSearchValue = searchValue.trim();
+  const onCreateOption = (searchValue: string) => {
+    const normalizedSearchValue = searchValue.trim();
 
-      const newOption = {
-        label: normalizedSearchValue,
-      };
-
-      onComboChange([newOption]);
+    const newOption = {
+      label: normalizedSearchValue,
     };
 
-    return (
-      <EuiComboBox
-        fullWidth
-        singleSelection={{ asPlainText: true }}
-        isLoading={isLoading}
-        isDisabled={isLoading}
-        isInvalid={isInvalid}
-        options={options}
-        data-test-subj="categories-list"
-        selectedOptions={selectedOptions}
-        onChange={onComboChange}
-        onCreateOption={onCreateOption}
-        aria-label="categories-list"
-        isClearable
-        customOptionText={ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX}
-        isCaseSensitive
-      />
-    );
-  }
-);
+    onComboChange([newOption]);
+  };
+
+  return (
+    <EuiComboBox
+      fullWidth
+      singleSelection={{ asPlainText: true }}
+      isLoading={isLoading}
+      isDisabled={isLoading}
+      isInvalid={isInvalid}
+      options={options}
+      data-test-subj="categories-list"
+      selectedOptions={selectedOptions}
+      onChange={onComboChange}
+      onCreateOption={onCreateOption}
+      aria-label="categories-list"
+      isClearable
+      customOptionText={ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX}
+      isCaseSensitive
+    />
+  );
+});
 
 CategoryComponent.displayName = 'CategoryComponent';

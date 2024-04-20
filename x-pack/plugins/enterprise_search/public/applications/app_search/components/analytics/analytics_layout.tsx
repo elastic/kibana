@@ -28,13 +28,15 @@ interface Props {
   isQueryView?: boolean;
   isAnalyticsView?: boolean;
 }
-export const AnalyticsLayout: React.FC<Props> = ({
-  title,
-  breadcrumbs = [],
-  isQueryView,
-  isAnalyticsView,
-  children,
-}) => {
+export const AnalyticsLayout = (
+  {
+    title,
+    breadcrumbs = [],
+    isQueryView,
+    isAnalyticsView,
+    children
+  }: Props
+) => {
   const { history } = useValues(KibanaLogic);
   const { query } = useParams() as { query: string };
   const { dataLoading } = useValues(AnalyticsLogic);

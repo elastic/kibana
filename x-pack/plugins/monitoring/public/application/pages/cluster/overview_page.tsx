@@ -24,7 +24,7 @@ import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
-export const ClusterOverview: React.FC<{}> = () => {
+export const ClusterOverview = () => {
   const state = useContext(GlobalStateContext);
   const externalConfig = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();

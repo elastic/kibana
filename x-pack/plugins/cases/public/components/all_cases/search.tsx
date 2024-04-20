@@ -15,10 +15,12 @@ interface TableSearchComponentProps {
   onFilterOptionsChange: (filterOptions: Partial<FilterOptions>) => void;
 }
 
-const TableSearchComponent: React.FC<TableSearchComponentProps> = ({
-  filterOptionsSearch,
-  onFilterOptionsChange,
-}) => {
+const TableSearchComponent = (
+  {
+    filterOptionsSearch,
+    onFilterOptionsChange
+  }: TableSearchComponentProps
+) => {
   const [search, setSearch] = useState(filterOptionsSearch);
 
   const onSearch = useCallback(

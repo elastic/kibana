@@ -44,12 +44,14 @@ const actionToMenuItem = (
   };
 };
 
-export const ActionBar: FC<ActionBarProps> = ({
-  actions,
-  onActionSelected,
-  selectedCount,
-  totalCount,
-}) => {
+export const ActionBar = (
+  {
+    actions,
+    onActionSelected,
+    selectedCount,
+    totalCount
+  }: ActionBarProps
+) => {
   const [isPopoverOpened, setPopOverOpened] = useState(false);
 
   const closePopover = useCallback(() => {

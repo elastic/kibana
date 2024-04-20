@@ -101,7 +101,11 @@ export interface UserProfileFormValues {
   avatarType: 'initials' | 'image';
 }
 
-const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) => {
+const UserDetailsEditor = (
+  {
+    user
+  }: UserDetailsEditorProps
+) => {
   const { services } = useKibana<CoreStart>();
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
@@ -160,11 +164,13 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
   );
 };
 
-const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
-  formik,
-  isThemeOverridden,
-  isOverriddenThemeDarkMode,
-}) => {
+const UserSettingsEditor = (
+  {
+    formik,
+    isThemeOverridden,
+    isOverriddenThemeDarkMode
+  }: UserSettingsEditorProps
+) => {
   if (!formik.values.data) {
     return null;
   }
@@ -581,7 +587,11 @@ function UserPasswordEditor({
   );
 }
 
-const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
+const UserRoles = (
+  {
+    user
+  }: UserRoleProps
+) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -643,7 +653,12 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
   );
 };
 
-export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
+export const UserProfile = (
+  {
+    user,
+    data
+  }: UserProfileProps
+) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
   const formik = useUserProfileForm({ user, data });
@@ -950,7 +965,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
   return formik;
 }
 
-export const SaveChangesBottomBar: FunctionComponent = () => {
+export const SaveChangesBottomBar = () => {
   const formik = useFormikContext();
   const { count } = useFormChangesContext();
 

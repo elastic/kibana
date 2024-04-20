@@ -67,18 +67,22 @@ export interface ClusterConfigurationFormProps {
   onSuccess?(): void;
 }
 
-export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFormProps> = ({
-  host,
-  authRequired,
-  certificateChain,
-  defaultValues = {
-    username: 'kibana_system',
-    password: '',
-    caCert: '',
-  },
-  onCancel,
-  onSuccess,
-}) => {
+export const ClusterConfigurationForm = (
+  {
+    host,
+    authRequired,
+    certificateChain,
+
+    defaultValues = {
+      username: 'kibana_system',
+      password: '',
+      caCert: '',
+    },
+
+    onCancel,
+    onSuccess
+  }: ClusterConfigurationFormProps
+) => {
   const { http } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
@@ -314,14 +318,16 @@ export interface CertificatePanelProps {
   onClick?(): void;
 }
 
-export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
-  certificate,
-  onClick,
-  type,
-  compressed = false,
-}) => {
+export const CertificatePanel = (
+  {
+    certificate,
+    onClick,
+    type,
+    compressed = false
+  }: CertificatePanelProps
+) => {
   return (
-    <EuiPanel color={compressed ? 'subdued' : undefined} hasBorder={!compressed}>
+    (<EuiPanel color={compressed ? 'subdued' : undefined} hasBorder={!compressed}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiIcon type="document" size="l" />
@@ -404,14 +410,18 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiPanel>)
   );
 };
 
 export interface CertificateChainProps {
   certificateChain: Certificate[];
 }
-const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificateChain }) => {
+const CertificateChain = (
+  {
+    certificateChain
+  }: CertificateChainProps
+) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -479,9 +489,11 @@ export interface ForgotPasswordPopoverProps {
   username: string;
 }
 
-export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps> = ({
-  username,
-}) => {
+export const ForgotPasswordPopover = (
+  {
+    username
+  }: ForgotPasswordPopoverProps
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (

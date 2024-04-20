@@ -18,17 +18,13 @@ const Fallback = () => <Fragment />;
 const LazyFieldTopValuesBucket = React.lazy(() => import('./field_top_values_bucket'));
 const LazyFieldStats = React.lazy(() => import('./field_stats'));
 
-const WrappedFieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = (props) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyFieldTopValuesBucket {...props} />
-  </React.Suspense>
-);
+const WrappedFieldTopValuesBucket = (props: FieldTopValuesBucketProps) => (<React.Suspense fallback={<Fallback />}>
+  <LazyFieldTopValuesBucket {...props} />
+</React.Suspense>);
 
-const WrappedFieldStats: React.FC<FieldStatsProps> = (props) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyFieldStats {...props} />
-  </React.Suspense>
-);
+const WrappedFieldStats = (props: FieldStatsProps) => (<React.Suspense fallback={<Fallback />}>
+  <LazyFieldStats {...props} />
+</React.Suspense>);
 
 export const FieldStats = WrappedFieldStats;
 export const FieldTopValuesBucket = WrappedFieldTopValuesBucket;

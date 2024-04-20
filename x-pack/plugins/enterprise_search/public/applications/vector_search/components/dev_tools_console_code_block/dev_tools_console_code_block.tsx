@@ -29,10 +29,12 @@ export type DevToolsConsoleCodeBlockProps = EuiCodeBlockProps & {
   children: string;
 };
 
-export const DevToolsConsoleCodeBlock: React.FC<DevToolsConsoleCodeBlockProps> = ({
-  children,
-  ...props
-}) => {
+export const DevToolsConsoleCodeBlock = (
+  {
+    children,
+    ...props
+  }: DevToolsConsoleCodeBlockProps
+) => {
   const { application, consolePlugin, share } = useValues(KibanaLogic);
 
   const showConsoleLink = !!application?.capabilities?.dev_tools?.show;

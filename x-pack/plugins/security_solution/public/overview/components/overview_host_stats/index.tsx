@@ -265,7 +265,12 @@ const AccordionContent = styled.div`
   padding-top: 8px;
 `;
 
-const OverviewHostStatsComponent: React.FC<OverviewHostProps> = ({ data, loading }) => {
+const OverviewHostStatsComponent = (
+  {
+    data,
+    loading
+  }: OverviewHostProps
+) => {
   const allHostStats = getOverviewHostStats(data);
   const allHostStatsCount = allHostStats.reduce((total, stat) => total + stat.count, 0);
   return (

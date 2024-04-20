@@ -39,17 +39,19 @@ interface Props {
   disableImport?: boolean;
 }
 
-export const ResultsView: FC<Props> = ({
-  data,
-  fileName,
-  results,
-  showEditFlyout,
-  showExplanationFlyout,
-  disableButtons,
-  onChangeMode,
-  onCancel,
-  disableImport,
-}) => {
+export const ResultsView = (
+  {
+    data,
+    fileName,
+    results,
+    showEditFlyout,
+    showExplanationFlyout,
+    disableButtons,
+    onChangeMode,
+    onCancel,
+    disableImport
+  }: Props
+) => {
   const semiStructureTextData =
     results.format === FILE_FORMATS.SEMI_STRUCTURED_TEXT
       ? {

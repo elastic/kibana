@@ -19,7 +19,7 @@ import { FlyoutBody } from '../../shared/components/flyout_body';
 /**
  * Document details expandable flyout section content for the isolate host component, displaying the form or the success banner
  */
-export const PanelContent: FC = () => {
+export const PanelContent = () => {
   const { openRightPanel } = useExpandableFlyoutApi();
   const { dataFormattedForFieldBrowser, eventId, scopeId, indexName, isolateAction } =
     useIsolateHostPanelContext();

@@ -60,24 +60,26 @@ interface AutocompleteFieldMatchProps {
   'aria-label'?: string;
 }
 
-export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
-  placeholder,
-  rowLabel,
-  selectedField,
-  selectedValue,
-  indexPattern,
-  isLoading,
-  isDisabled = false,
-  isClearable = false,
-  isRequired = false,
-  fieldInputWidth,
-  autocompleteService,
-  onChange,
-  onError,
-  onWarning,
-  warning,
-  'aria-label': ariaLabel,
-}): JSX.Element => {
+export const AutocompleteFieldMatchComponent = (
+  {
+    placeholder,
+    rowLabel,
+    selectedField,
+    selectedValue,
+    indexPattern,
+    isLoading,
+    isDisabled = false,
+    isClearable = false,
+    isRequired = false,
+    fieldInputWidth,
+    autocompleteService,
+    onChange,
+    onError,
+    onWarning,
+    warning,
+    'aria-label': ariaLabel
+  }: AutocompleteFieldMatchProps
+): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);

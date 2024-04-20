@@ -33,7 +33,7 @@ interface UseCaseOption {
   description: React.ReactNode;
 }
 
-export const OnboardingFlowForm: FunctionComponent = () => {
+export const OnboardingFlowForm = () => {
   const options: UseCaseOption[] = [
     {
       id: 'logs',
@@ -176,15 +176,18 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
-  <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiTitle size="xs">
-        <strong>{title}</strong>
-      </EuiTitle>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const TitleWithIcon = (
+  {
+    title,
+    iconType
+  }: TitleWithIconProps
+) => (<EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+  <EuiFlexItem grow={false}>
+    <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiTitle size="xs">
+      <strong>{title}</strong>
+    </EuiTitle>
+  </EuiFlexItem>
+</EuiFlexGroup>);

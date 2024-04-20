@@ -18,7 +18,12 @@ interface EventTypeFilterProps {
   onChange: (selectedItems: RuleExecutionEventType[]) => void;
 }
 
-const EventTypeFilterComponent: React.FC<EventTypeFilterProps> = ({ selectedItems, onChange }) => {
+const EventTypeFilterComponent = (
+  {
+    selectedItems,
+    onChange
+  }: EventTypeFilterProps
+) => {
   const renderItem = useCallback((item: RuleExecutionEventType) => {
     return <EventTypeIndicator type={item} />;
   }, []);

@@ -26,12 +26,14 @@ interface TransformAlertFlyoutProps {
   onCloseFlyout: () => void;
 }
 
-export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
-  initialAlert,
-  ruleParams,
-  onCloseFlyout,
-  onSave,
-}) => {
+export const TransformAlertFlyout = (
+  {
+    initialAlert,
+    ruleParams,
+    onCloseFlyout,
+    onSave
+  }: TransformAlertFlyoutProps
+) => {
   const { triggersActionsUi } = useAppDependencies();
 
   const AlertFlyout = useMemo(() => {

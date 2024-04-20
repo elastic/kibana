@@ -23,11 +23,13 @@ interface Props {
   backToContent?: React.ReactNode;
 }
 
-export const NotFoundPrompt: React.FC<Props> = ({
-  productSupportUrl,
-  backToLink = '/',
-  backToContent,
-}) => {
+export const NotFoundPrompt = (
+  {
+    productSupportUrl,
+    backToLink = '/',
+    backToContent
+  }: Props
+) => {
   const { hasGoldLicense } = useValues(LicensingLogic);
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : productSupportUrl;
 

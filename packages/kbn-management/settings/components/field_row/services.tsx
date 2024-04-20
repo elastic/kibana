@@ -41,12 +41,14 @@ export const FieldRowProvider = ({ children, ...services }: FieldRowProviderProp
 /**
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}.
  */
-export const FieldRowKibanaProvider: FC<FieldRowKibanaDependencies> = ({
-  children,
-  docLinks,
-  notifications,
-  settings,
-}) => {
+export const FieldRowKibanaProvider = (
+  {
+    children,
+    docLinks,
+    notifications,
+    settings
+  }: FieldRowKibanaDependencies
+) => {
   return (
     <FieldRowContext.Provider
       value={{

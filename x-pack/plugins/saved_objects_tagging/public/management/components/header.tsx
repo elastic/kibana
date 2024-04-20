@@ -14,7 +14,12 @@ interface HeaderProps {
   onCreate: () => void;
 }
 
-export const Header: FC<HeaderProps> = ({ canCreate, onCreate }) => {
+export const Header = (
+  {
+    canCreate,
+    onCreate
+  }: HeaderProps
+) => {
   return (
     <EuiPageHeader
       pageTitle={

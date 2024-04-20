@@ -43,42 +43,43 @@ const useStyle = () => {
   };
 };
 
-export const LandingLinksIconsCategoriesGroups: React.FC<LandingLinksIconsCategoriesGroupsProps> =
-  React.memo(function LandingLinksIconsCategoriesGroups({
+export const LandingLinksIconsCategoriesGroups = React.memo(function LandingLinksIconsCategoriesGroups(
+  {
     links,
     categories: accordionCategories,
     urlState,
-    onLinkClick,
-  }) {
-    const style = useStyle();
-    return (
-      <>
-        {accordionCategories.map(({ label, categories }, index) => (
-          <EuiAccordion
-            initialIsOpen
-            key={`${label}_${index}`}
-            id={`landingLinksCategoryGroups_${label}_${index}`}
-            buttonContent={label}
-            buttonClassName={stackManagementButtonClassName}
-            css={style.accordionButton}
-          >
-            <EuiSpacer size="m" />
-            <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-              {categories && (
-                <LandingLinksIconsCategoryGroups
-                  links={links}
-                  categories={categories}
-                  urlState={urlState}
-                  onLinkClick={onLinkClick}
-                />
-              )}
-              {/* This component can be extended to render LandingLinksIcons when `linkIds` is defined in the accordionCategory */}
-            </EuiPanel>
-          </EuiAccordion>
-        ))}
-      </>
-    );
-  });
+    onLinkClick
+  }: LandingLinksIconsCategoriesGroupsProps
+) {
+  const style = useStyle();
+  return (
+    <>
+      {accordionCategories.map(({ label, categories }, index) => (
+        <EuiAccordion
+          initialIsOpen
+          key={`${label}_${index}`}
+          id={`landingLinksCategoryGroups_${label}_${index}`}
+          buttonContent={label}
+          buttonClassName={stackManagementButtonClassName}
+          css={style.accordionButton}
+        >
+          <EuiSpacer size="m" />
+          <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
+            {categories && (
+              <LandingLinksIconsCategoryGroups
+                links={links}
+                categories={categories}
+                urlState={urlState}
+                onLinkClick={onLinkClick}
+              />
+            )}
+            {/* This component can be extended to render LandingLinksIcons when `linkIds` is defined in the accordionCategory */}
+          </EuiPanel>
+        </EuiAccordion>
+      ))}
+    </>
+  );
+});
 
 interface LandingLinksIconsCategoryGroupsProps {
   links: Readonly<NavigationLink[]>;
@@ -98,49 +99,59 @@ const useGroupStyles = () => {
     `,
   };
 };
-const LandingLinksIconsCategoryGroups: React.FC<LandingLinksIconsCategoryGroupsProps> = React.memo(
-  function LandingLinksIconsCategoryGroups({ links, categories, urlState, onLinkClick }) {
-    const styles = useGroupStyles();
+const LandingLinksIconsCategoryGroups = React.memo(function LandingLinksIconsCategoryGroups(
+  {
+    links,
+    categories,
+    urlState,
+    onLinkClick
+  }: LandingLinksIconsCategoryGroupsProps
+) {
+  const styles = useGroupStyles();
 
-    const categoriesLinks = useMemo(() => {
-      const linksById = Object.fromEntries(links.map((link) => [link.id, link]));
+  const categoriesLinks = useMemo(() => {
+    const linksById = Object.fromEntries(links.map((link) => [link.id, link]));
 
-      return categories.reduce<CategoriesLinks>((acc, { label, linkIds, type, iconType }) => {
-        const linksItem = linkIds.reduce<NavigationLink[]>((linksAcc, linkId) => {
-          if (linksById[linkId]) {
-            linksAcc.push(linksById[linkId]);
-          }
-          return linksAcc;
-        }, []);
-        if (linksItem.length > 0) {
-          acc.push({ type, label, iconType, links: linksItem });
+    return categories.reduce<CategoriesLinks>((acc, { label, linkIds, type, iconType }) => {
+      const linksItem = linkIds.reduce<NavigationLink[]>((linksAcc, linkId) => {
+        if (linksById[linkId]) {
+          linksAcc.push(linksById[linkId]);
         }
-        return acc;
+        return linksAcc;
       }, []);
-    }, [links, categories]);
+      if (linksItem.length > 0) {
+        acc.push({ type, label, iconType, links: linksItem });
+      }
+      return acc;
+    }, []);
+  }, [links, categories]);
 
-    return (
-      <EuiFlexGroup direction="row" gutterSize="xl" alignItems="flexStart" wrap>
-        {categoriesLinks.map(({ label, links: categoryLinks, iconType }, index) => (
-          <EuiFlexItem key={`${index}_${label}`} css={styles.container} grow={false}>
-            <LandingColumnHeading label={label} iconType={iconType} />
-            <LandingColumnLinks
-              items={categoryLinks}
-              urlState={urlState}
-              onLinkClick={onLinkClick}
-            />
-            <EuiSpacer size="l" />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
+  return (
+    <EuiFlexGroup direction="row" gutterSize="xl" alignItems="flexStart" wrap>
+      {categoriesLinks.map(({ label, links: categoryLinks, iconType }, index) => (
+        <EuiFlexItem key={`${index}_${label}`} css={styles.container} grow={false}>
+          <LandingColumnHeading label={label} iconType={iconType} />
+          <LandingColumnLinks
+            items={categoryLinks}
+            urlState={urlState}
+            onLinkClick={onLinkClick}
+          />
+          <EuiSpacer size="l" />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+});
+
+const LandingColumnHeading = React.memo(function LandingColumnHeading(
+  {
+    label,
+    iconType
+  }: {
+    label?: string;
+    iconType?: IconType;
   }
-);
-
-const LandingColumnHeading: React.FC<{
-  label?: string;
-  iconType?: IconType;
-}> = React.memo(function LandingColumnHeading({ label, iconType }) {
+) {
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
       {iconType && (

@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
-export const AdvancedSyncRules: React.FC = () => {
+export const AdvancedSyncRules = () => {
   const {
     hasJsonValidationError: hasError,
     localAdvancedSnippet,

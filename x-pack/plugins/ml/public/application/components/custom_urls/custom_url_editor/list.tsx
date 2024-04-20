@@ -60,13 +60,15 @@ export interface CustomUrlListProps {
  * React component for listing the custom URLs added to a job,
  * with buttons for testing and deleting each custom URL.
  */
-export const CustomUrlList: FC<CustomUrlListProps> = ({
-  job,
-  customUrls,
-  onChange: setCustomUrls,
-  dataViewListItems,
-  isPartialDFAJob,
-}) => {
+export const CustomUrlList = (
+  {
+    job,
+    customUrls,
+    onChange: setCustomUrls,
+    dataViewListItems,
+    isPartialDFAJob
+  }: CustomUrlListProps
+) => {
   const {
     services: {
       http,

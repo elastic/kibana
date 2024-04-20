@@ -30,8 +30,8 @@ export interface FieldVisualizeButtonProps {
   visualizeInfo?: VisualizeInformation;
 }
 
-export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.memo(
-  ({
+export const FieldVisualizeButton = React.memo((
+  {
     field,
     dataView,
     contextualFields,
@@ -40,40 +40,40 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
     originatingApp,
     uiActions,
     buttonProps,
-    visualizeInfo,
-  }) => {
-    if (!visualizeInfo) {
-      return null;
-    }
-    const handleVisualizeLinkClick = async (
-      event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-    ) => {
-      // regular link click. let the uiActions code handle the navigation and show popup if needed
-      event.preventDefault();
-
-      const triggerVisualization = (updatedDataView: DataView) => {
-        trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-        triggerVisualizeActions(
-          uiActions,
-          visualizeInfo.field,
-          contextualFields,
-          originatingApp,
-          updatedDataView
-        );
-      };
-      triggerVisualization(dataView);
-    };
-
-    return (
-      <FieldVisualizeButtonInner
-        field={field}
-        visualizeInfo={visualizeInfo}
-        handleVisualizeLinkClick={handleVisualizeLinkClick}
-        buttonProps={buttonProps}
-      />
-    );
+    visualizeInfo
+  }: FieldVisualizeButtonProps
+) => {
+  if (!visualizeInfo) {
+    return null;
   }
-);
+  const handleVisualizeLinkClick = async (
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    // regular link click. let the uiActions code handle the navigation and show popup if needed
+    event.preventDefault();
+
+    const triggerVisualization = (updatedDataView: DataView) => {
+      trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
+      triggerVisualizeActions(
+        uiActions,
+        visualizeInfo.field,
+        contextualFields,
+        originatingApp,
+        updatedDataView
+      );
+    };
+    triggerVisualization(dataView);
+  };
+
+  return (
+    <FieldVisualizeButtonInner
+      field={field}
+      visualizeInfo={visualizeInfo}
+      handleVisualizeLinkClick={handleVisualizeLinkClick}
+      buttonProps={buttonProps}
+    />
+  );
+});
 
 export async function getFieldVisualizeButton(props: FieldVisualizeButtonProps) {
   const visualizeInfo = await getVisualizeInformation(

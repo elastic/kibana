@@ -38,7 +38,7 @@ import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_managemen
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleFeatureTour } from '../../components/rules_table/feature_tour/rules_feature_tour';
 
-const RulesPageComponent: React.FC = () => {
+const RulesPageComponent = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const kibanaServices = useKibana().services;

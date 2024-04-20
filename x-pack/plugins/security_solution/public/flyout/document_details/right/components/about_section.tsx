@@ -30,7 +30,7 @@ const KEY = 'about';
  * For generic events (event.kind is event), it shows the event category description and event renderer.
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
-export const AboutSection: FC = memo(() => {
+export const AboutSection = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
@@ -49,10 +49,10 @@ export const AboutSection: FC = memo(() => {
         {eventKindInECS &&
           (eventKind === 'event' ? (
             // if event kind is event, show a detailed description based on event category
-            <EventCategoryDescription />
+            (<EventCategoryDescription />)
           ) : (
             // if event kind is not event, show a higher level description on event kind
-            <EventKindDescription eventKind={eventKind} />
+            (<EventKindDescription eventKind={eventKind} />)
           ))}
         <EventRenderer />
       </>

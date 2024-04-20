@@ -28,7 +28,12 @@ interface Props {
   state: State;
 }
 
-export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) => {
+export const ConfigurationStepDetails = (
+  {
+    setCurrentStep,
+    state
+  }: Props
+) => {
   const { selectedDataView } = useDataSource();
   const { form, isJobCreated } = state;
   const { dependentVariable, includes, jobConfigQueryString, jobType, trainingPercent } = form;

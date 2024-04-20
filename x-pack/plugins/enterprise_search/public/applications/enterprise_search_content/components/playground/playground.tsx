@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const Playground: React.FC = () => {
+export const Playground = () => {
   const [searchParams] = useSearchParams();
   const index: string | null = searchParams.has('default-index')
     ? searchParams.get('default-index')

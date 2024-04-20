@@ -35,11 +35,13 @@ export const mockAssistantAvailability: AssistantAvailability = {
 };
 
 /** A utility for wrapping children in the providers required to run tests */
-export const TestProvidersComponent: React.FC<Props> = ({
-  assistantAvailability = mockAssistantAvailability,
-  children,
-  providerContext,
-}) => {
+export const TestProvidersComponent = (
+  {
+    assistantAvailability = mockAssistantAvailability,
+    children,
+    providerContext
+  }: Props
+) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   actionTypeRegistry.get = jest.fn().mockReturnValue({
     id: '12345',

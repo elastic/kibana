@@ -31,7 +31,12 @@ interface Props {
   setSelectedTabId: (tabId: string) => void;
 }
 
-const ChartLegendComponent: React.FC<Props> = ({ partitionedFieldMetadata, setSelectedTabId }) => {
+const ChartLegendComponent = (
+  {
+    partitionedFieldMetadata,
+    setSelectedTabId
+  }: Props
+) => {
   const showIncompatibleTab = useCallback(
     () => setSelectedTabId(INCOMPATIBLE_TAB_ID),
     [setSelectedTabId]

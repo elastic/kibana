@@ -48,12 +48,14 @@ const TOUR_SUBTITLE = i18n.translate('xpack.securitySolution.flyout.tour.subtitl
  * Shared component that generates tour steps based on supplied tour step content.
  * Supports tours being shown in different panels and manages state via local storage
  */
-export const FlyoutTour: FC<FlyoutTourProps> = ({
-  tourStepContent,
-  totalSteps,
-  goToOverviewTab,
-  goToLeftPanel,
-}) => {
+export const FlyoutTour = (
+  {
+    tourStepContent,
+    totalSteps,
+    goToOverviewTab,
+    goToLeftPanel
+  }: FlyoutTourProps
+) => {
   const {
     services: { storage },
   } = useKibana();

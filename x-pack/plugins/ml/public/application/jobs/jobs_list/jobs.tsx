@@ -36,7 +36,12 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortDirection: 'asc',
 });
 
-export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
+export const JobsPage = (
+  {
+    isMlEnabledInSpace,
+    lastRefresh
+  }: JobsPageProps
+) => {
   const [pageState, setPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()

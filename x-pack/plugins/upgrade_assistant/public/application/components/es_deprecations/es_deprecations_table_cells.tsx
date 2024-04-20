@@ -35,12 +35,14 @@ const i18nTexts = {
   ),
 };
 
-export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
-  resolutionTableCell,
-  fieldName,
-  deprecation,
-  openFlyout,
-}) => {
+export const EsDeprecationsTableCells = (
+  {
+    resolutionTableCell,
+    fieldName,
+    deprecation,
+    openFlyout
+  }: Props
+) => {
   // "Status column"
   if (fieldName === 'isCritical') {
     return <DeprecationBadge isCritical={deprecation.isCritical} />;

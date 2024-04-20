@@ -94,10 +94,15 @@ const panels = [
   },
 ];
 
-export const DebugPage: React.FunctionComponent<{
-  isInitialized: boolean;
-  setupError: RequestError | null;
-}> = ({ isInitialized, setupError }) => {
+export const DebugPage = (
+  {
+    isInitialized,
+    setupError
+  }: {
+    isInitialized: boolean;
+    setupError: RequestError | null;
+  }
+) => {
   const { chrome } = useStartServices();
   const { getHref } = useLink();
 

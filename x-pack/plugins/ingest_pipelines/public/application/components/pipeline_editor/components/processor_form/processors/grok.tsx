@@ -114,7 +114,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Grok: FunctionComponent = () => {
+export const Grok = () => {
   return (
     <>
       <FieldNameField

@@ -18,10 +18,15 @@ import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
-export const SearchApplicationError: React.FC<{ error?: HttpError; notFound?: boolean }> = ({
-  error,
-  notFound,
-}) => {
+export const SearchApplicationError = (
+  {
+    error,
+    notFound
+  }: {
+    error?: HttpError;
+    notFound?: boolean;
+  }
+) => {
   if (notFound || error?.body?.statusCode === 404) {
     return (
       <>

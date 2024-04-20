@@ -12,10 +12,15 @@ import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
 
 import { AgentDetailsIntegration } from './agent_details_integration';
 
-export const AgentDetailsIntegrations: React.FunctionComponent<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+export const AgentDetailsIntegrations = memo((
+  {
+    agent,
+    agentPolicy
+  }: {
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+  }
+) => {
   if (!agentPolicy || !agentPolicy.package_policies) {
     return null;
   }

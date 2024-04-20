@@ -29,10 +29,12 @@ export interface Props {
   defaultIsCollapsed?: boolean;
 }
 
-export const RecentlyAccessed: FC<Props> = ({
-  recentlyAccessed$: recentlyAccessedProp$,
-  defaultIsCollapsed = false,
-}) => {
+export const RecentlyAccessed = (
+  {
+    recentlyAccessed$: recentlyAccessedProp$,
+    defaultIsCollapsed = false
+  }: Props
+) => {
   const strings = getI18nStrings();
   const { recentlyAccessed$, basePath, navigateToUrl } = useServices();
   const recentlyAccessed = useObservable(recentlyAccessedProp$ ?? recentlyAccessed$, []);

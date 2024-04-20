@@ -16,7 +16,7 @@ import { PRODUCT_SELECTOR_CALLOUT_HEADING } from '../../constants';
 import CtaImage from './assets/getting_started.png';
 import './setup_guide_cta.scss';
 
-export const SetupGuideCta: React.FC = () => (
+export const SetupGuideCta = () => (
   <EuiPanelTo
     to="/setup_guide"
     paddingSize="l"

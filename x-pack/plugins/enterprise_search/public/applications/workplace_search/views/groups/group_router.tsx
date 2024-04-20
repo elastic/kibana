@@ -19,7 +19,7 @@ import { GroupSourcePrioritization } from './components/group_source_prioritizat
 import { OrgSourcesModal } from './components/org_sources_modal';
 import { GroupLogic } from './group_logic';
 
-export const GroupRouter: React.FC = () => {
+export const GroupRouter = () => {
   const { groupId } = useParams() as { groupId: string };
 
   const { initializeGroup, resetGroup } = useActions(GroupLogic);

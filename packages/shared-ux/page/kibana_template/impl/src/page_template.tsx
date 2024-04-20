@@ -17,13 +17,15 @@ import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-typ
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
-export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
-  className,
-  children,
-  solutionNav,
-  noDataConfig,
-  ...rest
-}) => {
+export const _KibanaPageTemplate = (
+  {
+    className,
+    children,
+    solutionNav,
+    noDataConfig,
+    ...rest
+  }: KibanaPageTemplateProps
+) => {
   /**
    * If passing the custom template of `noDataConfig`
    */

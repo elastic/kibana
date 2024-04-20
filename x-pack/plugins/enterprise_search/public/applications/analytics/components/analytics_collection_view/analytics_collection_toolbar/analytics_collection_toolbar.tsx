@@ -78,7 +78,7 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
   },
 ];
 
-export const AnalyticsCollectionToolbar: React.FC = () => {
+export const AnalyticsCollectionToolbar = () => {
   const discoverLink = useDiscoverLink();
   const [isPopoverOpen, setPopover] = useState(false);
   const { application, navigateToUrl } = useValues(KibanaLogic);

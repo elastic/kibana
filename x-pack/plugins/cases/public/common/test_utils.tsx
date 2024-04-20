@@ -51,12 +51,14 @@ interface FormTestComponentProps {
 }
 
 // eslint-disable-next-line react/display-name
-export const FormTestComponent: React.FC<FormTestComponentProps> = ({
-  children,
-  onSubmit,
-  formDefaultValue,
-  schema,
-}) => {
+export const FormTestComponent = (
+  {
+    children,
+    onSubmit,
+    formDefaultValue,
+    schema
+  }: FormTestComponentProps
+) => {
   const { form } = useForm({ onSubmit, defaultValue: formDefaultValue, schema });
 
   return (

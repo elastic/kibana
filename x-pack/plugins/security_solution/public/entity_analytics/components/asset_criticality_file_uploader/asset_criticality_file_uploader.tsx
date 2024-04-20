@@ -17,7 +17,7 @@ import { useEntityAnalyticsRoutes } from '../../api/api';
 import { useFileValidation, useNavigationSteps } from './hooks';
 import type { OnCompleteParams } from './types';
 
-export const AssetCriticalityFileUploader: React.FC = () => {
+export const AssetCriticalityFileUploader = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const { uploadAssetCriticalityFile } = useEntityAnalyticsRoutes();
   const { telemetry } = useKibana().services;

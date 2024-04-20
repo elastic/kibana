@@ -37,12 +37,14 @@ interface Props {
   ingestPipelineId: string;
   closeFlyout(): void;
 }
-export const FilebeatConfigFlyout: FC<Props> = ({
-  index,
-  results,
-  ingestPipelineId,
-  closeFlyout,
-}) => {
+export const FilebeatConfigFlyout = (
+  {
+    index,
+    results,
+    ingestPipelineId,
+    closeFlyout
+  }: Props
+) => {
   const [fileBeatConfig, setFileBeatConfig] = useState('');
   const [username, setUsername] = useState<string | null>(null);
   const {
@@ -102,11 +104,17 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   );
 };
 
-const Contents: FC<{
-  value: string;
-  index: string;
-  username: string | null;
-}> = ({ value, index, username }) => {
+const Contents = (
+  {
+    value,
+    index,
+    username
+  }: {
+    value: string;
+    index: string;
+    username: string | null;
+  }
+) => {
   return (
     <EuiFlexItem data-test-subj="fileDataVisFilebeatConfigPanel">
       <EuiTitle size="s">

@@ -20,8 +20,8 @@ export const FILTER_OUT_VALUE = i18n.translate('xpack.timelines.hoverActions.fil
 
 export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
 
-const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnArgs> = React.memo(
-  ({
+const FilterOutValueButton = React.memo((
+  {
     Component,
     defaultFocusedButtonRef,
     field,
@@ -33,90 +33,90 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
     size,
     showTooltip = false,
     value,
-    dataViewId,
-  }) => {
-    const filterOutValueFn = useCallback(() => {
-      const makeFilter = (currentVal: string | null | undefined) =>
-        currentVal == null || currentVal?.length === 0
-          ? createFilter(field, null, false, dataViewId)
-          : createFilter(field, currentVal, true, dataViewId);
-      const filters = Array.isArray(value)
-        ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
-        : makeFilter(value);
+    dataViewId
+  }: HoverActionComponentProps & FilterValueFnArgs
+) => {
+  const filterOutValueFn = useCallback(() => {
+    const makeFilter = (currentVal: string | null | undefined) =>
+      currentVal == null || currentVal?.length === 0
+        ? createFilter(field, null, false, dataViewId)
+        : createFilter(field, currentVal, true, dataViewId);
+    const filters = Array.isArray(value)
+      ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
+      : makeFilter(value);
 
-      const activeFilterManager = filterManager;
+    const activeFilterManager = filterManager;
 
-      if (activeFilterManager != null) {
-        activeFilterManager.addFilters(filters);
-        if (onFilterAdded != null) {
-          onFilterAdded();
-        }
+    if (activeFilterManager != null) {
+      activeFilterManager.addFilters(filters);
+      if (onFilterAdded != null) {
+        onFilterAdded();
       }
-      if (onClick != null) {
-        onClick();
-      }
-    }, [field, filterManager, onClick, onFilterAdded, value, dataViewId]);
+    }
+    if (onClick != null) {
+      onClick();
+    }
+  }, [field, filterManager, onClick, onFilterAdded, value, dataViewId]);
 
-    useEffect(() => {
-      if (!ownFocus) {
-        return;
-      }
-      if (keyboardEvent?.key === FILTER_OUT_VALUE_KEYBOARD_SHORTCUT) {
-        stopPropagationAndPreventDefault(keyboardEvent);
-        filterOutValueFn();
-      }
-    }, [filterOutValueFn, keyboardEvent, ownFocus]);
+  useEffect(() => {
+    if (!ownFocus) {
+      return;
+    }
+    if (keyboardEvent?.key === FILTER_OUT_VALUE_KEYBOARD_SHORTCUT) {
+      stopPropagationAndPreventDefault(keyboardEvent);
+      filterOutValueFn();
+    }
+  }, [filterOutValueFn, keyboardEvent, ownFocus]);
 
-    const button = useMemo(
-      () =>
-        Component ? (
-          <Component
-            aria-label={FILTER_OUT_VALUE}
-            buttonRef={defaultFocusedButtonRef}
-            data-test-subj="filter-out-value"
-            iconType="minusInCircle"
-            onClick={filterOutValueFn}
-            size={size}
-            title={FILTER_OUT_VALUE}
-          >
-            {FILTER_OUT_VALUE}
-          </Component>
-        ) : (
-          <EuiButtonIcon
-            aria-label={FILTER_OUT_VALUE}
-            buttonRef={defaultFocusedButtonRef}
-            className="timelines__hoverActionButton"
-            data-test-subj="filter-out-value"
-            iconSize="s"
-            iconType="minusInCircle"
-            onClick={filterOutValueFn}
-            size={size}
-          />
-        ),
-      [Component, defaultFocusedButtonRef, filterOutValueFn, size]
-    );
+  const button = useMemo(
+    () =>
+      Component ? (
+        <Component
+          aria-label={FILTER_OUT_VALUE}
+          buttonRef={defaultFocusedButtonRef}
+          data-test-subj="filter-out-value"
+          iconType="minusInCircle"
+          onClick={filterOutValueFn}
+          size={size}
+          title={FILTER_OUT_VALUE}
+        >
+          {FILTER_OUT_VALUE}
+        </Component>
+      ) : (
+        <EuiButtonIcon
+          aria-label={FILTER_OUT_VALUE}
+          buttonRef={defaultFocusedButtonRef}
+          className="timelines__hoverActionButton"
+          data-test-subj="filter-out-value"
+          iconSize="s"
+          iconType="minusInCircle"
+          onClick={filterOutValueFn}
+          size={size}
+        />
+      ),
+    [Component, defaultFocusedButtonRef, filterOutValueFn, size]
+  );
 
-    return showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={FILTER_OUT_VALUE}
-            shortcut={FILTER_OUT_VALUE_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
-      >
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
-    );
-  }
-);
+  return showTooltip ? (
+    <EuiToolTip
+      content={
+        <TooltipWithKeyboardShortcut
+          additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+            field,
+            value,
+          })}
+          content={FILTER_OUT_VALUE}
+          shortcut={FILTER_OUT_VALUE_KEYBOARD_SHORTCUT}
+          showShortcut={ownFocus}
+        />
+      }
+    >
+      {button}
+    </EuiToolTip>
+  ) : (
+    button
+  );
+});
 
 FilterOutValueButton.displayName = 'FilterOutValueButton';
 

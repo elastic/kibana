@@ -41,10 +41,12 @@ const i18nTexts = {
   ),
 };
 
-export const ResetDocumentsModal: FunctionComponent<Props> = ({
-  confirmResetTestOutput,
-  closeModal,
-}) => {
+export const ResetDocumentsModal = (
+  {
+    confirmResetTestOutput,
+    closeModal
+  }: Props
+) => {
   return (
     <EuiConfirmModal
       buttonColor="danger"

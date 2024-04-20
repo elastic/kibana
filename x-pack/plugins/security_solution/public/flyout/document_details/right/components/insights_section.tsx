@@ -25,7 +25,7 @@ const KEY = 'insights';
 /**
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
-export const InsightsSection: FC = memo(() => {
+export const InsightsSection = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
 

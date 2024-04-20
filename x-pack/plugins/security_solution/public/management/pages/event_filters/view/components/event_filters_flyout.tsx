@@ -46,228 +46,232 @@ export interface EventFiltersFlyoutProps {
   maskProps?: EuiOverlayMaskProps;
 }
 
-export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
-  ({ onCancel: onClose, data, ...flyoutProps }) => {
-    const toasts = useToasts();
-    const http = useHttp();
+export const EventFiltersFlyout = memo((
+  {
+    onCancel: onClose,
+    data,
+    ...flyoutProps
+  }: EventFiltersFlyoutProps
+) => {
+  const toasts = useToasts();
+  const http = useHttp();
 
-    const { isLoading: isSubmittingData, mutateAsync: submitData } = useWithArtifactSubmitData(
-      EventFiltersApiClient.getInstance(http),
-      'create'
-    );
+  const { isLoading: isSubmittingData, mutateAsync: submitData } = useWithArtifactSubmitData(
+    EventFiltersApiClient.getInstance(http),
+    'create'
+  );
 
-    const [enrichedData, setEnrichedData] = useState<Ecs | null>();
-    const [isFormValid, setIsFormValid] = useState(false);
-    const {
-      data: { search },
-    } = useKibana().services;
+  const [enrichedData, setEnrichedData] = useState<Ecs | null>();
+  const [isFormValid, setIsFormValid] = useState(false);
+  const {
+    data: { search },
+  } = useKibana().services;
 
-    // load the list of policies>
-    const policiesRequest = useGetEndpointSpecificPolicies({
-      perPage: 1000,
-      onError: (error) => {
-        toasts.addWarning(getLoadPoliciesError(error));
-      },
-    });
+  // load the list of policies>
+  const policiesRequest = useGetEndpointSpecificPolicies({
+    perPage: 1000,
+    onError: (error) => {
+      toasts.addWarning(getLoadPoliciesError(error));
+    },
+  });
 
-    const [exception, setException] = useState<ArtifactFormComponentProps['item']>(
-      getInitialExceptionFromEvent(data)
-    );
+  const [exception, setException] = useState<ArtifactFormComponentProps['item']>(
+    getInitialExceptionFromEvent(data)
+  );
 
-    const [confirmModalLabels, setConfirmModalLabels] = useState<
-      ArtifactConfirmModalLabelProps | undefined
-    >();
+  const [confirmModalLabels, setConfirmModalLabels] = useState<
+    ArtifactConfirmModalLabelProps | undefined
+  >();
 
-    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
-    const policiesIsLoading = useMemo<boolean>(
-      () => policiesRequest.isLoading || policiesRequest.isRefetching,
-      [policiesRequest]
-    );
+  const policiesIsLoading = useMemo<boolean>(
+    () => policiesRequest.isLoading || policiesRequest.isRefetching,
+    [policiesRequest]
+  );
 
-    useEffect(() => {
-      const enrichEvent = async () => {
-        if (!data || !data._index) return;
-        const searchResponse = await lastValueFrom(
-          search.search({
-            params: {
-              index: data._index,
-              body: {
-                query: {
-                  match: {
-                    _id: data._id,
-                  },
+  useEffect(() => {
+    const enrichEvent = async () => {
+      if (!data || !data._index) return;
+      const searchResponse = await lastValueFrom(
+        search.search({
+          params: {
+            index: data._index,
+            body: {
+              query: {
+                match: {
+                  _id: data._id,
                 },
               },
             },
-          })
-        );
-        setEnrichedData({
-          ...data,
-          host: {
-            ...data.host,
-            os: {
-              ...(data?.host?.os || {}),
-              name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.name],
-            },
           },
-        });
-      };
-
-      if (data) {
-        enrichEvent();
-      }
-
-      return () => {
-        setException(getInitialExceptionFromEvent());
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const handleOnClose = useCallback(() => {
-      if (policiesIsLoading || isSubmittingData) return;
-      onClose();
-    }, [isSubmittingData, policiesIsLoading, onClose]);
-
-    const submitEventFilter = useCallback(() => {
-      return submitData(exception, {
-        onSuccess: (result) => {
-          toasts.addSuccess(getCreationSuccessMessage(result));
-          onClose();
-        },
-        onError: (error) => {
-          toasts.addError(error, getCreationErrorMessage(error));
+        })
+      );
+      setEnrichedData({
+        ...data,
+        host: {
+          ...data.host,
+          os: {
+            ...(data?.host?.os || {}),
+            name: [searchResponse.rawResponse.hits.hits[0]._source.host.os.name],
+          },
         },
       });
-    }, [exception, onClose, submitData, toasts]);
+    };
 
-    const handleOnSubmit = useCallback(() => {
-      if (confirmModalLabels) {
-        setShowConfirmModal(true);
-      } else {
-        return submitEventFilter();
-      }
-    }, [confirmModalLabels, submitEventFilter]);
+    if (data) {
+      enrichEvent();
+    }
 
-    const confirmButtonMemo = useMemo(
-      () => (
-        <EuiButton
-          data-test-subj="add-exception-confirm-button"
-          fill
-          disabled={
-            !isFormValid || isSubmittingData || (!!data && !enrichedData) || policiesIsLoading
-          }
-          onClick={handleOnSubmit}
-          isLoading={policiesIsLoading}
-        >
-          {data ? (
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update.withData"
-              defaultMessage="Add endpoint event filter"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create"
-              defaultMessage="Add event filter"
-            />
-          )}
-        </EuiButton>
-      ),
-      [data, enrichedData, handleOnSubmit, isFormValid, isSubmittingData, policiesIsLoading]
-    );
+    return () => {
+      setException(getInitialExceptionFromEvent());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    // update flyout state with form state
-    const onChange = useCallback((formState?: ArtifactFormComponentOnChangeCallbackProps) => {
-      if (!formState) return;
-      setIsFormValid(formState.isValid);
-      setException(formState.item);
-      setConfirmModalLabels(formState.confirmModalLabels);
-    }, []);
+  const handleOnClose = useCallback(() => {
+    if (policiesIsLoading || isSubmittingData) return;
+    onClose();
+  }, [isSubmittingData, policiesIsLoading, onClose]);
 
-    const confirmModal = useMemo(() => {
-      if (confirmModalLabels) {
-        const { title, body, confirmButton, cancelButton } = confirmModalLabels;
-        return (
-          <ArtifactConfirmModal
-            title={title}
-            body={body}
-            confirmButton={confirmButton}
-            cancelButton={cancelButton}
-            onSuccess={submitEventFilter}
-            onCancel={() => setShowConfirmModal(false)}
-            data-test-subj="artifactConfirmModal"
-          />
-        );
-      }
-    }, [confirmModalLabels, submitEventFilter]);
+  const submitEventFilter = useCallback(() => {
+    return submitData(exception, {
+      onSuccess: (result) => {
+        toasts.addSuccess(getCreationSuccessMessage(result));
+        onClose();
+      },
+      onError: (error) => {
+        toasts.addError(error, getCreationErrorMessage(error));
+      },
+    });
+  }, [exception, onClose, submitData, toasts]);
 
-    return (
-      <EuiFlyout
-        size="l"
-        onClose={handleOnClose}
-        data-test-subj="eventFiltersCreateFlyout"
-        {...flyoutProps}
+  const handleOnSubmit = useCallback(() => {
+    if (confirmModalLabels) {
+      setShowConfirmModal(true);
+    } else {
+      return submitEventFilter();
+    }
+  }, [confirmModalLabels, submitEventFilter]);
+
+  const confirmButtonMemo = useMemo(
+    () => (
+      <EuiButton
+        data-test-subj="add-exception-confirm-button"
+        fill
+        disabled={
+          !isFormValid || isSubmittingData || (!!data && !enrichedData) || policiesIsLoading
+        }
+        onClick={handleOnSubmit}
+        isLoading={policiesIsLoading}
       >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>
-              {data ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title.create.withData"
-                  defaultMessage="Add endpoint event filter"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
-                  defaultMessage="Add event filter"
-                />
-              )}
-            </h2>
-          </EuiTitle>
-          {data ? (
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create.withData"
-                defaultMessage="Endpoint security"
-              />
-            </EuiTextColor>
-          ) : null}
-        </EuiFlyoutHeader>
-
-        <EuiFlyoutBody>
-          <EventFiltersForm
-            allowSelectOs={!data}
-            error={undefined}
-            disabled={false}
-            item={exception}
-            mode="create"
-            onChange={onChange}
-            policies={policiesRequest?.data?.items ?? []}
-            policiesIsLoading={policiesIsLoading}
+        {data ? (
+          <FormattedMessage
+            id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.update.withData"
+            defaultMessage="Add endpoint event filter"
           />
-        </EuiFlyoutBody>
+        ) : (
+          <FormattedMessage
+            id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.confirm.create"
+            defaultMessage="Add event filter"
+          />
+        )}
+      </EuiButton>
+    ),
+    [data, enrichedData, handleOnSubmit, isFormValid, isSubmittingData, policiesIsLoading]
+  );
 
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                isDisabled={isSubmittingData}
-                data-test-subj="cancelExceptionAddButton"
-                onClick={handleOnClose}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.cancel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-        {showConfirmModal && confirmModal}
-      </EuiFlyout>
-    );
-  }
-);
+  // update flyout state with form state
+  const onChange = useCallback((formState?: ArtifactFormComponentOnChangeCallbackProps) => {
+    if (!formState) return;
+    setIsFormValid(formState.isValid);
+    setException(formState.item);
+    setConfirmModalLabels(formState.confirmModalLabels);
+  }, []);
+
+  const confirmModal = useMemo(() => {
+    if (confirmModalLabels) {
+      const { title, body, confirmButton, cancelButton } = confirmModalLabels;
+      return (
+        <ArtifactConfirmModal
+          title={title}
+          body={body}
+          confirmButton={confirmButton}
+          cancelButton={cancelButton}
+          onSuccess={submitEventFilter}
+          onCancel={() => setShowConfirmModal(false)}
+          data-test-subj="artifactConfirmModal"
+        />
+      );
+    }
+  }, [confirmModalLabels, submitEventFilter]);
+
+  return (
+    <EuiFlyout
+      size="l"
+      onClose={handleOnClose}
+      data-test-subj="eventFiltersCreateFlyout"
+      {...flyoutProps}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>
+            {data ? (
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.title.create.withData"
+                defaultMessage="Add endpoint event filter"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create"
+                defaultMessage="Add event filter"
+              />
+            )}
+          </h2>
+        </EuiTitle>
+        {data ? (
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.securitySolution.eventFilters.eventFiltersFlyout.subtitle.create.withData"
+              defaultMessage="Endpoint security"
+            />
+          </EuiTextColor>
+        ) : null}
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        <EventFiltersForm
+          allowSelectOs={!data}
+          error={undefined}
+          disabled={false}
+          item={exception}
+          mode="create"
+          onChange={onChange}
+          policies={policiesRequest?.data?.items ?? []}
+          policiesIsLoading={policiesIsLoading}
+        />
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              isDisabled={isSubmittingData}
+              data-test-subj="cancelExceptionAddButton"
+              onClick={handleOnClose}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.eventFiltersFlyout.actions.cancel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{confirmButtonMemo}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+      {showConfirmModal && confirmModal}
+    </EuiFlyout>
+  );
+});
 
 EventFiltersFlyout.displayName = 'EventFiltersFlyout';

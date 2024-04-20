@@ -22,7 +22,13 @@ type Callback = () => void;
 
 let testComp: ReactWrapper;
 
-const TestHook: FunctionComponent<{ callback: Callback }> = ({ callback }) => {
+const TestHook = (
+  {
+    callback
+  }: {
+    callback: Callback;
+  }
+) => {
   callback();
   return null;
 };

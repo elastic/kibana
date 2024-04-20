@@ -19,9 +19,7 @@ const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',
 });
 
-export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps> = (
-  templateProps
-) => {
+export const SubscriptionSplashPage = (templateProps: LazyObservabilityPageTemplateProps) => {
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
   const manageLicenseURL = useLicenseUrl();
 
@@ -110,7 +108,7 @@ export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps
   );
 };
 
-export const SubscriptionSplashPrompt: React.FC = () => {
+export const SubscriptionSplashPrompt = () => {
   const manageLicenseURL = useLicenseUrl();
 
   return (

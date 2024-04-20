@@ -28,7 +28,12 @@ export interface Props {
   onClose: () => void;
 }
 
-export const PolicyDetailsFlyout: FunctionComponent<Props> = ({ policy, onClose }) => {
+export const PolicyDetailsFlyout = (
+  {
+    policy,
+    onClose
+  }: Props
+) => {
   return (
     <EuiFlyout onClose={onClose} data-test-subj="policyDetailsFlyout" size="m" maxWidth={550}>
       <EuiFlyoutHeader>

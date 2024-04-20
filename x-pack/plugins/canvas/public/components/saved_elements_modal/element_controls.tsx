@@ -40,35 +40,38 @@ interface Props {
   onEdit: (event: MouseEvent) => void;
 }
 
-export const ElementControls: FunctionComponent<Props> = ({ onDelete, onEdit }) => (
-  <EuiFlexGroup
-    className="canvasElementCard__controls"
-    gutterSize="xs"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={strings.getEditTooltip()}>
-        <EuiButtonIcon
-          iconType="pencil"
-          aria-label={strings.getEditAriaLabel()}
-          onClick={onEdit}
-          data-test-subj="canvasElementCard__editButton"
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={strings.getDeleteTooltip()}>
-        <EuiButtonIcon
-          color="danger"
-          iconType="trash"
-          aria-label={strings.getDeleteAriaLabel()}
-          onClick={onDelete}
-          data-test-subj="canvasElementCard__deleteButton"
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const ElementControls = (
+  {
+    onDelete,
+    onEdit
+  }: Props
+) => (<EuiFlexGroup
+  className="canvasElementCard__controls"
+  gutterSize="xs"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem grow={false}>
+    <EuiToolTip content={strings.getEditTooltip()}>
+      <EuiButtonIcon
+        iconType="pencil"
+        aria-label={strings.getEditAriaLabel()}
+        onClick={onEdit}
+        data-test-subj="canvasElementCard__editButton"
+      />
+    </EuiToolTip>
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiToolTip content={strings.getDeleteTooltip()}>
+      <EuiButtonIcon
+        color="danger"
+        iconType="trash"
+        aria-label={strings.getDeleteAriaLabel()}
+        onClick={onDelete}
+        data-test-subj="canvasElementCard__deleteButton"
+      />
+    </EuiToolTip>
+  </EuiFlexItem>
+</EuiFlexGroup>);
 
 ElementControls.propTypes = {
   onDelete: PropTypes.func.isRequired,

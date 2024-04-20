@@ -48,7 +48,12 @@ import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/
 
 let mmLValidator: (value: any) => MemoryInputValidatorResult;
 
-export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }) => {
+export const EditActionFlyout = (
+  {
+    closeFlyout,
+    item
+  }: Required<EditAction>
+) => {
   const { id: jobId, config } = item;
   const { state } = item.stats;
   const initialAllowLazyStart =

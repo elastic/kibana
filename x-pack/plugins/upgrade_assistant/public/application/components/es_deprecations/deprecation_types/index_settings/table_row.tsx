@@ -22,10 +22,12 @@ interface Props {
   rowFieldNames: DeprecationTableColumns[];
 }
 
-export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
-  rowFieldNames,
-  deprecation,
-}) => {
+export const IndexSettingsTableRow = (
+  {
+    rowFieldNames,
+    deprecation
+  }: Props
+) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [status, setStatus] = useState<{
     statusType: Status;

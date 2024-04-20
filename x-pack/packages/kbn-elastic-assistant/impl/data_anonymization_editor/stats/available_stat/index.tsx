@@ -18,7 +18,12 @@ interface Props {
   inline?: boolean;
 }
 
-const AvailableStatComponent: React.FC<Props> = ({ total, inline }) => {
+const AvailableStatComponent = (
+  {
+    total,
+    inline
+  }: Props
+) => {
   const tooltipContent = useMemo(() => i18n.AVAILABLE_TOOLTIP(total), [total]);
 
   return (

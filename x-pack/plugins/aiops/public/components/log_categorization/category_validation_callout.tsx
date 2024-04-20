@@ -17,7 +17,11 @@ interface Props {
   validationResults: FieldValidationResults | null;
 }
 
-export const FieldValidationCallout: FC<Props> = ({ validationResults }) => {
+export const FieldValidationCallout = (
+  {
+    validationResults
+  }: Props
+) => {
   if (validationResults === null) {
     return null;
   }

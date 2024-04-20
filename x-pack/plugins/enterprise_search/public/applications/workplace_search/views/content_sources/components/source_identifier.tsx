@@ -26,38 +26,40 @@ interface Props {
   id: string;
 }
 
-export const SourceIdentifier: React.FC<Props> = ({ id }) => (
-  <>
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <strong>{ID_LABEL}</strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCopy beforeMessage={COPY_TOOLTIP} afterMessage={COPIED_TOOLTIP} textToCopy={id}>
-          {(copy) => (
-            <EuiButtonIcon
-              aria-label={COPY_TOOLTIP}
-              onClick={copy}
-              iconType="copy"
-              color="primary"
-            />
-          )}
-        </EuiCopy>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFieldText
-          value={id}
-          readOnly
-          aria-label={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.sourceIdentifier.sourceIdentifierFieldLabel',
-            {
-              defaultMessage: 'Source Identifier',
-            }
-          )}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </>
-);
+export const SourceIdentifier = (
+  {
+    id
+  }: Props
+) => (<>
+  <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <strong>{ID_LABEL}</strong>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiCopy beforeMessage={COPY_TOOLTIP} afterMessage={COPIED_TOOLTIP} textToCopy={id}>
+        {(copy) => (
+          <EuiButtonIcon
+            aria-label={COPY_TOOLTIP}
+            onClick={copy}
+            iconType="copy"
+            color="primary"
+          />
+        )}
+      </EuiCopy>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFieldText
+        value={id}
+        readOnly
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.sourceIdentifier.sourceIdentifierFieldLabel',
+          {
+            defaultMessage: 'Source Identifier',
+          }
+        )}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</>);

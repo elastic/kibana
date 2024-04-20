@@ -31,17 +31,19 @@ export interface Props {
   setSelectedSubCategory?: (c: string | undefined) => void;
 }
 
-export const SearchBox: FunctionComponent<Props> = ({
-  searchTerm,
-  setSearchTerm,
-  selectedCategory,
-  setCategory,
-  categories,
-  availableSubCategories,
-  setSelectedSubCategory,
-  selectedSubCategory,
-  setUrlandReplaceHistory,
-}) => {
+export const SearchBox = (
+  {
+    searchTerm,
+    setSearchTerm,
+    selectedCategory,
+    setCategory,
+    categories,
+    availableSubCategories,
+    setSelectedSubCategory,
+    selectedSubCategory,
+    setUrlandReplaceHistory
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
 
   const onQueryChange = (e: any) => {

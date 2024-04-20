@@ -50,7 +50,12 @@ export interface PageProps {
   jobType: JOB_TYPE;
 }
 
-export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
+export const Page = (
+  {
+    existingJobsAndGroups,
+    jobType
+  }: PageProps
+) => {
   const timefilter = useTimefilter();
   const dataSourceContext = useDataSource();
   const {

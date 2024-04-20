@@ -30,7 +30,12 @@ interface Props {
   connectorIntervals: GenerationInterval[];
 }
 
-const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorIntervals }) => {
+const CountdownComponent = (
+  {
+    approximateFutureTime,
+    connectorIntervals
+  }: Props
+) => {
   // theming:
   const { euiTheme } = useEuiTheme();
   const { theme } = useKibana().services;

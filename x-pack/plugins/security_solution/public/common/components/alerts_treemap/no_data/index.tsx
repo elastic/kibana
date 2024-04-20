@@ -19,24 +19,26 @@ interface Props {
   reason?: string;
 }
 
-const NoDataComponent: React.FC<Props> = ({ reason }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
-    <EuiFlexItem grow={true}>
-      <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
-        {i18n.NO_DATA_LABEL}
-      </NoDataLabel>
+const NoDataComponent = (
+  {
+    reason
+  }: Props
+) => (<EuiFlexGroup alignItems="center" gutterSize="none">
+  <EuiFlexItem grow={true}>
+    <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
+      {i18n.NO_DATA_LABEL}
+    </NoDataLabel>
 
-      {reason != null && (
-        <>
-          <EuiSpacer size="s" />
-          <NoDataLabel color="subdued" data-test-subj="reasonLabel" size="xs">
-            {reason}
-          </NoDataLabel>
-        </>
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+    {reason != null && (
+      <>
+        <EuiSpacer size="s" />
+        <NoDataLabel color="subdued" data-test-subj="reasonLabel" size="xs">
+          {reason}
+        </NoDataLabel>
+      </>
+    )}
+  </EuiFlexItem>
+</EuiFlexGroup>);
 
 NoDataComponent.displayName = 'NoDataComponent';
 

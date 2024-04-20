@@ -33,7 +33,11 @@ const emptyRichDetector: RichDetector = {
   useNull: null,
 };
 
-export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
+export const AdvancedDetectors = (
+  {
+    setIsValid
+  }: Props
+) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
 

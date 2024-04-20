@@ -27,15 +27,19 @@ export const ServicesContext = createContext<CanvasServices>(defaultContextValue
 
 export const useServices = () => useContext(ServicesContext);
 export const withServices = <Props extends WithServicesProps>(type: ComponentType<Props>) => {
-  const EnhancedType: FC<Props> = (props) =>
-    createElement(type, { ...props, services: useServices() });
+  const EnhancedType = (props: Props) => createElement(type, { ...props, services: useServices() });
   return EnhancedType;
 };
 
-export const LegacyServicesProvider: FC<{
-  providers?: Partial<CanvasServiceProviders>;
-  children: ReactElement<any>;
-}> = ({ providers = {}, children }) => {
+export const LegacyServicesProvider = (
+  {
+    providers = {},
+    children
+  }: {
+    providers?: Partial<CanvasServiceProviders>;
+    children: ReactElement<any>;
+  }
+) => {
   const specifiedProviders: CanvasServiceProviders = { ...services, ...providers };
   const value = {
     search: specifiedProviders.search.getService(),

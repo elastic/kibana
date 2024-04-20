@@ -27,13 +27,19 @@ const REFRESH_CONFIG = {
   value: 0,
 };
 
-export const AnomaliesSwimlaneVisualisation: React.FC<Props> = (props) => {
+export const AnomaliesSwimlaneVisualisation = (props: Props) => {
   const { embeddable: embeddablePlugin } = useKibanaContextForPlugin().services;
   if (!embeddablePlugin) return null;
   return <VisualisationContent {...props} />;
 };
 
-export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selectedDatasets }) => {
+export const VisualisationContent = (
+  {
+    timeRange,
+    jobIds,
+    selectedDatasets
+  }: Props
+) => {
   const { ml } = useKibanaContextForPlugin().services;
 
   const formattedTimeRange = useMemo(() => {

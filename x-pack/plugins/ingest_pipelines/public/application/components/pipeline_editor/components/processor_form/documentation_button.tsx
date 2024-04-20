@@ -14,7 +14,12 @@ interface Props {
   docLink: string;
 }
 
-export const DocumentationButton: FunctionComponent<Props> = ({ processorLabel, docLink }) => {
+export const DocumentationButton = (
+  {
+    processorLabel,
+    docLink
+  }: Props
+) => {
   return (
     <EuiButtonEmpty size="s" flush="right" href={docLink} target="_blank" iconType="help">
       {i18n.translate(

@@ -30,7 +30,12 @@ interface Props {
   reload: () => void;
 }
 
-export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
+export const SamplingMenu = (
+  {
+    randomSampler,
+    reload
+  }: Props
+) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
   const samplingProbability = useObservable(
@@ -166,9 +171,13 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
   );
 };
 
-const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
-  samplingProbability,
-}) => {
+const ProbabilityUsedMessage = (
+  {
+    samplingProbability
+  }: {
+    samplingProbability: number | null;
+  }
+) => {
   return samplingProbability !== null ? (
     <div data-test-subj="aiopsRandomSamplerProbabilityUsedMsg">
       <EuiSpacer size="m" />

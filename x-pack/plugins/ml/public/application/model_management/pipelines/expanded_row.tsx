@@ -23,7 +23,11 @@ interface ProcessorsStatsProps {
 
 type ProcessorStatsItem = ProcessorsStatsProps['stats'][number][string] & { id: string };
 
-export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
+export const ProcessorsStats = (
+  {
+    stats
+  }: ProcessorsStatsProps
+) => {
   const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);
 
   const items: ProcessorStatsItem[] = stats.map((v, i) => {

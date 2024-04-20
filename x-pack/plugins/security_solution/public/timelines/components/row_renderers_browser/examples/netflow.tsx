@@ -11,7 +11,7 @@ import { getDemoNetflowData } from '../../../../common/demo_data/netflow';
 import { netflowRowRenderer } from '../../timeline/body/renderers/netflow/netflow_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const NetflowExampleComponent: React.FC = () => (
+const NetflowExampleComponent = () => (
   <>
     {netflowRowRenderer.renderRow({
       data: getDemoNetflowData(),

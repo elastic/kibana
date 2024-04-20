@@ -62,7 +62,13 @@ const UNKNOWN_ENTITY_TYPE = {
 
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
 
-const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
+const NerOutput = (
+  {
+    inferrer
+  }: {
+    inferrer: NerInference;
+  }
+) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
 
   if (!result) {
@@ -85,7 +91,13 @@ const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
   return <Lines result={result[0]} />;
 };
 
-const Lines: FC<{ result: NerResponse }> = ({ result }) => {
+const Lines = (
+  {
+    result
+  }: {
+    result: NerResponse;
+  }
+) => {
   const { euiTheme } = useCurrentThemeVars();
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {

@@ -19,12 +19,14 @@ interface SourcesTableProps extends ISourceRow {
   sources: ContentSourceDetails[];
 }
 
-export const SourcesTable: React.FC<SourcesTableProps> = ({
-  sources,
-  showDetails,
-  isOrganization,
-  onSearchableToggle,
-}) => {
+export const SourcesTable = (
+  {
+    sources,
+    showDetails,
+    isOrganization,
+    onSearchableToggle
+  }: SourcesTableProps
+) => {
   return (
     <EuiTable responsiveBreakpoint={false}>
       <EuiTableHeader>

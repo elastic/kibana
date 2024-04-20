@@ -10,11 +10,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { MissingSetupPrivilegesToolTip } from './missing_setup_privileges_tooltip';
 
-export const CreateJobButton: React.FunctionComponent<
+export const CreateJobButton = (
   {
+    hasSetupCapabilities = true,
+    children,
+    ...buttonProps
+  }: {
     hasSetupCapabilities?: boolean;
   } & PropsOf<typeof EuiButton>
-> = ({ hasSetupCapabilities = true, children, ...buttonProps }) => {
+) => {
   const button = (
     <EuiButton
       data-test-subj="infraCreateJobButtonButton"
@@ -39,16 +43,16 @@ export const CreateJobButton: React.FunctionComponent<
   );
 };
 
-export const RecreateJobButton: React.FunctionComponent<PropsOf<typeof CreateJobButton>> = ({
-  children,
-  ...otherProps
-}) => (
-  <CreateJobButton {...otherProps}>
-    {children ?? (
-      <FormattedMessage
-        id="xpack.infra.logs.analysis.recreateJobButtonLabel"
-        defaultMessage="Recreate ML job"
-      />
-    )}
-  </CreateJobButton>
-);
+export const RecreateJobButton = (
+  {
+    children,
+    ...otherProps
+  }: PropsOf<typeof CreateJobButton>
+) => (<CreateJobButton {...otherProps}>
+  {children ?? (
+    <FormattedMessage
+      id="xpack.infra.logs.analysis.recreateJobButtonLabel"
+      defaultMessage="Recreate ML job"
+    />
+  )}
+</CreateJobButton>);

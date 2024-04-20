@@ -22,8 +22,10 @@ export async function showMapVisToADJobFlyout(
   data: DataPublicPluginStart,
   dashboardService: DashboardStart
 ): Promise<void> {
-  const Comp: FC<FlyoutComponentProps> = ({ onClose }) => (
-    <GeoJobFlyout embeddable={embeddable} onClose={onClose} />
-  );
+  const Comp = (
+    {
+      onClose
+    }: FlyoutComponentProps
+  ) => (<GeoJobFlyout embeddable={embeddable} onClose={onClose} />);
   return createFlyout(Comp, coreStart, share, data, dashboardService);
 }

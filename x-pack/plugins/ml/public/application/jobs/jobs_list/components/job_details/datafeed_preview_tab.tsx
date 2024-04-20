@@ -19,7 +19,11 @@ interface Props {
   job: CombinedJob;
 }
 
-export const DatafeedPreviewPane: FC<Props> = ({ job }) => {
+export const DatafeedPreviewPane = (
+  {
+    job
+  }: Props
+) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApiContext();
@@ -62,7 +66,7 @@ export const DatafeedPreviewPane: FC<Props> = ({ job }) => {
   );
 };
 
-const InsufficientPermissions: FC = () => (
+const InsufficientPermissions = () => (
   <EuiCallOut
     title={
       <FormattedMessage
@@ -82,7 +86,7 @@ const InsufficientPermissions: FC = () => (
   </EuiCallOut>
 );
 
-const EmptyResults: FC = () => (
+const EmptyResults = () => (
   <EuiCallOut
     title={
       <FormattedMessage

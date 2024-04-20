@@ -29,12 +29,14 @@ interface Props {
   onGenerate: () => void;
 }
 
-const EmptyPromptComponent: React.FC<Props> = ({
-  alertsCount,
-  isLoading,
-  isDisabled = false,
-  onGenerate,
-}) => {
+const EmptyPromptComponent = (
+  {
+    alertsCount,
+    isLoading,
+    isDisabled = false,
+    onGenerate
+  }: Props
+) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const title = useMemo(
     () => (

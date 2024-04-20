@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-export const NoCompatibleRealms: React.FunctionComponent = () => {
+export const NoCompatibleRealms = () => {
   const docLinks = useKibana().services.docLinks!;
   return (
     <EuiCallOut

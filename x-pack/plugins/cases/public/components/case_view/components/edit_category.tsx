@@ -42,12 +42,14 @@ type CategoryFormWrapper = Pick<EditCategoryProps, 'category' | 'isLoading'> & {
   onChange?: (state: CategoryFormState) => void;
 };
 
-const CategoryFormWrapper: React.FC<CategoryFormWrapper> = ({
-  category,
-  availableCategories,
-  isLoading,
-  onChange,
-}) => {
+const CategoryFormWrapper = (
+  {
+    category,
+    availableCategories,
+    isLoading,
+    onChange
+  }: CategoryFormWrapper
+) => {
   const { form } = useForm({
     defaultValue: { category },
   });

@@ -23,7 +23,13 @@ interface Props {
   tactic: string;
 }
 
-const TacticComponent: React.FC<Props> = ({ detected, rightJustify = false, tactic }) => {
+const TacticComponent = (
+  {
+    detected,
+    rightJustify = false,
+    tactic
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
 
   const WIDTH = 120; // px

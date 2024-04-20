@@ -50,7 +50,7 @@ const {
 
 export { Provider, useWizard, systemLogsRoutes };
 
-export const SystemLogsPanel: React.FC = () => {
+export const SystemLogsPanel = () => {
   return (
     <Provider>
       <EuiPanel hasBorder>

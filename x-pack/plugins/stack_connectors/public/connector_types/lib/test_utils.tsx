@@ -31,12 +31,14 @@ type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'
   connector: ConnectorFormSchema;
 };
 
-const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProps> = ({
-  children,
-  connector,
-  onSubmit,
-  connectorServices,
-}) => {
+const ConnectorFormTestProviderComponent = (
+  {
+    children,
+    connector,
+    onSubmit,
+    connectorServices
+  }: ConnectorFormTestProviderProps
+) => {
   return (
     <FormTestProviderComponent
       defaultValue={connector}
@@ -52,12 +54,14 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
 ConnectorFormTestProviderComponent.displayName = 'ConnectorFormTestProvider';
 export const ConnectorFormTestProvider = React.memo(ConnectorFormTestProviderComponent);
 
-const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
-  children,
-  defaultValue,
-  onSubmit,
-  connectorServices = { validateEmailAddresses: jest.fn() },
-}) => {
+const FormTestProviderComponent = (
+  {
+    children,
+    defaultValue,
+    onSubmit,
+    connectorServices = { validateEmailAddresses: jest.fn() }
+  }: FormTestProviderProps
+) => {
   const { form } = useForm({ defaultValue });
   const { submit } = form;
 
@@ -92,11 +96,15 @@ export interface AppMockRenderer {
 export const createAppMockRenderer = (): AppMockRenderer => {
   const services = createStartServicesMock();
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
-    </I18nProvider>
-  );
+  const AppWrapper = (
+    {
+      children
+    }: {
+      children: React.ReactElement;
+    }
+  ) => (<I18nProvider>
+    <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+  </I18nProvider>);
   AppWrapper.displayName = 'AppWrapper';
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {

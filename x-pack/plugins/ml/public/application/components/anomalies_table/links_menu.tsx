@@ -989,7 +989,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   );
 };
 
-export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
+export const LinksMenu = (props: Omit<LinksMenuProps, 'onItemClick'>) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onButtonClick = setPopoverOpen.bind(null, !isPopoverOpen);

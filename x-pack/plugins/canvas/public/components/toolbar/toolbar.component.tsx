@@ -52,13 +52,15 @@ export interface Props {
   workpadName: string;
 }
 
-export const Toolbar: FC<Props> = ({
-  isWriteable,
-  selectedElement,
-  selectedPageNumber,
-  totalPages,
-  workpadName,
-}) => {
+export const Toolbar = (
+  {
+    isWriteable,
+    selectedElement,
+    selectedPageNumber,
+    totalPages,
+    workpadName
+  }: Props
+) => {
   const [activeTray, setActiveTray] = useState<TrayType | null>(null);
   const { getUrl, previousPage } = useContext(WorkpadRoutingContext);
 

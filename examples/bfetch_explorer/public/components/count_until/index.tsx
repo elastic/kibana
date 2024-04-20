@@ -16,7 +16,11 @@ export interface Props {
   fetchStreaming: BfetchPublicSetup['fetchStreaming'];
 }
 
-export const CountUntil: React.FC<Props> = ({ fetchStreaming }) => {
+export const CountUntil = (
+  {
+    fetchStreaming
+  }: Props
+) => {
   const isMounted = useMountedState();
   const [data, setData] = useState(5);
   const [showingResults, setShowingResults] = useState(false);

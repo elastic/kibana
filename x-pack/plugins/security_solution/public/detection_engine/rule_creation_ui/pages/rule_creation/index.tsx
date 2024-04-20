@@ -108,7 +108,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC = () => {
+const CreateRulePageComponent = () => {
   const [
     {
       loading: userInfoLoading,

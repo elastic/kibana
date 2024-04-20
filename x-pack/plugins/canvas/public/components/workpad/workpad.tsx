@@ -31,7 +31,7 @@ import { useIncomingEmbeddable } from '../hooks';
 
 type ContainerProps = Pick<Props, 'registerLayout' | 'unregisterLayout'>;
 
-export const Workpad: FC<ContainerProps> = (props) => {
+export const Workpad = (props: ContainerProps) => {
   const dispatch = useDispatch();
   const [grid, setGrid] = useState<boolean>(false);
   const [transition, setTransition] = useState<any | null>(null);

@@ -27,7 +27,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { DEFAULT_START_DATE, DEFAULT_END_DATE, SERVER_DATE_FORMAT } from '../constants';
 import { convertTagsToSelectOptions } from '../utils';
 
-export const AnalyticsFilters: React.FC = () => {
+export const AnalyticsFilters = () => {
   const { allTags } = useValues(AnalyticsLogic);
   const { history } = useValues(KibanaLogic);
 

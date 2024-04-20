@@ -162,7 +162,13 @@ const ProcessorTypeConfigurator = ({ basePath }: { basePath: string }) => {
   );
 };
 
-const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
+const ProcessorsConfigurator = (
+  {
+    ruleType
+  }: {
+    ruleType: string;
+  }
+) => {
   return (
     <UseArray
       key={ruleType}
@@ -222,7 +228,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
   );
 };
 
-const FormContent: FC = () => {
+const FormContent = () => {
   const [{ ruleType }] = useFormData({ watch: 'ruleType' });
 
   return (

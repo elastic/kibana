@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { FEATURE_PRIVILEGES_PLUGIN_ID } from '../common';
 
-export const MyPluginComponent: React.FC = () => {
+export const MyPluginComponent = () => {
   const [time, setTime] = useState('');
   const kibana = useKibana<CoreStart>();
 

@@ -18,14 +18,16 @@ interface TableActionButtonProps {
   onClick: () => void;
 }
 
-export const TableActionButton: FC<TableActionButtonProps> = ({
-  iconType,
-  dataTestSubjPostfix,
-  isDisabled,
-  label,
-  tooltipText,
-  onClick,
-}) => {
+export const TableActionButton = (
+  {
+    iconType,
+    dataTestSubjPostfix,
+    isDisabled,
+    label,
+    tooltipText,
+    onClick
+  }: TableActionButtonProps
+) => {
   const buttonContent = (
     <>
       <EuiIcon type={iconType} css={{ marginRight: '8px' }} />

@@ -32,10 +32,12 @@ interface PolicyIdComboBoxFieldProps {
   options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
-  euiFieldProps,
-  options,
-}) => {
+const PolicyIdComboBoxFieldComponent = (
+  {
+    euiFieldProps,
+    options
+  }: PolicyIdComboBoxFieldProps
+) => {
   const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const {

@@ -44,18 +44,20 @@ export type RuleStatusPanelWithApiProps = Pick<
 > &
   RuleStatusPanelProps;
 
-export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
-  rule,
-  bulkEnableRules,
-  bulkDisableRules,
-  snoozeRule,
-  unsnoozeRule,
-  requestRefresh,
-  isEditable,
-  healthColor,
-  statusMessage,
-  refreshToken,
-}) => {
+export const RuleStatusPanel = (
+  {
+    rule,
+    bulkEnableRules,
+    bulkDisableRules,
+    snoozeRule,
+    unsnoozeRule,
+    requestRefresh,
+    isEditable,
+    healthColor,
+    statusMessage,
+    refreshToken
+  }: RuleStatusPanelWithApiProps
+) => {
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
   const isInitialized = useRef(false);
 

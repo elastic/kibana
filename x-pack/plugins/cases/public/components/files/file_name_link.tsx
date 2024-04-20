@@ -18,7 +18,12 @@ interface FileNameLinkProps {
   showPreview: () => void;
 }
 
-const FileNameLinkComponent: React.FC<FileNameLinkProps> = ({ file, showPreview }) => {
+const FileNameLinkComponent = (
+  {
+    file,
+    showPreview
+  }: FileNameLinkProps
+) => {
   let fileName = file.name;
 
   if (typeof file.extension !== 'undefined') {

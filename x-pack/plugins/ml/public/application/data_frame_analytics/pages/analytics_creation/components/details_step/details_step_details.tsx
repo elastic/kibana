@@ -23,10 +23,15 @@ export interface ListItems {
   description: string | JSX.Element;
 }
 
-export const DetailsStepDetails: FC<{
-  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
-  state: State;
-}> = ({ setCurrentStep, state }) => {
+export const DetailsStepDetails = (
+  {
+    setCurrentStep,
+    state
+  }: {
+    setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
+    state: State;
+  }
+) => {
   const { form, isJobCreated } = state;
   const { description, jobId, destinationIndex, resultsField } = form;
 

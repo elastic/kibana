@@ -69,9 +69,11 @@ interface AnalyticsCollectionOverviewProps {
   analyticsCollection: AnalyticsCollection;
 }
 
-export const AnalyticsCollectionOverview: React.FC<AnalyticsCollectionOverviewProps> = ({
-  analyticsCollection,
-}) => {
+export const AnalyticsCollectionOverview = (
+  {
+    analyticsCollection
+  }: AnalyticsCollectionOverviewProps
+) => {
   const { setTimeRange } = useActions(AnalyticsCollectionToolbarLogic);
   const { timeRange, searchSessionId } = useValues(AnalyticsCollectionToolbarLogic);
   const [filterBy, setFilterBy] = useState<FilterBy>(FilterBy.Searches);

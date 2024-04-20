@@ -54,7 +54,13 @@ interface Props {
   features: FeatureCatalogueEntry[];
 }
 
-export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) => {
+export const Overview = (
+  {
+    newsFetchResult,
+    solutions,
+    features
+  }: Props
+) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const [hasESData, setHasESData] = useState(false);
   const [hasDataView, setHasDataView] = useState(false);

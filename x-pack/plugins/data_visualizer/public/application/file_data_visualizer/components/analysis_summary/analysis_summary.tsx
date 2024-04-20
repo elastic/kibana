@@ -13,7 +13,13 @@ import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
-export const AnalysisSummary: FC<{ results: FindFileStructureResponse }> = ({ results }) => {
+export const AnalysisSummary = (
+  {
+    results
+  }: {
+    results: FindFileStructureResponse;
+  }
+) => {
   const items = createDisplayItems(results);
 
   return (

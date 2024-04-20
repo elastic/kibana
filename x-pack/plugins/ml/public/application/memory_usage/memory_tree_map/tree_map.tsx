@@ -60,7 +60,13 @@ const TYPE_LABELS_INVERTED = Object.entries(TYPE_LABELS).reduce<Record<MlSavedOb
   {} as Record<MlSavedObjectType, string>
 );
 
-export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
+export const JobMemoryTreeMap = (
+  {
+    node,
+    type,
+    height
+  }: Props
+) => {
   const {
     services: { theme: themeService },
   } = useMlKibana();

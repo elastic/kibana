@@ -16,87 +16,96 @@ interface CardProps {
   isSelected: boolean;
 }
 
-export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
-  <EuiFlexItem>
-    <EuiCard
-      data-test-subj={`mlJobWizardCategorizationDetectorCountCard${isSelected ? ' selected' : ''}`}
-      title={i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.title',
-        {
-          defaultMessage: 'Count',
-        }
-      )}
-      description={
-        <>
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
-            defaultMessage="Look for anomalies in the event rate of a category."
-          />
-
-          <EuiSpacer size="s" />
-
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description2"
-            defaultMessage="Recommended for categorizing all messages."
-          />
-        </>
+export const CountCard = (
+  {
+    onClick,
+    isSelected
+  }: CardProps
+) => (<EuiFlexItem>
+  <EuiCard
+    data-test-subj={`mlJobWizardCategorizationDetectorCountCard${isSelected ? ' selected' : ''}`}
+    title={i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.title',
+      {
+        defaultMessage: 'Count',
       }
-      selectable={{ onClick, isSelected }}
-    />
-  </EuiFlexItem>
-);
+    )}
+    description={
+      <>
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
+          defaultMessage="Look for anomalies in the event rate of a category."
+        />
 
-export const HighCountCard: FC<CardProps> = ({ onClick, isSelected }) => (
-  <EuiFlexItem>
-    <EuiCard
-      data-test-subj={`mlJobWizardCategorizationDetectorHighCountCard${
-        isSelected ? ' selected' : ''
-      }`}
-      title={i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.title',
-        {
-          defaultMessage: 'High count',
-        }
-      )}
-      description={
-        <>
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.description"
-            defaultMessage="Look for unusually high counts of a category in the event rate."
-          />
+        <EuiSpacer size="s" />
 
-          <EuiSpacer size="s" />
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description2"
+          defaultMessage="Recommended for categorizing all messages."
+        />
+      </>
+    }
+    selectable={{ onClick, isSelected }}
+  />
+</EuiFlexItem>);
 
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.description2"
-            defaultMessage="Recommended for categorizing error messages."
-          />
-        </>
+export const HighCountCard = (
+  {
+    onClick,
+    isSelected
+  }: CardProps
+) => (<EuiFlexItem>
+  <EuiCard
+    data-test-subj={`mlJobWizardCategorizationDetectorHighCountCard${
+      isSelected ? ' selected' : ''
+    }`}
+    title={i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.title',
+      {
+        defaultMessage: 'High count',
       }
-      selectable={{ onClick, isSelected }}
-    />
-  </EuiFlexItem>
-);
+    )}
+    description={
+      <>
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.description"
+          defaultMessage="Look for unusually high counts of a category in the event rate."
+        />
 
-export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
-  <EuiFlexItem>
-    <EuiCard
-      data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
-      title={i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.title',
-        {
-          defaultMessage: 'Rare',
-        }
-      )}
-      description={
-        <>
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
-            defaultMessage="Look for categories that occur rarely in time."
-          />
-        </>
+        <EuiSpacer size="s" />
+
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.description2"
+          defaultMessage="Recommended for categorizing error messages."
+        />
+      </>
+    }
+    selectable={{ onClick, isSelected }}
+  />
+</EuiFlexItem>);
+
+export const RareCard = (
+  {
+    onClick,
+    isSelected
+  }: CardProps
+) => (<EuiFlexItem>
+  <EuiCard
+    data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
+    title={i18n.translate(
+      'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.title',
+      {
+        defaultMessage: 'Rare',
       }
-      selectable={{ onClick, isSelected }}
-    />
-  </EuiFlexItem>
-);
+    )}
+    description={
+      <>
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.rareCard.description"
+          defaultMessage="Look for categories that occur rarely in time."
+        />
+      </>
+    }
+    selectable={{ onClick, isSelected }}
+  />
+</EuiFlexItem>);

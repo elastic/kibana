@@ -14,7 +14,12 @@ const FieldInputContext = React.createContext<FieldInputServices | null>(null);
 /**
  * React Provider that provides services to a {@link FieldInput} component and its dependents.
  */
-export const FieldInputProvider: FC<FieldInputServices> = ({ children, ...services }) => {
+export const FieldInputProvider = (
+  {
+    children,
+    ...services
+  }: FieldInputServices
+) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
   const { showDanger, validateChange } = services;
@@ -29,11 +34,13 @@ export const FieldInputProvider: FC<FieldInputServices> = ({ children, ...servic
 /**
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FieldInputProvider}.
  */
-export const FieldInputKibanaProvider: FC<FieldInputKibanaDependencies> = ({
-  children,
-  notifications: { toasts },
-  settings: { client },
-}) => {
+export const FieldInputKibanaProvider = (
+  {
+    children,
+    notifications: { toasts },
+    settings: { client }
+  }: FieldInputKibanaDependencies
+) => {
   return (
     <FieldInputContext.Provider
       value={{

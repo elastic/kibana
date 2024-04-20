@@ -41,12 +41,14 @@ export interface LogCategorizationAppStateProps {
   showFrozenDataTierChoice?: boolean;
 }
 
-export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
-  dataView,
-  savedSearch,
-  appDependencies,
-  showFrozenDataTierChoice = true,
-}) => {
+export const LogCategorizationAppState = (
+  {
+    dataView,
+    savedSearch,
+    appDependencies,
+    showFrozenDataTierChoice = true
+  }: LogCategorizationAppStateProps
+) => {
   if (!dataView) return null;
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_categorization');

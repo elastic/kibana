@@ -14,7 +14,11 @@ interface IntegrationLinkProps {
   integration: IntegrationDetails;
 }
 
-const IntegrationLinkComponent: React.FC<IntegrationLinkProps> = ({ integration }) => {
+const IntegrationLinkComponent = (
+  {
+    integration
+  }: IntegrationLinkProps
+) => {
   const basePath = useBasePath();
   const linkText = integration.integrationTitle;
   const linkUrl = `${basePath}/${integration.targetUrl}`;

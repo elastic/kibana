@@ -24,7 +24,7 @@ import { GroupsTable } from './components/groups_table';
 import { TableFilters } from './components/table_filters';
 import { GroupsLogic } from './groups_logic';
 
-export const Groups: React.FC = () => {
+export const Groups = () => {
   const { messages } = useValues(FlashMessagesLogic);
 
   const { getSearchResults, openNewGroupModal, resetGroups } = useActions(GroupsLogic);

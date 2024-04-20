@@ -40,7 +40,7 @@ interface StartAppComponent {
   theme$: AppMountParameters['theme$'];
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, theme$ }) => {
+const StartAppComponent = ({ children, history, store, theme$ }: StartAppComponent) => {
   const services = useKibana().services;
   const {
     i18n,
@@ -103,13 +103,13 @@ interface SecurityAppComponentProps {
   theme$: AppMountParameters['theme$'];
 }
 
-const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
+const SecurityAppComponent = ({
   children,
   history,
   services,
   store,
   theme$,
-}) => {
+}: SecurityAppComponentProps) => {
   const CloudProvider = services.cloud?.CloudContextProvider ?? React.Fragment;
 
   return (

@@ -21,7 +21,13 @@ interface Props {
   selectedField: string | null;
 }
 
-export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const CategorizationFieldSelect = (
+  {
+    fields,
+    changeHandler,
+    selectedField
+  }: Props
+) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { renderOption, optionCss } = useFieldStatsTrigger();
 

@@ -36,12 +36,14 @@ const REFRESH_INTERVAL_OVERRIDE = {
   value: 10000,
 };
 
-export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
-  uiSettings,
-  query,
-  toasts,
-  children,
-}) => {
+export const GlobalStateProvider = (
+  {
+    uiSettings,
+    query,
+    toasts,
+    children
+  }: GlobalStateProviderProps
+) => {
   const localState: State = {};
   const [globalState] = useState(
     () => new GlobalState(query, toasts, localState as { [key: string]: unknown })

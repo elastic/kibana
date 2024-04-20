@@ -30,7 +30,13 @@ import { OverviewCard } from './overview_card';
 
 const MAX_VISIBLE_ALIASES = 3;
 
-export const AliasesDetails: FunctionComponent<{ aliases: Index['aliases'] }> = ({ aliases }) => {
+export const AliasesDetails = (
+  {
+    aliases
+  }: {
+    aliases: Index['aliases'];
+  }
+) => {
   const [isShowingAliases, setIsShowingAliases] = useState<boolean>(false);
   if (!Array.isArray(aliases)) {
     return null;

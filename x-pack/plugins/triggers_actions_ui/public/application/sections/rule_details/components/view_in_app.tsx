@@ -23,7 +23,11 @@ const NO_NAVIGATION = false;
 
 type RuleNavigationLoadingState = string | false | null;
 
-export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => {
+export const ViewInApp = (
+  {
+    rule
+  }: ViewInAppProps
+) => {
   const {
     application: { navigateToUrl },
     http: { basePath },

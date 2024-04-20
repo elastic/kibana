@@ -21,7 +21,12 @@ interface Props {
   editorProps: { [key: string]: any };
 }
 
-export const TextEditor: FunctionComponent<Props> = ({ field, editorProps }) => {
+export const TextEditor = (
+  {
+    field,
+    editorProps
+  }: Props
+) => {
   const { value, helpText, setValue, label } = field;
   const { errorMessage } = getFieldValidityAndErrorMessage(field);
 

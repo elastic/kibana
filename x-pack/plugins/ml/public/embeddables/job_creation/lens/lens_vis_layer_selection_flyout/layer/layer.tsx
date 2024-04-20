@@ -27,7 +27,13 @@ interface Props {
   embeddable: LensApi;
 }
 
-export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
+export const Layer = (
+  {
+    layer,
+    layerIndex,
+    embeddable
+  }: Props
+) => {
   return (
     <>
       <EuiSplitPanel.Outer grow>

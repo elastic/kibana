@@ -14,7 +14,7 @@ import { newJobCapsService } from '../../../../../../../services/new_job_capabil
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const TimeField: FC = () => {
+export const TimeField = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
   const { dateFields } = newJobCapsService;

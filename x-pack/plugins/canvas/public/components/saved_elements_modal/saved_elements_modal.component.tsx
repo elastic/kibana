@@ -109,15 +109,17 @@ export interface Props {
   initialSearch?: string;
 }
 
-export const SavedElementsModal: FunctionComponent<Props> = ({
-  customElements,
-  onAddCustomElement,
-  onClose,
-  onRemoveCustomElement,
-  onUpdateCustomElement,
-  onSearch,
-  initialSearch = '',
-}) => {
+export const SavedElementsModal = (
+  {
+    customElements,
+    onAddCustomElement,
+    onClose,
+    onRemoveCustomElement,
+    onUpdateCustomElement,
+    onSearch,
+    initialSearch = ''
+  }: Props
+) => {
   const hasLoadedElements = useRef<boolean>(false);
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);

@@ -40,21 +40,23 @@ export interface ExceptionItemProps {
   showValueListModal: ElementType;
 }
 
-const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
-  disableActions = false,
-  exceptionItem,
-  listType,
-  ruleReferences,
-  dataTestSubj,
-  editActionLabel,
-  deleteActionLabel,
-  securityLinkAnchorComponent,
-  formattedDateComponent,
-  getFormattedComments,
-  onDeleteException,
-  onEditException,
-  showValueListModal,
-}) => {
+const ExceptionItemCardComponent = (
+  {
+    disableActions = false,
+    exceptionItem,
+    listType,
+    ruleReferences,
+    dataTestSubj,
+    editActionLabel,
+    deleteActionLabel,
+    securityLinkAnchorComponent,
+    formattedDateComponent,
+    getFormattedComments,
+    onDeleteException,
+    onEditException,
+    showValueListModal
+  }: ExceptionItemProps
+) => {
   const { actions, formattedComments } = useExceptionItemCard({
     listType,
     editActionLabel,

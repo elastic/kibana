@@ -31,15 +31,17 @@ interface OnboardingCardProps {
   complete?: boolean;
 }
 
-export const OnboardingCard: React.FC<OnboardingCardProps> = ({
-  title,
-  icon,
-  description,
-  actionTitle,
-  testSubj,
-  actionPath,
-  complete,
-}) => {
+export const OnboardingCard = (
+  {
+    title,
+    icon,
+    description,
+    actionTitle,
+    testSubj,
+    actionPath,
+    complete
+  }: OnboardingCardProps
+) => {
   const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>

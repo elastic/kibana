@@ -29,7 +29,7 @@ import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
 import { ContentFieldsPanel } from './content_fields_panel';
 import { ExtractionRulesLogic } from './extraction_rules_logic';
 
-export const ExtractionRulesTable: React.FC = () => {
+export const ExtractionRulesTable = () => {
   const {
     deleteFieldRule,
     editExtractionRule,

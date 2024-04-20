@@ -31,13 +31,15 @@ interface MiniHistogramProps {
   barHighlightColorOverride?: string;
 }
 
-export const MiniHistogram: FC<MiniHistogramProps> = ({
-  chartData,
-  isLoading,
-  label,
-  barColorOverride,
-  barHighlightColorOverride,
-}) => {
+export const MiniHistogram = (
+  {
+    chartData,
+    isLoading,
+    label,
+    barColorOverride,
+    barHighlightColorOverride
+  }: MiniHistogramProps
+) => {
   const { charts } = useAiopsAppContext();
 
   const euiTheme = useEuiTheme();

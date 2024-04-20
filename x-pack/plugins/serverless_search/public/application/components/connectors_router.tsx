@@ -10,7 +10,7 @@ import React from 'react';
 import { EditConnector } from './connectors/edit_connector';
 import { ConnectorsOverview } from './connectors_overview';
 
-export const ConnectorsRouter: React.FC = () => {
+export const ConnectorsRouter = () => {
   return (
     <Routes>
       <Route exact path={'/:id'}>

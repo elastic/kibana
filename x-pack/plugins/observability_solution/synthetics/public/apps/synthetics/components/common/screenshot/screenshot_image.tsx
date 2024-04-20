@@ -27,27 +27,31 @@ export interface ScreenshotImageProps {
   onClick?: MouseEventHandler<HTMLImageElement>;
 }
 
-export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string }> = ({
-  label,
-  imgSrc,
-  isLoading,
-  animateLoading = true,
-  unavailableMessage,
-  borderColor,
-  borderRadius,
-  hasBorder = true,
-  size = [100, 64],
-  onMouseEnter,
-  onMouseLeave,
-  onClick,
-}) => {
+export const ScreenshotImage = (
+  {
+    label,
+    imgSrc,
+    isLoading,
+    animateLoading = true,
+    unavailableMessage,
+    borderColor,
+    borderRadius,
+    hasBorder = true,
+    size = [100, 64],
+    onMouseEnter,
+    onMouseLeave,
+    onClick
+  }: ScreenshotImageProps & {
+    imgSrc?: string;
+  }
+) => {
   const { euiTheme } = useEuiTheme();
   const [naturalSize, setNaturalSize] = useState<[number, number]>(DEFAULT_SIZE);
   const { width, height } = getConfinedScreenshotSize(size, naturalSize);
 
   return imgSrc ? (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-    <img
+    (<img
       css={{
         outline: 0,
         objectFit: 'contain',
@@ -74,7 +78,7 @@ export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string 
       onMouseLeave={onMouseLeave}
       onClick={onClick}
       onKeyDown={undefined}
-    />
+    />)
   ) : (
     <EmptyThumbnail
       isLoading={isLoading}

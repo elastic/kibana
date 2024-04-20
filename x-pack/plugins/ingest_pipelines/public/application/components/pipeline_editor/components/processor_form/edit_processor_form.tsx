@@ -93,16 +93,18 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
   );
 };
 
-export const EditProcessorForm: FunctionComponent<Props> = ({
-  getProcessor,
-  form,
-  isOnFailure,
-  onOpen,
-  esDocsBasePath,
-  closeFlyout,
-  handleSubmit,
-  resetProcessors,
-}) => {
+export const EditProcessorForm = (
+  {
+    getProcessor,
+    form,
+    isOnFailure,
+    onOpen,
+    esDocsBasePath,
+    closeFlyout,
+    handleSubmit,
+    resetProcessors
+  }: Props
+) => {
   const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
   const {
     testOutputPerProcessor,

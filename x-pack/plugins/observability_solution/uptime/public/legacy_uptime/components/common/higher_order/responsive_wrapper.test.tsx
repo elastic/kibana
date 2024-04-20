@@ -14,7 +14,7 @@ interface Prop {
 }
 
 describe('ResponsiveWrapper HOC', () => {
-  let WrappedByHOC: React.FC<Prop>;
+  let WrappedByHOC;
   beforeEach(() => {
     WrappedByHOC = withResponsiveWrapper<Prop>(() => <div>Should be responsive</div>);
   });

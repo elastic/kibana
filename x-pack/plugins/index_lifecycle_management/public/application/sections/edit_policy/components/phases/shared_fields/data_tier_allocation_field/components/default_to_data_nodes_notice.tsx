@@ -15,9 +15,13 @@ import {
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
-  phase,
-}) => {
+export const DefaultToDataNodesNotice = (
+  {
+    phase
+  }: {
+    phase: PhaseWithAllocation;
+  }
+) => {
   return (
     <EuiCallOut
       data-test-subj="defaultToDataNodesNotice"

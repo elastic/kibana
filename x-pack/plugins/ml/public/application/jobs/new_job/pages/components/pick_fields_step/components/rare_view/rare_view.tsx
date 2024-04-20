@@ -24,7 +24,12 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const RareView: FC<Props> = ({ isActive, setCanProceed }) => {
+export const RareView = (
+  {
+    isActive,
+    setCanProceed
+  }: Props
+) => {
   const [rareFieldValid, setRareFieldValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
   const [rareDetectorType, setRareDetectorType] = useState(RARE_DETECTOR_TYPE.RARE);

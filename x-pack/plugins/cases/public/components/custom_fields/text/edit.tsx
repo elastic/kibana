@@ -52,12 +52,14 @@ interface FormWrapper {
   onChange: (state: FormState) => void;
 }
 
-const FormWrapperComponent: React.FC<FormWrapper> = ({
-  initialValue,
-  customFieldConfiguration,
-  isLoading,
-  onChange,
-}) => {
+const FormWrapperComponent = (
+  {
+    initialValue,
+    customFieldConfiguration,
+    isLoading,
+    onChange
+  }: FormWrapper
+) => {
   const { form } = useForm<{ value: string }>({
     defaultValue: {
       value:

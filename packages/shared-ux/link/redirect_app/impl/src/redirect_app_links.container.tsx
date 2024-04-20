@@ -23,11 +23,11 @@ import { RedirectAppLinks as Component } from './redirect_app_links.component';
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<Omit<RedirectAppLinksComponentProps, 'navigateToUrl'>> = ({
-  children,
-  ...props
-}) => (
-  <Component {...useServices()} {...props}>
-    {children}
-  </Component>
-);
+export const RedirectAppLinks = (
+  {
+    children,
+    ...props
+  }: Omit<RedirectAppLinksComponentProps, 'navigateToUrl'>
+) => (<Component {...useServices()} {...props}>
+  {children}
+</Component>);

@@ -11,12 +11,19 @@ import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 
-export const FieldValue: React.FC<{
-  highlightTerms: string[];
-  isActiveHighlight: boolean;
-  value: JsonArray;
-  render?: (value: JsonValue) => React.ReactNode;
-}> = React.memo(({ highlightTerms, isActiveHighlight, value, render }) => {
+export const FieldValue = React.memo((
+  {
+    highlightTerms,
+    isActiveHighlight,
+    value,
+    render
+  }: {
+    highlightTerms: string[];
+    isActiveHighlight: boolean;
+    value: JsonArray;
+    render?: (value: JsonValue) => React.ReactNode;
+  }
+) => {
   if (render) {
     return <>{render(value.length === 1 ? value[0] : value)}</>;
   }

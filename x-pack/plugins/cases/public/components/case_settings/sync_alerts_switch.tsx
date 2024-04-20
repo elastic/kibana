@@ -17,12 +17,14 @@ interface Props {
   onSwitchChange?: (isSynced: boolean) => void;
 }
 
-const SyncAlertsSwitchComponent: React.FC<Props> = ({
-  disabled,
-  isSynced = true,
-  showLabel = false,
-  onSwitchChange,
-}) => {
+const SyncAlertsSwitchComponent = (
+  {
+    disabled,
+    isSynced = true,
+    showLabel = false,
+    onSwitchChange
+  }: Props
+) => {
   const [isOn, setIsOn] = useState(isSynced);
 
   const onChange = useCallback(() => {

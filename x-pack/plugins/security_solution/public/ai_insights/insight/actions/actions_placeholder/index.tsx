@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 
-const ActionsPlaceholderComponent: React.FC = () => {
+const ActionsPlaceholderComponent = () => {
   const { euiTheme } = useEuiTheme();
 
   return (

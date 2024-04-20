@@ -21,11 +21,13 @@ interface Props {
   setDfaLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const OverviewContent: FC<Props> = ({
-  createAnomalyDetectionJobDisabled,
-  setAdLazyJobCount,
-  setDfaLazyJobCount,
-}) => {
+export const OverviewContent = (
+  {
+    createAnomalyDetectionJobDisabled,
+    setAdLazyJobCount,
+    setDfaLazyJobCount
+  }: Props
+) => {
   const {
     services: {
       uiSettings,

@@ -13,10 +13,12 @@ interface ConnectorUnconfiguredProps {
   configurationPathOnClick?: () => void;
   dataTelemetryIdPrefix: string;
 }
-export const ConnectorUnconfigured: React.FC<ConnectorUnconfiguredProps> = ({
-  configurationPathOnClick,
-  dataTelemetryIdPrefix,
-}) => {
+export const ConnectorUnconfigured = (
+  {
+    configurationPathOnClick,
+    dataTelemetryIdPrefix
+  }: ConnectorUnconfiguredProps
+) => {
   return (
     <>
       <EuiSpacer />

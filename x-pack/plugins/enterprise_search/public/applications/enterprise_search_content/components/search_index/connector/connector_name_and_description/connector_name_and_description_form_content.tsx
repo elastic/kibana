@@ -15,7 +15,7 @@ import { NAME_LABEL, DESCRIPTION_LABEL, OPTIONAL_LABEL } from '../../../../../sh
 
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
-export const ConnectorNameAndDescriptionFormContent: React.FC = () => {
+export const ConnectorNameAndDescriptionFormContent = () => {
   const {
     localNameAndDescription: { name, description },
   } = useValues(ConnectorNameAndDescriptionLogic);

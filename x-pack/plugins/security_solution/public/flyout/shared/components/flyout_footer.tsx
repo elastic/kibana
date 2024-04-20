@@ -16,7 +16,12 @@ interface FlyoutFooterProps extends React.ComponentProps<typeof EuiFlyoutFooter>
 /**
  * Wrapper of `EuiFlyoutFooter`, setting the recommended `16px` padding using a EuiPanel.
  */
-export const FlyoutFooter: FC<FlyoutFooterProps> = memo(({ children, ...flyoutFooterProps }) => {
+export const FlyoutFooter = memo((
+  {
+    children,
+    ...flyoutFooterProps
+  }: FlyoutFooterProps
+) => {
   return (
     <EuiFlyoutFooter {...flyoutFooterProps}>
       <EuiPanel hasShadow={false} color="transparent">

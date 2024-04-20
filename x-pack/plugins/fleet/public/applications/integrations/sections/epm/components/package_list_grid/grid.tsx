@@ -24,11 +24,18 @@ interface GridColumnProps {
   showCardLabels?: boolean;
 }
 
-const VirtualizedRow: React.FC<{
-  index: number;
-  onHeightChange: (index: number, size: number) => void;
-  style: any;
-}> = ({ index, children, style, onHeightChange }) => {
+const VirtualizedRow = (
+  {
+    index,
+    children,
+    style,
+    onHeightChange
+  }: {
+    index: number;
+    onHeightChange: (index: number, size: number) => void;
+    style: any;
+  }
+) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

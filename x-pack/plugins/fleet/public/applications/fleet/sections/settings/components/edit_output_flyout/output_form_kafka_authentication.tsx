@@ -69,11 +69,13 @@ const kafkaAuthenticationsOptions = [
   },
 ];
 
-export const OutputFormKafkaAuthentication: React.FunctionComponent<{
-  inputs: OutputFormInputsType;
-  useSecretsStorage: boolean;
-  onToggleSecretStorage: (secretEnabled: boolean) => void;
-}> = (props) => {
+export const OutputFormKafkaAuthentication = (
+  props: {
+    inputs: OutputFormInputsType;
+    useSecretsStorage: boolean;
+    onToggleSecretStorage: (secretEnabled: boolean) => void;
+  }
+) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     kafkaAuthPassword: false,

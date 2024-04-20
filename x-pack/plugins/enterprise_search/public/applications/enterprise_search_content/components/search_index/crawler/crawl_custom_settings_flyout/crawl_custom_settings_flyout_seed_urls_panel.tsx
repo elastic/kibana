@@ -54,7 +54,7 @@ interface CrawlCustomSettingsFlyoutSeedUrlsPanelProps {
   toggleIncludeSitemapsInRobotsTxt: () => void;
 }
 
-export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps: React.FC = () => {
+export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps = () => {
   const {
     customEntryPointUrls,
     customSitemapUrls,
@@ -96,16 +96,16 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps: React.FC = ()
   );
 };
 
-export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC<
-  CrawlCustomSettingsFlyoutSeedUrlsPanelProps
-> = ({
-  scheduleConfig,
-  onSelectCustomEntryPointUrls,
-  onSelectCustomSitemapUrls,
-  onSelectEntryPointUrls,
-  onSelectSitemapUrls,
-  toggleIncludeSitemapsInRobotsTxt,
-}) => {
+export const CrawlCustomSettingsFlyoutSeedUrlsPanel = (
+  {
+    scheduleConfig,
+    onSelectCustomEntryPointUrls,
+    onSelectCustomSitemapUrls,
+    onSelectEntryPointUrls,
+    onSelectSitemapUrls,
+    toggleIncludeSitemapsInRobotsTxt
+  }: CrawlCustomSettingsFlyoutSeedUrlsPanelProps
+) => {
   const totalSeedUrls =
     scheduleConfig.customEntryPointUrls.length +
     scheduleConfig.customSitemapUrls.length +

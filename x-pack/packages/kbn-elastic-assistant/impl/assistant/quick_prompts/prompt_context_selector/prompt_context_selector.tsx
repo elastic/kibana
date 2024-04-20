@@ -23,81 +23,86 @@ export type PromptContextSelectorOption = EuiComboBoxOptionOption<{ category: st
 /**
  * Selector for choosing multiple Prompt Context Categories
  */
-export const PromptContextSelector: React.FC<Props> = React.memo(
-  ({ isDisabled, onPromptContextSelectionChange, promptContexts, selectedPromptContexts = [] }) => {
-    // ComboBox options
-    const options = useMemo<PromptContextSelectorOption[]>(
-      () =>
-        promptContexts.map((pc) => ({
+export const PromptContextSelector = React.memo((
+  {
+    isDisabled,
+    onPromptContextSelectionChange,
+    promptContexts,
+    selectedPromptContexts = []
+  }: Props
+) => {
+  // ComboBox options
+  const options = useMemo<PromptContextSelectorOption[]>(
+    () =>
+      promptContexts.map((pc) => ({
+        value: {
+          category: pc.category,
+        },
+        label: pc.description,
+        'data-test-subj': pc.description,
+      })),
+    [promptContexts]
+  );
+  const selectedOptions = useMemo<PromptContextSelectorOption[]>(() => {
+    return selectedPromptContexts != null
+      ? selectedPromptContexts.map((pc) => ({
           value: {
             category: pc.category,
           },
           label: pc.description,
-          'data-test-subj': pc.description,
-        })),
-      [promptContexts]
-    );
-    const selectedOptions = useMemo<PromptContextSelectorOption[]>(() => {
-      return selectedPromptContexts != null
-        ? selectedPromptContexts.map((pc) => ({
-            value: {
-              category: pc.category,
-            },
-            label: pc.description,
-          }))
-        : [];
-    }, [selectedPromptContexts]);
+        }))
+      : [];
+  }, [selectedPromptContexts]);
 
-    const handleSelectionChange = useCallback(
-      (promptContextSelectorOption: PromptContextSelectorOption[]) => {
-        const newPromptSelection = promptContexts.filter((pc) =>
-          promptContextSelectorOption.some((qpso) => pc.description === qpso.label)
-        );
-        onPromptContextSelectionChange(newPromptSelection);
-      },
-      [onPromptContextSelectionChange, promptContexts]
-    );
-
-    // Callback for when user selects a prompt context
-    const onChange = useCallback(
-      (newOptions: PromptContextSelectorOption[]) => {
-        if (newOptions.length === 0) {
-          handleSelectionChange([]);
-        } else if (options.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
-          handleSelectionChange(newOptions);
-        }
-      },
-      [handleSelectionChange, options]
-    );
-
-    const renderOption: (
-      option: PromptContextSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, value } = option;
-      return (
-        <span className={contentClassName}>
-          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-          <span>{` / (${value?.category})`}</span>
-        </span>
+  const handleSelectionChange = useCallback(
+    (promptContextSelectorOption: PromptContextSelectorOption[]) => {
+      const newPromptSelection = promptContexts.filter((pc) =>
+        promptContextSelectorOption.some((qpso) => pc.description === qpso.label)
       );
-    };
+      onPromptContextSelectionChange(newPromptSelection);
+    },
+    [onPromptContextSelectionChange, promptContexts]
+  );
 
+  // Callback for when user selects a prompt context
+  const onChange = useCallback(
+    (newOptions: PromptContextSelectorOption[]) => {
+      if (newOptions.length === 0) {
+        handleSelectionChange([]);
+      } else if (options.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
+        handleSelectionChange(newOptions);
+      }
+    },
+    [handleSelectionChange, options]
+  );
+
+  const renderOption: (
+    option: PromptContextSelectorOption,
+    searchValue: string,
+    OPTION_CONTENT_CLASSNAME: string
+  ) => React.ReactNode = (option, searchValue, contentClassName) => {
+    const { label, value } = option;
     return (
-      <EuiComboBox
-        aria-label={i18n.PROMPT_CONTEXT_SELECTOR}
-        compressed
-        fullWidth
-        isDisabled={isDisabled}
-        placeholder={i18n.PROMPT_CONTEXT_SELECTOR_PLACEHOLDER}
-        options={options}
-        selectedOptions={selectedOptions}
-        onChange={onChange}
-        renderOption={renderOption}
-      />
+      <span className={contentClassName}>
+        <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+        <span>{` / (${value?.category})`}</span>
+      </span>
     );
-  }
-);
+  };
+
+  return (
+    <EuiComboBox
+      aria-label={i18n.PROMPT_CONTEXT_SELECTOR}
+      compressed
+      fullWidth
+      isDisabled={isDisabled}
+      placeholder={i18n.PROMPT_CONTEXT_SELECTOR_PLACEHOLDER}
+      options={options}
+      selectedOptions={selectedOptions}
+      onChange={onChange}
+      renderOption={renderOption}
+    />
+  );
+});
 
 PromptContextSelector.displayName = 'PromptContextSelector';

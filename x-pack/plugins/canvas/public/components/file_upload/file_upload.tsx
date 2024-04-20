@@ -18,9 +18,7 @@ interface Props {
   onUpload: () => void;
 }
 
-export const FileUpload: FunctionComponent<Props> = (props) => (
-  <EuiFilePicker compressed id={props.id} className={props.className} onChange={props.onUpload} />
-);
+export const FileUpload = (props: Props) => (<EuiFilePicker compressed id={props.id} className={props.className} onChange={props.onUpload} />);
 
 FileUpload.defaultProps = {
   id: '',

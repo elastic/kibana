@@ -19,7 +19,14 @@ interface Props {
   }>;
 }
 
-export const UnitField: FunctionComponent<Props> = ({ path, disabled, options, euiFieldProps }) => {
+export const UnitField = (
+  {
+    path,
+    disabled,
+    options,
+    euiFieldProps
+  }: Props
+) => {
   const [open, setOpen] = useState(false);
 
   return (

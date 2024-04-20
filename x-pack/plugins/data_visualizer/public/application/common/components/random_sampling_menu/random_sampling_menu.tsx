@@ -36,7 +36,13 @@ interface Props {
   id?: string;
 }
 
-export const SamplingMenu: FC<Props> = ({ randomSampler, reload, id }) => {
+export const SamplingMenu = (
+  {
+    randomSampler,
+    reload,
+    id
+  }: Props
+) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
   const samplingProbability = useObservable(

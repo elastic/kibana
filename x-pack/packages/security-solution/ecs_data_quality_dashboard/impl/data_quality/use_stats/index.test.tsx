@@ -23,7 +23,7 @@ const mockTelemetryEvents = {
 };
 const { toasts } = notificationServiceMock.createSetupContract();
 
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
@@ -34,7 +34,7 @@ const ContextWrapper: React.FC = ({ children }) => (
   </DataQualityProvider>
 );
 
-const ContextWrapperILMNotAvailable: React.FC = ({ children }) => (
+const ContextWrapperILMNotAvailable = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}

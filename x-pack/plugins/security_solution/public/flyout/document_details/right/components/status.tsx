@@ -33,7 +33,7 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
 /**
  * Document details status displayed in flyout right section header
  */
-export const DocumentStatus: FC = () => {
+export const DocumentStatus = () => {
   const { closeFlyout } = useExpandableFlyoutApi();
   const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
     useRightPanelContext();

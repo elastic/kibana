@@ -35,7 +35,12 @@ interface Props {
   savedObjects: SimpleSOAssetType[];
 }
 
-export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {
+export const AssetsAccordion = (
+  {
+    savedObjects,
+    type
+  }: Props
+) => {
   const { http } = useStartServices();
 
   const isDashboard = type === KibanaAssetType.dashboard;

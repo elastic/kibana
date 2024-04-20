@@ -16,7 +16,7 @@ import { newJobCapsService } from '../../../../../../../services/new_job_capabil
 import { Description } from './description';
 import type { RareJobCreator } from '../../../../../common/job_creator';
 
-export const RareFieldSelector: FC = () => {
+export const RareFieldSelector = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
 

@@ -53,7 +53,7 @@ export const explorerRouteFactory = (
   'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
-const PageWrapper: FC<PageProps> = () => {
+const PageWrapper = () => {
   const {
     services: {
       mlServices: { mlApiServices },

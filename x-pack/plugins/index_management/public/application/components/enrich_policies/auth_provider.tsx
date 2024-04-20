@@ -11,7 +11,7 @@ import { AuthorizationProvider } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
 import { INTERNAL_API_BASE_PATH } from '../../../../common';
 
-export const EnrichPoliciesAuthProvider: React.FunctionComponent = ({
+export const EnrichPoliciesAuthProvider = ({
   children,
 }: {
   children?: React.ReactNode;

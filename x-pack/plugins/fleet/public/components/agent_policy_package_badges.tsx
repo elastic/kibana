@@ -23,11 +23,13 @@ interface Props {
   excludeFleetServer?: boolean;
 }
 
-export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
-  agentPolicyId,
-  hideTitle,
-  excludeFleetServer,
-}) => {
+export const AgentPolicyPackageBadges = (
+  {
+    agentPolicyId,
+    hideTitle,
+    excludeFleetServer
+  }: Props
+) => {
   const agentPolicyRequest = useGetOneAgentPolicy(agentPolicyId);
   const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
 

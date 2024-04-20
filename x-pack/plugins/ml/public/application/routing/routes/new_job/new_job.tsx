@@ -20,6 +20,6 @@ export const newJobRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const Page: FC = () => {
+const Page = () => {
   return <Redirect to={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX)} />;
 };

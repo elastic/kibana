@@ -17,7 +17,7 @@ import type { Results } from '../../../../../common/results_loader';
 import { ml } from '../../../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
-export const TopCategories: FC = () => {
+export const TopCategories = () => {
   const { displayErrorToast } = useToastNotificationService();
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;

@@ -31,7 +31,12 @@ import {
   isGeoJobCreator,
 } from '../../../common/job_creator';
 
-export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+export const PickFieldsStep = (
+  {
+    setCurrentStep,
+    isCurrentStep
+  }: StepProps
+) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [selectionValid, setSelectionValid] = useState(false);

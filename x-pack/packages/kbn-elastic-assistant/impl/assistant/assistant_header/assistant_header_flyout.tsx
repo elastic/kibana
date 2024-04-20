@@ -53,24 +53,26 @@ type Props = OwnProps;
  * Provide a user interface for selecting and managing conversations,
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
-export const AssistantHeaderFlyout: React.FC<Props> = ({
-  selectedConversation,
-  defaultConnector,
-  docLinks,
-  isDisabled,
-  isSettingsModalVisible,
-  onToggleShowAnonymizedValues,
-  setIsSettingsModalVisible,
-  showAnonymizedValues,
-  onChatCleared,
-  chatHistoryVisible,
-  setChatHistoryVisible,
-  onCloseFlyout,
-  onConversationSelected,
-  conversations,
-  refetchConversationsState,
-  onConversationCreate,
-}) => {
+export const AssistantHeaderFlyout = (
+  {
+    selectedConversation,
+    defaultConnector,
+    docLinks,
+    isDisabled,
+    isSettingsModalVisible,
+    onToggleShowAnonymizedValues,
+    setIsSettingsModalVisible,
+    showAnonymizedValues,
+    onChatCleared,
+    chatHistoryVisible,
+    setChatHistoryVisible,
+    onCloseFlyout,
+    onConversationSelected,
+    conversations,
+    refetchConversationsState,
+    onConversationCreate
+  }: Props
+) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
       selectedConversation?.replacements != null &&

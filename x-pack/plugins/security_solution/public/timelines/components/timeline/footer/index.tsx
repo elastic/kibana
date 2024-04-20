@@ -162,13 +162,15 @@ const TimelinePaginationContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-export const PagingControlComponent: React.FC<PagingControlProps> = ({
-  activePage,
-  isLoading,
-  onPageClick,
-  totalCount,
-  totalPages,
-}) => {
+export const PagingControlComponent = (
+  {
+    activePage,
+    isLoading,
+    onPageClick,
+    totalCount,
+    totalPages
+  }: PagingControlProps
+) => {
   if (isLoading) {
     return <>{`${i18n.LOADING}...`}</>;
   }

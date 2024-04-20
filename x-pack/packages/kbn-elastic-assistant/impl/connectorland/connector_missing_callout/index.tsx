@@ -30,58 +30,63 @@ interface Props {
  * TODO: Add 'quick fix' button to just pick a connector
  * TODO: Add setting for 'default connector' so we can auto-resolve and not even show this
  */
-export const ConnectorMissingCallout: React.FC<Props> = React.memo(
-  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible, isFlyoutMode }) => {
-    const { assistantAvailability, setSelectedSettingsTab } = useAssistantContext();
+export const ConnectorMissingCallout = React.memo((
+  {
+    isConnectorConfigured,
+    isSettingsModalVisible,
+    setIsSettingsModalVisible,
+    isFlyoutMode
+  }: Props
+) => {
+  const { assistantAvailability, setSelectedSettingsTab } = useAssistantContext();
 
-    const onConversationSettingsClicked = useCallback(() => {
-      if (!isSettingsModalVisible) {
-        setIsSettingsModalVisible(true);
-        setSelectedSettingsTab(CONVERSATIONS_TAB);
-      }
-    }, [isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab]);
+  const onConversationSettingsClicked = useCallback(() => {
+    if (!isSettingsModalVisible) {
+      setIsSettingsModalVisible(true);
+      setSelectedSettingsTab(CONVERSATIONS_TAB);
+    }
+  }, [isSettingsModalVisible, setIsSettingsModalVisible, setSelectedSettingsTab]);
 
-    // Show missing callout if user has all privileges or read privileges and at least 1 connector configured
-    const showMissingCallout =
-      assistantAvailability.hasConnectorsAllPrivilege ||
-      (assistantAvailability.hasConnectorsReadPrivilege && isConnectorConfigured);
+  // Show missing callout if user has all privileges or read privileges and at least 1 connector configured
+  const showMissingCallout =
+    assistantAvailability.hasConnectorsAllPrivilege ||
+    (assistantAvailability.hasConnectorsReadPrivilege && isConnectorConfigured);
 
-    return (
-      <>
-        {showMissingCallout ? (
-          <EuiCallOut
-            data-test-subj="connectorMissingCallout"
-            color="danger"
-            iconType="controlsVertical"
-            size="m"
-            title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
-            css={
-              isFlyoutMode &&
-              css`
-                padding-left: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
-                padding-right: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
-              `
-            }
-          >
-            <p>
-              <FormattedMessage
-                defaultMessage="Select a connector above or from the {link} to continue"
-                id="xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutDescription"
-                values={{
-                  link: (
-                    <EuiLink onClick={onConversationSettingsClicked}>
-                      {i18n.MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </EuiCallOut>
-        ) : (
-          <ConnectorButton />
-        )}
-      </>
-    );
-  }
-);
+  return (
+    <>
+      {showMissingCallout ? (
+        <EuiCallOut
+          data-test-subj="connectorMissingCallout"
+          color="danger"
+          iconType="controlsVertical"
+          size="m"
+          title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
+          css={
+            isFlyoutMode &&
+            css`
+              padding-left: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+              padding-right: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+            `
+          }
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Select a connector above or from the {link} to continue"
+              id="xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutDescription"
+              values={{
+                link: (
+                  <EuiLink onClick={onConversationSettingsClicked}>
+                    {i18n.MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiCallOut>
+      ) : (
+        <ConnectorButton />
+      )}
+    </>
+  );
+});
 ConnectorMissingCallout.displayName = 'ConnectorMissingCallout';

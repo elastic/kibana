@@ -22,7 +22,7 @@ import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_ES_DEPRECATION_LOGS_PAGE_LOAD } from '../../lib/ui_metric';
 import { FixDeprecationLogs } from './fix_deprecation_logs';
 
-export const EsDeprecationLogs: FunctionComponent = () => {
+export const EsDeprecationLogs = () => {
   const {
     services: {
       breadcrumbs,

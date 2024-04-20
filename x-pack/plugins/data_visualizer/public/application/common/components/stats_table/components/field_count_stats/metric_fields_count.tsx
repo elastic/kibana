@@ -19,7 +19,11 @@ export interface MetricFieldsCountProps {
   metricsStats?: MetricFieldsStats;
 }
 
-export const MetricFieldsCount: FC<MetricFieldsCountProps> = ({ metricsStats }) => {
+export const MetricFieldsCount = (
+  {
+    metricsStats
+  }: MetricFieldsCountProps
+) => {
   if (
     !metricsStats ||
     metricsStats.visibleMetricsCount === undefined ||

@@ -68,17 +68,8 @@ const mappingConfig: FieldConfig<SwimlaneFieldMappingConfig | null> = {
   ],
 };
 
-const MappingField: React.FC<{
-  path: string;
-  label: string;
-  validationLabel: string;
-  options: EuiComboBoxProps<string>['options'];
-  fieldIdMap: Map<string, SwimlaneFieldMappingConfig>;
-  connectorType: SwimlaneConnectorType;
-  readOnly: boolean;
-  dataTestSubj?: string;
-}> = React.memo(
-  ({
+const MappingField = React.memo((
+  {
     path,
     options,
     label,
@@ -86,65 +77,79 @@ const MappingField: React.FC<{
     dataTestSubj,
     fieldIdMap,
     connectorType,
-    readOnly,
-  }) => {
-    return (
-      <UseField<SwimlaneFieldMappingConfig | null>
-        path={path}
-        component={ComboBoxField}
-        config={mappingConfig}
-        validationData={{ connectorType, validationLabel }}
-      >
-        {(field) => {
-          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-          const onComboChange = (opt: Array<EuiComboBoxOptionOption<string>>) => {
-            const option = opt[0];
-
-            const item = fieldIdMap.get(option?.value ?? '');
-            if (!item) {
-              field.setValue(null);
-              return;
-            }
-
-            field.setValue({
-              id: item.id,
-              name: item.name,
-              key: item.key,
-              fieldType: item.fieldType,
-            });
-          };
-
-          const onSearchComboChange = (value: string) => {
-            if (value !== undefined) {
-              field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
-            }
-          };
-
-          const selectedOptions = createSelectedOption(fieldIdMap.get(field.value?.id ?? ''));
-
-          return (
-            <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
-              <EuiComboBox
-                singleSelection={SINGLE_SELECTION}
-                selectedOptions={selectedOptions}
-                onChange={onComboChange}
-                onSearchChange={onSearchComboChange}
-                fullWidth
-                noSuggestions={false}
-                data-test-subj={dataTestSubj}
-                options={options}
-                isDisabled={readOnly}
-              />
-            </EuiFormRow>
-          );
-        }}
-      </UseField>
-    );
+    readOnly
+  }: {
+    path: string;
+    label: string;
+    validationLabel: string;
+    options: EuiComboBoxProps<string>['options'];
+    fieldIdMap: Map<string, SwimlaneFieldMappingConfig>;
+    connectorType: SwimlaneConnectorType;
+    readOnly: boolean;
+    dataTestSubj?: string;
   }
-);
+) => {
+  return (
+    <UseField<SwimlaneFieldMappingConfig | null>
+      path={path}
+      component={ComboBoxField}
+      config={mappingConfig}
+      validationData={{ connectorType, validationLabel }}
+    >
+      {(field) => {
+        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-const SwimlaneFieldsComponent: React.FC<Props> = ({ fields, readOnly }) => {
+        const onComboChange = (opt: Array<EuiComboBoxOptionOption<string>>) => {
+          const option = opt[0];
+
+          const item = fieldIdMap.get(option?.value ?? '');
+          if (!item) {
+            field.setValue(null);
+            return;
+          }
+
+          field.setValue({
+            id: item.id,
+            name: item.name,
+            key: item.key,
+            fieldType: item.fieldType,
+          });
+        };
+
+        const onSearchComboChange = (value: string) => {
+          if (value !== undefined) {
+            field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
+          }
+        };
+
+        const selectedOptions = createSelectedOption(fieldIdMap.get(field.value?.id ?? ''));
+
+        return (
+          <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+            <EuiComboBox
+              singleSelection={SINGLE_SELECTION}
+              selectedOptions={selectedOptions}
+              onChange={onComboChange}
+              onSearchChange={onSearchComboChange}
+              fullWidth
+              noSuggestions={false}
+              data-test-subj={dataTestSubj}
+              options={options}
+              isDisabled={readOnly}
+            />
+          </EuiFormRow>
+        );
+      }}
+    </UseField>
+  );
+});
+
+const SwimlaneFieldsComponent = (
+  {
+    fields,
+    readOnly
+  }: Props
+) => {
   const [{ config }] = useFormData({
     watch: ['config.connectorType'],
   });

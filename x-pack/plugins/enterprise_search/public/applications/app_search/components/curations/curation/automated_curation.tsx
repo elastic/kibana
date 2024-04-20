@@ -31,7 +31,7 @@ import { CurationLogic } from './curation_logic';
 import { DeleteCurationButton } from './delete_curation_button';
 import { PromotedDocuments, OrganicDocuments } from './documents';
 
-export const AutomatedCuration: React.FC = () => {
+export const AutomatedCuration = () => {
   const { curationId } = useParams<{ curationId: string }>();
   const logic = CurationLogic({ curationId });
   const { convertToManual, onSelectPageTab } = useActions(logic);

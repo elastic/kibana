@@ -27,7 +27,7 @@ const INTEGRATIONS_CALLOUT_BUTTON_TEXT = i18n.translate(
   { defaultMessage: 'Browse integrations' }
 );
 
-export const Assets: React.FC = () => {
+export const Assets = () => {
   const { euiTheme } = useEuiTheme();
   const link = useRootNavLink(SecurityPageName.assets);
   const { links = [], title } = link ?? {};

@@ -344,7 +344,11 @@ interface Props {
   navNode: ChromeProjectNavigationNode;
 }
 
-export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode }) => {
+export const NavigationSectionUI = React.memo((
+  {
+    navNode: _navNode
+  }: Props
+) => {
   const { activeNodes } = useNavigation();
   const { navigateToUrl, isSideNavCollapsed } = useServices();
 
@@ -542,11 +546,11 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
 
   return (
     // @ts-ignore - TODO
-    <EuiCollapsibleNavItem
+    (<EuiCollapsibleNavItem
       {...props}
       className={className}
       items={subItems}
       accordionProps={getAccordionProps(navNode.path)}
-    />
+    />)
   );
 });

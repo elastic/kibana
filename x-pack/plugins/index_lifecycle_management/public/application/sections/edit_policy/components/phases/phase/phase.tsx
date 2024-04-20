@@ -38,7 +38,13 @@ interface Props {
   topLevelSettings?: React.ReactNode;
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
+export const Phase = (
+  {
+    children,
+    topLevelSettings,
+    phase
+  }: Props
+) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],

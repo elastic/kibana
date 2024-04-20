@@ -20,10 +20,12 @@ interface AddAnalyticsCollectionForm {
   formId: string;
 }
 
-export const AddAnalyticsCollectionForm: React.FC<AddAnalyticsCollectionForm> = ({
-  formId,
-  collectionNameField,
-}) => {
+export const AddAnalyticsCollectionForm = (
+  {
+    formId,
+    collectionNameField
+  }: AddAnalyticsCollectionForm
+) => {
   const { createAnalyticsCollection, setNameValue } = useActions(AddAnalyticsCollectionLogic);
   const { name, isLoading, canSubmit, inputError } = useValues(AddAnalyticsCollectionLogic);
 

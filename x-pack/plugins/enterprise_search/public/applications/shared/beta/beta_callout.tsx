@@ -15,7 +15,12 @@ interface BetaCallOutProps {
   title?: string;
 }
 
-export const BetaCallOut: React.FC<BetaCallOutProps> = ({ title, description }) => {
+export const BetaCallOut = (
+  {
+    title,
+    description
+  }: BetaCallOutProps
+) => {
   return (
     <EuiCallOut
       color="warning"

@@ -56,12 +56,14 @@ export interface Props {
   fixedPanelWidths?: boolean;
 }
 
-export const Panels: React.FC<Props> = ({
-  maxWidth,
-  flyoutClassName,
-  fixedPanelWidths = false,
-  ...props
-}) => {
+export const Panels = (
+  {
+    maxWidth,
+    flyoutClassName,
+    fixedPanelWidths = false,
+    ...props
+  }: Props
+) => {
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 

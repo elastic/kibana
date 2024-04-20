@@ -47,7 +47,12 @@ export interface DiscoverActionNameProps {
   dataViewExists: boolean;
   items: TransformListRow[];
 }
-export const DiscoverActionName: FC<DiscoverActionNameProps> = ({ dataViewExists, items }) => {
+export const DiscoverActionName = (
+  {
+    dataViewExists,
+    items
+  }: DiscoverActionNameProps
+) => {
   const isBulkAction = items.length > 1;
 
   const item = items[0];

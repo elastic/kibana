@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useRootNavLink } from '../common/links/nav_links';
 
-export const Investigations: React.FC = () => {
+export const Investigations = () => {
   const link = useRootNavLink(SecurityPageName.investigations);
   const { links = [], title } = link ?? {};
 

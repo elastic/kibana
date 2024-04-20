@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ChatForm } from '../../types';
 import { EditContextFlyout } from './edit_context_flyout';
 
-export const EditContextAction: React.FC = () => {
+export const EditContextAction = () => {
   const { watch } = useFormContext<ChatForm>();
   const [showFlyout, setShowFlyout] = useState(false);
   const selectedIndices: string[] = watch('indices');

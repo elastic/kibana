@@ -9,7 +9,7 @@
 import * as React from 'react';
 import { useDrilldownManager } from '../context';
 
-export const DrilldownManagerFooter: React.FC = ({ children }) => {
+export const DrilldownManagerFooter = ({ children }) => {
   const drilldowns = useDrilldownManager();
   React.useEffect(() => {
     drilldowns.setFooter(children);
@@ -20,7 +20,7 @@ export const DrilldownManagerFooter: React.FC = ({ children }) => {
   return null;
 };
 
-export const RenderDrilldownManagerFooter: React.FC = () => {
+export const RenderDrilldownManagerFooter = () => {
   const drilldowns = useDrilldownManager();
   const footer = drilldowns.useFooter();
   return <>{footer}</>;

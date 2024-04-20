@@ -29,13 +29,15 @@ interface Props {
   isFlyoutMode: boolean;
 }
 
-const ContextPillsComponent: React.FC<Props> = ({
-  anonymizationFields,
-  promptContexts,
-  selectedPromptContexts,
-  setSelectedPromptContexts,
-  isFlyoutMode,
-}) => {
+const ContextPillsComponent = (
+  {
+    anonymizationFields,
+    promptContexts,
+    selectedPromptContexts,
+    setSelectedPromptContexts,
+    isFlyoutMode
+  }: Props
+) => {
   const sortedPromptContexts = useMemo(
     () => sortBy('description', Object.values(promptContexts)),
     [promptContexts]

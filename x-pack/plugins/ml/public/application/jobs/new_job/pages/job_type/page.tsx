@@ -32,7 +32,7 @@ import { GeoIcon } from './geo_job_icon';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 
-export const Page: FC = () => {
+export const Page = () => {
   const {
     services: {
       share,

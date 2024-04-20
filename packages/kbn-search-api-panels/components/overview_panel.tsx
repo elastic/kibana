@@ -29,15 +29,17 @@ interface OverviewPanelProps {
   overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
-export const OverviewPanel: React.FC<OverviewPanelProps> = ({
-  children,
-  description,
-  leftPanelContent,
-  links,
-  rightPanelContent,
-  title,
-  overviewPanelProps,
-}) => {
+export const OverviewPanel = (
+  {
+    children,
+    description,
+    leftPanelContent,
+    links,
+    rightPanelContent,
+    title,
+    overviewPanelProps
+  }: OverviewPanelProps
+) => {
   return (
     <>
       <EuiSpacer size="xxl" />

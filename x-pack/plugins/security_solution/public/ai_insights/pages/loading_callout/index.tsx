@@ -25,11 +25,13 @@ interface Props {
   connectorIntervals: GenerationInterval[];
 }
 
-const LoadingCalloutComponent: React.FC<Props> = ({
-  alertsCount,
-  approximateFutureTime,
-  connectorIntervals,
-}) => {
+const LoadingCalloutComponent = (
+  {
+    alertsCount,
+    approximateFutureTime,
+    connectorIntervals
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const { theme } = useKibana().services;
 

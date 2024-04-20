@@ -55,10 +55,12 @@ const MAX_WIDTH = 830;
 /**
  * A presentational component that is shown in cases when there are no data views created yet.
  */
-export const AddDataPrompt: React.FC<AddDataPromptComponentProps> = ({
-  addDataHref,
-  docLink: docLink,
-}) => {
+export const AddDataPrompt = (
+  {
+    addDataHref,
+    docLink: docLink
+  }: AddDataPromptComponentProps
+) => {
   const createDataViewText = i18n.translate('indexPatternManagement.addDataPrompt.addDataText', {
     defaultMessage: 'Add data',
   });

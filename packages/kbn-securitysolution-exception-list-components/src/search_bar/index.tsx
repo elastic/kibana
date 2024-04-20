@@ -60,19 +60,21 @@ interface SearchBarProps {
   onSearch: (arg: GetExceptionItemProps) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
-const SearchBarComponent: FC<SearchBarProps> = ({
-  addExceptionButtonText,
-  placeholdertext,
-  canAddException,
-  listType,
-  isSearching,
-  dataTestSubj,
-  filters = [],
-  isButtonFilled = true,
-  buttonIconType,
-  onSearch,
-  onAddExceptionClick,
-}) => {
+const SearchBarComponent = (
+  {
+    addExceptionButtonText,
+    placeholdertext,
+    canAddException,
+    listType,
+    isSearching,
+    dataTestSubj,
+    filters = [],
+    isButtonFilled = true,
+    buttonIconType,
+    onSearch,
+    onAddExceptionClick
+  }: SearchBarProps
+) => {
   const handleOnSearch = useCallback(
     ({ queryText }): void => {
       onSearch({ search: queryText });

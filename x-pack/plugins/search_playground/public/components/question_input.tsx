@@ -19,12 +19,14 @@ interface QuestionInputProps {
   isDisabled?: boolean;
 }
 
-export const QuestionInput: React.FC<QuestionInputProps> = ({
-  value,
-  onChange,
-  button,
-  isDisabled,
-}) => {
+export const QuestionInput = (
+  {
+    value,
+    onChange,
+    button,
+    isDisabled
+  }: QuestionInputProps
+) => {
   const { euiTheme } = useEuiTheme();
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

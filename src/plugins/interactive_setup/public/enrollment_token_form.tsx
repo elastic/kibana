@@ -49,13 +49,16 @@ export interface EnrollmentTokenFormProps {
   onSuccess?(): void;
 }
 
-export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = ({
-  defaultValues = {
-    token: '',
-  },
-  onCancel,
-  onSuccess,
-}) => {
+export const EnrollmentTokenForm = (
+  {
+    defaultValues = {
+      token: '',
+    },
+
+    onCancel,
+    onSuccess
+  }: EnrollmentTokenFormProps
+) => {
   const { http } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
@@ -174,23 +177,25 @@ interface EnrollmentTokenDetailsProps {
   token: EnrollmentToken;
 }
 
-const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = ({ token }) => (
-  <EuiText size="xs">
-    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false} className="eui-textNoWrap">
-        <FormattedMessage
-          id="interactiveSetup.enrollmentTokenDetails.connectTo"
-          defaultMessage="Connect to"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
-        <TextTruncate>
-          <strong>{token.adr[0]}</strong>
-        </TextTruncate>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiText>
-);
+const EnrollmentTokenDetails = (
+  {
+    token
+  }: EnrollmentTokenDetailsProps
+) => (<EuiText size="xs">
+  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+    <EuiFlexItem grow={false} className="eui-textNoWrap">
+      <FormattedMessage
+        id="interactiveSetup.enrollmentTokenDetails.connectTo"
+        defaultMessage="Connect to"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false} style={{ overflow: 'hidden' }}>
+      <TextTruncate>
+        <strong>{token.adr[0]}</strong>
+      </TextTruncate>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiText>);
 
 export function decodeEnrollmentToken(enrollmentToken: string): EnrollmentToken | undefined {
   try {

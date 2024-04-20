@@ -66,7 +66,11 @@ export interface UserEntityOverviewProps {
 /**
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
+export const UserEntityOverview = (
+  {
+    userName
+  }: UserEntityOverviewProps
+) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {

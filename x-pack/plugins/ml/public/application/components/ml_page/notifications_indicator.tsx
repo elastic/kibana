@@ -20,7 +20,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
 
-export const NotificationsIndicator: FC = () => {
+export const NotificationsIndicator = () => {
   const { notificationsCounts, latestRequestedAt } = useMlNotifications();
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 

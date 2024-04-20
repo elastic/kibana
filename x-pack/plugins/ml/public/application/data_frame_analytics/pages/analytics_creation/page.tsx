@@ -45,7 +45,11 @@ interface Props {
   jobId?: DataFrameAnalyticsId;
 }
 
-export const Page: FC<Props> = ({ jobId }) => {
+export const Page = (
+  {
+    jobId
+  }: Props
+) => {
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
     true,

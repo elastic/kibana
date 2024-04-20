@@ -25,7 +25,7 @@ import {
 
 import { CredentialsLogic } from '../credentials_logic';
 
-export const CredentialsFlyoutFooter: React.FC = () => {
+export const CredentialsFlyoutFooter = () => {
   const { hideCredentialsForm, onApiTokenChange } = useActions(CredentialsLogic);
   const { activeApiTokenExists } = useValues(CredentialsLogic);
 

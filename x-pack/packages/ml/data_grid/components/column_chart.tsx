@@ -54,13 +54,15 @@ const columnChartTheme = {
   scales: { barsPadding: 0.1 },
 };
 
-export const ColumnChart: FC<Props> = ({
-  chartData,
-  columnType,
-  dataTestSubj,
-  hideLabel,
-  maxChartColumns,
-}) => {
+export const ColumnChart = (
+  {
+    chartData,
+    columnType,
+    dataTestSubj,
+    hideLabel,
+    maxChartColumns
+  }: Props
+) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
 
   return (

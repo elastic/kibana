@@ -16,7 +16,12 @@ import { ExpandedRowContent } from './expanded_row_content';
 import { ChoroplethMap } from './choropleth_map';
 import { ErrorMessageContent } from './error_message';
 
-export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+export const KeywordContent = (
+  {
+    config,
+    onAddFilter
+  }: FieldDataRowProps
+) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
   const { stats, fieldName } = config;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;

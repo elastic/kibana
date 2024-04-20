@@ -33,7 +33,11 @@ import { CollapsiblePanel } from '../../../components/collapsible_panel';
 interface Props {
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
-export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
+export const AnalyticsPanel = (
+  {
+    setLazyJobCount
+  }: Props
+) => {
   const refresh = useRefresh();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);

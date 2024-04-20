@@ -96,7 +96,7 @@ const Wrapper = styled.div`
   width: 100%;
 `;
 
-const CasesByStatusComponent: React.FC = () => {
+const CasesByStatusComponent = () => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(CASES_BY_STATUS_ID);
   const { getAppUrl, navigateTo } = useNavigation();
   const { search } = useFormatUrl(SecurityPageName.case);

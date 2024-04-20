@@ -26,12 +26,14 @@ interface TimeSeriesExplorerPageProps {
   noSingleMetricJobsFound?: boolean;
 }
 
-export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
-  children,
-  dateFormatTz,
-  resizeRef,
-  noSingleMetricJobsFound,
-}) => {
+export const TimeSeriesExplorerPage = (
+  {
+    children,
+    dateFormatTz,
+    resizeRef,
+    noSingleMetricJobsFound
+  }: TimeSeriesExplorerPageProps
+) => {
   const {
     services: { docLinks },
   } = useMlKibana();

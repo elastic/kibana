@@ -33,9 +33,9 @@ const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
   areSearchSourceExpressionPropsEqual
 );
 
-export const EsQueryRuleTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<EsQueryRuleParams, EsQueryRuleMetaData>
-> = (props) => {
+export const EsQueryRuleTypeExpression = (
+  props: RuleTypeParamsExpressionProps<EsQueryRuleParams, EsQueryRuleMetaData>
+) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
   const isEsqlQuery = isEsqlQueryRule(ruleParams);

@@ -179,12 +179,14 @@ const MixedIndicesCallout = ({
   );
 };
 
-export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
-  dataStream,
-  ilmPolicyName,
-  ilmPolicyLink,
-  onClose,
-}) => {
+export const EditDataRetentionModal = (
+  {
+    dataStream,
+    ilmPolicyName,
+    ilmPolicyLink,
+    onClose
+  }: Props
+) => {
   const lifecycle = dataStream?.lifecycle;
   const dataStreamName = dataStream?.name as string;
 

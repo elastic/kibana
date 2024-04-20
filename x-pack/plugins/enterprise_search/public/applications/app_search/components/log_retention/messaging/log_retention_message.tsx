@@ -17,7 +17,11 @@ import { NoLogging, CustomPolicy, DefaultPolicy } from './constants';
 interface Props {
   type: LogRetentionOptions;
 }
-export const LogRetentionMessage: React.FC<Props> = ({ type }) => {
+export const LogRetentionMessage = (
+  {
+    type
+  }: Props
+) => {
   const { logRetention } = useValues(LogRetentionLogic);
   if (!logRetention) return null;
 

@@ -14,7 +14,7 @@ import demoIconUrl from './demo_icon.svg';
 import docsIconUrl from './docs_icon.svg';
 import forumIconUrl from './forum_icon.svg';
 
-export const Footer: FunctionComponent = () => {
+export const Footer = () => {
   const sections = [
     {
       iconUrl: integrationsIconUrl,

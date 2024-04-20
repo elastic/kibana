@@ -25,18 +25,26 @@ function PageLoadingUI() {
   );
 }
 
-const PageLoadingTracking: React.FunctionComponent<{ pageViewTitle: string }> = ({
-  pageViewTitle,
-}) => {
+const PageLoadingTracking = (
+  {
+    pageViewTitle
+  }: {
+    pageViewTitle: string;
+  }
+) => {
   const path = pageViewTitle.toLowerCase().replace(/-/g, '').replace(/\s+/g, '_');
   useTrackPageview({ app: 'stack_monitoring', path });
   useTrackPageview({ app: 'stack_monitoring', path, delay: 15000 });
   return <PageLoadingUI />;
 };
 
-export const PageLoading: React.FunctionComponent<{ pageViewTitle?: string }> = ({
-  pageViewTitle,
-}) => {
+export const PageLoading = (
+  {
+    pageViewTitle
+  }: {
+    pageViewTitle?: string;
+  }
+) => {
   if (pageViewTitle) {
     return <PageLoadingTracking pageViewTitle={pageViewTitle} />;
   }

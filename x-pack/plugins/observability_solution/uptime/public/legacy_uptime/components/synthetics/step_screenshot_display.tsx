@@ -94,14 +94,16 @@ const ComposedStepImage = ({
   return <BaseStepImage stepIndex={stepIndex} stepName={stepName} url={url} />;
 };
 
-export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
-  checkGroup,
-  isFullScreenshot: isScreenshotBlob,
-  isScreenshotRef,
-  stepIndex,
-  stepName,
-  lazyLoad = true,
-}) => {
+export const StepScreenshotDisplay = (
+  {
+    checkGroup,
+    isFullScreenshot: isScreenshotBlob,
+    isScreenshotRef,
+    stepIndex,
+    stepName,
+    lazyLoad = true
+  }: StepScreenshotDisplayProps
+) => {
   const containerRef = useRef(null);
   const {
     colors: { lightestShade: pageBackground },

@@ -65,17 +65,19 @@ export type HostRiskScoreColumns = [
   Columns<RiskScoreItem[RiskScoreFields.hostRisk]>
 ];
 
-const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
-  data,
-  id,
-  isInspect,
-  loading,
-  loadPage,
-  setQuerySkip,
-  severityCount,
-  totalCount,
-  type,
-}) => {
+const HostRiskScoreTableComponent = (
+  {
+    data,
+    id,
+    isInspect,
+    loading,
+    loadPage,
+    setQuerySkip,
+    severityCount,
+    totalCount,
+    type
+  }: HostRiskScoreTableProps
+) => {
   const dispatch = useDispatch();
   const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>

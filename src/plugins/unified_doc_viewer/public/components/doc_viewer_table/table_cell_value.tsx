@@ -19,7 +19,12 @@ interface IgnoreWarningProps {
   rawValue: unknown;
 }
 
-const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reason }) => {
+const IgnoreWarning = React.memo((
+  {
+    rawValue,
+    reason
+  }: IgnoreWarningProps
+) => {
   const multiValue = Array.isArray(rawValue) && rawValue.length > 1;
 
   const getToolTipContent = (): string => {

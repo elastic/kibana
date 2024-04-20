@@ -16,19 +16,21 @@ interface Props {
     dataTestSubj?: string;
   }>;
 }
-export const AnalyticsCards: React.FC<Props> = ({ stats }) => (
-  <EuiFlexGroup direction="column">
-    {stats.map(({ text, stat, dataTestSubj }) => (
-      <EuiFlexItem key={text}>
-        <EuiPanel color="subdued" hasShadow={false}>
-          <EuiStat
-            title={stat}
-            description={text}
-            titleColor="primary"
-            data-test-subj={dataTestSubj}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
-);
+export const AnalyticsCards = (
+  {
+    stats
+  }: Props
+) => (<EuiFlexGroup direction="column">
+  {stats.map(({ text, stat, dataTestSubj }) => (
+    <EuiFlexItem key={text}>
+      <EuiPanel color="subdued" hasShadow={false}>
+        <EuiStat
+          title={stat}
+          description={text}
+          titleColor="primary"
+          data-test-subj={dataTestSubj}
+        />
+      </EuiPanel>
+    </EuiFlexItem>
+  ))}
+</EuiFlexGroup>);

@@ -72,7 +72,7 @@ const steps: EuiContainedStepProps[] = [
   },
 ];
 
-export const LinearCombinationPanel: React.FC = () => (
+export const LinearCombinationPanel = () => (
   <>
     <EuiSpacer />
     <EuiFlexGroup direction="column">

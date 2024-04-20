@@ -28,13 +28,15 @@ const i18nTexts = {
   ),
 };
 
-export const NodeAllocation: FunctionComponent<SharedProps> = ({
-  phase,
-  nodes,
-  isLoading,
-  isCloudEnabled,
-  isUsingDeprecatedDataRoleConfig,
-}) => {
+export const NodeAllocation = (
+  {
+    phase,
+    nodes,
+    isLoading,
+    isCloudEnabled,
+    isUsingDeprecatedDataRoleConfig
+  }: SharedProps
+) => {
   const allocationNodeAttributePath = `_meta.${phase}.allocationNodeAttribute`;
 
   const [formData] = useFormData({

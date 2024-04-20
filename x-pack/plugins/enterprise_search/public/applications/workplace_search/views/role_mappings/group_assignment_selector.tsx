@@ -24,7 +24,7 @@ import {
 
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-export const GroupAssignmentSelector: React.FC = () => {
+export const GroupAssignmentSelector = () => {
   const { handleAllGroupsSelectionChange, handleGroupSelectionChange } =
     useActions(RoleMappingsLogic);
 

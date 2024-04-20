@@ -42,16 +42,18 @@ export type MlAnomalyAlertTriggerProps =
     mlCapabilities: MlCapabilities;
   };
 
-const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
-  ruleParams,
-  setRuleParams,
-  setRuleProperty,
-  errors,
-  ruleInterval,
-  alertNotifyWhen,
-  getStartServices,
-  mlCapabilities,
-}) => {
+const MlAnomalyAlertTrigger = (
+  {
+    ruleParams,
+    setRuleParams,
+    setRuleProperty,
+    errors,
+    ruleInterval,
+    alertNotifyWhen,
+    getStartServices,
+    mlCapabilities
+  }: MlAnomalyAlertTriggerProps
+) => {
   const {
     services: { http },
   } = useKibana();

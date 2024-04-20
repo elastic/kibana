@@ -23,7 +23,7 @@ import {
   FormKeyUpdateWarning,
 } from './form_components';
 
-export const CredentialsFlyoutBody: React.FC = () => {
+export const CredentialsFlyoutBody = () => {
   const { onApiTokenChange } = useActions(CredentialsLogic);
   const { activeApiToken, activeApiTokenExists } = useValues(CredentialsLogic);
 

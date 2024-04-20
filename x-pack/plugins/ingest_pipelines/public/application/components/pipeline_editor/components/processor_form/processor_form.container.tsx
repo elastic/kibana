@@ -47,13 +47,15 @@ const formOptions: FormOptions = {
   stripEmptyFields: false,
 };
 
-export const ProcessorFormContainer: FunctionComponent<Props> = ({
-  processor,
-  onFormUpdate,
-  onSubmit,
-  onClose,
-  ...rest
-}) => {
+export const ProcessorFormContainer = (
+  {
+    processor,
+    onFormUpdate,
+    onSubmit,
+    onClose,
+    ...rest
+  }: Props
+) => {
   const { services } = useKibana();
 
   // We need to keep track of the processor form state if the user

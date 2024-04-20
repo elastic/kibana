@@ -16,17 +16,24 @@ const Context = React.createContext<NavigationServices | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NavigationProvider: FC<NavigationServices> = ({ children, ...services }) => {
+export const NavigationProvider = (
+  {
+    children,
+    ...services
+  }: NavigationServices
+) => {
   return <Context.Provider value={services}>{children}</Context.Provider>;
 };
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const NavigationKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: NavigationKibanaDependencies
+) => {
   const { core, activeNodes$ } = dependencies;
   const { chrome, http } = core;
   const { basePath } = http;

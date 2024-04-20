@@ -31,65 +31,79 @@ const useStyles = () => {
   };
 };
 
-export const LandingLinksIconsCategories: React.FC<LandingLinksIconsCategoriesProps> = React.memo(
-  function LandingLinksIconsCategories({ links, categories, urlState, onLinkClick }) {
-    const categoriesLinks = useMemo(() => {
-      const linksById = Object.fromEntries(links.map((link) => [link.id, link]));
+export const LandingLinksIconsCategories = React.memo(function LandingLinksIconsCategories(
+  {
+    links,
+    categories,
+    urlState,
+    onLinkClick
+  }: LandingLinksIconsCategoriesProps
+) {
+  const categoriesLinks = useMemo(() => {
+    const linksById = Object.fromEntries(links.map((link) => [link.id, link]));
 
-      return categories.reduce<CategoriesLinks>((acc, { label, linkIds, type }) => {
-        const linksItem = linkIds?.reduce<NavigationLink[]>((linksAcc, linkId) => {
-          if (linksById[linkId]) {
-            linksAcc.push(linksById[linkId]);
-          }
-          return linksAcc;
-        }, []);
-        if (linksItem?.length) {
-          acc.push({ type, label, links: linksItem });
+    return categories.reduce<CategoriesLinks>((acc, { label, linkIds, type }) => {
+      const linksItem = linkIds?.reduce<NavigationLink[]>((linksAcc, linkId) => {
+        if (linksById[linkId]) {
+          linksAcc.push(linksById[linkId]);
         }
-        return acc;
+        return linksAcc;
       }, []);
-    }, [links, categories]);
+      if (linksItem?.length) {
+        acc.push({ type, label, links: linksItem });
+      }
+      return acc;
+    }, []);
+  }, [links, categories]);
 
-    return (
-      <>
-        {categoriesLinks.map(
-          ({ type = LinkCategoryType.title, label, links: categoryLinks }, index) => (
-            <div key={`${index}_${label}`}>
-              <CategoryHeading type={type} label={label} index={index} />
-              <LandingLinksIcons
-                items={categoryLinks}
-                urlState={urlState}
-                onLinkClick={onLinkClick}
-              />
-              <EuiSpacer size="l" />
-            </div>
-          )
-        )}
-      </>
-    );
+  return (
+    <>
+      {categoriesLinks.map(
+        ({ type = LinkCategoryType.title, label, links: categoryLinks }, index) => (
+          <div key={`${index}_${label}`}>
+            <CategoryHeading type={type} label={label} index={index} />
+            <LandingLinksIcons
+              items={categoryLinks}
+              urlState={urlState}
+              onLinkClick={onLinkClick}
+            />
+            <EuiSpacer size="l" />
+          </div>
+        )
+      )}
+    </>
+  );
+});
+
+const CategoryHeading = React.memo(function CategoryHeading(
+  {
+    type,
+    label,
+    index
+  }: {
+    type?: LinkCategoryType;
+    label?: string;
+    index: number;
   }
-);
-
-const CategoryHeading: React.FC<{ type?: LinkCategoryType; label?: string; index: number }> =
-  React.memo(function CategoryHeading({ type, label, index }) {
-    const styles = useStyles();
-    return (
-      <>
-        {index > 0 && <EuiSpacer size="xl" />}
-        {type === LinkCategoryType.title && (
-          <>
-            <EuiTitle size="xxxs">
-              <h2>{label}</h2>
-            </EuiTitle>
-            <EuiHorizontalRule css={styles.horizontalRule} />
-          </>
-        )}
-        {type === LinkCategoryType.separator && index > 0 && (
+) {
+  const styles = useStyles();
+  return (
+    <>
+      {index > 0 && <EuiSpacer size="xl" />}
+      {type === LinkCategoryType.title && (
+        <>
+          <EuiTitle size="xxxs">
+            <h2>{label}</h2>
+          </EuiTitle>
           <EuiHorizontalRule css={styles.horizontalRule} />
-        )}
-      </>
-    );
-  });
+        </>
+      )}
+      {type === LinkCategoryType.separator && index > 0 && (
+        <EuiHorizontalRule css={styles.horizontalRule} />
+      )}
+    </>
+  );
+});
 
 // eslint-disable-next-line import/no-default-export
 export default LandingLinksIconsCategories;

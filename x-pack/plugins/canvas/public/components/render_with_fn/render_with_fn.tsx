@@ -33,15 +33,17 @@ interface Props {
 
 const style = { height: '100%', width: '100%' };
 
-export const RenderWithFn: FC<Props> = ({
-  name: functionName,
-  renderFn,
-  reuseNode = false,
-  handlers: incomingHandlers,
-  config,
-  width,
-  height,
-}) => {
+export const RenderWithFn = (
+  {
+    name: functionName,
+    renderFn,
+    reuseNode = false,
+    handlers: incomingHandlers,
+    config,
+    width,
+    height
+  }: Props
+) => {
   const canvasApi = useCanvasApi();
   const { error: onError } = useNotifyService();
 

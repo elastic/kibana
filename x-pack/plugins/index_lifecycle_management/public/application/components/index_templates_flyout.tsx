@@ -26,11 +26,13 @@ interface Props {
   indexTemplates: string[];
   close: () => void;
 }
-export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
-  policyName,
-  indexTemplates,
-  close,
-}) => {
+export const IndexTemplatesFlyout = (
+  {
+    policyName,
+    indexTemplates,
+    close
+  }: Props
+) => {
   const {
     services: { getUrlForApp },
   } = useKibana();

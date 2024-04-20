@@ -26,7 +26,7 @@ import { useRightPanelContext } from '../context';
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
-export const Reason: FC = () => {
+export const Reason = () => {
   const { telemetry } = useKibana().services;
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
     useRightPanelContext();

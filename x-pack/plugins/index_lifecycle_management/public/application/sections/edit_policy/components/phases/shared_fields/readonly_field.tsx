@@ -15,7 +15,11 @@ interface Props {
   phase: 'hot' | 'warm' | 'cold';
 }
 
-export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {
+export const ReadonlyField = (
+  {
+    phase
+  }: Props
+) => {
   const { docLinks } = useKibana().services;
   return (
     <ToggleFieldWithDescribedFormRow

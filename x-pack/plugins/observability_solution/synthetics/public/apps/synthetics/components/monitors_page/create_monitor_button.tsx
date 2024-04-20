@@ -14,7 +14,7 @@ import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 
 import { SyntheticsSettingsContext } from '../../contexts/synthetics_settings_context';
 
-export const CreateMonitorButton: React.FC = () => {
+export const CreateMonitorButton = () => {
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const {

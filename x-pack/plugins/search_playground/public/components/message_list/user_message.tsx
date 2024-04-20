@@ -20,7 +20,12 @@ import { CopyActionButton } from './copy_action_button';
 
 type UserMessageProps = Pick<MessageType, 'content' | 'createdAt'>;
 
-export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) => {
+export const UserMessage = (
+  {
+    content,
+    createdAt
+  }: UserMessageProps
+) => {
   const currentUserProfile = useUserProfile();
 
   return (

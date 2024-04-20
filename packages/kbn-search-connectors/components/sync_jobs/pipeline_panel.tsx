@@ -20,7 +20,11 @@ interface PipelinePanelProps {
   pipeline: IngestPipelineParams;
 }
 
-export const PipelinePanel: React.FC<PipelinePanelProps> = ({ pipeline }) => {
+export const PipelinePanel = (
+  {
+    pipeline
+  }: PipelinePanelProps
+) => {
   const items: Array<{ setting: string; value: string | boolean }> = [
     {
       setting: i18n.translate('searchConnectors.index.syncJobs.pipeline.name', {

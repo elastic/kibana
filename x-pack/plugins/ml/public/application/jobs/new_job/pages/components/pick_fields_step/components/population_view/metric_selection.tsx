@@ -27,7 +27,11 @@ interface Props {
 
 type DetectorFieldValues = Record<number, string[]>;
 
-export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
+export const PopulationDetectors = (
+  {
+    setIsValid
+  }: Props
+) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

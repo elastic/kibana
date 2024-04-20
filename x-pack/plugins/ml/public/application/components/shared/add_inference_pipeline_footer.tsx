@@ -31,17 +31,19 @@ interface Props {
   hasProcessorStep: boolean;
 }
 
-export const AddInferencePipelineFooter: FC<Props> = ({
-  isDetailsStepValid,
-  isConfigureProcessorStepValid,
-  creatingPipeline,
-  pipelineCreated,
-  onClose,
-  onCreate,
-  step,
-  setStep,
-  hasProcessorStep,
-}) => {
+export const AddInferencePipelineFooter = (
+  {
+    isDetailsStepValid,
+    isConfigureProcessorStepValid,
+    creatingPipeline,
+    pipelineCreated,
+    onClose,
+    onCreate,
+    step,
+    setStep,
+    hasProcessorStep
+  }: Props
+) => {
   const { nextStep, previousStep, isContinueButtonEnabled } = useMemo(
     () => getSteps(step, isDetailsStepValid, isConfigureProcessorStepValid, hasProcessorStep),
     [isDetailsStepValid, isConfigureProcessorStepValid, step, hasProcessorStep]

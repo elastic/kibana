@@ -35,7 +35,11 @@ interface Props {
   inferrer: InferrerType;
 }
 
-export const IndexInputForm: FC<Props> = ({ inferrer }) => {
+export const IndexInputForm = (
+  {
+    inferrer
+  }: Props
+) => {
   const {
     currentContext: { defaultSelectedDataViewId, createPipelineFlyoutOpen },
   } = useTestTrainedModelsContext();

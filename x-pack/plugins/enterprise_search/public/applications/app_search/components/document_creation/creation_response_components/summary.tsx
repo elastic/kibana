@@ -32,7 +32,7 @@ import {
   SchemaFieldsSummary,
 } from './summary_sections';
 
-export const Summary: React.FC = () => {
+export const Summary = () => {
   return (
     <>
       <FlyoutHeader />
@@ -42,7 +42,7 @@ export const Summary: React.FC = () => {
   );
 };
 
-export const FlyoutHeader: React.FC = () => {
+export const FlyoutHeader = () => {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
@@ -56,7 +56,7 @@ export const FlyoutHeader: React.FC = () => {
   );
 };
 
-export const FlyoutBody: React.FC = () => {
+export const FlyoutBody = () => {
   const { summary } = useValues(DocumentCreationLogic);
   const hasInvalidDocuments = summary.invalidDocuments.total > 0;
   const invalidDocumentsBanner = (
@@ -72,7 +72,7 @@ export const FlyoutBody: React.FC = () => {
   );
 };
 
-export const FlyoutFooter: React.FC = () => {
+export const FlyoutFooter = () => {
   const { setCreationStep, closeDocumentCreation } = useActions(DocumentCreationLogic);
   const { summary } = useValues(DocumentCreationLogic);
   const hasInvalidDocuments = summary.invalidDocuments.total > 0;

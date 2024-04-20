@@ -15,7 +15,7 @@ import React from 'react';
 import { addDataLabel } from '../constants';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 
-export const AddDataButton: React.FunctionComponent<{}> = ({}) => {
+export const AddDataButton = () => {
   const {
     services: {
       share: { url: urlService },

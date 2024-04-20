@@ -13,7 +13,7 @@ import { useKibana } from '../../../shared_imports';
 import { useLoadPoliciesList } from '../../services/api';
 import { PolicyListContextProvider } from './policy_list_context';
 
-export const PolicyList: React.FunctionComponent = () => {
+export const PolicyList = () => {
   const {
     services: { breadcrumbService },
   } = useKibana();

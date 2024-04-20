@@ -33,11 +33,13 @@ interface Props {
   showStopDatafeedsFlyout(job: MlSummaryJob[]): void;
 }
 
-export const StopDatafeedsConfirmModal: FC<Props> = ({
-  setShowFunction,
-  unsetShowFunction,
-  refreshJobs,
-}) => {
+export const StopDatafeedsConfirmModal = (
+  {
+    setShowFunction,
+    unsetShowFunction,
+    refreshJobs
+  }: Props
+) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToStop, setJobsToStop] = useState<MlSummaryJob[]>([]);

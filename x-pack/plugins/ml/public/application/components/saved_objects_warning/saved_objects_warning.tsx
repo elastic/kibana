@@ -20,11 +20,13 @@ interface Props {
   forceRefresh?: boolean;
 }
 
-export const SavedObjectsWarning: FC<Props> = ({
-  mlSavedObjectType,
-  onCloseFlyout,
-  forceRefresh,
-}) => {
+export const SavedObjectsWarning = (
+  {
+    mlSavedObjectType,
+    onCloseFlyout,
+    forceRefresh
+  }: Props
+) => {
   const {
     savedObjects: { syncCheck },
   } = useMlApiContext();

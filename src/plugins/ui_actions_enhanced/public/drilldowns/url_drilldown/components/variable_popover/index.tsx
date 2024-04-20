@@ -30,7 +30,13 @@ export interface Props {
   variablesHelpLink?: string;
 }
 
-export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variablesHelpLink }) => {
+export const VariablePopover = (
+  {
+    variables,
+    onSelect,
+    variablesHelpLink
+  }: Props
+) => {
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   const closePopover = () => setIsVariablesPopoverOpen(false);
 

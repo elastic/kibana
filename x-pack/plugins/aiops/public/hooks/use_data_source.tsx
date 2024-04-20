@@ -42,12 +42,14 @@ export interface DataSourceContextProviderProps {
  * @param children
  * @constructor
  */
-export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
-  dataViewId,
-  savedSearchId,
-  children,
-  onChange,
-}) => {
+export const DataSourceContextProvider = (
+  {
+    dataViewId,
+    savedSearchId,
+    children,
+    onChange
+  }: DataSourceContextProviderProps
+) => {
   const [value, setValue] = useState<DataViewAndSavedSearch>();
   const [error, setError] = useState<Error>();
 

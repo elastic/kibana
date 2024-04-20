@@ -90,7 +90,12 @@ export interface StopActionNameProps {
   items: TransformListRow[];
   forceDisable?: boolean;
 }
-export const StopActionName: FC<StopActionNameProps> = ({ items, forceDisable }) => {
+export const StopActionName = (
+  {
+    items,
+    forceDisable
+  }: StopActionNameProps
+) => {
   const capabilities = useTransformCapabilities();
   // Disable transforms if stats does not exist
   const stoppedTransformMessage = getStopActionDisabledMessage({

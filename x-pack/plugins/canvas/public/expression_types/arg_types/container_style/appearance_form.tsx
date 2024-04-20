@@ -39,12 +39,14 @@ const opacities = [
   { value: 0.1, text: '10%' },
 ];
 
-export const AppearanceForm: FunctionComponent<Props> = ({
-  padding = '',
-  opacity = 1,
-  overflow = 'hidden',
-  onChange,
-}) => {
+export const AppearanceForm = (
+  {
+    padding = '',
+    opacity = 1,
+    overflow = 'hidden',
+    onChange
+  }: Props
+) => {
   if (typeof padding === 'string') {
     padding = padding.replace('px', '');
   }

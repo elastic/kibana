@@ -39,7 +39,11 @@ interface Props {
   stickyHistogram?: boolean;
 }
 
-export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
+export const LogRateAnalysisPage = (
+  {
+    stickyHistogram
+  }: Props
+) => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 

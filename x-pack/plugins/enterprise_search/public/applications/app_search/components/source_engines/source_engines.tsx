@@ -19,7 +19,7 @@ import { AddSourceEnginesButton, AddSourceEnginesModal, SourceEnginesTable } fro
 import { SOURCE_ENGINES_TITLE } from './i18n';
 import { SourceEnginesLogic } from './source_engines_logic';
 
-export const SourceEngines: React.FC = () => {
+export const SourceEngines = () => {
   const {
     myRole: { canManageMetaEngineSourceEngines },
   } = useValues(AppLogic);

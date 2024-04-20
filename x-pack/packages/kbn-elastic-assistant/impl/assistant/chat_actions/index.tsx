@@ -23,14 +23,16 @@ type Props = OwnProps;
  * Renders two EuiButtonIcon components with tooltips for clearing the chat and submitting a message,
  * while handling the disabled and loading states of the buttons.
  */
-export const ChatActions: React.FC<Props> = ({
-  isDisabled,
-  isLoading,
-  onChatCleared,
-  onSendMessage,
-  isFlyoutMode,
-  promptValue,
-}) => {
+export const ChatActions = (
+  {
+    isDisabled,
+    isLoading,
+    onChatCleared,
+    onSendMessage,
+    isFlyoutMode,
+    promptValue
+  }: Props
+) => {
   const submitTooltipRef = useRef<EuiToolTip | null>(null);
 
   const closeTooltip = useCallback(() => {

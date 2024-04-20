@@ -44,89 +44,93 @@ export interface FlyoutNavigationProps {
  * Navigation menu on the right panel only, with expand/collapse button and option to
  * pass in a list of actions to be displayed on top.
  */
-export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
-  ({ flyoutIsExpandable = false, expandDetails, actions }) => {
-    const { euiTheme } = useEuiTheme();
-    const { closeLeftPanel } = useExpandableFlyoutApi();
-    const panels = useExpandableFlyoutState();
+export const FlyoutNavigation = memo((
+  {
+    flyoutIsExpandable = false,
+    expandDetails,
+    actions
+  }: FlyoutNavigationProps
+) => {
+  const { euiTheme } = useEuiTheme();
+  const { closeLeftPanel } = useExpandableFlyoutApi();
+  const panels = useExpandableFlyoutState();
 
-    const isExpanded: boolean = !!panels.left;
-    const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
+  const isExpanded: boolean = !!panels.left;
+  const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
 
-    const collapseButton = useMemo(
-      () => (
-        <EuiButtonEmpty
-          iconSide="left"
-          onClick={collapseDetails}
-          iconType="arrowEnd"
-          size="s"
-          data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.header.collapseDetailButtonAriaLabel',
-            {
-              defaultMessage: 'Collapse details',
-            }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
-            defaultMessage="Collapse details"
-          />
-        </EuiButtonEmpty>
-      ),
-      [collapseDetails]
-    );
+  const collapseButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        iconSide="left"
+        onClick={collapseDetails}
+        iconType="arrowEnd"
+        size="s"
+        data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.right.header.collapseDetailButtonAriaLabel',
+          {
+            defaultMessage: 'Collapse details',
+          }
+        )}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
+          defaultMessage="Collapse details"
+        />
+      </EuiButtonEmpty>
+    ),
+    [collapseDetails]
+  );
 
-    const expandButton = useMemo(
-      () => (
-        <EuiButtonEmpty
-          iconSide="left"
-          onClick={expandDetails}
-          iconType="arrowStart"
-          size="s"
-          data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.header.expandDetailButtonAriaLabel',
-            {
-              defaultMessage: 'Expand details',
-            }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"
-            defaultMessage="Expand details"
-          />
-        </EuiButtonEmpty>
-      ),
-      [expandDetails]
-    );
+  const expandButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        iconSide="left"
+        onClick={expandDetails}
+        iconType="arrowStart"
+        size="s"
+        data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.right.header.expandDetailButtonAriaLabel',
+          {
+            defaultMessage: 'Expand details',
+          }
+        )}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"
+          defaultMessage="Expand details"
+        />
+      </EuiButtonEmpty>
+    ),
+    [expandDetails]
+  );
 
-    return flyoutIsExpandable || actions ? (
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup
-          direction="row"
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-          css={css`
-            padding-left: ${euiTheme.size.s};
-            padding-right: ${euiTheme.size.xl};
-            height: ${euiTheme.size.xxl};
-          `}
-        >
-          <EuiFlexItem grow={false} data-test-subj={HEADER_NAVIGATION_BUTTON_TEST_ID}>
-            {flyoutIsExpandable && expandDetails && (isExpanded ? collapseButton : expandButton)}
+  return flyoutIsExpandable || actions ? (
+    <EuiFlyoutHeader hasBorder>
+      <EuiFlexGroup
+        direction="row"
+        justifyContent="spaceBetween"
+        alignItems="center"
+        gutterSize="none"
+        responsive={false}
+        css={css`
+          padding-left: ${euiTheme.size.s};
+          padding-right: ${euiTheme.size.xl};
+          height: ${euiTheme.size.xxl};
+        `}
+      >
+        <EuiFlexItem grow={false} data-test-subj={HEADER_NAVIGATION_BUTTON_TEST_ID}>
+          {flyoutIsExpandable && expandDetails && (isExpanded ? collapseButton : expandButton)}
+        </EuiFlexItem>
+        {actions && (
+          <EuiFlexItem grow={false} data-test-subj={HEADER_ACTIONS_TEST_ID}>
+            {actions}
           </EuiFlexItem>
-          {actions && (
-            <EuiFlexItem grow={false} data-test-subj={HEADER_ACTIONS_TEST_ID}>
-              {actions}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-    ) : null;
-  }
-);
+        )}
+      </EuiFlexGroup>
+    </EuiFlyoutHeader>
+  ) : null;
+});
 
 FlyoutNavigation.displayName = 'FlyoutNavigation';

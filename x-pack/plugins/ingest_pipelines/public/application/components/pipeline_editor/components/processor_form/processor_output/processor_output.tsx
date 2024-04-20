@@ -82,13 +82,15 @@ const i18nTexts = {
   }),
 };
 
-export const ProcessorOutput: FunctionComponent<Props> = ({
-  processorOutput,
-  documents,
-  selectedDocumentIndex,
-  updateSelectedDocument,
-  isExecuting,
-}) => {
+export const ProcessorOutput = (
+  {
+    processorOutput,
+    documents,
+    selectedDocumentIndex,
+    updateSelectedDocument,
+    isExecuting
+  }: Props
+) => {
   if (isExecuting) {
     return <SectionLoading inline>{i18nTexts.loadingMessage}</SectionLoading>;
   }
@@ -105,7 +107,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
     status,
   } = processorOutput!;
 
-  const NoOutputCallOut: FunctionComponent = () => (
+  const NoOutputCallOut = () => (
     <EuiCallOut title={i18nTexts.noOutputCalloutTitle} iconType="pin" />
   );
 

@@ -39,12 +39,14 @@ interface SavedQueryFormProps {
   idSet?: Set<string>;
 }
 
-const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
-  viewMode,
-  hasPlayground,
-  isValid,
-  idSet,
-}) => {
+const SavedQueryFormComponent = (
+  {
+    viewMode,
+    hasPlayground,
+    isValid,
+    idSet
+  }: SavedQueryFormProps
+) => {
   const [playgroundVisible, setPlaygroundVisible] = useState(false);
 
   const euiFieldProps = useMemo(

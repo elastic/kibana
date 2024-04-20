@@ -18,7 +18,7 @@ interface Props {
   value?: string;
 }
 
-export const GoToDate: React.FunctionComponent<Props> = (props) => {
+export const GoToDate = (props: Props) => {
   return (
     <EuiDatePicker
       data-test-subj="agentActivityFlyout.goToDateButton"

@@ -41,11 +41,13 @@ interface Props {
 
 const { useGlobalFlyout } = GlobalFlyout;
 
-export const ComponentTemplateList: React.FunctionComponent<Props> = ({
-  componentTemplateName,
-  history,
-  filter,
-}) => {
+export const ComponentTemplateList = (
+  {
+    componentTemplateName,
+    history,
+    filter
+  }: Props
+) => {
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();

@@ -26,13 +26,15 @@ export interface CollapsiblePanelProps {
   headerItems?: React.ReactElement[];
 }
 
-export const CollapsiblePanel: FC<CollapsiblePanelProps> = ({
-  isOpen,
-  onToggle,
-  children,
-  header,
-  headerItems,
-}) => {
+export const CollapsiblePanel = (
+  {
+    isOpen,
+    onToggle,
+    children,
+    header,
+    headerItems
+  }: CollapsiblePanelProps
+) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (
@@ -95,7 +97,12 @@ export interface OverviewStatsBarProps {
   dataTestSub?: string;
 }
 
-export const OverviewStatsBar: FC<OverviewStatsBarProps> = ({ inputStats, dataTestSub }) => {
+export const OverviewStatsBar = (
+  {
+    inputStats,
+    dataTestSub
+  }: OverviewStatsBarProps
+) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'m'}>
       {inputStats.map(({ value, label, 'data-test-subj': dataTestSubjValue }) => {

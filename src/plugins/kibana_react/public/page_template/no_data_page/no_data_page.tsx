@@ -68,14 +68,16 @@ export interface NoDataPageProps extends CommonProps {
   actions: NoDataPageActionsProps;
 }
 
-export const NoDataPage: FunctionComponent<NoDataPageProps> = ({
-  solution,
-  logo,
-  actions,
-  docsLink,
-  pageTitle,
-  ...rest
-}) => {
+export const NoDataPage = (
+  {
+    solution,
+    logo,
+    actions,
+    docsLink,
+    pageTitle,
+    ...rest
+  }: NoDataPageProps
+) => {
   // Convert obj data into an iterable array
   const entries = Object.entries(actions);
 

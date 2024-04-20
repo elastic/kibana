@@ -57,10 +57,12 @@ interface Props {
   onMigrationDone: () => void;
 }
 
-export const IlmPolicyMigrationNeededCallOut: FunctionComponent<Props> = ({
-  toasts,
-  onMigrationDone,
-}) => {
+export const IlmPolicyMigrationNeededCallOut = (
+  {
+    toasts,
+    onMigrationDone
+  }: Props
+) => {
   const [isMigratingIndices, setIsMigratingIndices] = useState(false);
   const isMounted = useMountedState();
 

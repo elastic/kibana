@@ -17,7 +17,7 @@ import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml';
 
-export const LogRateAnalysisPage: FC = () => {
+export const LogRateAnalysisPage = () => {
   const { services } = useMlKibana();
   const { showNodeInfo } = useEnabledFeatures();
 

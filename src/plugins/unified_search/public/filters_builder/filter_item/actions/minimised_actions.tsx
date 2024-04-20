@@ -12,7 +12,7 @@ import { strings } from './action_strings';
 import { FilterItemActionsProps } from './types';
 import { FilterItemActions } from './actions';
 
-export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) => {
+export const MinimisedFilterItemActions = (props: FilterItemActionsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onMoreActionsButtonClick = () => {

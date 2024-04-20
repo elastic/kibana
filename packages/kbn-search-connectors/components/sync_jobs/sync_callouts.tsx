@@ -22,7 +22,11 @@ interface SyncJobCalloutsProps {
   syncJob: ConnectorSyncJob;
 }
 
-export const SyncJobCallouts: React.FC<SyncJobCalloutsProps> = ({ syncJob }) => {
+export const SyncJobCallouts = (
+  {
+    syncJob
+  }: SyncJobCalloutsProps
+) => {
   return (
     <>
       {!!syncJob.completed_at && (

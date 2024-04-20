@@ -29,37 +29,37 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ExtendedTemplate: FunctionComponent<Props> = ({
-  getArgValue,
-  setArgValue,
-  workpad,
-}) => (
-  <div>
-    <EuiTitle size="xxxs" textTransform="uppercase">
-      <h6>{strings.getAppearanceTitle()}</h6>
-    </EuiTitle>
-    <EuiSpacer size="xs" />
-    <EuiSpacer size="xs" />
-    <AppearanceForm
-      onChange={setArgValue}
-      opacity={getArgValue('opacity')}
-      overflow={getArgValue('overflow')}
-      padding={getArgValue('padding')}
-    />
-    <EuiSpacer size="m" />
-    <EuiTitle size="xxxs" textTransform="uppercase">
-      <h6>{strings.getBorderTitle()}</h6>
-    </EuiTitle>
-    <EuiSpacer size="xs" />
-    <EuiSpacer size="xs" />
-    <BorderForm
-      colors={workpad.colors}
-      onChange={setArgValue}
-      radius={getArgValue('borderRadius')}
-      value={getArgValue('border')}
-    />
-  </div>
-);
+export const ExtendedTemplate = (
+  {
+    getArgValue,
+    setArgValue,
+    workpad
+  }: Props
+) => (<div>
+  <EuiTitle size="xxxs" textTransform="uppercase">
+    <h6>{strings.getAppearanceTitle()}</h6>
+  </EuiTitle>
+  <EuiSpacer size="xs" />
+  <EuiSpacer size="xs" />
+  <AppearanceForm
+    onChange={setArgValue}
+    opacity={getArgValue('opacity')}
+    overflow={getArgValue('overflow')}
+    padding={getArgValue('padding')}
+  />
+  <EuiSpacer size="m" />
+  <EuiTitle size="xxxs" textTransform="uppercase">
+    <h6>{strings.getBorderTitle()}</h6>
+  </EuiTitle>
+  <EuiSpacer size="xs" />
+  <EuiSpacer size="xs" />
+  <BorderForm
+    colors={workpad.colors}
+    onChange={setArgValue}
+    radius={getArgValue('borderRadius')}
+    value={getArgValue('border')}
+  />
+</div>);
 
 ExtendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
 

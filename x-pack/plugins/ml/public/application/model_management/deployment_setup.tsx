@@ -60,13 +60,15 @@ const THREADS_MAX_EXPONENT = 5;
 /**
  * Form for setting threading params.
  */
-export const DeploymentSetup: FC<DeploymentSetupProps> = ({
-  config,
-  onConfigChange,
-  errors,
-  isUpdate,
-  deploymentsParams,
-}) => {
+export const DeploymentSetup = (
+  {
+    config,
+    onConfigChange,
+    errors,
+    isUpdate,
+    deploymentsParams
+  }: DeploymentSetupProps
+) => {
   const {
     total_ml_processors: totalMlProcessors,
     max_single_ml_node_processors: maxSingleMlNodeProcessors,
@@ -365,14 +367,16 @@ interface StartDeploymentModalProps {
 /**
  * Modal window wrapper for {@link DeploymentSetup}
  */
-export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
-  model,
-  onConfigChange,
-  onClose,
-  startModelDeploymentDocUrl,
-  initialParams,
-  modelAndDeploymentIds,
-}) => {
+export const StartUpdateDeploymentModal = (
+  {
+    model,
+    onConfigChange,
+    onClose,
+    startModelDeploymentDocUrl,
+    initialParams,
+    modelAndDeploymentIds
+  }: StartDeploymentModalProps
+) => {
   const isUpdate = !!initialParams;
 
   const { total_ml_processors: totalMlProcessors } = getNewJobLimits();

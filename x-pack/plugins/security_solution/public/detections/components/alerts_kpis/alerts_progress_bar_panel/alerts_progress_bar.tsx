@@ -51,12 +51,14 @@ export interface AlertsProcessBarProps {
   groupBySelection: GroupBySelection;
 }
 
-export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
-  data,
-  isLoading,
-  addFilter,
-  groupBySelection,
-}) => {
+export const AlertsProgressBar = (
+  {
+    data,
+    isLoading,
+    addFilter,
+    groupBySelection
+  }: AlertsProcessBarProps
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);

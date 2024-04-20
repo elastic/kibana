@@ -41,32 +41,34 @@ export interface Props {
   zoomScale: number;
 }
 
-export const Workpad: FC<Props> = ({
-  fetchAllRenderables,
-  getAnimation,
-  grid,
-  hasHeaderBanner,
-  height,
-  isFullscreen,
-  nextPage,
-  onTransitionEnd,
-  pages,
-  previousPage,
-  redoHistory,
-  registerLayout,
-  resetZoom,
-  selectedPageNumber,
-  setFullscreen,
-  setGrid,
-  totalElementCount,
-  width,
-  workpadCss,
-  undoHistory,
-  unregisterLayout,
-  zoomIn,
-  zoomOut,
-  zoomScale,
-}) => {
+export const Workpad = (
+  {
+    fetchAllRenderables,
+    getAnimation,
+    grid,
+    hasHeaderBanner,
+    height,
+    isFullscreen,
+    nextPage,
+    onTransitionEnd,
+    pages,
+    previousPage,
+    redoHistory,
+    registerLayout,
+    resetZoom,
+    selectedPageNumber,
+    setFullscreen,
+    setGrid,
+    totalElementCount,
+    width,
+    workpadCss,
+    undoHistory,
+    unregisterLayout,
+    zoomIn,
+    zoomOut,
+    zoomScale
+  }: Props
+) => {
   const headerBannerOffset = useMemo(() => {
     if (!hasHeaderBanner) return 0;
     if (typeof document === 'undefined') return 0;

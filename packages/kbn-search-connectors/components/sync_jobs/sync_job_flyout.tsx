@@ -33,7 +33,12 @@ interface SyncJobFlyoutProps {
   syncJob?: ConnectorSyncJob;
 }
 
-export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }) => {
+export const SyncJobFlyout = (
+  {
+    onClose,
+    syncJob
+  }: SyncJobFlyoutProps
+) => {
   const filtering = syncJob?.connector.filtering
     ? Array.isArray(syncJob?.connector.filtering)
       ? syncJob?.connector.filtering?.[0]

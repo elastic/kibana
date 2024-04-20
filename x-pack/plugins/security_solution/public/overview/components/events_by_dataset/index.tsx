@@ -76,29 +76,31 @@ const StyledLinkButton = styled(EuiButton)`
   }
 `;
 
-const EventsByDatasetComponent: React.FC<Props> = ({
-  combinedQueries,
-  deleteQuery,
-  filters,
-  from,
-  headerChildren,
-  indexPattern,
-  indexNames,
-  runtimeMappings,
-  onlyField,
-  paddingSize,
-  query,
-  queryType,
-  setAbsoluteRangeDatePickerTarget,
-  setQuery,
-  showLegend,
-  showSpacer = true,
-  scopeId,
-  sourcererScopeId,
-  to,
-  toggleTopN,
-  hideQueryToggle = false,
-}) => {
+const EventsByDatasetComponent = (
+  {
+    combinedQueries,
+    deleteQuery,
+    filters,
+    from,
+    headerChildren,
+    indexPattern,
+    indexNames,
+    runtimeMappings,
+    onlyField,
+    paddingSize,
+    query,
+    queryType,
+    setAbsoluteRangeDatePickerTarget,
+    setQuery,
+    showLegend,
+    showSpacer = true,
+    scopeId,
+    sourcererScopeId,
+    to,
+    toggleTopN,
+    hideQueryToggle = false
+  }: Props
+) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
   useEffect(() => {

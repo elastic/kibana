@@ -53,7 +53,7 @@ export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
   sortDirection: 'desc',
 });
 
-export const NotificationsList: FC = () => {
+export const NotificationsList = () => {
   const {
     services: {
       mlServices: { mlApiServices },

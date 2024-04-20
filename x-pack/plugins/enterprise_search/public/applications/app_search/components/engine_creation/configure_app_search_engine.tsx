@@ -40,7 +40,7 @@ import {
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
-export const ConfigureAppSearchEngine: React.FC = () => {
+export const ConfigureAppSearchEngine = () => {
   const { isSubmitDisabled, language, name, rawName } = useValues(EngineCreationLogic);
   const { setCreationStep, setLanguage, setRawName, submitEngine } =
     useActions(EngineCreationLogic);

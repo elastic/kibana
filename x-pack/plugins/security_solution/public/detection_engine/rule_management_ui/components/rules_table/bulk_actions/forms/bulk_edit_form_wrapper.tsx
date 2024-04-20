@@ -36,15 +36,17 @@ interface BulkEditFormWrapperProps {
   flyoutSize?: EuiFlyoutSize;
 }
 
-const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
-  form,
-  title,
-  banner,
-  children,
-  onClose,
-  onSubmit,
-  flyoutSize = 's',
-}) => {
+const BulkEditFormWrapperComponent = (
+  {
+    form,
+    title,
+    banner,
+    children,
+    onClose,
+    onSubmit,
+    flyoutSize = 's'
+  }: BulkEditFormWrapperProps
+) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RulesBulkEditForm',
   });

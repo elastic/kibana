@@ -51,7 +51,13 @@ interface ThreatMatchRowProps {
 
 const MAX_INDICATOR_VISIBLE = 2;
 
-const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, scopeId }) => {
+const ThreatMatchRowWrapper = (
+  {
+    data,
+    isDraggable,
+    scopeId
+  }: ThreatMatchRowProps
+) => {
   const indicators = get(data, ENRICHMENT_DESTINATION_PATH) as Fields[];
   const eventId = get(data, ID_FIELD_NAME);
 
@@ -106,7 +112,12 @@ interface ThreatMatchRowModalProps {
   renderChildren: () => ReactElement;
 }
 
-const ThreatMatchRowModal: FC<ThreatMatchRowModalProps> = ({ title, renderChildren }) => {
+const ThreatMatchRowModal = (
+  {
+    title,
+    renderChildren
+  }: ThreatMatchRowModalProps
+) => {
   const [isModalVisible, setShowModal] = useState(false);
   const closeModal = () => setShowModal(false);
   const showModal = () => setShowModal(true);

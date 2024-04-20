@@ -61,12 +61,14 @@ const tabToUiMetricMap: { [key: string]: string } = {
   [TAB_HISTORY]: UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
 };
 
-export const PolicyDetails: React.FunctionComponent<Props> = ({
-  policyName,
-  onClose,
-  onPolicyDeleted,
-  onPolicyExecuted,
-}) => {
+export const PolicyDetails = (
+  {
+    policyName,
+    onClose,
+    onPolicyDeleted,
+    onPolicyExecuted
+  }: Props
+) => {
   const { i18n, uiMetricService, history } = useServices();
   const { error, data: policyDetails, resendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);

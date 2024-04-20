@@ -24,7 +24,13 @@ type ComponentProps = LinkToAppProps & {
   size?: 'm' | 'l';
 };
 
-export const LinkWithIcon: FC<ComponentProps> = memo(({ children, size = 'l', ...props }) => {
+export const LinkWithIcon = memo((
+  {
+    children,
+    size = 'l',
+    ...props
+  }: ComponentProps
+) => {
   return (
     <LinkToApp {...props}>
       <LinkLabel size={size}>{children}</LinkLabel>

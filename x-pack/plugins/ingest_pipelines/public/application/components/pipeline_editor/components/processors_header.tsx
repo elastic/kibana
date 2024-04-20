@@ -19,10 +19,15 @@ export interface Props {
   hasProcessors: boolean;
 }
 
-export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson, hasProcessors }) => {
+export const ProcessorsHeader = (
+  {
+    onLoadJson,
+    hasProcessors
+  }: Props
+) => {
   const { services } = useKibana();
 
-  const ProcessorTitle: FunctionComponent = () => (
+  const ProcessorTitle = () => (
     <EuiTitle size="s">
       <h3>
         {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {

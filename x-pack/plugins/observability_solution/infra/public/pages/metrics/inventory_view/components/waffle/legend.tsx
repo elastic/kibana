@@ -26,7 +26,13 @@ interface Props {
   formatter: InfraFormatter;
 }
 
-export const Legend: React.FC<Props> = ({ legend, bounds, formatter }) => {
+export const Legend = (
+  {
+    legend,
+    bounds,
+    formatter
+  }: Props
+) => {
   return (
     <LegendContainer>
       {GradientLegendRT.is(legend) && (

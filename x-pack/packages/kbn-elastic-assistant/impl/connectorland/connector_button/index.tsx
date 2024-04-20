@@ -20,35 +20,37 @@ export interface ConnectorButtonProps {
  * Simple button component for adding a connector. Note: component is basic and does not handle connector
  * add logic. See ConnectorSetup component if wanting to manage connector add logic.
  */
-export const ConnectorButton: React.FC<ConnectorButtonProps> = React.memo<ConnectorButtonProps>(
-  ({ setIsConnectorModalVisible }) => {
-    const { assistantAvailability } = useAssistantContext();
+export const ConnectorButton = React.memo<ConnectorButtonProps>((
+  {
+    setIsConnectorModalVisible
+  }: ConnectorButtonProps
+) => {
+  const { assistantAvailability } = useAssistantContext();
 
-    const title = assistantAvailability.hasConnectorsAllPrivilege
-      ? i18n.ADD_CONNECTOR_TITLE
-      : i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_TITLE;
-    const description = assistantAvailability.hasConnectorsAllPrivilege
-      ? i18n.ADD_CONNECTOR_DESCRIPTION
-      : i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION;
+  const title = assistantAvailability.hasConnectorsAllPrivilege
+    ? i18n.ADD_CONNECTOR_TITLE
+    : i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_TITLE;
+  const description = assistantAvailability.hasConnectorsAllPrivilege
+    ? i18n.ADD_CONNECTOR_DESCRIPTION
+    : i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION;
 
-    const onClick = useCallback(() => {
-      setIsConnectorModalVisible?.(true);
-    }, [setIsConnectorModalVisible]);
+  const onClick = useCallback(() => {
+    setIsConnectorModalVisible?.(true);
+  }, [setIsConnectorModalVisible]);
 
-    return (
-      <EuiFlexGroup gutterSize="l" justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiCard
-            data-test-subj="connectorButton"
-            layout="horizontal"
-            icon={<EuiIcon size="xl" type={OpenAILogo} />}
-            title={title}
-            description={description}
-            onClick={assistantAvailability.hasConnectorsAllPrivilege ? onClick : undefined}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+  return (
+    <EuiFlexGroup gutterSize="l" justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiCard
+          data-test-subj="connectorButton"
+          layout="horizontal"
+          icon={<EuiIcon size="xl" type={OpenAILogo} />}
+          title={title}
+          description={description}
+          onClick={assistantAvailability.hasConnectorsAllPrivilege ? onClick : undefined}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 ConnectorButton.displayName = 'ConnectorButton';

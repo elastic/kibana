@@ -19,13 +19,15 @@ interface DataQualityProviderProps {
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
 
-export const DataQualityProvider: React.FC<DataQualityProviderProps> = ({
-  children,
-  httpFetch,
-  toasts,
-  isILMAvailable,
-  telemetryEvents,
-}) => {
+export const DataQualityProvider = (
+  {
+    children,
+    httpFetch,
+    toasts,
+    isILMAvailable,
+    telemetryEvents
+  }: DataQualityProviderProps
+) => {
   const value = useMemo(
     () => ({
       httpFetch,

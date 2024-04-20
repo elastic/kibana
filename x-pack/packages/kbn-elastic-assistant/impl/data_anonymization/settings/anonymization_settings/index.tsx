@@ -27,13 +27,15 @@ export interface Props {
   >;
 }
 
-const AnonymizationSettingsComponent: React.FC<Props> = ({
-  defaultPageSize,
-  anonymizationFields,
-  anonymizationFieldsBulkActions,
-  setAnonymizationFieldsBulkActions,
-  setUpdatedAnonymizationData,
-}) => {
+const AnonymizationSettingsComponent = (
+  {
+    defaultPageSize,
+    anonymizationFields,
+    anonymizationFieldsBulkActions,
+    setAnonymizationFieldsBulkActions,
+    setUpdatedAnonymizationData
+  }: Props
+) => {
   const onListUpdated = useCallback(
     async (updates: BatchUpdateListItem[]) => {
       const updatedFieldsKeys = updates.map((u) => u.field);

@@ -42,11 +42,13 @@ export interface ReauthorizeActionNameProps {
   forceDisable?: boolean;
   transformNodes: number;
 }
-export const ReauthorizeActionName: FC<ReauthorizeActionNameProps> = ({
-  items,
-  forceDisable,
-  transformNodes,
-}) => {
+export const ReauthorizeActionName = (
+  {
+    items,
+    forceDisable,
+    transformNodes
+  }: ReauthorizeActionNameProps
+) => {
   const { canStartStopTransform } = useTransformCapabilities();
 
   const someNeedsReauthorization = items.some(needsReauthorization);

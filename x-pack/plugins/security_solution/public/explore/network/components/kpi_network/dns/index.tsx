@@ -29,7 +29,12 @@ export const dnsStatItems: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({ from, to }) => {
+const NetworkKpiDnsComponent = (
+  {
+    from,
+    to
+  }: NetworkKpiProps
+) => {
   return <KpiBaseComponent id={ID} statItems={dnsStatItems} from={from} to={to} />;
 };
 

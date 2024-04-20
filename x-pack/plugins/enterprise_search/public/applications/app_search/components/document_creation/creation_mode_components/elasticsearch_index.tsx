@@ -33,7 +33,7 @@ import { Errors } from '../creation_response_components';
 
 import './paste_json_text.scss';
 
-export const ElasticsearchIndex: React.FC = () => (
+export const ElasticsearchIndex = () => (
   <>
     <FlyoutHeader />
     <FlyoutBody />
@@ -41,7 +41,7 @@ export const ElasticsearchIndex: React.FC = () => (
   </>
 );
 
-export const FlyoutHeader: React.FC = () => {
+export const FlyoutHeader = () => {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
@@ -58,7 +58,7 @@ export const FlyoutHeader: React.FC = () => {
   );
 };
 
-export const FlyoutBody: React.FC = () => {
+export const FlyoutBody = () => {
   return (
     <EuiFlyoutBody banner={<Errors />}>
       <EuiText color="subdued">
@@ -87,7 +87,7 @@ export const FlyoutBody: React.FC = () => {
   );
 };
 
-export const FlyoutFooter: React.FC = () => {
+export const FlyoutFooter = () => {
   // TODO: replace these
   const { textInput, isUploading } = useValues(DocumentCreationLogic);
   // TODO: replace 'onSubmitJson'

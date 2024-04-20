@@ -22,33 +22,35 @@ import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-export const SecretFormRow: React.FC<{
-  fullWidth?: boolean;
-  children: ConstructorParameters<typeof EuiFormRow>[0]['children'];
-  useSecretsStorage: boolean;
-  isConvertedToSecret?: boolean;
-  onToggleSecretStorage: (secretEnabled: boolean) => void;
-  error?: string[];
-  isInvalid?: boolean;
-  title?: string;
-  clear?: () => void;
-  initialValue?: any;
-  cancelEdit?: () => void;
-  label?: JSX.Element;
-}> = ({
-  fullWidth,
-  error,
-  isInvalid,
-  children,
-  clear,
-  title,
-  initialValue,
-  onToggleSecretStorage,
-  cancelEdit,
-  useSecretsStorage,
-  isConvertedToSecret = false,
-  label,
-}) => {
+export const SecretFormRow = (
+  {
+    fullWidth,
+    error,
+    isInvalid,
+    children,
+    clear,
+    title,
+    initialValue,
+    onToggleSecretStorage,
+    cancelEdit,
+    useSecretsStorage,
+    isConvertedToSecret = false,
+    label
+  }: {
+    fullWidth?: boolean;
+    children: ConstructorParameters<typeof EuiFormRow>[0]['children'];
+    useSecretsStorage: boolean;
+    isConvertedToSecret?: boolean;
+    onToggleSecretStorage: (secretEnabled: boolean) => void;
+    error?: string[];
+    isInvalid?: boolean;
+    title?: string;
+    clear?: () => void;
+    initialValue?: any;
+    cancelEdit?: () => void;
+    label?: JSX.Element;
+  }
+) => {
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
   const valueHiddenPanel = (

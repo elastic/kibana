@@ -23,7 +23,11 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
+export const SingleMetricSettings = (
+  {
+    setIsValid
+  }: Props
+) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const navigateToPath = useNavigateToPath();
 

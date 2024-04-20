@@ -51,7 +51,7 @@ describe('getUrlState', () => {
 
 describe('useUrlState', () => {
   it('pushes a properly encoded search string to history', () => {
-    const TestComponent: FC = () => {
+    const TestComponent = () => {
       const [appState, setAppState] = useUrlState('_a');
 
       useEffect(() => {
@@ -87,7 +87,7 @@ describe('useUrlState', () => {
   });
 
   it('updates both _g and _a state successfully', () => {
-    const TestComponent: FC = () => {
+    const TestComponent = () => {
       const [globalState, setGlobalState] = useUrlState('_g');
       const [appState, setAppState] = useUrlState('_a');
 

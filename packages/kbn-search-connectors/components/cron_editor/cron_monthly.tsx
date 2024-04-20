@@ -23,89 +23,88 @@ interface Props {
   onChange: ({ minute, hour, date }: { minute?: string; hour?: string; date?: string }) => void;
 }
 
-export const CronMonthly: React.FunctionComponent<Props> = ({
-  disabled,
-  minute,
-  minuteOptions,
-  hour,
-  hourOptions,
-  date,
-  dateOptions,
-  onChange,
-}) => (
-  <Fragment>
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="searchConnectors.cronEditor.cronMonthly.fieldDateLabel"
-          defaultMessage="Date"
-        />
-      }
-      fullWidth
-      data-test-subj="cronFrequencyConfiguration"
-    >
-      <EuiSelect
-        disabled={disabled}
-        options={dateOptions}
-        value={date}
-        onChange={(e) => onChange({ date: e.target.value })}
-        fullWidth
-        prepend={i18n.translate('searchConnectors.cronEditor.cronMonthly.textOnTheLabel', {
-          defaultMessage: 'On the',
-        })}
-        data-test-subj="cronFrequencyMonthlyDateSelect"
+export const CronMonthly = (
+  {
+    disabled,
+    minute,
+    minuteOptions,
+    hour,
+    hourOptions,
+    date,
+    dateOptions,
+    onChange
+  }: Props
+) => (<Fragment>
+  <EuiFormRow
+    label={
+      <FormattedMessage
+        id="searchConnectors.cronEditor.cronMonthly.fieldDateLabel"
+        defaultMessage="Date"
       />
-    </EuiFormRow>
-
-    <EuiFormRow
-      label={
-        <FormattedMessage
-          id="searchConnectors.cronEditor.cronMonthly.fieldTimeLabel"
-          defaultMessage="Time"
-        />
-      }
+    }
+    fullWidth
+    data-test-subj="cronFrequencyConfiguration"
+  >
+    <EuiSelect
+      disabled={disabled}
+      options={dateOptions}
+      value={date}
+      onChange={(e) => onChange({ date: e.target.value })}
       fullWidth
-      data-test-subj="cronFrequencyConfiguration"
-    >
-      <EuiFlexGroup gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiSelect
-            disabled={disabled}
-            options={hourOptions}
-            value={hour}
-            aria-label={i18n.translate('searchConnectors.cronEditor.cronMonthly.hourSelectLabel', {
-              defaultMessage: 'Hour',
-            })}
-            onChange={(e) => onChange({ hour: e.target.value })}
-            fullWidth
-            prepend={i18n.translate(
-              'searchConnectors.cronEditor.cronMonthly.fieldHour.textAtLabel',
-              {
-                defaultMessage: 'At',
-              }
-            )}
-            data-test-subj="cronFrequencyMonthlyHourSelect"
-          />
-        </EuiFlexItem>
+      prepend={i18n.translate('searchConnectors.cronEditor.cronMonthly.textOnTheLabel', {
+        defaultMessage: 'On the',
+      })}
+      data-test-subj="cronFrequencyMonthlyDateSelect"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    label={
+      <FormattedMessage
+        id="searchConnectors.cronEditor.cronMonthly.fieldTimeLabel"
+        defaultMessage="Time"
+      />
+    }
+    fullWidth
+    data-test-subj="cronFrequencyConfiguration"
+  >
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiSelect
+          disabled={disabled}
+          options={hourOptions}
+          value={hour}
+          aria-label={i18n.translate('searchConnectors.cronEditor.cronMonthly.hourSelectLabel', {
+            defaultMessage: 'Hour',
+          })}
+          onChange={(e) => onChange({ hour: e.target.value })}
+          fullWidth
+          prepend={i18n.translate(
+            'searchConnectors.cronEditor.cronMonthly.fieldHour.textAtLabel',
+            {
+              defaultMessage: 'At',
+            }
+          )}
+          data-test-subj="cronFrequencyMonthlyHourSelect"
+        />
+      </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiSelect
-            disabled={disabled}
-            options={minuteOptions}
-            value={minute}
-            aria-label={i18n.translate(
-              'searchConnectors.cronEditor.cronMonthly.minuteSelectLabel',
-              {
-                defaultMessage: 'Minute',
-              }
-            )}
-            onChange={(e) => onChange({ minute: e.target.value })}
-            fullWidth
-            prepend=":"
-            data-test-subj="cronFrequencyMonthlyMinuteSelect"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
-  </Fragment>
-);
+      <EuiFlexItem>
+        <EuiSelect
+          disabled={disabled}
+          options={minuteOptions}
+          value={minute}
+          aria-label={i18n.translate(
+            'searchConnectors.cronEditor.cronMonthly.minuteSelectLabel',
+            {
+              defaultMessage: 'Minute',
+            }
+          )}
+          onChange={(e) => onChange({ minute: e.target.value })}
+          fullWidth
+          prepend=":"
+          data-test-subj="cronFrequencyMonthlyMinuteSelect"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFormRow>
+</Fragment>);

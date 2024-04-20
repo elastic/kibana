@@ -25,16 +25,18 @@ interface MlJobEditorProps {
   'data-test-subj'?: string;
   schema?: object;
 }
-export const MLJobEditor: FC<MlJobEditorProps> = ({
-  value,
-  height = '500px',
-  width = '100%',
-  mode = ML_EDITOR_MODE.JSON,
-  readOnly = false,
-  onChange = () => {},
-  'data-test-subj': dataTestSubj,
-  schema,
-}) => {
+export const MLJobEditor = (
+  {
+    value,
+    height = '500px',
+    width = '100%',
+    mode = ML_EDITOR_MODE.JSON,
+    readOnly = false,
+    onChange = () => {},
+    'data-test-subj': dataTestSubj,
+    schema
+  }: MlJobEditorProps
+) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
     try {
       value = expandLiteralStrings(value);

@@ -15,21 +15,24 @@ interface InterimResultsControlProps {
   onChange: (update: boolean) => void;
 }
 
-export const InterimResultsControl: FC<InterimResultsControlProps> = React.memo(
-  ({ value, onChange }) => {
-    return (
-      <EuiFormRow>
-        <EuiSwitch
-          label={
-            <FormattedMessage
-              id="xpack.ml.interimResultsControl.label"
-              defaultMessage="Include interim results"
-            />
-          }
-          checked={value ?? false}
-          onChange={onChange.bind(null, !value)}
-        />
-      </EuiFormRow>
-    );
-  }
-);
+export const InterimResultsControl = React.memo((
+  {
+    value,
+    onChange
+  }: InterimResultsControlProps
+) => {
+  return (
+    <EuiFormRow>
+      <EuiSwitch
+        label={
+          <FormattedMessage
+            id="xpack.ml.interimResultsControl.label"
+            defaultMessage="Include interim results"
+          />
+        }
+        checked={value ?? false}
+        onChange={onChange.bind(null, !value)}
+      />
+    </EuiFormRow>
+  );
+});

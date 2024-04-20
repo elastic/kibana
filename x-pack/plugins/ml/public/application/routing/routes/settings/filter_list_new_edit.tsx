@@ -75,7 +75,12 @@ export const editFilterListRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<NewFilterPageProps> = ({ location, mode }) => {
+const PageWrapper = (
+  {
+    location,
+    mode
+  }: NewFilterPageProps
+) => {
   let filterId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);

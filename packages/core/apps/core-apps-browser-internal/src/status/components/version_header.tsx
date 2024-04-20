@@ -15,7 +15,11 @@ interface VersionHeaderProps {
   version: ServerVersion;
 }
 
-export const VersionHeader: FC<VersionHeaderProps> = ({ version }) => {
+export const VersionHeader = (
+  {
+    version
+  }: VersionHeaderProps
+) => {
   const { build_hash: buildHash, build_number: buildNumber, number } = version;
   return (
     <EuiPanel grow={false}>

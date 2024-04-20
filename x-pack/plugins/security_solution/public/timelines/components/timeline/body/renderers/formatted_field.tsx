@@ -62,48 +62,50 @@ const dataGridToolTipOffset = css`
   }
 `;
 
-const FormattedFieldValueComponent: React.FC<{
-  asPlainText?: boolean;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  contextId: string;
-  eventId: string;
-  isAggregatable?: boolean;
-  isObjectArray?: boolean;
-  isUnifiedDataTable?: boolean;
-  fieldFormat?: string;
-  fieldFromBrowserField?: BrowserField;
-  fieldName: string;
-  fieldType?: string;
-  isButton?: boolean;
-  isDraggable?: boolean;
-  onClick?: () => void;
-  onClickAriaLabel?: string;
-  title?: string;
-  truncate?: boolean;
-  value: string | number | undefined | null;
-  linkValue?: string | null | undefined;
-}> = ({
-  asPlainText,
-  Component,
-  contextId,
-  eventId,
-  fieldFormat,
-  isAggregatable = false,
-  isUnifiedDataTable,
-  fieldName,
-  fieldType = '',
-  fieldFromBrowserField,
-  isButton,
-  isObjectArray = false,
-  isDraggable = true,
-  onClick,
-  onClickAriaLabel,
-  title,
-  truncate = true,
-  value,
-  linkValue,
-}) => {
+const FormattedFieldValueComponent = (
+  {
+    asPlainText,
+    Component,
+    contextId,
+    eventId,
+    fieldFormat,
+    isAggregatable = false,
+    isUnifiedDataTable,
+    fieldName,
+    fieldType = '',
+    fieldFromBrowserField,
+    isButton,
+    isObjectArray = false,
+    isDraggable = true,
+    onClick,
+    onClickAriaLabel,
+    title,
+    truncate = true,
+    value,
+    linkValue
+  }: {
+    asPlainText?: boolean;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    contextId: string;
+    eventId: string;
+    isAggregatable?: boolean;
+    isObjectArray?: boolean;
+    isUnifiedDataTable?: boolean;
+    fieldFormat?: string;
+    fieldFromBrowserField?: BrowserField;
+    fieldName: string;
+    fieldType?: string;
+    isButton?: boolean;
+    isDraggable?: boolean;
+    onClick?: () => void;
+    onClickAriaLabel?: string;
+    title?: string;
+    truncate?: boolean;
+    value: string | number | undefined | null;
+    linkValue?: string | null | undefined;
+  }
+) => {
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {

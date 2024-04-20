@@ -20,7 +20,12 @@ export interface Props {
 
 const SHOW_FIELD = 'show';
 
-export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
+export const SimpleTemplate = (
+  {
+    onValueChange,
+    argValue
+  }: Props
+) => {
   const showValuePath = getFieldPath(SHOW_FIELD);
 
   useEffect(() => {

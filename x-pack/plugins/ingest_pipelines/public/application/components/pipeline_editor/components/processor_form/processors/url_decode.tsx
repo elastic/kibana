@@ -12,7 +12,7 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 
-export const UrlDecode: FunctionComponent = () => {
+export const UrlDecode = () => {
   return (
     <>
       <FieldNameField

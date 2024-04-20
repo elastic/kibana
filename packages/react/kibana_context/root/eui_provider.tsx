@@ -56,12 +56,14 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
  * should not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana.
  */
-export const KibanaEuiProvider: FC<KibanaEuiProviderProps> = ({
-  theme: { theme$ },
-  globalStyles: globalStylesProp,
-  colorMode: colorModeProp,
-  children,
-}) => {
+export const KibanaEuiProvider = (
+  {
+    theme: { theme$ },
+    globalStyles: globalStylesProp,
+    colorMode: colorModeProp,
+    children
+  }: KibanaEuiProviderProps
+) => {
   const theme = useObservable(theme$, defaultTheme);
   const themeColorMode = useMemo(() => getColorMode(theme), [theme]);
 

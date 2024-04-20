@@ -24,7 +24,11 @@ interface Props {
   addBasePath: (path: string) => string;
 }
 
-export const MoveData: FC<Props> = ({ addBasePath }) => {
+export const MoveData = (
+  {
+    addBasePath
+  }: Props
+) => {
   const migrateDataUrl = 'https://ela.st/cloud-migration';
   const buttonLabel = (
     <FormattedMessage

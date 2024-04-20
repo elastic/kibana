@@ -27,7 +27,13 @@ import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge/technical_preview_badge';
-export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
+export const IndexDataVisualizerPage = (
+  {
+    esql = false
+  }: {
+    esql: boolean;
+  }
+) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {

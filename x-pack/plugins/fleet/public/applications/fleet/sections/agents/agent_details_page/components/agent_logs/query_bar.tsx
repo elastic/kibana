@@ -22,11 +22,17 @@ import {
 
 const EXCLUDED_FIELDS = [AGENT_ID_FIELD.name, DATASET_FIELD.name, LOG_LEVEL_FIELD.name];
 
-export const LogQueryBar: React.FunctionComponent<{
-  query: string;
-  isQueryValid: boolean;
-  onUpdateQuery: (query: string, runQuery?: boolean) => void;
-}> = memo(({ query, isQueryValid, onUpdateQuery }) => {
+export const LogQueryBar = memo((
+  {
+    query,
+    isQueryValid,
+    onUpdateQuery
+  }: {
+    query: string;
+    isQueryValid: boolean;
+    onUpdateQuery: (query: string, runQuery?: boolean) => void;
+  }
+) => {
   const {
     data,
     unifiedSearch: {

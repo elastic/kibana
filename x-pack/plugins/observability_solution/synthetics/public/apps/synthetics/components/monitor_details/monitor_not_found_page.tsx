@@ -16,7 +16,7 @@ import { CreateMonitorButton } from '../monitors_page/create_monitor_button';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import { ClientPluginsStart } from '../../../../plugin';
 
-export const MonitorNotFoundPage: React.FC = () => {
+export const MonitorNotFoundPage = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const { monitorId } = useParams<{ monitorId: string }>();
 

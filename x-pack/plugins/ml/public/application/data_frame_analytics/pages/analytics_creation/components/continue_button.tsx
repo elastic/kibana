@@ -17,20 +17,23 @@ const continueButtonText = i18n.translate(
   }
 );
 
-export const ContinueButton: FC<{ isDisabled: boolean; onClick: any }> = ({
-  isDisabled,
-  onClick,
-}) => (
-  <EuiFlexGroup>
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        data-test-subj="mlAnalyticsCreateJobWizardContinueButton"
-        isDisabled={isDisabled}
-        size="s"
-        onClick={onClick}
-      >
-        {continueButtonText}
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const ContinueButton = (
+  {
+    isDisabled,
+    onClick
+  }: {
+    isDisabled: boolean;
+    onClick: any;
+  }
+) => (<EuiFlexGroup>
+  <EuiFlexItem grow={false}>
+    <EuiButton
+      data-test-subj="mlAnalyticsCreateJobWizardContinueButton"
+      isDisabled={isDisabled}
+      size="s"
+      onClick={onClick}
+    >
+      {continueButtonText}
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>);

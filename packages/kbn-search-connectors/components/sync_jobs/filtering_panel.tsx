@@ -23,10 +23,12 @@ interface FilteringPanelProps {
   filteringRules: FilteringRule[];
 }
 
-export const FilteringPanel: React.FC<FilteringPanelProps> = ({
-  advancedSnippet,
-  filteringRules,
-}) => {
+export const FilteringPanel = (
+  {
+    advancedSnippet,
+    filteringRules
+  }: FilteringPanelProps
+) => {
   return (
     <>
       <FlyoutPanel

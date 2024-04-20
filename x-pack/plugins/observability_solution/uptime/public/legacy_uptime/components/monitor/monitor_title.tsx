@@ -29,7 +29,7 @@ const getPageTitle = (monitorId: string, selectedMonitor: Ping | null) => {
   return monitorId;
 };
 
-export const MonitorPageTitle: React.FC = () => {
+export const MonitorPageTitle = () => {
   const monitorId = useMonitorId();
 
   const selectedMonitor = useSelector(monitorStatusSelector);

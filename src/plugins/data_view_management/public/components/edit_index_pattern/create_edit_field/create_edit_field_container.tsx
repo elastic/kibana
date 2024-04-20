@@ -17,7 +17,11 @@ import { CreateEditField } from './create_edit_field';
 
 export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName?: string }>;
 
-const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props }) => {
+const CreateEditFieldCont = (
+  {
+    ...props
+  }: CreateEditFieldContainerProps
+) => {
   const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<DataView>();
   const fieldName =

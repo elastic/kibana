@@ -99,14 +99,16 @@ interface DetectionEngineAlertTableProps {
   onRuleChange?: () => void;
 }
 
-export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
-  configId,
-  inputFilters,
-  tableId = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
-  isLoading,
-  onRuleChange,
-}) => {
+export const AlertsTableComponent = (
+  {
+    configId,
+    inputFilters,
+    tableId = TableId.alertsOnAlertsPage,
+    sourcererScope = SourcererScopeName.detections,
+    isLoading,
+    onRuleChange
+  }: DetectionEngineAlertTableProps
+) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
   const { from, to, setQuery } = useGlobalTime();

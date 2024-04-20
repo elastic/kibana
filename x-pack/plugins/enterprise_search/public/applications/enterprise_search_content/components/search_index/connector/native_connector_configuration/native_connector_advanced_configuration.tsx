@@ -23,7 +23,7 @@ import { SyncsContextMenu } from '../../components/header_actions/syncs_context_
 import { IndexNameLogic } from '../../index_name_logic';
 import { SearchIndexTabId } from '../../search_index';
 
-export const NativeConnectorAdvancedConfiguration: React.FC = () => {
+export const NativeConnectorAdvancedConfiguration = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   return (

@@ -31,7 +31,12 @@ export interface RulePreviewTitleProps {
 /**
  * Title component that shows basic information of a rule. This is displayed above rule preview body in rule preview panel
  */
-export const RulePreviewTitle: React.FC<RulePreviewTitleProps> = ({ rule, isSuppressed }) => {
+export const RulePreviewTitle = (
+  {
+    rule,
+    isSuppressed
+  }: RulePreviewTitleProps
+) => {
   return (
     <div data-test-subj={RULE_PREVIEW_TITLE_TEST_ID}>
       <EuiTitle>

@@ -71,7 +71,7 @@ const PRIORITY_TABLE_HEADER = i18n.translate(
   }
 );
 
-export const GroupSourcePrioritization: React.FC = () => {
+export const GroupSourcePrioritization = () => {
   const { updatePriority, saveGroupSourcePrioritization, showOrgSourcesModal } =
     useActions(GroupLogic);
 

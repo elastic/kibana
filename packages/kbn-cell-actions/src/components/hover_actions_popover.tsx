@@ -44,14 +44,16 @@ interface Props {
   disabledActionTypes: string[];
 }
 
-export const HoverActionsPopover: React.FC<Props> = ({
-  anchorPosition,
-  children,
-  visibleCellActions,
-  actionContext,
-  showActionTooltips,
-  disabledActionTypes,
-}) => {
+export const HoverActionsPopover = (
+  {
+    anchorPosition,
+    children,
+    visibleCellActions,
+    actionContext,
+    showActionTooltips,
+    disabledActionTypes
+  }: Props
+) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);
@@ -111,9 +113,9 @@ export const HoverActionsPopover: React.FC<Props> = ({
       // This hack is required because we anchor the popover to the hover content instead
       // of anchoring it to the button that triggers the popover.
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-      <div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
+      (<div ref={contentRef} onMouseEnter={onMouseEnter} onClick={closeExtraActions}>
         {children}
-      </div>
+      </div>)
     );
   }, [onMouseEnter, closeExtraActions, children]);
 

@@ -17,12 +17,14 @@ interface Props {
   error: RepositorySettingsValidation['maxRestoreBytesPerSec'];
 }
 
-export const MaxRestoreField: React.FunctionComponent<Props> = ({
-  isInvalid,
-  error,
-  defaultValue,
-  updateSettings,
-}) => {
+export const MaxRestoreField = (
+  {
+    isInvalid,
+    error,
+    defaultValue,
+    updateSettings
+  }: Props
+) => {
   return (
     <EuiDescribedFormGroup
       title={

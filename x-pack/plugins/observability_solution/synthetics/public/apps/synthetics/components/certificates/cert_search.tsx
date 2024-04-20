@@ -19,7 +19,11 @@ interface Props {
   setSearch: (val: string) => void;
 }
 
-export const CertificateSearch: React.FC<Props> = ({ setSearch }) => {
+export const CertificateSearch = (
+  {
+    setSearch
+  }: Props
+) => {
   const [debouncedValue, setDebouncedValue] = useState('');
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {

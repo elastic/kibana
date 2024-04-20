@@ -46,21 +46,23 @@ function selectedDateToParam(selectedDate: Moment | null) {
   return undefined;
 }
 
-export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
-  disabled?: boolean;
-  setStartTime: (startTime: number | undefined) => void;
-  setEndTime: (endTime: number | undefined) => void;
-  startTime: number | undefined;
-  endTime: number | undefined;
-  validationErrors?: TimeRangeValidationError[];
-}> = ({
-  disabled = false,
-  setStartTime,
-  setEndTime,
-  startTime,
-  endTime,
-  validationErrors = [],
-}) => {
+export const AnalysisSetupTimerangeForm = (
+  {
+    disabled = false,
+    setStartTime,
+    setEndTime,
+    startTime,
+    endTime,
+    validationErrors = []
+  }: {
+    disabled?: boolean;
+    setStartTime: (startTime: number | undefined) => void;
+    setEndTime: (endTime: number | undefined) => void;
+    startTime: number | undefined;
+    endTime: number | undefined;
+    validationErrors?: TimeRangeValidationError[];
+  }
+) => {
   const [now] = useState(() => moment());
   const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
 

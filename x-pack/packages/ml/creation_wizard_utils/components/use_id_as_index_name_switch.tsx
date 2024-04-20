@@ -16,18 +16,18 @@ interface UseIdAsIndexNameSwitchProps {
   label: string;
 }
 
-export const UseIdAsIndexNameSwitch: FC<UseIdAsIndexNameSwitchProps> = ({
-  destIndexSameAsId,
-  isJobCreated,
-  setDestIndexSameAsId,
-  label,
-}) => (
-  <EuiSwitch
-    disabled={isJobCreated}
-    name="mlCreationWizardUtilsJobIdAsDestIndexName"
-    label={label}
-    checked={destIndexSameAsId === true}
-    onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
-    data-test-subj="mlCreationWizardUtilsJobIdAsDestIndexNameSwitch"
-  />
-);
+export const UseIdAsIndexNameSwitch = (
+  {
+    destIndexSameAsId,
+    isJobCreated,
+    setDestIndexSameAsId,
+    label
+  }: UseIdAsIndexNameSwitchProps
+) => (<EuiSwitch
+  disabled={isJobCreated}
+  name="mlCreationWizardUtilsJobIdAsDestIndexName"
+  label={label}
+  checked={destIndexSameAsId === true}
+  onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
+  data-test-subj="mlCreationWizardUtilsJobIdAsDestIndexNameSwitch"
+/>);

@@ -20,7 +20,7 @@ import { DocumentCreationButton, EmptyState } from './components';
 import { DOCUMENTS_TITLE } from './constants';
 import { SearchExperience } from './search_experience';
 
-export const Documents: React.FC = () => {
+export const Documents = () => {
   const {
     isMetaEngine,
     isElasticsearchEngine,

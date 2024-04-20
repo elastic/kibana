@@ -91,9 +91,13 @@ function useDatastreamIngestPipelines(
   };
 }
 
-export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
-  PackagePolicyEditorDatastreamPipelinesProps
-> = ({ packageInputStream, packageInfo, customDataset }) => {
+export const PackagePolicyEditorDatastreamPipelines = (
+  {
+    packageInputStream,
+    packageInfo,
+    customDataset
+  }: PackagePolicyEditorDatastreamPipelinesProps
+) => {
   const dataStream = customDataset
     ? { ...packageInputStream.data_stream, dataset: customDataset }
     : packageInputStream.data_stream;

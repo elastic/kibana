@@ -29,7 +29,7 @@ import { SaveConfig } from '../../content_sources/components/add_source/save_con
 import { getSourceData } from '../../content_sources/source_data';
 import { SettingsLogic } from '../settings_logic';
 
-export const SourceConfig: React.FC = () => {
+export const SourceConfig = () => {
   const { serviceType } = useParams<{ serviceType: string }>();
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
   const addSourceLogic = AddSourceLogic({ serviceType });

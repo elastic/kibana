@@ -44,7 +44,12 @@ interface Props {
 /**
  * Top-level layout control for the data tier allocation field.
  */
-export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, description }) => {
+export const DataTierAllocationField = (
+  {
+    phase,
+    description
+  }: Props
+) => {
   const {
     services: { cloud },
   } = useKibana();

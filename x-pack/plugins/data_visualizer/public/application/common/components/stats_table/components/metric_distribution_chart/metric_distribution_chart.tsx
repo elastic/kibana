@@ -45,13 +45,15 @@ interface Props {
 
 const SPEC_ID = 'metric_distribution';
 
-export const MetricDistributionChart: FC<Props> = ({
-  width,
-  height,
-  chartData,
-  fieldFormat,
-  hideXAxis,
-}) => {
+export const MetricDistributionChart = (
+  {
+    width,
+    height,
+    chartData,
+    fieldFormat,
+    hideXAxis
+  }: Props
+) => {
   // This value is shown to label the y axis values in the tooltip.
   // Ideally we wouldn't show these values at all in the tooltip,
   // but this is not yet possible with Elastic charts.

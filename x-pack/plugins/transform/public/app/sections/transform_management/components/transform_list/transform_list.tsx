@@ -91,14 +91,16 @@ interface TransformListProps {
   transformsStatsLoading: boolean;
 }
 
-export const TransformList: FC<TransformListProps> = ({
-  isLoading,
-  onCreateTransform,
-  transformNodes,
-  transforms,
-  transformsLoading,
-  transformsStatsLoading,
-}) => {
+export const TransformList = (
+  {
+    isLoading,
+    onCreateTransform,
+    transformNodes,
+    transforms,
+    transformsLoading,
+    transformsStatsLoading
+  }: TransformListProps
+) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
 

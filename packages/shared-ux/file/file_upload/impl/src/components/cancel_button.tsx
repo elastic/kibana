@@ -18,7 +18,12 @@ interface Props {
   onClick: () => void;
 }
 
-export const CancelButton: FunctionComponent<Props> = ({ onClick, compressed }) => {
+export const CancelButton = (
+  {
+    onClick,
+    compressed
+  }: Props
+) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const disabled = !uploading;

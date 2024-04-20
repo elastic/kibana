@@ -39,76 +39,76 @@ interface Props {
   generateViewPath?(id: string): string;
 }
 
-export const SchemaErrorsAccordion: React.FC<Props> = ({
-  fieldCoercionErrors,
-  schema,
-  generateViewPath,
-}) => (
-  <>
-    {Object.keys(fieldCoercionErrors).map((fieldName) => {
-      const fieldType = schema[fieldName];
-      const errors = fieldCoercionErrors[fieldName];
+export const SchemaErrorsAccordion = (
+  {
+    fieldCoercionErrors,
+    schema,
+    generateViewPath
+  }: Props
+) => (<>
+  {Object.keys(fieldCoercionErrors).map((fieldName) => {
+    const fieldType = schema[fieldName];
+    const errors = fieldCoercionErrors[fieldName];
 
-      const accordionHeader = (
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="xl"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <strong>
-              <TruncatedContent content={fieldName} length={32} />
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <code>{fieldType}</code>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {/* Mock an EuiButton without actually creating one - we shouldn't nest a button within a button */}
-            <div className="euiButton euiButton--primary euiButton--small">
-              {ERROR_TABLE_REVIEW_CONTROL}
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+    const accordionHeader = (
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="xl"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <strong>
+            <TruncatedContent content={fieldName} length={32} />
+          </strong>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <code>{fieldType}</code>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {/* Mock an EuiButton without actually creating one - we shouldn't nest a button within a button */}
+          <div className="euiButton euiButton--primary euiButton--small">
+            {ERROR_TABLE_REVIEW_CONTROL}
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
 
-      return (
-        <EuiAccordion
-          key={fieldName}
-          id={`schemaErrorAccordion-${fieldName}`}
-          className="schemaErrorsAccordion"
-          borders="horizontal"
-          buttonProps={{ paddingSize: 'm' }}
-          buttonContent={accordionHeader}
-        >
-          <EuiTable tableLayout="auto">
-            <EuiTableHeader>
-              <EuiTableHeaderCell>{ERROR_TABLE_ID_HEADER}</EuiTableHeaderCell>
-              <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
-              {generateViewPath && <EuiTableHeaderCell aria-hidden />}
-            </EuiTableHeader>
-            <EuiTableBody>
-              {errors.map((error) => {
-                const { id, error: errorMessage } = error;
-                return (
-                  <EuiTableRow key={`schemaErrorDocument-${fieldName}-${id}`}>
-                    <EuiTableRowCell truncateText>
-                      <TruncatedContent tooltipType="title" content={id} length={22} />
+    return (
+      <EuiAccordion
+        key={fieldName}
+        id={`schemaErrorAccordion-${fieldName}`}
+        className="schemaErrorsAccordion"
+        borders="horizontal"
+        buttonProps={{ paddingSize: 'm' }}
+        buttonContent={accordionHeader}
+      >
+        <EuiTable tableLayout="auto">
+          <EuiTableHeader>
+            <EuiTableHeaderCell>{ERROR_TABLE_ID_HEADER}</EuiTableHeaderCell>
+            <EuiTableHeaderCell>{ERROR_TABLE_ERROR_HEADER}</EuiTableHeaderCell>
+            {generateViewPath && <EuiTableHeaderCell aria-hidden />}
+          </EuiTableHeader>
+          <EuiTableBody>
+            {errors.map((error) => {
+              const { id, error: errorMessage } = error;
+              return (
+                <EuiTableRow key={`schemaErrorDocument-${fieldName}-${id}`}>
+                  <EuiTableRowCell truncateText>
+                    <TruncatedContent tooltipType="title" content={id} length={22} />
+                  </EuiTableRowCell>
+                  <EuiTableRowCell>{errorMessage}</EuiTableRowCell>
+                  {generateViewPath && (
+                    <EuiTableRowCell>
+                      <EuiLinkTo to={generateViewPath(id)}>{ERROR_TABLE_VIEW_LINK}</EuiLinkTo>
                     </EuiTableRowCell>
-                    <EuiTableRowCell>{errorMessage}</EuiTableRowCell>
-                    {generateViewPath && (
-                      <EuiTableRowCell>
-                        <EuiLinkTo to={generateViewPath(id)}>{ERROR_TABLE_VIEW_LINK}</EuiLinkTo>
-                      </EuiTableRowCell>
-                    )}
-                  </EuiTableRow>
-                );
-              })}
-            </EuiTableBody>
-          </EuiTable>
-        </EuiAccordion>
-      );
-    })}
-  </>
-);
+                  )}
+                </EuiTableRow>
+              );
+            })}
+          </EuiTableBody>
+        </EuiTable>
+      </EuiAccordion>
+    );
+  })}
+</>);

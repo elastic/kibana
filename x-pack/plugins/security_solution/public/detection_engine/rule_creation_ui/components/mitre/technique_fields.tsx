@@ -57,13 +57,15 @@ interface AddTechniqueProps {
   onFieldChange: (threats: Threats) => void;
 }
 
-export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
-  field,
-  idAria,
-  isDisabled,
-  threatIndex,
-  onFieldChange,
-}): JSX.Element => {
+export const MitreAttackTechniqueFields = (
+  {
+    field,
+    idAria,
+    isDisabled,
+    threatIndex,
+    onFieldChange
+  }: AddTechniqueProps
+): JSX.Element => {
   const values = field.value as Threats;
 
   const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);

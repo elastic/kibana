@@ -13,7 +13,13 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useMlKibana } from '../../../../contexts/kibana';
 import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
-export const DocsLink: FC<{ currentTabId: MlSavedObjectType }> = ({ currentTabId }) => {
+export const DocsLink = (
+  {
+    currentTabId
+  }: {
+    currentTabId: MlSavedObjectType;
+  }
+) => {
   const {
     services: {
       docLinks: {

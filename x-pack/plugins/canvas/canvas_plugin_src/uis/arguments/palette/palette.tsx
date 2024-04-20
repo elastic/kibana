@@ -29,13 +29,15 @@ interface Props {
   };
 }
 
-export const PaletteArgInput: FC<Props> = ({
-  onValueChange,
-  argId,
-  argValue,
-  renderError,
-  typeInstance,
-}) => {
+export const PaletteArgInput = (
+  {
+    onValueChange,
+    argId,
+    argValue,
+    renderError,
+    typeInstance
+  }: Props
+) => {
   const handleChange = (palette: ColorPalette | CustomColorPalette): void => {
     let colorStopsPaletteConfig = {};
     if (palette.stops?.length) {
@@ -74,7 +76,7 @@ export const PaletteArgInput: FC<Props> = ({
   return <PalettePicker id={argId} palette={palette} onChange={handleChange} />;
 };
 
-export const SimplePaletteArgInput: FC<Props> = (props) => {
+export const SimplePaletteArgInput = (props: Props) => {
   const { typeInstance } = props;
   const { type, ...restOptions } = typeInstance.options ?? {};
   return (
@@ -82,15 +84,13 @@ export const SimplePaletteArgInput: FC<Props> = (props) => {
   );
 };
 
-export const StopsPaletteArgInput: FC<Props> = (props) => (
-  <PaletteArgInput
-    {...props}
-    typeInstance={{
-      ...props.typeInstance,
-      options: { ...(props.typeInstance.options ?? {}), type: 'stops' },
-    }}
-  />
-);
+export const StopsPaletteArgInput = (props: Props) => (<PaletteArgInput
+  {...props}
+  typeInstance={{
+    ...props.typeInstance,
+    options: { ...(props.typeInstance.options ?? {}), type: 'stops' },
+  }}
+/>);
 
 PaletteArgInput.propTypes = {
   argId: PropTypes.string,

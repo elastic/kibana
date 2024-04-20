@@ -37,7 +37,7 @@ export interface FormRowProps {
  * @throws Error if not a child of a `<Formik>` component.
  * @throws Error if `name` prop is not set and can't be inferred from its child element.
  */
-export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props) => {
+export const FormRow = (props: EuiFormRowProps & FormRowProps) => {
   const formik = useFormikContext();
   const child = Children.only(props.children);
   const name = props.name ?? child.props.name;
@@ -57,7 +57,7 @@ export const FormRow: FunctionComponent<EuiFormRowProps & FormRowProps> = (props
   );
 };
 
-export const OptionalText: FunctionComponent = () => {
+export const OptionalText = () => {
   return (
     <EuiText size="xs" color="subdued">
       <FormattedMessage id="xpack.security.formRow.optionalText" defaultMessage="Optional" />

@@ -23,7 +23,7 @@ import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyo
 /**
  * Guided tour for the right panel in details flyout
  */
-export const RightPanelTour: FC = memo(() => {
+export const RightPanelTour = memo(() => {
   const { openLeftPanel, openRightPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, getFieldsData } = useRightPanelContext();
 

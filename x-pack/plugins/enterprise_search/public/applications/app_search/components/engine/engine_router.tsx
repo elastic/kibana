@@ -49,7 +49,7 @@ import { Synonyms } from '../synonyms';
 
 import { EngineLogic, getEngineBreadcrumbs } from '.';
 
-export const EngineRouter: React.FC = () => {
+export const EngineRouter = () => {
   const {
     myRole: {
       canViewEngineAnalytics,

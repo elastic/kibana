@@ -68,7 +68,11 @@ interface ExpandedRowStatsPaneProps {
   item: TransformListRow;
 }
 
-export const ExpandedRowStatsPane: FC<ExpandedRowStatsPaneProps> = ({ item }) => {
+export const ExpandedRowStatsPane = (
+  {
+    item
+  }: ExpandedRowStatsPaneProps
+) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
 
   if (!isTransformListRowWithStats(item) && fullStats === undefined) {

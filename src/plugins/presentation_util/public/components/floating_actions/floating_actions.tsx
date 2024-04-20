@@ -30,14 +30,16 @@ export interface FloatingActionsProps {
   disabledActions?: EmbeddableInput['disabledActions'];
 }
 
-export const FloatingActions: FC<FloatingActionsProps> = ({
-  children,
-  viewMode,
-  isEnabled,
-  embeddable,
-  className = '',
-  disabledActions,
-}) => {
+export const FloatingActions = (
+  {
+    children,
+    viewMode,
+    isEnabled,
+    embeddable,
+    className = '',
+    disabledActions
+  }: FloatingActionsProps
+) => {
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();

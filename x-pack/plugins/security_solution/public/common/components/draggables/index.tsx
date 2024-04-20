@@ -198,40 +198,41 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
-  contextId,
-  eventId,
-  field,
-  value,
-  iconType,
-  isDraggable,
-  isAggregatable,
-  fieldType,
-  name,
-  color = 'hollow',
-  children,
-  scopeId,
-  tooltipContent,
-  queryValue,
-}) =>
-  value != null ? (
-    <DefaultDraggable
-      id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
-      isDraggable={isDraggable}
-      isAggregatable={isAggregatable}
-      fieldType={fieldType}
-      field={field}
-      name={name}
-      value={value}
-      scopeId={scopeId}
-      tooltipContent={tooltipContent}
-      queryValue={queryValue}
-    >
-      <Badge iconType={iconType} color={color} title="">
-        {children ? children : value !== '' ? value : getEmptyStringTag()}
-      </Badge>
-    </DefaultDraggable>
-  ) : null;
+const DraggableBadgeComponent = (
+  {
+    contextId,
+    eventId,
+    field,
+    value,
+    iconType,
+    isDraggable,
+    isAggregatable,
+    fieldType,
+    name,
+    color = 'hollow',
+    children,
+    scopeId,
+    tooltipContent,
+    queryValue
+  }: BadgeDraggableType
+) => value != null ? (
+  <DefaultDraggable
+    id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
+    isDraggable={isDraggable}
+    isAggregatable={isAggregatable}
+    fieldType={fieldType}
+    field={field}
+    name={name}
+    value={value}
+    scopeId={scopeId}
+    tooltipContent={tooltipContent}
+    queryValue={queryValue}
+  >
+    <Badge iconType={iconType} color={color} title="">
+      {children ? children : value !== '' ? value : getEmptyStringTag()}
+    </Badge>
+  </DefaultDraggable>
+) : null;
 
 DraggableBadgeComponent.displayName = 'DraggableBadgeComponent';
 

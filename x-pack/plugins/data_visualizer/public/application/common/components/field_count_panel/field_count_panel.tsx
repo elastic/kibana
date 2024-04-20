@@ -24,12 +24,14 @@ interface Props extends TotalFieldsCountProps, MetricFieldsCountProps {
   toggleShowEmptyFields: () => void;
 }
 
-export const FieldCountPanel: FC<Props> = ({
-  metricsStats,
-  fieldsCountStats,
-  showEmptyFields,
-  toggleShowEmptyFields,
-}) => {
+export const FieldCountPanel = (
+  {
+    metricsStats,
+    fieldsCountStats,
+    showEmptyFields,
+    toggleShowEmptyFields
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
 
   const dvFieldCountPanelCss = css({

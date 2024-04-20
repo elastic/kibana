@@ -47,7 +47,13 @@ interface SourceFeatureProps {
 
 type IncludedFeatureIds = Exclude<FeatureIds, FeatureIds.DocumentLevelPermissions>;
 
-export const SourceFeatures: React.FC<SourceFeatureProps> = ({ features, objTypes, name }) => {
+export const SourceFeatures = (
+  {
+    features,
+    objTypes,
+    name
+  }: SourceFeatureProps
+) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { isOrganization } = useValues(AppLogic);
 

@@ -12,7 +12,7 @@ import { createGenericFileRowRenderer } from '../../timeline/body/renderers/syst
 import { DELETED_FILE } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SystemFileExampleComponent: React.FC = () => {
+const SystemFileExampleComponent = () => {
   const systemFileRowRenderer = createGenericFileRowRenderer({
     actionName: 'file_delete_event',
     text: DELETED_FILE,

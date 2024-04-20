@@ -33,14 +33,16 @@ interface ClassificationDecisionPathProps {
   baseline?: FeatureImportanceBaseline;
 }
 
-export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = ({
-  featureImportance,
-  predictedValue,
-  topClasses,
-  predictionFieldName,
-  predictedProbability,
-  baseline,
-}) => {
+export const ClassificationDecisionPath = (
+  {
+    featureImportance,
+    predictedValue,
+    topClasses,
+    predictionFieldName,
+    predictedProbability,
+    baseline
+  }: ClassificationDecisionPathProps
+) => {
   const [currentClass, setCurrentClass] = useState<string>(
     Array.isArray(topClasses) && topClasses.length > 0
       ? getStringBasedClassName(topClasses[0].class_name)

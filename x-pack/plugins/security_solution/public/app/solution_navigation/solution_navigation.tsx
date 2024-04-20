@@ -25,39 +25,42 @@ export const withNavigationProvider = <T extends object>(
   Component: React.ComponentType<T>,
   core: CoreStart
 ) =>
-  function WithNavigationProvider(props: T) {
+  (function WithNavigationProvider(props: T) {
     return (
       <NavigationProvider core={core}>
         <Component {...props} />
       </NavigationProvider>
     );
-  };
+  });
 
 const getPanelContent = (
   core: CoreStart,
   solutionNavLinks$: SolutionNavLinks$
 ): React.FC<PanelComponentProps> => {
-  const PanelContentProvider: React.FC<PanelComponentProps> = React.memo(
-    function PanelContentProvider({ selectedNode: { id: linkId }, closePanel }) {
-      const solutionNavLinks = useObservable(solutionNavLinks$, []);
-      const currentPanelItem = solutionNavLinks.find((item) => item.id === linkId);
+  const PanelContentProvider = React.memo(function PanelContentProvider(
+    {
+      selectedNode: { id: linkId },
+      closePanel
+    }: PanelComponentProps
+  ) {
+    const solutionNavLinks = useObservable(solutionNavLinks$, []);
+    const currentPanelItem = solutionNavLinks.find((item) => item.id === linkId);
 
-      const { title = '', links = [], categories } = currentPanelItem ?? {};
-      const items = usePanelSideNavItems(links);
+    const { title = '', links = [], categories } = currentPanelItem ?? {};
+    const items = usePanelSideNavItems(links);
 
-      if (items.length === 0) {
-        return null;
-      }
-      return (
-        <SolutionSideNavPanelContent
-          title={title}
-          items={items}
-          categories={categories}
-          onClose={closePanel}
-        />
-      );
+    if (items.length === 0) {
+      return null;
     }
-  );
+    return (
+      <SolutionSideNavPanelContent
+        title={title}
+        items={items}
+        categories={categories}
+        onClose={closePanel}
+      />
+    );
+  });
 
   return withNavigationProvider(PanelContentProvider, core);
 };

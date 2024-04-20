@@ -32,9 +32,13 @@ interface FieldTypeTableItem {
   description: string;
 }
 
-export const FieldTypesHelpPopover: FC<{
-  fieldTypes: string[];
-}> = ({ fieldTypes }) => {
+export const FieldTypesHelpPopover = (
+  {
+    fieldTypes
+  }: {
+    fieldTypes: string[];
+  }
+) => {
   {
     const { services } = useDataVisualizerKibana();
     const { docLinks } = services;

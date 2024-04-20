@@ -31,7 +31,7 @@ import { EditExtractionRule } from './edit_extraction_rule';
 import { ExtractionRulesLogic } from './extraction_rules_logic';
 import { ExtractionRulesTable } from './extraction_rules_table';
 
-export const ExtractionRules: React.FC = () => {
+export const ExtractionRules = () => {
   const {
     cancelEditExtractionRule,
     deleteExtractionRule,

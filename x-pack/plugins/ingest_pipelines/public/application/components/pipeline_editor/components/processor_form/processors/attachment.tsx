@@ -121,7 +121,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Attachment: FunctionComponent = () => {
+export const Attachment = () => {
   return (
     <>
       <EuiFlexGroup>

@@ -40,7 +40,14 @@ const ExpandedRow = euiStyled.div`
   width: 100%;
 `;
 
-export const ExecutedStep: FC<ExecutedStepProps> = ({ loading, step, index, browserConsoles }) => {
+export const ExecutedStep = (
+  {
+    loading,
+    step,
+    index,
+    browserConsoles
+  }: ExecutedStepProps
+) => {
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
   return (

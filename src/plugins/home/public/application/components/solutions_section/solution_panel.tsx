@@ -20,7 +20,12 @@ interface Props {
   solution: FeatureCatalogueSolution;
 }
 
-export const SolutionPanel: FC<Props> = ({ addBasePath, solution }) => {
+export const SolutionPanel = (
+  {
+    addBasePath,
+    solution
+  }: Props
+) => {
   const { trackUiMetric } = getServices();
 
   const getSolutionGraphicURL = (solutionId: string) =>

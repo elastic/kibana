@@ -10,7 +10,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { Chat } from './chat';
 
-export const App: React.FC = () => {
+export const App = () => {
   return (
     <KibanaPageTemplate.Section
       alignment="top"

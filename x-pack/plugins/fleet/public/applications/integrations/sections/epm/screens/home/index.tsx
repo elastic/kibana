@@ -41,7 +41,7 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
   return categories.some((c) => c.id === category);
 };
 
-export const EPMHomePage: React.FC = () => {
+export const EPMHomePage = () => {
   const authz = useAuthz();
   const isAuthorizedToFetchSettings = authz.fleet.readSettings;
   const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({

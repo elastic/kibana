@@ -34,18 +34,20 @@ interface ChartGridProps {
   loading?: boolean;
 }
 
-export const ChartGrid: FC<ChartGridProps> = ({
-  aggFieldPairList,
-  chartSettings,
-  splitField,
-  lineChartsData,
-  modelData,
-  anomalyData,
-  deleteDetector,
-  jobType,
-  fieldValuesPerDetector,
-  loading = false,
-}) => {
+export const ChartGrid = (
+  {
+    aggFieldPairList,
+    chartSettings,
+    splitField,
+    lineChartsData,
+    modelData,
+    anomalyData,
+    deleteDetector,
+    jobType,
+    fieldValuesPerDetector,
+    loading = false
+  }: ChartGridProps
+) => {
   const animateSplit = useAnimateSplit();
 
   return (

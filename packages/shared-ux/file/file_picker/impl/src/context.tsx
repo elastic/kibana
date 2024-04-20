@@ -30,14 +30,16 @@ interface FilePickerContextProps
   uploadMeta?: unknown;
 }
 
-export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
-  kind,
-  shouldAllowDelete,
-  pageSize,
-  multiple,
-  children,
-  uploadMeta,
-}) => {
+export const FilePickerContext = (
+  {
+    kind,
+    shouldAllowDelete,
+    pageSize,
+    multiple,
+    children,
+    uploadMeta
+  }: FilePickerContextProps
+) => {
   const filesContext = useFilesContext();
   const { client } = filesContext;
   const state = useMemo(

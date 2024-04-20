@@ -25,12 +25,14 @@ interface Props {
   onSuccess?(): void;
 }
 
-export const ConfirmDeleteModal: FunctionComponent<Props> = ({
-  space,
-  onSuccess,
-  onCancel,
-  spacesManager,
-}) => {
+export const ConfirmDeleteModal = (
+  {
+    space,
+    onSuccess,
+    onCancel,
+    spacesManager
+  }: Props
+) => {
   const { services } = useKibana();
 
   const { value: isCurrentSpace } = useAsync(

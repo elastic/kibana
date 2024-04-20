@@ -52,25 +52,27 @@ export interface DocumentCountContentProps {
   barStyleAccessor?: BarStyleAccessor;
 }
 
-export const DocumentCountWithBrush: FC<DocumentCountContentProps> = ({
-  id,
-  randomSampler,
-  reload,
-  brushSelectionUpdateHandler,
-  documentCountStats,
-  documentCountStatsSplit,
-  documentCountStatsSplitLabel = '',
-  isBrushCleared,
-  totalCount,
-  sampleProbability,
-  initialAnalysisStart,
-  barColorOverride,
-  barHighlightColorOverride,
-  incomingInitialAnalysisStart,
-  stateManager,
-  label,
-  ...docCountChartProps
-}) => {
+export const DocumentCountWithBrush = (
+  {
+    id,
+    randomSampler,
+    reload,
+    brushSelectionUpdateHandler,
+    documentCountStats,
+    documentCountStatsSplit,
+    documentCountStatsSplitLabel = '',
+    isBrushCleared,
+    totalCount,
+    sampleProbability,
+    initialAnalysisStart,
+    barColorOverride,
+    barHighlightColorOverride,
+    incomingInitialAnalysisStart,
+    stateManager,
+    label,
+    ...docCountChartProps
+  }: DocumentCountContentProps
+) => {
   const {
     services: {
       data,

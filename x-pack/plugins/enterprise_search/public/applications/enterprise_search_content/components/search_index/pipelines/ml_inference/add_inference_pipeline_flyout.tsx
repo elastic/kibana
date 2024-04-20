@@ -142,7 +142,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
   );
 };
 
-export const AddInferencePipelineHorizontalSteps: React.FC = () => {
+export const AddInferencePipelineHorizontalSteps = () => {
   const {
     addInferencePipelineModal: { step },
     isConfigureStepValid,
@@ -227,9 +227,14 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
-export const AddInferencePipelineFooter: React.FC<
-  AddInferencePipelineFlyoutProps & { ingestionMethod: string }
-> = ({ ingestionMethod, onClose }) => {
+export const AddInferencePipelineFooter = (
+  {
+    ingestionMethod,
+    onClose
+  }: AddInferencePipelineFlyoutProps & {
+    ingestionMethod: string;
+  }
+) => {
   const {
     addInferencePipelineModal: modal,
     isPipelineDataValid,

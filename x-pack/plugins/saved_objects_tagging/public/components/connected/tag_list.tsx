@@ -22,12 +22,14 @@ interface SavedObjectTagListProps {
   tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
-const SavedObjectTagList: FC<SavedObjectTagListProps> = ({
-  object,
-  tags: allTags,
-  onClick,
-  tagRender,
-}) => {
+const SavedObjectTagList = (
+  {
+    object,
+    tags: allTags,
+    onClick,
+    tagRender
+  }: SavedObjectTagListProps
+) => {
   const objectTags = useMemo(() => {
     const { tags } = getObjectTags(object, allTags);
     tags.sort(byNameTagSorter);

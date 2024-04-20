@@ -28,11 +28,13 @@ interface EntryPointsTableProps {
   items: EntryPoint[];
 }
 
-export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
-  domain,
-  engineName,
-  items,
-}) => {
+export const EntryPointsTable = (
+  {
+    domain,
+    engineName,
+    items
+  }: EntryPointsTableProps
+) => {
   const { onAdd, onDelete, onUpdate } = useActions(EntryPointsTableLogic);
   const field = 'value';
 

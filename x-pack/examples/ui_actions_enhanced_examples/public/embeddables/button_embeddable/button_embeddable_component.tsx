@@ -12,9 +12,11 @@ export interface ButtonEmbeddableComponentProps {
   onClick: () => void;
 }
 
-export const ButtonEmbeddableComponent: React.FC<ButtonEmbeddableComponentProps> = ({
-  onClick,
-}) => {
+export const ButtonEmbeddableComponent = (
+  {
+    onClick
+  }: ButtonEmbeddableComponentProps
+) => {
   return (
     <EuiFlexItem>
       <EuiCard

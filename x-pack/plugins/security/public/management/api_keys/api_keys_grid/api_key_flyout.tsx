@@ -137,13 +137,15 @@ const defaultInitialValues: ApiKeyFormValues = {
   role_descriptors: '{}',
 };
 
-export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
-  onSuccess,
-  onCancel,
-  apiKey,
-  canManageCrossClusterApiKeys = false,
-  readOnly = false,
-}) => {
+export const ApiKeyFlyout = (
+  {
+    onSuccess,
+    onCancel,
+    apiKey,
+    canManageCrossClusterApiKeys = false,
+    readOnly = false
+  }: ApiKeyFlyoutProps
+) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const isDarkMode = useDarkMode();

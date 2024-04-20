@@ -24,9 +24,13 @@ export const getTextEmbeddingOutputComponent = (inferrer: TextEmbeddingInference
   <TextEmbeddingOutput inferrer={inferrer} />
 );
 
-const TextEmbeddingOutput: FC<{
-  inferrer: TextEmbeddingInference;
-}> = ({ inferrer }) => {
+const TextEmbeddingOutput = (
+  {
+    inferrer
+  }: {
+    inferrer: TextEmbeddingInference;
+  }
+) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -44,10 +48,15 @@ const TextEmbeddingOutput: FC<{
   );
 };
 
-const TextEmbedding: FC<{
-  value: string;
-  inputText: string;
-}> = ({ value, inputText }) => {
+const TextEmbedding = (
+  {
+    value,
+    inputText
+  }: {
+    value: string;
+    inputText: string;
+  }
+) => {
   return (
     <>
       <EuiText size="s">{inputText}</EuiText>

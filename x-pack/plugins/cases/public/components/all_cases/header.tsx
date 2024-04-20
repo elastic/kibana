@@ -19,7 +19,11 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const CasesTableHeader: FunctionComponent<Props> = ({ actionsErrors }) => {
+export const CasesTableHeader = (
+  {
+    actionsErrors
+  }: Props
+) => {
   return (
     <HeaderPage title={i18n.PAGE_TITLE} border data-test-subj="cases-all-title">
       <EuiFlexGroup

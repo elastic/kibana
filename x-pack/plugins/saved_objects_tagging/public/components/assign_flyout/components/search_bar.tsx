@@ -15,11 +15,13 @@ export interface AssignFlyoutSearchBarProps {
   types: string[];
 }
 
-export const AssignFlyoutSearchBar: FC<AssignFlyoutSearchBarProps> = ({
-  onChange,
-  types,
-  isLoading,
-}) => {
+export const AssignFlyoutSearchBar = (
+  {
+    onChange,
+    types,
+    isLoading
+  }: AssignFlyoutSearchBarProps
+) => {
   const filters = useMemo(() => {
     return [
       {

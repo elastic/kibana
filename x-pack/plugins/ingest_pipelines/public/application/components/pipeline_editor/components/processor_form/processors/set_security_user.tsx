@@ -54,7 +54,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const SetSecurityUser: FunctionComponent = () => {
+export const SetSecurityUser = () => {
   return (
     <>
       <FieldNameField

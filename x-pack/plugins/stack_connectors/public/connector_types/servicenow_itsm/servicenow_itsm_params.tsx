@@ -45,13 +45,20 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const CorrelationIdField: React.FunctionComponent<
-  Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables' | 'errors'> & {
+const CorrelationIdField = (
+  {
+    index,
+    messageVariables,
+    correlationId,
+    editSubActionProperty,
+    isRequired,
+    errors
+  }: Pick<ActionParamsProps<ServiceNowITSMActionParams>, 'index' | 'messageVariables' | 'errors'> & {
     correlationId: string | null;
     editSubActionProperty: (key: string, value: any) => void;
     isRequired?: boolean;
   }
-> = ({ index, messageVariables, correlationId, editSubActionProperty, isRequired, errors }) => {
+) => {
   const { docLinks } = useKibana().services;
   return (
     <EuiFormRow
@@ -101,9 +108,7 @@ const eventActionOptions = [
   },
 ];
 
-const ServiceNowParamsFields: React.FunctionComponent<
-  ActionParamsProps<ServiceNowITSMActionParams>
-> = (props) => {
+const ServiceNowParamsFields = (props: ActionParamsProps<ServiceNowITSMActionParams>) => {
   const {
     executionMode,
     actionConnector,

@@ -117,7 +117,11 @@ export function useListItemsFormatter() {
   );
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+export const ExpandedRow = (
+  {
+    item
+  }: ExpandedRowProps
+) => {
   const formatToListItems = useListItemsFormatter();
   const { showLicenseInfo, showNodeInfo } = useEnabledFeatures();
 

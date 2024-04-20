@@ -23,7 +23,7 @@ import { DocumentCreationStep } from './types';
 
 import { DocumentCreationLogic } from '.';
 
-export const DocumentCreationFlyout: React.FC = () => {
+export const DocumentCreationFlyout = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
   const { isDocumentCreationOpen } = useValues(DocumentCreationLogic);
 
@@ -36,7 +36,7 @@ export const DocumentCreationFlyout: React.FC = () => {
   ) : null;
 };
 
-export const FlyoutContent: React.FC = () => {
+export const FlyoutContent = () => {
   const { creationStep, creationMode } = useValues(DocumentCreationLogic);
 
   switch (creationStep) {

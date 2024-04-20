@@ -28,7 +28,7 @@ export interface Props {
   onEditCustomField: (key: string) => void;
 }
 
-const CustomFieldsListComponent: React.FC<Props> = (props) => {
+const CustomFieldsListComponent = (props: Props) => {
   const { customFields, onDeleteCustomField, onEditCustomField } = props;
   const [selectedItem, setSelectedItem] = useState<CustomFieldsConfiguration[number] | null>(null);
   const { euiTheme } = useEuiTheme();

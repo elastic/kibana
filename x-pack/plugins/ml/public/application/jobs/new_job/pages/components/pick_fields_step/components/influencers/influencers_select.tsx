@@ -24,7 +24,13 @@ interface Props {
   selectedInfluencers: string[];
 }
 
-export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
+export const InfluencersSelect = (
+  {
+    fields,
+    changeHandler,
+    selectedInfluencers
+  }: Props
+) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { renderOption, optionCss } = useFieldStatsTrigger();
 

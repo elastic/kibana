@@ -48,7 +48,7 @@ const useGlobalFields = () => {
   return ctx;
 };
 
-const FormGlobalFields: React.FC = ({ children }) => {
+const FormGlobalFields = ({ children }) => {
   return (
     <UseMultiFields fields={globalFields}>
       {(fields) => {

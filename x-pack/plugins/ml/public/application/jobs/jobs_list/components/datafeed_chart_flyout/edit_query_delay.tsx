@@ -30,11 +30,17 @@ const tooltipContent = i18n.translate(
   }
 );
 
-export const EditQueryDelay: FC<{
-  datafeedId: Datafeed['datafeed_id'];
-  queryDelay: Datafeed['query_delay'];
-  isEnabled: boolean;
-}> = ({ datafeedId, queryDelay, isEnabled }) => {
+export const EditQueryDelay = (
+  {
+    datafeedId,
+    queryDelay,
+    isEnabled
+  }: {
+    datafeedId: Datafeed['datafeed_id'];
+    queryDelay: Datafeed['query_delay'];
+    isEnabled: boolean;
+  }
+) => {
   const [currentQueryDelay, setCurrentQueryDelay] = useState(queryDelay);
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);

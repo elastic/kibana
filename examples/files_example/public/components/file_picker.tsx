@@ -19,7 +19,13 @@ interface Props {
   onDone: (ids: string[]) => void;
 }
 
-export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
+export const MyFilePicker = (
+  {
+    onClose,
+    onDone,
+    onUpload
+  }: Props
+) => {
   return (
     <FilePicker
       kind={exampleFileKind.id}

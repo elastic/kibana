@@ -27,9 +27,15 @@ import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useAlertDataViews } from '../hooks/use_alert_data_view';
 
-export const CasesParamsFieldsComponent: React.FunctionComponent<
-  ActionParamsProps<CasesActionParams>
-> = ({ actionParams, editAction, errors, index, producerId }) => {
+export const CasesParamsFieldsComponent = (
+  {
+    actionParams,
+    editAction,
+    errors,
+    index,
+    producerId
+  }: ActionParamsProps<CasesActionParams>
+) => {
   const { dataViews, loading: loadingAlertDataViews } = useAlertDataViews(
     producerId ? [producerId as ValidFeatureId] : []
   );

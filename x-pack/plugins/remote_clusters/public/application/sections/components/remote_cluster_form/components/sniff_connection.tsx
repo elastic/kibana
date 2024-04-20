@@ -20,12 +20,14 @@ import { transportPortUrl } from '../../../../services/documentation';
 import { validateSeed } from '../validators';
 import { Props } from './connection_mode';
 
-export const SniffConnection: FunctionComponent<Props> = ({
-  fields,
-  fieldsErrors,
-  areErrorsVisible,
-  onFieldsChange,
-}) => {
+export const SniffConnection = (
+  {
+    fields,
+    fieldsErrors,
+    areErrorsVisible,
+    onFieldsChange
+  }: Props
+) => {
   const [localSeedErrors, setLocalSeedErrors] = useState<JSX.Element[]>([]);
   const { seeds = [], nodeConnections } = fields;
   const { seeds: seedsError } = fieldsErrors;

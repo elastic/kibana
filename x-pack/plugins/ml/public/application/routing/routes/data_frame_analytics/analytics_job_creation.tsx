@@ -47,7 +47,11 @@ export const analyticsJobsCreationRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location }) => {
+const PageWrapper = (
+  {
+    location
+  }: PageProps
+) => {
   const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {
     sort: false,
   });

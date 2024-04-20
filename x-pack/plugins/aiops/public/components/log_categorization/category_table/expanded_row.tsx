@@ -21,7 +21,12 @@ interface ExpandedRowProps {
   displayExamples?: boolean;
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ category, displayExamples = true }) => {
+export const ExpandedRow = (
+  {
+    category,
+    displayExamples = true
+  }: ExpandedRowProps
+) => {
   const { euiTheme } = useEuiTheme();
   const cssExpandedRow = css({
     marginRight: euiTheme.size.xxl,
@@ -61,7 +66,14 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ category, displayExamples = 
   );
 };
 
-const Section: FC<{ title: string }> = ({ title, children }) => {
+const Section = (
+  {
+    title,
+    children
+  }: {
+    title: string;
+  }
+) => {
   return (
     <>
       <EuiText size="s">

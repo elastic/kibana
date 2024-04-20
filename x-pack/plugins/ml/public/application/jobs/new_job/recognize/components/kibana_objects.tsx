@@ -28,89 +28,93 @@ export interface KibanaObjectItemProps {
   isSaving: boolean;
 }
 
-export const KibanaObjectList: FC<KibanaObjectItemProps> = memo(
-  ({ objectType, kibanaObjects, isSaving }) => {
-    const kibanaObjectLabels: Record<string, string> = {
-      dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {
-        defaultMessage: 'Dashboards',
-      }),
-      search: i18n.translate('xpack.ml.newJob.recognize.searchesLabel', {
-        defaultMessage: 'Searches',
-      }),
-      visualization: i18n.translate('xpack.ml.newJob.recognize.visualizationsLabel', {
-        defaultMessage: 'Visualizations',
-      }),
-    };
+export const KibanaObjectList = memo((
+  {
+    objectType,
+    kibanaObjects,
+    isSaving
+  }: KibanaObjectItemProps
+) => {
+  const kibanaObjectLabels: Record<string, string> = {
+    dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {
+      defaultMessage: 'Dashboards',
+    }),
+    search: i18n.translate('xpack.ml.newJob.recognize.searchesLabel', {
+      defaultMessage: 'Searches',
+    }),
+    visualization: i18n.translate('xpack.ml.newJob.recognize.visualizationsLabel', {
+      defaultMessage: 'Visualizations',
+    }),
+  };
 
-    if (kibanaObjects === undefined) {
-      return null;
-    }
-
-    return (
-      <>
-        <EuiTitle size="s">
-          <h4>{kibanaObjectLabels[objectType]}</h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <ul>
-          {kibanaObjects.map(({ id, title, success, exists, error }, i) => (
-            <li key={id}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem>
-                      <EuiText size="s" color={exists ? 'subdued' : 'success'}>
-                        {title}
-                      </EuiText>
-                      {success === false && error !== undefined && (
-                        <EuiText size="xs" color="danger">
-                          {extractErrorMessage(error)}
-                        </EuiText>
-                      )}
-                    </EuiFlexItem>
-                    {exists && (
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="default">
-                          <FormattedMessage
-                            id="xpack.ml.newJob.recognize.alreadyExistsLabel"
-                            defaultMessage="(already exists)"
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {!exists && (
-                  <EuiFlexItem grow={false} style={{ width: '60px' }}>
-                    <EuiText textAlign="center">
-                      {isSaving ? <EuiLoadingSpinner size="m" /> : null}
-                      {success !== undefined ? (
-                        <EuiIcon
-                          type={success ? 'check' : 'cross'}
-                          color={success ? 'success' : 'danger'}
-                          aria-label={
-                            success
-                              ? i18n.translate('xpack.ml.newJob.recognize.results.savedAriaLabel', {
-                                  defaultMessage: 'Saved',
-                                })
-                              : i18n.translate(
-                                  'xpack.ml.newJob.recognize.results.saveFailedAriaLabel',
-                                  { defaultMessage: 'Save failed' }
-                                )
-                          }
-                        />
-                      ) : null}
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              {(kibanaObjects.length === 1 || i < kibanaObjects.length - 1) && (
-                <EuiHorizontalRule margin="s" />
-              )}
-            </li>
-          ))}
-        </ul>
-      </>
-    );
+  if (kibanaObjects === undefined) {
+    return null;
   }
-);
+
+  return (
+    <>
+      <EuiTitle size="s">
+        <h4>{kibanaObjectLabels[objectType]}</h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ul>
+        {kibanaObjects.map(({ id, title, success, exists, error }, i) => (
+          <li key={id}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiText size="s" color={exists ? 'subdued' : 'success'}>
+                      {title}
+                    </EuiText>
+                    {success === false && error !== undefined && (
+                      <EuiText size="xs" color="danger">
+                        {extractErrorMessage(error)}
+                      </EuiText>
+                    )}
+                  </EuiFlexItem>
+                  {exists && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="default">
+                        <FormattedMessage
+                          id="xpack.ml.newJob.recognize.alreadyExistsLabel"
+                          defaultMessage="(already exists)"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {!exists && (
+                <EuiFlexItem grow={false} style={{ width: '60px' }}>
+                  <EuiText textAlign="center">
+                    {isSaving ? <EuiLoadingSpinner size="m" /> : null}
+                    {success !== undefined ? (
+                      <EuiIcon
+                        type={success ? 'check' : 'cross'}
+                        color={success ? 'success' : 'danger'}
+                        aria-label={
+                          success
+                            ? i18n.translate('xpack.ml.newJob.recognize.results.savedAriaLabel', {
+                                defaultMessage: 'Saved',
+                              })
+                            : i18n.translate(
+                                'xpack.ml.newJob.recognize.results.saveFailedAriaLabel',
+                                { defaultMessage: 'Save failed' }
+                              )
+                        }
+                      />
+                    ) : null}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            {(kibanaObjects.length === 1 || i < kibanaObjects.length - 1) && (
+              <EuiHorizontalRule margin="s" />
+            )}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+});

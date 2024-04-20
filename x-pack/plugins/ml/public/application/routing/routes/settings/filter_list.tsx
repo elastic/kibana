@@ -40,7 +40,7 @@ export const filterListRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetFilters'], { getMlNodeCount });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });

@@ -35,14 +35,16 @@ interface Props {
 
 const isFormFieldValid = (field: Field) => !Boolean(field.errors?.length);
 
-export const MetadataForm: FC<Props> = ({
-  form,
-  tagsReferences,
-  TagList,
-  TagSelector,
-  isReadonly,
-  readonlyReason,
-}) => {
+export const MetadataForm = (
+  {
+    form,
+    tagsReferences,
+    TagList,
+    TagSelector,
+    isReadonly,
+    readonlyReason
+  }: Props
+) => {
   const {
     title,
     setTitle,

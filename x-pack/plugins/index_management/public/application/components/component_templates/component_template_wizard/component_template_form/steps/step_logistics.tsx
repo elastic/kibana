@@ -42,257 +42,261 @@ interface Props {
   isEditing?: boolean;
 }
 
-export const StepLogistics: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, isEditing, onChange }) => {
-    const { form } = useForm({
-      schema: logisticsFormSchema,
-      defaultValue,
-      options: { stripEmptyFields: false },
+export const StepLogistics = React.memo((
+  {
+    defaultValue,
+    isEditing,
+    onChange
+  }: Props
+) => {
+  const { form } = useForm({
+    schema: logisticsFormSchema,
+    defaultValue,
+    options: { stripEmptyFields: false },
+  });
+
+  const { isValid: isFormValid, submit, getFormData, subscribe } = form;
+
+  const [{ lifecycle }] = useFormData<{
+    lifecycle: DataRetention;
+  }>({
+    form,
+    watch: ['lifecycle.enabled', 'lifecycle.infiniteDataRetention'],
+  });
+
+  const { documentation } = useComponentTemplatesContext();
+
+  const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
+    Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
+  );
+
+  const validate = useCallback(async () => {
+    return (await submit()).isValid;
+  }, [submit]);
+
+  useEffect(() => {
+    onChange({
+      isValid: isFormValid,
+      validate,
+      getData: getFormData,
     });
+  }, [isFormValid, getFormData, validate, onChange]);
 
-    const { isValid: isFormValid, submit, getFormData, subscribe } = form;
-
-    const [{ lifecycle }] = useFormData<{
-      lifecycle: DataRetention;
-    }>({
-      form,
-      watch: ['lifecycle.enabled', 'lifecycle.infiniteDataRetention'],
-    });
-
-    const { documentation } = useComponentTemplatesContext();
-
-    const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
-      Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
-    );
-
-    const validate = useCallback(async () => {
-      return (await submit()).isValid;
-    }, [submit]);
-
-    useEffect(() => {
+  useEffect(() => {
+    const subscription = subscribe(({ data, isValid }) => {
       onChange({
-        isValid: isFormValid,
+        isValid,
         validate,
-        getData: getFormData,
+        getData: data.format,
       });
-    }, [isFormValid, getFormData, validate, onChange]);
+    });
+    return subscription.unsubscribe;
+  }, [subscribe, validate, onChange]);
 
-    useEffect(() => {
-      const subscription = subscribe(({ data, isValid }) => {
-        onChange({
-          isValid,
-          validate,
-          getData: data.format,
-        });
-      });
-      return subscription.unsubscribe;
-    }, [subscribe, validate, onChange]);
-
-    return (
-      <Form form={form} data-test-subj="stepLogistics">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateForm.stepLogistics.stepTitle"
-                  defaultMessage="Logistics"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              flush="right"
-              href={documentation.componentTemplates}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
+  return (
+    <Form form={form} data-test-subj="stepLogistics">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2>
               <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.docsButtonLabel"
-                defaultMessage="Component Templates docs"
+                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.stepTitle"
+                defaultMessage="Logistics"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
 
-        <EuiSpacer size="l" />
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            flush="right"
+            href={documentation.componentTemplates}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.docsButtonLabel"
+              defaultMessage="Component Templates docs"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        {/* Name field */}
-        <FormRow
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameTitle"
-              defaultMessage="Name"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
-              defaultMessage="Unique name for this component template."
-            />
-          }
-        >
-          <UseField
-            path="name"
-            componentProps={{
-              ['data-test-subj']: 'nameField',
-              euiFieldProps: { disabled: isEditing },
-            }}
+      <EuiSpacer size="l" />
+
+      {/* Name field */}
+      <FormRow
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameTitle"
+            defaultMessage="Name"
           />
-        </FormRow>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
+            defaultMessage="Unique name for this component template."
+          />
+        }
+      >
+        <UseField
+          path="name"
+          componentProps={{
+            ['data-test-subj']: 'nameField',
+            euiFieldProps: { disabled: isEditing },
+          }}
+        />
+      </FormRow>
 
-        {/* Data retention field */}
-        <FormRow
-          title={
+      {/* Data retention field */}
+      <FormRow
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepLogistics.dataRetentionTitle"
+            defaultMessage="Data retention"
+          />
+        }
+        description={
+          <>
             <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.dataRetentionTitle"
-              defaultMessage="Data retention"
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.dataRetentionDescription"
+              defaultMessage="Data will be kept at least this long before being automatically deleted."
             />
-          }
-          description={
-            <>
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.dataRetentionDescription"
-                defaultMessage="Data will be kept at least this long before being automatically deleted."
-              />
-              <EuiSpacer size="m" />
-              <UseField
-                path="lifecycle.enabled"
-                componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
-              />
-            </>
-          }
-        >
-          {lifecycle?.enabled && (
+            <EuiSpacer size="m" />
             <UseField
-              path="lifecycle.value"
-              component={NumericField}
-              labelAppend={
-                <UseField
-                  path="lifecycle.infiniteDataRetention"
-                  data-test-subj="infiniteDataRetentionToggle"
-                  componentProps={{
-                    euiFieldProps: {
-                      compressed: true,
-                    },
-                  }}
-                />
-              }
-              componentProps={{
-                euiFieldProps: {
-                  disabled: lifecycle?.infiniteDataRetention,
-                  'data-test-subj': 'valueDataRetentionField',
-                  min: 1,
-                  append: (
-                    <UnitField
-                      path="lifecycle.unit"
-                      options={timeUnits}
-                      disabled={lifecycle?.infiniteDataRetention}
-                      euiFieldProps={{
-                        'data-test-subj': 'unitDataRetentionField',
-                      }}
-                    />
-                  ),
-                },
-              }}
+              path="lifecycle.enabled"
+              componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
             />
-          )}
-        </FormRow>
-
-        {/* version field */}
-        <FormRow
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle"
-              defaultMessage="Version"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription"
-              defaultMessage="Number used by external management systems to identify the component template."
-            />
-          }
-        >
+          </>
+        }
+      >
+        {lifecycle?.enabled && (
           <UseField
-            path="version"
-            componentProps={{
-              ['data-test-subj']: 'versionField',
-            }}
-          />
-        </FormRow>
-
-        {/* _meta field */}
-        <FormRow
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaTitle"
-              defaultMessage="Metadata"
-            />
-          }
-          description={
-            <>
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDescription"
-                defaultMessage="Arbitrary information about the template, stored in the cluster state. {learnMoreLink}"
-                values={{
-                  learnMoreLink: (
-                    <EuiLink
-                      href={documentation.componentTemplatesMetadata}
-                      target="_blank"
-                      external
-                    >
-                      {i18n.translate(
-                        'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDocumentionLink',
-                        {
-                          defaultMessage: 'Learn more.',
-                        }
-                      )}
-                    </EuiLink>
-                  ),
+            path="lifecycle.value"
+            component={NumericField}
+            labelAppend={
+              <UseField
+                path="lifecycle.infiniteDataRetention"
+                data-test-subj="infiniteDataRetentionToggle"
+                componentProps={{
+                  euiFieldProps: {
+                    compressed: true,
+                  },
                 }}
               />
-
-              <EuiSpacer size="m" />
-
-              <EuiSwitch
-                label={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metadataDescription"
-                    defaultMessage="Add metadata"
+            }
+            componentProps={{
+              euiFieldProps: {
+                disabled: lifecycle?.infiniteDataRetention,
+                'data-test-subj': 'valueDataRetentionField',
+                min: 1,
+                append: (
+                  <UnitField
+                    path="lifecycle.unit"
+                    options={timeUnits}
+                    disabled={lifecycle?.infiniteDataRetention}
+                    euiFieldProps={{
+                      'data-test-subj': 'unitDataRetentionField',
+                    }}
                   />
-                }
-                checked={isMetaVisible}
-                onChange={(e) => setIsMetaVisible(e.target.checked)}
-                data-test-subj="metaToggle"
-              />
-            </>
-          }
-        >
-          {isMetaVisible && (
-            <UseField
-              path="_meta"
-              component={JsonEditorField}
-              componentProps={{
-                codeEditorProps: {
-                  ['data-test-subj']: 'metaEditor',
-                  height: '200px',
-                  'aria-label': i18n.translate(
-                    'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaAriaLabel',
-                    {
-                      defaultMessage: '_meta field data editor',
-                    }
-                  ),
-                },
+                ),
+              },
+            }}
+          />
+        )}
+      </FormRow>
+
+      {/* version field */}
+      <FormRow
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle"
+            defaultMessage="Version"
+          />
+        }
+        description={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription"
+            defaultMessage="Number used by external management systems to identify the component template."
+          />
+        }
+      >
+        <UseField
+          path="version"
+          componentProps={{
+            ['data-test-subj']: 'versionField',
+          }}
+        />
+      </FormRow>
+
+      {/* _meta field */}
+      <FormRow
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaTitle"
+            defaultMessage="Metadata"
+          />
+        }
+        description={
+          <>
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDescription"
+              defaultMessage="Arbitrary information about the template, stored in the cluster state. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={documentation.componentTemplatesMetadata}
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate(
+                      'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDocumentionLink',
+                      {
+                        defaultMessage: 'Learn more.',
+                      }
+                    )}
+                  </EuiLink>
+                ),
               }}
             />
-          )}
-        </FormRow>
-      </Form>
-    );
-  }
-);
+
+            <EuiSpacer size="m" />
+
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metadataDescription"
+                  defaultMessage="Add metadata"
+                />
+              }
+              checked={isMetaVisible}
+              onChange={(e) => setIsMetaVisible(e.target.checked)}
+              data-test-subj="metaToggle"
+            />
+          </>
+        }
+      >
+        {isMetaVisible && (
+          <UseField
+            path="_meta"
+            component={JsonEditorField}
+            componentProps={{
+              codeEditorProps: {
+                ['data-test-subj']: 'metaEditor',
+                height: '200px',
+                'aria-label': i18n.translate(
+                  'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaAriaLabel',
+                  {
+                    defaultMessage: '_meta field data editor',
+                  }
+                ),
+              },
+            }}
+          />
+        )}
+      </FormRow>
+    </Form>
+  );
+});

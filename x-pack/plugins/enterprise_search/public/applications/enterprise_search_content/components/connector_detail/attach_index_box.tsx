@@ -55,7 +55,11 @@ export interface AttachIndexBoxProps {
   connector: Connector;
 }
 
-export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => {
+export const AttachIndexBox = (
+  {
+    connector
+  }: AttachIndexBoxProps
+) => {
   const { indexName } = useParams<{ indexName: string }>();
   const { createIndex, attachIndex, setConnector, checkIndexExists } = useActions(AttachIndexLogic);
   const {

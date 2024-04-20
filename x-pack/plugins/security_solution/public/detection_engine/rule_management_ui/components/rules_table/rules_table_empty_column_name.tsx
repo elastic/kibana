@@ -11,14 +11,16 @@ interface RulesTableEmptyColumnNameProps {
   name: string;
 }
 
-export const RulesTableEmptyColumnName: FC<RulesTableEmptyColumnNameProps> = React.memo(
-  ({ name }) => {
-    return (
-      <EuiScreenReaderOnly>
-        <p>{name}</p>
-      </EuiScreenReaderOnly>
-    );
-  }
-);
+export const RulesTableEmptyColumnName = React.memo((
+  {
+    name
+  }: RulesTableEmptyColumnNameProps
+) => {
+  return (
+    <EuiScreenReaderOnly>
+      <p>{name}</p>
+    </EuiScreenReaderOnly>
+  );
+});
 
 RulesTableEmptyColumnName.displayName = 'RulesTableEmptyColumnName';

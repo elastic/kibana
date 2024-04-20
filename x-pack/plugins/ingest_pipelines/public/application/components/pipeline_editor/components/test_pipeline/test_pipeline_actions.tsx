@@ -25,7 +25,7 @@ const i18nTexts = {
   ),
 };
 
-export const TestPipelineActions: FunctionComponent = () => {
+export const TestPipelineActions = () => {
   const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
 
   const {

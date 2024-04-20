@@ -26,7 +26,7 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   totalComments: theCase.totalComment,
 });
 
-const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
+const CasesCellComponent = (props: CellComponentProps) => {
   const { isLoading, alert, cases, caseAppId } = props;
   const { navigateToCaseView } = useCaseViewNavigation(caseAppId);
 

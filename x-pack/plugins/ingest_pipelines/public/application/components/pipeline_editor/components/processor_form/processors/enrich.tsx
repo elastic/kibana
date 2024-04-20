@@ -137,7 +137,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Enrich: FunctionComponent = () => {
+export const Enrich = () => {
   const { services } = useKibana();
   return (
     <>

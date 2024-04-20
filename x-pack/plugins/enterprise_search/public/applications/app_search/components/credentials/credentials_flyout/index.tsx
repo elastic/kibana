@@ -18,7 +18,7 @@ import { CredentialsFlyoutBody } from './body';
 import { CredentialsFlyoutFooter } from './footer';
 import { CredentialsFlyoutHeader } from './header';
 
-export const CredentialsFlyout: React.FC = () => {
+export const CredentialsFlyout = () => {
   const { hideCredentialsForm } = useActions(CredentialsLogic);
 
   return (

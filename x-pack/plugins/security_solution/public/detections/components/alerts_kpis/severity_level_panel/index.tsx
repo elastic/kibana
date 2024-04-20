@@ -19,14 +19,16 @@ import * as i18n from './translations';
 
 const SEVERITY_DONUT_CHART_ID = 'alerts-summary-severity-donut';
 
-export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
-  filters,
-  query,
-  signalIndexName,
-  runtimeMappings,
-  addFilter,
-  skip,
-}) => {
+export const SeverityLevelPanel = (
+  {
+    filters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+    addFilter,
+    skip
+  }: ChartsPanelProps
+) => {
   const uniqueQueryId = useMemo(() => `${SEVERITY_DONUT_CHART_ID}-${uuid()}`, []);
 
   const { items, isLoading } = useSummaryChartData({

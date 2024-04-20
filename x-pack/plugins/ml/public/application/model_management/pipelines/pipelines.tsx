@@ -28,7 +28,12 @@ interface ModelPipelinesProps {
   ingestStats: IngestStatsResponse;
 }
 
-export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats }) => {
+export const ModelPipelines = (
+  {
+    pipelines,
+    ingestStats
+  }: ModelPipelinesProps
+) => {
   const {
     services: { share },
   } = useMlKibana();

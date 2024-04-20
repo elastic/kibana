@@ -17,7 +17,11 @@ interface Props {
   onClick: () => void;
 }
 
-export const RetryButton: FunctionComponent<Props> = ({ onClick }) => {
+export const RetryButton = (
+  {
+    onClick
+  }: Props
+) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
 

@@ -15,10 +15,12 @@ interface PolicyStatusContextProviderProps {
   config: ClientConfigType;
 }
 
-export const PolicyStatusContextProvider: FunctionComponent<PolicyStatusContextProviderProps> = ({
-  children,
-  ...props
-}) => {
+export const PolicyStatusContextProvider = (
+  {
+    children,
+    ...props
+  }: PolicyStatusContextProviderProps
+) => {
   return props.config.statefulSettings.enabled ? (
     <IlmPolicyStatusContextProvider>{children}</IlmPolicyStatusContextProvider>
   ) : (

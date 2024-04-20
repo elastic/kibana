@@ -23,44 +23,42 @@ interface StartChatPanelProps {
   isValid?: boolean;
 }
 
-export const StartChatPanel: React.FC<StartChatPanelProps> = ({
-  title,
-  description,
-  children,
-  isValid,
-}) => (
-  <EuiPanel hasBorder paddingSize="l">
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiTitle size="xs">
-        <h5>{title}</h5>
-      </EuiTitle>
+export const StartChatPanel = (
+  {
+    title,
+    description,
+    children,
+    isValid
+  }: StartChatPanelProps
+) => (<EuiPanel hasBorder paddingSize="l">
+  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+    <EuiTitle size="xs">
+      <h5>{title}</h5>
+    </EuiTitle>
 
-      {isValid && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiIcon type="check" color="success" />
+    {isValid && (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiIcon type="check" color="success" />
 
-            <EuiText size="xs" color="success">
-              <p>
-                <FormattedMessage
-                  id="xpack.searchPlayground.startChatPanel.verified"
-                  defaultMessage="Completed"
-                />
-              </p>
-            </EuiText>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+          <EuiText size="xs" color="success">
+            <p>
+              <FormattedMessage
+                id="xpack.searchPlayground.startChatPanel.verified"
+                defaultMessage="Completed"
+              />
+            </p>
+          </EuiText>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+  <EuiSpacer size="s" />
+  <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiText size="s">
+      <p>{description}</p>
+    </EuiText>
 
-    <EuiSpacer size="s" />
-
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiText size="s">
-        <p>{description}</p>
-      </EuiText>
-
-      {children}
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+    {children}
+  </EuiFlexGroup>
+</EuiPanel>);

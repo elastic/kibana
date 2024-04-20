@@ -19,10 +19,12 @@ const ExitFullScreenButtonContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const ExitFullScreenButtonProvider: FC<ExitFullScreenButtonServices> = ({
-  children,
-  ...services
-}) => {
+export const ExitFullScreenButtonProvider = (
+  {
+    children,
+    ...services
+  }: ExitFullScreenButtonServices
+) => {
   return (
     <ExitFullScreenButtonContext.Provider value={services}>
       {children}
@@ -33,10 +35,12 @@ export const ExitFullScreenButtonProvider: FC<ExitFullScreenButtonServices> = ({
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ExitFullScreenButtonKibanaProvider: FC<ExitFullScreenButtonKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const ExitFullScreenButtonKibanaProvider = (
+  {
+    children,
+    ...services
+  }: ExitFullScreenButtonKibanaDependencies
+) => {
   return (
     <ExitFullScreenButtonContext.Provider
       value={{

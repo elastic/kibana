@@ -30,18 +30,18 @@ import type {
   ValidChannelResponse,
 } from '../../../common/slack_api/types';
 
-const SlackParamsFields: React.FunctionComponent<
-  ActionParamsProps<PostMessageParams | PostBlockkitParams>
-> = ({
-  actionConnector,
-  actionParams,
-  editAction,
-  index,
-  errors,
-  messageVariables,
-  defaultMessage,
-  useDefaultMessage,
-}) => {
+const SlackParamsFields = (
+  {
+    actionConnector,
+    actionParams,
+    editAction,
+    index,
+    errors,
+    messageVariables,
+    defaultMessage,
+    useDefaultMessage
+  }: ActionParamsProps<PostMessageParams | PostBlockkitParams>
+) => {
   const [connectorId, setConnectorId] = useState<string>();
   const { subAction, subActionParams } = actionParams;
   const { channels = [], text, channelIds = [] } = subActionParams ?? {};

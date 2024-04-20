@@ -24,7 +24,7 @@ import { AddCustomSourceLogic, AddCustomSourceSteps } from './add_custom_source_
 import { ConfigureCustom } from './configure_custom';
 import { SaveCustom } from './save_custom';
 
-export const AddCustomSource: React.FC = () => {
+export const AddCustomSource = () => {
   const { baseServiceType } = useParams<{ baseServiceType?: string }>();
   const sourceData = getSourceData('custom', baseServiceType);
 

@@ -44,7 +44,7 @@ export const changePointDetectionRouteFactory = (
   disabled: !CHANGE_POINT_DETECTION_ENABLED,
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canUseAiops']);
 
   return (

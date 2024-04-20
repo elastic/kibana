@@ -21,7 +21,12 @@ interface Props {
   fill?: boolean;
 }
 
-export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }) => {
+export const StartCrawlContextMenu = (
+  {
+    menuButtonLabel,
+    fill
+  }: Props
+) => {
   const { startCrawl } = useActions(CrawlerLogic);
   const { showModal: showCrawlSelectDomainsModal } = useActions(CrawlSelectDomainsModalLogic);
   const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(CrawlCustomSettingsFlyoutLogic);

@@ -37,21 +37,24 @@ interface Props {
   searchItems: SearchItems;
 }
 
-export const StepDefineSummary: FC<Props> = ({
-  formState: {
-    isDatePickerApplyEnabled,
-    timeRangeMs,
-    runtimeMappings,
-    searchString,
-    searchQuery,
-    groupByList,
-    aggList,
-    transformFunction,
-    previewRequest: partialPreviewRequest,
-    validationStatus,
-  },
-  searchItems,
-}) => {
+export const StepDefineSummary = (
+  {
+    formState: {
+      isDatePickerApplyEnabled,
+      timeRangeMs,
+      runtimeMappings,
+      searchString,
+      searchQuery,
+      groupByList,
+      aggList,
+      transformFunction,
+      previewRequest: partialPreviewRequest,
+      validationStatus,
+    },
+
+    searchItems
+  }: Props
+) => {
   const toastNotifications = useToastNotifications();
 
   const transformConfigQuery = getTransformConfigQuery(searchQuery);

@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { AddDomainLogic } from './add_domain_logic';
 import { ValidationStepPanel } from './validation_step_panel';
 
-export const AddDomainValidation: React.FC = () => {
+export const AddDomainValidation = () => {
   const {
     addDomainFormInputValue,
     canIgnoreValidationFailure,

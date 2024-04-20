@@ -25,7 +25,7 @@ import { isDevMode } from '../../utils/dev_mode';
 import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
 import { NotFoundPage } from '../404';
 
-export const LogsPageContent: React.FunctionComponent = () => {
+export const LogsPageContent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 

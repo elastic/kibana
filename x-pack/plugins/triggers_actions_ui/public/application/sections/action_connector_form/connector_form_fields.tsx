@@ -22,11 +22,13 @@ interface ConnectorFormFieldsProps {
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
-const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
-  actionTypeModel,
-  isEdit,
-  registerPreSubmitValidator,
-}) => {
+const ConnectorFormFieldsComponent = (
+  {
+    actionTypeModel,
+    isEdit,
+    registerPreSubmitValidator
+  }: ConnectorFormFieldsProps
+) => {
   const {
     application: { capabilities },
   } = useKibana().services;

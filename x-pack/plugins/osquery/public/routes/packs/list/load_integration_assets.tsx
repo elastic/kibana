@@ -21,9 +21,11 @@ interface LoadIntegrationAssetsButtonProps {
   fill?: EuiButtonProps['fill'];
 }
 
-const LoadIntegrationAssetsButtonComponent: React.FC<LoadIntegrationAssetsButtonProps> = ({
-  fill,
-}) => {
+const LoadIntegrationAssetsButtonComponent = (
+  {
+    fill
+  }: LoadIntegrationAssetsButtonProps
+) => {
   const { data } = useAssetsStatus();
   const { isLoading, mutateAsync } = useImportAssets({
     successToastText: data?.upToDate?.length

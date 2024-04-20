@@ -28,7 +28,7 @@ export const job: SampleMlJob = {
 
 export const context: SampleApp1ClickContext = { job };
 
-export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
+export const DrilldownsWithoutEmbeddableExample = () => {
   const { plugins, managerWithoutEmbeddable } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);

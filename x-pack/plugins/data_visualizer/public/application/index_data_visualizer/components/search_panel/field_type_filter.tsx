@@ -17,11 +17,17 @@ import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import type { Option } from '../../../common/components/multi_select_picker';
 import { MultiSelectPicker } from '../../../common/components/multi_select_picker';
 
-export const DataVisualizerFieldTypeFilter: FC<{
-  indexedFieldTypes: string[];
-  setVisibleFieldTypes(q: string[]): void;
-  visibleFieldTypes: string[];
-}> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
+export const DataVisualizerFieldTypeFilter = (
+  {
+    indexedFieldTypes,
+    setVisibleFieldTypes,
+    visibleFieldTypes
+  }: {
+    indexedFieldTypes: string[];
+    setVisibleFieldTypes(q: string[]): void;
+    visibleFieldTypes: string[];
+  }
+) => {
   const euiTheme = useCurrentEuiTheme();
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {

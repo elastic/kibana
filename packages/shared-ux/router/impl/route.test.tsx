@@ -30,7 +30,7 @@ describe('Route', () => {
   });
 
   test('component prop renders', () => {
-    const sampleComponent: FC<{}> = () => {
+    const sampleComponent = () => {
       return <Component>Test</Component>;
     };
     const example = shallow(<Route component={sampleComponent} />);

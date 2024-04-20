@@ -25,7 +25,14 @@ interface Props {
   multiple: boolean;
 }
 
-export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload, multiple }) => {
+export const ModalFooter = (
+  {
+    kind,
+    onDone,
+    onUpload,
+    multiple
+  }: Props
+) => {
   const { state, uploadMeta } = useFilePickerContext();
   const onUploadStart = useCallback(() => state.setIsUploading(true), [state]);
   const onUploadEnd = useCallback(() => state.setIsUploading(false), [state]);

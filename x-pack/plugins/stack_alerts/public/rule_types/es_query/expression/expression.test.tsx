@@ -162,13 +162,18 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
 );
 (httpMock.post as jest.Mock).mockImplementation(() => Promise.resolve({ fields: [] }));
 
-const Wrapper: React.FC<{
-  ruleParams:
-    | EsQueryRuleParams<SearchType.searchSource>
-    | EsQueryRuleParams<SearchType.esQuery>
-    | EsQueryRuleParams<SearchType.esqlQuery>;
-  metadata?: EsQueryRuleMetaData;
-}> = ({ ruleParams, metadata }) => {
+const Wrapper = (
+  {
+    ruleParams,
+    metadata
+  }: {
+    ruleParams:
+      | EsQueryRuleParams<SearchType.searchSource>
+      | EsQueryRuleParams<SearchType.esQuery>
+      | EsQueryRuleParams<SearchType.esqlQuery>;
+    metadata?: EsQueryRuleMetaData;
+  }
+) => {
   const [currentRuleParams, setCurrentRuleParams] = useState<CommonEsQueryRuleParams>(ruleParams);
   const errors = {
     index: [],

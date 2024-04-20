@@ -28,7 +28,12 @@ interface TransformTaskStateBadgeProps {
   reason?: TransformStats['reason'];
 }
 
-export const TransformTaskStateBadge: FC<TransformTaskStateBadgeProps> = ({ state, reason }) => {
+export const TransformTaskStateBadge = (
+  {
+    state,
+    reason
+  }: TransformTaskStateBadgeProps
+) => {
   const color = STATE_COLOR[state];
 
   if (state === TRANSFORM_STATE.FAILED && reason !== undefined) {

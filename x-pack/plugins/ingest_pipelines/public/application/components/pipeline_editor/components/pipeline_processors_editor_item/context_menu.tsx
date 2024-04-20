@@ -22,7 +22,7 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export const ContextMenu: FunctionComponent<Props> = (props) => {
+export const ContextMenu = (props: Props) => {
   const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled, hidden } = props;
   const [isOpen, setIsOpen] = useState<boolean>(false);
 

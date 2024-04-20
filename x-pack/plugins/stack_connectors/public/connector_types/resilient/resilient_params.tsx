@@ -28,14 +28,16 @@ import { ResilientActionParams } from './types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
-const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
-  actionConnector,
-  actionParams,
-  editAction,
-  errors,
-  index,
-  messageVariables,
-}) => {
+const ResilientParamsFields = (
+  {
+    actionConnector,
+    actionParams,
+    editAction,
+    errors,
+    index,
+    messageVariables
+  }: ActionParamsProps<ResilientActionParams>
+) => {
   const {
     http,
     notifications: { toasts },

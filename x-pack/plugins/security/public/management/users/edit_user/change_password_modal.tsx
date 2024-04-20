@@ -87,16 +87,20 @@ export const validateChangePasswordForm = (
   return errors;
 };
 
-export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = ({
-  username,
-  defaultValues = {
-    current_password: '',
-    password: '',
-    confirm_password: '',
-  },
-  onSuccess,
-  onCancel,
-}) => {
+export const ChangePasswordModal = (
+  {
+    username,
+
+    defaultValues = {
+      current_password: '',
+      password: '',
+      confirm_password: '',
+    },
+
+    onSuccess,
+    onCancel
+  }: ChangePasswordModalProps
+) => {
   const { services } = useKibana();
   const { value: currentUser, loading: isLoading } = useCurrentUser();
   const isCurrentUser = currentUser?.username === username;

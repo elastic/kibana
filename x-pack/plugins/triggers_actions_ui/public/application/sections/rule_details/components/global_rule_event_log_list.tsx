@@ -10,7 +10,11 @@ import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { RuleEventLogListTable, RuleEventLogListCommonProps } from './rule_event_log_list_table';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent = (
+  {
+    children
+  }: SpacesContextProps
+) => <>{children}</>;
 
 export interface GlobalRuleEventLogListProps {
   setHeaderActions?: RuleEventLogListCommonProps['setHeaderActions'];

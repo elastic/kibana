@@ -18,7 +18,11 @@ import { ExpandedRowPanel } from '../../stats_table/components/field_data_expand
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 
-export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
+export const GeoPointContent = (
+  {
+    config
+  }: FieldDataRowProps
+) => {
   const formattedResults = useMemo(() => {
     const { stats } = config;
 

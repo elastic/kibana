@@ -36,9 +36,11 @@ interface AddAnalyticsCollectionModalProps {
   onClose: () => void;
 }
 
-export const AddAnalyticsCollectionModal: React.FC<AddAnalyticsCollectionModalProps> = ({
-  onClose,
-}) => {
+export const AddAnalyticsCollectionModal = (
+  {
+    onClose
+  }: AddAnalyticsCollectionModalProps
+) => {
   const { isLoading, isSuccess, isSystemError, canSubmit } = useValues(AddAnalyticsCollectionLogic);
   const modalFormId = useGeneratedHtmlId({ prefix: 'createAnalyticsCollection' });
 

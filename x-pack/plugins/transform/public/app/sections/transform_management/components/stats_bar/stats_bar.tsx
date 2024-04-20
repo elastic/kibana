@@ -29,7 +29,12 @@ interface StatsBarProps {
   dataTestSub: string;
 }
 
-export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
+export const StatsBar = (
+  {
+    stats,
+    dataTestSub
+  }: StatsBarProps
+) => {
   const statsList = useMemo(() => Object.values(stats), [stats]);
 
   return (

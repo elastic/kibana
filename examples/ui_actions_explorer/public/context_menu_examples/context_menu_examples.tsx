@@ -15,7 +15,7 @@ import { PanelEdit } from './panel_edit';
 import { PanelEditWithDrilldowns } from './panel_edit_with_drilldowns';
 import { PanelEditWithDrilldownsAndContextActions } from './panel_edit_with_drilldowns_and_context_actions';
 
-export const ContextMenuExamples: React.FC = () => {
+export const ContextMenuExamples = () => {
   return (
     <EuiText>
       <h1>Context menu examples</h1>

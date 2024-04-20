@@ -26,7 +26,7 @@ interface Props {
   hasEncryptedSavedObjectConfigured: boolean;
 }
 
-export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props) => {
+export const OutputFormLogstashSection = (props: Props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage, hasEncryptedSavedObjectConfigured } =
     props;
   const { docLinks } = useStartServices();

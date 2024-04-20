@@ -30,15 +30,25 @@ import { LogColumnConfiguration } from '../../../../../utils/source_configuratio
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
 
-export const CategoryExampleMessage: React.FunctionComponent<{
-  id: string;
-  dataset: string;
-  message: string;
-  timeRange: TimeRange;
-  timestamp: number;
-  tiebreaker: number;
-  context: LogEntryContext;
-}> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
+export const CategoryExampleMessage = (
+  {
+    id,
+    dataset,
+    message,
+    timestamp,
+    timeRange,
+    tiebreaker,
+    context
+  }: {
+    id: string;
+    dataset: string;
+    message: string;
+    timeRange: TimeRange;
+    timestamp: number;
+    tiebreaker: number;
+    context: LogEntryContext;
+  }
+) => {
   const trackMetric = useUiTracker({ app: 'infra_logs' });
   const [, { setContextEntry }] = useViewLogInProviderContext();
   // handle special cases for the dataset value

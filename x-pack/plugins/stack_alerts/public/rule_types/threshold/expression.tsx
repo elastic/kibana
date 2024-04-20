@@ -79,9 +79,17 @@ interface EsField {
 }
 const EMPTY_ARRAY: EsField[] = [];
 
-export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
-  Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
-> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
+export const IndexThresholdRuleTypeExpression = (
+  {
+    ruleParams,
+    ruleInterval,
+    setRuleParams,
+    setRuleProperty,
+    errors,
+    charts,
+    data
+  }: Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
+) => {
   const {
     index,
     timeField,

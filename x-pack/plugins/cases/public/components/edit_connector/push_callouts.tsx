@@ -16,12 +16,14 @@ interface PushCalloutsProps {
   onEditClick: () => void;
 }
 
-const PushCalloutsComponent: React.FC<PushCalloutsProps> = ({
-  hasConnectors,
-  hasLicenseError,
-  errorsMsg,
-  onEditClick,
-}) => {
+const PushCalloutsComponent = (
+  {
+    hasConnectors,
+    hasLicenseError,
+    errorsMsg,
+    onEditClick
+  }: PushCalloutsProps
+) => {
   return (
     <CaseCallOut
       hasConnectors={hasConnectors}

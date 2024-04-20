@@ -63,9 +63,11 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
       delete oldRule.license;
       newRule.license = 'GPLv3';
 
-      const ThemeWrapper: React.FC<{}> = ({ children }) => (
-        <EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>
-      );
+      const ThemeWrapper = (
+        {
+          children
+        }: {}
+      ) => (<EuiThemeProvider colorMode={colorMode}>{children}</EuiThemeProvider>);
 
       const { container } = render(<RuleDiffTab oldRule={oldRule} newRule={newRule} />, {
         wrapper: ThemeWrapper,

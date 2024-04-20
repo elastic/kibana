@@ -109,19 +109,21 @@ export interface Props {
  * Renders a chat window with a prompt input and a chat history, along with
  * quick prompts for common actions, settings, and prompt context providers.
  */
-const AssistantComponent: React.FC<Props> = ({
-  conversationTitle,
-  embeddedLayout = false,
-  promptContextId = '',
-  shouldRefocusPrompt = false,
-  showTitle = true,
-  setConversationTitle,
-  onCloseFlyout,
-  isFlyoutMode = false,
-  chatHistoryVisible,
-  setChatHistoryVisible,
-  currentUserAvatar,
-}) => {
+const AssistantComponent = (
+  {
+    conversationTitle,
+    embeddedLayout = false,
+    promptContextId = '',
+    shouldRefocusPrompt = false,
+    showTitle = true,
+    setConversationTitle,
+    onCloseFlyout,
+    isFlyoutMode = false,
+    chatHistoryVisible,
+    setChatHistoryVisible,
+    currentUserAvatar
+  }: Props
+) => {
   const {
     assistantTelemetry,
     augmentMessageCodeBlocks,

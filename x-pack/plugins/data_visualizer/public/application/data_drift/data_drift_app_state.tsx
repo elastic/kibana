@@ -53,10 +53,12 @@ const getStr = (arg: string | string[] | null, fallbackStr?: string): string => 
   return '';
 };
 
-export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = ({
-  dataView,
-  savedSearch,
-}) => {
+export const DataDriftDetectionAppState = (
+  {
+    dataView,
+    savedSearch
+  }: DataDriftDetectionAppStateProps
+) => {
   if (!(dataView || savedSearch)) {
     throw Error('No data view or saved search available.');
   }

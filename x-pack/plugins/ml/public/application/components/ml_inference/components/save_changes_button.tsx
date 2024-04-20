@@ -15,16 +15,19 @@ interface SaveChangesButtonProps {
   disabled: boolean;
 }
 
-export const SaveChangesButton: FC<SaveChangesButtonProps> = ({ onClick, disabled }) => (
-  <EuiButtonEmpty
-    size="xs"
-    onClick={onClick}
-    disabled={disabled}
-    data-test-subj="mlTrainedModelsInferencePipelineFlyoutSaveChangesButton"
-  >
-    {i18n.translate(
-      'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.saveChangesButton',
-      { defaultMessage: 'Save changes' }
-    )}
-  </EuiButtonEmpty>
-);
+export const SaveChangesButton = (
+  {
+    onClick,
+    disabled
+  }: SaveChangesButtonProps
+) => (<EuiButtonEmpty
+  size="xs"
+  onClick={onClick}
+  disabled={disabled}
+  data-test-subj="mlTrainedModelsInferencePipelineFlyoutSaveChangesButton"
+>
+  {i18n.translate(
+    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.saveChangesButton',
+    { defaultMessage: 'Save changes' }
+  )}
+</EuiButtonEmpty>);

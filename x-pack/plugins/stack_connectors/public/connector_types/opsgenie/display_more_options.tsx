@@ -14,10 +14,12 @@ interface DisplayMoreOptionsProps {
   toggleShowingMoreOptions: () => void;
 }
 
-const DisplayMoreOptionsComponent: React.FC<DisplayMoreOptionsProps> = ({
-  showingMoreOptions,
-  toggleShowingMoreOptions,
-}) => {
+const DisplayMoreOptionsComponent = (
+  {
+    showingMoreOptions,
+    toggleShowingMoreOptions
+  }: DisplayMoreOptionsProps
+) => {
   return (
     <EuiButtonEmpty
       color="primary"

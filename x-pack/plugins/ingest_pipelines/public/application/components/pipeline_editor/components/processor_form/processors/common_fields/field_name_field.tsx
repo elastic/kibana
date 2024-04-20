@@ -47,15 +47,18 @@ interface Props {
   additionalValidations?: ValidationConfig[];
 }
 
-export const FieldNameField: FunctionComponent<Props> = ({ helpText, additionalValidations }) => (
-  <UseField
-    config={{
-      ...fieldsConfig.field,
-      helpText,
-      validations: fieldsConfig.field.validations!.concat(additionalValidations ?? []),
-    }}
-    component={Field}
-    path="fields.field"
-    data-test-subj="fieldNameField"
-  />
-);
+export const FieldNameField = (
+  {
+    helpText,
+    additionalValidations
+  }: Props
+) => (<UseField
+  config={{
+    ...fieldsConfig.field,
+    helpText,
+    validations: fieldsConfig.field.validations!.concat(additionalValidations ?? []),
+  }}
+  component={Field}
+  path="fields.field"
+  data-test-subj="fieldNameField"
+/>);

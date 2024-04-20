@@ -13,7 +13,11 @@ export interface PlatformIconProps {
   platform: string;
 }
 
-const PlatformIconComponent: React.FC<PlatformIconProps> = ({ platform }) => {
+const PlatformIconComponent = (
+  {
+    platform
+  }: PlatformIconProps
+) => {
   const platformIconModule = useMemo(() => getPlatformIconModule(platform), [platform]);
 
   return <EuiIcon type={platformIconModule} title={platform} size="l" />;

@@ -55,16 +55,26 @@ export const DEFAULT_NUMBER_OF_LINK = 5;
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 // Internal Links
-const UserDetailsLinkComponent: React.FC<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  userName: string;
-  userTab?: UsersTableType;
-  title?: string;
-  isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick: onClickParam, title, userTab }) => {
+const UserDetailsLinkComponent = (
+  {
+    children,
+    Component,
+    userName,
+    isButton,
+    onClick: onClickParam,
+    title,
+    userTab
+  }: {
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    userName: string;
+    userTab?: UsersTableType;
+    title?: string;
+    isButton?: boolean;
+    onClick?: (e: SyntheticEvent) => void;
+  }
+) => {
   const encodedUserName = encodeURIComponent(userName);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const {
@@ -122,16 +132,26 @@ const UserDetailsLinkComponent: React.FC<{
 
 export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
-const HostDetailsLinkComponent: React.FC<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  hostName: string;
-  isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void;
-  hostTab?: HostsTableType;
-  title?: string;
-}> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
+const HostDetailsLinkComponent = (
+  {
+    children,
+    Component,
+    hostName,
+    isButton,
+    onClick: onClickParam,
+    title,
+    hostTab
+  }: {
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    hostName: string;
+    isButton?: boolean;
+    onClick?: (e: SyntheticEvent) => void;
+    hostTab?: HostsTableType;
+    title?: string;
+  }
+) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const {
     application: { navigateToApp },
@@ -226,16 +246,26 @@ export const ExternalLink = React.memo<{
 
 ExternalLink.displayName = 'ExternalLink';
 
-const NetworkDetailsLinkComponent: React.FC<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  ip: string | string[];
-  flowTarget?: FlowTarget | FlowTargetSourceDest;
-  isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void | undefined;
-  title?: string;
-}> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
+const NetworkDetailsLinkComponent = (
+  {
+    Component,
+    children,
+    ip,
+    flowTarget = FlowTarget.source,
+    isButton,
+    onClick,
+    title
+  }: {
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    ip: string | string[];
+    flowTarget?: FlowTarget | FlowTargetSourceDest;
+    isButton?: boolean;
+    onClick?: (e: SyntheticEvent) => void | undefined;
+    title?: string;
+  }
+) => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
@@ -292,12 +322,14 @@ export interface CaseDetailsLinkComponentProps {
   index?: number;
 }
 
-const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
-  index,
-  children,
-  detailName,
-  title,
-}) => {
+const CaseDetailsLinkComponent = (
+  {
+    index,
+    children,
+    detailName,
+    title
+  }: CaseDetailsLinkComponentProps
+) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, isTourShown } = useTourContext();
@@ -473,19 +505,21 @@ const defaultNameMapping: Record<DefaultReputationLink, string> = {
   [DefaultReputationLink['talosIntelligence.com']]: i18n.VIEW_TALOS_INTELLIGENCE,
 };
 
-const ReputationLinkComponent: React.FC<{
-  overflowIndexStart?: number;
-  allItemsLimit?: number;
-  showDomain?: boolean;
-  domain: string;
-  direction?: 'row' | 'column';
-}> = ({
-  overflowIndexStart = DEFAULT_NUMBER_OF_LINK,
-  allItemsLimit = DEFAULT_NUMBER_OF_LINK,
-  showDomain = false,
-  domain,
-  direction = 'row',
-}) => {
+const ReputationLinkComponent = (
+  {
+    overflowIndexStart = DEFAULT_NUMBER_OF_LINK,
+    allItemsLimit = DEFAULT_NUMBER_OF_LINK,
+    showDomain = false,
+    domain,
+    direction = 'row'
+  }: {
+    overflowIndexStart?: number;
+    allItemsLimit?: number;
+    showDomain?: boolean;
+    domain: string;
+    direction?: 'row' | 'column';
+  }
+) => {
   const [ipReputationLinksSetting] = useUiSetting$<ReputationLinkSetting[]>(
     IP_REPUTATION_LINKS_SETTING
   );

@@ -14,7 +14,11 @@ interface Props {
   onClick(): void;
 }
 
-export const CustomizationCallout: React.FC<Props> = ({ onClick }) => {
+export const CustomizationCallout = (
+  {
+    onClick
+  }: Props
+) => {
   return (
     <EuiFlexGroup
       direction="column"

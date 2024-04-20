@@ -51,12 +51,14 @@ const itemToSelectableOption = (item: {
   } as ItemSelectableOption;
 };
 
-const EditTagsSelectableComponent: React.FC<Props> = ({
-  selectedCases,
-  tags,
-  isLoading,
-  onChangeTags,
-}) => {
+const EditTagsSelectableComponent = (
+  {
+    selectedCases,
+    tags,
+    isLoading,
+    onChangeTags
+  }: Props
+) => {
   const { state, options, totalSelectedItems, onChange, onSelectAll, onSelectNone } = useItemsState(
     {
       items: tags,

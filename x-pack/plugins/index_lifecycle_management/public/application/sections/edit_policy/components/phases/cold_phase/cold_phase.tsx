@@ -29,7 +29,7 @@ const i18nTexts = {
   },
 };
 
-export const ColdPhase: FunctionComponent = () => {
+export const ColdPhase = () => {
   const {
     isUsingSearchableSnapshotInHotPhase,
     isUsingDownsampleInHotPhase,

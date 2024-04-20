@@ -17,9 +17,13 @@ import { isJobStarted } from '../../../../../../common/machine_learning/helpers'
 
 import { MlJobItem } from '../ml_job_item';
 
-const MlUserJobDescriptionComponent: FC<{
-  job: MlSummaryJob;
-}> = ({ job }) => {
+const MlUserJobDescriptionComponent = (
+  {
+    job
+  }: {
+    job: MlSummaryJob;
+  }
+) => {
   const switchComponent = useMemo(
     () => (
       <EuiToolTip content={i18n.ML_ADMIN_REQUIRED}>

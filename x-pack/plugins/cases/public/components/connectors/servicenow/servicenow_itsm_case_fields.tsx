@@ -32,9 +32,11 @@ const defaultFields: Fields = {
   subcategory: [],
 };
 
-const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
-  connector,
-}) => {
+const ServiceNowITSMFieldsComponent = (
+  {
+    connector
+  }: ConnectorFieldsProps
+) => {
   const form = useFormContext();
   const [{ fields }] = useFormData<{ fields: ServiceNowITSMFieldsType }>();
 

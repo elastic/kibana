@@ -27,19 +27,21 @@ interface Props {
   dataViews: DataView[];
 }
 
-export const FilterView: FC<Props> = ({
-  filter,
-  readOnly,
-  iconOnClick,
-  onClick,
-  valueLabel,
-  fieldLabel,
-  errorMessage,
-  filterLabelStatus,
-  hideAlias,
-  dataViews,
-  ...rest
-}: Props) => {
+export const FilterView = (
+  {
+    filter,
+    readOnly,
+    iconOnClick,
+    onClick,
+    valueLabel,
+    fieldLabel,
+    errorMessage,
+    filterLabelStatus,
+    hideAlias,
+    dataViews,
+    ...rest
+  }: Props
+) => {
   const [ref, innerText] = useInnerText();
 
   const filterString = readOnly

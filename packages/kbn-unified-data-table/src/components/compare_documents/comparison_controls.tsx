@@ -367,12 +367,18 @@ const enableShowDiffTooltip = i18n.translate('unifiedDataTable.enableShowDiff', 
   defaultMessage: 'You need to enable Show diff',
 });
 
-const DiffModeEntry: FC<
-  Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
+const DiffModeEntry = (
+  {
+    children,
+    entryDiffMode,
+    diffMode,
+    disabled,
+    setDiffMode
+  }: Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
     entryDiffMode: DocumentDiffMode;
     disabled?: boolean;
   }
-> = ({ children, entryDiffMode, diffMode, disabled, setDiffMode }) => {
+) => {
   const { euiTheme } = useEuiTheme();
 
   return (

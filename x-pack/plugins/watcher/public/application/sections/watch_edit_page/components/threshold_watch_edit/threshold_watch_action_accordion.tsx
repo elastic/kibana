@@ -74,10 +74,12 @@ interface Props {
   };
 }
 
-export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
-  settings,
-  actionErrors,
-}) => {
+export const WatchActionsAccordion = (
+  {
+    settings,
+    actionErrors
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const {
     links: { watchActionsConfigurationMap },

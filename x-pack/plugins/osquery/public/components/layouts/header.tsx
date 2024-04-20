@@ -37,27 +37,31 @@ export interface HeaderProps {
   'data-test-subj'?: string;
 }
 
-const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
-  ({ leftColumn, rightColumn, rightColumnGrow }) => (
-    <EuiFlexGroup alignItems="center">
-      {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
-      {rightColumn ? <EuiFlexItem grow={rightColumnGrow}>{rightColumn}</EuiFlexItem> : null}
-    </EuiFlexGroup>
-  )
-);
+const HeaderColumns = memo((
+  {
+    leftColumn,
+    rightColumn,
+    rightColumnGrow
+  }: Omit<HeaderProps, 'tabs'>
+) => (<EuiFlexGroup alignItems="center">
+  {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
+  {rightColumn ? <EuiFlexItem grow={rightColumnGrow}>{rightColumn}</EuiFlexItem> : null}
+</EuiFlexGroup>));
 
 HeaderColumns.displayName = 'HeaderColumns';
 
-const HeaderComponent: React.FC<HeaderProps> = ({
-  children,
-  leftColumn,
-  rightColumn,
-  rightColumnGrow,
-  tabs,
-  maxWidth,
-  tabsClassName,
-  'data-test-subj': dataTestSubj,
-}) => {
+const HeaderComponent = (
+  {
+    children,
+    leftColumn,
+    rightColumn,
+    rightColumnGrow,
+    tabs,
+    maxWidth,
+    tabsClassName,
+    'data-test-subj': dataTestSubj
+  }: HeaderProps
+) => {
   const wrapperCss = useCallback(
     ({ euiTheme }: UseEuiTheme) => css`
       max-width: ${maxWidth || 1200}px;

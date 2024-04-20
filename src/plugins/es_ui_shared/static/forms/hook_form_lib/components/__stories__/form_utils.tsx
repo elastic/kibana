@@ -30,7 +30,12 @@ export interface FormWrapperProps {
   formConfig?: FormConfig<any>;
 }
 
-export const FormWrapper: FC<FormWrapperProps> = ({ formConfig, children }) => {
+export const FormWrapper = (
+  {
+    formConfig,
+    children
+  }: FormWrapperProps
+) => {
   const { form } = useForm(formConfig);
 
   return (

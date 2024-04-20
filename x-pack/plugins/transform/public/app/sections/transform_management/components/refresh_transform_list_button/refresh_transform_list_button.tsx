@@ -14,20 +14,20 @@ interface RefreshTransformListButton {
   isLoading: boolean;
   onClick(): void;
 }
-export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
-  onClick,
-  isLoading,
-}) => (
-  <EuiButton
-    color="success"
-    iconType="refresh"
-    data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
-    onClick={onClick}
-    isLoading={isLoading}
-  >
-    <FormattedMessage
-      id="xpack.transform.transformList.refreshButtonLabel"
-      defaultMessage="Reload"
-    />
-  </EuiButton>
-);
+export const RefreshTransformListButton = (
+  {
+    onClick,
+    isLoading
+  }: RefreshTransformListButton
+) => (<EuiButton
+  color="success"
+  iconType="refresh"
+  data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
+  onClick={onClick}
+  isLoading={isLoading}
+>
+  <FormattedMessage
+    id="xpack.transform.transformList.refreshButtonLabel"
+    defaultMessage="Reload"
+  />
+</EuiButton>);

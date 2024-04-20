@@ -32,11 +32,13 @@ interface PlatinumLicensePopoverProps {
   isPopoverOpen: boolean;
 }
 
-export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
-  button,
-  isPopoverOpen,
-  closePopover,
-}) => {
+export const PlatinumLicensePopover = (
+  {
+    button,
+    isPopoverOpen,
+    closePopover
+  }: PlatinumLicensePopoverProps
+) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPopover

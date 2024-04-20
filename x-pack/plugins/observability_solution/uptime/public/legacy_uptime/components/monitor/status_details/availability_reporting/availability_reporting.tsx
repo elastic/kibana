@@ -21,7 +21,11 @@ export const formatAvailabilityValue = (val: number) => {
   return result.toFixed(2);
 };
 
-export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
+export const AvailabilityReporting = (
+  {
+    allLocations
+  }: Props
+) => {
   const [pageIndex, setPageIndex] = useState(0);
 
   const cols = [

@@ -43,23 +43,25 @@ interface ListExceptionItemsProps {
   onCreateExceptionListItem: () => void;
 }
 
-const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
-  isReadOnly,
-  exceptions,
-  listType,
-  lastUpdated,
-  pagination,
-  emptyViewerTitle,
-  emptyViewerBody,
-  emptyViewerButtonText,
-  viewerStatus,
-  ruleReferences,
-  hideUtility = false,
-  onDeleteException,
-  onEditExceptionItem,
-  onPaginationChange,
-  onCreateExceptionListItem,
-}) => {
+const ListExceptionItemsComponent = (
+  {
+    isReadOnly,
+    exceptions,
+    listType,
+    lastUpdated,
+    pagination,
+    emptyViewerTitle,
+    emptyViewerBody,
+    emptyViewerButtonText,
+    viewerStatus,
+    ruleReferences,
+    hideUtility = false,
+    onDeleteException,
+    onEditExceptionItem,
+    onPaginationChange,
+    onCreateExceptionListItem
+  }: ListExceptionItemsProps
+) => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const editButtonText = useMemo(() => {

@@ -22,10 +22,12 @@ interface FiltersChangesBanner {
   discardChangesHandler: () => void;
 }
 
-export const FiltersChangedBanner: FC<FiltersChangesBanner> = ({
-  saveChangesHandler,
-  discardChangesHandler,
-}) => {
+export const FiltersChangedBanner = (
+  {
+    saveChangesHandler,
+    discardChangesHandler
+  }: FiltersChangesBanner
+) => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
       <EuiFlexItem grow={true}>

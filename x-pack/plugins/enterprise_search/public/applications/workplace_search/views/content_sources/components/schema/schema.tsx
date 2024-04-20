@@ -39,7 +39,7 @@ import {
 import { SchemaFieldsTable } from './schema_fields_table';
 import { SchemaLogic } from './schema_logic';
 
-export const Schema: React.FC = () => {
+export const Schema = () => {
   const {
     initializeSchema,
     addNewField,

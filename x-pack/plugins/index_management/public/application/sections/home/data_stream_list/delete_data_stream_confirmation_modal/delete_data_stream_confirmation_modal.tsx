@@ -18,13 +18,12 @@ interface Props {
   onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }
 
-export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> = ({
-  dataStreams,
-  onClose,
-}: {
-  dataStreams: string[];
-  onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
-}) => {
+export const DeleteDataStreamConfirmationModal = (
+  {
+    dataStreams,
+    onClose
+  }: Props
+) => {
   const [isLoading, setLoading] = useState(false);
 
   const dataStreamsCount = dataStreams.length;

@@ -25,12 +25,14 @@ import { redirectAppLinksStyles } from './redirect_app_links.styles';
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
-  children,
-  navigateToUrl,
-  currentAppId,
-  ...containerProps
-}) => {
+export const RedirectAppLinks = (
+  {
+    children,
+    navigateToUrl,
+    currentAppId,
+    ...containerProps
+  }: RedirectAppLinksComponentProps
+) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
@@ -46,7 +48,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-    <div
+    (<div
       onClick={handleClick}
       ref={containerRef}
       css={redirectAppLinksStyles}
@@ -54,6 +56,6 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
       {...containerProps}
     >
       {children}
-    </div>
+    </div>)
   );
 };

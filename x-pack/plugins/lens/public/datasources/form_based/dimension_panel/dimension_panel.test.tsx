@@ -284,9 +284,13 @@ describe('FormBasedDimensionEditor', () => {
   });
 
   const renderDimensionPanel = (propsOverrides = {}) => {
-    const Wrapper: React.FC<{
-      children: React.ReactNode;
-    }> = ({ children }) => {
+    const Wrapper = (
+      {
+        children
+      }: {
+        children: React.ReactNode;
+      }
+    ) => {
       return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
     };
 

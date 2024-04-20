@@ -20,7 +20,11 @@ interface Props {
   onClick: () => void;
 }
 
-export const ClearFilterButton: FunctionComponent<Props> = ({ onClick }) => {
+export const ClearFilterButton = (
+  {
+    onClick
+  }: Props
+) => {
   const { state } = useFilePickerContext();
   const isUploading = useBehaviorSubject(state.isUploading$);
   const query = useObservable(state.queryDebounced$);

@@ -40,10 +40,12 @@ interface GenerateAnalyticsApiKeyModalProps {
   onClose(): void;
 }
 
-export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModalProps> = ({
-  collectionName,
-  onClose,
-}) => {
+export const GenerateAnalyticsApiKeyModal = (
+  {
+    collectionName,
+    onClose
+  }: GenerateAnalyticsApiKeyModalProps
+) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(generateAnalyticsApiKeyLogic);

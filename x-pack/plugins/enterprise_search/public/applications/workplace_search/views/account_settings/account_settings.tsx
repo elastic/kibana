@@ -15,7 +15,7 @@ import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { PersonalDashboardLayout } from '../../components/layout';
 import { ACCOUNT_SETTINGS_TITLE } from '../../constants';
 
-export const AccountSettings: React.FC = () => {
+export const AccountSettings = () => {
   const { security } = useValues(KibanaLogic);
 
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);

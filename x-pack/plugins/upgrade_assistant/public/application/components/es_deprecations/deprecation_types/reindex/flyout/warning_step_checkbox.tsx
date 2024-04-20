@@ -28,51 +28,57 @@ export const hasReindexWarning = (
   return Boolean(warnings.find((warning) => warning.warningType === warningType));
 };
 
-const WarningCheckbox: React.FunctionComponent<{
-  isChecked: boolean;
-  warningId: string;
-  label: React.ReactNode;
-  description: React.ReactNode;
-  documentationUrl?: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
-  <>
-    <EuiText>
-      <EuiFlexGroup justifyContent="spaceBetween">
+const WarningCheckbox = (
+  {
+    isChecked,
+    warningId,
+    label,
+    onChange,
+    description,
+    documentationUrl
+  }: {
+    isChecked: boolean;
+    warningId: string;
+    label: React.ReactNode;
+    description: React.ReactNode;
+    documentationUrl?: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  }
+) => (<>
+  <EuiText>
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiCheckbox
+          id={warningId}
+          label={<strong>{label}</strong>}
+          checked={isChecked}
+          onChange={onChange}
+        />
+      </EuiFlexItem>
+      {documentationUrl !== undefined && (
         <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id={warningId}
-            label={<strong>{label}</strong>}
-            checked={isChecked}
-            onChange={onChange}
-          />
+          <EuiLink href={documentationUrl} target="_blank" external={false}>
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
+                  defaultMessage="Documentation"
+                />
+              }
+              position="right"
+              type="help"
+            />
+          </EuiLink>
         </EuiFlexItem>
-        {documentationUrl !== undefined && (
-          <EuiFlexItem grow={false}>
-            <EuiLink href={documentationUrl} target="_blank" external={false}>
-              <EuiIconTip
-                content={
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
-                    defaultMessage="Documentation"
-                  />
-                }
-                position="right"
-                type="help"
-              />
-            </EuiLink>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      )}
+    </EuiFlexGroup>
 
-      <EuiSpacer size="xs" />
+    <EuiSpacer size="xs" />
 
-      {description}
-    </EuiText>
-
-    <EuiSpacer />
-  </>
-);
+    {description}
+  </EuiText>
+  <EuiSpacer />
+</>);
 
 export interface WarningCheckboxProps {
   isChecked: boolean;
@@ -82,13 +88,15 @@ export interface WarningCheckboxProps {
   meta?: ReindexWarning['meta'];
 }
 
-export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
-  isChecked,
-  onChange,
-  docLinks,
-  id,
-  meta,
-}) => {
+export const CustomTypeNameWarningCheckbox = (
+  {
+    isChecked,
+    onChange,
+    docLinks,
+    id,
+    meta
+  }: WarningCheckboxProps
+) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}
@@ -118,13 +126,15 @@ export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheck
   );
 };
 
-export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
-  isChecked,
-  onChange,
-  docLinks,
-  id,
-  meta,
-}) => {
+export const DeprecatedSettingWarningCheckbox = (
+  {
+    isChecked,
+    onChange,
+    docLinks,
+    id,
+    meta
+  }: WarningCheckboxProps
+) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}
@@ -161,9 +171,15 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
   );
 };
 
-export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
-  WarningCheckboxProps
-> = ({ isChecked, onChange, docLinks, id, meta }) => {
+export const ReplaceIndexWithAliasWarningCheckbox = (
+  {
+    isChecked,
+    onChange,
+    docLinks,
+    id,
+    meta
+  }: WarningCheckboxProps
+) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}

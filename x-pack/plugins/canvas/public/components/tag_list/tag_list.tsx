@@ -26,17 +26,21 @@ export interface Props {
   getTag: (tagName: string) => TagSpec;
 }
 
-export const TagList: FunctionComponent<Props> = ({ tags = [], tagType = 'health', getTag }) => (
-  <Fragment>
-    {tags.length
-      ? tags.map((tag: string) => {
-          const { color, name } = getTag(tag);
-          const id = getId('tag');
-          return <Tag key={id} color={color} name={name} type={tagType} />;
-        })
-      : null}
-  </Fragment>
-);
+export const TagList = (
+  {
+    tags = [],
+    tagType = 'health',
+    getTag
+  }: Props
+) => (<Fragment>
+  {tags.length
+    ? tags.map((tag: string) => {
+        const { color, name } = getTag(tag);
+        const id = getId('tag');
+        return <Tag key={id} color={color} name={name} type={tagType} />;
+      })
+    : null}
+</Fragment>);
 
 TagList.propTypes = {
   tags: PropTypes.array,

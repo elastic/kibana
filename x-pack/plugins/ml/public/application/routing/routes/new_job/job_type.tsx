@@ -37,7 +37,7 @@ export const jobTypeRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
 
   return (

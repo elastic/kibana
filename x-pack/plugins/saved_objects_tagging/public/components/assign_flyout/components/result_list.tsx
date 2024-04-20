@@ -24,13 +24,15 @@ interface ResultInternals {
   previously: 'on' | undefined;
 }
 
-export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
-  results,
-  isLoading,
-  initialStatus,
-  overrides,
-  onChange,
-}) => {
+export const AssignFlyoutResultList = (
+  {
+    results,
+    isLoading,
+    initialStatus,
+    overrides,
+    onChange
+  }: AssignFlyoutResultListProps
+) => {
   const options = results.map((result) => {
     const key = getKey(result);
     const overriddenStatus = getOverriddenStatus(initialStatus[key], overrides[key]);
@@ -87,7 +89,13 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
   );
 };
 
-const ResultActionLabel: FC<{ action: AssignmentAction }> = ({ action }) => {
+const ResultActionLabel = (
+  {
+    action
+  }: {
+    action: AssignmentAction;
+  }
+) => {
   if (action === 'unchanged') {
     return null;
   }

@@ -15,10 +15,12 @@ interface Props {
   kibanaVersion?: string;
 }
 
-export const VersionMismatchError: React.FC<Props> = ({
-  enterpriseSearchVersion,
-  kibanaVersion,
-}) => {
+export const VersionMismatchError = (
+  {
+    enterpriseSearchVersion,
+    kibanaVersion
+  }: Props
+) => {
   return (
     <EuiEmptyPrompt
       iconType="warning"

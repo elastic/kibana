@@ -158,14 +158,19 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
+const RouteInit = (
+  {
+    path,
+    title
+  }: Pick<RouteProps, 'path' | 'title'>
+) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);
   return null;
 };
 
-export const PageRouter: FC = () => {
+export const PageRouter = () => {
   const routes = getRoutes();
   const { addInspectorRequest } = useInspectorContext();
 

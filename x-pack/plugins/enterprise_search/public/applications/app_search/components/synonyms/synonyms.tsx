@@ -20,7 +20,7 @@ import { SYNONYMS_TITLE } from './constants';
 
 import { SynonymsLogic } from '.';
 
-export const Synonyms: React.FC = () => {
+export const Synonyms = () => {
   const { loadSynonyms, onPaginate, openModal } = useActions(SynonymsLogic);
   const { synonymSets, meta, dataLoading } = useValues(SynonymsLogic);
   const hasSynonyms = synonymSets.length > 0;

@@ -36,12 +36,14 @@ export interface PreviewListItemProps {
 
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
-export const PreviewListItem: React.FC<PreviewListItemProps> = ({
-  field: { key, value, formattedValue, isPinned = false },
-  toggleIsPinned,
-  hasScriptError,
-  isFromScript = false,
-}) => {
+export const PreviewListItem = (
+  {
+    field: { key, value, formattedValue, isPinned = false },
+    toggleIsPinned,
+    hasScriptError,
+    isFromScript = false
+  }: PreviewListItemProps
+) => {
   const { controller } = useFieldPreviewContext();
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 

@@ -18,23 +18,25 @@ interface Props {
   defaultToggleValue: boolean;
 }
 
-export const IgnoreAboveParameter: FunctionComponent<Props> = ({ defaultToggleValue }) => (
-  <EditFieldFormRow
-    title={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldTitle', {
-      defaultMessage: 'Set length limit',
-    })}
-    description={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldDescription', {
-      defaultMessage:
-        'Strings longer than this value will not be indexed. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
-    })}
-    docLink={{
-      text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveDocLinkText', {
-        defaultMessage: 'Ignore above documentation',
-      }),
-      href: documentationService.getIgnoreAboveLink(),
-    }}
-    defaultToggleValue={defaultToggleValue}
-  >
-    <UseField path="ignore_above" config={getFieldConfig('ignore_above')} component={Field} />
-  </EditFieldFormRow>
-);
+export const IgnoreAboveParameter = (
+  {
+    defaultToggleValue
+  }: Props
+) => (<EditFieldFormRow
+  title={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldTitle', {
+    defaultMessage: 'Set length limit',
+  })}
+  description={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldDescription', {
+    defaultMessage:
+      'Strings longer than this value will not be indexed. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
+  })}
+  docLink={{
+    text: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveDocLinkText', {
+      defaultMessage: 'Ignore above documentation',
+    }),
+    href: documentationService.getIgnoreAboveLink(),
+  }}
+  defaultToggleValue={defaultToggleValue}
+>
+  <UseField path="ignore_above" config={getFieldConfig('ignore_above')} component={Field} />
+</EditFieldFormRow>);

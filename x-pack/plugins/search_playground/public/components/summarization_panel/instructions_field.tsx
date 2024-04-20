@@ -16,7 +16,12 @@ interface InstructionsFieldProps {
   onChange: (value: string) => void;
 }
 
-export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onChange }) => {
+export const InstructionsField = (
+  {
+    value,
+    onChange
+  }: InstructionsFieldProps
+) => {
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
     onChange(e.target.value);
 

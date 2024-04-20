@@ -23,7 +23,7 @@ const FILTER_SOURCES_BUTTON_TEXT = i18n.translate(
   }
 );
 
-export const TableFilterSourcesDropdown: React.FC = () => {
+export const TableFilterSourcesDropdown = () => {
   const {
     addFilteredSource,
     removeFilteredSource,

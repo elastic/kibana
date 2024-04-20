@@ -57,12 +57,14 @@ interface WarningsConfirmationFlyoutProps {
  * Displays warning text about destructive changes required to reindex this index. The user
  * must acknowledge each change before being allowed to proceed.
  */
-export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFlyoutProps> = ({
-  warnings,
-  hideWarningsStep,
-  continueReindex,
-  meta,
-}) => {
+export const WarningsFlyoutStep = (
+  {
+    warnings,
+    hideWarningsStep,
+    continueReindex,
+    meta
+  }: WarningsConfirmationFlyoutProps
+) => {
   const {
     services: {
       core: { docLinks },

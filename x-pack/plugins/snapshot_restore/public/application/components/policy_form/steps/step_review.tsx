@@ -27,10 +27,12 @@ import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
 import { PolicyFeatureStatesSummary } from '../../summaries';
 
-export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
-  policy,
-  updateCurrentStep,
-}) => {
+export const PolicyStepReview = (
+  {
+    policy,
+    updateCurrentStep
+  }: StepProps
+) => {
   const { i18n } = useServices();
   const { name, snapshotName, schedule, repository, config, retention } = policy;
   const { indices, includeGlobalState, featureStates, ignoreUnavailable, partial } = config || {

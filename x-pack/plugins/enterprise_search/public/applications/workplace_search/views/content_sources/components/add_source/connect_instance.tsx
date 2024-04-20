@@ -41,15 +41,17 @@ interface ConnectInstanceProps {
   onFormCreated(name: string): void;
 }
 
-export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
-  configuration: { needsSubdomain, hasOauthRedirect, needsCredentials },
-  features,
-  objTypes,
-  name,
-  needsPermissions,
-  onFormCreated,
-  header,
-}) => {
+export const ConnectInstance = (
+  {
+    configuration: { needsSubdomain, hasOauthRedirect, needsCredentials },
+    features,
+    objTypes,
+    name,
+    needsPermissions,
+    onFormCreated,
+    header
+  }: ConnectInstanceProps
+) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const {

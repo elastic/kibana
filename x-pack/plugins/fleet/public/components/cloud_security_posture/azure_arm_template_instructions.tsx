@@ -23,11 +23,13 @@ interface Props {
   cloudSecurityIntegration: CloudSecurityIntegration;
   agentPolicy?: AgentPolicy;
 }
-export const AzureArmTemplateInstructions: React.FunctionComponent<Props> = ({
-  enrollmentAPIKey,
-  cloudSecurityIntegration,
-  agentPolicy,
-}) => {
+export const AzureArmTemplateInstructions = (
+  {
+    enrollmentAPIKey,
+    cloudSecurityIntegration,
+    agentPolicy
+  }: Props
+) => {
   const { isLoading, azureArmTemplateUrl, error, isError } = useCreateAzureArmTemplateUrl({
     enrollmentAPIKey,
     azureArmTemplateProps: cloudSecurityIntegration?.azureArmTemplateProps,

@@ -17,12 +17,14 @@ interface Props extends ProcessorsContextProps {
   children: React.ReactNode;
 }
 
-export const ProcessorsEditorContextProvider: FunctionComponent<Props> = ({
-  children,
-  onUpdate,
-  value,
-  onFlyoutOpen,
-}: Props) => {
+export const ProcessorsEditorContextProvider = (
+  {
+    children,
+    onUpdate,
+    value,
+    onFlyoutOpen
+  }: Props
+) => {
   return (
     <TestPipelineContextProvider>
       <PipelineProcessorsContextProvider

@@ -26,13 +26,15 @@ export interface PageProps {
   theme: ThemeServiceSetup;
 }
 
-export const Page: React.FC<PageProps> = ({
-  manager,
-  homeHref,
-  customBranding,
-  docTitle,
-  theme,
-}) => {
+export const Page = (
+  {
+    manager,
+    homeHref,
+    customBranding,
+    docTitle,
+    theme
+  }: PageProps
+) => {
   const error = useObservable(manager.error$);
   const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 

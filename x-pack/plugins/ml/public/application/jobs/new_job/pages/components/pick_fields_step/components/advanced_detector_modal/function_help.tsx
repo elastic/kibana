@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
-export const FunctionHelpPopover: FC = memo(() => {
+export const FunctionHelpPopover = memo(() => {
   const {
     services: { docLinks },
   } = useMlKibana();

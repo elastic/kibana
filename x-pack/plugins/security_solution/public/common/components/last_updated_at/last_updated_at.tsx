@@ -24,15 +24,18 @@ const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated
   defaultMessage: 'Updated',
 });
 
-export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, updatedAt }) => (
-  <EuiFlexGroup>
-    {isUpdating ? (
-      <EuiFlexItem grow={false}>{UPDATING}</EuiFlexItem>
-    ) : (
-      <EuiFlexItem grow={false}>
-        <>{UPDATED} </>
-        <FormattedRelative data-test-subj="last-updated-at-date" value={new Date(updatedAt)} />
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+export const LastUpdatedAt = (
+  {
+    isUpdating,
+    updatedAt
+  }: LastUpdatedAtProps
+) => (<EuiFlexGroup>
+  {isUpdating ? (
+    <EuiFlexItem grow={false}>{UPDATING}</EuiFlexItem>
+  ) : (
+    <EuiFlexItem grow={false}>
+      <>{UPDATED} </>
+      <FormattedRelative data-test-subj="last-updated-at-date" value={new Date(updatedAt)} />
+    </EuiFlexItem>
+  )}
+</EuiFlexGroup>);

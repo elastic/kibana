@@ -24,7 +24,13 @@ interface Props {
   features: FeatureCatalogueEntry[];
 }
 
-export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
+export const ManageData = (
+  {
+    addBasePath,
+    application,
+    features
+  }: Props
+) => {
   const { share, trackUiMetric } = getServices();
   const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators

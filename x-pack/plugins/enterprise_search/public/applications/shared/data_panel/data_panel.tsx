@@ -37,19 +37,21 @@ type Props = Omit<_EuiPanelDivlike, 'title'> & {
   className?: string;
 };
 
-export const DataPanel: React.FC<Props> = ({
-  title,
-  titleSize = 'xs',
-  subtitle,
-  iconType,
-  action,
-  filled,
-  isLoading,
-  footerDocLink,
-  className,
-  children,
-  ...props // e.g., data-test-subj
-}) => {
+export const DataPanel = (
+  {
+    title,
+    titleSize = 'xs',
+    subtitle,
+    iconType,
+    action,
+    filled,
+    isLoading,
+    footerDocLink,
+    className,
+    children,
+    ...props
+  }: Props
+) => {
   const classes = classNames('dataPanel', className, {
     'dataPanel--filled': filled,
   });

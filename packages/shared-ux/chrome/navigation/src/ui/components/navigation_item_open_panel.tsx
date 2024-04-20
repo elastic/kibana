@@ -50,7 +50,13 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, activeNodes }: Props) => {
+export const NavigationItemOpenPanel = (
+  {
+    item,
+    navigateToUrl,
+    activeNodes
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { isSideNavCollapsed } = useServices();

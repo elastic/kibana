@@ -11,7 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
 
-const SubmitCaseButtonComponent: React.FC = () => {
+const SubmitCaseButtonComponent = () => {
   const { submit, isSubmitting } = useFormContext();
 
   return (

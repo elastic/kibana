@@ -59,16 +59,18 @@ export interface Props {
 
 const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
 
-export const ContentEditorFlyoutContent: FC<Props> = ({
-  item,
-  entityName,
-  isReadonly = true,
-  readonlyReason,
-  services: { TagSelector, TagList, notifyError },
-  onSave,
-  onCancel,
-  customValidators,
-}) => {
+export const ContentEditorFlyoutContent = (
+  {
+    item,
+    entityName,
+    isReadonly = true,
+    readonlyReason,
+    services: { TagSelector, TagList, notifyError },
+    onSave,
+    onCancel,
+    customValidators
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

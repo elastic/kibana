@@ -20,23 +20,28 @@ import { RenderRuleName } from '../../../../timelines/components/timeline/body/r
 /**
  * One-off helper to make sure that inline values are rendered consistently
  */
-const ValueContainer: FC<{ text?: ReactElement }> = ({ text, children }) => (
-  <>
-    {text && (
-      <>
-        &nbsp;
-        <span>{text}</span>
-        &nbsp;
-      </>
-    )}
-    {children}
-  </>
-);
+const ValueContainer = (
+  {
+    text,
+    children
+  }: {
+    text?: ReactElement;
+  }
+) => (<>
+  {text && (
+    <>
+      &nbsp;
+      <span>{text}</span>
+      &nbsp;
+    </>
+  )}
+  {children}
+</>);
 
 /**
  * Renders session preview under Visualizations section in the flyout right EuiPanel
  */
-export const SessionPreview: FC = () => {
+export const SessionPreview = () => {
   const { eventId, scopeId, isPreview } = useRightPanelContext();
 
   const { processName, userName, startAt, ruleName, ruleId, workdir, command } = useProcessData();

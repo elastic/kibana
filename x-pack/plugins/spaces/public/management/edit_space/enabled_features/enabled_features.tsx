@@ -24,7 +24,7 @@ interface Props {
   onChange: (space: Partial<Space>) => void;
 }
 
-export const EnabledFeatures: FunctionComponent<Props> = (props) => {
+export const EnabledFeatures = (props: Props) => {
   const { services } = useKibana();
   const canManageRoles = services.application?.capabilities.management?.security?.roles === true;
 

@@ -26,7 +26,14 @@ interface Props {
   saveEnabled: boolean;
 }
 
-export const ModalWrapper: FC<Props> = ({ onCreateClick, closeModal, saveEnabled, children }) => {
+export const ModalWrapper = (
+  {
+    onCreateClick,
+    closeModal,
+    saveEnabled,
+    children
+  }: Props
+) => {
   return (
     <EuiModal
       onClose={closeModal}

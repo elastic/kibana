@@ -13,7 +13,11 @@ import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 import { AppSearchPageTemplate } from '../layout';
 
-export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
+export const NotFound = (
+  {
+    pageChrome = []
+  }: PageTemplateProps
+) => {
   return (
     <AppSearchPageTemplate pageChrome={[...pageChrome, '404']} customPageSections>
       <SendAppSearchTelemetry action="error" metric="not_found" />

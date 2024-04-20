@@ -28,12 +28,14 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const TypeSettings: React.FunctionComponent<Props> = ({
-  repository,
-  isManagedRepository,
-  updateRepository,
-  settingErrors,
-}) => {
+export const TypeSettings = (
+  {
+    repository,
+    isManagedRepository,
+    updateRepository,
+    settingErrors
+  }: Props
+) => {
   const { i18n } = useServices();
   const { type, settings } = repository;
   const updateRepositorySettings = (

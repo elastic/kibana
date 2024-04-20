@@ -16,10 +16,15 @@ import { DateFormatter } from '../services';
 const DefaultDateFormatter: DateFormatter = ({ value, children }) =>
   children(new Date(value).toDateString());
 
-export const UpdatedAtField: FC<{ dateTime?: string; DateFormatterComp?: DateFormatter }> = ({
-  dateTime,
-  DateFormatterComp = DefaultDateFormatter,
-}) => {
+export const UpdatedAtField = (
+  {
+    dateTime,
+    DateFormatterComp = DefaultDateFormatter
+  }: {
+    dateTime?: string;
+    DateFormatterComp?: DateFormatter;
+  }
+) => {
   if (!dateTime) {
     return (
       <EuiToolTip

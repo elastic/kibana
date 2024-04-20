@@ -17,7 +17,7 @@ import { PRODUCT_SELECTOR_CALLOUT_HEADING } from '../../constants';
 
 import { LICENSE_CALLOUT_BODY } from './constants';
 
-export const LicenseCallout: React.FC = () => {
+export const LicenseCallout = () => {
   const { hasPlatinumLicense, isTrial } = useValues(LicensingLogic);
 
   if (hasPlatinumLicense && !isTrial) return null;

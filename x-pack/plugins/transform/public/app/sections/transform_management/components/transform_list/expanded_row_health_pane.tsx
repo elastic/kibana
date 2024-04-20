@@ -25,7 +25,11 @@ interface ExpandedRowHealthPaneProps {
   health: TransformStats['health'];
 }
 
-export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }) => {
+export const ExpandedRowHealthPane = (
+  {
+    health
+  }: ExpandedRowHealthPaneProps
+) => {
   const healthStatus = mapEsHealthStatus2TransformHealthStatus(health?.status);
   const issues = health?.issues;
 

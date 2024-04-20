@@ -28,41 +28,41 @@ interface ConfirmDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
-  output,
-  agentCount,
-  agentPolicyCount,
-}) => (
-  <FormattedMessage
-    id="xpack.fleet.settings.deleteOutput.confirmModalText"
-    defaultMessage="This action will delete {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      outputName: <strong>{output.name}</strong>,
-      agents: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.deleteOutput.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.deleteOutput.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
-  />
-);
+const ConfirmDescription = (
+  {
+    output,
+    agentCount,
+    agentPolicyCount
+  }: ConfirmDescriptionProps
+) => (<FormattedMessage
+  id="xpack.fleet.settings.deleteOutput.confirmModalText"
+  defaultMessage="This action will delete {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
+  values={{
+    outputName: <strong>{output.name}</strong>,
+    agents: (
+      <strong>
+        <FormattedMessage
+          id="xpack.fleet.settings.deleteOutput.agentsCount"
+          defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      </strong>
+    ),
+    policies: (
+      <strong>
+        <FormattedMessage
+          id="xpack.fleet.settings.deleteOutput.agentPolicyCount"
+          defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
+          values={{
+            agentPolicyCount,
+          }}
+        />
+      </strong>
+    ),
+  }}
+/>);
 
 export function useDeleteOutput(onSuccess: () => void) {
   const { confirm } = useConfirmModal();

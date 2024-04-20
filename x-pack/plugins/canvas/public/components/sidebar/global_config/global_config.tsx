@@ -26,7 +26,7 @@ const strings = {
     }),
 };
 
-export const GlobalConfig: FC = () => {
+export const GlobalConfig = () => {
   const tabs = [
     {
       id: 'general',

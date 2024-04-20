@@ -13,7 +13,7 @@ import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_a
 import { EngineLogic } from '../engine';
 import { QueryTesterButton } from '../query_tester';
 
-export const KibanaHeaderActions: React.FC = () => {
+export const KibanaHeaderActions = () => {
   const { engineName } = useValues(EngineLogic);
 
   return (

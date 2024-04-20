@@ -31,7 +31,7 @@ import { TestPipelineLogic } from './test_pipeline_logic';
 
 import './add_inference_pipeline_flyout.scss';
 
-export const TestPipeline: React.FC = () => {
+export const TestPipeline = () => {
   const {
     addInferencePipelineModal: {
       configuration: { fieldMappings },

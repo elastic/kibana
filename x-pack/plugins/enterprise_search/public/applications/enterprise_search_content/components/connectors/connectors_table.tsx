@@ -42,20 +42,24 @@ interface ConnectorsTableProps {
   onChange: (criteria: CriteriaWithPagination<ConnectorViewItem>) => void;
   onDelete: (connectorName: string, connectorId: string, indexName: string | null) => void;
 }
-export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
-  items,
-  meta = {
-    page: {
-      from: 0,
-      size: 10,
-      total: 0,
+export const ConnectorsTable = (
+  {
+    items,
+
+    meta = {
+      page: {
+        from: 0,
+        size: 10,
+        total: 0,
+      },
     },
-  },
-  onChange,
-  isCrawler,
-  isLoading,
-  onDelete,
-}) => {
+
+    onChange,
+    isCrawler,
+    isLoading,
+    onDelete
+  }: ConnectorsTableProps
+) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
     ...(!isCrawler

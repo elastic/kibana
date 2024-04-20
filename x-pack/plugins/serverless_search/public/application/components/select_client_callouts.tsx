@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ConnectorsCallout } from './connectors_callout';
 import { FileUploadCallout } from './file_upload_callout';
 
-export const SelectClientCallouts: React.FC = () => (
+export const SelectClientCallouts = () => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem>
       <ConnectorsCallout />

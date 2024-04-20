@@ -40,14 +40,16 @@ export interface SingleMetricViewerInitializerProps {
   onCancel: () => void;
 }
 
-export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProps> = ({
-  defaultTitle,
-  bounds,
-  initialInput,
-  job,
-  onCreate,
-  onCancel,
-}) => {
+export const SingleMetricViewerInitializer = (
+  {
+    defaultTitle,
+    bounds,
+    initialInput,
+    job,
+    onCreate,
+    onCancel
+  }: SingleMetricViewerInitializerProps
+) => {
   const isNewJob = initialInput?.jobIds !== undefined && initialInput?.jobIds[0] !== job.job_id;
 
   const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);

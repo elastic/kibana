@@ -18,10 +18,12 @@ export interface AgentBinarySectionProps {
   deleteDownloadSource: (ds: DownloadSource) => void;
 }
 
-export const AgentBinarySection: React.FunctionComponent<AgentBinarySectionProps> = ({
-  downloadSources,
-  deleteDownloadSource,
-}) => {
+export const AgentBinarySection = (
+  {
+    downloadSources,
+    deleteDownloadSource
+  }: AgentBinarySectionProps
+) => {
   const { getHref } = useLink();
   const authz = useAuthz();
   const hasAllSettingsPrivileges = authz.fleet.allSettings;

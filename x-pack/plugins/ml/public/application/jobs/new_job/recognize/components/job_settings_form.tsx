@@ -48,12 +48,14 @@ interface JobSettingsFormProps {
   jobs: ModuleJobUI[];
 }
 
-export const JobSettingsForm: FC<JobSettingsFormProps> = ({
-  onSubmit,
-  onJobPrefixChange,
-  saveState,
-  jobs,
-}) => {
+export const JobSettingsForm = (
+  {
+    onSubmit,
+    onJobPrefixChange,
+    saveState,
+    jobs
+  }: JobSettingsFormProps
+) => {
   const timefilter = useTimefilter();
   const { from, to } = getTimeFilterRange(timefilter);
   const { selectedDataView: dataView } = useDataSource();

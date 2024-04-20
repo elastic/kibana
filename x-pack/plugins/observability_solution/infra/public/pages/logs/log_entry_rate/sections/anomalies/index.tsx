@@ -30,35 +30,37 @@ import {
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 
-export const AnomaliesResults: React.FunctionComponent<{
-  isLoadingAnomaliesResults: boolean;
-  anomalies: LogEntryAnomalies;
-  timeRange: TimeRange;
-  page: Page;
-  fetchNextPage?: FetchNextPage;
-  fetchPreviousPage?: FetchPreviousPage;
-  changeSortOptions: ChangeSortOptions;
-  changePaginationOptions: ChangePaginationOptions;
-  sortOptions: SortOptions;
-  paginationOptions: PaginationOptions;
-  selectedDatasets: string[];
-  jobIds: string[];
-  autoRefresh: AutoRefresh;
-}> = ({
-  isLoadingAnomaliesResults,
-  timeRange,
-  anomalies,
-  changeSortOptions,
-  sortOptions,
-  changePaginationOptions,
-  paginationOptions,
-  fetchNextPage,
-  fetchPreviousPage,
-  page,
-  selectedDatasets,
-  jobIds,
-  autoRefresh,
-}) => {
+export const AnomaliesResults = (
+  {
+    isLoadingAnomaliesResults,
+    timeRange,
+    anomalies,
+    changeSortOptions,
+    sortOptions,
+    changePaginationOptions,
+    paginationOptions,
+    fetchNextPage,
+    fetchPreviousPage,
+    page,
+    selectedDatasets,
+    jobIds,
+    autoRefresh
+  }: {
+    isLoadingAnomaliesResults: boolean;
+    anomalies: LogEntryAnomalies;
+    timeRange: TimeRange;
+    page: Page;
+    fetchNextPage?: FetchNextPage;
+    fetchPreviousPage?: FetchPreviousPage;
+    changeSortOptions: ChangeSortOptions;
+    changePaginationOptions: ChangePaginationOptions;
+    sortOptions: SortOptions;
+    paginationOptions: PaginationOptions;
+    selectedDatasets: string[];
+    jobIds: string[];
+    autoRefresh: AutoRefresh;
+  }
+) => {
   return (
     <>
       <EuiFlexGroup>

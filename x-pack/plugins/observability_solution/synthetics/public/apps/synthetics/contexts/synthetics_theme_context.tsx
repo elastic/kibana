@@ -54,10 +54,12 @@ interface ThemeContextProps {
   darkMode: boolean;
 }
 
-export const SyntheticsThemeContextProvider: React.FC<ThemeContextProps> = ({
-  darkMode,
-  children,
-}) => {
+export const SyntheticsThemeContextProvider = (
+  {
+    darkMode,
+    children
+  }: ThemeContextProps
+) => {
   let colors: SyntheticsAppColors;
   if (darkMode) {
     colors = {

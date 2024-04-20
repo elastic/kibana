@@ -62,8 +62,8 @@ export type SettingCardProps = React.PropsWithChildren<{
   selected?: boolean;
 }>;
 
-export const SettingCard: FC<SettingCardProps> = memo(
-  ({
+export const SettingCard = memo((
+  {
     type,
     supportedOss,
     osRestriction,
@@ -71,91 +71,91 @@ export const SettingCard: FC<SettingCardProps> = memo(
     rightCorner,
     children,
     selected = true,
-    mode = 'edit',
-  }) => {
-    const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
-    const getTestId = useTestIdGenerator(dataTestSubj);
+    mode = 'edit'
+  }: SettingCardProps
+) => {
+  const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
+  const getTestId = useTestIdGenerator(dataTestSubj);
 
-    return (
-      <EuiPanel data-test-subj={getTestId()} hasBorder={true} hasShadow={false} paddingSize="none">
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="none"
-          alignItems="center"
-          style={{ padding: `${paddingSize} ${paddingSize} 0 ${paddingSize}` }}
-        >
-          <EuiFlexItem grow={1}>
-            <SettingCardHeader>{TITLES.type}</SettingCardHeader>
-            <EuiText size="s" data-test-subj={getTestId('type')}>
-              {type}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <SettingCardHeader>{TITLES.os}</SettingCardHeader>
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="s"
-              alignItems="center"
-              data-test-subj={getTestId('osValueContainer')}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" data-test-subj={getTestId('osValues')}>
-                  {supportedOss.map((os) => OS_TITLES[os]).join(', ')}{' '}
-                </EuiText>
-              </EuiFlexItem>
-              {osRestriction && (
-                <EuiFlexItem grow={false} data-test-subj={getTestId('osRestriction')}>
-                  <EuiFlexGroup direction="row" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiTextColor color="subdued">
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
-                          defaultMessage="Restrictions"
-                        />
-                      </EuiTextColor>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="warning"
-                        color="warning"
-                        content={osRestriction}
-                        anchorProps={{ 'data-test-subj': getTestId('osRestrictionTooltipIcon') }}
+  return (
+    <EuiPanel data-test-subj={getTestId()} hasBorder={true} hasShadow={false} paddingSize="none">
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="none"
+        alignItems="center"
+        style={{ padding: `${paddingSize} ${paddingSize} 0 ${paddingSize}` }}
+      >
+        <EuiFlexItem grow={1}>
+          <SettingCardHeader>{TITLES.type}</SettingCardHeader>
+          <EuiText size="s" data-test-subj={getTestId('type')}>
+            {type}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <SettingCardHeader>{TITLES.os}</SettingCardHeader>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="s"
+            alignItems="center"
+            data-test-subj={getTestId('osValueContainer')}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" data-test-subj={getTestId('osValues')}>
+                {supportedOss.map((os) => OS_TITLES[os]).join(', ')}{' '}
+              </EuiText>
+            </EuiFlexItem>
+            {osRestriction && (
+              <EuiFlexItem grow={false} data-test-subj={getTestId('osRestriction')}>
+                <EuiFlexGroup direction="row" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiTextColor color="subdued">
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policy.details.antivirusRegistration.osRestriction"
+                        defaultMessage="Restrictions"
                       />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
+                    </EuiTextColor>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      type="warning"
+                      color="warning"
+                      content={osRestriction}
+                      anchorProps={{ 'data-test-subj': getTestId('osRestrictionTooltipIcon') }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiShowFor sizes={['m', 'l', 'xl']}>
+          <EuiFlexItem grow={3}>
+            <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
+              <EuiFlexItem grow={false} data-test-subj={getTestId('rightCornerContainer')}>
+                {rightCorner}
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiShowFor sizes={['m', 'l', 'xl']}>
-            <EuiFlexItem grow={3}>
-              <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
-                <EuiFlexItem grow={false} data-test-subj={getTestId('rightCornerContainer')}>
-                  {rightCorner}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiShowFor>
-          <EuiShowFor sizes={rightCorner ? ['s', 'xs'] : []}>
-            <EuiFlexItem data-test-subj={getTestId('rightCornerContainer')}>
-              {rightCorner}
-            </EuiFlexItem>
-          </EuiShowFor>
-        </EuiFlexGroup>
+        </EuiShowFor>
+        <EuiShowFor sizes={rightCorner ? ['s', 'xs'] : []}>
+          <EuiFlexItem data-test-subj={getTestId('rightCornerContainer')}>
+            {rightCorner}
+          </EuiFlexItem>
+        </EuiShowFor>
+      </EuiFlexGroup>
 
-        {mode === 'edit' || selected ? (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>
-              {children}
-            </div>
-          </>
-        ) : (
-          <EuiSpacer size="m" />
-        )}
-      </EuiPanel>
-    );
-  }
-);
+      {mode === 'edit' || selected ? (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>
+            {children}
+          </div>
+        </>
+      ) : (
+        <EuiSpacer size="m" />
+      )}
+    </EuiPanel>
+  );
+});
 
 SettingCard.displayName = 'SettingCard';

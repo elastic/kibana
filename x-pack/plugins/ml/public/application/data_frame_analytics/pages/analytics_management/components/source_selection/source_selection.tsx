@@ -22,7 +22,7 @@ import {
 
 const fixedPageSize: number = 20;
 
-export const SourceSelection: FC = () => {
+export const SourceSelection = () => {
   const {
     services: {
       savedSearch: savedSearchService,

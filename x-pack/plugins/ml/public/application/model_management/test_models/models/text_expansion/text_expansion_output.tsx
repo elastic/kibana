@@ -30,9 +30,13 @@ export const getTextExpansionOutputComponent = (inferrer: TextExpansionInference
   <TextExpansionOutput inferrer={inferrer} />
 );
 
-export const TextExpansionOutput: FC<{
-  inferrer: TextExpansionInference;
-}> = ({ inferrer }) => {
+export const TextExpansionOutput = (
+  {
+    inferrer
+  }: {
+    inferrer: TextExpansionInference;
+  }
+) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -61,9 +65,13 @@ export const TextExpansionOutput: FC<{
   );
 };
 
-export const DocumentResult: FC<{
-  response: FormattedTextExpansionResponse;
-}> = ({ response }) => {
+export const DocumentResult = (
+  {
+    response
+  }: {
+    response: FormattedTextExpansionResponse;
+  }
+) => {
   const statInfo = useResultStatFormatting(response);
 
   return (
@@ -99,9 +107,13 @@ export const DocumentResult: FC<{
  * Currently not used. Tokens could contain sensitive words, so need to be hidden from the user.
  * This may change in the future, in which case this function will be used.
  */
-export const DocumentResultWithTokens: FC<{
-  response: FormattedTextExpansionResponse;
-}> = ({ response }) => {
+export const DocumentResultWithTokens = (
+  {
+    response
+  }: {
+    response: FormattedTextExpansionResponse;
+  }
+) => {
   const tokens = response.adjustedTokenWeights
     .filter(({ value }) => value > 0)
     .sort((a, b) => b.value - a.value)

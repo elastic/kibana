@@ -65,7 +65,12 @@ const TableListViewContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const TableListViewProvider: FC<Services> = ({ children, ...services }) => {
+export const TableListViewProvider = (
+  {
+    children,
+    ...services
+  }: Services
+) => {
   return <TableListViewContext.Provider value={services}>{children}</TableListViewContext.Provider>;
 };
 
@@ -159,10 +164,12 @@ export interface TableListViewKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const TableListViewKibanaProvider = (
+  {
+    children,
+    ...services
+  }: TableListViewKibanaDependencies
+) => {
   const { core, toMountPoint, savedObjectsTagging, FormattedRelative } = services;
 
   const searchQueryParser = useMemo(() => {

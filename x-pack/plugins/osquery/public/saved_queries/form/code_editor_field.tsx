@@ -24,11 +24,13 @@ interface CodeEditorFieldProps {
   helpText?: string;
 }
 
-const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
-  euiFieldProps,
-  labelAppend,
-  helpText,
-}) => {
+const CodeEditorFieldComponent = (
+  {
+    euiFieldProps,
+    labelAppend,
+    helpText
+  }: CodeEditorFieldProps
+) => {
   const {
     field: { onChange, value },
     fieldState: { error },

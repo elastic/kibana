@@ -13,10 +13,15 @@ import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { RUNNING_STATE } from './inference_base';
 import type { InferrerType } from '.';
 
-export const TextInput: FC<{
-  placeholder?: string;
-  inferrer: InferrerType;
-}> = ({ placeholder, inferrer }) => {
+export const TextInput = (
+  {
+    placeholder,
+    inferrer
+  }: {
+    placeholder?: string;
+    inferrer: InferrerType;
+  }
+) => {
   const [inputText, setInputText] = useState('');
 
   useEffect(() => {

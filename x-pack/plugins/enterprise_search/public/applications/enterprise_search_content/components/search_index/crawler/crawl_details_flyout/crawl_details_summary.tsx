@@ -35,12 +35,14 @@ export interface CrawlerDetailsSummaryProps {
   stats: CrawlRequestStats | null;
 }
 
-export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
-  crawlDepth,
-  crawlType,
-  domainCount,
-  stats,
-}) => {
+export const CrawlDetailsSummary = (
+  {
+    crawlDepth,
+    crawlType,
+    domainCount,
+    stats
+  }: CrawlerDetailsSummaryProps
+) => {
   const duration = () => {
     if (stats?.status?.crawlDurationMSec) {
       const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');

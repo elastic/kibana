@@ -11,7 +11,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { LogsPageContent } from './page_content';
 import { LogsPageProviders } from './page_providers';
 
-export const LogsPage: React.FunctionComponent<RouteComponentProps> = () => {
+export const LogsPage = () => {
   return (
     <EuiErrorBoundary>
       <LogsPageProviders>

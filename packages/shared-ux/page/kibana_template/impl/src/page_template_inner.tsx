@@ -24,16 +24,18 @@ const getClasses = (template?: string, className?: string) => {
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export const KibanaPageTemplateInner: FC<Props> = ({
-  className,
-  pageHeader,
-  children,
-  isEmptyState,
-  pageSideBar,
-  pageSideBarProps,
-  emptyPageBody,
-  ...rest
-}) => {
+export const KibanaPageTemplateInner = (
+  {
+    className,
+    pageHeader,
+    children,
+    isEmptyState,
+    pageSideBar,
+    pageSideBarProps,
+    emptyPageBody,
+    ...rest
+  }: Props
+) => {
   let header;
 
   if (isEmptyState && pageHeader && !children) {

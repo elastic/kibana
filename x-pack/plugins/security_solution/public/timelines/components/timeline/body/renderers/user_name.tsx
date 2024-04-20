@@ -36,19 +36,21 @@ interface Props {
   title?: string;
 }
 
-const UserNameComponent: React.FC<Props> = ({
-  fieldName,
-  Component,
-  contextId,
-  eventId,
-  fieldType,
-  isAggregatable,
-  isDraggable,
-  isButton,
-  onClick,
-  title,
-  value,
-}) => {
+const UserNameComponent = (
+  {
+    fieldName,
+    Component,
+    contextId,
+    eventId,
+    fieldType,
+    isAggregatable,
+    isDraggable,
+    isButton,
+    onClick,
+    title,
+    value
+  }: Props
+) => {
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');

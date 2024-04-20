@@ -18,7 +18,11 @@ interface Props {
   isLoading: boolean;
 }
 
-const TagsComponent: React.FC<Props> = ({ isLoading }) => {
+const TagsComponent = (
+  {
+    isLoading
+  }: Props
+) => {
   const { data: tagOptions = [], isLoading: isLoadingTags } = useGetTags();
   const options = useMemo(
     () =>

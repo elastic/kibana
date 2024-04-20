@@ -32,7 +32,7 @@ const txtCreateDrilldownButton = i18n.translate(
   }
 );
 
-export const CreateDrilldownForm: React.FC = () => {
+export const CreateDrilldownForm = () => {
   const isMounted = useMountedState();
   const drilldowns = useDrilldownManager();
   const drilldownState = drilldowns.getDrilldownState()!;

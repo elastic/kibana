@@ -24,39 +24,43 @@ const mergeQueryStrings = (query: string, queryFromHash: string) => {
   return stringify({ ...queryObject, ...hashObject });
 };
 
-export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
-  <Router history={history}>
-    <Route
-      path="/"
-      children={(route: RouteComponentProps) => {
-        // If it looks like the hash is a route then we will do a redirect
-        if (isHashPath(route.location.hash) && !route.location.pathname) {
-          const [hashPath, hashQuery] = route.location.hash.split('?');
-          let search = route.location.search || '?';
+export const CanvasRouter = (
+  {
+    history
+  }: {
+    history: History;
+  }
+) => (<Router history={history}>
+  <Route
+    path="/"
+    children={(route: RouteComponentProps) => {
+      // If it looks like the hash is a route then we will do a redirect
+      if (isHashPath(route.location.hash) && !route.location.pathname) {
+        const [hashPath, hashQuery] = route.location.hash.split('?');
+        let search = route.location.search || '?';
 
-          if (hashQuery !== undefined) {
-            search = mergeQueryStrings(search, `?${hashQuery}`);
-          }
-
-          return (
-            <Redirect
-              push
-              to={{
-                pathname: `${hashPath.substring(1)}`,
-                search,
-              }}
-            />
-          );
+        if (hashQuery !== undefined) {
+          search = mergeQueryStrings(search, `?${hashQuery}`);
         }
 
         return (
-          <Routes>
-            {ExportWorkpadRoute()}
-            {WorkpadRoute()}
-            {HomeRoute()}
-          </Routes>
+          <Redirect
+            push
+            to={{
+              pathname: `${hashPath.substring(1)}`,
+              search,
+            }}
+          />
         );
-      }}
-    />
-  </Router>
-);
+      }
+
+      return (
+        <Routes>
+          {ExportWorkpadRoute()}
+          {WorkpadRoute()}
+          {HomeRoute()}
+        </Routes>
+      );
+    }}
+  />
+</Router>);

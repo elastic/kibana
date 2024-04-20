@@ -20,7 +20,7 @@ import { MIN_POPOVER_WIDTH } from '../../constants';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
 import { RangeSliderStrings } from './range_slider_strings';
 
-export const RangeSliderControl: FC = () => {
+export const RangeSliderControl = () => {
   /** Controls Services Context */
   const rangeSlider = useRangeSlider();
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);

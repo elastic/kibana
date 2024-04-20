@@ -16,7 +16,11 @@ export interface HeaderTopBannerProps {
   headerBanner$: Observable<ChromeUserBanner | undefined>;
 }
 
-export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ headerBanner$ }) => {
+export const HeaderTopBanner = (
+  {
+    headerBanner$
+  }: HeaderTopBannerProps
+) => {
   const headerBanner = useObservable(headerBanner$, undefined);
   if (!headerBanner) {
     return null;

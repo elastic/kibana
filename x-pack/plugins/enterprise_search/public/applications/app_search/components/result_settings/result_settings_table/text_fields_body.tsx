@@ -17,7 +17,7 @@ import { FieldResultSetting } from '../types';
 
 import { FieldNumber } from './field_number';
 
-export const TextFieldsBody: React.FC = () => {
+export const TextFieldsBody = () => {
   const { isSnippetAllowed, textResultFields } = useValues(ResultSettingsLogic);
   const {
     toggleRawForField,

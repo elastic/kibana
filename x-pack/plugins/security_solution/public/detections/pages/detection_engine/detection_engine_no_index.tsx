@@ -23,10 +23,15 @@ const buildMessage = (needsListsIndex: boolean, needsSignalsIndex: boolean): str
   }
 };
 
-const DetectionEngineNoIndexComponent: React.FC<{
-  needsListsIndex: boolean;
-  needsSignalsIndex: boolean;
-}> = ({ needsListsIndex, needsSignalsIndex }) => {
+const DetectionEngineNoIndexComponent = (
+  {
+    needsListsIndex,
+    needsSignalsIndex
+  }: {
+    needsListsIndex: boolean;
+    needsSignalsIndex: boolean;
+  }
+) => {
   const docLinks = useKibana().services.docLinks;
   const actions = useMemo(
     () => ({

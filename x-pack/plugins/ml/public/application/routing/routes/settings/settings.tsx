@@ -41,7 +41,7 @@ export const settingsRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], {
     getMlNodeCount,
   });

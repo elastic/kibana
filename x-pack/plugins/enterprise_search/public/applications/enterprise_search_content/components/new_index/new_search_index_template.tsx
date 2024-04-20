@@ -49,15 +49,17 @@ export interface Props {
   type: string;
 }
 
-export const NewSearchIndexTemplate: React.FC<Props> = ({
-  buttonLoading,
-  disabled,
-  error,
-  onNameChange,
-  onSubmit,
-  type,
-  isBeta,
-}) => {
+export const NewSearchIndexTemplate = (
+  {
+    buttonLoading,
+    disabled,
+    error,
+    onNameChange,
+    onSubmit,
+    type,
+    isBeta
+  }: Props
+) => {
   const {
     fullIndexName,
     fullIndexNameExists,

@@ -40,11 +40,13 @@ export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
  * The behavior expects that the left and preview sections should only be displayed is a right section
  * is already rendered.
  */
-export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
-  customStyles,
-  registeredPanels,
-  ...flyoutProps
-}) => {
+export const ExpandableFlyout = (
+  {
+    customStyles,
+    registeredPanels,
+    ...flyoutProps
+  }: ExpandableFlyoutProps
+) => {
   const windowWidth = useWindowSize();
 
   const { left, right, preview } = useExpandableFlyoutState();

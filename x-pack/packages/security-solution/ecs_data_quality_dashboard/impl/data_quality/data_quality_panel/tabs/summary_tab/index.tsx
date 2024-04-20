@@ -54,52 +54,51 @@ interface Props {
   baseTheme: Theme;
 }
 
-const SummaryTabComponent: React.FC<Props> = ({
-  addSuccessToast,
-  addToNewCaseDisabled,
-  formatBytes,
-  formatNumber,
-  docsCount,
-  getGroupByFieldsOnClick,
-  ilmPhase,
-  indexName,
-  isAssistantEnabled,
-  onAddToNewCase,
-  partitionedFieldMetadata,
-  pattern,
-  patternDocsCount,
-  setSelectedTabId,
-  sizeInBytes,
-  theme,
-  baseTheme,
-}) => (
-  <>
-    <CalloutSummary
-      addSuccessToast={addSuccessToast}
-      addToNewCaseDisabled={addToNewCaseDisabled}
-      formatBytes={formatBytes}
-      formatNumber={formatNumber}
-      docsCount={docsCount}
-      ilmPhase={ilmPhase}
-      indexName={indexName}
-      isAssistantEnabled={isAssistantEnabled}
-      onAddToNewCase={onAddToNewCase}
-      partitionedFieldMetadata={partitionedFieldMetadata}
-      pattern={pattern}
-      patternDocsCount={patternDocsCount}
-      sizeInBytes={sizeInBytes}
-    />
-
-    <EcsSummaryDonutChart
-      defaultTabId={ALL_TAB_ID}
-      getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-      partitionedFieldMetadata={partitionedFieldMetadata}
-      setSelectedTabId={setSelectedTabId}
-      theme={theme}
-      baseTheme={baseTheme}
-    />
-  </>
-);
+const SummaryTabComponent = (
+  {
+    addSuccessToast,
+    addToNewCaseDisabled,
+    formatBytes,
+    formatNumber,
+    docsCount,
+    getGroupByFieldsOnClick,
+    ilmPhase,
+    indexName,
+    isAssistantEnabled,
+    onAddToNewCase,
+    partitionedFieldMetadata,
+    pattern,
+    patternDocsCount,
+    setSelectedTabId,
+    sizeInBytes,
+    theme,
+    baseTheme
+  }: Props
+) => (<>
+  <CalloutSummary
+    addSuccessToast={addSuccessToast}
+    addToNewCaseDisabled={addToNewCaseDisabled}
+    formatBytes={formatBytes}
+    formatNumber={formatNumber}
+    docsCount={docsCount}
+    ilmPhase={ilmPhase}
+    indexName={indexName}
+    isAssistantEnabled={isAssistantEnabled}
+    onAddToNewCase={onAddToNewCase}
+    partitionedFieldMetadata={partitionedFieldMetadata}
+    pattern={pattern}
+    patternDocsCount={patternDocsCount}
+    sizeInBytes={sizeInBytes}
+  />
+  <EcsSummaryDonutChart
+    defaultTabId={ALL_TAB_ID}
+    getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+    partitionedFieldMetadata={partitionedFieldMetadata}
+    setSelectedTabId={setSelectedTabId}
+    theme={theme}
+    baseTheme={baseTheme}
+  />
+</>);
 
 SummaryTabComponent.displayName = 'SummaryTabComponent';
 

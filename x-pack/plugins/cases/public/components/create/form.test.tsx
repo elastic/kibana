@@ -56,10 +56,14 @@ describe('CreateCaseForm', () => {
   let globalForm: FormHook;
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
-  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
-    children,
-    testProviderProps = {},
-  }) => {
+  const MockHookWrapperComponent = (
+    {
+      children,
+      testProviderProps = {}
+    }: {
+      testProviderProps?: unknown;
+    }
+  ) => {
     const { form } = useForm<FormProps>({
       defaultValue: initialCaseValue,
       options: { stripEmptyFields: false },
@@ -70,9 +74,9 @@ describe('CreateCaseForm', () => {
 
     return (
       // @ts-expect-error ts upgrade v4.7.4
-      <TestProviders {...testProviderProps}>
+      (<TestProviders {...testProviderProps}>
         <Form form={form}>{children}</Form>
-      </TestProviders>
+      </TestProviders>)
     );
   };
 

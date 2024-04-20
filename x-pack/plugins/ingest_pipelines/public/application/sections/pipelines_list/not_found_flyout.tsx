@@ -15,7 +15,12 @@ interface Props {
   pipelineName: string | string[] | null | undefined;
 }
 
-export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ onClose, pipelineName }) => {
+export const PipelineNotFoundFlyout = (
+  {
+    onClose,
+    pipelineName
+  }: Props
+) => {
   return (
     <EuiFlyout onClose={onClose} size="m" maxWidth={550}>
       <EuiFlyoutHeader>

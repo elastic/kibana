@@ -42,10 +42,12 @@ export interface TimeSeriesExplorerUrlStateManager {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
-  config,
-  jobsWithTimeRange,
-}) => {
+export const TimeSeriesExplorerUrlStateManager = (
+  {
+    config,
+    jobsWithTimeRange
+  }: TimeSeriesExplorerUrlStateManager
+) => {
   const {
     services: {
       data: { dataViews: dataViewsService },

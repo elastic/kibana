@@ -11,9 +11,13 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { LabelBadge } from './label_badge';
 
-export const NavItemLabel: React.FC<{
-  item: ChromeProjectNavigationNode;
-}> = ({ item: { title, withBadge, badgeOptions } }) => {
+export const NavItemLabel = (
+  {
+    item: { title, withBadge, badgeOptions }
+  }: {
+    item: ChromeProjectNavigationNode;
+  }
+) => {
   return (
     <>
       {title}

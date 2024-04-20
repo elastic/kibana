@@ -77,10 +77,12 @@ import { useHasSecurityCapability } from '../../../../helper_hooks';
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
 
-const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
-  detailName,
-  usersDetailsPagePath,
-}) => {
+const UsersDetailsComponent = (
+  {
+    detailName,
+    usersDetailsPagePath
+  }: UsersDetailsProps
+) => {
   const dispatch = useDispatch();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);

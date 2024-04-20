@@ -58,52 +58,52 @@ interface Props {
   showHeader?: boolean;
 }
 
-export const Datatable: FC<Props> = ({
-  datatable,
-  paginate = false,
-  perPage = 10,
-  showHeader = false,
-}) => (
-  <Paginate rows={datatable.rows} perPage={perPage}>
-    {({ rows, setPage, pageNumber, totalPages }) => (
-      <div className="canvasDataTable">
-        <div className="canvasDataTable__tableWrapper">
-          <table className="canvasDataTable__table">
-            {!showHeader ? null : (
-              <thead className="canvasDataTable__thead">
-                <tr className="canvasDataTable__tr">
-                  {datatable.columns.map((col) => (
-                    <th key={`header-${getColumnName(col)}`} className="canvasDataTable__th">
-                      {getColumnName(col)}
-                      &nbsp;
-                      {getIcon(getColumnType(col))}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-            )}
-            <tbody className="canvasDataTable__tbody">
-              {rows.map((row, i) => (
-                <tr key={i} className="canvasDataTable__tr">
-                  {datatable.columns.map((col) => (
-                    <td key={`row-${i}-${getColumnName(col)}`} className="canvasDataTable__td">
-                      {getFormattedValue(row[getColumnId(col)], getColumnType(col))}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {paginate && (
-          <div className="canvasDataTable__footer">
-            <EuiPagination pageCount={totalPages} activePage={pageNumber} onPageClick={setPage} />
-          </div>
-        )}
+export const Datatable = (
+  {
+    datatable,
+    paginate = false,
+    perPage = 10,
+    showHeader = false
+  }: Props
+) => (<Paginate rows={datatable.rows} perPage={perPage}>
+  {({ rows, setPage, pageNumber, totalPages }) => (
+    <div className="canvasDataTable">
+      <div className="canvasDataTable__tableWrapper">
+        <table className="canvasDataTable__table">
+          {!showHeader ? null : (
+            <thead className="canvasDataTable__thead">
+              <tr className="canvasDataTable__tr">
+                {datatable.columns.map((col) => (
+                  <th key={`header-${getColumnName(col)}`} className="canvasDataTable__th">
+                    {getColumnName(col)}
+                    &nbsp;
+                    {getIcon(getColumnType(col))}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+          )}
+          <tbody className="canvasDataTable__tbody">
+            {rows.map((row, i) => (
+              <tr key={i} className="canvasDataTable__tr">
+                {datatable.columns.map((col) => (
+                  <td key={`row-${i}-${getColumnName(col)}`} className="canvasDataTable__td">
+                    {getFormattedValue(row[getColumnId(col)], getColumnType(col))}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    )}
-  </Paginate>
-);
+      {paginate && (
+        <div className="canvasDataTable__footer">
+          <EuiPagination pageCount={totalPages} activePage={pageNumber} onPageClick={setPage} />
+        </div>
+      )}
+    </div>
+  )}
+</Paginate>);
 
 Datatable.propTypes = {
   datatable: PropTypes.object.isRequired,

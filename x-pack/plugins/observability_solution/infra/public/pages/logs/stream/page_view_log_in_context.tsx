@@ -24,7 +24,7 @@ import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
 
 const MODAL_MARGIN = 25;
 
-export const PageViewLogInContext: React.FC = () => {
+export const PageViewLogInContext = () => {
   const [{ contextEntry, startTimestamp, endTimestamp, logViewReference }, { setContextEntry }] =
     useViewLogInProviderContext();
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
@@ -78,7 +78,13 @@ const LogInContextWrapper = euiStyled.div<{ width: number | string; height: numb
   max-height: 75vh; // Same as EuiModal
 `;
 
-const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }) => {
+const LogEntryContext = (
+  {
+    context
+  }: {
+    context: LogEntry['context'];
+  }
+) => {
   let text;
   if ('container.id' in context) {
     text = (

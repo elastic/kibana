@@ -16,7 +16,7 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 
 const { emptyField } = fieldValidators;
 
-export const Rename: FunctionComponent = () => {
+export const Rename = () => {
   return (
     <>
       <FieldNameField

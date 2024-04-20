@@ -34,7 +34,12 @@ const getEnrichPolicyNameFromLocation = (location: Location) => {
   return policy;
 };
 
-const ListView: React.FunctionComponent<RouteComponentProps> = ({ history, location }) => {
+const ListView = (
+  {
+    history,
+    location
+  }: RouteComponentProps
+) => {
   const {
     core: { executionContext },
   } = useAppContext();
@@ -152,10 +157,8 @@ const ListView: React.FunctionComponent<RouteComponentProps> = ({ history, locat
   );
 };
 
-export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = (props) => (
-  <EnrichPoliciesAuthProvider>
-    <EnrichPoliciesWithPrivileges>
-      <ListView {...props} />
-    </EnrichPoliciesWithPrivileges>
-  </EnrichPoliciesAuthProvider>
-);
+export const EnrichPoliciesList = (props: RouteComponentProps) => (<EnrichPoliciesAuthProvider>
+  <EnrichPoliciesWithPrivileges>
+    <ListView {...props} />
+  </EnrichPoliciesWithPrivileges>
+</EnrichPoliciesAuthProvider>);

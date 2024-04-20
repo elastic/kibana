@@ -13,12 +13,14 @@ import type { ResetAction } from './use_reset_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-export const ResetActionModal: FC<ResetAction> = ({
-  closeModal,
-  resetAndCloseModal,
-  items,
-  shouldForceReset,
-}) => {
+export const ResetActionModal = (
+  {
+    closeModal,
+    resetAndCloseModal,
+    items,
+    shouldForceReset
+  }: ResetAction
+) => {
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
   const isBulkAction = items.length > 1;
 

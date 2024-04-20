@@ -31,12 +31,14 @@ const pagination = {
   pageSizeOptions: [25, 50, 100],
 };
 
-export const PoliciesTable: FunctionComponent<Props> = ({
-  policies,
-  onReloadClick,
-  onDeletePolicyClick,
-  onExecutePolicyClick,
-}) => {
+export const PoliciesTable = (
+  {
+    policies,
+    onReloadClick,
+    onDeletePolicyClick,
+    onExecutePolicyClick
+  }: Props
+) => {
   const { history } = useAppContext();
 
   const renderToolsRight = () => {

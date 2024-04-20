@@ -29,7 +29,13 @@ interface Props {
   stepIndex: number;
 }
 
-export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex, activeStep }) => {
+export const WaterfallChartContainer = (
+  {
+    checkGroup,
+    stepIndex,
+    activeStep
+  }: Props
+) => {
   const _networkEvents = useSelector(networkEventsSelector);
   const networkEvents = _networkEvents[checkGroup ?? '']?.[stepIndex];
   const hasEvents = networkEvents?.events?.length > 0;

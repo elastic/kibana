@@ -68,17 +68,19 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
 
 */
 
-export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
-  dryRunData,
-  isUpgradingPackagePolicies = false,
-  name,
-  packagePolicyIds = [],
-  agentPolicyIds = [],
-  setIsUpgradingPackagePolicies = () => {},
-  title,
-  version,
-  theme$,
-}) => {
+export const UpdateButton = (
+  {
+    dryRunData,
+    isUpgradingPackagePolicies = false,
+    name,
+    packagePolicyIds = [],
+    agentPolicyIds = [],
+    setIsUpgradingPackagePolicies = () => {},
+    title,
+    version,
+    theme$
+  }: UpdateButtonProps
+) => {
   const history = useHistory();
   const { getPath } = useLink();
 

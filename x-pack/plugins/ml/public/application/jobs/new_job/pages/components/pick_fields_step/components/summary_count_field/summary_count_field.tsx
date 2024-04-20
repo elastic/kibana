@@ -18,7 +18,7 @@ import type {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const SummaryCountField: FC = () => {
+export const SummaryCountField = () => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

@@ -30,7 +30,7 @@ import { SearchBarWrapper } from './search_bar';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 import { type ChangePointType } from './constants';
 
-export const ChangePointDetectionPage: FC = () => {
+export const ChangePointDetectionPage = () => {
   const [isFlyoutVisible, setFlyoutVisible] = useState<boolean>(false);
 
   const {

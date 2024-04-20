@@ -36,13 +36,15 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
-  startDate,
-  endDate,
-  hostName,
-  skip,
-  type,
-}) => {
+const AnomaliesHostTableComponent = (
+  {
+    startDate,
+    endDate,
+    hostName,
+    skip,
+    type
+  }: AnomaliesHostTableProps
+) => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
   const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesHostTable`);

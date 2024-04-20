@@ -23,7 +23,11 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const TestOutputButton: FunctionComponent<Props> = ({ openFlyout }) => {
+export const TestOutputButton = (
+  {
+    openFlyout
+  }: Props
+) => {
   return (
     <EuiButton size="s" onClick={() => openFlyout('output')} data-test-subj="viewOutputButton">
       {i18nTexts.buttonLabel}

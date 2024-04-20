@@ -22,7 +22,7 @@ import { getNewJobDefaults } from '../../../../../../../services/ml_server_info'
 import type { ListItems } from '../common';
 import { falseLabel, trueLabel, defaultLabel, Italic } from '../common';
 
-export const JobDetails: FC = () => {
+export const JobDetails = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const {
     services: { uiSettings },

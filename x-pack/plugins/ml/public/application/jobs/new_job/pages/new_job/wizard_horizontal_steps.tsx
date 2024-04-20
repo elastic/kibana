@@ -23,13 +23,15 @@ interface Props {
   jobType: JOB_TYPE;
 }
 
-export const WizardHorizontalSteps: FC<Props> = ({
-  currentStep,
-  highestStep,
-  setCurrentStep,
-  disableSteps,
-  jobType,
-}) => {
+export const WizardHorizontalSteps = (
+  {
+    currentStep,
+    highestStep,
+    setCurrentStep,
+    disableSteps,
+    jobType
+  }: Props
+) => {
   function jumpToStep(step: WIZARD_STEPS) {
     if (step <= highestStep) {
       setCurrentStep(step);

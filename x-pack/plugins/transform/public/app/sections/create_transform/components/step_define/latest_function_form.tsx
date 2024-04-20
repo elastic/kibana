@@ -19,11 +19,13 @@ interface LatestFunctionFormProps {
   latestFunctionService: LatestFunctionService;
 }
 
-export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
-  copyToClipboard,
-  copyToClipboardDescription,
-  latestFunctionService,
-}) => {
+export const LatestFunctionForm = (
+  {
+    copyToClipboard,
+    copyToClipboardDescription,
+    latestFunctionService
+  }: LatestFunctionFormProps
+) => {
   const {
     ml: { useFieldStatsTrigger },
   } = useAppDependencies();

@@ -16,11 +16,13 @@ interface Props {
   text?: string;
 }
 
-export const Loading: FC<Props> = ({
-  animated = false,
-  text = '',
-  backgroundColor = '#000000',
-}) => {
+export const Loading = (
+  {
+    animated = false,
+    text = '',
+    backgroundColor = '#000000'
+  }: Props
+) => {
   if (animated) {
     return (
       <div className="canvasLoading">

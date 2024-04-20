@@ -17,12 +17,14 @@ interface Props {
   error: RepositorySettingsValidation['maxSnapshotBytesPerSec'];
 }
 
-export const MaxSnapshotsField: React.FunctionComponent<Props> = ({
-  isInvalid,
-  error,
-  defaultValue,
-  updateSettings,
-}) => {
+export const MaxSnapshotsField = (
+  {
+    isInvalid,
+    error,
+    defaultValue,
+    updateSettings
+  }: Props
+) => {
   return (
     <EuiDescribedFormGroup
       title={

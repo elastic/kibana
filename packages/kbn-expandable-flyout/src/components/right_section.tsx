@@ -24,10 +24,12 @@ interface RightSectionProps {
 /**
  * Right section of the expanded flyout rendering a panel
  */
-export const RightSection: React.FC<RightSectionProps> = ({
-  component,
-  width,
-}: RightSectionProps) => {
+export const RightSection = (
+  {
+    component,
+    width
+  }: RightSectionProps
+) => {
   const style = useMemo<React.CSSProperties>(
     () => ({ height: '100%', width: `${width}px` }),
     [width]

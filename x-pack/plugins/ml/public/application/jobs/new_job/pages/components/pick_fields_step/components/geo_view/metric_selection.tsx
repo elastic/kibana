@@ -21,7 +21,11 @@ interface Props {
   setIsValid: (na: boolean) => void;
 }
 
-export const GeoDetector: FC<Props> = ({ setIsValid }) => {
+export const GeoDetector = (
+  {
+    setIsValid
+  }: Props
+) => {
   const { jobCreator: jc, jobCreatorUpdated, chartLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as GeoJobCreator;
 

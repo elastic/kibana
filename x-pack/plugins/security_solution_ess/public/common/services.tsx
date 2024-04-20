@@ -16,9 +16,14 @@ import type { SecuritySolutionEssPluginStartDeps } from '../types';
 
 export type Services = CoreStart & SecuritySolutionEssPluginStartDeps;
 
-export const KibanaServicesProvider: React.FC<{
-  services: Services;
-}> = ({ services, children }) => {
+export const KibanaServicesProvider = (
+  {
+    services,
+    children
+  }: {
+    services: Services;
+  }
+) => {
   return (
     <KibanaContextProvider services={services}>
       <NavigationProvider core={services}>{children}</NavigationProvider>

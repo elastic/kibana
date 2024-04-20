@@ -21,7 +21,7 @@ const KEY = 'response';
 /**
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
-export const ResponseSection: FC = memo(() => {
+export const ResponseSection = memo(() => {
   const { isPreview, getFieldsData } = useRightPanelContext();
 
   const expanded = useExpandSection({ title: KEY, defaultValue: false });

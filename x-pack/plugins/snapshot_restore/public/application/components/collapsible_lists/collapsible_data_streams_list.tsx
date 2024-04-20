@@ -15,7 +15,11 @@ interface Props {
   dataStreams: string[] | string | undefined;
 }
 
-export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dataStreams }) => {
+export const CollapsibleDataStreamsList = (
+  {
+    dataStreams
+  }: Props
+) => {
   const { isShowingFullList, setIsShowingFullList, items, hiddenItemsCount } = useCollapsibleList({
     items: dataStreams,
   });

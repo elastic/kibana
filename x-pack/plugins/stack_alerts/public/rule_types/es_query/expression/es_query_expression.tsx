@@ -37,9 +37,15 @@ import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from 
 
 const { useXJsonMode } = XJson;
 
-export const EsQueryExpression: React.FC<
-  RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
+export const EsQueryExpression = (
+  {
+    ruleParams,
+    setRuleParams,
+    setRuleProperty,
+    errors,
+    data
+  }: RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
+) => {
   const services = useTriggerUiActionServices();
   const { http, docLinks, isServerless } = services;
 

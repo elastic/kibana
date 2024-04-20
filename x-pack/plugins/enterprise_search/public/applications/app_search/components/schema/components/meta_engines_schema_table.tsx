@@ -27,7 +27,7 @@ import { MetaEngineSchemaLogic } from '../schema_meta_engine_logic';
 
 import { TruncatedEnginesList } from '.';
 
-export const MetaEnginesSchemaTable: React.FC = () => {
+export const MetaEnginesSchemaTable = () => {
   const { schema, fields } = useValues(MetaEngineSchemaLogic);
 
   return (

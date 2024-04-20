@@ -18,11 +18,13 @@ interface Props {
   renderComplete?: () => void;
 }
 
-export const VisualizationNoResults: FC<Props> = ({
-  hasNegativeValues = false,
-  chartType,
-  renderComplete,
-}) => {
+export const VisualizationNoResults = (
+  {
+    hasNegativeValues = false,
+    chartType,
+    renderComplete
+  }: Props
+) => {
   if (hasNegativeValues) {
     const message = (
       <FormattedMessage

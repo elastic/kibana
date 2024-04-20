@@ -23,32 +23,37 @@ interface Props {
   subtitle: string;
   title: string;
 }
-export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, children }) => (
-  <section>
-    <header>
-      <EuiFlexGroup
-        gutterSize="xs"
-        alignItems="center"
-        justifyContent="flexStart"
-        responsive={false}
-      >
-        {iconType && (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={iconType} size="l" />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>{title}</h2>
-          </EuiTitle>
+export const AnalyticsSection = (
+  {
+    title,
+    subtitle,
+    iconType,
+    children
+  }: Props
+) => (<section>
+  <header>
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      justifyContent="flexStart"
+      responsive={false}
+    >
+      {iconType && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={iconType} size="l" />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>{subtitle}</p>
-      </EuiText>
-    </header>
-    <EuiSpacer size="m" />
-    <EuiPageSection paddingSize="none">{children}</EuiPageSection>
-  </section>
-);
+      )}
+      <EuiFlexItem>
+        <EuiTitle size="s">
+          <h2>{title}</h2>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="xs" />
+    <EuiText size="s" color="subdued">
+      <p>{subtitle}</p>
+    </EuiText>
+  </header>
+  <EuiSpacer size="m" />
+  <EuiPageSection paddingSize="none">{children}</EuiPageSection>
+</section>);

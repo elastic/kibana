@@ -25,7 +25,11 @@ interface Props {
 
 const DTR_IDX = 0;
 
-export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
+export const SingleMetricDetectors = (
+  {
+    setIsValid
+  }: Props
+) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

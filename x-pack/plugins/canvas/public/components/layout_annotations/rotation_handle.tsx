@@ -15,19 +15,22 @@ interface Props {
   zoomScale?: number;
 }
 
-export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
+export const RotationHandle = (
+  {
+    transformMatrix,
+    zoomScale = 1
+  }: Props
+) => (<div
+  className="canvasRotationHandle canvasLayoutAnnotation"
+  style={{
+    transform: matrixToCSS(transformMatrix),
+  }}
+>
   <div
-    className="canvasRotationHandle canvasLayoutAnnotation"
-    style={{
-      transform: matrixToCSS(transformMatrix),
-    }}
-  >
-    <div
-      className="canvasRotationHandle__handle"
-      style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
-    />
-  </div>
-);
+    className="canvasRotationHandle__handle"
+    style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
+  />
+</div>);
 
 RotationHandle.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,

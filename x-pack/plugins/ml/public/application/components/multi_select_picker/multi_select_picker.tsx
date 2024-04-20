@@ -41,13 +41,21 @@ const NoFilterItems = () => {
   );
 };
 
-export const MultiSelectPicker: FC<{
-  options: Option[];
-  onChange?: (items: string[]) => void;
-  title?: string;
-  checkedOptions: string[];
-  dataTestSubj: string;
-}> = ({ options, onChange, title, checkedOptions, dataTestSubj }) => {
+export const MultiSelectPicker = (
+  {
+    options,
+    onChange,
+    title,
+    checkedOptions,
+    dataTestSubj
+  }: {
+    options: Option[];
+    onChange?: (items: string[]) => void;
+    title?: string;
+    checkedOptions: string[];
+    dataTestSubj: string;
+  }
+) => {
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
 

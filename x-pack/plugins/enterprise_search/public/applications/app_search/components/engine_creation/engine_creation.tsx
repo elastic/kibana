@@ -24,7 +24,7 @@ import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logi
 import { ReviewElasticsearchEngine } from './review_elasticsearch_engine';
 import { SelectEngineType } from './select_engine_type';
 
-export const EngineCreation: React.FC = () => {
+export const EngineCreation = () => {
   const { search } = useLocation() as Location;
   const { method, ...params } = parseQueryParams(search);
 

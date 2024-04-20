@@ -48,7 +48,11 @@ const Callout = (
     })}
   </EuiCallOut>
 );
-export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ closeFlyout }) => {
+export const DefaultSettingsFlyout = (
+  {
+    closeFlyout
+  }: DefaultSettingsFlyoutProps
+) => {
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
   const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
   const {

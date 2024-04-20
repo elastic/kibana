@@ -81,7 +81,7 @@ interface Tab {
   title: string;
 }
 
-export const SearchApplicationApiIntegrationStage: React.FC = () => {
+export const SearchApplicationApiIntegrationStage = () => {
   const { application, share } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
   const { searchApplicationName } = useValues(SearchApplicationViewLogic);

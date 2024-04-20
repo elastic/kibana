@@ -37,7 +37,7 @@ import { CreatePackagePolicyBottomBar } from '.';
 const CentralTitle = styled('h1')`
   text-align: center;
 `;
-const PaddedCentralTitle: React.FC = ({ children }) => (
+const PaddedCentralTitle = ({ children }) => (
   <>
     <EuiSpacer size={'s'} />
     <EuiTitle size="l">
@@ -64,7 +64,7 @@ const CenteredEuiImage = (props: EuiImageProps) => (
   </div>
 );
 
-const ResponsiveStepGroup: React.FC = ({ children }) => {
+const ResponsiveStepGroup = ({ children }) => {
   const isScreenSmall = useIsWithinMaxBreakpoint('s');
 
   return (
@@ -210,23 +210,25 @@ const CenteredLearnMoreLink = () => {
   );
 };
 
-export const AddFirstIntegrationSplashScreen: React.FC<{
-  integrationInfo?: RegistryPolicyTemplate;
-  error?: RequestError | null;
-  packageInfo?: PackageInfo;
-  isLoading: boolean;
-  cancelClickHandler?: React.ReactEventHandler;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({
-  integrationInfo,
-  packageInfo,
-  isLoading,
-  error,
-  cancelUrl,
-  cancelClickHandler,
-  onNext,
-}) => {
+export const AddFirstIntegrationSplashScreen = (
+  {
+    integrationInfo,
+    packageInfo,
+    isLoading,
+    error,
+    cancelUrl,
+    cancelClickHandler,
+    onNext
+  }: {
+    integrationInfo?: RegistryPolicyTemplate;
+    error?: RequestError | null;
+    packageInfo?: PackageInfo;
+    isLoading: boolean;
+    cancelClickHandler?: React.ReactEventHandler;
+    cancelUrl: string;
+    onNext: () => void;
+  }
+) => {
   if (error) {
     return (
       <Error

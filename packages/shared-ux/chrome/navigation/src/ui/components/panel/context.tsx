@@ -30,7 +30,13 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const PanelProvider: FC<Props> = ({ children, contentProvider, activeNodes }) => {
+export const PanelProvider = (
+  {
+    children,
+    contentProvider,
+    activeNodes
+  }: Props
+) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNode, setActiveNode] = useState<PanelNavNode | null>(null);
 

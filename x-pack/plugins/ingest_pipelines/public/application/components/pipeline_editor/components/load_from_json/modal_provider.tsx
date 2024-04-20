@@ -56,7 +56,12 @@ const i18nTexts = {
 const defaultValue = {};
 const defaultValueRaw = JSON.stringify(defaultValue, null, 2);
 
-export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) => {
+export const ModalProvider = (
+  {
+    onDone,
+    children
+  }: Props
+) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isValidJson, setIsValidJson] = useState(true);
   const [error, setError] = useState<Error | undefined>();

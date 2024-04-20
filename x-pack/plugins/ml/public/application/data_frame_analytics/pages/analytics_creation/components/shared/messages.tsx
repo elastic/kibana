@@ -16,7 +16,11 @@ interface Props {
   messages: FormMessage[];
 }
 
-export const Messages: FC<Props> = ({ messages }) => {
+export const Messages = (
+  {
+    messages
+  }: Props
+) => {
   return (
     <>
       {messages.map((requestMessage, i) => (

@@ -22,7 +22,11 @@ export const fromLensRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location }) => {
+const PageWrapper = (
+  {
+    location
+  }: PageProps
+) => {
   const { vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
     location.search,
     {

@@ -68,13 +68,15 @@ const getRectDataValue = (
   return getHorizontalRect(name, isFillAbove, formatter, value, nextValue);
 };
 
-export const ReferenceLineAnnotations: FC<Props> = ({
-  config,
-  axesMap,
-  formatter,
-  paddingMap,
-  isHorizontal,
-}) => {
+export const ReferenceLineAnnotations = (
+  {
+    config,
+    axesMap,
+    formatter,
+    paddingMap,
+    isHorizontal
+  }: Props
+) => {
   const { id, axisGroup, iconPosition, name, value, fill, color } = config;
 
   const defaultColor = euiLightVars.euiColorDarkShade;

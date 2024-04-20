@@ -14,7 +14,11 @@ interface Props {
   settings: IndexSettings | undefined;
 }
 
-export const TabSettings: React.FunctionComponent<Props> = ({ settings }) => {
+export const TabSettings = (
+  {
+    settings
+  }: Props
+) => {
   if (settings && Object.keys(settings).length) {
     return (
       <div data-test-subj="settingsTabContent">

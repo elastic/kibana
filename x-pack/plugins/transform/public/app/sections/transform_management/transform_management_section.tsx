@@ -50,10 +50,15 @@ import {
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
 
-const ErrorMessageCallout: FC<{
-  text: JSX.Element;
-  errorMessage: IHttpFetchError<unknown> | null;
-}> = ({ text, errorMessage }) => {
+const ErrorMessageCallout = (
+  {
+    text,
+    errorMessage
+  }: {
+    text: JSX.Element;
+    errorMessage: IHttpFetchError<unknown> | null;
+  }
+) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -74,7 +79,7 @@ const ErrorMessageCallout: FC<{
   );
 };
 
-export const TransformManagement: FC = () => {
+export const TransformManagement = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
   const { dataViewEditor } = useAppDependencies();
@@ -371,7 +376,7 @@ export const TransformManagement: FC = () => {
   );
 };
 
-export const TransformManagementSection: FC = () => {
+export const TransformManagementSection = () => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.HOME);

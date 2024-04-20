@@ -15,7 +15,12 @@ interface Props {
   validation: Validation;
 }
 
-export const Description: FC<Props> = memo(({ children, validation }) => {
+export const Description = memo((
+  {
+    children,
+    validation
+  }: Props
+) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.jobDetailsStep.jobId.title', {
     defaultMessage: 'Job ID',
   });

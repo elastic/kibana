@@ -24,9 +24,13 @@ export type KibanaPageTemplateSolutionNavCollapseButtonProps =
 /**
  * Creates the styled icon button for showing/hiding solution nav
  */
-export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<
-  KibanaPageTemplateSolutionNavCollapseButtonProps
-> = ({ className, isCollapsed, ...rest }) => {
+export const KibanaPageTemplateSolutionNavCollapseButton = (
+  {
+    className,
+    isCollapsed,
+    ...rest
+  }: KibanaPageTemplateSolutionNavCollapseButtonProps
+) => {
   const classes = classNames(
     'kbnPageTemplateSolutionNavCollapseButton',
     {

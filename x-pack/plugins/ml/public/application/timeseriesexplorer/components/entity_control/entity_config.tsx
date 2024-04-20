@@ -33,12 +33,14 @@ interface EntityConfigProps {
   onConfigChange: (fieldType: MlEntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
 }
 
-export const EntityConfig: FC<EntityConfigProps> = ({
-  entity,
-  isModelPlotEnabled,
-  config,
-  onConfigChange,
-}) => {
+export const EntityConfig = (
+  {
+    entity,
+    isModelPlotEnabled,
+    config,
+    onConfigChange
+  }: EntityConfigProps
+) => {
   const [isEntityConfigPopoverOpen, setIsEntityConfigPopoverOpen] = useState(false);
 
   const forceSortByName = isModelPlotEnabled && !config?.anomalousOnly;

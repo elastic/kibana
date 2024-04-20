@@ -18,7 +18,11 @@ interface Props {
   alertsCount: number;
 }
 
-const LoadingMessagesComponent: React.FC<Props> = ({ alertsCount }) => {
+const LoadingMessagesComponent = (
+  {
+    alertsCount
+  }: Props
+) => {
   const { theme } = useKibana().services;
 
   const isDarkMode = theme.getTheme().darkMode === true;

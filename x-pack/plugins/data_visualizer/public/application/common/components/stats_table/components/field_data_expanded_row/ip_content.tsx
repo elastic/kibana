@@ -12,7 +12,12 @@ import { TopValues } from '../../../top_values';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 
-export const IpContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+export const IpContent = (
+  {
+    config,
+    onAddFilter
+  }: FieldDataRowProps
+) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount, cardinality } = stats;

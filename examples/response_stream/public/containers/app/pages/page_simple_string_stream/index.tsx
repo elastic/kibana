@@ -25,7 +25,7 @@ import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 import { useDeps } from '../../../../hooks/use_deps';
 import { Page } from '../../../../components/page';
 
-export const PageSimpleStringStream: FC = () => {
+export const PageSimpleStringStream = () => {
   const { core } = useDeps();
 
   const [compressResponse, setCompressResponse] = useState(true);

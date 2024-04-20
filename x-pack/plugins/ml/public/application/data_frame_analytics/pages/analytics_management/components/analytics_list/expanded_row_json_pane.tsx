@@ -17,7 +17,12 @@ interface Props {
   dataTestSubj: string;
 }
 
-export const ExpandedRowJsonPane: FC<Props> = ({ json, dataTestSubj }) => {
+export const ExpandedRowJsonPane = (
+  {
+    json,
+    dataTestSubj
+  }: Props
+) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSubj}>
       <EuiFlexItem>

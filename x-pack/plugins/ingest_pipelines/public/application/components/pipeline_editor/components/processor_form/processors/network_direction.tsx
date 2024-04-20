@@ -185,7 +185,7 @@ const getInternalNetworkConfig: (toggleCustom: () => void) => Record<
   },
 });
 
-export const NetworkDirection: FunctionComponent = () => {
+export const NetworkDirection = () => {
   const { getFieldDefaultValue } = useFormContext();
   const isInternalNetowrksFieldDefined =
     getFieldDefaultValue('fields.internal_networks_field') !== undefined;

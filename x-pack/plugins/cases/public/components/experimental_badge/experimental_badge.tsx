@@ -16,7 +16,12 @@ interface Props {
   size?: EuiBetaBadgeProps['size'];
 }
 
-const ExperimentalBadgeComponent: React.FC<Props> = ({ icon = false, size = 's' }) => {
+const ExperimentalBadgeComponent = (
+  {
+    icon = false,
+    size = 's'
+  }: Props
+) => {
   const props: EuiBetaBadgeProps = {
     label: EXPERIMENTAL_LABEL,
     size,

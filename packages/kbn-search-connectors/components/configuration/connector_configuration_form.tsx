@@ -52,14 +52,16 @@ function configViewToConfigValues(
   return result;
 }
 
-export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = ({
-  cancelEditing,
-  configuration,
-  hasDocumentLevelSecurity,
-  isLoading,
-  isNative,
-  saveConfig,
-}) => {
+export const ConnectorConfigurationForm = (
+  {
+    cancelEditing,
+    configuration,
+    hasDocumentLevelSecurity,
+    isLoading,
+    isNative,
+    saveConfig
+  }: ConnectorConfigurationForm
+) => {
   const [localConfig, setLocalConfig] = useState<ConnectorConfiguration>(configuration);
   const [configView, setConfigView] = useState<ConfigView>(
     sortAndFilterConnectorConfiguration(configuration, isNative)

@@ -16,7 +16,12 @@ export interface LicenseBadgeProps {
   modelDetailsPageUrl?: string;
 }
 
-export const LicenseBadge: React.FC<LicenseBadgeProps> = ({ licenseType, modelDetailsPageUrl }) => {
+export const LicenseBadge = (
+  {
+    licenseType,
+    modelDetailsPageUrl
+  }: LicenseBadgeProps
+) => {
   const licenseLabel = i18n.translate(
     'xpack.enterpriseSearch.content.indices.pipelines.modelSelectOption.licenseBadge.label',
     {

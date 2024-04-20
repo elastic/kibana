@@ -26,7 +26,11 @@ function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
   return job.node === undefined && job.state === JOB_STATE.OPENING;
 }
 
-const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
+const MLJobsAwaitingNodeWarning = (
+  {
+    jobIds
+  }: Props
+) => {
   const { http } = useKibana().services;
   const ml = useMemo(() => mlApiServicesProvider(new HttpService(http!)), [http]);
 

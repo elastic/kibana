@@ -27,11 +27,13 @@ export interface TypeFilterProps {
   filters: string[];
 }
 
-export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
-  options,
-  onChange: onFilterChange,
-  filters,
-}: TypeFilterProps) => {
+export const TypeFilter = (
+  {
+    options,
+    onChange: onFilterChange,
+    filters
+  }: TypeFilterProps
+) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

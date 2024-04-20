@@ -56,7 +56,7 @@ export const TextExpansionDismissButton = ({
   );
 };
 
-export const FineTuneModelsButton: React.FC = () => (
+export const FineTuneModelsButton = () => (
   <EuiButtonEmpty
     iconSide="left"
     iconType="wrench"
@@ -75,7 +75,7 @@ export const FineTuneModelsButton: React.FC = () => (
   </EuiButtonEmpty>
 );
 
-export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
+export const TextExpansionCallOut = (props: TextExpansionCallOutProps) => {
   const { dismiss, isCompact, isDismissable, show } = useTextExpansionCallOutData(props);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {

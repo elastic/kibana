@@ -49,13 +49,15 @@ export interface TriggerPickerProps {
   onChange: (selected: string[]) => void;
 }
 
-export const TriggerPicker: React.FC<TriggerPickerProps> = ({
-  items,
-  selected = [],
-  docs,
-  disabled,
-  onChange,
-}) => {
+export const TriggerPicker = (
+  {
+    items,
+    selected = [],
+    docs,
+    disabled,
+    onChange
+  }: TriggerPickerProps
+) => {
   return (
     <EuiFormFieldset
       data-test-subj={`triggerPicker`}

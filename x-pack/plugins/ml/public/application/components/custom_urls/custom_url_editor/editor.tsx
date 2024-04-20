@@ -81,16 +81,18 @@ interface CustomUrlEditorProps {
 /*
  * React component for the form for editing a custom URL.
  */
-export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
-  customUrl,
-  setEditCustomUrl,
-  savedCustomUrls,
-  dashboards,
-  dataViewListItems,
-  showCustomTimeRangeSelector,
-  job,
-  isPartialDFAJob,
-}) => {
+export const CustomUrlEditor = (
+  {
+    customUrl,
+    setEditCustomUrl,
+    savedCustomUrls,
+    dashboards,
+    dataViewListItems,
+    showCustomTimeRangeSelector,
+    job,
+    isPartialDFAJob
+  }: CustomUrlEditorProps
+) => {
   const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
   const [hasTimefield, setHasTimefield] = useState<boolean>(false);
   const [addIntervalTimerange, setAddIntervalTimerange] = useState<boolean>(false);

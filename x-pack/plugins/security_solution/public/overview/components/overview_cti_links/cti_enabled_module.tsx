@@ -11,7 +11,7 @@ import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_dat
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
 
-export const CtiEnabledModuleComponent: React.FC<ThreatIntelLinkPanelProps> = (props) => {
+export const CtiEnabledModuleComponent = (props: ThreatIntelLinkPanelProps) => {
   const { to, from, allTiDataSources, setQuery, deleteQuery } = props;
   const { tiDataSources, totalCount } = useTiDataSources({
     to,

@@ -36,7 +36,11 @@ interface AddFileProps {
   caseId: string;
 }
 
-const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
+const AddFileComponent = (
+  {
+    caseId
+  }: AddFileProps
+) => {
   const { owner, permissions } = useCasesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
   const { isLoading, mutateAsync: createAttachments } = useCreateAttachments();

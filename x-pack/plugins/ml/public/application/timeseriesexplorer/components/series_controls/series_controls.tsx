@@ -85,17 +85,19 @@ interface SeriesControlsProps {
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls: FC<SeriesControlsProps> = ({
-  appStateHandler,
-  bounds,
-  children,
-  functionDescription,
-  job,
-  selectedDetectorIndex,
-  selectedEntities,
-  selectedJobId,
-  setFunctionDescription,
-}) => {
+export const SeriesControls = (
+  {
+    appStateHandler,
+    bounds,
+    children,
+    functionDescription,
+    job,
+    selectedDetectorIndex,
+    selectedEntities,
+    selectedJobId,
+    setFunctionDescription
+  }: SeriesControlsProps
+) => {
   const {
     services: {
       mlServices: {

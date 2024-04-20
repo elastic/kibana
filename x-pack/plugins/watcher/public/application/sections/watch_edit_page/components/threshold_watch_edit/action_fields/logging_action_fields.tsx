@@ -18,12 +18,14 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const LoggingActionFields: React.FunctionComponent<Props> = ({
-  action,
-  editAction,
-  errors,
-  hasErrors,
-}) => {
+export const LoggingActionFields = (
+  {
+    action,
+    editAction,
+    errors,
+    hasErrors
+  }: Props
+) => {
   const { text } = action;
   return (
     <ErrableFormRow

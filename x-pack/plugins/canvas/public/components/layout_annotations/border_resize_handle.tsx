@@ -15,14 +15,17 @@ interface Props {
   zoomScale?: number;
 }
 
-export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
-  <div
-    className="canvasBorderResizeHandle canvasLayoutAnnotation"
-    style={{
-      transform: `${matrixToCSS(transformMatrix)} scale3d(${1 / zoomScale},${1 / zoomScale}, 1)`,
-    }}
-  />
-);
+export const BorderResizeHandle = (
+  {
+    transformMatrix,
+    zoomScale = 1
+  }: Props
+) => (<div
+  className="canvasBorderResizeHandle canvasLayoutAnnotation"
+  style={{
+    transform: `${matrixToCSS(transformMatrix)} scale3d(${1 / zoomScale},${1 / zoomScale}, 1)`,
+  }}
+/>);
 
 BorderResizeHandle.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,

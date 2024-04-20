@@ -46,7 +46,14 @@ export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Props) => {
   });
 };
 
-export const MLJobLink: React.FC<Props> = ({ basePath, monitorId, dateRange, children }) => {
+export const MLJobLink = (
+  {
+    basePath,
+    monitorId,
+    dateRange,
+    children
+  }: Props
+) => {
   const href = getMLJobLinkHref({ basePath, monitorId, dateRange });
   return (
     <EuiButtonEmpty

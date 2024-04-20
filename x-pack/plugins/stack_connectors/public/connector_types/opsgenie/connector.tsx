@@ -63,7 +63,12 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-const OpsgenieConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const OpsgenieConnectorFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => {
   return (
     <SimpleConnectorForm
       isEdit={isEdit}

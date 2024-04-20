@@ -117,7 +117,13 @@ describe('<UseField />', () => {
   describe('state', () => {
     describe('isPristine, isDirty, isModified', () => {
       // Dummy component to handle object type data
-      const ObjectField: React.FC<{ field: FieldHook }> = ({ field: { setValue } }) => {
+      const ObjectField = (
+        {
+          field: { setValue }
+        }: {
+          field: FieldHook;
+        }
+      ) => {
         const onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           // Make sure to set the field value to an **object**
           setValue(JSON.parse(e.target.value));

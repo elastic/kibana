@@ -29,63 +29,63 @@ interface ActionIconItemProps {
   buttonType?: 'text' | 'icon' | 'emptyButton';
 }
 
-const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
-  width = DEFAULT_ACTION_BUTTON_WIDTH,
-  dataTestSubj,
-  content,
-  ariaLabel,
-  iconType = '',
-  isDisabled = false,
-  onClick,
-  children,
-  buttonType = 'icon',
-}) => (
-  <>
-    {buttonType === 'icon' && (
-      <div>
-        <EventsTdContent textAlign="center" width={width}>
-          {children ?? (
-            <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>
-              <EuiButtonIcon
-                aria-label={ariaLabel}
-                data-test-subj={`${dataTestSubj}-button`}
-                iconType={iconType}
-                isDisabled={isDisabled}
-                onClick={onClick}
-                size="s"
-              />
-            </EuiToolTip>
-          )}
-        </EventsTdContent>
-      </div>
-    )}
-    {buttonType === 'text' && (
-      <EuiContextMenuItem
-        aria-label={ariaLabel}
-        data-test-subj={`${dataTestSubj}-button-menu-item`}
-        disabled={isDisabled}
-        onClick={onClick}
-        color="text"
-        size="s"
-      >
-        <EuiText data-test-subj={`${dataTestSubj}-button`} size="m">
-          {content}
-        </EuiText>
-      </EuiContextMenuItem>
-    )}
-    {buttonType === 'emptyButton' && (
-      <EuiButtonEmpty
-        onClick={onClick}
-        iconType="timeline"
-        flush="right"
-        size="xs"
-        data-test-subj={dataTestSubj}
-      >
+const ActionIconItemComponent = (
+  {
+    width = DEFAULT_ACTION_BUTTON_WIDTH,
+    dataTestSubj,
+    content,
+    ariaLabel,
+    iconType = '',
+    isDisabled = false,
+    onClick,
+    children,
+    buttonType = 'icon'
+  }: ActionIconItemProps
+) => (<>
+  {buttonType === 'icon' && (
+    <div>
+      <EventsTdContent textAlign="center" width={width}>
+        {children ?? (
+          <EuiToolTip data-test-subj={`${dataTestSubj}-tool-tip`} content={content}>
+            <EuiButtonIcon
+              aria-label={ariaLabel}
+              data-test-subj={`${dataTestSubj}-button`}
+              iconType={iconType}
+              isDisabled={isDisabled}
+              onClick={onClick}
+              size="s"
+            />
+          </EuiToolTip>
+        )}
+      </EventsTdContent>
+    </div>
+  )}
+  {buttonType === 'text' && (
+    <EuiContextMenuItem
+      aria-label={ariaLabel}
+      data-test-subj={`${dataTestSubj}-button-menu-item`}
+      disabled={isDisabled}
+      onClick={onClick}
+      color="text"
+      size="s"
+    >
+      <EuiText data-test-subj={`${dataTestSubj}-button`} size="m">
         {content}
-      </EuiButtonEmpty>
-    )}
-  </>
-);
+      </EuiText>
+    </EuiContextMenuItem>
+  )}
+  {buttonType === 'emptyButton' && (
+    <EuiButtonEmpty
+      onClick={onClick}
+      iconType="timeline"
+      flush="right"
+      size="xs"
+      data-test-subj={dataTestSubj}
+    >
+      {content}
+    </EuiButtonEmpty>
+  )}
+</>);
 
 ActionIconItemComponent.displayName = 'ActionIconItemComponent';
 

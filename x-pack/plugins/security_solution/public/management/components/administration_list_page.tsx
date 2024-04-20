@@ -28,8 +28,8 @@ interface AdministrationListPageProps {
   headerBackComponent?: React.ReactNode;
 }
 
-export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({
+export const AdministrationListPage = memo((
+  {
     title,
     subtitle,
     actions,
@@ -39,49 +39,49 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     hideHeader = false,
     headerBackComponent,
     ...otherProps
-  }) => {
-    const header = useMemo(() => {
-      return (
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            {headerBackComponent && <>{headerBackComponent}</>}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <span data-test-subj="header-page-title">{title}</span>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }, [headerBackComponent, title]);
-
-    const description = useMemo(() => {
-      return subtitle ? <span data-test-subj="header-panel-subtitle">{subtitle}</span> : undefined;
-    }, [subtitle]);
-
-    const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
-
+  }: AdministrationListPageProps & CommonProps
+) => {
+  const header = useMemo(() => {
     return (
-      <div {...otherProps}>
-        {!hideHeader && (
-          <>
-            <EuiPageHeader
-              pageTitle={header}
-              description={description}
-              bottomBorder={hasBottomBorder}
-              rightSideItems={actions ? [actions] : undefined}
-              restrictWidth={restrictWidth}
-              data-test-subj={getTestId('header')}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
-        <EuiPageSection paddingSize="none" color="transparent" restrictWidth={restrictWidth}>
-          {children}
-        </EuiPageSection>
-      </div>
+      <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          {headerBackComponent && <>{headerBackComponent}</>}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="l">
+            <span data-test-subj="header-page-title">{title}</span>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
-  }
-);
+  }, [headerBackComponent, title]);
+
+  const description = useMemo(() => {
+    return subtitle ? <span data-test-subj="header-panel-subtitle">{subtitle}</span> : undefined;
+  }, [subtitle]);
+
+  const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
+
+  return (
+    <div {...otherProps}>
+      {!hideHeader && (
+        <>
+          <EuiPageHeader
+            pageTitle={header}
+            description={description}
+            bottomBorder={hasBottomBorder}
+            rightSideItems={actions ? [actions] : undefined}
+            restrictWidth={restrictWidth}
+            data-test-subj={getTestId('header')}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      <EuiPageSection paddingSize="none" color="transparent" restrictWidth={restrictWidth}>
+        {children}
+      </EuiPageSection>
+    </div>
+  );
+});
 
 AdministrationListPage.displayName = 'AdministrationListPage';

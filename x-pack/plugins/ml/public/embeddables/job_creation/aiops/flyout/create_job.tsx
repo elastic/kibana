@@ -42,7 +42,14 @@ interface Props {
   timeRange: TimeRange;
 }
 
-export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
+export const CreateJob = (
+  {
+    dataView,
+    field,
+    query,
+    timeRange
+  }: Props
+) => {
   const {
     services: {
       data,

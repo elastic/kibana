@@ -18,7 +18,12 @@ interface Props {
   isOrganization?: boolean;
   pageChrome?: PageTemplateProps['pageChrome'];
 }
-export const NotFound: React.FC<Props> = ({ isOrganization = true, pageChrome = [] }) => {
+export const NotFound = (
+  {
+    isOrganization = true,
+    pageChrome = []
+  }: Props
+) => {
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (

@@ -32,7 +32,12 @@ const fieldTypeSelectOptions = (): EuiSelectOption[] => {
   return options;
 };
 
-const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting, isEditMode }) => {
+const FormFieldsComponent = (
+  {
+    isSubmitting,
+    isEditMode
+  }: FormFieldsProps
+) => {
   const [{ type }] = useFormData<{ type: CustomFieldTypes }>();
 
   const builtCustomField = useMemo(() => {

@@ -31,7 +31,7 @@ const EntityAnalyticsManagementTelemetry = () => (
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
+const EntityAnalyticsManagementContainer = React.memo(() => {
   return (
     <Switch>
       <Route
@@ -54,7 +54,7 @@ const EntityAnalyticsAssetClassificationTelemetry = () => (
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
+const EntityAnalyticsAssetClassificationContainer = React.memo(() => {
   return (
     <Switch>
       <Route

@@ -21,10 +21,10 @@ interface CoreThemeProviderProps {
  * @internal Only meant to be used within core for internal usages of EUI/React
  * @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme
  */
-export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({
-  theme$,
-  globalStyles,
-  children,
-}) => (
-  <KibanaThemeProvider {...{ theme: { theme$ }, globalStyles }}>{children}</KibanaThemeProvider>
-);
+export const CoreThemeProvider = (
+  {
+    theme$,
+    globalStyles,
+    children
+  }: CoreThemeProviderProps
+) => (<KibanaThemeProvider {...{ theme: { theme$ }, globalStyles }}>{children}</KibanaThemeProvider>);

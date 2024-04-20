@@ -123,7 +123,11 @@ const i18nTexts = {
   },
 };
 
-const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+const MigrateSystemIndicesStep = (
+  {
+    setIsComplete
+  }: Props
+) => {
   const { beginSystemIndicesMigration, startMigrationStatus, migrationStatus, setShowFlyout } =
     useMigrateSystemIndices();
 

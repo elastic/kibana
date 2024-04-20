@@ -28,7 +28,7 @@ export interface IsolateHostPanelProps extends FlyoutPanelProps {
  * Panel to be displayed right section in the document details expandable flyout when isolate host is clicked in the
  * take action button
  */
-export const IsolateHostPanel: FC<Partial<IsolateHostPanelProps>> = () => {
+export const IsolateHostPanel = () => {
   return (
     <>
       <PanelHeader />

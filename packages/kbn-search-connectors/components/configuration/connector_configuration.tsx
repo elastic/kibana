@@ -80,15 +80,17 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationProps> = ({
-  children,
-  connector,
-  hasPlatinumLicense,
-  isLoading,
-  saveConfig,
-  subscriptionLink,
-  stackManagementLink,
-}) => {
+export const ConnectorConfigurationComponent = (
+  {
+    children,
+    connector,
+    hasPlatinumLicense,
+    isLoading,
+    saveConfig,
+    subscriptionLink,
+    stackManagementLink
+  }: ConnectorConfigurationProps
+) => {
   const configurationRef = useRef<ConnectorConfiguration>({});
   const {
     configuration,

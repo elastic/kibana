@@ -69,14 +69,16 @@ export interface LogCategorizationPageProps {
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
-  dataView,
-  savedSearch,
-  selectedField,
-  onClose,
-  embeddingOrigin,
-  additionalFilter,
-}) => {
+export const LogCategorizationFlyout = (
+  {
+    dataView,
+    savedSearch,
+    selectedField,
+    onClose,
+    embeddingOrigin,
+    additionalFilter
+  }: LogCategorizationPageProps
+) => {
   const {
     notifications: { toasts },
     data: {

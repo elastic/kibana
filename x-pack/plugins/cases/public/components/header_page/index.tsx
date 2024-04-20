@@ -41,15 +41,17 @@ const getHeaderCss = (euiTheme: EuiThemeComputed<{}>, border?: boolean) => css`
   `}
 `;
 
-const HeaderPageComponent: React.FC<HeaderPageProps> = ({
-  showBackButton = false,
-  border,
-  children,
-  isLoading,
-  title,
-  titleNode,
-  'data-test-subj': dataTestSubj,
-}) => {
+const HeaderPageComponent = (
+  {
+    showBackButton = false,
+    border,
+    children,
+    isLoading,
+    title,
+    titleNode,
+    'data-test-subj': dataTestSubj
+  }: HeaderPageProps
+) => {
   const { releasePhase } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { euiTheme } = useEuiTheme();

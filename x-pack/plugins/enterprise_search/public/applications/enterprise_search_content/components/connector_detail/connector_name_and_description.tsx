@@ -39,9 +39,11 @@ const getValidationPromiseResolvers = (): ResolverObject => {
   return resolvers;
 };
 
-export const ConnectorNameAndDescription: React.FC<ConnectorNameAndDescriptionProps> = ({
-  connector,
-}) => {
+export const ConnectorNameAndDescription = (
+  {
+    connector
+  }: ConnectorNameAndDescriptionProps
+) => {
   const [resolverObject, setResolverObject] = useState<ResolverObject>({
     rej: () => {},
     res: () => {},

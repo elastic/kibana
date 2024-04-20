@@ -19,7 +19,7 @@ export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
 /**
  * Threat intelligence displayed in the document details expandable flyout left section under the Insights tab
  */
-export const ThreatIntelligenceDetails: React.FC = () => {
+export const ThreatIntelligenceDetails = () => {
   const {
     enrichments,
     eventFields,

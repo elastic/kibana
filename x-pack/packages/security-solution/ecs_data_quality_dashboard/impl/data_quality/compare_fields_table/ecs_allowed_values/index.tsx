@@ -21,18 +21,21 @@ interface Props {
   allowedValues: AllowedValue[] | undefined;
 }
 
-const EcsAllowedValuesComponent: React.FC<Props> = ({ allowedValues }) =>
-  allowedValues == null ? (
-    <EuiCode data-test-subj="ecsAllowedValuesEmpty">{EMPTY_PLACEHOLDER}</EuiCode>
-  ) : (
-    <EuiFlexGroup data-test-subj="ecsAllowedValues" direction="column" gutterSize="none">
-      {allowedValues.map((x, i) => (
-        <EcsAllowedValueFlexItem grow={false} key={`${x.name}_${i}`}>
-          <CodeSuccess>{x.name}</CodeSuccess>
-        </EcsAllowedValueFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
+const EcsAllowedValuesComponent = (
+  {
+    allowedValues
+  }: Props
+) => allowedValues == null ? (
+  <EuiCode data-test-subj="ecsAllowedValuesEmpty">{EMPTY_PLACEHOLDER}</EuiCode>
+) : (
+  <EuiFlexGroup data-test-subj="ecsAllowedValues" direction="column" gutterSize="none">
+    {allowedValues.map((x, i) => (
+      <EcsAllowedValueFlexItem grow={false} key={`${x.name}_${i}`}>
+        <CodeSuccess>{x.name}</CodeSuccess>
+      </EcsAllowedValueFlexItem>
+    ))}
+  </EuiFlexGroup>
+);
 
 EcsAllowedValuesComponent.displayName = 'EcsAllowedValuesComponent';
 

@@ -36,7 +36,11 @@ interface Props {
   phase: PhaseWithAllocation;
 }
 
-export const NoTiersAvailableNotice: FunctionComponent<Props> = ({ phase }) => {
+export const NoTiersAvailableNotice = (
+  {
+    phase
+  }: Props
+) => {
   return (
     <EuiCallOut
       data-test-subj="noTiersAvailableNotice"

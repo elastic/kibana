@@ -34,7 +34,7 @@ import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 
-export const OverviewPage: React.FC = () => {
+export const OverviewPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
   useTrackPageview({ app: 'synthetics', path: 'overview', delay: 15000 });
   useOverviewBreadcrumbs();

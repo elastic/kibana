@@ -32,7 +32,12 @@ interface ContextProps {
    */
   client: FilesClient<any>;
 }
-export const FilesContext: FunctionComponent<ContextProps> = ({ client, children }) => {
+export const FilesContext = (
+  {
+    client,
+    children
+  }: ContextProps
+) => {
   return (
     <FilesContextObject.Provider
       value={{

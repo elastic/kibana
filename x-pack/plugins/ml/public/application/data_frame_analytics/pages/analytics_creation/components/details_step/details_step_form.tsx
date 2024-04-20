@@ -35,11 +35,13 @@ const indexNameExistsMessage = i18n.translate(
   }
 );
 
-export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
-  actions,
-  state,
-  setCurrentStep,
-}) => {
+export const DetailsStepForm = (
+  {
+    actions,
+    state,
+    setCurrentStep
+  }: CreateAnalyticsStepProps
+) => {
   const {
     services: { docLinks, notifications },
   } = useMlKibana();

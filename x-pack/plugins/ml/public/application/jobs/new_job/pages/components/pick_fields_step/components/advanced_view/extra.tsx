@@ -15,7 +15,7 @@ import { CategorizationPerPartitionField } from '../categorization_partition_fie
 import { JobCreatorContext } from '../../../job_creator_context';
 import { isAdvancedJobCreator } from '../../../../../common/job_creator';
 
-export const ExtraSettings: FC = () => {
+export const ExtraSettings = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const showCategorizationPerPartitionField =
     isAdvancedJobCreator(jobCreator) && jobCreator.categorizationFieldName !== null;

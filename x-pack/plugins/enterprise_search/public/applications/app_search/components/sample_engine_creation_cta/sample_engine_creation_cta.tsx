@@ -18,7 +18,7 @@ import {
 } from './i18n';
 import { SampleEngineCreationCtaLogic } from './sample_engine_creation_cta_logic';
 
-export const SampleEngineCreationCta: React.FC = () => {
+export const SampleEngineCreationCta = () => {
   const { isLoading } = useValues(SampleEngineCreationCtaLogic);
   const { createSampleEngine } = useActions(SampleEngineCreationCtaLogic);
 

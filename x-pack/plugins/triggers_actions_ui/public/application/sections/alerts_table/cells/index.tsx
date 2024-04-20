@@ -19,7 +19,7 @@ export const systemCells: SystemCellId[] = [
   ALERT_MAINTENANCE_WINDOW_IDS,
 ];
 
-const SystemCellFactoryComponent: React.FC<CellComponentProps> = (props) => {
+const SystemCellFactoryComponent = (props: CellComponentProps) => {
   const { columnId } = props;
   const cellComponents: SystemCellComponentMap = useMemo(
     () => ({

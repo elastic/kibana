@@ -59,15 +59,17 @@ const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
  * enables users to click outside of the tree and cancel moving a
  * processor.
  */
-export const PrivateTree: FunctionComponent<PrivateProps> = ({
-  processors,
-  selector,
-  movingProcessor,
-  onAction,
-  level,
-  windowScrollerRef,
-  listRef,
-}) => {
+export const PrivateTree = (
+  {
+    processors,
+    selector,
+    movingProcessor,
+    onAction,
+    level,
+    windowScrollerRef,
+    listRef
+  }: PrivateProps
+) => {
   const selectors: string[][] = useMemo(() => {
     return processors.map((_, idx) => selector.concat(String(idx)));
   }, [processors, selector]);

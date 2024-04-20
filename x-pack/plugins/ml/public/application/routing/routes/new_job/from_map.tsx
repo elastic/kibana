@@ -22,7 +22,11 @@ export const fromMapRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location }) => {
+const PageWrapper = (
+  {
+    location
+  }: PageProps
+) => {
   const {
     dashboard,
     dataViewId,

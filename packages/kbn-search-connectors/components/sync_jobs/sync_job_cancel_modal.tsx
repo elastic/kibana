@@ -17,12 +17,14 @@ export type CancelSyncModalProps = Omit<EuiConfirmModalProps, 'onConfirm'> & {
   errorMessages?: string[];
 };
 
-export const CancelSyncJobModal: React.FC<CancelSyncModalProps> = ({
-  syncJobId,
-  onCancel,
-  onConfirmCb,
-  isLoading,
-}) => {
+export const CancelSyncJobModal = (
+  {
+    syncJobId,
+    onCancel,
+    onConfirmCb,
+    isLoading
+  }: CancelSyncModalProps
+) => {
   return (
     <EuiConfirmModal
       title={i18n.translate('searchConnectors.syncJobs.cancelSyncModal.title', {

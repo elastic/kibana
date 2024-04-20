@@ -16,9 +16,13 @@ import { TextInput } from '../text_input';
 import type { TextExpansionInference } from './text_expansion_inference';
 import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
-const QueryInput: FC<{
-  inferrer: TextExpansionInference;
-}> = ({ inferrer }) => {
+const QueryInput = (
+  {
+    inferrer
+  }: {
+    inferrer: TextExpansionInference;
+  }
+) => {
   const questionText = useObservable(inferrer.getQueryText$(), inferrer.getQueryText());
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 

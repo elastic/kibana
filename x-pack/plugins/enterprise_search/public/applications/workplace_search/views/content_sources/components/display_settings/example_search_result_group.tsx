@@ -20,7 +20,7 @@ import { DisplaySettingsLogic } from './display_settings_logic';
 import { SubtitleField } from './subtitle_field';
 import { TitleField } from './title_field';
 
-export const ExampleSearchResultGroup: React.FC = () => {
+export const ExampleSearchResultGroup = () => {
   const {
     sourceName,
     searchResultConfig: {

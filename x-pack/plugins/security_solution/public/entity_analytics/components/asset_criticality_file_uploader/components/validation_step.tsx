@@ -34,170 +34,176 @@ export interface AssetCriticalityValidationStepProps {
 const CODE_BLOCK_HEIGHT = 250;
 const INVALID_FILE_NAME = `invalid_asset_criticality.csv`;
 
-export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidationStepProps> =
-  React.memo(({ validatedFile, isLoading, onConfirm, onReturn }) => {
-    const { validLines, invalidLines, size: fileSize, name: fileName } = validatedFile;
-    const { euiTheme } = useEuiTheme();
-    const { telemetry } = useKibana().services;
-    const annotations = buildAnnotationsFromError(invalidLines.errors);
+export const AssetCriticalityValidationStep = React.memo((
+  {
+    validatedFile,
+    isLoading,
+    onConfirm,
+    onReturn
+  }: AssetCriticalityValidationStepProps
+) => {
+  const { validLines, invalidLines, size: fileSize, name: fileName } = validatedFile;
+  const { euiTheme } = useEuiTheme();
+  const { telemetry } = useKibana().services;
+  const annotations = buildAnnotationsFromError(invalidLines.errors);
 
-    const onConfirmClick = () => {
-      telemetry.reportAssetCriticalityCsvImported({
-        file: {
-          size: fileSize,
-        },
-      });
-      onConfirm();
-    };
+  const onConfirmClick = () => {
+    telemetry.reportAssetCriticalityCsvImported({
+      file: {
+        size: fileSize,
+      },
+    });
+    onConfirm();
+  };
 
-    return (
-      <>
-        <EuiSpacer size="l" />
+  return (
+    <>
+      <EuiSpacer size="l" />
 
-        <FormattedMessage
-          defaultMessage="{fileName} preview"
-          id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.fileNamePreviewText"
-          values={{ fileName }}
-        />
-        <EuiSpacer size="m" />
-        {validLines.count > 0 && (
-          <>
-            <EuiFlexGroup alignItems="baseline">
-              <EuiFlexItem grow>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={'checkInCircleFilled'} color="success" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <span data-test-subj="asset-criticality-validLinesMessage">
-                      <FormattedMessage
-                        id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.validLinesMessage"
-                        defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset criticality will be assigned} other {{validLinesCountBold} asset criticalities will be assigned}}"
-                        values={{
-                          validLinesCount: validLines.count,
-                          validLinesCountBold: <b>{validLines.count}</b>,
-                        }}
-                      />
-                    </span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+      <FormattedMessage
+        defaultMessage="{fileName} preview"
+        id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.fileNamePreviewText"
+        values={{ fileName }}
+      />
+      <EuiSpacer size="m" />
+      {validLines.count > 0 && (
+        <>
+          <EuiFlexGroup alignItems="baseline">
+            <EuiFlexItem grow>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={'checkInCircleFilled'} color="success" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span data-test-subj="asset-criticality-validLinesMessage">
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.validLinesMessage"
+                      defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} asset criticality will be assigned} other {{validLinesCountBold} asset criticalities will be assigned}}"
+                      values={{
+                        validLinesCount: validLines.count,
+                        validLinesCountBold: <b>{validLines.count}</b>,
+                      }}
+                    />
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty flush="right" onClick={onReturn} size="xs" disabled={isLoading}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty flush="right" onClick={onReturn} size="xs" disabled={isLoading}>
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.chooseAnotherFileText"
+                  defaultMessage="Choose another file"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiCodeBlock
+            overflowHeight={CODE_BLOCK_HEIGHT}
+            lineNumbers
+            language="CSV"
+            isVirtualized
+            css={css`
+              border: 1px solid ${euiTheme.colors.success};
+            `}
+          >
+            {validLines.text}
+          </EuiCodeBlock>
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      {invalidLines.count > 0 && (
+        <>
+          <EuiFlexGroup alignItems="baseline">
+            <EuiFlexItem grow>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={'error'} color="danger" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span data-test-subj="asset-criticality-invalidLinesMessage">
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.invalidLinesMessage"
+                      defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} line is invalid and won't be assigned} other {{invalidLinesCountBold} lines are invalid and won't be assigned}}"
+                      values={{
+                        invalidLinesCount: invalidLines.count,
+                        invalidLinesCountBold: <b>{invalidLines.count}</b>,
+                      }}
+                    />
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              {invalidLines.text && (
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  disabled={isLoading}
+                  onClick={() => {
+                    if (invalidLines.text.length > 0) {
+                      downloadBlob(new Blob([invalidLines.text]), INVALID_FILE_NAME);
+                    }
+                  }}
+                >
                   <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.chooseAnotherFileText"
-                    defaultMessage="Choose another file"
+                    id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.downloadCSV"
+                    defaultMessage="Download CSV"
                   />
                 </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-            <EuiCodeBlock
-              overflowHeight={CODE_BLOCK_HEIGHT}
-              lineNumbers
-              language="CSV"
-              isVirtualized
-              css={css`
-                border: 1px solid ${euiTheme.colors.success};
-              `}
-            >
-              {validLines.text}
-            </EuiCodeBlock>
-            <EuiSpacer size="l" />
-          </>
-        )}
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        {invalidLines.count > 0 && (
-          <>
-            <EuiFlexGroup alignItems="baseline">
-              <EuiFlexItem grow>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={'error'} color="danger" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <span data-test-subj="asset-criticality-invalidLinesMessage">
-                      <FormattedMessage
-                        id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.invalidLinesMessage"
-                        defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} line is invalid and won't be assigned} other {{invalidLinesCountBold} lines are invalid and won't be assigned}}"
-                        values={{
-                          invalidLinesCount: invalidLines.count,
-                          invalidLinesCountBold: <b>{invalidLines.count}</b>,
-                        }}
-                      />
-                    </span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock
+            overflowHeight={CODE_BLOCK_HEIGHT}
+            lineNumbers={{ annotations }}
+            language="CSV"
+            isVirtualized
+            css={css`
+              border: 1px solid ${euiTheme.colors.danger};
+            `}
+          >
+            {invalidLines.text}
+          </EuiCodeBlock>
+          <EuiSpacer size="l" />
+        </>
+      )}
 
-              <EuiFlexItem grow={false}>
-                {invalidLines.text && (
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="right"
-                    disabled={isLoading}
-                    onClick={() => {
-                      if (invalidLines.text.length > 0) {
-                        downloadBlob(new Blob([invalidLines.text]), INVALID_FILE_NAME);
-                      }
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.downloadCSV"
-                      defaultMessage="Download CSV"
-                    />
-                  </EuiButtonEmpty>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+      <EuiHorizontalRule />
+      <EuiSpacer size="s" />
 
-            <EuiSpacer size="s" />
-            <EuiCodeBlock
-              overflowHeight={CODE_BLOCK_HEIGHT}
-              lineNumbers={{ annotations }}
-              language="CSV"
-              isVirtualized
-              css={css`
-                border: 1px solid ${euiTheme.colors.danger};
-              `}
-            >
-              {invalidLines.text}
-            </EuiCodeBlock>
-            <EuiSpacer size="l" />
-          </>
-        )}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onReturn} disabled={isLoading}>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.backButtonText"
+              defaultMessage="Back"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
 
-        <EuiHorizontalRule />
-        <EuiSpacer size="s" />
-
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onReturn} disabled={isLoading}>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.backButtonText"
-                defaultMessage="Back"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={onConfirmClick}
-              disabled={validLines.count === 0}
-              data-test-subj="asset-criticality-assign-button"
-              isLoading={isLoading}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.assignButtonText"
-                defaultMessage="Assign"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  });
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={onConfirmClick}
+            disabled={validLines.count === 0}
+            data-test-subj="asset-criticality-assign-button"
+            isLoading={isLoading}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityValidationStep.assignButtonText"
+              defaultMessage="Assign"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+});
 
 AssetCriticalityValidationStep.displayName = 'AssetCriticalityValidationStep';

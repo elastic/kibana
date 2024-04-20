@@ -55,7 +55,13 @@ export interface UserAvatarProps
 /**
  * Renders an avatar given a user profile
  */
-export const UserAvatar: FunctionComponent<UserAvatarProps> = ({ user, avatar, ...rest }) => {
+export const UserAvatar = (
+  {
+    user,
+    avatar,
+    ...rest
+  }: UserAvatarProps
+) => {
   const { euiTheme } = useEuiTheme();
 
   if (!user) {

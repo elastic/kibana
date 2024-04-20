@@ -45,7 +45,7 @@ import {
   META_ENGINE_CREATION_PATH,
 } from './routes';
 
-export const AppSearch: React.FC<InitialAppData> = (props) => {
+export const AppSearch = (props: InitialAppData) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
@@ -78,7 +78,7 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
   );
 };
 
-export const AppSearchUnconfigured: React.FC = () => {
+export const AppSearchUnconfigured = () => {
   const { renderHeaderActions } = useValues(KibanaLogic);
   renderHeaderActions(EndpointsHeaderAction);
 
@@ -91,7 +91,7 @@ export const AppSearchUnconfigured: React.FC = () => {
   );
 };
 
-export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
+export const AppSearchConfigured = (props: Required<InitialAppData>) => {
   const {
     myRole: {
       canManageEngines,

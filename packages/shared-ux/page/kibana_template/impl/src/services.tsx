@@ -21,20 +21,24 @@ import {
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const KibanaPageTemplateProvider: FC<KibanaPageTemplateServices> = ({
-  children,
-  ...services
-}) => {
+export const KibanaPageTemplateProvider = (
+  {
+    children,
+    ...services
+  }: KibanaPageTemplateServices
+) => {
   return <NoDataConfigPageProvider {...services}>{children}</NoDataConfigPageProvider>;
 };
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaPageTemplateKibanaProvider: FC<KibanaPageTemplateKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const KibanaPageTemplateKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: KibanaPageTemplateKibanaDependencies
+) => {
   return (
     <NoDataConfigPageKibanaProvider {...dependencies}>{children}</NoDataConfigPageKibanaProvider>
   );

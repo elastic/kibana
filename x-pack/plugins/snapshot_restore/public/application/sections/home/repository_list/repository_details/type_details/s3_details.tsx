@@ -15,7 +15,11 @@ interface Props {
   repository: S3Repository;
 }
 
-export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
+export const S3Details = (
+  {
+    repository
+  }: Props
+) => {
   const {
     settings: {
       bucket,

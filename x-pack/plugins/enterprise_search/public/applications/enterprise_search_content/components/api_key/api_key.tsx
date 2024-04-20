@@ -14,16 +14,19 @@ interface ApiKeyProps {
   label?: string;
 }
 
-export const ApiKey: React.FC<ApiKeyProps> = ({ apiKey, label }) => (
-  <>
-    {label && (
-      <>
-        <EuiFormLabel>{label}</EuiFormLabel>
-        <EuiSpacer size="xs" />
-      </>
-    )}
-    <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
-      {apiKey}
-    </EuiCodeBlock>
-  </>
-);
+export const ApiKey = (
+  {
+    apiKey,
+    label
+  }: ApiKeyProps
+) => (<>
+  {label && (
+    <>
+      <EuiFormLabel>{label}</EuiFormLabel>
+      <EuiSpacer size="xs" />
+    </>
+  )}
+  <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
+    {apiKey}
+  </EuiCodeBlock>
+</>);

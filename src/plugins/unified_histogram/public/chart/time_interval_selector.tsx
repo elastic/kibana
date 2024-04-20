@@ -18,10 +18,12 @@ export interface TimeIntervalSelectorProps {
   onTimeIntervalChange: (timeInterval: string) => void;
 }
 
-export const TimeIntervalSelector: React.FC<TimeIntervalSelectorProps> = ({
-  chart,
-  onTimeIntervalChange,
-}) => {
+export const TimeIntervalSelector = (
+  {
+    chart,
+    onTimeIntervalChange
+  }: TimeIntervalSelectorProps
+) => {
   const onChange: ToolbarSelectorProps['onChange'] = useCallback(
     (chosenOption) => {
       const selectedOption = chosenOption?.value;

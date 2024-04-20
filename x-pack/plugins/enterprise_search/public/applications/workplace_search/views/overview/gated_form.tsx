@@ -211,7 +211,13 @@ const participateInUXLabsChoice = {
   yes: { choice: 'yes', value: true },
 };
 
-const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }) => {
+const EducationPanel = (
+  {
+    featureContent
+  }: {
+    featureContent: string;
+  }
+) => {
   const feature = getFeature(featureContent);
   const { setFeaturesOther } = useActions(WorkplaceSearchGateLogic);
   if (feature) {
@@ -308,7 +314,7 @@ const EducationPanel: React.FC<{ featureContent: string }> = ({ featureContent }
     );
   }
 };
-export const WorkplaceSearchGate: React.FC = () => {
+export const WorkplaceSearchGate = () => {
   const options = [
     {
       dropdownDisplay: (

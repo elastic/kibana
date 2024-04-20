@@ -23,7 +23,11 @@ interface Props {
   setIsValid: (na: boolean) => void;
 }
 
-export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
+export const MultiMetricDetectors = (
+  {
+    setIsValid
+  }: Props
+) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

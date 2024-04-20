@@ -52,14 +52,14 @@ export interface ProvidersProps {
   defaultCode?: string;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
-  defaultCode,
-  services,
-  children,
-}) => (
-  <KibanaRenderContextProvider {...services}>
-    <KibanaProvider services={services}>
-      <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
-    </KibanaProvider>
-  </KibanaRenderContextProvider>
-);
+export const Providers = (
+  {
+    defaultCode,
+    services,
+    children
+  }: ProvidersProps
+) => (<KibanaRenderContextProvider {...services}>
+  <KibanaProvider services={services}>
+    <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
+  </KibanaProvider>
+</KibanaRenderContextProvider>);

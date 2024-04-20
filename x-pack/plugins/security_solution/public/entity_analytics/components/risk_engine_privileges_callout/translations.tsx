@@ -20,10 +20,12 @@ export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
-  indexPrivileges,
-  clusterPrivileges,
-}) => {
+export const MissingPrivilegesCallOutBody = (
+  {
+    indexPrivileges,
+    clusterPrivileges
+  }: MissingPrivileges
+) => {
   const { docLinks } = useKibana().services;
 
   return (

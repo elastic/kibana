@@ -21,13 +21,15 @@ interface Props {
   metricFormat?: string;
 }
 
-export const MetricComponent: FunctionComponent<Props> = ({
-  label,
-  metric,
-  labelFont,
-  metricFont,
-  metricFormat,
-}) => {
+export const MetricComponent = (
+  {
+    label,
+    metric,
+    labelFont,
+    metricFont,
+    metricFormat
+  }: Props
+) => {
   return (
     <div className="canvasMetric">
       <div className="canvasMetric__metric" style={metricFont}>

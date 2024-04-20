@@ -14,7 +14,7 @@ import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { useAppContext } from '../../../app_context';
 import { uiMetricService, UIM_BACKUP_DATA_ON_PREM_CLICK } from '../../../lib/ui_metric';
 
-const SnapshotRestoreAppLink: React.FunctionComponent = () => {
+const SnapshotRestoreAppLink = () => {
   const {
     plugins: { share },
   } = useAppContext();
@@ -25,7 +25,7 @@ const SnapshotRestoreAppLink: React.FunctionComponent = () => {
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiButton
+    (<EuiButton
       href={snapshotRestoreUrl}
       onClick={() => {
         uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_BACKUP_DATA_ON_PREM_CLICK);
@@ -36,11 +36,11 @@ const SnapshotRestoreAppLink: React.FunctionComponent = () => {
         id="xpack.upgradeAssistant.overview.snapshotRestoreLink"
         defaultMessage="Create snapshot"
       />
-    </EuiButton>
+    </EuiButton>)
   );
 };
 
-export const OnPremBackup: React.FunctionComponent = () => {
+export const OnPremBackup = () => {
   return (
     <>
       <EuiText>

@@ -34,11 +34,13 @@ export interface CustomAssetsAccordionProps {
   title?: string;
 }
 
-export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps> = ({
-  views,
-  initialIsOpen = false,
-  title,
-}) => {
+export const CustomAssetsAccordion = (
+  {
+    views,
+    initialIsOpen = false,
+    title
+  }: CustomAssetsAccordionProps
+) => {
   const { application } = useStartServices();
 
   return (

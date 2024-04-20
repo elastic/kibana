@@ -31,13 +31,15 @@ interface BrushBadgeProps {
  * @param width - width of badge
  * @constructor
  */
-export const BrushBadge: FC<BrushBadgeProps> = ({
-  label,
-  marginLeft,
-  timestampFrom,
-  timestampTo,
-  width,
-}) => {
+export const BrushBadge = (
+  {
+    label,
+    marginLeft,
+    timestampFrom,
+    timestampTo,
+    width
+  }: BrushBadgeProps
+) => {
   // If "from" and "to" are on the same day, we skip displaying the date twice.
   const dateFrom = formatDate(timestampFrom, DATE_FORMAT);
   const dateTo = formatDate(timestampTo, DATE_FORMAT);

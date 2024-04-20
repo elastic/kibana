@@ -27,13 +27,15 @@ interface Props {
   documentCountStats?: DocumentCountStats;
 }
 
-export const DocumentCountChart: FC<Props> = ({
-  eventRate,
-  totalCount,
-  pinnedCategory,
-  selectedCategory,
-  documentCountStats,
-}) => {
+export const DocumentCountChart = (
+  {
+    eventRate,
+    totalCount,
+    pinnedCategory,
+    selectedCategory,
+    documentCountStats
+  }: Props
+) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const chartPointsSplitLabel = i18n.translate(

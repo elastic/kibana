@@ -107,17 +107,19 @@ const styleButtons = [
   },
 ];
 
-export const TextStylePicker: FC<Props> = ({
-  align = 'left',
-  color,
-  colors,
-  family,
-  italic = false,
-  onChange,
-  size = 14,
-  underline = false,
-  weight = 'normal',
-}) => {
+export const TextStylePicker = (
+  {
+    align = 'left',
+    color,
+    colors,
+    family,
+    italic = false,
+    onChange,
+    size = 14,
+    underline = false,
+    weight = 'normal'
+  }: Props
+) => {
   const [style, setStyle] = useState<StyleProps>({
     align,
     color,

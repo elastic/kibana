@@ -99,7 +99,7 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider: FC = ({ children }) => {
+export const ChangePointDetectionControlsContextProvider = ({ children }) => {
   const { dataView } = useDataSource();
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
@@ -127,7 +127,7 @@ export const ChangePointDetectionControlsContextProvider: FC = ({ children }) =>
   );
 };
 
-export const ChangePointDetectionContextProvider: FC = ({ children }) => {
+export const ChangePointDetectionContextProvider = ({ children }) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,

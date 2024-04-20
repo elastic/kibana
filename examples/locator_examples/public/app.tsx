@@ -30,7 +30,7 @@ const HelloPage = ({ firstName, lastName }: HelloPageProps) => (
   <EuiText>{`Hello ${firstName} ${lastName}`}</EuiText>
 );
 
-export const Routes: React.FC<{}> = () => {
+export const Routes = () => {
   const query = useQuery();
 
   return (
@@ -52,9 +52,11 @@ export const Routes: React.FC<{}> = () => {
   );
 };
 
-export const LinksExample: React.FC<{
-  appBasePath: string;
-}> = (props) => {
+export const LinksExample = (
+  props: {
+    appBasePath: string;
+  }
+) => {
   const history = React.useMemo(
     () =>
       createBrowserHistory({

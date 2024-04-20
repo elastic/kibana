@@ -13,9 +13,7 @@ import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions
 
 type DiscoverInTimelineContextProviderProps = PropsWithChildren<{}>;
 
-export const DiscoverInTimelineContextProvider: FC<DiscoverInTimelineContextProviderProps> = (
-  props
-) => {
+export const DiscoverInTimelineContextProvider = (props: DiscoverInTimelineContextProviderProps) => {
   const discoverStateContainer = useRef<DiscoverStateContainer>();
 
   const actions = useDiscoverInTimelineActions(discoverStateContainer);

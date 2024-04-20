@@ -24,7 +24,13 @@ interface Props {
   field?: SearchField;
 }
 
-export const TextSearchToggle: React.FC<Props> = ({ name, type, field }) => {
+export const TextSearchToggle = (
+  {
+    name,
+    type,
+    field
+  }: Props
+) => {
   const { toggleSearchField } = useActions(RelevanceTuningLogic);
   const isText = type === SchemaType.Text;
 

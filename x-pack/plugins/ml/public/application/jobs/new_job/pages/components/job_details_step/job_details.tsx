@@ -27,14 +27,16 @@ interface Props extends StepProps {
   setAdditionalExpanded: (a: boolean) => void;
 }
 
-export const JobDetailsStep: FC<Props> = ({
-  setCurrentStep,
-  isCurrentStep,
-  advancedExpanded,
-  setAdvancedExpanded,
-  additionalExpanded,
-  setAdditionalExpanded,
-}) => {
+export const JobDetailsStep = (
+  {
+    setCurrentStep,
+    isCurrentStep,
+    advancedExpanded,
+    setAdvancedExpanded,
+    additionalExpanded,
+    setAdditionalExpanded
+  }: Props
+) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 

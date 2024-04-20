@@ -19,12 +19,14 @@ type TimeIntervalControlProps = Omit<EuiFieldTextProps, 'value' | 'onChange'> & 
   onChange: (update: string) => void;
 };
 
-export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
-  value,
-  onChange,
-  label,
-  ...fieldTextProps
-}) => {
+export const TimeIntervalControl = (
+  {
+    value,
+    onChange,
+    label,
+    ...fieldTextProps
+  }: TimeIntervalControlProps
+) => {
   const validators = useMemo(() => composeValidators(timeIntervalInputValidator()), []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

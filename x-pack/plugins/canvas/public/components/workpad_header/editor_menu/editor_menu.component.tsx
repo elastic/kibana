@@ -50,15 +50,17 @@ interface Props {
   ) => (event: React.MouseEvent) => void;
 }
 
-export const EditorMenu: FC<Props> = ({
-  factories,
-  addPanelActions,
-  promotedVisTypes,
-  visTypeAliases,
-  createNewVisType,
-  createNewEmbeddableFromAction,
-  createNewEmbeddableFromFactory,
-}: Props) => {
+export const EditorMenu = (
+  {
+    factories,
+    addPanelActions,
+    promotedVisTypes,
+    visTypeAliases,
+    createNewVisType,
+    createNewEmbeddableFromAction,
+    createNewEmbeddableFromFactory
+  }: Props
+) => {
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
   const canvasApi = useCanvasApi();

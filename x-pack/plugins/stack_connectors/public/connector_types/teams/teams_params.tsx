@@ -11,15 +11,17 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { TeamsActionParams } from '../types';
 
-const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  errors,
-  messageVariables,
-  defaultMessage,
-  useDefaultMessage,
-}) => {
+const TeamsParamsFields = (
+  {
+    actionParams,
+    editAction,
+    index,
+    errors,
+    messageVariables,
+    defaultMessage,
+    useDefaultMessage
+  }: ActionParamsProps<TeamsActionParams>
+) => {
   const { message } = actionParams;
   useEffect(() => {
     if (useDefaultMessage || (!message && defaultMessage && defaultMessage.length > 0)) {

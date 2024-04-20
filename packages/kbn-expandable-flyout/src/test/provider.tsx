@@ -19,11 +19,13 @@ interface TestProviderProps {
   urlKey?: string;
 }
 
-export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
-  children,
-  state = initialState,
-  urlKey,
-}) => {
+export const TestProvider = (
+  {
+    children,
+    state = initialState,
+    urlKey
+  }: PropsWithChildren<TestProviderProps>
+) => {
   const store = configureStore({
     reducer,
     devTools: false,

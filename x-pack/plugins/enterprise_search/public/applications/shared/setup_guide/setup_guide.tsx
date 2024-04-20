@@ -39,7 +39,13 @@ interface Props {
   productName: string;
 }
 
-export const SetupGuideLayout: React.FC<Props> = ({ children, productName, productEuiIcon }) => {
+export const SetupGuideLayout = (
+  {
+    children,
+    productName,
+    productEuiIcon
+  }: Props
+) => {
   const { cloud } = useValues(KibanaLogic);
   const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
   const cloudDeploymentLink = cloud?.deploymentUrl || '';

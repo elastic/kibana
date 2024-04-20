@@ -17,7 +17,7 @@ import { FormInternal } from '../../types';
 
 import { Timeline as ViewComponent } from './timeline';
 
-export const Timeline: FunctionComponent = () => {
+export const Timeline = () => {
   const [formData] = useFormData<FormInternal>();
   const timings = formDataToAbsoluteTimings(formData);
   const { isUsingRollover } = useConfiguration();

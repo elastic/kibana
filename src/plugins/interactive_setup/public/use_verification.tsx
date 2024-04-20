@@ -38,7 +38,7 @@ const [OuterVerificationProvider, useVerification] = constate(
   }
 );
 
-const InnerVerificationProvider: FunctionComponent = ({ children }) => {
+const InnerVerificationProvider = ({ children }) => {
   const { http } = useKibana();
   const { status, setStatus, setCode } = useVerification();
 
@@ -72,10 +72,12 @@ const InnerVerificationProvider: FunctionComponent = ({ children }) => {
   );
 };
 
-export const VerificationProvider: FunctionComponent<VerificationProps> = ({
-  defaultCode,
-  children,
-}) => {
+export const VerificationProvider = (
+  {
+    defaultCode,
+    children
+  }: VerificationProps
+) => {
   return (
     <OuterVerificationProvider defaultCode={defaultCode}>
       <InnerVerificationProvider>{children}</InnerVerificationProvider>

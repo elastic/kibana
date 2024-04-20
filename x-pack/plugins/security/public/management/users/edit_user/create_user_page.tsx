@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UserForm } from './user_form';
 import { useCapabilities } from '../../../components/use_capabilities';
 
-export const CreateUserPage: FunctionComponent = () => {
+export const CreateUserPage = () => {
   const history = useHistory();
   const readOnly = !useCapabilities('users').save;
   const backToUsers = () => history.push('/');

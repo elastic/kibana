@@ -11,17 +11,19 @@ import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 
-export const AnomalySeverityIndicatorList: React.FunctionComponent<{
-  datasets: LogEntryCategoryDataset[];
-}> = ({ datasets }) => (
-  <ul>
-    {datasets.map((dataset) => {
-      const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
-      return (
-        <li key={datasetLabel}>
-          <AnomalySeverityIndicator anomalyScore={dataset.maximumAnomalyScore} />
-        </li>
-      );
-    })}
-  </ul>
-);
+export const AnomalySeverityIndicatorList = (
+  {
+    datasets
+  }: {
+    datasets: LogEntryCategoryDataset[];
+  }
+) => (<ul>
+  {datasets.map((dataset) => {
+    const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
+    return (
+      <li key={datasetLabel}>
+        <AnomalySeverityIndicator anomalyScore={dataset.maximumAnomalyScore} />
+      </li>
+    );
+  })}
+</ul>);

@@ -14,7 +14,7 @@ import { RenderDrilldownManagerTitle } from '../drilldown_manager_title';
 import { RenderDrilldownManagerFooter } from '../drilldown_manager_footer';
 import { HelloBar } from '../hello_bar';
 
-export const DrilldownManager: React.FC = ({}) => {
+export const DrilldownManager = ({}) => {
   const drilldowns = useDrilldownManager();
   const route = drilldowns.useRoute();
 

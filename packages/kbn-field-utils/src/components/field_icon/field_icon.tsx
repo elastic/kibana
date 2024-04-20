@@ -12,7 +12,12 @@ import { getFieldTypeName } from '../../utils/get_field_type_name';
 
 export type FieldIconProps = KbnFieldIconProps;
 
-const InnerFieldIcon: React.FC<FieldIconProps> = ({ type, ...rest }) => {
+const InnerFieldIcon = (
+  {
+    type,
+    ...rest
+  }: FieldIconProps
+) => {
   return <KbnFieldIcon type={normalizeFieldType(type)} label={getFieldTypeName(type)} {...rest} />;
 };
 

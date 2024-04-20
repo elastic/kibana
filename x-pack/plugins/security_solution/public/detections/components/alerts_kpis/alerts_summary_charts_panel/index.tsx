@@ -45,20 +45,22 @@ interface Props {
   setGroupBySelection: (groupBySelection: GroupBySelection) => void;
 }
 
-export const AlertsSummaryChartsPanel: React.FC<Props> = ({
-  alignHeader,
-  filters,
-  addFilter,
-  panelHeight,
-  query,
-  runtimeMappings,
-  signalIndexName,
-  title = i18n.CHARTS_TITLE,
-  isExpanded,
-  setIsExpanded,
-  groupBySelection,
-  setGroupBySelection,
-}: Props) => {
+export const AlertsSummaryChartsPanel = (
+  {
+    alignHeader,
+    filters,
+    addFilter,
+    panelHeight,
+    query,
+    runtimeMappings,
+    signalIndexName,
+    title = i18n.CHARTS_TITLE,
+    isExpanded,
+    setIsExpanded,
+    groupBySelection,
+    setGroupBySelection
+  }: Props
+) => {
   const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);

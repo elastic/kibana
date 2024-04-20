@@ -32,12 +32,14 @@ type AdditionalOptionsProps = Pick<
   'subActionParams' | 'editOptionalSubAction' | 'index' | 'messageVariables'
 >;
 
-const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
-  subActionParams,
-  editOptionalSubAction,
-  index,
-  messageVariables,
-}) => {
+const AdditionalOptions = (
+  {
+    subActionParams,
+    editOptionalSubAction,
+    index,
+    messageVariables
+  }: AdditionalOptionsProps
+) => {
   return (
     <>
       <EuiSpacer size={'m'} />
@@ -91,15 +93,17 @@ type CloseAlertProps = Pick<
   showSaveError: boolean;
 };
 
-const CloseAlertComponent: React.FC<CloseAlertProps> = ({
-  editSubAction,
-  editOptionalSubAction,
-  errors,
-  index,
-  messageVariables,
-  subActionParams,
-  showSaveError,
-}) => {
+const CloseAlertComponent = (
+  {
+    editSubAction,
+    editOptionalSubAction,
+    errors,
+    index,
+    messageVariables,
+    subActionParams,
+    showSaveError
+  }: CloseAlertProps
+) => {
   const isAliasInvalid =
     (errors['subActionParams.alias'] !== undefined &&
       errors['subActionParams.alias'].length > 0 &&

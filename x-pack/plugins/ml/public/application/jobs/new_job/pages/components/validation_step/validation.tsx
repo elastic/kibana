@@ -23,7 +23,12 @@ const idFilterList = [
   'success_bucket_span',
 ];
 
-export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+export const ValidationStep = (
+  {
+    setCurrentStep,
+    isCurrentStep
+  }: StepProps
+) => {
   const { jobCreator, jobCreatorUpdate, jobValidator } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 

@@ -55,14 +55,16 @@ type ActivePanelNav = string | null;
 /**
  * The Solution side navigation main component
  */
-export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(function SolutionSideNav({
-  items,
-  categories,
-  selectedId,
-  panelBottomOffset,
-  panelTopOffset,
-  tracker,
-}) {
+export const SolutionSideNav = React.memo(function SolutionSideNav(
+  {
+    items,
+    categories,
+    selectedId,
+    panelBottomOffset,
+    panelTopOffset,
+    tracker
+  }: SolutionSideNavProps
+) {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
   const [activePanelNavId, setActivePanelNavId] = useState<ActivePanelNav>(null);
@@ -155,68 +157,68 @@ interface SolutionSideNavItemsProps {
  * Renders either the top or bottom panel items, considering the categories if present.
  * When `categories` is received all links that do not belong to any category are ignored.
  */
-const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
-  function SolutionSideNavItems({
+const SolutionSideNavItems = React.memo(function SolutionSideNavItems(
+  {
     items,
     categories,
     selectedId,
     activePanelNavId,
     isMobileSize,
-    onOpenPanelNav,
-  }) {
-    if (!categories?.length) {
-      return (
-        <>
-          {items.map((item) => (
-            <SolutionSideNavItem
-              key={item.id}
-              item={item}
-              isSelected={selectedId === item.id}
-              isActive={activePanelNavId === item.id}
-              isMobileSize={isMobileSize}
-              onOpenPanelNav={onOpenPanelNav}
-            />
-          ))}
-        </>
-      );
-    }
-
+    onOpenPanelNav
+  }: SolutionSideNavItemsProps
+) {
+  if (!categories?.length) {
     return (
       <>
-        {categories?.map((category, categoryIndex) => {
-          const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
-            const link = items.find((item) => item.id === linkId);
-            if (link) {
-              acc.push(link);
-            }
-            return acc;
-          }, []);
-
-          if (!categoryItems.length) {
-            return null;
-          }
-
-          return (
-            <React.Fragment key={categoryIndex}>
-              {categoryIndex !== 0 && <EuiSpacer size="s" />}
-              {categoryItems.map((item) => (
-                <SolutionSideNavItem
-                  key={item.id}
-                  item={item}
-                  isSelected={selectedId === item.id}
-                  isActive={activePanelNavId === item.id}
-                  isMobileSize={isMobileSize}
-                  onOpenPanelNav={onOpenPanelNav}
-                />
-              ))}
-              <EuiSpacer size="s" />
-            </React.Fragment>
-          );
-        })}
+        {items.map((item) => (
+          <SolutionSideNavItem
+            key={item.id}
+            item={item}
+            isSelected={selectedId === item.id}
+            isActive={activePanelNavId === item.id}
+            isMobileSize={isMobileSize}
+            onOpenPanelNav={onOpenPanelNav}
+          />
+        ))}
       </>
     );
   }
-);
+
+  return (
+    <>
+      {categories?.map((category, categoryIndex) => {
+        const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
+          const link = items.find((item) => item.id === linkId);
+          if (link) {
+            acc.push(link);
+          }
+          return acc;
+        }, []);
+
+        if (!categoryItems.length) {
+          return null;
+        }
+
+        return (
+          <React.Fragment key={categoryIndex}>
+            {categoryIndex !== 0 && <EuiSpacer size="s" />}
+            {categoryItems.map((item) => (
+              <SolutionSideNavItem
+                key={item.id}
+                item={item}
+                isSelected={selectedId === item.id}
+                isActive={activePanelNavId === item.id}
+                isMobileSize={isMobileSize}
+                onOpenPanelNav={onOpenPanelNav}
+              />
+            ))}
+            <EuiSpacer size="s" />
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+});
 
 interface SolutionSideNavItemProps {
   item: SolutionSideNavItem;
@@ -230,91 +232,97 @@ interface SolutionSideNavItemProps {
  * Renders a single item for the main side navigation panel,
  * and it adds a button to open the item secondary panel if needed.
  */
-const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
-  function SolutionSideNavItem({ item, isSelected, isActive, isMobileSize, onOpenPanelNav }) {
-    const { euiTheme } = useEuiTheme();
-    const { tracker } = useTelemetryContext();
+const SolutionSideNavItem = React.memo(function SolutionSideNavItem(
+  {
+    item,
+    isSelected,
+    isActive,
+    isMobileSize,
+    onOpenPanelNav
+  }: SolutionSideNavItemProps
+) {
+  const { euiTheme } = useEuiTheme();
+  const { tracker } = useTelemetryContext();
 
-    const { id, href, label, items, onClick, iconType, appendSeparator } = item;
+  const { id, href, label, items, onClick, iconType, appendSeparator } = item;
 
-    const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
-    const itemClassNames = classNames(
-      'solutionSideNavItem',
-      { 'solutionSideNavItem--isSelected': isSelected },
-      solutionSideNavItemStyles
-    );
-    const buttonClassNames = classNames('solutionSideNavItemButton');
+  const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
+  const itemClassNames = classNames(
+    'solutionSideNavItem',
+    { 'solutionSideNavItem--isSelected': isSelected },
+    solutionSideNavItemStyles
+  );
+  const buttonClassNames = classNames('solutionSideNavItemButton');
 
-    const hasPanelNav = useMemo(
-      () => !isMobileSize && items != null && items.length > 0,
-      [items, isMobileSize]
-    );
+  const hasPanelNav = useMemo(
+    () => !isMobileSize && items != null && items.length > 0,
+    [items, isMobileSize]
+  );
 
-    const onLinkClicked: React.MouseEventHandler = useCallback(
-      (ev) => {
-        tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
-        onClick?.(ev);
-      },
-      [id, onClick, tracker]
-    );
+  const onLinkClicked: React.MouseEventHandler = useCallback(
+    (ev) => {
+      tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
+      onClick?.(ev);
+    },
+    [id, onClick, tracker]
+  );
 
-    const onButtonClick: React.MouseEventHandler = useCallback(() => {
-      tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION_TOGGLE}${id}`);
-      onOpenPanelNav(id);
-    }, [id, onOpenPanelNav, tracker]);
+  const onButtonClick: React.MouseEventHandler = useCallback(() => {
+    tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION_TOGGLE}${id}`);
+    onOpenPanelNav(id);
+  }, [id, onOpenPanelNav, tracker]);
 
-    const itemLabel = useMemo(() => {
-      if (iconType == null) {
-        return label;
-      }
-      return (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          <EuiFlexItem>{label}</EuiFlexItem>
-          <EuiFlexItem grow={0}>
-            <EuiIcon type={iconType} color="text" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }, [label, iconType]);
-
+  const itemLabel = useMemo(() => {
+    if (iconType == null) {
+      return label;
+    }
     return (
-      <>
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem>
-            <EuiListGroup gutterSize="none">
-              <EuiListGroupItem
-                label={itemLabel}
-                href={href}
-                wrapText
-                onClick={onLinkClicked}
-                className={itemClassNames}
-                color="text"
-                size="s"
-                data-test-subj={`solutionSideNavItemLink-${id}`}
-              />
-            </EuiListGroup>
-          </EuiFlexItem>
-          {hasPanelNav && (
-            <EuiFlexItem grow={0}>
-              <EuiButtonIcon
-                className={buttonClassNames}
-                display={isActive ? 'base' : 'empty'}
-                size="s"
-                color="text"
-                onClick={onButtonClick}
-                iconType="spaces"
-                iconSize="m"
-                aria-label={TOGGLE_PANEL_LABEL}
-                data-test-subj={`solutionSideNavItemButton-${id}`}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        {appendSeparator ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="xs" />}
-      </>
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexItem>{label}</EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          <EuiIcon type={iconType} color="text" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
-  }
-);
+  }, [label, iconType]);
+
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem>
+          <EuiListGroup gutterSize="none">
+            <EuiListGroupItem
+              label={itemLabel}
+              href={href}
+              wrapText
+              onClick={onLinkClicked}
+              className={itemClassNames}
+              color="text"
+              size="s"
+              data-test-subj={`solutionSideNavItemLink-${id}`}
+            />
+          </EuiListGroup>
+        </EuiFlexItem>
+        {hasPanelNav && (
+          <EuiFlexItem grow={0}>
+            <EuiButtonIcon
+              className={buttonClassNames}
+              display={isActive ? 'base' : 'empty'}
+              size="s"
+              color="text"
+              onClick={onButtonClick}
+              iconType="spaces"
+              iconSize="m"
+              aria-label={TOGGLE_PANEL_LABEL}
+              data-test-subj={`solutionSideNavItemButton-${id}`}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {appendSeparator ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="xs" />}
+    </>
+  );
+});
 
 interface SolutionSideNavPanelsProps {
   items: SolutionSideNavItem[];
@@ -328,37 +336,37 @@ interface SolutionSideNavPanelsProps {
  * The Solution side navigation panels component.
  * Renders the secondary panel according to the `activePanelNavId` received.
  */
-const SolutionSideNavPanels: React.FC<SolutionSideNavPanelsProps> = React.memo(
-  function SolutionSideNavPanels({
+const SolutionSideNavPanels = React.memo(function SolutionSideNavPanels(
+  {
     items,
     activePanelNavId,
     onClose,
     onOutsideClick,
     bottomOffset,
-    topOffset,
-  }) {
-    const activePanelNavItem = useMemo<SolutionSideNavItem | undefined>(
-      () => items.find(({ id }) => id === activePanelNavId),
-      [items, activePanelNavId]
-    );
+    topOffset
+  }: SolutionSideNavPanelsProps
+) {
+  const activePanelNavItem = useMemo<SolutionSideNavItem | undefined>(
+    () => items.find(({ id }) => id === activePanelNavId),
+    [items, activePanelNavId]
+  );
 
-    if (activePanelNavItem == null || !activePanelNavItem.items?.length) {
-      return null;
-    }
-
-    return (
-      <SolutionSideNavPanel
-        onClose={onClose}
-        onOutsideClick={onOutsideClick}
-        items={activePanelNavItem.items}
-        title={activePanelNavItem.label}
-        categories={activePanelNavItem.categories}
-        bottomOffset={bottomOffset}
-        topOffset={topOffset}
-      />
-    );
+  if (activePanelNavItem == null || !activePanelNavItem.items?.length) {
+    return null;
   }
-);
+
+  return (
+    <SolutionSideNavPanel
+      onClose={onClose}
+      onOutsideClick={onOutsideClick}
+      items={activePanelNavItem.items}
+      title={activePanelNavItem.label}
+      categories={activePanelNavItem.categories}
+      bottomOffset={bottomOffset}
+      topOffset={topOffset}
+    />
+  );
+});
 
 // eslint-disable-next-line import/no-default-export
 export default SolutionSideNav;

@@ -57,7 +57,7 @@ export const renderMonitorType = (type: string | undefined) => {
   }
 };
 
-export const MonitorStatusBar: React.FC = () => {
+export const MonitorStatusBar = () => {
   const { monitorId, monitorStatus, monitorLocations = {} } = useStatusBar();
 
   const { locations, up_history: ups, down_history: downs } = monitorLocations as MonitorLocations;

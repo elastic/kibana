@@ -20,14 +20,16 @@ export interface Props extends ColorManagerProps {
   colors?: string[];
 }
 
-export const ColorPicker: FC<Props> = ({
-  colors = [],
-  hasButtons = false,
-  onAddColor,
-  onChange,
-  onRemoveColor,
-  value = '',
-}) => {
+export const ColorPicker = (
+  {
+    colors = [],
+    hasButtons = false,
+    onAddColor,
+    onChange,
+    onRemoveColor,
+    value = ''
+  }: Props
+) => {
   const tc = tinycolor(value);
   const isValidColor = tc.isValid();
 

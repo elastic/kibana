@@ -19,15 +19,17 @@ interface HighlightedIntervalProps {
   target: number | null;
 }
 
-export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
-  className,
-  end,
-  getPositionOfTime,
-  start,
-  targetWidth,
-  width,
-  target,
-}) => {
+export const HighlightedInterval = (
+  {
+    className,
+    end,
+    getPositionOfTime,
+    start,
+    targetWidth,
+    width,
+    target
+  }: HighlightedIntervalProps
+) => {
   const yStart = getPositionOfTime(start);
   const yEnd = getPositionOfTime(end);
   const yTarget = target && getPositionOfTime(target);

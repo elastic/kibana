@@ -17,7 +17,11 @@ interface Props {
   error: Error;
 }
 
-export const ErrorContent: FunctionComponent<Props> = ({ error }) => {
+export const ErrorContent = (
+  {
+    error
+  }: Props
+) => {
   const { state } = useFilePickerContext();
   const isLoading = useBehaviorSubject(state.isLoading$);
   return (

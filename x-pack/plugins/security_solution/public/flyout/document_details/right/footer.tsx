@@ -30,7 +30,11 @@ interface PanelFooterProps {
 /**
  *
  */
-export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
+export const PanelFooter = (
+  {
+    isPreview
+  }: PanelFooterProps
+) => {
   const { closeFlyout, openRightPanel } = useExpandableFlyoutApi();
   const {
     eventId,

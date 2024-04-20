@@ -16,20 +16,24 @@ interface Props {
   width: number;
 }
 
-export const AlignmentGuide: FC<Props> = ({ transformMatrix, width, height }) => (
-  <div
-    className="canvasAlignmentGuide canvasInteractable canvasLayoutAnnotation"
-    style={{
-      background: 'magenta',
-      height,
-      marginLeft: -width / 2,
-      marginTop: -height / 2,
-      position: 'absolute',
-      transform: matrixToCSS(transformMatrix),
-      width,
-    }}
-  />
-);
+export const AlignmentGuide = (
+  {
+    transformMatrix,
+    width,
+    height
+  }: Props
+) => (<div
+  className="canvasAlignmentGuide canvasInteractable canvasLayoutAnnotation"
+  style={{
+    background: 'magenta',
+    height,
+    marginLeft: -width / 2,
+    marginTop: -height / 2,
+    position: 'absolute',
+    transform: matrixToCSS(transformMatrix),
+    width,
+  }}
+/>);
 
 AlignmentGuide.propTypes = {
   height: PropTypes.number.isRequired,

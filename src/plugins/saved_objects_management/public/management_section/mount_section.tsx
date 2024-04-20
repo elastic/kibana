@@ -43,7 +43,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
 
   coreStart.chrome.docTitle.change(title);
 
-  const RedirectToHomeIfUnauthorized: React.FunctionComponent = ({ children }) => {
+  const RedirectToHomeIfUnauthorized = ({ children }) => {
     const allowed = capabilities?.management?.kibana?.objects ?? false;
 
     if (!allowed) {

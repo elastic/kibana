@@ -24,12 +24,14 @@ interface ConnectorConfigurationFormItemsProps {
   setConfigEntry: (key: string, value: string | number | boolean | null) => void;
 }
 
-export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFormItemsProps> = ({
-  isLoading,
-  items,
-  hasDocumentLevelSecurityEnabled,
-  setConfigEntry,
-}) => {
+export const ConnectorConfigurationFormItems = (
+  {
+    isLoading,
+    items,
+    hasDocumentLevelSecurityEnabled,
+    setConfigEntry
+  }: ConnectorConfigurationFormItemsProps
+) => {
   return (
     <EuiFlexGroup direction="column">
       {items.map((configEntry) => {

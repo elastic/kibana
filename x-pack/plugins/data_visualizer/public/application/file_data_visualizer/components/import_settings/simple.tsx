@@ -26,16 +26,18 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const SimpleSettings: FC<Props> = ({
-  index,
-  initialized,
-  onIndexChange,
-  createDataView,
-  onCreateDataViewChange,
-  indexNameError,
-  combinedFields,
-  canCreateDataView,
-}) => {
+export const SimpleSettings = (
+  {
+    index,
+    initialized,
+    onIndexChange,
+    createDataView,
+    onCreateDataViewChange,
+    indexNameError,
+    combinedFields,
+    canCreateDataView
+  }: Props
+) => {
   return (
     <React.Fragment>
       <EuiFormRow

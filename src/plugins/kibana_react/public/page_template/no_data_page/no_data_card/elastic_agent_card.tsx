@@ -21,16 +21,18 @@ export type ElasticAgentCardProps = NoDataPageActions & {
 /**
  * Applies extra styling to a typical EuiAvatar
  */
-export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
-  solution,
-  recommended,
-  title,
-  href,
-  button,
-  layout,
-  category,
-  ...cardRest
-}) => {
+export const ElasticAgentCard = (
+  {
+    solution,
+    recommended,
+    title,
+    href,
+    button,
+    layout,
+    category,
+    ...cardRest
+  }: ElasticAgentCardProps
+) => {
   const {
     services: { http, application },
   } = useKibana<CoreStart>();
@@ -87,7 +89,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
     ) : (
       // The href and/or onClick are attached to the whole Card, so the button is just for show.
       // Do not add the behavior here too or else it will propogate through
-      <EuiButton fill>{button || title || defaultCTAtitle}</EuiButton>
+      (<EuiButton fill>{button || title || defaultCTAtitle}</EuiButton>)
     );
 
   return (

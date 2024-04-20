@@ -14,7 +14,13 @@ import type { LensProps } from './types';
 
 type Props = LensProps & { attachmentId: string };
 
-const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, timeRange }) => {
+const OpenLensButtonComponent = (
+  {
+    attachmentId,
+    attributes,
+    timeRange
+  }: Props
+) => {
   const {
     lens: { navigateToPrefilledEditor, canUseEditor },
   } = useKibana().services;

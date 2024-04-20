@@ -15,7 +15,11 @@ interface Props {
   repository: GCSRepository;
 }
 
-export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
+export const GCSDetails = (
+  {
+    repository
+  }: Props
+) => {
   const {
     settings: {
       bucket,

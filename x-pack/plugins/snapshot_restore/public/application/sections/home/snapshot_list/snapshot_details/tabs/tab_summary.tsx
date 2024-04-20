@@ -35,7 +35,11 @@ interface Props {
   snapshotDetails: SnapshotDetails;
 }
 
-export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
+export const TabSummary = (
+  {
+    snapshotDetails
+  }: Props
+) => {
   const {
     version,
     // TODO: Add a tooltip explaining that: a false value means that the cluster global state

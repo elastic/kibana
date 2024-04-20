@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-export const AutomatedIcon: React.FC = ({ ...props }) => (
+export const AutomatedIcon = ({ ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="euiIcon"

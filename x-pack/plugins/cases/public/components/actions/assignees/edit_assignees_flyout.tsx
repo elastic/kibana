@@ -40,11 +40,13 @@ const FlyoutBodyCss = css`
   }
 `;
 
-const EditAssigneesFlyoutComponent: React.FC<Props> = ({
-  selectedCases,
-  onClose,
-  onSaveAssignees,
-}) => {
+const EditAssigneesFlyoutComponent = (
+  {
+    selectedCases,
+    onClose,
+    onSaveAssignees
+  }: Props
+) => {
   const [assigneesSelection, setAssigneesSelection] = useState<ItemsSelectionState>({
     selectedItems: [],
     unSelectedItems: [],

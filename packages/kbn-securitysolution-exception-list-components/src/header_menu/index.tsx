@@ -48,18 +48,20 @@ const popoverHeightStyle = css`
   overflow-x: hidden;
   overflow-y: auto;
 `;
-const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
-  text,
-  dataTestSubj,
-  actions,
-  disableActions,
-  emptyButton,
-  useCustomActions,
-  iconType,
-  iconSide = 'left',
-  anchorPosition = 'downCenter',
-  panelPaddingSize = 's',
-}) => {
+const HeaderMenuComponent = (
+  {
+    text,
+    dataTestSubj,
+    actions,
+    disableActions,
+    emptyButton,
+    useCustomActions,
+    iconType,
+    iconSide = 'left',
+    anchorPosition = 'downCenter',
+    panelPaddingSize = 's'
+  }: HeaderMenuComponentProps
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);

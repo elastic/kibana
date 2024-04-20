@@ -20,11 +20,11 @@ import { MAINTENANCE_WINDOW_PATHS } from '../../common';
 import { useLicense } from '../hooks/use_license';
 import { AlertingPluginStart } from '../plugin';
 
-const MaintenanceWindowsLazy: React.FC = React.lazy(() => import('../pages/maintenance_windows'));
-const MaintenanceWindowsCreateLazy: React.FC = React.lazy(
+const MaintenanceWindowsLazy = React.lazy(() => import('../pages/maintenance_windows'));
+const MaintenanceWindowsCreateLazy = React.lazy(
   () => import('../pages/maintenance_windows/maintenance_window_create_page')
 );
-const MaintenanceWindowsEditLazy: React.FC = React.lazy(
+const MaintenanceWindowsEditLazy = React.lazy(
   () => import('../pages/maintenance_windows/maintenance_window_edit_page')
 );
 

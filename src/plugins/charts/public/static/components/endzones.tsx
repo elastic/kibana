@@ -35,16 +35,18 @@ interface EndzonesProps {
   isFullBin?: boolean;
 }
 
-export const Endzones: FC<EndzonesProps> = ({
-  isDarkMode,
-  domainStart,
-  domainEnd,
-  interval,
-  domainMin,
-  domainMax,
-  hideTooltips = true,
-  isFullBin = false,
-}) => {
+export const Endzones = (
+  {
+    isDarkMode,
+    domainStart,
+    domainEnd,
+    interval,
+    domainMin,
+    domainMax,
+    hideTooltips = true,
+    isFullBin = false
+  }: EndzonesProps
+) => {
   const rectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
     strokeWidth: 0,

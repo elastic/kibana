@@ -16,24 +16,22 @@ interface Props {
   logo?: string;
 }
 
-export const AuthenticationStatePage: React.FC<Props> = (props) => (
-  <div className={`secAuthenticationStatePage ${props.className || ''}`}>
-    <header className="secAuthenticationStatePage__header">
-      <div className="secAuthenticationStatePage__content eui-textCenter">
-        <EuiSpacer size="xxl" />
-        <span className="secAuthenticationStatePage__logo">
-          {props.logo ? (
-            <EuiImage src={props.logo} size={40} alt={'logo'} />
-          ) : (
-            <EuiIcon type="logoElastic" size="xxl" />
-          )}
-        </span>
-        <EuiTitle size="l" className="secAuthenticationStatePage__title">
-          <h1>{props.title}</h1>
-        </EuiTitle>
-        <EuiSpacer size="xl" />
-      </div>
-    </header>
-    <div className="secAuthenticationStatePage__content eui-textCenter">{props.children}</div>
-  </div>
-);
+export const AuthenticationStatePage = (props: Props) => (<div className={`secAuthenticationStatePage ${props.className || ''}`}>
+  <header className="secAuthenticationStatePage__header">
+    <div className="secAuthenticationStatePage__content eui-textCenter">
+      <EuiSpacer size="xxl" />
+      <span className="secAuthenticationStatePage__logo">
+        {props.logo ? (
+          <EuiImage src={props.logo} size={40} alt={'logo'} />
+        ) : (
+          <EuiIcon type="logoElastic" size="xxl" />
+        )}
+      </span>
+      <EuiTitle size="l" className="secAuthenticationStatePage__title">
+        <h1>{props.title}</h1>
+      </EuiTitle>
+      <EuiSpacer size="xl" />
+    </div>
+  </header>
+  <div className="secAuthenticationStatePage__content eui-textCenter">{props.children}</div>
+</div>);

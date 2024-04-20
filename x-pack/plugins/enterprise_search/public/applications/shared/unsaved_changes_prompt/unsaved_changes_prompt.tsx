@@ -18,10 +18,12 @@ interface Props {
   messageText?: string;
 }
 
-export const UnsavedChangesPrompt: React.FC<Props> = ({
-  hasUnsavedChanges,
-  messageText = DEFAULT_MESSAGE_TEXT,
-}) => {
+export const UnsavedChangesPrompt = (
+  {
+    hasUnsavedChanges,
+    messageText = DEFAULT_MESSAGE_TEXT
+  }: Props
+) => {
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {

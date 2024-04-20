@@ -107,7 +107,7 @@ const CONFIRM_TITLE_TEXT = i18n.translate(
   }
 );
 
-export const GroupOverview: React.FC = () => {
+export const GroupOverview = () => {
   const {
     deleteGroup,
     showOrgSourcesModal,

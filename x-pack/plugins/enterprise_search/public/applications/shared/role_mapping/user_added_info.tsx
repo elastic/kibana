@@ -38,28 +38,28 @@ const kibanaAccessWarning = (
 
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 
-export const UserAddedInfo: React.FC<Props> = ({
-  username,
-  email,
-  roleType,
-  showKibanaAccessWarning,
-}) => (
-  <>
-    {showKibanaAccessWarning && kibanaAccessWarning}
-    <EuiText size="s">
-      <strong>{USERNAME_LABEL}</strong>
-    </EuiText>
-    <EuiText size="s">{username}</EuiText>
-    <EuiSpacer />
-    <EuiText size="s">
-      <strong>{EMAIL_LABEL}</strong>
-    </EuiText>
-    <EuiText size="s">{email || noItemsPlaceholder}</EuiText>
-    <EuiSpacer />
-    <EuiText size="s">
-      <strong>{ROLE_LABEL}</strong>
-    </EuiText>
-    <EuiText size="s">{roleType}</EuiText>
-    <EuiSpacer />
-  </>
-);
+export const UserAddedInfo = (
+  {
+    username,
+    email,
+    roleType,
+    showKibanaAccessWarning
+  }: Props
+) => (<>
+  {showKibanaAccessWarning && kibanaAccessWarning}
+  <EuiText size="s">
+    <strong>{USERNAME_LABEL}</strong>
+  </EuiText>
+  <EuiText size="s">{username}</EuiText>
+  <EuiSpacer />
+  <EuiText size="s">
+    <strong>{EMAIL_LABEL}</strong>
+  </EuiText>
+  <EuiText size="s">{email || noItemsPlaceholder}</EuiText>
+  <EuiSpacer />
+  <EuiText size="s">
+    <strong>{ROLE_LABEL}</strong>
+  </EuiText>
+  <EuiText size="s">{roleType}</EuiText>
+  <EuiSpacer />
+</>);

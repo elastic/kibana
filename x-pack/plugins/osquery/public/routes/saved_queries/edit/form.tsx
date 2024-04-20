@@ -31,11 +31,13 @@ interface EditSavedQueryFormProps {
   viewMode?: boolean;
 }
 
-const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
-  defaultValue,
-  handleSubmit,
-  viewMode,
-}) => {
+const EditSavedQueryFormComponent = (
+  {
+    defaultValue,
+    handleSubmit,
+    viewMode
+  }: EditSavedQueryFormProps
+) => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const hooksForm = useSavedQueryForm({

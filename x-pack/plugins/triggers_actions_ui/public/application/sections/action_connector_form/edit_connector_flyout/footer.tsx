@@ -13,7 +13,11 @@ interface Props {
   onClose: () => void;
 }
 
-const FlyoutFooterComponent: React.FC<Props> = ({ onClose }) => {
+const FlyoutFooterComponent = (
+  {
+    onClose
+  }: Props
+) => {
   return (
     <EuiFlyoutFooter data-test-subj="edit-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">

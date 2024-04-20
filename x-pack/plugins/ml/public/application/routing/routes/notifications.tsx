@@ -42,7 +42,7 @@ export const notificationsRouteFactory = (
   'data-test-subj': 'mlPageNotifications',
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,

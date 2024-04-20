@@ -18,7 +18,11 @@ interface Props {
   detectorType: RARE_DETECTOR_TYPE;
 }
 
-export const DetectorDescription: FC<Props> = ({ detectorType }) => {
+export const DetectorDescription = (
+  {
+    detectorType
+  }: Props
+) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
   const [description, setDescription] = useState<string | null>(null);

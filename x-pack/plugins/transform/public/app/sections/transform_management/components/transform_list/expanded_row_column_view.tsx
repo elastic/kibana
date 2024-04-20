@@ -35,7 +35,11 @@ interface SectionProps {
   section: SectionConfig;
 }
 
-export const Section: FC<SectionProps> = ({ section }) => {
+export const Section = (
+  {
+    section
+  }: SectionProps
+) => {
   if (section.items.length === 0) {
     return null;
   }
@@ -56,11 +60,13 @@ interface ExpandedRowDetailsPaneProps {
   dataTestSubj?: string;
 }
 
-export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
-  sections,
-  showErrorCallout = false,
-  dataTestSubj,
-}) => {
+export const ExpandedRowColumnView = (
+  {
+    sections,
+    showErrorCallout = false,
+    dataTestSubj
+  }: ExpandedRowDetailsPaneProps
+) => {
   return (
     <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
       {showErrorCallout && (

@@ -19,9 +19,13 @@ import { useAppContext } from '../../../../../app_context';
 import { humanizeTimeStamp } from '../../../data_stream_list/humanize_time_stamp';
 import { OverviewCard } from './overview_card';
 
-export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = ({
-  dataStreamName,
-}) => {
+export const DataStreamDetails = (
+  {
+    dataStreamName
+  }: {
+    dataStreamName: string;
+  }
+) => {
   const { error, data: dataStream, isLoading, resendRequest } = useLoadDataStream(dataStreamName);
   const {
     core: { getUrlForApp },

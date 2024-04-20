@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { AddDomainLogic } from './add_domain_logic';
 
-export const AddDomainFormSubmitButton: React.FC = () => {
+export const AddDomainFormSubmitButton = () => {
   const { submitNewDomain } = useActions(AddDomainLogic);
 
   const { allowSubmit } = useValues(AddDomainLogic);

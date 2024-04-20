@@ -27,13 +27,13 @@ export interface DropOverlayWrapperProps {
  * @param otherProps
  * @constructor
  */
-export const DropOverlayWrapper: React.FC<DropOverlayWrapperProps> = ({
+export const DropOverlayWrapper = ({
   isVisible,
   children,
   overlayProps,
   className,
   ...otherProps
-}) => {
+}: PropsWithChildren<DropOverlayWrapperProps>) => {
   return (
     <div className={classnames('domDroppable__overlayWrapper', className)} {...(otherProps || {})}>
       {children}

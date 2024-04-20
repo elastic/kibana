@@ -38,7 +38,13 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+export const DeleteJobModal = (
+  {
+    setShowFunction,
+    unsetShowFunction,
+    refreshJobs
+  }: Props
+) => {
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [adJobs, setAdJobs] = useState<MlSummaryJob[]>([]);

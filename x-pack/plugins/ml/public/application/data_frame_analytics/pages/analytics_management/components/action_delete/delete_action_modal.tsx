@@ -18,19 +18,21 @@ import {
 
 import type { DeleteAction } from './use_delete_action';
 
-export const DeleteActionModal: FC<DeleteAction> = ({
-  closeModal,
-  deleteAndCloseModal,
-  deleteTargetIndex,
-  deleteDataView,
-  dataViewExists,
-  isLoading,
-  item,
-  toggleDeleteIndex,
-  toggleDeleteDataView,
-  userCanDeleteIndex,
-  userCanDeleteDataView,
-}) => {
+export const DeleteActionModal = (
+  {
+    closeModal,
+    deleteAndCloseModal,
+    deleteTargetIndex,
+    deleteDataView,
+    dataViewExists,
+    isLoading,
+    item,
+    toggleDeleteIndex,
+    toggleDeleteDataView,
+    userCanDeleteIndex,
+    userCanDeleteDataView
+  }: DeleteAction
+) => {
   if (item === undefined) {
     return null;
   }

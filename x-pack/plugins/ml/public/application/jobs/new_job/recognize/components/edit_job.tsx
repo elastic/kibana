@@ -40,7 +40,14 @@ interface EditJobProps {
 /**
  * Edit job flyout for overriding job configuration.
  */
-export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, onClose }) => {
+export const EditJob = (
+  {
+    job,
+    jobOverride,
+    existingGroupIds,
+    onClose
+  }: EditJobProps
+) => {
   const [formState, setFormState] = usePartialState({
     jobGroups: (jobOverride && jobOverride.groups) || job.config.groups,
   });

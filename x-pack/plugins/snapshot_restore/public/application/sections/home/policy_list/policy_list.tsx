@@ -37,9 +37,11 @@ interface MatchParams {
   policyName?: SlmPolicy['name'];
 }
 
-export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  history,
-}) => {
+export const PolicyList = (
+  {
+    history
+  }: RouteComponentProps<MatchParams>
+) => {
   const { policyName } = useDecodedParams<MatchParams>();
   const {
     error,

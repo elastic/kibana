@@ -25,7 +25,11 @@ interface ViewButtonProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const ViewButton: FC<ViewButtonProps> = ({ item }) => {
+export const ViewButton = (
+  {
+    item
+  }: ViewButtonProps
+) => {
   const { disabled, tooltipContent } = getViewLinkStatus(item);
 
   if (disabled) {

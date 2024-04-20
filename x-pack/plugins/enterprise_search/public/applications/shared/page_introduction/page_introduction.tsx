@@ -16,12 +16,14 @@ export interface PageIntroductionProps {
   title?: string | React.ReactNode;
 }
 
-export const PageIntroduction: React.FC<PageIntroductionProps> = ({
-  actions,
-  description,
-  links,
-  title = '',
-}) => {
+export const PageIntroduction = (
+  {
+    actions,
+    description,
+    links,
+    title = ''
+  }: PageIntroductionProps
+) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="m">
       <EuiFlexItem>

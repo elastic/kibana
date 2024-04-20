@@ -9,7 +9,7 @@ import React, { FunctionComponent, useState } from 'react';
 import { UserProfilesSelectable, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
-export const SelectableDemo: FunctionComponent = () => {
+export const SelectableDemo = () => {
   const [selectedOptions, setSelectedOptions] = useState<UserProfileWithAvatar[]>([
     {
       uid: 'u_BOulL4QMPSyV9jg5lQI2JmCkUnokHTazBnet3xVHNv0_0',

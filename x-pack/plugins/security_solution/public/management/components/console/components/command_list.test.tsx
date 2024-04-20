@@ -127,7 +127,7 @@ describe('When rendering the command list (help output)', () => {
     });
 
     it('should display custom help output when Command service has `getHelp()` defined', async () => {
-      const HelpComponent: React.FunctionComponent = () => {
+      const HelpComponent = () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
@@ -141,7 +141,7 @@ describe('When rendering the command list (help output)', () => {
 
   describe('And displayed when `help` command is entered', () => {
     it('should display custom help output when Command service has `getHelp()` defined', async () => {
-      const HelpComponent: React.FunctionComponent = () => {
+      const HelpComponent = () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });

@@ -44,14 +44,16 @@ export const EditorContainer = styled.div<{
   ${({ $accordionState }) => ($accordionState === 'closed' ? 'position: absolute;' : '')}
 `;
 
-const SelectedPromptContextsComponent: React.FC<Props> = ({
-  isNewConversation,
-  promptContexts,
-  selectedPromptContexts,
-  setSelectedPromptContexts,
-  currentReplacements,
-  isFlyoutMode,
-}) => {
+const SelectedPromptContextsComponent = (
+  {
+    isNewConversation,
+    promptContexts,
+    selectedPromptContexts,
+    setSelectedPromptContexts,
+    currentReplacements,
+    isFlyoutMode
+  }: Props
+) => {
   const [accordionState, setAccordionState] = React.useState<'closed' | 'open'>('closed');
 
   const onToggle = useCallback(

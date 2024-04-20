@@ -11,9 +11,13 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { DocumentProvider, useSelectedDocument } from './document_context';
 
-const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <DocumentProvider>{children}</DocumentProvider>
-);
+const wrapper = (
+  {
+    children
+  }: {
+    children: React.ReactNode;
+  }
+) => (<DocumentProvider>{children}</DocumentProvider>);
 
 describe('DocumentContext', () => {
   it('defines `selectedDocument` and defaults to `null`', () => {

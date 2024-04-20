@@ -15,10 +15,12 @@ import { TelemetryLogic, SendTelemetryHelper } from './telemetry_logic';
  * React component helpers - useful for on-page-load/views
  */
 
-export const SendEnterpriseSearchTelemetry: React.FC<SendTelemetryHelper> = ({
-  action,
-  metric,
-}) => {
+export const SendEnterpriseSearchTelemetry = (
+  {
+    action,
+    metric
+  }: SendTelemetryHelper
+) => {
   const { sendTelemetry } = useActions(TelemetryLogic);
 
   useEffect(() => {
@@ -28,7 +30,12 @@ export const SendEnterpriseSearchTelemetry: React.FC<SendTelemetryHelper> = ({
   return null;
 };
 
-export const SendAppSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, metric }) => {
+export const SendAppSearchTelemetry = (
+  {
+    action,
+    metric
+  }: SendTelemetryHelper
+) => {
   const { sendTelemetry } = useActions(TelemetryLogic);
 
   useEffect(() => {
@@ -38,7 +45,12 @@ export const SendAppSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, 
   return null;
 };
 
-export const SendWorkplaceSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, metric }) => {
+export const SendWorkplaceSearchTelemetry = (
+  {
+    action,
+    metric
+  }: SendTelemetryHelper
+) => {
   const { sendTelemetry } = useActions(TelemetryLogic);
 
   useEffect(() => {

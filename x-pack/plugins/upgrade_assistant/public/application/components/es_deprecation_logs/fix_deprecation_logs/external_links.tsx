@@ -63,7 +63,11 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
   }
 };
 
-const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+const DiscoverAppLink = (
+  {
+    checkpoint
+  }: Props
+) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -110,7 +114,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
+    (<EuiLink
       href={discoveryUrl}
       onClick={() => {
         uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DISCOVER_CLICK);
@@ -121,11 +125,15 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyze logs in Discover"
       />
-    </EuiLink>
+    </EuiLink>)
   );
 };
 
-const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+const ObservabilityAppLink = (
+  {
+    checkpoint
+  }: Props
+) => {
   const {
     services: {
       core: { http },
@@ -149,7 +157,7 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
+    (<EuiLink
       href={logStreamUrl}
       onClick={() => {
         uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_OBSERVABILITY_CLICK);
@@ -160,11 +168,15 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
         id="xpack.upgradeAssistant.overview.viewObservabilityResultsAction"
         defaultMessage="View deprecation logs in Observability"
       />
-    </EuiLink>
+    </EuiLink>)
   );
 };
 
-export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
+export const ExternalLinks = (
+  {
+    checkpoint
+  }: Props
+) => {
   const { infra: hasInfraPlugin } = useAppContext().plugins;
 
   return (

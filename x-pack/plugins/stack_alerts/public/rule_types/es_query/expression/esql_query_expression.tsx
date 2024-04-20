@@ -38,9 +38,14 @@ import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
 import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
 
-export const EsqlQueryExpression: React.FC<
-  RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
+export const EsqlQueryExpression = (
+  {
+    ruleParams,
+    setRuleParams,
+    setRuleProperty,
+    errors
+  }: RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
+) => {
   const { expressions, http, fieldFormats, isServerless } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, sourceFields } = ruleParams;
 

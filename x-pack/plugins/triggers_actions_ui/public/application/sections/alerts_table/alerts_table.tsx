@@ -68,10 +68,15 @@ const getCellActionsStub = {
 const fieldBrowserStub = () => ({});
 const stableMappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
 
-const BasicRenderCellValue: React.FC<{
-  data: Array<{ field: string; value: string[] }>;
-  columnId: string;
-}> = memo(({ data, columnId }) => {
+const BasicRenderCellValue = memo((
+  {
+    data,
+    columnId
+  }: {
+    data: Array<{ field: string; value: string[] }>;
+    columnId: string;
+  }
+) => {
   const value = (Array.isArray(data) && data.find((d) => d.field === columnId)?.value) ?? [];
   if (Array.isArray(value)) {
     return <>{value.length ? value.join() : '--'}</>;
@@ -278,7 +283,7 @@ const CustomGridBody = memo(
   }
 );
 
-const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: AlertsTableProps) => {
+const AlertsTable = memo((props: AlertsTableProps) => {
   const {
     visibleColumns,
     onToggleColumn,

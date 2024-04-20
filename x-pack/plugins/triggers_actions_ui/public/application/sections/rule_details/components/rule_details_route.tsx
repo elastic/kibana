@@ -30,14 +30,17 @@ type RuleDetailsRouteProps = RouteComponentProps<{
   Pick<ActionApis, 'loadActionTypes'> &
   Pick<RuleApis, 'loadRuleTypes' | 'resolveRule'>;
 
-export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = ({
-  match: {
-    params: { ruleId },
-  },
-  loadRuleTypes,
-  loadActionTypes,
-  resolveRule,
-}) => {
+export const RuleDetailsRoute = (
+  {
+    match: {
+      params: { ruleId },
+    },
+
+    loadRuleTypes,
+    loadActionTypes,
+    resolveRule
+  }: RuleDetailsRouteProps
+) => {
   const {
     http,
     notifications: { toasts },

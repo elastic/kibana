@@ -19,7 +19,7 @@ import { DetectorDescription } from './detector_description';
 
 const DTR_IDX = 0;
 
-export const RareDetectorsSummary: FC = () => {
+export const RareDetectorsSummary = () => {
   const {
     jobCreator: jc,
     chartLoader,

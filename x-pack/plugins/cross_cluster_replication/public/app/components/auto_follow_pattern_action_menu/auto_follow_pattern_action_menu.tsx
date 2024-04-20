@@ -45,14 +45,16 @@ const allValuesSame = (values: boolean[]) => {
   return true;
 };
 
-const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
-  patterns,
-  deleteAutoFollowPattern,
-  pauseAutoFollowPattern,
-  resumeAutoFollowPattern,
-  arrowDirection,
-  edit,
-}) => {
+const AutoFollowPatternActionMenuUI = (
+  {
+    patterns,
+    deleteAutoFollowPattern,
+    pauseAutoFollowPattern,
+    resumeAutoFollowPattern,
+    arrowDirection,
+    edit
+  }: Props
+) => {
   const [showPopover, setShowPopover] = useState(false);
 
   const allActiveValuesSame = allValuesSame(patterns.filter(Boolean).map(({ active }) => active));

@@ -22,10 +22,15 @@ import type { CombinedJob } from '../../../../../../../../common/types/anomaly_d
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { useMlApiContext } from '../../../../../../contexts/kibana';
 
-export const DatafeedPreview: FC<{
-  combinedJob: CombinedJob | null;
-  heightOffset?: number;
-}> = ({ combinedJob, heightOffset = 0 }) => {
+export const DatafeedPreview = (
+  {
+    combinedJob,
+    heightOffset = 0
+  }: {
+    combinedJob: CombinedJob | null;
+    heightOffset?: number;
+  }
+) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApiContext();

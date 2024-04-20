@@ -19,7 +19,11 @@ interface Props {
   toasts: NotificationsSetup['toasts'];
 }
 
-export const MigrateIlmPolicyCallOut: FunctionComponent<Props> = ({ toasts }) => {
+export const MigrateIlmPolicyCallOut = (
+  {
+    toasts
+  }: Props
+) => {
   const { isLoading, recheckStatus, status } = useIlmPolicyStatus();
 
   if (isLoading || !status || status === 'ok') {

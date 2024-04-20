@@ -17,9 +17,12 @@ import type { ResilientFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { ConnectorCard } from '../card';
 
-const ResilientFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsPreviewProps<ResilientFieldsType>
-> = ({ connector, fields }) => {
+const ResilientFieldsComponent = (
+  {
+    connector,
+    fields
+  }: ConnectorFieldsPreviewProps<ResilientFieldsType>
+) => {
   const { incidentTypes = null, severityCode = null } = fields ?? {};
   const { http } = useKibana().services;
 

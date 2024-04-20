@@ -33,7 +33,13 @@ interface Props {
   error: Error;
 }
 
-export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
+export const SectionError = (
+  {
+    title,
+    error,
+    ...rest
+  }: Props
+) => {
   const data = error.data || error;
 
   const { error: errorString, cause, message } = data;

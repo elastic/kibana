@@ -238,18 +238,22 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
-    <AppRootProvider
-      store={store}
-      history={history}
-      coreStart={coreStart}
-      depsStart={depsStart}
-      startServices={startServices}
-      queryClient={queryClient}
-    >
-      {children}
-    </AppRootProvider>
-  );
+  const AppWrapper = (
+    {
+      children
+    }: {
+      children: React.ReactElement;
+    }
+  ) => (<AppRootProvider
+    store={store}
+    history={history}
+    coreStart={coreStart}
+    depsStart={depsStart}
+    startServices={startServices}
+    queryClient={queryClient}
+  >
+    {children}
+  </AppRootProvider>);
 
   const render: UiRender = (ui, options) => {
     applyIntersectionObserverMock();

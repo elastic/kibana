@@ -20,7 +20,12 @@ interface Props {
   onClose: () => void;
 }
 
-export const TestDfaModelsFlyout: FC<Props> = ({ model, onClose }) => {
+export const TestDfaModelsFlyout = (
+  {
+    model,
+    onClose
+  }: Props
+) => {
   const sourceIndex = useMemo(
     () =>
       Array.isArray(model.metadata?.analytics_config.source.index)

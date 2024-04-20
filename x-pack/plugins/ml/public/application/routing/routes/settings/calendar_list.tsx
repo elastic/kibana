@@ -40,7 +40,7 @@ export const calendarListRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetCalendars'], { getMlNodeCount });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });

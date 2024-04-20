@@ -16,7 +16,11 @@ interface MlUserJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds }) => {
+const MlUserJobsDescriptionComponent = (
+  {
+    jobIds
+  }: MlUserJobsDescriptionProps
+) => {
   const { isMlUser, jobs } = useInstalledSecurityJobs();
 
   if (!isMlUser) {

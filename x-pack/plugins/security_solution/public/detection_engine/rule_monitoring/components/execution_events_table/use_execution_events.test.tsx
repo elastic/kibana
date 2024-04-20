@@ -41,7 +41,7 @@ describe('useExecutionEvents', () => {
         },
       },
     });
-    const wrapper: React.FC = ({ children }) => (
+    const wrapper = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;

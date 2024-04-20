@@ -25,7 +25,12 @@ interface DeleteActionNameProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const DeleteActionName: FC<DeleteActionNameProps> = ({ isDisabled, item }) => {
+export const DeleteActionName = (
+  {
+    isDisabled,
+    item
+  }: DeleteActionNameProps
+) => {
   if (isDisabled) {
     return (
       <EuiToolTip

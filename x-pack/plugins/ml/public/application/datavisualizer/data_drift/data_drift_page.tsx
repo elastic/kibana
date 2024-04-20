@@ -15,7 +15,7 @@ import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 
-export const DataDriftPage: FC = () => {
+export const DataDriftPage = () => {
   const {
     services: { dataVisualizer },
   } = useMlKibana();

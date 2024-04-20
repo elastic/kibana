@@ -21,7 +21,7 @@ export const job: SampleMlJob = {
 
 export const context: SampleApp1ClickContext = { job };
 
-export const DrilldownsManager: React.FC = () => {
+export const DrilldownsManager = () => {
   return (
     <div>
       <Section title={'Drilldowns Manager'}>

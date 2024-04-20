@@ -38,12 +38,14 @@ interface Props {
   colors: string[];
 }
 
-export const BorderForm: FunctionComponent<Props> = ({
-  value = '',
-  radius = '',
-  onChange,
-  colors,
-}) => {
+export const BorderForm = (
+  {
+    value = '',
+    radius = '',
+    onChange,
+    colors
+  }: Props
+) => {
   const [borderWidth = '', borderStyle = '', borderColor = ''] = value.split(' ');
 
   const borderStyleVal = isBorderStyle(borderStyle) ? borderStyle : BorderStyle.NONE;

@@ -64,7 +64,14 @@ interface Props {
   className?: string;
 }
 
-export const ResultFieldValue: React.FC<Props> = ({ snippet, raw, type, className }) => {
+export const ResultFieldValue = (
+  {
+    snippet,
+    raw,
+    type,
+    className
+  }: Props
+) => {
   const isEmpty = isFieldValueEmpty(type, raw, snippet);
   if (isEmpty) return <>&mdash;</>;
   const classes = classNames({ [`enterpriseSearchDataType--${type}`]: !!type }, className);

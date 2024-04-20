@@ -16,7 +16,11 @@ interface Props {
   featureStates: string[] | undefined;
 }
 
-export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ featureStates }) => {
+export const CollapsibleFeatureStatesList = (
+  {
+    featureStates
+  }: Props
+) => {
   const { isShowingFullList, setIsShowingFullList, items, hiddenItemsCount } = useCollapsibleList({
     items: featureStates,
   });

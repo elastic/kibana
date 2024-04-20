@@ -16,12 +16,14 @@ export interface AssignFlyoutFooterProps {
   onSave: () => void;
 }
 
-export const AssignFlyoutFooter: FC<AssignFlyoutFooterProps> = ({
-  isSaving,
-  hasPendingChanges,
-  onCancel,
-  onSave,
-}) => {
+export const AssignFlyoutFooter = (
+  {
+    isSaving,
+    hasPendingChanges,
+    onCancel,
+    onSave
+  }: AssignFlyoutFooterProps
+) => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>

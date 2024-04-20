@@ -14,12 +14,15 @@ interface Props {
   hidePanel: () => void;
 }
 
-export const KeyboardShortcutsDocPanel: FC<Props> = ({ isVisible, hidePanel }) => (
-  <>
-    {isVisible && (
-      <EuiPortal>
-        <KeyboardShortcutsDoc onClose={hidePanel} />
-      </EuiPortal>
-    )}
-  </>
-);
+export const KeyboardShortcutsDocPanel = (
+  {
+    isVisible,
+    hidePanel
+  }: Props
+) => (<>
+  {isVisible && (
+    <EuiPortal>
+      <KeyboardShortcutsDoc onClose={hidePanel} />
+    </EuiPortal>
+  )}
+</>);

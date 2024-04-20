@@ -42,15 +42,17 @@ interface Props {
   chartReady: boolean;
 }
 
-export const CreateCalendar: FC<Props> = ({
-  calendarEvents,
-  setCalendarEvents,
-  minSelectableTimeStamp,
-  maxSelectableTimeStamp,
-  eventRateData,
-  anomalies,
-  chartReady,
-}) => {
+export const CreateCalendar = (
+  {
+    calendarEvents,
+    setCalendarEvents,
+    minSelectableTimeStamp,
+    maxSelectableTimeStamp,
+    eventRateData,
+    anomalies,
+    chartReady
+  }: Props
+) => {
   const maxSelectableTimeMoment = moment(maxSelectableTimeStamp);
   const minSelectableTimeMoment = moment(minSelectableTimeStamp);
 
@@ -262,32 +264,30 @@ interface ChartProps {
   overlayColor: string;
 }
 
-const Chart: FC<ChartProps> = memo(
-  ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges, overlayColor }) => (
-    <EventRateChart
-      eventRateChartData={eventRateData}
-      anomalyData={anomalies}
-      loading={loading}
-      height={'100px'}
-      width={'100%'}
-      fadeChart={true}
-      overlayRanges={overlayRanges.map((c) => ({
-        start: c.start,
-        end: c.end,
-        color: overlayColor,
-        showMarker: false,
-      }))}
-      onBrushEnd={onBrushEnd as BrushEndListener}
-    />
-  ),
-  (prev: ChartProps, next: ChartProps) => {
-    // only redraw if the calendar ranges have changes
-    return (
-      prev.overlayRanges.length === next.overlayRanges.length &&
-      JSON.stringify(prev.overlayRanges) === JSON.stringify(next.overlayRanges)
-    );
-  }
-);
+const Chart = memo((
+  {
+    eventRateData,
+    anomalies,
+    loading,
+    onBrushEnd,
+    overlayRanges,
+    overlayColor
+  }: ChartProps
+) => (<EventRateChart
+  eventRateChartData={eventRateData}
+  anomalyData={anomalies}
+  loading={loading}
+  height={'100px'}
+  width={'100%'}
+  fadeChart={true}
+  overlayRanges={overlayRanges.map((c) => ({
+    start: c.start,
+    end: c.end,
+    color: overlayColor,
+    showMarker: false,
+  }))}
+  onBrushEnd={onBrushEnd as BrushEndListener}
+/>));
 
 function filterIncompleteEvents(event: CalendarEvent): event is CalendarEvent {
   return event.start !== null && event.end !== null;

@@ -57,7 +57,13 @@ interface Props {
   mode: TestPipelineMode;
 }
 
-export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
+export const TestPipeline = memo((
+  {
+    state,
+    sourceIndex,
+    mode
+  }: Props
+) => {
   const [simulatePipelineResult, setSimulatePipelineResult] = useState<
     undefined | estypes.IngestSimulateResponse
   >();

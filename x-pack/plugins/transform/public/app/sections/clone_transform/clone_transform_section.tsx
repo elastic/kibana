@@ -29,7 +29,12 @@ import { overrideTransformForCloning } from '../../common/transform';
 
 type Props = RouteComponentProps<{ transformId: string }>;
 
-export const CloneTransformSection: FC<Props> = ({ match, location }) => {
+export const CloneTransformSection = (
+  {
+    match,
+    location
+  }: Props
+) => {
   const { dataViewId }: Record<string, any> = parse(location.search, {
     sort: false,
   });

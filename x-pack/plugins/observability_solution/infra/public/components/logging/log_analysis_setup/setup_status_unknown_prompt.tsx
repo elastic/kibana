@@ -15,32 +15,32 @@ interface Props {
   retry: () => void;
 }
 
-export const LogAnalysisSetupStatusUnknownPrompt: React.FunctionComponent<Props> = ({
-  retry,
-}: Props) => (
-  <EmptyPrompt
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.infra.logs.analysis.setupStatusUnknownTitle"
-          defaultMessage="We couldn't determine the status of your ML jobs."
-        />
-      </h2>
-    }
-    actions={
-      <EuiButton
-        data-test-subj="infraLogAnalysisSetupStatusUnknownPromptTryAgainButton"
-        onClick={() => retry()}
-        color="primary"
-        fill
-      >
-        {i18n.translate('xpack.infra.logs.analysis.setupStatusTryAgainButton', {
-          defaultMessage: 'Try again',
-        })}
-      </EuiButton>
-    }
-  />
-);
+export const LogAnalysisSetupStatusUnknownPrompt = (
+  {
+    retry
+  }: Props
+) => (<EmptyPrompt
+  title={
+    <h2>
+      <FormattedMessage
+        id="xpack.infra.logs.analysis.setupStatusUnknownTitle"
+        defaultMessage="We couldn't determine the status of your ML jobs."
+      />
+    </h2>
+  }
+  actions={
+    <EuiButton
+      data-test-subj="infraLogAnalysisSetupStatusUnknownPromptTryAgainButton"
+      onClick={() => retry()}
+      color="primary"
+      fill
+    >
+      {i18n.translate('xpack.infra.logs.analysis.setupStatusTryAgainButton', {
+        defaultMessage: 'Try again',
+      })}
+    </EuiButton>
+  }
+/>);
 
 const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
   align-self: center;

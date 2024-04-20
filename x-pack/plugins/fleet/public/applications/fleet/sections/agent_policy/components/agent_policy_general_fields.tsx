@@ -23,13 +23,15 @@ interface Props {
   disabled?: boolean;
 }
 
-export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
-  agentPolicy,
-  updateAgentPolicy,
-  validation,
-  nameLabel,
-  disabled,
-}) => {
+export const AgentPolicyGeneralFields = (
+  {
+    agentPolicy,
+    updateAgentPolicy,
+    validation,
+    nameLabel,
+    disabled
+  }: Props
+) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const isDisabled = disabled || agentPolicy.is_managed === true;
 

@@ -22,10 +22,12 @@ interface Props {
   rowFieldNames: DeprecationTableColumns[];
 }
 
-export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
-  rowFieldNames,
-  deprecation,
-}) => {
+export const ClusterSettingsTableRow = (
+  {
+    rowFieldNames,
+    deprecation
+  }: Props
+) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [status, setStatus] = useState<{
     statusType: Status;

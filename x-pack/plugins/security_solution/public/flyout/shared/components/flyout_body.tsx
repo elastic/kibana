@@ -16,7 +16,12 @@ interface FlyoutBodyProps extends React.ComponentProps<typeof EuiFlyoutBody> {
 /**
  * Wrapper of `EuiFlyoutBody`, setting the recommended `16px` padding using a EuiPanel.
  */
-export const FlyoutBody: FC<FlyoutBodyProps> = memo(({ children, ...flyoutBodyProps }) => {
+export const FlyoutBody = memo((
+  {
+    children,
+    ...flyoutBodyProps
+  }: FlyoutBodyProps
+) => {
   return (
     <EuiFlyoutBody {...flyoutBodyProps}>
       <EuiPanel hasShadow={false} color="transparent">

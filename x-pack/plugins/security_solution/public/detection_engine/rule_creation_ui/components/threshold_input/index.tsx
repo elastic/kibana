@@ -42,13 +42,15 @@ const valueDescribedByIds = ['detectionEngineStepDefineRuleThresholdValue'];
 const cardinalityFieldDescribedByIds = ['detectionEngineStepDefineRuleThresholdCardinalityField'];
 const cardinalityValueDescribedByIds = ['detectionEngineStepDefineRuleThresholdCardinalityValue'];
 
-const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
-  thresholdField,
-  thresholdValue,
-  browserFields,
-  thresholdCardinalityField,
-  thresholdCardinalityValue,
-}: ThresholdInputProps) => {
+const ThresholdInputComponent = (
+  {
+    thresholdField,
+    thresholdValue,
+    browserFields,
+    thresholdCardinalityField,
+    thresholdCardinalityValue
+  }: ThresholdInputProps
+) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
       fullWidth: true,

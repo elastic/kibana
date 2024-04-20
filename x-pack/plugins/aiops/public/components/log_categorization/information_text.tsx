@@ -18,12 +18,14 @@ interface Props {
   loading: boolean;
 }
 
-export const InformationText: FC<Props> = ({
-  eventRateLength,
-  fieldSelected,
-  categoriesLength,
-  loading,
-}) => {
+export const InformationText = (
+  {
+    eventRateLength,
+    fieldSelected,
+    categoriesLength,
+    loading
+  }: Props
+) => {
   if (loading === true) {
     return null;
   }

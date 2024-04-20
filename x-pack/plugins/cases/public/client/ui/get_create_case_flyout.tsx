@@ -19,7 +19,7 @@ export type GetCreateCaseFlyoutProps = Omit<
   | 'getFilesClient'
 >;
 
-export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
+export const CreateCaseFlyoutLazy = lazy(
   () => import('../../components/create/flyout')
 );
 export const getCreateCaseFlyoutLazy = ({

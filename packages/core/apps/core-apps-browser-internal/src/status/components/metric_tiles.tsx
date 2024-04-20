@@ -13,10 +13,15 @@ import { DataType, formatNumber, Metric } from '../lib';
 /*
  * Displays metadata for a metric.
  */
-const MetricCardFooter: FunctionComponent<{
-  title: string;
-  description: string;
-}> = ({ title, description }) => {
+const MetricCardFooter = (
+  {
+    title,
+    description
+  }: {
+    title: string;
+    description: string;
+  }
+) => {
   return (
     <EuiStat
       data-test-subj="serverMetricMeta"
@@ -28,7 +33,13 @@ const MetricCardFooter: FunctionComponent<{
   );
 };
 
-const DelayMetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
+const DelayMetricTile = (
+  {
+    metric
+  }: {
+    metric: Metric;
+  }
+) => {
   const { name, meta } = metric;
   return (
     <EuiCard
@@ -48,7 +59,13 @@ const DelayMetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
   );
 };
 
-const LoadMetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
+const LoadMetricTile = (
+  {
+    metric
+  }: {
+    metric: Metric;
+  }
+) => {
   const { name, meta } = metric;
   return (
     <EuiCard
@@ -61,7 +78,13 @@ const LoadMetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
   );
 };
 
-const ResponseTimeMetric: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
+const ResponseTimeMetric = (
+  {
+    metric
+  }: {
+    metric: Metric;
+  }
+) => {
   const { name, meta } = metric;
   return (
     <EuiCard
@@ -85,7 +108,13 @@ const ResponseTimeMetric: FunctionComponent<{ metric: Metric }> = ({ metric }) =
 /*
  * Displays a metric with the correct format.
  */
-export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
+export const MetricTile = (
+  {
+    metric
+  }: {
+    metric: Metric;
+  }
+) => {
   const { name } = metric;
   switch (name) {
     case 'Delay':
@@ -109,15 +138,19 @@ export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) =>
 /*
  * Wrapper component that simply maps each metric to MetricTile inside a FlexGroup
  */
-export const MetricTiles: FunctionComponent<{ metrics: Metric[] }> = ({ metrics }) => (
-  <EuiFlexGrid columns={3}>
-    {metrics.map((metric) => (
-      <EuiFlexItem key={metric.name} data-test-subj="serverMetric">
-        <MetricTile metric={metric} />
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGrid>
-);
+export const MetricTiles = (
+  {
+    metrics
+  }: {
+    metrics: Metric[];
+  }
+) => (<EuiFlexGrid columns={3}>
+  {metrics.map((metric) => (
+    <EuiFlexItem key={metric.name} data-test-subj="serverMetric">
+      <MetricTile metric={metric} />
+    </EuiFlexItem>
+  ))}
+</EuiFlexGrid>);
 
 // formatting helper functions
 

@@ -45,7 +45,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Convert: FunctionComponent = () => {
+export const Convert = () => {
   return (
     <>
       <FieldNameField

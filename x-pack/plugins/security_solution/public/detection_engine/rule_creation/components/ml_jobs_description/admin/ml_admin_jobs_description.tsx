@@ -16,7 +16,11 @@ interface MlAdminJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlAdminJobsDescriptionComponent: FC<MlAdminJobsDescriptionProps> = ({ jobIds }) => {
+const MlAdminJobsDescriptionComponent = (
+  {
+    jobIds
+  }: MlAdminJobsDescriptionProps
+) => {
   const { loading, jobs, refetch: refreshJobs, isMlAdmin } = useSecurityJobs();
 
   if (!isMlAdmin) {

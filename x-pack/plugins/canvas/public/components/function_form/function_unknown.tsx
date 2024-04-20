@@ -24,11 +24,13 @@ interface Props {
   argType: string;
 }
 
-export const FunctionUnknown: FunctionComponent<Props> = ({ argType }) => (
-  <div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
-    {strings.getUnknownArgumentTypeErrorMessage(argType)}
-  </div>
-);
+export const FunctionUnknown = (
+  {
+    argType
+  }: Props
+) => (<div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
+  {strings.getUnknownArgumentTypeErrorMessage(argType)}
+</div>);
 
 FunctionUnknown.propTypes = {
   argType: PropTypes.string,

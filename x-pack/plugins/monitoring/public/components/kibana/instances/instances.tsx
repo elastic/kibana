@@ -213,7 +213,7 @@ interface Props {
   instances: ElasticsearchSourceKibanaStats[];
 }
 
-export const KibanaInstances: React.FC<Props> = (props: Props) => {
+export const KibanaInstances = (props: Props) => {
   const { clusterStatus, alerts, setupMode, sorting, pagination, onTableChange } = props;
 
   const { staleStatusThresholdSeconds } = React.useContext(ExternalConfigContext);

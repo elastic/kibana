@@ -15,7 +15,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../shared_imports';
 import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
 
-export const EmptyList: FunctionComponent = () => {
+export const EmptyList = () => {
   const { services } = useKibana();
   const history = useHistory() as ScopedHistory;
   const [showPopover, setShowPopover] = useState<boolean>(false);

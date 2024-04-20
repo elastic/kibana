@@ -13,8 +13,6 @@ import type { Props as NavigationProps } from './side_navigation';
 
 const SideNavComponentLazy = React.lazy(() => import('./side_navigation'));
 
-export const SideNavComponent: FC<NavigationProps> = (props) => (
-  <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-    <SideNavComponentLazy {...props} />
-  </Suspense>
-);
+export const SideNavComponent = (props: NavigationProps) => (<Suspense fallback={<EuiLoadingSpinner size="s" />}>
+  <SideNavComponentLazy {...props} />
+</Suspense>);

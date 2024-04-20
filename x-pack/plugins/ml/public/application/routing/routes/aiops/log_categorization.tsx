@@ -42,7 +42,7 @@ export const logCategorizationRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canUseAiops']);
 
   return (

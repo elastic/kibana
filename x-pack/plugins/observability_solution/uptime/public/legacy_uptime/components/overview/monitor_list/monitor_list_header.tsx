@@ -15,7 +15,7 @@ const FlexGroupContainer = styled(EuiFlexGroup)`
   position: relative;
 `;
 
-export const MonitorListHeader: React.FC = () => {
+export const MonitorListHeader = () => {
   return (
     <FlexGroupContainer alignItems="center">
       <EuiFlexItem grow={false}>

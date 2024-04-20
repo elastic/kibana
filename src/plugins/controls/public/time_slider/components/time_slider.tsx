@@ -23,7 +23,7 @@ interface Props {
   onChange: (value?: TimeSlice) => void;
 }
 
-export const TimeSlider: FC<Props> = (props: Props) => {
+export const TimeSlider = (props: Props) => {
   const timeSlider = useTimeSlider();
 
   const stepSize = timeSlider.select((state) => {

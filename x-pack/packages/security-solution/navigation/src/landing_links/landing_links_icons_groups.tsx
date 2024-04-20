@@ -22,21 +22,25 @@ export interface LandingSubLinkProps {
   onLinkClick?: (id: string) => void;
 }
 
-export const LandingLinksIconsGroups: React.FC<LandingLinksIconsGroupsProps> = React.memo(
-  function LandingLinksIconsGroups({ items, urlState, onLinkClick }) {
-    return (
-      <EuiFlexGroup gutterSize="xl" wrap>
-        {items.map(({ links, ...link }) => (
-          <LandingLinkIcon key={link.id} item={link} urlState={urlState} onLinkClick={onLinkClick}>
-            {links?.length && (
-              <LandingColumnLinks items={links} urlState={urlState} onLinkClick={onLinkClick} />
-            )}
-          </LandingLinkIcon>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
-);
+export const LandingLinksIconsGroups = React.memo(function LandingLinksIconsGroups(
+  {
+    items,
+    urlState,
+    onLinkClick
+  }: LandingLinksIconsGroupsProps
+) {
+  return (
+    <EuiFlexGroup gutterSize="xl" wrap>
+      {items.map(({ links, ...link }) => (
+        <LandingLinkIcon key={link.id} item={link} urlState={urlState} onLinkClick={onLinkClick}>
+          {links?.length && (
+            <LandingColumnLinks items={links} urlState={urlState} onLinkClick={onLinkClick} />
+          )}
+        </LandingLinkIcon>
+      ))}
+    </EuiFlexGroup>
+  );
+});
 
 // eslint-disable-next-line import/no-default-export
 export default LandingLinksIconsGroups;

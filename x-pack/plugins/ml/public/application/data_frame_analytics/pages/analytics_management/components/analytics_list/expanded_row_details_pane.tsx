@@ -37,40 +37,42 @@ interface SectionProps {
   section: SectionConfig;
 }
 
-export const OverallDetails: FC<{
-  overallDetails: SectionConfig;
-}> = ({ overallDetails }) => (
-  <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
-    {overallDetails.items.map((item) => {
-      if (item.title === 'badge') {
-        return (
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={item.description} color="subdued" title={item.title} />
-          </EuiFlexItem>
-        );
-      }
-
+export const OverallDetails = (
+  {
+    overallDetails
+  }: {
+    overallDetails: SectionConfig;
+  }
+) => (<EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
+  {overallDetails.items.map((item) => {
+    if (item.title === 'badge') {
       return (
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiDescriptionListDescription className="descriptionListTitle">
-                <EuiText size="xs">{item.title}</EuiText>
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle className="descriptionListDescription">
-                <EuiText size="s">
-                  <h5>{item.description}</h5>
-                </EuiText>
-              </EuiDescriptionListTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiBetaBadge label={item.description} color="subdued" title={item.title} />
         </EuiFlexItem>
       );
-    })}
-  </EuiFlexGroup>
-);
+    }
+
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiDescriptionListDescription className="descriptionListTitle">
+              <EuiText size="xs">{item.title}</EuiText>
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle className="descriptionListDescription">
+              <EuiText size="s">
+                <h5>{item.description}</h5>
+              </EuiText>
+            </EuiDescriptionListTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  })}
+</EuiFlexGroup>);
 
 export const Stats = ({ section }: { section: SectionConfig }) => (
   <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={section.dataTestSubj}>
@@ -98,7 +100,11 @@ export const Stats = ({ section }: { section: SectionConfig }) => (
   </EuiFlexGroup>
 );
 
-export const Section: FC<SectionProps> = ({ section }) => {
+export const Section = (
+  {
+    section
+  }: SectionProps
+) => {
   if (section?.items && section.items.length === 0) {
     return null;
   }
@@ -142,14 +148,16 @@ interface ExpandedRowDetailsPaneProps {
   dataTestSubj: string;
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
-  analysisStats,
-  dataCounts,
-  memoryUsage,
-  overallDetails,
-  progress,
-  dataTestSubj,
-}) => {
+export const ExpandedRowDetailsPane = (
+  {
+    analysisStats,
+    dataCounts,
+    memoryUsage,
+    overallDetails,
+    progress,
+    dataTestSubj
+  }: ExpandedRowDetailsPaneProps
+) => {
   return (
     <>
       <EuiSpacer />

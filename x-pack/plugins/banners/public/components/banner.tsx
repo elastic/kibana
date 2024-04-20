@@ -15,7 +15,11 @@ interface BannerProps {
   bannerConfig: BannerConfiguration;
 }
 
-export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
+export const Banner = (
+  {
+    bannerConfig
+  }: BannerProps
+) => {
   const { textContent, textColor, backgroundColor } = bannerConfig;
   return (
     <div

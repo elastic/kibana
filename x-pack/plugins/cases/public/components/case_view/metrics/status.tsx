@@ -122,7 +122,13 @@ const useGetLifespanMetrics = (
   }, [features, metrics]);
 };
 
-const CreationDate: React.FC<{ date: string }> = React.memo(({ date }) => {
+const CreationDate = React.memo((
+  {
+    date
+  }: {
+    date: string;
+  }
+) => {
   const creationDate = getMaybeDate(date);
   if (!creationDate.isValid()) {
     return getEmptyCellValue();
@@ -165,31 +171,42 @@ const getOpenCloseDuration = (openDate: string, closeDate: string | null): strin
   return formatDuration(closeDateObject.diff(openDateObject));
 };
 
-const CaseStatusMetricsItem: React.FC<{
-  title: string;
-  value: JSX.Element | string;
-  euiTheme: EuiThemeComputed<{}>;
-}> = React.memo(({ title, value, euiTheme }) => (
-  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-    <EuiFlexItem
-      css={css`
-        font-size: ${euiTheme.size.m};
-        font-weight: bold;
-      `}
-    >
-      {title}
-    </EuiFlexItem>
-    <EuiFlexItem>{value}</EuiFlexItem>
-  </EuiFlexGroup>
-));
+const CaseStatusMetricsItem = React.memo((
+  {
+    title,
+    value,
+    euiTheme
+  }: {
+    title: string;
+    value: JSX.Element | string;
+    euiTheme: EuiThemeComputed<{}>;
+  }
+) => (<EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+  <EuiFlexItem
+    css={css`
+      font-size: ${euiTheme.size.m};
+      font-weight: bold;
+    `}
+  >
+    {title}
+  </EuiFlexItem>
+  <EuiFlexItem>{value}</EuiFlexItem>
+</EuiFlexGroup>));
 CaseStatusMetricsItem.displayName = 'CaseStatusMetricsItem';
 
-const CaseStatusMetricsOpenCloseDuration: React.FC<{
-  title: string;
-  value?: string;
-  reopens: string[];
-  euiTheme: EuiThemeComputed<{}>;
-}> = React.memo(({ title, value, reopens, euiTheme }) => {
+const CaseStatusMetricsOpenCloseDuration = React.memo((
+  {
+    title,
+    value,
+    reopens,
+    euiTheme
+  }: {
+    title: string;
+    value?: string;
+    reopens: string[];
+    euiTheme: EuiThemeComputed<{}>;
+  }
+) => {
   const valueText = getOpenCloseDurationText(value, reopens);
 
   return (
@@ -226,10 +243,15 @@ const caseWasReopened = (reopens: string[]) => {
   return reopens.length > 0;
 };
 
-const ValueWithExplanationIcon: React.FC<{
-  value: string | JSX.Element;
-  explanationValues: string[];
-}> = React.memo(({ value, explanationValues }) => {
+const ValueWithExplanationIcon = React.memo((
+  {
+    value,
+    explanationValues
+  }: {
+    value: string | JSX.Element;
+    explanationValues: string[];
+  }
+) => {
   const content = (
     <>
       {CASE_REOPENED_ON}

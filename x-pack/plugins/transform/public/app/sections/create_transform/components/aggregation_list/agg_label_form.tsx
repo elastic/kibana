@@ -28,13 +28,15 @@ interface Props {
   onChange(item: PivotAggsConfig): void;
 }
 
-export const AggLabelForm: React.FC<Props> = ({
-  deleteHandler,
-  item,
-  otherAggNames,
-  onChange,
-  options,
-}) => {
+export const AggLabelForm = (
+  {
+    deleteHandler,
+    item,
+    otherAggNames,
+    onChange,
+    options
+  }: Props
+) => {
   const [isPopoverVisible, setPopoverVisibility] = useState(
     isPivotAggsWithExtendedForm(item) && !item.isValid()
   );

@@ -54,15 +54,17 @@ interface FieldStatsContentProps {
   dslQuery?: FieldStatsProps['dslQuery'];
 }
 
-export const FieldStatsContent: FC<FieldStatsContentProps> = ({
-  dataView: currentDataView,
-  field,
-  fieldName,
-  fieldValue,
-  fieldStatsServices,
-  timeRangeMs,
-  dslQuery,
-}) => {
+export const FieldStatsContent = (
+  {
+    dataView: currentDataView,
+    field,
+    fieldName,
+    fieldValue,
+    fieldStatsServices,
+    timeRangeMs,
+    dslQuery
+  }: FieldStatsContentProps
+) => {
   const [fieldStatsState, setFieldStatsState] = useState<FieldStatsState | undefined>();
 
   // Format timestamp to ISO formatted date strings

@@ -13,13 +13,16 @@ interface ChartEmptyStateProps {
   body: string | JSX.Element;
 }
 
-export const ChartEmptyState: FC<ChartEmptyStateProps> = ({ title, body }) => (
-  <EuiEmptyPrompt
-    title={
-      <EuiTitle>
-        <h5>{title}</h5>
-      </EuiTitle>
-    }
-    body={<p>{body}</p>}
-  />
-);
+export const ChartEmptyState = (
+  {
+    title,
+    body
+  }: ChartEmptyStateProps
+) => (<EuiEmptyPrompt
+  title={
+    <EuiTitle>
+      <h5>{title}</h5>
+    </EuiTitle>
+  }
+  body={<p>{body}</p>}
+/>);

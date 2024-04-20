@@ -21,7 +21,13 @@ interface Props {
   onChange(value: number): void;
 }
 
-export const ResultsPerPageView: React.FC<Props> = ({ onChange, options = [], value = 20 }) => {
+export const ResultsPerPageView = (
+  {
+    onChange,
+    options = [],
+    value = 20
+  }: Props
+) => {
   // If we don't have the value in options, unset it
   const selectedValue = value && !options.includes(value) ? undefined : value;
 

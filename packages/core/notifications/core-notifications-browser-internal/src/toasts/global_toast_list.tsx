@@ -34,11 +34,13 @@ const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
   text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
 });
 
-export const GlobalToastList: FunctionComponent<Props> = ({
-  toasts$,
-  dismissToast,
-  reportEvent,
-}) => {
+export const GlobalToastList = (
+  {
+    toasts$,
+    dismissToast,
+    reportEvent
+  }: Props
+) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
 

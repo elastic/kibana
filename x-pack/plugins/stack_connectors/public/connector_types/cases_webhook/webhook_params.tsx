@@ -33,14 +33,16 @@ const CREATE_COMMENT_WARNING_DESC = i18n.translate(
   }
 );
 
-const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhookActionParams>> = ({
-  actionConnector,
-  actionParams,
-  editAction,
-  errors,
-  index,
-  messageVariables,
-}) => {
+const WebhookParamsFields = (
+  {
+    actionConnector,
+    actionParams,
+    editAction,
+    errors,
+    index,
+    messageVariables
+  }: ActionParamsProps<CasesWebhookActionParams>
+) => {
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??

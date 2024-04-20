@@ -27,7 +27,11 @@ interface ExpandedRowPreviewPaneProps {
   transformConfig: TransformConfigUnion;
 }
 
-export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
+export const ExpandedRowPreviewPane = (
+  {
+    transformConfig
+  }: ExpandedRowPreviewPaneProps
+) => {
   const toastNotifications = useToastNotifications();
 
   const { searchQuery, validationStatus, previewRequest, runtimeMappings } = useMemo(

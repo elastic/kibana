@@ -140,34 +140,36 @@ export interface Columns<T, U = T> {
   width?: string;
 }
 
-const PaginatedTableComponent: FC<SiemTables> = ({
-  activePage,
-  columns,
-  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
-  headerCount,
-  headerFilters,
-  headerSupplement,
-  headerTitle,
-  headerTooltip,
-  headerUnit,
-  headerSubtitle,
-  id,
-  isInspect,
-  itemsPerRow,
-  limit,
-  loading,
-  loadPage,
-  onChange = noop,
-  pageOfItems,
-  setQuerySkip,
-  showMorePagesIndicator,
-  sorting = null,
-  split,
-  stackHeader,
-  totalCount,
-  updateActivePage,
-  updateLimitPagination,
-}) => {
+const PaginatedTableComponent = (
+  {
+    activePage,
+    columns,
+    dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
+    headerCount,
+    headerFilters,
+    headerSupplement,
+    headerTitle,
+    headerTooltip,
+    headerUnit,
+    headerSubtitle,
+    id,
+    isInspect,
+    itemsPerRow,
+    limit,
+    loading,
+    loadPage,
+    onChange = noop,
+    pageOfItems,
+    setQuerySkip,
+    showMorePagesIndicator,
+    sorting = null,
+    split,
+    stackHeader,
+    totalCount,
+    updateActivePage,
+    updateLimitPagination
+  }: SiemTables
+) => {
   const [myLoading, setMyLoading] = useState(loading);
   const [myActivePage, setActivePage] = useState(activePage);
   const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);

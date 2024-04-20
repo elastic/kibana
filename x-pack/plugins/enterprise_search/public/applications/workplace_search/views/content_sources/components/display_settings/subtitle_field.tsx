@@ -19,23 +19,23 @@ interface SubtitleFieldProps {
   subtitleFieldHover: boolean;
 }
 
-export const SubtitleField: React.FC<SubtitleFieldProps> = ({
-  result,
-  subtitleField,
-  subtitleFieldHover,
-}) => (
-  <div
-    data-test-subj="SubtitleField"
-    className={classNames('example-result-content__subtitle', {
-      'example-result-field-hover': subtitleFieldHover,
-    })}
-  >
-    {subtitleField ? (
-      <div className="eui-textTruncate">{result[subtitleField]}</div>
-    ) : (
-      <span data-test-subj="DefaultSubtitleLabel" className="example-result-content-placeholder">
-        {SUBTITLE_LABEL}
-      </span>
-    )}
-  </div>
-);
+export const SubtitleField = (
+  {
+    result,
+    subtitleField,
+    subtitleFieldHover
+  }: SubtitleFieldProps
+) => (<div
+  data-test-subj="SubtitleField"
+  className={classNames('example-result-content__subtitle', {
+    'example-result-field-hover': subtitleFieldHover,
+  })}
+>
+  {subtitleField ? (
+    <div className="eui-textTruncate">{result[subtitleField]}</div>
+  ) : (
+    <span data-test-subj="DefaultSubtitleLabel" className="example-result-content-placeholder">
+      {SUBTITLE_LABEL}
+    </span>
+  )}
+</div>);

@@ -37,11 +37,13 @@ interface Props {
   disableIndexSelection: boolean;
 }
 
-export const InferenceInputFormIndexControls: FC<Props> = ({
-  inferrer,
-  data,
-  disableIndexSelection,
-}) => {
+export const InferenceInputFormIndexControls = (
+  {
+    inferrer,
+    data,
+    disableIndexSelection
+  }: Props
+) => {
   const {
     dataViewListItems,
     fieldNames,

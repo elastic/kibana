@@ -18,14 +18,16 @@ import * as i18n from './translations';
 import { DEFAULT_BEDROCK_MODEL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockActionParams } from './types';
 
-const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  messageVariables,
-  executionMode,
-  errors,
-}) => {
+const BedrockParamsFields = (
+  {
+    actionParams,
+    editAction,
+    index,
+    messageVariables,
+    executionMode,
+    errors
+  }: ActionParamsProps<BedrockActionParams>
+) => {
   const { subAction, subActionParams } = actionParams;
 
   const { body, model } = subActionParams ?? {};

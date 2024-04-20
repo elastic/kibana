@@ -31,7 +31,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Sort: FunctionComponent = () => {
+export const Sort = () => {
   return (
     <>
       <FieldNameField

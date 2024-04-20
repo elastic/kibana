@@ -75,8 +75,8 @@ const userProfileToComboBoxOption = (userProfile: UserProfileWithAvatar) => ({
 
 const comboBoxOptionToAssignee = (option: EuiComboBoxOptionOption) => ({ uid: option.value });
 
-const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
-  ({
+const AssigneesFieldComponent = React.memo((
+  {
     field,
     isLoading,
     isDisabled,
@@ -84,123 +84,127 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
     currentUserProfile,
     selectedOptions,
     setSelectedOptions,
-    onSearchComboChange,
-  }) => {
-    const { setValue } = field;
-    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+    onSearchComboChange
+  }: FieldProps
+) => {
+  const { setValue } = field;
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-    const onComboChange = useCallback(
-      (currentOptions: EuiComboBoxOptionOption[]) => {
-        setSelectedOptions(currentOptions);
-        setValue(currentOptions.map((option) => comboBoxOptionToAssignee(option)));
-      },
-      [setSelectedOptions, setValue]
-    );
+  const onComboChange = useCallback(
+    (currentOptions: EuiComboBoxOptionOption[]) => {
+      setSelectedOptions(currentOptions);
+      setValue(currentOptions.map((option) => comboBoxOptionToAssignee(option)));
+    },
+    [setSelectedOptions, setValue]
+  );
 
-    const onSelfAssign = useCallback(() => {
-      if (!currentUserProfile) {
-        return;
-      }
+  const onSelfAssign = useCallback(() => {
+    if (!currentUserProfile) {
+      return;
+    }
 
-      setSelectedOptions((prev) => [
-        ...(prev ?? []),
-        userProfileToComboBoxOption(currentUserProfile),
-      ]);
+    setSelectedOptions((prev) => [
+      ...(prev ?? []),
+      userProfileToComboBoxOption(currentUserProfile),
+    ]);
 
-      setValue([
-        ...(selectedOptions?.map((option) => comboBoxOptionToAssignee(option)) ?? []),
-        { uid: currentUserProfile.uid },
-      ]);
-    }, [currentUserProfile, selectedOptions, setSelectedOptions, setValue]);
+    setValue([
+      ...(selectedOptions?.map((option) => comboBoxOptionToAssignee(option)) ?? []),
+      { uid: currentUserProfile.uid },
+    ]);
+  }, [currentUserProfile, selectedOptions, setSelectedOptions, setValue]);
 
-    const renderOption = useCallback(
-      (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
-        const { user, data } = option as EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
+  const renderOption = useCallback(
+    (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
+      const { user, data } = option as EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
 
-        const displayName = getUserDisplayName(user);
+      const displayName = getUserDisplayName(user);
 
-        return (
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="flexStart"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <UserAvatar user={user} avatar={data.avatar} size="s" />
+          </EuiFlexItem>
           <EuiFlexGroup
             alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="s"
+            justifyContent="spaceBetween"
+            gutterSize="none"
             responsive={false}
           >
-            <EuiFlexItem grow={false}>
-              <UserAvatar user={user} avatar={data.avatar} size="s" />
+            <EuiFlexItem>
+              <EuiHighlight search={searchValue} className={contentClassName}>
+                {displayName}
+              </EuiHighlight>
             </EuiFlexItem>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="none"
-              responsive={false}
-            >
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue} className={contentClassName}>
-                  {displayName}
-                </EuiHighlight>
+            {user.email && user.email !== displayName ? (
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color={'subdued'}>
+                  <EuiHighlight search={searchValue} className={contentClassName}>
+                    {user.email}
+                  </EuiHighlight>
+                </EuiTextColor>
               </EuiFlexItem>
-              {user.email && user.email !== displayName ? (
-                <EuiFlexItem grow={false}>
-                  <EuiTextColor color={'subdued'}>
-                    <EuiHighlight search={searchValue} className={contentClassName}>
-                      {user.email}
-                    </EuiHighlight>
-                  </EuiTextColor>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
+            ) : null}
           </EuiFlexGroup>
-        );
-      },
-      []
-    );
+        </EuiFlexGroup>
+      );
+    },
+    []
+  );
 
-    const isCurrentUserSelected = Boolean(
-      selectedOptions?.find((option) => option.value === currentUserProfile?.uid)
-    );
+  const isCurrentUserSelected = Boolean(
+    selectedOptions?.find((option) => option.value === currentUserProfile?.uid)
+  );
 
-    return (
-      <EuiFormRow
-        id="createCaseAssignees"
+  return (
+    <EuiFormRow
+      id="createCaseAssignees"
+      fullWidth
+      label={i18n.ASSIGNEES}
+      labelAppend={OptionalFieldLabel}
+      helpText={
+        currentUserProfile ? (
+          <EuiLink
+            data-test-subj="create-case-assign-yourself-link"
+            onClick={onSelfAssign}
+            disabled={isCurrentUserSelected}
+          >
+            {i18n.ASSIGN_YOURSELF}
+          </EuiLink>
+        ) : undefined
+      }
+      isInvalid={isInvalid}
+      error={errorMessage}
+    >
+      <EuiComboBox
         fullWidth
-        label={i18n.ASSIGNEES}
-        labelAppend={OptionalFieldLabel}
-        helpText={
-          currentUserProfile ? (
-            <EuiLink
-              data-test-subj="create-case-assign-yourself-link"
-              onClick={onSelfAssign}
-              disabled={isCurrentUserSelected}
-            >
-              {i18n.ASSIGN_YOURSELF}
-            </EuiLink>
-          ) : undefined
-        }
-        isInvalid={isInvalid}
-        error={errorMessage}
-      >
-        <EuiComboBox
-          fullWidth
-          async
-          isLoading={isLoading}
-          options={options}
-          data-test-subj="createCaseAssigneesComboBox"
-          selectedOptions={selectedOptions}
-          isDisabled={isDisabled}
-          onChange={onComboChange}
-          onSearchChange={onSearchComboChange}
-          renderOption={renderOption}
-          rowHeight={35}
-        />
-      </EuiFormRow>
-    );
-  }
-);
+        async
+        isLoading={isLoading}
+        options={options}
+        data-test-subj="createCaseAssigneesComboBox"
+        selectedOptions={selectedOptions}
+        isDisabled={isDisabled}
+        onChange={onComboChange}
+        onSearchChange={onSearchComboChange}
+        renderOption={renderOption}
+        rowHeight={35}
+      />
+    </EuiFormRow>
+  );
+});
 
 AssigneesFieldComponent.displayName = 'AssigneesFieldComponent';
 
-const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
+const AssigneesComponent = (
+  {
+    isLoading: isLoadingForm
+  }: Props
+) => {
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');

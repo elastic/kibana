@@ -61,19 +61,21 @@ export interface LogRateAnalysisContentWrapperProps {
   embeddingOrigin: string;
 }
 
-export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
-  dataView,
-  appDependencies,
-  initialAnalysisStart,
-  timeRange,
-  esSearchQuery,
-  stickyHistogram,
-  barColorOverride,
-  barHighlightColorOverride,
-  onAnalysisCompleted,
-  showFrozenDataTierChoice = true,
-  embeddingOrigin,
-}) => {
+export const LogRateAnalysisContentWrapper = (
+  {
+    dataView,
+    appDependencies,
+    initialAnalysisStart,
+    timeRange,
+    esSearchQuery,
+    stickyHistogram,
+    barColorOverride,
+    barHighlightColorOverride,
+    onAnalysisCompleted,
+    showFrozenDataTierChoice = true,
+    embeddingOrigin
+  }: LogRateAnalysisContentWrapperProps
+) => {
   if (!dataView) return null;
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_rate_analysis');

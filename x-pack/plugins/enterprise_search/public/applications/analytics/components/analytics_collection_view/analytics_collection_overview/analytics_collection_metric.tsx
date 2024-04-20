@@ -66,9 +66,16 @@ interface AnalyticsCollectionViewMetricLensProps {
   secondaryMetric: number | null;
 }
 
-export const AnalyticsCollectionViewMetric: React.FC<
-  AnalyticsCollectionViewMetricProps & AnalyticsCollectionViewMetricLensProps
-> = ({ isLoading, isSelected, metric, name, onClick, secondaryMetric }) => {
+export const AnalyticsCollectionViewMetric = (
+  {
+    isLoading,
+    isSelected,
+    metric,
+    name,
+    onClick,
+    secondaryMetric
+  }: AnalyticsCollectionViewMetricProps & AnalyticsCollectionViewMetricLensProps
+) => {
   const { euiTheme } = useEuiTheme();
   const [displayMetric, setDisplayMetric] = useState(metric);
   const [displaySecondaryMetric, setDisplaySecondaryMetric] = useState(secondaryMetric);

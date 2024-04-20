@@ -39,10 +39,12 @@ interface SourceConfigFieldsProps {
   sourceConfigData: SourceConfigData;
 }
 
-export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
-  isOauth1,
-  sourceConfigData,
-}) => {
+export const SourceConfigFields = (
+  {
+    isOauth1,
+    sourceConfigData
+  }: SourceConfigFieldsProps
+) => {
   const { configuredFields, configurableFields = [], serviceType } = sourceConfigData;
 
   // TODO use configurableFields instead of static field names

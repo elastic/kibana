@@ -31,13 +31,15 @@ interface Props {
   hasError: boolean;
 }
 
-export const PipelinesPreview: FC<Props> = ({
-  processors,
-  onDownload,
-  onClickToCreatePipeline,
-  onUpdateProcessors,
-  hasError,
-}) => {
+export const PipelinesPreview = (
+  {
+    processors,
+    onDownload,
+    onClickToCreatePipeline,
+    onUpdateProcessors,
+    hasError
+  }: Props
+) => {
   const [isValidJson, setIsValidJson] = useState<boolean>(true);
   const [processorsJson, setProcessorsJson] = useState<string>('');
 

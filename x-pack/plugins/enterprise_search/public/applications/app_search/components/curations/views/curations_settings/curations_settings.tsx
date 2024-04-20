@@ -37,7 +37,7 @@ import { AutomatedIcon } from '../../components/automated_icon';
 
 import { CurationsSettingsLogic } from './curations_settings_logic';
 
-export const CurationsSettings: React.FC = () => {
+export const CurationsSettings = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const {

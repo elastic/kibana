@@ -31,12 +31,14 @@ interface Props {
   timelineId: string;
 }
 
-export const HeaderComponent: React.FC<Props> = ({
-  header,
-  onFilterChange = noop,
-  sort,
-  timelineId,
-}) => {
+export const HeaderComponent = (
+  {
+    header,
+    onFilterChange = noop,
+    sort,
+    timelineId
+  }: Props
+) => {
   const dispatch = useDispatch();
   const getIsEqlOn = useMemo(() => isEqlOnSelector(), []);
   const isEqlOn = useShallowEqualSelector((state) => getIsEqlOn(state, timelineId));

@@ -14,7 +14,7 @@ import { CodeEditor } from '@kbn/code-editor';
 
 import { useAppContext } from '../../context';
 
-export const ParametersTab: FunctionComponent = () => {
+export const ParametersTab = () => {
   const {
     store: { payload },
     updatePayload,

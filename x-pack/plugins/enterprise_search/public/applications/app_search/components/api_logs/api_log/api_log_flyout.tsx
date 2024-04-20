@@ -30,7 +30,7 @@ import { getStatusColor, attemptToFormatJson } from '../utils';
 
 import { ApiLogLogic } from '.';
 
-export const ApiLogFlyout: React.FC = () => {
+export const ApiLogFlyout = () => {
   const { isFlyoutOpen, apiLog } = useValues(ApiLogLogic);
   const { closeFlyout } = useActions(ApiLogLogic);
 
@@ -124,7 +124,7 @@ export const ApiLogFlyout: React.FC = () => {
   );
 };
 
-export const ApiLogHeading: React.FC = ({ children }) => (
+export const ApiLogHeading = ({ children }) => (
   <EuiTitle size="xs">
     <h3>{children}</h3>
   </EuiTitle>

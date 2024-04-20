@@ -37,201 +37,201 @@ interface Props {
 /**
  * Settings adding/removing quick prompts. Configure name, color, prompt and category.
  */
-export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
-  ({
+export const QuickPromptSettings = React.memo<Props>((
+  {
     onSelectedQuickPromptChange,
     quickPromptSettings,
     selectedQuickPrompt,
-    setUpdatedQuickPromptSettings,
-  }) => {
-    const { basePromptContexts } = useAssistantContext();
+    setUpdatedQuickPromptSettings
+  }: Props
+) => {
+  const { basePromptContexts } = useAssistantContext();
 
-    // Prompt
-    const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
+  // Prompt
+  const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
 
-    const handlePromptChange = useCallback(
-      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        if (selectedQuickPrompt != null) {
-          setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+  const handlePromptChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (selectedQuickPrompt != null) {
+        setUpdatedQuickPromptSettings((prev) => {
+          const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
 
-            if (alreadyExists) {
-              return prev.map((qp) => {
-                if (qp.title === selectedQuickPrompt.title) {
-                  return {
-                    ...qp,
-                    prompt: e.target.value,
-                  };
-                }
-                return qp;
-              });
-            }
+          if (alreadyExists) {
+            return prev.map((qp) => {
+              if (qp.title === selectedQuickPrompt.title) {
+                return {
+                  ...qp,
+                  prompt: e.target.value,
+                };
+              }
+              return qp;
+            });
+          }
 
-            return prev;
-          });
-        }
-      },
-      [selectedQuickPrompt, setUpdatedQuickPromptSettings]
-    );
+          return prev;
+        });
+      }
+    },
+    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+  );
 
-    // Color
-    const selectedColor = useMemo(
-      () => selectedQuickPrompt?.color ?? DEFAULT_COLOR,
-      [selectedQuickPrompt?.color]
-    );
+  // Color
+  const selectedColor = useMemo(
+    () => selectedQuickPrompt?.color ?? DEFAULT_COLOR,
+    [selectedQuickPrompt?.color]
+  );
 
-    const handleColorChange = useCallback<EuiSetColorMethod>(
-      (color, { hex, isValid }) => {
-        if (selectedQuickPrompt != null) {
-          setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+  const handleColorChange = useCallback<EuiSetColorMethod>(
+    (color, { hex, isValid }) => {
+      if (selectedQuickPrompt != null) {
+        setUpdatedQuickPromptSettings((prev) => {
+          const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
 
-            if (alreadyExists) {
-              return prev.map((qp) => {
-                if (qp.title === selectedQuickPrompt.title) {
-                  return {
-                    ...qp,
-                    color,
-                  };
-                }
-                return qp;
-              });
-            }
-            return prev;
-          });
-        }
-      },
-      [selectedQuickPrompt, setUpdatedQuickPromptSettings]
-    );
+          if (alreadyExists) {
+            return prev.map((qp) => {
+              if (qp.title === selectedQuickPrompt.title) {
+                return {
+                  ...qp,
+                  color,
+                };
+              }
+              return qp;
+            });
+          }
+          return prev;
+        });
+      }
+    },
+    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+  );
 
-    // Prompt Contexts
-    const selectedPromptContexts = useMemo(
-      () =>
-        basePromptContexts.filter((bpc) =>
-          selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
-        ) ?? [],
-      [basePromptContexts, selectedQuickPrompt?.categories]
-    );
+  // Prompt Contexts
+  const selectedPromptContexts = useMemo(
+    () =>
+      basePromptContexts.filter((bpc) =>
+        selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
+      ) ?? [],
+    [basePromptContexts, selectedQuickPrompt?.categories]
+  );
 
-    const onPromptContextSelectionChange = useCallback(
-      (pc: PromptContextTemplate[]) => {
-        if (selectedQuickPrompt != null) {
-          setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+  const onPromptContextSelectionChange = useCallback(
+    (pc: PromptContextTemplate[]) => {
+      if (selectedQuickPrompt != null) {
+        setUpdatedQuickPromptSettings((prev) => {
+          const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
 
-            if (alreadyExists) {
-              return prev.map((qp) => {
-                if (qp.title === selectedQuickPrompt.title) {
-                  return {
-                    ...qp,
-                    categories: pc.map((p) => p.category),
-                  };
-                }
-                return qp;
-              });
-            }
-            return prev;
-          });
-        }
-      },
-      [selectedQuickPrompt, setUpdatedQuickPromptSettings]
-    );
+          if (alreadyExists) {
+            return prev.map((qp) => {
+              if (qp.title === selectedQuickPrompt.title) {
+                return {
+                  ...qp,
+                  categories: pc.map((p) => p.category),
+                };
+              }
+              return qp;
+            });
+          }
+          return prev;
+        });
+      }
+    },
+    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+  );
 
-    // When top level quick prompt selection changes
-    const onQuickPromptSelectionChange = useCallback(
-      (quickPrompt?: QuickPrompt | string) => {
-        const isNew = typeof quickPrompt === 'string';
-        const newSelectedQuickPrompt: QuickPrompt | undefined = isNew
-          ? {
-              title: quickPrompt ?? '',
-              prompt: '',
-              color: DEFAULT_COLOR,
-              categories: [],
-            }
-          : quickPrompt;
+  // When top level quick prompt selection changes
+  const onQuickPromptSelectionChange = useCallback(
+    (quickPrompt?: QuickPrompt | string) => {
+      const isNew = typeof quickPrompt === 'string';
+      const newSelectedQuickPrompt: QuickPrompt | undefined = isNew
+        ? {
+            title: quickPrompt ?? '',
+            prompt: '',
+            color: DEFAULT_COLOR,
+            categories: [],
+          }
+        : quickPrompt;
 
-        if (newSelectedQuickPrompt != null) {
-          setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === newSelectedQuickPrompt.title);
+      if (newSelectedQuickPrompt != null) {
+        setUpdatedQuickPromptSettings((prev) => {
+          const alreadyExists = prev.some((qp) => qp.title === newSelectedQuickPrompt.title);
 
-            if (!alreadyExists) {
-              return [...prev, newSelectedQuickPrompt];
-            }
+          if (!alreadyExists) {
+            return [...prev, newSelectedQuickPrompt];
+          }
 
-            return prev;
-          });
-        }
+          return prev;
+        });
+      }
 
-        onSelectedQuickPromptChange(newSelectedQuickPrompt);
-      },
-      [onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
-    );
+      onSelectedQuickPromptChange(newSelectedQuickPrompt);
+    },
+    [onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
+  );
 
-    const onQuickPromptDeleted = useCallback(
-      (title: string) => {
-        setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.title !== title));
-      },
-      [setUpdatedQuickPromptSettings]
-    );
+  const onQuickPromptDeleted = useCallback(
+    (title: string) => {
+      setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.title !== title));
+    },
+    [setUpdatedQuickPromptSettings]
+  );
 
-    return (
-      <>
-        <EuiTitle size={'s'}>
-          <h2>{i18n.SETTINGS_TITLE}</h2>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
-        <EuiHorizontalRule margin={'s'} />
+  return (
+    <>
+      <EuiTitle size={'s'}>
+        <h2>{i18n.SETTINGS_TITLE}</h2>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
+      <EuiHorizontalRule margin={'s'} />
 
-        <EuiFormRow label={i18n.QUICK_PROMPT_NAME} display="rowCompressed" fullWidth>
-          <QuickPromptSelector
-            onQuickPromptDeleted={onQuickPromptDeleted}
-            onQuickPromptSelectionChange={onQuickPromptSelectionChange}
-            quickPrompts={quickPromptSettings}
-            selectedQuickPrompt={selectedQuickPrompt}
-          />
-        </EuiFormRow>
+      <EuiFormRow label={i18n.QUICK_PROMPT_NAME} display="rowCompressed" fullWidth>
+        <QuickPromptSelector
+          onQuickPromptDeleted={onQuickPromptDeleted}
+          onQuickPromptSelectionChange={onQuickPromptSelectionChange}
+          quickPrompts={quickPromptSettings}
+          selectedQuickPrompt={selectedQuickPrompt}
+        />
+      </EuiFormRow>
 
-        <EuiFormRow label={i18n.QUICK_PROMPT_PROMPT} display="rowCompressed" fullWidth>
-          <EuiTextArea
-            compressed
-            disabled={selectedQuickPrompt == null}
-            fullWidth
-            data-test-subj="quick-prompt-prompt"
-            onChange={handlePromptChange}
-            placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
-            value={prompt}
-            css={css`
-              min-height: 150px;
-            `}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          display="rowCompressed"
+      <EuiFormRow label={i18n.QUICK_PROMPT_PROMPT} display="rowCompressed" fullWidth>
+        <EuiTextArea
+          compressed
+          disabled={selectedQuickPrompt == null}
           fullWidth
-          label={i18n.QUICK_PROMPT_CONTEXTS}
-          helpText={i18n.QUICK_PROMPT_CONTEXTS_HELP_TEXT}
-        >
-          <PromptContextSelector
-            isDisabled={selectedQuickPrompt == null}
-            onPromptContextSelectionChange={onPromptContextSelectionChange}
-            promptContexts={basePromptContexts}
-            selectedPromptContexts={selectedPromptContexts}
-          />
-        </EuiFormRow>
+          data-test-subj="quick-prompt-prompt"
+          onChange={handlePromptChange}
+          placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
+          value={prompt}
+          css={css`
+            min-height: 150px;
+          `}
+        />
+      </EuiFormRow>
 
-        <EuiFormRow display="rowCompressed" label={i18n.QUICK_PROMPT_BADGE_COLOR}>
-          <EuiColorPicker
-            color={selectedColor}
-            compressed
-            disabled={selectedQuickPrompt == null}
-            onChange={handleColorChange}
-          />
-        </EuiFormRow>
-      </>
-    );
-  }
-);
+      <EuiFormRow
+        display="rowCompressed"
+        fullWidth
+        label={i18n.QUICK_PROMPT_CONTEXTS}
+        helpText={i18n.QUICK_PROMPT_CONTEXTS_HELP_TEXT}
+      >
+        <PromptContextSelector
+          isDisabled={selectedQuickPrompt == null}
+          onPromptContextSelectionChange={onPromptContextSelectionChange}
+          promptContexts={basePromptContexts}
+          selectedPromptContexts={selectedPromptContexts}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow display="rowCompressed" label={i18n.QUICK_PROMPT_BADGE_COLOR}>
+        <EuiColorPicker
+          color={selectedColor}
+          compressed
+          disabled={selectedQuickPrompt == null}
+          onChange={handleColorChange}
+        />
+      </EuiFormRow>
+    </>
+  );
+});
 
 QuickPromptSettings.displayName = 'AddQuickPromptModal';

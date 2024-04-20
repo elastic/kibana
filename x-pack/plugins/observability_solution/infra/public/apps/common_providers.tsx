@@ -23,13 +23,22 @@ import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
-export const CommonInfraProviders: React.FC<{
-  appName: string;
-  storage: Storage;
-  triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+export const CommonInfraProviders = (
+  {
+    children,
+    triggersActionsUI,
+    setHeaderActionMenu,
+    appName,
+    storage,
+    theme$
+  }: {
+    appName: string;
+    storage: Storage;
+    triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    theme$: AppMountParameters['theme$'];
+  }
+) => {
   const darkMode = useIsDarkMode();
 
   return (
@@ -53,14 +62,16 @@ export interface CoreProvidersProps {
   kibanaEnvironment?: KibanaEnvContext;
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({
-  children,
-  core,
-  pluginStart,
-  plugins,
-  theme$,
-  kibanaEnvironment,
-}) => {
+export const CoreProviders = (
+  {
+    children,
+    core,
+    pluginStart,
+    plugins,
+    theme$,
+    kibanaEnvironment
+  }: CoreProvidersProps
+) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -86,8 +97,13 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   );
 };
 
-const DataUIProviders: React.FC<{ appName: string; storage: Storage }> = ({
-  appName,
-  children,
-  storage,
-}) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;
+const DataUIProviders = (
+  {
+    appName,
+    children,
+    storage
+  }: {
+    appName: string;
+    storage: Storage;
+  }
+) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;

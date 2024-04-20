@@ -13,6 +13,10 @@ export interface FieldSummaryMessageProps {
   message: string;
 }
 
-export const FieldSummaryMessage: React.FC<FieldSummaryMessageProps> = ({ message }) => {
+export const FieldSummaryMessage = (
+  {
+    message
+  }: FieldSummaryMessageProps
+) => {
   return <EuiText size="s">{message}</EuiText>;
 };

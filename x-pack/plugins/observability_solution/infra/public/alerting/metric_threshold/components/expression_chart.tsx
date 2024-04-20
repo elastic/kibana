@@ -60,17 +60,19 @@ interface Props {
   timeRange?: TimeRange;
 }
 
-export const ExpressionChart: React.FC<Props> = ({
-  expression,
-  derivedIndexPattern,
-  annotations,
-  chartType = MetricsExplorerChartType.bar,
-  filterQuery,
-  groupBy,
-  hideTitle = false,
-  source,
-  timeRange,
-}) => {
+export const ExpressionChart = (
+  {
+    expression,
+    derivedIndexPattern,
+    annotations,
+    chartType = MetricsExplorerChartType.bar,
+    filterQuery,
+    groupBy,
+    hideTitle = false,
+    source,
+    timeRange
+  }: Props
+) => {
   const { charts } = useKibanaContextForPlugin().services;
   const chartTheme = useTimelineChartTheme();
 

@@ -34,12 +34,14 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-export const SearchPanel: FC<Props> = ({
-  dataView,
-  searchString,
-  searchQueryLanguage,
-  setSearchParams,
-}) => {
+export const SearchPanel = (
+  {
+    dataView,
+    searchString,
+    searchQueryLanguage,
+    setSearchParams
+  }: Props
+) => {
   const {
     uiSettings,
     unifiedSearch: {

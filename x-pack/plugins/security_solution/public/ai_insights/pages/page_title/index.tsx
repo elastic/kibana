@@ -20,7 +20,7 @@ import * as i18n from './translations';
 
 const BETA_BADGE_SIZE = 24; // px
 
-const PageTitleComponent: React.FC = () => {
+const PageTitleComponent = () => {
   const { euiTheme } = useEuiTheme();
 
   return (

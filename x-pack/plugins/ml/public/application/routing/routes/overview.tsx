@@ -44,7 +44,7 @@ export const overviewRouteFactory = (
   'data-test-subj': 'mlPageOverview',
 });
 
-const PageWrapper: FC<PageProps> = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,
@@ -69,7 +69,7 @@ export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   breadcrumbs: [],
 });
 
-const Page: FC = () => {
+const Page = () => {
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
   if (isADEnabled === false && isDFAEnabled === false && isNLPEnabled === true) {
     // if only NLP is enabled, redirect to the trained models page.

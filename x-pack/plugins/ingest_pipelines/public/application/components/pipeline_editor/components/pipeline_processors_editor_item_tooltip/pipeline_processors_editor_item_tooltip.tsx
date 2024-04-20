@@ -24,7 +24,11 @@ interface Props {
 const MOUSE_PADDING_RIGHT = 20;
 const MOUSE_PADDING_BOTTOM = 20;
 
-export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ processor }) => {
+export const PipelineProcessorsItemTooltip = (
+  {
+    processor
+  }: Props
+) => {
   const [position, setPosition] = useState<Position | undefined>();
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ proces
      * overflow: hidden we use a portal to render this tooltip in the document body so
      * that we can render it anywhere the cursor can go.
      */
-    <EuiPortal>
+    (<EuiPortal>
       <div
         className="pipelineProcessorsEditor__itemTooltip"
         style={{
@@ -57,6 +61,6 @@ export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ proces
       >
         <ProcessorInformation processor={processor} />
       </div>
-    </EuiPortal>
+    </EuiPortal>)
   );
 };

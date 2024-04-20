@@ -44,7 +44,7 @@ import {
 
 const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 
-export const HotPhase: FunctionComponent = () => {
+export const HotPhase = () => {
   const { license } = useEditPolicyContext();
   const [formData] = useFormData({
     watch: [isUsingDefaultRolloverPath, ...rolloverFieldPaths],

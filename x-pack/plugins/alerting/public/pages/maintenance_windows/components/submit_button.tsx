@@ -16,7 +16,12 @@ interface SubmitButtonProps {
   editMode?: boolean;
 }
 
-export const SubmitButton: React.FC<SubmitButtonProps> = React.memo(({ isLoading, editMode }) => {
+export const SubmitButton = React.memo((
+  {
+    isLoading,
+    editMode
+  }: SubmitButtonProps
+) => {
   const { submit, isSubmitting } = useFormContext();
 
   return (

@@ -16,7 +16,14 @@ interface Props {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const TimeseriesExplorerCheckbox: FC<Props> = ({ id, label, checked, onChange }) => {
+export const TimeseriesExplorerCheckbox = (
+  {
+    id,
+    label,
+    checked,
+    onChange
+  }: Props
+) => {
   const checkboxId = useMemo(() => `id-${htmlIdGenerator()()}`, []);
   return (
     <EuiFlexItem grow={false}>

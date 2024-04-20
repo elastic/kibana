@@ -76,7 +76,7 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Invite your colleagues into this organization to search with you.' }
 );
 
-export const OnboardingSteps: React.FC = () => {
+export const OnboardingSteps = () => {
   const {
     organization: { name, defaultOrgName },
   } = useValues(AppLogic);
@@ -126,7 +126,7 @@ export const OnboardingSteps: React.FC = () => {
   );
 };
 
-export const OrgNameOnboarding: React.FC = () => {
+export const OrgNameOnboarding = () => {
   const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>

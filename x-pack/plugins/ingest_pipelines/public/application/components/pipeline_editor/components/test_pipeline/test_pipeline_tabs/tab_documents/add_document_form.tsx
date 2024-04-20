@@ -103,7 +103,11 @@ interface Props {
   onAddDocuments: (document: Document) => void;
 }
 
-export const AddDocumentForm: FunctionComponent<Props> = ({ onAddDocuments }) => {
+export const AddDocumentForm = (
+  {
+    onAddDocuments
+  }: Props
+) => {
   const { services } = useKibana();
   const isMounted = useIsMounted();
 

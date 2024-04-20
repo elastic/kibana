@@ -9,6 +9,6 @@ import React, { FunctionComponent } from 'react';
 
 import { PipelineProcessorsEditor } from '../components';
 
-export const GlobalOnFailureProcessorsEditor: FunctionComponent = () => {
+export const GlobalOnFailureProcessorsEditor = () => {
   return <PipelineProcessorsEditor stateSlice="onFailure" />;
 };

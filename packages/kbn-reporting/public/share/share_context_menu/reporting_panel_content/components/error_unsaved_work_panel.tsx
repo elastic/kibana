@@ -18,7 +18,7 @@ const i18nTexts = {
   }),
 };
 
-export const ErrorUnsavedWorkPanel: FunctionComponent = () => {
+export const ErrorUnsavedWorkPanel = () => {
   return (
     <EuiCallOut
       size="s"

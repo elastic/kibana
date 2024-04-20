@@ -106,14 +106,16 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
   };
 };
 
-const ConnectorFormComponent: React.FC<Props> = ({
-  actionTypeModel,
-  connector,
-  isEdit,
-  onChange,
-  onFormModifiedChange,
-  setResetForm,
-}) => {
+const ConnectorFormComponent = (
+  {
+    actionTypeModel,
+    connector,
+    isEdit,
+    onChange,
+    onFormModifiedChange,
+    setResetForm
+  }: Props
+) => {
   const { form } = useForm({
     defaultValue: connector,
     serializer: formSerializer,

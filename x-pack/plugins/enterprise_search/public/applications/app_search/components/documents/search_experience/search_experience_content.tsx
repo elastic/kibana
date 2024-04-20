@@ -22,7 +22,7 @@ import { useSearchContextState } from './hooks';
 import { Pagination } from './pagination';
 import { ResultView } from './views';
 
-export const SearchExperienceContent: React.FC = () => {
+export const SearchExperienceContent = () => {
   const { resultSearchTerm, totalResults, wasSearched } = useSearchContextState();
 
   const { isMetaEngine, engine } = useValues(EngineLogic);

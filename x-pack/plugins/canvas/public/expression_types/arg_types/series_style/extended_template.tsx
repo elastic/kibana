@@ -36,7 +36,7 @@ export type Props = {
   };
 } & ResolvedArgProps<ResolvedLabels>;
 
-export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
+export const ExtendedTemplate = (props: Props) => {
   const {
     typeInstance,
     onValueChange,

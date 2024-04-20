@@ -80,12 +80,14 @@ export const getDeferredAssetDescription = (
   }
 };
 
-export const DeferredTransformAccordion: FunctionComponent<Props> = ({
-  packageInfo,
-  type,
-  deferredInstallations,
-  forceRefreshAssets,
-}) => {
+export const DeferredTransformAccordion = (
+  {
+    packageInfo,
+    type,
+    deferredInstallations,
+    forceRefreshAssets
+  }: Props
+) => {
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
   const deferredTransforms = useMemo(

@@ -21,28 +21,30 @@ const CONSOLE_STEP_TYPES = ['stderr', 'stdout', 'cmd/status'];
 const isConsoleStep = (step: JourneyStep) =>
   CONSOLE_STEP_TYPES.some((type) => type === step.synthetics.type);
 
-export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
-  <div>
-    <EuiTitle>
-      <h4>
-        <FormattedMessage
-          id="xpack.uptime.synthetics.consoleStepList.title"
-          defaultMessage="No steps ran"
-        />
-      </h4>
-    </EuiTitle>
-    <EuiSpacer />
-    <p>
+export const ConsoleOutputEventList = (
+  {
+    journey
+  }: Props
+) => (<div>
+  <EuiTitle>
+    <h4>
       <FormattedMessage
-        id="xpack.uptime.synthetics.consoleStepList.message"
-        defaultMessage="This journey failed to run, recorded console output is shown below:"
+        id="xpack.uptime.synthetics.consoleStepList.title"
+        defaultMessage="No steps ran"
       />
-    </p>
-    <EuiSpacer />
-    <EuiCodeBlock>
-      {journey.steps.filter(isConsoleStep).map((consoleEvent) => (
-        <ConsoleEvent event={consoleEvent} key={consoleEvent._id + '_console-event-row'} />
-      ))}
-    </EuiCodeBlock>
-  </div>
-);
+    </h4>
+  </EuiTitle>
+  <EuiSpacer />
+  <p>
+    <FormattedMessage
+      id="xpack.uptime.synthetics.consoleStepList.message"
+      defaultMessage="This journey failed to run, recorded console output is shown below:"
+    />
+  </p>
+  <EuiSpacer />
+  <EuiCodeBlock>
+    {journey.steps.filter(isConsoleStep).map((consoleEvent) => (
+      <ConsoleEvent event={consoleEvent} key={consoleEvent._id + '_console-event-row'} />
+    ))}
+  </EuiCodeBlock>
+</div>);

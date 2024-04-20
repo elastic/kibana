@@ -38,8 +38,8 @@ export interface ColumnToggleProps extends HoverActionComponentProps {
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
-const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
-  ({
+const ColumnToggleButton = React.memo((
+  {
     Component,
     defaultFocusedButtonRef,
     field,
@@ -50,82 +50,82 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
     onClick,
     showTooltip = false,
     toggleColumn,
-    value,
-  }) => {
-    const label = isObjectArray ? NESTED_COLUMN(field) : COLUMN_TOGGLE(field);
+    value
+  }: ColumnToggleProps
+) => {
+  const label = isObjectArray ? NESTED_COLUMN(field) : COLUMN_TOGGLE(field);
 
-    const handleToggleColumn = useCallback(() => {
-      toggleColumn({
-        columnHeaderType: defaultColumnHeaderType,
-        id: field,
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      });
-      if (onClick != null) {
-        onClick();
+  const handleToggleColumn = useCallback(() => {
+    toggleColumn({
+      columnHeaderType: defaultColumnHeaderType,
+      id: field,
+      initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+    });
+    if (onClick != null) {
+      onClick();
+    }
+  }, [onClick, field, toggleColumn]);
+
+  useEffect(() => {
+    if (!ownFocus) {
+      return;
+    }
+    if (keyboardEvent?.key === COLUMN_TOGGLE_KEYBOARD_SHORTCUT) {
+      stopPropagationAndPreventDefault(keyboardEvent);
+      handleToggleColumn();
+    }
+  }, [handleToggleColumn, keyboardEvent, ownFocus]);
+
+  const button = useMemo(
+    () =>
+      Component ? (
+        <Component
+          aria-label={label}
+          data-test-subj={`toggle-field-${field}`}
+          icon="listAdd"
+          iconType="listAdd"
+          onClick={handleToggleColumn}
+          title={label}
+        >
+          {label}
+        </Component>
+      ) : (
+        <EuiButtonIcon
+          aria-label={label}
+          buttonRef={defaultFocusedButtonRef}
+          className="timelines__hoverActionButton"
+          data-test-subj={`toggle-field-${field}`}
+          data-colindex={1}
+          disabled={isDisabled}
+          id={field}
+          iconSize="s"
+          iconType="listAdd"
+          onClick={handleToggleColumn}
+        />
+      ),
+    [Component, defaultFocusedButtonRef, field, handleToggleColumn, isDisabled, label]
+  );
+
+  return showTooltip ? (
+    <EuiToolTip
+      content={
+        <TooltipWithKeyboardShortcut
+          additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+            field,
+            value,
+          })}
+          content={label}
+          shortcut={COLUMN_TOGGLE_KEYBOARD_SHORTCUT}
+          showShortcut={ownFocus}
+        />
       }
-    }, [onClick, field, toggleColumn]);
-
-    useEffect(() => {
-      if (!ownFocus) {
-        return;
-      }
-      if (keyboardEvent?.key === COLUMN_TOGGLE_KEYBOARD_SHORTCUT) {
-        stopPropagationAndPreventDefault(keyboardEvent);
-        handleToggleColumn();
-      }
-    }, [handleToggleColumn, keyboardEvent, ownFocus]);
-
-    const button = useMemo(
-      () =>
-        Component ? (
-          <Component
-            aria-label={label}
-            data-test-subj={`toggle-field-${field}`}
-            icon="listAdd"
-            iconType="listAdd"
-            onClick={handleToggleColumn}
-            title={label}
-          >
-            {label}
-          </Component>
-        ) : (
-          <EuiButtonIcon
-            aria-label={label}
-            buttonRef={defaultFocusedButtonRef}
-            className="timelines__hoverActionButton"
-            data-test-subj={`toggle-field-${field}`}
-            data-colindex={1}
-            disabled={isDisabled}
-            id={field}
-            iconSize="s"
-            iconType="listAdd"
-            onClick={handleToggleColumn}
-          />
-        ),
-      [Component, defaultFocusedButtonRef, field, handleToggleColumn, isDisabled, label]
-    );
-
-    return showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={label}
-            shortcut={COLUMN_TOGGLE_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
-      >
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
-    );
-  }
-);
+    >
+      {button}
+    </EuiToolTip>
+  ) : (
+    button
+  );
+});
 
 ColumnToggleButton.displayName = 'ColumnToggleButton';
 

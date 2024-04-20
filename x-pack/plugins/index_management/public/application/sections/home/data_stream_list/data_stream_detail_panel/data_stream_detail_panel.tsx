@@ -60,7 +60,11 @@ interface DetailsListProps {
   }>;
 }
 
-const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => {
+const DetailsList = (
+  {
+    details
+  }: DetailsListProps
+) => {
   const descriptionListItems = details.map((detail, index) => {
     const { name, toolTip, content, dataTestSubj } = detail;
 
@@ -117,10 +121,12 @@ export const ConditionalWrap = ({
   children: JSX.Element;
 }): JSX.Element => (condition ? wrap(children) : children);
 
-export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
-  dataStreamName,
-  onClose,
-}) => {
+export const DataStreamDetailPanel = (
+  {
+    dataStreamName,
+    onClose
+  }: Props
+) => {
   const [isManagePopOverOpen, setManagePopOver] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isEditingDataRetention, setIsEditingDataRetention] = useState<boolean>(false);

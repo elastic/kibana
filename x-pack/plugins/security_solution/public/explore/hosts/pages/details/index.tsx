@@ -79,7 +79,12 @@ import { useHasSecurityCapability } from '../../../../helper_hooks';
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
 
-const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
+const HostDetailsComponent = (
+  {
+    detailName,
+    hostDetailsPagePath
+  }: HostDetailsProps
+) => {
   const dispatch = useDispatch();
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(

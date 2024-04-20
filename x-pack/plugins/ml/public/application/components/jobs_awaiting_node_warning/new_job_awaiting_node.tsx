@@ -18,7 +18,7 @@ interface Props {
   jobType: JobType;
 }
 
-export const NewJobAwaitingNodeWarning: FC<Props> = () => {
+export const NewJobAwaitingNodeWarning = () => {
   const { showNodeInfo } = useEnabledFeatures();
   if (lazyMlNodesAvailable() === false) {
     return null;

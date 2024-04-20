@@ -18,12 +18,14 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const IndexActionFields: React.FunctionComponent<Props> = ({
-  action,
-  editAction,
-  errors,
-  hasErrors,
-}) => {
+export const IndexActionFields = (
+  {
+    action,
+    editAction,
+    errors,
+    hasErrors
+  }: Props
+) => {
   const { index } = action;
   return (
     <ErrableFormRow

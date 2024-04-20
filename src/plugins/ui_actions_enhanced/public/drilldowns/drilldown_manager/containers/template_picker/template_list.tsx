@@ -20,7 +20,11 @@ export interface TemplateListProps {
   items: DrilldownTemplate[];
 }
 
-export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
+export const TemplateList = (
+  {
+    items
+  }: TemplateListProps
+) => {
   const drilldowns = useDrilldownManager();
   const tableItems: DrilldownTemplateTableItem[] = React.useMemo<
     DrilldownTemplateTableItem[]

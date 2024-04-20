@@ -9,11 +9,11 @@
 import React from 'react';
 import { EuiSpacer, EuiFlyoutHeader, EuiFlyoutHeaderProps } from '@elastic/eui';
 
-export const PanelHeader: React.FunctionComponent<
-  { children: React.ReactNode } & Omit<EuiFlyoutHeaderProps, 'children'>
-> = (props) => (
-  <>
-    <EuiFlyoutHeader className="fieldEditor__flyoutPanel__header" {...props} />
-    <EuiSpacer />
-  </>
-);
+export const PanelHeader = (
+  props: {
+    children: React.ReactNode;
+  } & Omit<EuiFlyoutHeaderProps, 'children'>
+) => (<>
+  <EuiFlyoutHeader className="fieldEditor__flyoutPanel__header" {...props} />
+  <EuiSpacer />
+</>);

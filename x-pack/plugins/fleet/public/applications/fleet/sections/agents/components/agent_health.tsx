@@ -102,7 +102,12 @@ const WrappedEuiCallOut = styled(EuiCallOut)`
   white-space: wrap !important;
 `;
 
-export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails }) => {
+export const AgentHealth = (
+  {
+    agent,
+    fromDetails
+  }: Props
+) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
   const lastCheckInMessageText = lastCheckInMessage ? (

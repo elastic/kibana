@@ -73,13 +73,15 @@ const refreshedTimeframe = (startDate: string, endDate: string) => {
   };
 };
 
-const RulePreviewComponent: React.FC<RulePreviewProps> = ({
-  isDisabled,
-  defineRuleData,
-  aboutRuleData,
-  scheduleRuleData,
-  exceptionsList,
-}) => {
+const RulePreviewComponent = (
+  {
+    isDisabled,
+    defineRuleData,
+    aboutRuleData,
+    scheduleRuleData,
+    exceptionsList
+  }: RulePreviewProps
+) => {
   const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
 

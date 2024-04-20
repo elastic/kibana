@@ -24,11 +24,13 @@ interface CasesAppProps {
   getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
-const CasesAppComponent: React.FC<CasesAppProps> = ({
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
-  getFilesClient,
-}) => {
+const CasesAppComponent = (
+  {
+    externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    getFilesClient
+  }: CasesAppProps
+) => {
   const userCapabilities = useApplicationCapabilities();
 
   return (

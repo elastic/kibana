@@ -11,7 +11,11 @@ import React, { memo, useReducer } from 'react';
 import type { ManageRoutesSpyProps, RouteSpyState, RouteSpyAction } from './types';
 import { RouterSpyStateContext, initRouteSpy } from './helpers';
 
-const ManageRoutesSpyComponent: FC<ManageRoutesSpyProps> = ({ children }) => {
+const ManageRoutesSpyComponent = (
+  {
+    children
+  }: ManageRoutesSpyProps
+) => {
   const reducerSpyRoute = (state: RouteSpyState, action: RouteSpyAction): RouteSpyState => {
     switch (action.type) {
       case 'updateRoute':

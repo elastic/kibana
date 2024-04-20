@@ -22,7 +22,7 @@ import {
  * Render either the investigation guide button that opens Investigation section in the left panel,
  * or a no-data message if investigation guide hasn't been set up on the rule
  */
-export const InvestigationGuide: React.FC = () => {
+export const InvestigationGuide = () => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview } =
     useRightPanelContext();

@@ -22,25 +22,32 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
-export const ErrorLayout: React.FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
-  isAddIntegrationsPath,
-  children,
-}) => (
-  <EuiErrorBoundary>
-    {isAddIntegrationsPath ? (
-      <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>
-    ) : (
-      <DefaultLayout>
-        <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-      </DefaultLayout>
-    )}
-  </EuiErrorBoundary>
-);
+export const ErrorLayout = (
+  {
+    isAddIntegrationsPath,
+    children
+  }: {
+    isAddIntegrationsPath: boolean;
+  }
+) => (<EuiErrorBoundary>
+  {isAddIntegrationsPath ? (
+    <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>
+  ) : (
+    <DefaultLayout>
+      <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
+    </DefaultLayout>
+  )}
+</EuiErrorBoundary>);
 
-export const PermissionsError: React.FunctionComponent<{
-  error: string;
-  requiredFleetRole?: string;
-}> = React.memo(({ error, requiredFleetRole }) => {
+export const PermissionsError = React.memo((
+  {
+    error,
+    requiredFleetRole
+  }: {
+    error: string;
+    requiredFleetRole?: string;
+  }
+) => {
   if (error === 'MISSING_SECURITY') {
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }

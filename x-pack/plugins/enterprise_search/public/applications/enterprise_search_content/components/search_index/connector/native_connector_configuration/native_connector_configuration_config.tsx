@@ -36,9 +36,13 @@ interface NativeConnectorConfigurationConfigProps {
   status: ConnectorStatus;
 }
 
-export const NativeConnectorConfigurationConfig: React.FC<
-  NativeConnectorConfigurationConfigProps
-> = ({ connector, nativeConnector, status }) => {
+export const NativeConnectorConfigurationConfig = (
+  {
+    connector,
+    nativeConnector,
+    status
+  }: NativeConnectorConfigurationConfigProps
+) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);

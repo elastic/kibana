@@ -29,7 +29,11 @@ interface EditNameProps {
   connector: Connector;
 }
 
-export const EditName: React.FC<EditNameProps> = ({ connector }) => {
+export const EditName = (
+  {
+    connector
+  }: EditNameProps
+) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(connector.name || CONNECTOR_LABEL);
   const { http } = useKibanaServices();

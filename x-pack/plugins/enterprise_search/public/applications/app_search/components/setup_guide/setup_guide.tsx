@@ -18,7 +18,7 @@ import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemet
 
 import GettingStarted from './assets/getting_started.png';
 
-export const SetupGuide: React.FC = () => (
+export const SetupGuide = () => (
   <SetupGuideLayout productName={APP_SEARCH_PLUGIN.NAME} productEuiIcon="logoAppSearch">
     <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
     <SendTelemetry action="viewed" metric="setup_guide" />

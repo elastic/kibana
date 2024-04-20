@@ -15,7 +15,12 @@ import DashboardLink from './dashboard_link';
 import { BEDROCK } from './translations';
 import { bedrockConfig, bedrockSecrets } from './constants';
 
-const BedrockConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const BedrockConnectorFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => {
   const [{ id, name }] = useFormData();
   return (
     <>

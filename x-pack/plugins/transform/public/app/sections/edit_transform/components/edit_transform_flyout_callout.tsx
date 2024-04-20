@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../../hooks/use_documentation_links';
-export const EditTransformFlyoutCallout: FC = () => {
+export const EditTransformFlyoutCallout = () => {
   const { esTransformUpdate } = useDocumentationLinks();
 
   return (

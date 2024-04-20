@@ -182,14 +182,13 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     hookValueCallback(body(props));
     return null;
   };
-  const TestComponent: React.FunctionComponent<Args> = (args) =>
-    WrapperComponent ? (
-      <WrapperComponent>
-        <HookComponent {...args} />
-      </WrapperComponent>
-    ) : (
+  const TestComponent = (args: Args) => WrapperComponent ? (
+    <WrapperComponent>
       <HookComponent {...args} />
-    );
+    </WrapperComponent>
+  ) : (
+    <HookComponent {...args} />
+  );
 
   reactAct(() => {
     component = mount(<TestComponent {...initialArgs} />);

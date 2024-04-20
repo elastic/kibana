@@ -16,7 +16,7 @@ import { LogRetentionLogic, LogRetentionOptions } from '../../log_retention';
 
 import { GenericConfirmationModal } from './generic_confirmation_modal';
 
-export const LogRetentionConfirmationModal: React.FC = () => {
+export const LogRetentionConfirmationModal = () => {
   const CANNOT_BE_RECOVERED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.recovery',
     {

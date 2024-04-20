@@ -16,23 +16,25 @@ import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay
 import { TopCategoriesTable } from './top_categories_table';
 import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
 
-export const TopCategoriesSection: React.FunctionComponent<{
-  isLoadingTopCategories?: boolean;
-  jobId: string;
-  logViewReference: PersistedLogViewReference;
-  timeRange: TimeRange;
-  topCategories: LogEntryCategory[];
-  sortOptions: SortOptions;
-  changeSortOptions: ChangeSortOptions;
-}> = ({
-  isLoadingTopCategories = false,
-  jobId,
-  logViewReference,
-  timeRange,
-  topCategories,
-  sortOptions,
-  changeSortOptions,
-}) => {
+export const TopCategoriesSection = (
+  {
+    isLoadingTopCategories = false,
+    jobId,
+    logViewReference,
+    timeRange,
+    topCategories,
+    sortOptions,
+    changeSortOptions
+  }: {
+    isLoadingTopCategories?: boolean;
+    jobId: string;
+    logViewReference: PersistedLogViewReference;
+    timeRange: TimeRange;
+    topCategories: LogEntryCategory[];
+    sortOptions: SortOptions;
+    changeSortOptions: ChangeSortOptions;
+  }
+) => {
   return (
     <>
       <LoadingOverlayWrapper

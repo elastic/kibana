@@ -32,11 +32,13 @@ interface ValidationStepPanelProps {
 const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
-export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
-  step,
-  label,
-  action,
-}) => {
+export const ValidationStepPanel = (
+  {
+    step,
+    label,
+    action
+  }: ValidationStepPanelProps
+) => {
   const showErrorMessage = step.state === 'invalid' || step.state === 'warning';
 
   return (

@@ -27,7 +27,11 @@ const copyToClipboardLabel = i18n.translate('savedObjectsManagement.view.copyToC
   defaultMessage: 'Copy to clipboard',
 });
 
-export const Inspect: FC<InspectProps> = ({ object }) => {
+export const Inspect = (
+  {
+    object
+  }: InspectProps
+) => {
   const title = object.meta.title || 'saved object';
 
   const objectAsJsonString = useMemo(() => JSON.stringify(omit(object, 'meta'), null, 2), [object]);

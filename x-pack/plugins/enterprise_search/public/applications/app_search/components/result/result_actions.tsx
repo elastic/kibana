@@ -15,7 +15,11 @@ interface Props {
   actions: ResultAction[];
 }
 
-export const ResultActions: React.FC<Props> = ({ actions }) => {
+export const ResultActions = (
+  {
+    actions
+  }: Props
+) => {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
       {actions.map(({ onClick, title, iconType, iconColor, disabled }) => (

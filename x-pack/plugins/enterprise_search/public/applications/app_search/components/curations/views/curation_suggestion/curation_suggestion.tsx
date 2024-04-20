@@ -36,7 +36,7 @@ import { CurationResultPanel } from './curation_result_panel';
 
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
 
-export const CurationSuggestion: React.FC = () => {
+export const CurationSuggestion = () => {
   const { query } = useDecodedParams();
   const { engine, isMetaEngine } = useValues(EngineLogic);
   const curationSuggestionLogic = CurationSuggestionLogic({ query });

@@ -33,14 +33,16 @@ interface ModuleJobsProps {
 
 export const SETUP_RESULTS_WIDTH = '200px';
 
-export const ModuleJobs: FC<ModuleJobsProps> = ({
-  jobs,
-  jobPrefix,
-  jobOverrides,
-  saveState,
-  existingGroupIds,
-  onJobOverridesChange,
-}) => {
+export const ModuleJobs = (
+  {
+    jobs,
+    jobPrefix,
+    jobOverrides,
+    saveState,
+    existingGroupIds,
+    onJobOverridesChange
+  }: ModuleJobsProps
+) => {
   const isSaving = saveState === SAVE_STATE.SAVING;
 
   const [jobToEdit, setJobToEdit] = useState<ModuleJobUI | null>(null);

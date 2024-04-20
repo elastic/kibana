@@ -42,12 +42,14 @@ export const getManifestDownloadLink = (fleetServerHost?: string, enrollmentAPIK
   return `${agentPolicyRouteService.getK8sFullDownloadPath()}?${searchParams.toString()}`;
 };
 
-export const KubernetesInstructions: React.FunctionComponent<Props> = ({
-  enrollmentAPIKey,
-  onCopy,
-  onDownload,
-  fleetServerHost,
-}) => {
+export const KubernetesInstructions = (
+  {
+    enrollmentAPIKey,
+    onCopy,
+    onDownload,
+    fleetServerHost
+  }: Props
+) => {
   const core = useStartServices();
   const { notifications, docLinks } = core;
 

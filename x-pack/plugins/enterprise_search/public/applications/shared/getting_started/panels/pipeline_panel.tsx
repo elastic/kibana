@@ -13,7 +13,7 @@ import clusterImage from '../../../../assets/images/cluster.svg';
 import cutImage from '../../../../assets/images/cut.svg';
 import reporterImage from '../../../../assets/images/reporter.svg';
 
-export const GettingStartedPipelinePanel: React.FC = () => {
+export const GettingStartedPipelinePanel = () => {
   return (
     <PipelinePanel clusterImage={clusterImage} cutImage={cutImage} reporterImage={reporterImage} />
   );

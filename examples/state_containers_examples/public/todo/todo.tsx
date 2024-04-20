@@ -46,7 +46,12 @@ interface TodoAppProps {
   stateContainer: StateContainer<TodoState, TodoActions>;
 }
 
-const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
+const TodoApp = (
+  {
+    filter,
+    stateContainer
+  }: TodoAppProps
+) => {
   const { edit: editTodo, delete: deleteTodo, add: addTodo } = stateContainer.transitions;
   const todos = useContainerSelector(stateContainer, (state) => state.todos);
   const filteredTodos = useMemo(
@@ -131,11 +136,13 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
   );
 };
 
-export const TodoAppPage: React.FC<{
-  history: History;
-  appTitle: string;
-  appBasePath: string;
-}> = (props) => {
+export const TodoAppPage = (
+  props: {
+    history: History;
+    appTitle: string;
+    appBasePath: string;
+  }
+) => {
   const initialAppUrl = React.useRef(window.location.href);
   const stateContainer = React.useMemo(
     () => createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions),

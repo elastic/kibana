@@ -39,7 +39,7 @@ import { IngestionSelector } from './ingestion_selector';
 import './product_selector.scss';
 import { WelcomeBanner } from './welcome_banner';
 
-export const ProductSelector: React.FC = () => {
+export const ProductSelector = () => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { user } = useValues(KibanaLogic);

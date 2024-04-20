@@ -39,52 +39,52 @@ export type TimelineEventDetailRowProps = RenderCellValueProps & TimelineEventDe
  * a event/alert is expanded (i.e. when flyout is open and user is viewing the details of the event)
  *
  * */
-export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = memo(
-  function TimelineEventDetailRow({
+export const TimelineEventDetailRow = memo(function TimelineEventDetailRow(
+  {
     rowIndex,
     event,
     setCellProps,
     timelineId,
-    enabledRowRenderers,
-  }) {
-    const containerRef = useRef<HTMLDivElement | null>(null);
+    enabledRowRenderers
+  }: TimelineEventDetailRowProps
+) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-    /*
-     * Ideally, unified data table could have handled the styling of trailing columns when a row is expanded.
-     * But, a trailing column can have arbitrary design and that is why it is best for consumer to handle the styling
-     * as we are doing below
-     *
-     * */
-    const ctx = useTimelineUnifiedDataTableContext();
+  /*
+   * Ideally, unified data table could have handled the styling of trailing columns when a row is expanded.
+   * But, a trailing column can have arbitrary design and that is why it is best for consumer to handle the styling
+   * as we are doing below
+   *
+   * */
+  const ctx = useTimelineUnifiedDataTableContext();
 
-    useEffect(() => {
-      setCellProps?.({
-        className: ctx.expanded?.id === event._id ? 'unifiedDataTable__cell--expanded' : '',
-        style: { width: '100%', height: 'auto' },
-      });
-    }, [ctx.expanded?.id, setCellProps, rowIndex, event._id]);
+  useEffect(() => {
+    setCellProps?.({
+      className: ctx.expanded?.id === event._id ? 'unifiedDataTable__cell--expanded' : '',
+      style: { width: '100%', height: 'auto' },
+    });
+  }, [ctx.expanded?.id, setCellProps, rowIndex, event._id]);
 
-    if (!enabledRowRenderers || enabledRowRenderers.length === 0) return null;
+  if (!enabledRowRenderers || enabledRowRenderers.length === 0) return null;
 
-    return (
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        data-test-subj={`timeline-row-renderer-${rowIndex}`}
-      >
-        <EuiFlexItem grow={false}>
-          <EventsTrSupplement>
-            <StatefulRowRenderer
-              ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
-              containerRef={containerRef}
-              event={event}
-              lastFocusedAriaColindex={rowIndex - 1}
-              rowRenderers={enabledRowRenderers}
-              timelineId={timelineId}
-            />
-          </EventsTrSupplement>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+  return (
+    <EuiFlexGroup
+      justifyContent="center"
+      alignItems="center"
+      data-test-subj={`timeline-row-renderer-${rowIndex}`}
+    >
+      <EuiFlexItem grow={false}>
+        <EventsTrSupplement>
+          <StatefulRowRenderer
+            ariaRowindex={rowIndex + ARIA_ROW_INDEX_OFFSET}
+            containerRef={containerRef}
+            event={event}
+            lastFocusedAriaColindex={rowIndex - 1}
+            rowRenderers={enabledRowRenderers}
+            timelineId={timelineId}
+          />
+        </EventsTrSupplement>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});

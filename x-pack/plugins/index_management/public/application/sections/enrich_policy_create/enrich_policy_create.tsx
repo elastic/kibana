@@ -19,7 +19,7 @@ import {
   EnrichPoliciesWithPrivileges,
 } from '../../components/enrich_policies';
 
-const CreateView: React.FunctionComponent<RouteComponentProps> = () => {
+const CreateView = () => {
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.enrichPoliciesCreate);
   }, []);
@@ -65,10 +65,8 @@ const CreateView: React.FunctionComponent<RouteComponentProps> = () => {
   );
 };
 
-export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = (props) => (
-  <EnrichPoliciesAuthProvider>
-    <EnrichPoliciesWithPrivileges>
-      <CreateView {...props} />
-    </EnrichPoliciesWithPrivileges>
-  </EnrichPoliciesAuthProvider>
-);
+export const EnrichPolicyCreate = (props: RouteComponentProps) => (<EnrichPoliciesAuthProvider>
+  <EnrichPoliciesWithPrivileges>
+    <CreateView {...props} />
+  </EnrichPoliciesWithPrivileges>
+</EnrichPoliciesAuthProvider>);

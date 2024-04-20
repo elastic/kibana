@@ -18,7 +18,11 @@ interface Props {
   tags?: Query['tags'];
 }
 
-export const TagsCount: React.FC<Props> = ({ tags }) => {
+export const TagsCount = (
+  {
+    tags
+  }: Props
+) => {
   if (!tags?.length) return null;
 
   return (
@@ -33,7 +37,11 @@ export const TagsCount: React.FC<Props> = ({ tags }) => {
   );
 };
 
-export const TagsList: React.FC<Props> = ({ tags }) => {
+export const TagsList = (
+  {
+    tags
+  }: Props
+) => {
   if (!tags?.length) return null;
 
   const displayedTags = tags.slice(0, 2);

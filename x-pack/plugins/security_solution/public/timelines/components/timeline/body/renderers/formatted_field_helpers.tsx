@@ -50,23 +50,25 @@ interface RenderRuleNameProps {
   value: string | number | null | undefined;
 }
 
-export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
-  children,
-  Component,
-  contextId,
-  eventId,
-  fieldName,
-  fieldType,
-  isAggregatable,
-  isDraggable,
-  isButton,
-  onClick,
-  linkValue,
-  openInNewTab = false,
-  truncate,
-  title,
-  value,
-}) => {
+export const RenderRuleName = (
+  {
+    children,
+    Component,
+    contextId,
+    eventId,
+    fieldName,
+    fieldType,
+    isAggregatable,
+    isDraggable,
+    isButton,
+    onClick,
+    linkValue,
+    openInNewTab = false,
+    truncate,
+    title,
+    value
+  }: RenderRuleNameProps
+) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
   const { search } = useFormatUrl(SecurityPageName.rules);
@@ -276,16 +278,26 @@ export const renderEventModule = ({
   );
 };
 
-const GenericLinkComponent: React.FC<{
-  children?: React.ReactNode;
-  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  dataTestSubj?: string;
-  href: string;
-  onClick?: (e: SyntheticEvent) => void;
-  title?: string;
-  iconType?: string;
-}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'link' }) => {
+const GenericLinkComponent = (
+  {
+    children,
+    Component,
+    dataTestSubj,
+    href,
+    onClick,
+    title,
+    iconType = 'link'
+  }: {
+    children?: React.ReactNode;
+    /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+    dataTestSubj?: string;
+    href: string;
+    onClick?: (e: SyntheticEvent) => void;
+    title?: string;
+    iconType?: string;
+  }
+) => {
   return Component ? (
     <Component
       data-test-subj={dataTestSubj}

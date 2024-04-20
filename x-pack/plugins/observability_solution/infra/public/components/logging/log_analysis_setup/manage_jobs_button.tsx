@@ -9,11 +9,9 @@ import { EuiButton, PropsOf } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const ManageJobsButton: React.FunctionComponent<PropsOf<typeof EuiButton>> = (props) => (
-  <EuiButton data-test-subj="infraManageJobsButtonManageMlJobsButton" {...props}>
-    <FormattedMessage
-      id="xpack.infra.logs.analysis.manageMlJobsButtonLabel"
-      defaultMessage="Manage ML jobs"
-    />
-  </EuiButton>
-);
+export const ManageJobsButton = (props: PropsOf<typeof EuiButton>) => (<EuiButton data-test-subj="infraManageJobsButtonManageMlJobsButton" {...props}>
+  <FormattedMessage
+    id="xpack.infra.logs.analysis.manageMlJobsButtonLabel"
+    defaultMessage="Manage ML jobs"
+  />
+</EuiButton>);

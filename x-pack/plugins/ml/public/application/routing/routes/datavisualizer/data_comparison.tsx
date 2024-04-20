@@ -57,7 +57,7 @@ export const dataDriftRouteFactory = (
   'data-test-subj': 'mlPageDataDrift',
 });
 
-const PageWrapper: FC<PageProps> = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (

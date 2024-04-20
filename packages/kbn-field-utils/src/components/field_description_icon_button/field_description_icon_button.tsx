@@ -16,10 +16,12 @@ export type FieldDescriptionIconButtonProps = Pick<EuiPopoverProps, 'css'> & {
   field: FieldDescriptionProps['field'];
 };
 
-export const FieldDescriptionIconButton: React.FC<FieldDescriptionIconButtonProps> = ({
-  field,
-  ...otherProps
-}) => {
+export const FieldDescriptionIconButton = (
+  {
+    field,
+    ...otherProps
+  }: FieldDescriptionIconButtonProps
+) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

@@ -16,7 +16,12 @@ interface Props {
   destIndex?: string;
 }
 
-export const DataViewPrompt: FC<Props> = ({ destIndex, color }) => {
+export const DataViewPrompt = (
+  {
+    destIndex,
+    color
+  }: Props
+) => {
   const {
     services: {
       http: { basePath },

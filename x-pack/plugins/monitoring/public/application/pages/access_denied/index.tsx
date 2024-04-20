@@ -16,7 +16,7 @@ import { ComponentProps } from '../../route_init';
 import { MonitoringStartServices } from '../../../types';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 
-export const AccessDeniedPage: React.FC<ComponentProps> = () => {
+export const AccessDeniedPage = () => {
   const { isCcsEnabled } = useContext(ExternalConfigContext);
   const { services } = useKibana<MonitoringStartServices>();
   const [hasAccess, setHasAccess] = useState<boolean>(false);

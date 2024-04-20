@@ -89,16 +89,18 @@ interface Props {
   toggleCompactView: () => void;
 }
 
-export const Expression: FC<Props> = ({
-  functionDefinitions,
-  formState,
-  updateValue,
-  setExpression,
-  done,
-  error,
-  isCompact,
-  toggleCompactView,
-}) => {
+export const Expression = (
+  {
+    functionDefinitions,
+    formState,
+    updateValue,
+    setExpression,
+    done,
+    error,
+    isCompact,
+    toggleCompactView
+  }: Props
+) => {
   const refExpressionInput: ExpressionInputEditorRef = useRef(null);
 
   const handleRun = () => {

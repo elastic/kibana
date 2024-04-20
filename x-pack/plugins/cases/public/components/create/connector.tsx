@@ -26,7 +26,13 @@ interface Props {
   isLoadingConnectors: boolean;
 }
 
-const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
+const ConnectorComponent = (
+  {
+    connectors,
+    isLoading,
+    isLoadingConnectors
+  }: Props
+) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const connector = getConnectorById(connectorId, connectors) ?? null;
 

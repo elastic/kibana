@@ -24,7 +24,11 @@ interface Props {
  * static, such as banners meant to indicate the sensitivity (e.g., classification) of the information being
  * represented.
  */
-export const BannersList: React.FunctionComponent<Props> = ({ banners$ }) => {
+export const BannersList = (
+  {
+    banners$
+  }: Props
+) => {
   const [banners, setBanners] = useState<OverlayBanner[]>([]);
   useEffect(() => {
     const subscription = banners$.subscribe(setBanners);
@@ -44,7 +48,13 @@ export const BannersList: React.FunctionComponent<Props> = ({ banners$ }) => {
   );
 };
 
-const BannerItem: React.FunctionComponent<{ banner: OverlayBanner }> = ({ banner }) => {
+const BannerItem = (
+  {
+    banner
+  }: {
+    banner: OverlayBanner;
+  }
+) => {
   const element = useRef(null);
   useEffect(() => banner.mount(element.current!), [banner]); // Only unmount / remount if banner object changed.
 

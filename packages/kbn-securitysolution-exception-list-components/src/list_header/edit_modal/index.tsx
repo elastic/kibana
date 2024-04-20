@@ -30,7 +30,13 @@ interface EditModalProps {
   onCancel: () => void;
 }
 
-const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel }) => {
+const EditModalComponent = (
+  {
+    listDetails,
+    onSave,
+    onCancel
+  }: EditModalProps
+) => {
   const { error, modalFormId, newListDetails, showProgress, onBlur, onSubmit, onChange } =
     useEditModal({
       listDetails,

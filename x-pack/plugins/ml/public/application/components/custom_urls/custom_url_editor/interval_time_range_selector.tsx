@@ -19,11 +19,13 @@ interface IntervalTimerangeSelectorProps {
 /*
  * React component for the form for adding a custom time range.
  */
-export const IntervalTimerangeSelector: FC<IntervalTimerangeSelectorProps> = ({
-  setAddIntervalTimerange,
-  addIntervalTimerange,
-  disabled,
-}) => {
+export const IntervalTimerangeSelector = (
+  {
+    setAddIntervalTimerange,
+    addIntervalTimerange,
+    disabled
+  }: IntervalTimerangeSelectorProps
+) => {
   return (
     <>
       <EuiSpacer size="xs" />

@@ -19,7 +19,12 @@ interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
 }
 
-const IncompatibleCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => {
+const IncompatibleCalloutComponent = (
+  {
+    children,
+    enrichedFieldMetadata
+  }: Props
+) => {
   const fieldCount = enrichedFieldMetadata.length;
   const title = useMemo(
     () => <span data-test-subj="title">{i18n.INCOMPATIBLE_CALLOUT_TITLE(fieldCount)}</span>,

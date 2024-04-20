@@ -27,11 +27,13 @@ interface StartActionNameProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const StartActionName: FC<StartActionNameProps> = ({
-  canStartStopDataFrameAnalytics,
-  isDisabled,
-  item,
-}) => {
+export const StartActionName = (
+  {
+    canStartStopDataFrameAnalytics,
+    isDisabled,
+    item
+  }: StartActionNameProps
+) => {
   if (isDisabled) {
     return (
       <EuiToolTip

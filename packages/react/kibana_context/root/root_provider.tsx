@@ -34,12 +34,12 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
  * - Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.
  *
  */
-export const KibanaRootContextProvider: FC<KibanaRootContextProviderProps> = ({
-  children,
-  i18n,
-  ...props
-}) => (
-  <KibanaEuiProvider {...props}>
-    <i18n.Context>{children}</i18n.Context>
-  </KibanaEuiProvider>
-);
+export const KibanaRootContextProvider = (
+  {
+    children,
+    i18n,
+    ...props
+  }: KibanaRootContextProviderProps
+) => (<KibanaEuiProvider {...props}>
+  <i18n.Context>{children}</i18n.Context>
+</KibanaEuiProvider>);

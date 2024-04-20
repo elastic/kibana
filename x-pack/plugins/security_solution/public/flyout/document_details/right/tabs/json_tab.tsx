@@ -21,7 +21,7 @@ const FLYOUT_FOOTER_HEIGHT = 72;
 /**
  * Json view displayed in the document details expandable flyout right section
  */
-export const JsonTab: FC = memo(() => {
+export const JsonTab = memo(() => {
   const { searchHit, isPreview } = useRightPanelContext();
   const jsonValue = JSON.stringify(searchHit, null, 2);
 

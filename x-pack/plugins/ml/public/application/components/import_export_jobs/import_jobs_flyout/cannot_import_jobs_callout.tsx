@@ -18,7 +18,12 @@ interface Props {
   autoExpand?: boolean;
 }
 
-export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false }) => {
+export const CannotImportJobsCallout = (
+  {
+    jobs,
+    autoExpand = false
+  }: Props
+) => {
   if (jobs.length === 0) {
     return null;
   }
@@ -62,30 +67,34 @@ export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false })
   );
 };
 
-const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
-  <>
-    {jobs.length > 0 && (
-      <>
-        {jobs.map(({ jobId, missingIndices, missingFilters }) => (
-          <EuiText size="s">
-            <h5>{jobId}</h5>
-            {missingIndices.length > 0 && (
-              <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
-                defaultMessage="Missing index {num, plural, one {pattern} other {patterns}}: {indices}"
-                values={{ num: missingIndices.length, indices: missingIndices.join(',') }}
-              />
-            )}
-            {missingFilters.length > 0 && (
-              <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingFilters"
-                defaultMessage="Missing filter {num, plural, one {list} other {lists}}: {filters}"
-                values={{ num: missingFilters.length, filters: missingFilters.join(',') }}
-              />
-            )}
-          </EuiText>
-        ))}
-      </>
-    )}
-  </>
-);
+const SkippedJobList = (
+  {
+    jobs
+  }: {
+    jobs: SkippedJobs[];
+  }
+) => (<>
+  {jobs.length > 0 && (
+    <>
+      {jobs.map(({ jobId, missingIndices, missingFilters }) => (
+        <EuiText size="s">
+          <h5>{jobId}</h5>
+          {missingIndices.length > 0 && (
+            <FormattedMessage
+              id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
+              defaultMessage="Missing index {num, plural, one {pattern} other {patterns}}: {indices}"
+              values={{ num: missingIndices.length, indices: missingIndices.join(',') }}
+            />
+          )}
+          {missingFilters.length > 0 && (
+            <FormattedMessage
+              id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingFilters"
+              defaultMessage="Missing filter {num, plural, one {list} other {lists}}: {filters}"
+              values={{ num: missingFilters.length, filters: missingFilters.join(',') }}
+            />
+          )}
+        </EuiText>
+      ))}
+    </>
+  )}
+</>);

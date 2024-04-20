@@ -53,7 +53,7 @@ function startTrialDescription() {
   );
 }
 
-export const DatavisualizerSelector: FC = () => {
+export const DatavisualizerSelector = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const {

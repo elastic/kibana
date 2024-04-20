@@ -30,7 +30,11 @@ interface Props {
   options: ArgOptions[];
 }
 
-export const ArgAddPopover: FC<Props> = ({ options }) => {
+export const ArgAddPopover = (
+  {
+    options
+  }: Props
+) => {
   const button = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
     <EuiButtonIcon
       iconType="plusInCircle"

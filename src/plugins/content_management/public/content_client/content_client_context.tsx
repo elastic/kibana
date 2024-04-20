@@ -18,10 +18,14 @@ export const useContentClient = (): ContentClient => {
   return contentClient;
 };
 
-export const ContentClientProvider: React.FC<{ contentClient: ContentClient }> = ({
-  contentClient,
-  children,
-}) => {
+export const ContentClientProvider = (
+  {
+    contentClient,
+    children
+  }: {
+    contentClient: ContentClient;
+  }
+) => {
   return (
     <ContentClientContext.Provider value={contentClient}>
       <QueryClientProvider client={contentClient.queryClient}>{children}</QueryClientProvider>

@@ -22,7 +22,7 @@ interface Props {
 type ComponentProps = Pick<Props, 'children' | 'errorInfo' | 'resetErrorState' | 'error'>;
 type ChildrenProps = Omit<ComponentProps, 'children'>;
 
-const ErrorBoundaryComponent: FC<ComponentProps> = (props) => {
+const ErrorBoundaryComponent = (props: ComponentProps) => {
   const { children, ...rest } = props;
   return <>{children(rest)}</>;
 };

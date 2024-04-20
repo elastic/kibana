@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { OverviewLogic } from './overview.logic';
 
-export const ApiTotalStats: React.FC = () => {
+export const ApiTotalStats = () => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const documentCount = indexData?.count ?? 0;
   const hideStats = isLoading || isError;

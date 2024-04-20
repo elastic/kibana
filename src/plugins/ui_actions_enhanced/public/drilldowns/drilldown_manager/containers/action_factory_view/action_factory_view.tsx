@@ -17,11 +17,13 @@ export interface ActionFactoryViewProps {
   constant?: boolean;
 }
 
-export const ActionFactoryView: React.FC<ActionFactoryViewProps> = ({
-  factory,
-  context,
-  constant,
-}) => {
+export const ActionFactoryView = (
+  {
+    factory,
+    context,
+    constant
+  }: ActionFactoryViewProps
+) => {
   const drilldowns = useDrilldownManager();
   const name = React.useMemo(() => factory.getDisplayName(context), [factory, context]);
   const icon = React.useMemo(() => factory.getIconType(context), [factory, context]);

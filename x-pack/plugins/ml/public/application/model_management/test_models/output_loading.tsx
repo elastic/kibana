@@ -10,7 +10,13 @@ import React from 'react';
 import type { EuiSkeletonTextProps } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
 
-export const OutputLoadingContent: FC<{ text: string }> = ({ text }) => {
+export const OutputLoadingContent = (
+  {
+    text
+  }: {
+    text: string;
+  }
+) => {
   const actualLines = text.split(/\r\n|\r|\n/).length + 1;
   const lines = actualLines > 4 && actualLines <= 10 ? actualLines : 4;
 

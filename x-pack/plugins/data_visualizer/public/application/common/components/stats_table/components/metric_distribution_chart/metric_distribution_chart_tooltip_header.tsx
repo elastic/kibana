@@ -19,11 +19,13 @@ interface Props {
   fieldFormat?: any; // Kibana formatter for field being viewed
 }
 
-export const MetricDistributionChartTooltipHeader: FC<Props> = ({
-  chartPoint,
-  maxWidth,
-  fieldFormat,
-}) => {
+export const MetricDistributionChartTooltipHeader = (
+  {
+    chartPoint,
+    maxWidth,
+    fieldFormat
+  }: Props
+) => {
   if (chartPoint === undefined) {
     return null;
   }

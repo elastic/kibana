@@ -10,6 +10,6 @@ import React from 'react';
 
 import { DetectorList } from './detector_list';
 
-export const AdvancedDetectorsSummary: FC = () => (
+export const AdvancedDetectorsSummary = () => (
   <DetectorList isActive={false} onEditJob={() => {}} onDeleteJob={() => {}} />
 );

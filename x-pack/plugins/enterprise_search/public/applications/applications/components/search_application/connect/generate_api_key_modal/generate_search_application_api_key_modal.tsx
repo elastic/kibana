@@ -40,9 +40,12 @@ interface GenerateSearchApplicationApiKeyModalProps {
   searchApplicationName: string;
 }
 
-export const GenerateSearchApplicationApiKeyModal: React.FC<
-  GenerateSearchApplicationApiKeyModalProps
-> = ({ onClose, searchApplicationName }) => {
+export const GenerateSearchApplicationApiKeyModal = (
+  {
+    onClose,
+    searchApplicationName
+  }: GenerateSearchApplicationApiKeyModalProps
+) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(GenerateSearchApplicationApiKeyLogic);

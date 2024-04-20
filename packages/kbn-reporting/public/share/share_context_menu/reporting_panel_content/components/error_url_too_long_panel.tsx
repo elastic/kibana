@@ -22,27 +22,29 @@ const i18nTexts = {
   }),
 };
 
-export const ErrorUrlTooLongPanel: FunctionComponent<Props> = ({ isUnsaved }) => (
-  <EuiCallOut title={i18nTexts.title} size="s" iconType="warning" color="danger">
-    <EuiText size="s">
-      <p>
-        {isUnsaved ? (
-          <span data-test-subj="urlTooLongTrySavingMessage">
-            <FormattedMessage
-              id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthTrySaveDescription"
-              defaultMessage="This URL cannot be copied. Try saving your work."
-            />
-          </span>
-        ) : (
-          // Reaching this state is essentially just an error and should result in a user contacting us.
-          <span data-test-subj="urlTooLongErrorMessage">
-            <FormattedMessage
-              id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthDescription"
-              defaultMessage="This URL cannot be copied."
-            />
-          </span>
-        )}
-      </p>
-    </EuiText>
-  </EuiCallOut>
-);
+export const ErrorUrlTooLongPanel = (
+  {
+    isUnsaved
+  }: Props
+) => (<EuiCallOut title={i18nTexts.title} size="s" iconType="warning" color="danger">
+  <EuiText size="s">
+    <p>
+      {isUnsaved ? (
+        <span data-test-subj="urlTooLongTrySavingMessage">
+          <FormattedMessage
+            id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthTrySaveDescription"
+            defaultMessage="This URL cannot be copied. Try saving your work."
+          />
+        </span>
+      ) : (
+        // Reaching this state is essentially just an error and should result in a user contacting us.
+        (<span data-test-subj="urlTooLongErrorMessage">
+          <FormattedMessage
+            id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthDescription"
+            defaultMessage="This URL cannot be copied."
+          />
+        </span>)
+      )}
+    </p>
+  </EuiText>
+</EuiCallOut>);

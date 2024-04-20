@@ -28,13 +28,15 @@ interface Props {
   latest: number | undefined;
 }
 
-export const CreateCategorizationJobButton: FC<Props> = ({
-  dataView,
-  field,
-  query,
-  earliest,
-  latest,
-}) => {
+export const CreateCategorizationJobButton = (
+  {
+    dataView,
+    field,
+    query,
+    earliest,
+    latest
+  }: Props
+) => {
   const {
     uiActions,
     application: { capabilities },

@@ -48,56 +48,60 @@ const useStyles = () => {
 
 const EuiCardWithLink = withLink(EuiCard);
 
-export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.memo(
-  function LandingLinksImageCards({ items, urlState, onLinkClick }) {
-    const styles = useStyles();
-    return (
-      <EuiFlexGroup direction="row" wrap data-test-subj="LandingImageCards">
-        {items.map((item) => {
-          const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
-          const { id, landingImage, title, description, isBeta, betaOptions } = item;
-          return (
-            <EuiFlexItem
-              key={id}
-              data-test-subj="LandingImageCard-item"
-              grow={false}
-              css={styles.container}
-            >
-              <EuiCardWithLink
-                {...linkProps}
-                hasBorder
-                textAlign="left"
-                paddingSize="m"
-                css={styles.card}
-                image={
-                  landingImage && (
-                    <EuiImage
-                      data-test-subj="LandingImageCard-image"
-                      role="presentation"
-                      size={CARD_WIDTH}
-                      alt={title}
-                      src={landingImage}
-                    />
-                  )
-                }
-                title={
-                  <div css={styles.titleContainer}>
-                    <EuiTitle size="xs" css={styles.title}>
-                      <h2>{title}</h2>
-                    </EuiTitle>
-                    {isBeta && <BetaBadge text={betaOptions?.text} />}
-                  </div>
-                }
-                titleElement="span"
-                description={<span css={styles.description}>{description}</span>}
-              />
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
-    );
-  }
-);
+export const LandingLinksImageCards = React.memo(function LandingLinksImageCards(
+  {
+    items,
+    urlState,
+    onLinkClick
+  }: LandingLinksImagesProps
+) {
+  const styles = useStyles();
+  return (
+    <EuiFlexGroup direction="row" wrap data-test-subj="LandingImageCards">
+      {items.map((item) => {
+        const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
+        const { id, landingImage, title, description, isBeta, betaOptions } = item;
+        return (
+          <EuiFlexItem
+            key={id}
+            data-test-subj="LandingImageCard-item"
+            grow={false}
+            css={styles.container}
+          >
+            <EuiCardWithLink
+              {...linkProps}
+              hasBorder
+              textAlign="left"
+              paddingSize="m"
+              css={styles.card}
+              image={
+                landingImage && (
+                  <EuiImage
+                    data-test-subj="LandingImageCard-image"
+                    role="presentation"
+                    size={CARD_WIDTH}
+                    alt={title}
+                    src={landingImage}
+                  />
+                )
+              }
+              title={
+                <div css={styles.titleContainer}>
+                  <EuiTitle size="xs" css={styles.title}>
+                    <h2>{title}</h2>
+                  </EuiTitle>
+                  {isBeta && <BetaBadge text={betaOptions?.text} />}
+                </div>
+              }
+              titleElement="span"
+              description={<span css={styles.description}>{description}</span>}
+            />
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+});
 
 // eslint-disable-next-line import/no-default-export
 export default LandingLinksImageCards;

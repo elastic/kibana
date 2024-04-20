@@ -32,7 +32,7 @@ export interface FeedActivity {
   sourceId?: string;
 }
 
-export const RecentActivity: React.FC = () => {
+export const RecentActivity = () => {
   const {
     organization: { name, defaultOrgName },
   } = useValues(AppLogic);
@@ -80,13 +80,15 @@ export const RecentActivity: React.FC = () => {
   );
 };
 
-export const RecentActivityItem: React.FC<FeedActivity> = ({
-  id,
-  status,
-  message,
-  timestamp,
-  sourceId,
-}) => {
+export const RecentActivityItem = (
+  {
+    id,
+    status,
+    message,
+    timestamp,
+    sourceId
+  }: FeedActivity
+) => {
   const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>

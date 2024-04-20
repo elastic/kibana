@@ -76,7 +76,7 @@ const getTargetFieldHelpText = (isTextExpansionModelSelected: boolean) =>
     ? TARGET_FIELD_HELP_TEXT_TEXT_EXPANSION_MODEL
     : TARGET_FIELD_HELP_TEXT_DEFAULT;
 
-export const MultiFieldMapping: React.FC = () => {
+export const MultiFieldMapping = () => {
   const {
     addInferencePipelineModal: { configuration, selectedSourceFields = [] },
     isTextExpansionModelSelected,
@@ -220,7 +220,11 @@ export interface SelectedFieldMappingsProps {
   isReadOnly?: boolean;
 }
 
-export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ isReadOnly }) => {
+export const SelectedFieldMappings = (
+  {
+    isReadOnly
+  }: SelectedFieldMappingsProps
+) => {
   const { removeFieldFromMapping } = useActions(MLInferenceLogic);
   const {
     addInferencePipelineModal: { configuration },

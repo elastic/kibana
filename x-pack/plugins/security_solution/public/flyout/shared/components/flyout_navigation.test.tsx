@@ -24,7 +24,11 @@ import {
 
 const expandDetails = jest.fn();
 
-const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) => {
+const ExpandableFlyoutTestProviders = (
+  {
+    children
+  }: PropsWithChildren<{}>
+) => {
   return <TestProviders>{children}</TestProviders>;
 };
 

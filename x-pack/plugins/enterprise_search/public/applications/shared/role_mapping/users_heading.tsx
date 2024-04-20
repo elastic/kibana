@@ -15,23 +15,25 @@ interface Props {
   onClick(): void;
 }
 
-export const UsersHeading: React.FC<Props> = ({ onClick }) => (
-  <>
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem>
-        <EuiTitle>
-          <h2>{USERS_HEADING_TITLE}</h2>
-        </EuiTitle>
-        <EuiText>
-          <p>{USERS_HEADING_DESCRIPTION}</p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onClick}>
-          {USERS_HEADING_LABEL}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-  </>
-);
+export const UsersHeading = (
+  {
+    onClick
+  }: Props
+) => (<>
+  <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexItem>
+      <EuiTitle>
+        <h2>{USERS_HEADING_TITLE}</h2>
+      </EuiTitle>
+      <EuiText>
+        <p>{USERS_HEADING_DESCRIPTION}</p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiButton fill onClick={onClick}>
+        {USERS_HEADING_LABEL}
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer size="s" />
+</>);

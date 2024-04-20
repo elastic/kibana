@@ -39,12 +39,14 @@ export interface ExplorationQueryBarProps {
   };
 }
 
-export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
-  dataView,
-  setSearchQuery,
-  filters,
-  query,
-}) => {
+export const ExplorationQueryBar = (
+  {
+    dataView,
+    setSearchQuery,
+    filters,
+    query
+  }: ExplorationQueryBarProps
+) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(query);
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});

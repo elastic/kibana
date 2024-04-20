@@ -39,7 +39,11 @@ interface Props {
   indexDetails: Index;
 }
 
-export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetails }) => {
+export const DetailsPageOverview = (
+  {
+    indexDetails
+  }: Props
+) => {
   const {
     name,
     status,

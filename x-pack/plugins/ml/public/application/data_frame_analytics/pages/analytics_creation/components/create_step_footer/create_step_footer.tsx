@@ -37,7 +37,13 @@ export interface AnalyticsProgressStats {
   totalPhases: number;
 }
 
-export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) => {
+export const CreateStepFooter = (
+  {
+    jobId,
+    jobType,
+    showProgress
+  }: Props
+) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [jobFinished, setJobFinished] = useState<boolean>(false);

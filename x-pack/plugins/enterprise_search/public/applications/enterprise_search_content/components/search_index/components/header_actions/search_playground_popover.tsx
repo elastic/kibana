@@ -20,10 +20,12 @@ export interface SearchPlaygroundPopoverProps {
   ingestionMethod: string;
 }
 
-export const SearchPlaygroundPopover: React.FC<SearchPlaygroundPopoverProps> = ({
-  indexName,
-  ingestionMethod,
-}) => {
+export const SearchPlaygroundPopover = (
+  {
+    indexName,
+    ingestionMethod
+  }: SearchPlaygroundPopoverProps
+) => {
   const playgroundUrl = PLAYGROUND_PATH + `?default-index=${indexName}`;
 
   return (

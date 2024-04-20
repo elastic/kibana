@@ -14,12 +14,14 @@ import { AppDependencies, IndexManagementAppContext } from '../../../..';
 import { IndexMappingWithContextProps } from './index_mapping_with_context_types';
 import { DetailsPageMappings } from './details_page_mappings';
 
-export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = ({
-  core,
-  dependencies,
-  index,
-  showAboutMappings,
-}) => {
+export const IndexMappingWithContext = (
+  {
+    core,
+    dependencies,
+    index,
+    showAboutMappings
+  }: IndexMappingWithContextProps
+) => {
   // this normally happens when the index management app is rendered
   // but if components are embedded elsewhere that setup is skipped, so we have to do it here
   // would do it in plugin.ts but that blows up the bundle size

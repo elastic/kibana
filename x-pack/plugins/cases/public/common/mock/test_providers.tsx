@@ -67,16 +67,18 @@ const mockGetFilesClient = () => {
 export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<TestProviderProps> = ({
-  children,
-  features,
-  owner = mockedTestProvidersOwner,
-  permissions = allCasesPermissions(),
-  releasePhase = 'ga',
-  externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
-  persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
-  license,
-}) => {
+const TestProvidersComponent = (
+  {
+    children,
+    features,
+    owner = mockedTestProvidersOwner,
+    permissions = allCasesPermissions(),
+    releasePhase = 'ga',
+    externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
+    persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
+    license
+  }: TestProviderProps
+) => {
   const services = createStartServicesMock({ license });
 
   const queryClient = new QueryClient({
@@ -175,30 +177,34 @@ export const createAppMockRenderer = ({
 
   const getFilesClient = mockGetFilesClient();
 
-  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <MemoryRouter>
-            <CasesProvider
-              value={{
-                externalReferenceAttachmentTypeRegistry,
-                persistableStateAttachmentTypeRegistry,
-                features,
-                owner,
-                permissions,
-                releasePhase,
-                getFilesClient,
-              }}
-              queryClient={queryClient}
-            >
-              {children}
-            </CasesProvider>
-          </MemoryRouter>
-        </ThemeProvider>
-      </KibanaContextProvider>
-    </I18nProvider>
-  );
+  const AppWrapper = (
+    {
+      children
+    }: {
+      children: React.ReactNode;
+    }
+  ) => (<I18nProvider>
+    <KibanaContextProvider services={services}>
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <MemoryRouter>
+          <CasesProvider
+            value={{
+              externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
+              features,
+              owner,
+              permissions,
+              releasePhase,
+              getFilesClient,
+            }}
+            queryClient={queryClient}
+          >
+            {children}
+          </CasesProvider>
+        </MemoryRouter>
+      </ThemeProvider>
+    </KibanaContextProvider>
+  </I18nProvider>);
 
   AppWrapper.displayName = 'AppWrapper';
 

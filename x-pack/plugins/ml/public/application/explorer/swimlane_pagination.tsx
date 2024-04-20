@@ -26,12 +26,14 @@ interface SwimLanePaginationProps {
   onPaginationChange: (arg: { perPage?: number; fromPage?: number }) => void;
 }
 
-export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
-  cardinality,
-  fromPage,
-  perPage,
-  onPaginationChange,
-}) => {
+export const SwimLanePagination = (
+  {
+    cardinality,
+    fromPage,
+    perPage,
+    onPaginationChange
+  }: SwimLanePaginationProps
+) => {
   const componentFromPage = fromPage - 1;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

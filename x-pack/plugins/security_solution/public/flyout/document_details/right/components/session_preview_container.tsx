@@ -28,7 +28,7 @@ const timelineId = 'timeline-1';
 /**
  * Checks if the SessionView component is available, if so render it or else render an error message
  */
-export const SessionPreviewContainer: FC = () => {
+export const SessionPreviewContainer = () => {
   const { dataAsNestedObject, getFieldsData, isPreview } = useRightPanelContext();
 
   // decide whether to show the session view or not

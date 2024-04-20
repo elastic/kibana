@@ -14,7 +14,7 @@ interface LayoutProps {
   actionSection?: React.ReactNode;
 }
 
-export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
+export const NoDataLayout = withRouter<
   any,
   React.FunctionComponent<LayoutProps>
 >(({ actionSection, title, children }: React.PropsWithChildren<LayoutProps>) => {

@@ -41,19 +41,21 @@ export interface ProductCardProps {
   url?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
-  cta,
-  description,
-  emptyCta = false,
-  hasBorder,
-  hasShadow,
-  icon,
-  iconSize,
-  productId,
-  rightPanelItems,
-  name,
-  url,
-}) => {
+export const ProductCard = (
+  {
+    cta,
+    description,
+    emptyCta = false,
+    hasBorder,
+    hasShadow,
+    icon,
+    iconSize,
+    productId,
+    rightPanelItems,
+    name,
+    url
+  }: ProductCardProps
+) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
 
   return (

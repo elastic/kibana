@@ -50,7 +50,7 @@ import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
 import { SetupGuide } from './views/setup_guide';
 
-export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
+export const WorkplaceSearch = (props: InitialAppData) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
@@ -73,10 +73,15 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   return <WorkplaceSearchConfigured {...props} />;
 };
 
-export const WorkplaceSearchConfiguredRoutes: React.FC<{
-  isAdmin: boolean;
-  kibanaUIsEnabled: boolean;
-}> = ({ isAdmin, kibanaUIsEnabled }) => {
+export const WorkplaceSearchConfiguredRoutes = (
+  {
+    isAdmin,
+    kibanaUIsEnabled
+  }: {
+    isAdmin: boolean;
+    kibanaUIsEnabled: boolean;
+  }
+) => {
   const isblockingRoutes = isAdmin && !kibanaUIsEnabled;
   return !isblockingRoutes ? (
     <Routes>
@@ -142,7 +147,7 @@ export const WorkplaceSearchConfiguredRoutes: React.FC<{
     </Routes>
   );
 };
-export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
+export const WorkplaceSearchConfigured = (props: InitialAppData) => {
   const {
     hasInitialized,
     organization: { kibanaUIsEnabled },
@@ -173,7 +178,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   return <WorkplaceSearchConfiguredRoutes isAdmin={isAdmin} kibanaUIsEnabled={kibanaUIsEnabled} />;
 };
 
-export const WorkplaceSearchUnconfigured: React.FC = () => (
+export const WorkplaceSearchUnconfigured = () => (
   <Routes>
     <Route exact path={SETUP_GUIDE_PATH}>
       <SetupGuide />

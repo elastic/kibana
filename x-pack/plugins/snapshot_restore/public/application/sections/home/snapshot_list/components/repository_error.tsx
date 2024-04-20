@@ -12,7 +12,7 @@ import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToRepositories } from '../../../../services/navigation';
 
-export const RepositoryError: React.FunctionComponent = () => {
+export const RepositoryError = () => {
   const history = useHistory();
   return (
     <EuiPageTemplate.EmptyPrompt

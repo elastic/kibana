@@ -16,10 +16,12 @@ interface ActionConnectorWarningsComponentProps {
   actionConnectorsWarnings: WarningSchema[];
   importedActionConnectorsCount?: number;
 }
-const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps> = ({
-  actionConnectorsWarnings,
-  importedActionConnectorsCount,
-}) => {
+const ActionConnectorWarningsComponent = (
+  {
+    actionConnectorsWarnings,
+    importedActionConnectorsCount
+  }: ActionConnectorWarningsComponentProps
+) => {
   const { http } = useKibana().services;
 
   if (!importedActionConnectorsCount || !actionConnectorsWarnings.length) return null;

@@ -26,11 +26,13 @@ interface PipelinePanelProps {
   reporterImage: string;
 }
 
-export const PipelinePanel: React.FC<PipelinePanelProps> = ({
-  clusterImage,
-  cutImage,
-  reporterImage,
-}) => {
+export const PipelinePanel = (
+  {
+    clusterImage,
+    cutImage,
+    reporterImage
+  }: PipelinePanelProps
+) => {
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">

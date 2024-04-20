@@ -45,13 +45,15 @@ interface Props {
 
 const INFINITE_AS_ICON = true;
 
-export const DataStreamTable: React.FunctionComponent<Props> = ({
-  dataStreams,
-  reload,
-  history,
-  filters,
-  includeStats,
-}) => {
+export const DataStreamTable = (
+  {
+    dataStreams,
+    reload,
+    history,
+    filters,
+    includeStats
+  }: Props
+) => {
   const [selection, setSelection] = useState<DataStream[]>([]);
   const [dataStreamsToDelete, setDataStreamsToDelete] = useState<string[]>([]);
   const { config } = useAppContext();

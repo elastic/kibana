@@ -15,7 +15,7 @@ import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
 /**
  * Response button that opens Response section in the left panel
  */
-export const ResponseButton: React.FC = () => {
+export const ResponseButton = () => {
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useRightPanelContext();
 

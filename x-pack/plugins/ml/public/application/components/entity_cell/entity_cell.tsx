@@ -89,12 +89,14 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
  * of the entity, such as a partitioning or influencer field value, and optionally links for
  * adding or removing a filter on this entity.
  */
-export const EntityCell: FC<EntityCellProps> = ({
-  entityName,
-  entityValue,
-  filter,
-  wrapText = false,
-}) => {
+export const EntityCell = (
+  {
+    entityName,
+    entityValue,
+    filter,
+    wrapText = false
+  }: EntityCellProps
+) => {
   let valueText = entityValue === '' ? <i>{EMPTY_FIELD_VALUE_LABEL}</i> : entityValue;
   if (entityName === MLCATEGORY) {
     valueText = `${MLCATEGORY} ${valueText}`;

@@ -14,7 +14,7 @@ import { useDeps } from '../../hooks/use_deps';
 import { Sidebar } from './sidebar';
 import { routes } from '../../routes';
 
-export const App: React.FC = () => {
+export const App = () => {
   const { appBasePath } = useDeps();
 
   const routeElements: React.ReactElement[] = [];

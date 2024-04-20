@@ -16,11 +16,17 @@ import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_
 
 const exampleCount = 5;
 
-export const CategoryDetailsRow: React.FunctionComponent<{
-  categoryId: number;
-  timeRange: TimeRange;
-  logViewReference: PersistedLogViewReference;
-}> = ({ categoryId, timeRange, logViewReference }) => {
+export const CategoryDetailsRow = (
+  {
+    categoryId,
+    timeRange,
+    logViewReference
+  }: {
+    categoryId: number;
+    timeRange: TimeRange;
+    logViewReference: PersistedLogViewReference;
+  }
+) => {
   const { idFormats } = useLogMlJobIdFormatsShimContext();
 
   const {

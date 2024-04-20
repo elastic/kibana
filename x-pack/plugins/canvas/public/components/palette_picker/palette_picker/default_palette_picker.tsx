@@ -18,7 +18,7 @@ const strings = {
     }),
 };
 
-export const DefaultPalettePicker: FC<RequiredComponentProps> = (props) => {
+export const DefaultPalettePicker = (props: RequiredComponentProps) => {
   const { palette, palettes, onChange = () => {} } = props;
   const colorPalettes = palettes.map(prepareColorPalette);
 

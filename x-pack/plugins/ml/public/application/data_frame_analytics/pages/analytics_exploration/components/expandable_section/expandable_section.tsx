@@ -49,16 +49,18 @@ export interface ExpandableSectionProps {
   urlStateKey: ExpandablePanels;
 }
 
-export const ExpandableSection: FC<ExpandableSectionProps> = ({
-  headerItems,
-  content,
-  isExpanded: isExpandedDefault,
-  contentPadding = false,
-  dataTestId,
-  title,
-  docsLink,
-  urlStateKey,
-}) => {
+export const ExpandableSection = (
+  {
+    headerItems,
+    content,
+    isExpanded: isExpandedDefault,
+    contentPadding = false,
+    dataTestId,
+    title,
+    docsLink,
+    urlStateKey
+  }: ExpandableSectionProps
+) => {
   const overrides = useMemo(
     () => (isExpandedDefault !== undefined ? { [urlStateKey]: isExpandedDefault } : undefined),
     [urlStateKey, isExpandedDefault]

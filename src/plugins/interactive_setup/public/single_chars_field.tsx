@@ -25,15 +25,17 @@ export interface SingleCharsFieldProps {
   autoFocus?: boolean;
 }
 
-export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
-  defaultValue,
-  length,
-  separator,
-  pattern = /^[0-9]$/,
-  onChange,
-  isInvalid,
-  autoFocus = false,
-}) => {
+export const SingleCharsField = (
+  {
+    defaultValue,
+    length,
+    separator,
+    pattern = /^[0-9]$/,
+    onChange,
+    isInvalid,
+    autoFocus = false
+  }: SingleCharsFieldProps
+) => {
   // Strip any invalid characters from input or clipboard and restrict length.
   const sanitize = (str: string) => {
     return str

@@ -25,7 +25,11 @@ export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;
 }
 
-export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
+export const VegaChartView = (
+  {
+    vegaSpec
+  }: VegaChartViewProps
+) => {
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
   useEffect(() => {

@@ -26,10 +26,12 @@ export interface SessionExpirationToastProps {
   onExtend: () => Promise<any>;
 }
 
-export const SessionExpirationToast: FunctionComponent<SessionExpirationToastProps> = ({
-  sessionState$,
-  onExtend,
-}) => {
+export const SessionExpirationToast = (
+  {
+    sessionState$,
+    onExtend
+  }: SessionExpirationToastProps
+) => {
   const state = useObservable(sessionState$);
   const [{ loading }, extend] = useAsyncFn(onExtend);
 

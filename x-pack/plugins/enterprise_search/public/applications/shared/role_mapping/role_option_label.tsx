@@ -14,13 +14,16 @@ interface Props {
   description: string;
 }
 
-export const RoleOptionLabel: React.FC<Props> = ({ label, description }) => (
-  <>
-    <EuiText size="s">{label.charAt(0).toUpperCase() + label.toLowerCase().slice(1)}</EuiText>
-    <EuiSpacer size="xs" />
-    <EuiText size="xs">
-      <p>{description}</p>
-    </EuiText>
-    <EuiSpacer size="s" />
-  </>
-);
+export const RoleOptionLabel = (
+  {
+    label,
+    description
+  }: Props
+) => (<>
+  <EuiText size="s">{label.charAt(0).toUpperCase() + label.toLowerCase().slice(1)}</EuiText>
+  <EuiSpacer size="xs" />
+  <EuiText size="xs">
+    <p>{description}</p>
+  </EuiText>
+  <EuiSpacer size="s" />
+</>);

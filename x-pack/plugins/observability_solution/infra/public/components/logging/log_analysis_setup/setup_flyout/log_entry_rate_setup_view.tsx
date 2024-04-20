@@ -11,9 +11,13 @@ import { createInitialConfigurationStep } from '../initial_configuration_step';
 import { createProcessStep } from '../process_step';
 import { useLogEntryRateSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_rate';
 
-export const LogEntryRateSetupView: React.FC<{
-  onClose: () => void;
-}> = ({ onClose }) => {
+export const LogEntryRateSetupView = (
+  {
+    onClose
+  }: {
+    onClose: () => void;
+  }
+) => {
   const {
     cleanUpAndSetUp,
     endTime,

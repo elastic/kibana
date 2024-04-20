@@ -19,7 +19,11 @@ interface GroupSourcesProps {
   groupSources: ContentSource[];
 }
 
-export const GroupSources: React.FC<GroupSourcesProps> = ({ groupSources }) => {
+export const GroupSources = (
+  {
+    groupSources
+  }: GroupSourcesProps
+) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const closePopover = () => setPopoverOpen(false);
   const togglePopover = () => setPopoverOpen(!popoverOpen);

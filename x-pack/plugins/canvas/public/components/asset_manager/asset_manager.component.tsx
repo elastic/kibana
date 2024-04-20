@@ -74,7 +74,7 @@ export interface Props {
   onAddAsset: (file: File) => Promise<void | string>;
 }
 
-export const AssetManager: FC<Props> = (props) => {
+export const AssetManager = (props: Props) => {
   const { assets, onClose, onAddAsset } = props;
   const [isLoading, setIsLoading] = useState(false);
 

@@ -19,10 +19,15 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 import { LogsPageTemplate } from './page_template';
 
-export const LogViewErrorPage: React.FC<{
-  errors: Error[];
-  onRetry: () => void;
-}> = ({ errors, onRetry }) => {
+export const LogViewErrorPage = (
+  {
+    errors,
+    onRetry
+  }: {
+    errors: Error[];
+    onRetry: () => void;
+  }
+) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
   return (
@@ -84,7 +89,7 @@ export const LogViewErrorPage: React.FC<{
 
 export const LogSourceErrorPage = LogViewErrorPage;
 
-export const ConnectedLogViewErrorPage: React.FC = () => {
+export const ConnectedLogViewErrorPage = () => {
   const { logViewStateService } = useLogViewContext();
 
   const errors = useSelector(logViewStateService, (state) => {
@@ -104,10 +109,16 @@ export const ConnectedLogViewErrorPage: React.FC = () => {
   return <LogSourceErrorPage errors={errors} onRetry={retry} />;
 };
 
-const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
+const LogSourceErrorMessage = (
+  {
+    error
+  }: {
+    error: Error;
+  }
+) => {
   if (error instanceof ResolveLogViewError) {
     return (
-      <LogSourceErrorCallout
+      (<LogSourceErrorCallout
         title={
           <FormattedMessage
             id="xpack.infra.logSourceErrorPage.resolveLogSourceConfigurationErrorTitle"
@@ -117,18 +128,18 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
       >
         {error.cause instanceof SavedObjectNotFound ? (
           // the SavedObjectNotFound error message contains broken markup
-          <FormattedMessage
+          (<FormattedMessage
             id="xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage"
             defaultMessage="Failed to locate that {savedObjectType}: {savedObjectId}"
             values={{
               savedObjectType: error.cause.savedObjectType,
               savedObjectId: error.cause.savedObjectId,
             }}
-          />
+          />)
         ) : (
           `${error.cause?.message ?? error.message}`
         )}
-      </LogSourceErrorCallout>
+      </LogSourceErrorCallout>)
     );
   } else if (error instanceof FetchLogViewError) {
     return (
@@ -161,8 +172,13 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
   }
 };
 
-const LogSourceErrorCallout: React.FC<{ title: React.ReactNode }> = ({ title, children }) => (
-  <EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
-    <p>{children}</p>
-  </EuiCallOut>
-);
+const LogSourceErrorCallout = (
+  {
+    title,
+    children
+  }: {
+    title: React.ReactNode;
+  }
+) => (<EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
+  <p>{children}</p>
+</EuiCallOut>);

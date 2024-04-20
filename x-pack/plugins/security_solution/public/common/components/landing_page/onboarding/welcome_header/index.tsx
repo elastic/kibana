@@ -20,7 +20,13 @@ import { useProjectFeaturesUrl } from '../hooks/use_project_features_url';
 import { useCurrentUser } from '../../../../lib/kibana';
 import { CurrentPlan } from './current_plan';
 
-const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ productTier }) => {
+const WelcomeHeaderComponent = (
+  {
+    productTier
+  }: {
+    productTier?: ProductTier;
+  }
+) => {
   const userName = useCurrentUser();
 
   // Full name could be null, user name should always exist

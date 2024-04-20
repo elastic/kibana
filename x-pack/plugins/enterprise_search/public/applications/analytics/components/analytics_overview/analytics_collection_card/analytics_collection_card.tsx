@@ -101,9 +101,17 @@ const getChartStatus = (metric: number | null): ChartStatus => {
   if (metric && metric < 0) return ChartStatus.DECREASE;
   return ChartStatus.CONSTANT;
 };
-export const AnalyticsCollectionCard: React.FC<
-  AnalyticsCollectionCardProps & AnalyticsCollectionCardLensProps
-> = ({ collection, isLoading, isCreatedByEngine, subtitle, data, metric, secondaryMetric }) => {
+export const AnalyticsCollectionCard = (
+  {
+    collection,
+    isLoading,
+    isCreatedByEngine,
+    subtitle,
+    data,
+    metric,
+    secondaryMetric
+  }: AnalyticsCollectionCardProps & AnalyticsCollectionCardLensProps
+) => {
   const { euiTheme } = useEuiTheme();
   const { history, navigateToUrl } = useValues(KibanaLogic);
   const cardStyles = AnalyticsCollectionCardStyles(euiTheme);

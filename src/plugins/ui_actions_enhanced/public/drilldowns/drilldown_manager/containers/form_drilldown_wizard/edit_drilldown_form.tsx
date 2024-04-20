@@ -25,7 +25,11 @@ export interface EditDrilldownFormProps {
   state: DrilldownState;
 }
 
-export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ state }) => {
+export const EditDrilldownForm = (
+  {
+    state
+  }: EditDrilldownFormProps
+) => {
   const drilldowns = useDrilldownManager();
   const name = state.useName();
   const triggers = state.useTriggers();

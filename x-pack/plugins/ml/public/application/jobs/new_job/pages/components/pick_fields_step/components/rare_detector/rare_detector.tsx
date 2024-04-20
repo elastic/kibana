@@ -19,7 +19,11 @@ interface Props {
   onChange(d: RARE_DETECTOR_TYPE): void;
 }
 
-export const RareDetector: FC<Props> = ({ onChange }) => {
+export const RareDetector = (
+  {
+    onChange
+  }: Props
+) => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
   const [rareDetectorType, setRareDetectorType] = useState<RARE_DETECTOR_TYPE | null>(null);

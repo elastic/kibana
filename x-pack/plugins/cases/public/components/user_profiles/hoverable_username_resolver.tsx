@@ -13,12 +13,16 @@ import { Username } from './username';
 import { convertToUserInfo } from './user_converter';
 import { UserToolTip } from './user_tooltip';
 
-const HoverableUsernameResolverComponent: React.FC<
+const HoverableUsernameResolverComponent = (
   {
+    user,
+    userProfiles,
+    boldName = true
+  }: {
     user: CaseUser;
     userProfiles?: Map<string, UserProfileWithAvatar>;
   } & Pick<HoverableUserWithAvatarProps, 'boldName'>
-> = ({ user, userProfiles, boldName = true }) => {
+) => {
   const { userInfo } = convertToUserInfo(user, userProfiles) ?? { userInfo: undefined };
 
   return (

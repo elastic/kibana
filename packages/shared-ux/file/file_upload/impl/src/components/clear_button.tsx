@@ -15,7 +15,11 @@ interface Props {
   onClick: () => void;
 }
 
-export const ClearButton: FunctionComponent<Props> = ({ onClick }) => {
+export const ClearButton = (
+  {
+    onClick
+  }: Props
+) => {
   return (
     <EuiButtonEmpty size="s" data-test-subj="clearButton" onClick={onClick} color="primary">
       {i18nTexts.clear}

@@ -231,7 +231,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
   describe('Embedded Console', () => {
     it('renders embedded console if available', () => {
-      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
+      const FakeEmbeddedConsole = () => <div className="embedded_console">foo</div>;
       const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
 
       setMockValues({
@@ -248,7 +248,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(true);
     });
     it('Hides embedded console if available but page template prop set to hide', () => {
-      const FakeEmbeddedConsole: React.FC = () => <div className="embedded_console">foo</div>;
+      const FakeEmbeddedConsole = () => <div className="embedded_console">foo</div>;
       const consolePlugin = { EmbeddableConsole: FakeEmbeddedConsole };
 
       setMockValues({

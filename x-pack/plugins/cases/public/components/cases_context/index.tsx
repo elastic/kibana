@@ -62,20 +62,27 @@ export interface CasesContextProps
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
-export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: QueryClient }> = ({
-  children,
-  value: {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
-    owner,
-    permissions,
-    basePath = DEFAULT_BASE_PATH,
-    features = {},
-    releasePhase = 'ga',
-    getFilesClient,
-  },
-  queryClient = casesQueryClient,
-}) => {
+export const CasesProvider = (
+  {
+    children,
+
+    value: {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      permissions,
+      basePath = DEFAULT_BASE_PATH,
+      features = {},
+      releasePhase = 'ga',
+      getFilesClient,
+    },
+
+    queryClient = casesQueryClient
+  }: {
+    value: CasesContextProps;
+    queryClient?: QueryClient;
+  }
+) => {
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
   const value: CasesContextValue = useMemo(

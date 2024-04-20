@@ -47,7 +47,13 @@ export type AddModelFlyoutTabId = 'clickToDownload' | 'manualDownload';
 /**
  * Flyout for downloading elastic curated models and showing instructions for importing third-party models.
  */
-export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, modelDownloads }) => {
+export const AddModelFlyout = (
+  {
+    onClose,
+    onSubmit,
+    modelDownloads
+  }: AddModelFlyoutProps
+) => {
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
   const isClickToDownloadTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
@@ -147,10 +153,12 @@ interface ClickToDownloadTabContentProps {
 /**
  * Tab content for selecting a model to download.
  */
-const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
-  modelDownloads,
-  onModelDownload,
-}) => {
+const ClickToDownloadTabContent = (
+  {
+    modelDownloads,
+    onModelDownload
+  }: ClickToDownloadTabContentProps
+) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -366,7 +374,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
 /**
  * Manual download tab content for showing instructions for importing third-party models.
  */
-const ManualDownloadTabContent: FC = () => {
+const ManualDownloadTabContent = () => {
   const {
     services: { docLinks },
   } = useMlKibana();

@@ -32,7 +32,13 @@ interface Props {
   width: string;
 }
 
-export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width }) => {
+export const EventRateChart = (
+  {
+    eventRateChartData,
+    height,
+    width
+  }: Props
+) => {
   const { euiColorLightShade } = useCurrentEuiTheme();
   const theme: PartialTheme = {
     scales: { histogramPadding: 0.2 },

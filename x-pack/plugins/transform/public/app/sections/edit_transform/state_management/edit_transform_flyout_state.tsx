@@ -53,10 +53,12 @@ const getReduxStore = () =>
 
 const EditTransformFlyoutContext = createContext<ProviderProps | null>(null);
 
-export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> = ({
-  children,
-  ...props
-}) => {
+export const EditTransformFlyoutProvider = (
+  {
+    children,
+    ...props
+  }: PropsWithChildren<ProviderProps>
+) => {
   const store = useMemo(getReduxStore, []);
 
   // Apply original transform config to redux form state.

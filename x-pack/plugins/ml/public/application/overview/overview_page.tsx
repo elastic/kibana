@@ -37,7 +37,7 @@ export const overviewPanelDefaultState = Object.freeze({
   dfaJobs: true,
 });
 
-export const OverviewPage: FC = () => {
+export const OverviewPage = () => {
   const [canViewMlNodes, canCreateJob] = usePermissionCheck(['canViewMlNodes', 'canCreateJob']);
 
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();

@@ -26,11 +26,13 @@ import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
-const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
-  ruleParams,
-  setRuleParams,
-  errors,
-}) => {
+const AnomalyDetectionJobsHealthRuleTrigger = (
+  {
+    ruleParams,
+    setRuleParams,
+    errors
+  }: MlAnomalyAlertTriggerProps
+) => {
   const {
     services: { http },
   } = useMlKibana();

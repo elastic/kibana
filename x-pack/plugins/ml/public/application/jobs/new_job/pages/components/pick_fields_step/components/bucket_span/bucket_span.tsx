@@ -19,7 +19,12 @@ interface Props {
   hideEstimateButton?: boolean;
 }
 
-export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }) => {
+export const BucketSpan = (
+  {
+    setIsValid,
+    hideEstimateButton = false
+  }: Props
+) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);

@@ -29,7 +29,7 @@ import { useRetentionPolicyField } from '../state_management/selectors/retention
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 
-export const EditTransformRetentionPolicy: FC = () => {
+export const EditTransformRetentionPolicy = () => {
   const { i18n: i18nStart, theme } = useAppDependencies();
 
   const toastNotifications = useToastNotifications();

@@ -25,13 +25,15 @@ interface Props {
  * In some scenarios, it replaces the usage of <SectionError />.
  */
 
-export const PageError: React.FunctionComponent<Props> = ({
-  title,
-  error,
-  actions,
-  isCentered,
-  ...rest
-}) => {
+export const PageError = (
+  {
+    title,
+    error,
+    actions,
+    isCentered,
+    ...rest
+  }: Props
+) => {
   const errorString = error?.error;
   const cause = error?.cause; // wrapEsError() on the server adds a "cause" array
   const message = error?.message;

@@ -29,7 +29,7 @@ import { CredentialsFlyout } from './credentials_flyout';
 import { CredentialsList } from './credentials_list';
 import { CredentialsLogic } from './credentials_logic';
 
-export const Credentials: React.FC = () => {
+export const Credentials = () => {
   const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } =
     useActions(CredentialsLogic);
 

@@ -92,7 +92,11 @@ export const dataDriftRouteIndexPatternFactory = (
 interface DataDriftPageProps extends PageProps {
   mode: 'data_drift_index_select' | 'data_drift_custom';
 }
-const PageWrapper: FC<DataDriftPageProps> = ({ mode }) => {
+const PageWrapper = (
+  {
+    mode
+  }: DataDriftPageProps
+) => {
   const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (

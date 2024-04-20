@@ -48,7 +48,7 @@ const EmptyMessage = () => (
   </EuiFlexGroup>
 );
 
-export const SearchBar: FC<SearchBarProps> = (opts) => {
+export const SearchBar = (opts: SearchBarProps) => {
   const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
   const isMounted = useMountedState();

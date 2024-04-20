@@ -146,16 +146,18 @@ interface EmbeddablePanelWrapperProps {
   abortController?: AbortController;
 }
 
-const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
-  factory,
-  uiActions,
-  actionPredicate,
-  input,
-  extraActions,
-  showInspector = true,
-  withDefaultActions,
-  abortController,
-}) => {
+const EmbeddablePanelWrapper = (
+  {
+    factory,
+    uiActions,
+    actionPredicate,
+    input,
+    extraActions,
+    showInspector = true,
+    withDefaultActions,
+    abortController
+  }: EmbeddablePanelWrapperProps
+) => {
   const [embeddable, loading] = useEmbeddableFactory({ factory, input });
   useEffect(() => {
     if (embeddable) {

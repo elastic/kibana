@@ -62,11 +62,18 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   }
 `;
 
-const CollapsablePanel: React.FC<{
-  id: string;
-  title: React.ReactNode;
-  'data-test-subj'?: string;
-}> = ({ id, title, children, 'data-test-subj': dataTestSubj }) => {
+const CollapsablePanel = (
+  {
+    id,
+    title,
+    children,
+    'data-test-subj': dataTestSubj
+  }: {
+    id: string;
+    title: React.ReactNode;
+    'data-test-subj'?: string;
+  }
+) => {
   const arrowProps = useMemo<EuiAccordionProps['arrowProps']>(() => {
     if (dataTestSubj) {
       return {
@@ -92,12 +99,19 @@ const CollapsablePanel: React.FC<{
   );
 };
 
-export const AgentDetailsIntegration: React.FunctionComponent<{
-  agent: Agent;
-  agentPolicy: AgentPolicy;
-  packagePolicy: PackagePolicy;
-  'data-test-subj'?: string;
-}> = memo(({ agent, agentPolicy, packagePolicy, 'data-test-subj': dataTestSubj }) => {
+export const AgentDetailsIntegration = memo((
+  {
+    agent,
+    agentPolicy,
+    packagePolicy,
+    'data-test-subj': dataTestSubj
+  }: {
+    agent: Agent;
+    agentPolicy: AgentPolicy;
+    packagePolicy: PackagePolicy;
+    'data-test-subj'?: string;
+  }
+) => {
   const { getHref } = useLink();
   const theme = useEuiTheme();
 

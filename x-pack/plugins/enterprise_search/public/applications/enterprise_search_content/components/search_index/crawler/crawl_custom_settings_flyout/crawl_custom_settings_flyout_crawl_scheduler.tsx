@@ -38,13 +38,15 @@ interface MultiCrawlSchedulerProps {
   onSetConnectorSchedulingEnabled: (enabled: boolean) => void;
 }
 
-export const MultiCrawlScheduler: React.FC<MultiCrawlSchedulerProps> = ({
-  index,
-  interval,
-  schedulingEnabled,
-  setConnectorSchedulingInterval,
-  onSetConnectorSchedulingEnabled,
-}) => {
+export const MultiCrawlScheduler = (
+  {
+    index,
+    interval,
+    schedulingEnabled,
+    setConnectorSchedulingInterval,
+    onSetConnectorSchedulingEnabled
+  }: MultiCrawlSchedulerProps
+) => {
   if (!isCrawlerIndex(index)) {
     return <></>;
   }

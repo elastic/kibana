@@ -23,7 +23,12 @@ interface AddControlProps extends Partial<EuiButtonIconProps> {
   onClick: () => void;
 }
 
-export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
+export const AddControl = (
+  {
+    onClick,
+    ...rest
+  }: AddControlProps
+) => {
   const { isDisabled } = rest;
   return (
     <EuiToolTip content={isDisabled ? ADD_CONTROLS_MAX_LIMIT : ADD_CONTROLS}>
@@ -45,7 +50,11 @@ interface SaveControlsProps {
   onClick: () => void;
 }
 
-export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
+export const SaveControls = (
+  {
+    onClick
+  }: SaveControlsProps
+) => {
   const {
     hasPendingChanges,
     openPendingChangesPopover,

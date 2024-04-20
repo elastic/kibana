@@ -166,17 +166,19 @@ function getTicks(ticksPosition: GaugeTicksPosition, colorBands?: number[]) {
   }
 }
 
-export const GaugeComponent: FC<GaugeRenderProps> = ({
-  data,
-  args,
-  uiState,
-  formatFactory,
-  paletteService,
-  chartsThemeService,
-  renderComplete,
-  overrides,
-  setChartSize,
-}) => {
+export const GaugeComponent = (
+  {
+    data,
+    args,
+    uiState,
+    formatFactory,
+    paletteService,
+    chartsThemeService,
+    renderComplete,
+    overrides,
+    setChartSize
+  }: GaugeRenderProps
+) => {
   const {
     shape: gaugeType,
     palette,

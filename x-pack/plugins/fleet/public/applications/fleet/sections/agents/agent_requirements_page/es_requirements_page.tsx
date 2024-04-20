@@ -28,10 +28,14 @@ import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
 import { useStartServices } from '../../../hooks';
 
-export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({
-  isMissing,
-  children,
-}) => {
+export const RequirementItem = (
+  {
+    isMissing,
+    children
+  }: {
+    isMissing: boolean;
+  }
+) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart">
       <EuiFlexItem grow={false}>
@@ -57,9 +61,13 @@ const StyledPageBody = styled(EuiPageBody)`
   border-radius: 5px;
 `;
 
-export const MissingESRequirementsPage: React.FunctionComponent<{
-  missingRequirements: GetFleetStatusResponse['missing_requirements'];
-}> = ({ missingRequirements }) => {
+export const MissingESRequirementsPage = (
+  {
+    missingRequirements
+  }: {
+    missingRequirements: GetFleetStatusResponse['missing_requirements'];
+  }
+) => {
   const { docLinks } = useStartServices();
   return (
     <WithoutHeaderLayout>

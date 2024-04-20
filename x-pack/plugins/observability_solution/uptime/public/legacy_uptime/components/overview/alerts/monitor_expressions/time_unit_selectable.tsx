@@ -24,13 +24,15 @@ interface Props {
   timeRangeOptions: TimeRangeOption[];
 }
 
-export const TimeUnitSelectable: React.FC<Props> = ({
-  'aria-label': ariaLabel,
-  'data-test-subj': dataTestSubj,
-  headlineText: headlineText,
-  onChange,
-  timeRangeOptions,
-}) => {
+export const TimeUnitSelectable = (
+  {
+    'aria-label': ariaLabel,
+    'data-test-subj': dataTestSubj,
+    headlineText: headlineText,
+    onChange,
+    timeRangeOptions
+  }: Props
+) => {
   return (
     <>
       <EuiTitle size="xxs">

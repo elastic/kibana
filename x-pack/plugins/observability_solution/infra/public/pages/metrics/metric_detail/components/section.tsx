@@ -22,15 +22,17 @@ type SectionProps = LayoutProps & {
   sectionLabel: string;
 };
 
-export const Section: FunctionComponent<SectionProps> = ({
-  children,
-  metrics,
-  navLabel,
-  sectionLabel,
-  onChangeRangeTime,
-  isLiveStreaming,
-  stopLiveStreaming,
-}) => {
+export const Section = (
+  {
+    children,
+    metrics,
+    navLabel,
+    sectionLabel,
+    onChangeRangeTime,
+    isLiveStreaming,
+    stopLiveStreaming
+  }: SectionProps
+) => {
   const { addNavItem } = useContext(SideNavContext);
 
   const subNavItems = Children.toArray(children).reduce<SubNavItem[]>(

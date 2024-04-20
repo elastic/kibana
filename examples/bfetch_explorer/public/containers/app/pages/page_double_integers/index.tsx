@@ -16,7 +16,7 @@ import { Sidebar } from '../../sidebar';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
 
-export const PageDoubleIntegers: React.FC<Props> = () => {
+export const PageDoubleIntegers = () => {
   const { explorer } = useDeps();
 
   return (

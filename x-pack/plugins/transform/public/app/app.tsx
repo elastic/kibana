@@ -27,21 +27,25 @@ import {
   type TransformEnabledFeatures,
 } from './serverless_context';
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
-  <Router history={history}>
-    <Routes>
-      <Route
-        path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-        component={CloneTransformSection}
-      />
-      <Route
-        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-        component={CreateTransformSection}
-      />
-      <Route path={`/`} component={TransformManagementSection} />
-    </Routes>
-  </Router>
-);
+export const App = (
+  {
+    history
+  }: {
+    history: ScopedHistory;
+  }
+) => (<Router history={history}>
+  <Routes>
+    <Route
+      path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+      component={CloneTransformSection}
+    />
+    <Route
+      path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+      component={CreateTransformSection}
+    />
+    <Route path={`/`} component={TransformManagementSection} />
+  </Routes>
+</Router>);
 
 export const renderApp = (
   element: HTMLElement,

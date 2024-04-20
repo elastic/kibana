@@ -41,7 +41,7 @@ export const nodesListRouteFactory = (
   enableDatePicker: true,
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (

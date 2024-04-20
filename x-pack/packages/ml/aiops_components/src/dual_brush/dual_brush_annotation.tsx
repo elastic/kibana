@@ -26,7 +26,7 @@ interface BrushAnnotationProps {
  * @param props BrushAnnotationProps component props
  * @returns The DualBrushAnnotation component.
  */
-export const DualBrushAnnotation: FC<BrushAnnotationProps> = (props) => {
+export const DualBrushAnnotation = (props: BrushAnnotationProps) => {
   const { id, min, max, style } = props;
   const { euiTheme } = useEuiTheme();
   const { colors } = euiTheme;

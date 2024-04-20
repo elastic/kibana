@@ -12,7 +12,7 @@ import { demoEndgameCreationEvent } from '../../../../common/demo_data/endgame_e
 import { PROCESS_STARTED } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SystemEndgameProcessExampleComponent: React.FC = () => {
+const SystemEndgameProcessExampleComponent = () => {
   const systemEndgameProcessRowRenderer = createEndgameProcessRowRenderer({
     actionName: 'creation_event',
     text: PROCESS_STARTED,

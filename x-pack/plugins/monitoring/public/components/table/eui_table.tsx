@@ -12,14 +12,16 @@ import { getIdentifier } from '../setup_mode/formatting';
 import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 
-export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
-  rows: items,
-  search = {},
-  columns: _columns,
-  setupMode,
-  productName,
-  ...props
-}) => {
+export const EuiMonitoringTable = (
+  {
+    rows: items,
+    search = {},
+    columns: _columns,
+    setupMode,
+    productName,
+    ...props
+  }: Record<any, any>
+) => {
   const [hasItems, setHasItem] = React.useState(items.length > 0);
 
   if (search.box && !search.box['data-test-subj']) {

@@ -16,7 +16,7 @@ import {
 
 type Props = Omit<ViewComponentProps, 'editor' | 'processorsDispatch'>;
 
-export const PipelineProcessorsEditorItem: FunctionComponent<Props> = (props) => {
+export const PipelineProcessorsEditorItem = (props: Props) => {
   const { state } = usePipelineProcessorsContext();
 
   return (

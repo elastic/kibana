@@ -35,13 +35,15 @@ interface JobMessagesProps {
  * Component for rendering job messages for anomaly detection
  * and data frame analytics jobs.
  */
-export const JobMessages: FC<JobMessagesProps> = ({
-  messages,
-  loading,
-  error,
-  refreshMessage,
-  actionHandler,
-}) => {
+export const JobMessages = (
+  {
+    messages,
+    loading,
+    error,
+    refreshMessage,
+    actionHandler
+  }: JobMessagesProps
+) => {
   const { showNodeInfo } = useEnabledFeatures();
   const columns: Array<EuiBasicTableColumn<JobMessage>> = useMemo(() => {
     const cols: Array<EuiBasicTableColumn<JobMessage>> = [

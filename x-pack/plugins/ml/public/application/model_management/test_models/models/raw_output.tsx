@@ -25,9 +25,13 @@ type ResultResponses = Array<
   estypes.MlInferTrainedModelResponse | RawTextClassificationResponse | RawTextEmbeddingResponse
 >;
 
-export const RawOutput: FC<{
-  inferrer: InferrerType;
-}> = ({ inferrer }) => {
+export const RawOutput = (
+  {
+    inferrer
+  }: {
+    inferrer: InferrerType;
+  }
+) => {
   const inferenceError = useObservable(inferrer.getInferenceError$(), inferrer.getInferenceError());
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
   const inferenceResult = useObservable(

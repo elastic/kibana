@@ -22,12 +22,14 @@ interface SummarySectionAccordionProps {
   status: 'success' | 'error' | 'info';
   title: string;
 }
-export const SummarySectionAccordion: React.FC<SummarySectionAccordionProps> = ({
-  id,
-  status,
-  title,
-  children,
-}) => {
+export const SummarySectionAccordion = (
+  {
+    id,
+    status,
+    title,
+    children
+  }: SummarySectionAccordionProps
+) => {
   return (
     <EuiAccordion
       id={id}
@@ -49,7 +51,11 @@ export const SummarySectionAccordion: React.FC<SummarySectionAccordionProps> = (
 interface SummarySectionEmptyProps {
   title: string;
 }
-export const SummarySectionEmpty: React.FC<SummarySectionEmptyProps> = ({ title }) => {
+export const SummarySectionEmpty = (
+  {
+    title
+  }: SummarySectionEmptyProps
+) => {
   return (
     <div className="documentCreationSummarySection">
       <div className="documentCreationSummarySection__title">

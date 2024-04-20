@@ -37,7 +37,12 @@ interface Props {
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 
-export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
+export const SpaceManagement = (
+  {
+    spacesApi,
+    setCurrentTab
+  }: Props
+) => {
   const { getList } = useManagementApiService();
 
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType | null>(null);
@@ -240,18 +245,21 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   );
 };
 
-export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boolean }> = ({
-  onRefreshClick,
-  isRefreshing,
-}) => (
-  <EuiButtonEmpty
-    data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
-    onClick={onRefreshClick}
-    isLoading={isRefreshing}
-    iconType={'refresh'}
-    iconSide={'left'}
-    iconSize={'m'}
-  >
-    <FormattedMessage id="xpack.ml.management.list.refreshButtonLabel" defaultMessage="Refresh" />
-  </EuiButtonEmpty>
-);
+export const RefreshButton = (
+  {
+    onRefreshClick,
+    isRefreshing
+  }: {
+    onRefreshClick: () => void;
+    isRefreshing: boolean;
+  }
+) => (<EuiButtonEmpty
+  data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
+  onClick={onRefreshClick}
+  isLoading={isRefreshing}
+  iconType={'refresh'}
+  iconSide={'left'}
+  iconSize={'m'}
+>
+  <FormattedMessage id="xpack.ml.management.list.refreshButtonLabel" defaultMessage="Refresh" />
+</EuiButtonEmpty>);

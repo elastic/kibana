@@ -142,12 +142,14 @@ const documentFieldConfig: FieldConfig<object[], {}, string> = {
   ],
 };
 
-export const DocumentsTab: FunctionComponent<Props> = ({
-  validateAndTestPipeline,
-  isRunningTest,
-  form,
-  resetTestOutput,
-}) => {
+export const DocumentsTab = (
+  {
+    validateAndTestPipeline,
+    isRunningTest,
+    form,
+    resetTestOutput
+  }: Props
+) => {
   const { services } = useKibana();
   const { getFormData, reset } = form;
 

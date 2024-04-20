@@ -21,14 +21,16 @@ interface NewSelectionIdBadgesProps {
   showAllBadges?: boolean;
 }
 
-export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
-  limit,
-  maps,
-  newSelection,
-  onDeleteClick,
-  onLinkClick,
-  showAllBadges,
-}) => {
+export const NewSelectionIdBadges = (
+  {
+    limit,
+    maps,
+    newSelection,
+    onDeleteClick,
+    onLinkClick,
+    showAllBadges
+  }: NewSelectionIdBadgesProps
+) => {
   const badges = [];
 
   for (let i = 0; i < newSelection.length; i++) {

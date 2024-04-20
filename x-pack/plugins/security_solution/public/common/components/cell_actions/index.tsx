@@ -52,13 +52,15 @@ export interface UseDataGridColumnsSecurityCellActionsProps
 export const useDataGridColumnsSecurityCellActions: UseDataGridColumnsCellActions<UseDataGridColumnsSecurityCellActionsProps> =
   useDataGridColumnsCellActions;
 
-export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
-  sourcererScopeId = SourcererScopeName.default,
-  data,
-  metadata,
-  children,
-  ...props
-}) => {
+export const SecurityCellActions = (
+  {
+    sourcererScopeId = SourcererScopeName.default,
+    data,
+    metadata,
+    children,
+    ...props
+  }: SecurityCellActionsProps
+) => {
   const getFieldSpec = useGetFieldSpec(sourcererScopeId);
   const dataViewId = useDataViewId(sourcererScopeId);
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline

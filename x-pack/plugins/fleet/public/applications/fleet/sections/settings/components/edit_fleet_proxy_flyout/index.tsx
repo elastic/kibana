@@ -32,10 +32,12 @@ export interface FleetProxyFlyoutProps {
   fleetProxy?: FleetProxy;
 }
 
-export const FleetProxyFlyout: React.FunctionComponent<FleetProxyFlyoutProps> = ({
-  onClose,
-  fleetProxy,
-}) => {
+export const FleetProxyFlyout = (
+  {
+    onClose,
+    fleetProxy
+  }: FleetProxyFlyoutProps
+) => {
   // const { docLinks } = useStartServices();
 
   const form = useFleetProxyForm(fleetProxy, onClose);

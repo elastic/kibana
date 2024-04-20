@@ -61,7 +61,14 @@ export const useKibanaEnvironmentContextProvider = (kibanaEnvironment?: KibanaEn
     [kibanaEnvironment]
   );
 
-  const Provider: React.FC<{ kibanaEnv?: KibanaEnvContext }> = ({ kibanaEnv = {}, children }) => {
+  const Provider = (
+    {
+      kibanaEnv = {},
+      children
+    }: {
+      kibanaEnv?: KibanaEnvContext;
+    }
+  ) => {
     const newProvider = createElement(KibanaEnvironmentContext.Provider, {
       value: { ...kibanaEnv, ...value },
       children,

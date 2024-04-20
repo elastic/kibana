@@ -16,7 +16,11 @@ interface Props {
   isLoading: boolean;
 }
 
-const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading }) => {
+const SyncAlertsToggleComponent = (
+  {
+    isLoading
+  }: Props
+) => {
   const [{ syncAlerts }] = useFormData({ watch: ['syncAlerts'] });
   return (
     <CommonUseField

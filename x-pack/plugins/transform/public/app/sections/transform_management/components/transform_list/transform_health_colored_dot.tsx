@@ -22,11 +22,13 @@ interface TransformHealthProps {
   showToolTip?: boolean;
 }
 
-export const TransformHealthColoredDot: FC<TransformHealthProps> = ({
-  healthStatus,
-  compact = true,
-  showToolTip = true,
-}) => {
+export const TransformHealthColoredDot = (
+  {
+    healthStatus,
+    compact = true,
+    showToolTip = true
+  }: TransformHealthProps
+) => {
   const transformHealthDescription = TRANSFORM_HEALTH_DESCRIPTION[healthStatus];
   const transformHealthColor = TRANSFORM_HEALTH_COLOR[healthStatus];
   const transformHealthLabel = TRANSFORM_HEALTH_LABEL[healthStatus];

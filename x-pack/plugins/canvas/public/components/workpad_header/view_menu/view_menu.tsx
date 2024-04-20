@@ -81,7 +81,7 @@ const mergeProps = (
   };
 };
 
-const ViewMenuWithContext: FC<Omit<ComponentProps, PropsFromContext>> = (props) => {
+const ViewMenuWithContext = (props: Omit<ComponentProps, PropsFromContext>) => {
   const dispatch = useDispatch();
   const {
     autoplayInterval,

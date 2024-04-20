@@ -26,7 +26,12 @@ interface Props {
   isResolved?: boolean;
 }
 
-export const DeprecationBadge: FunctionComponent<Props> = ({ isCritical, isResolved }) => {
+export const DeprecationBadge = (
+  {
+    isCritical,
+    isResolved
+  }: Props
+) => {
   if (isResolved) {
     return (
       <EuiBadge color="success" data-test-subj="resolvedDeprecationBadge">

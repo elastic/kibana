@@ -17,7 +17,14 @@ interface Props {
   width: number;
 }
 
-export const Positionable: FC<Props> = ({ children, transformMatrix, width, height }) => {
+export const Positionable = (
+  {
+    children,
+    transformMatrix,
+    width,
+    height
+  }: Props
+) => {
   // Throw if there is more than one child
   const childNode = React.Children.only(children);
 

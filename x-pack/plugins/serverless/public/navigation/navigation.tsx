@@ -17,7 +17,12 @@ export interface Props {
   deps: NavigationKibanaDependencies;
 }
 
-export const SideNavigation: FC<Props> = ({ navProps, deps }) => {
+export const SideNavigation = (
+  {
+    navProps,
+    deps
+  }: Props
+) => {
   return (
     <NavigationKibanaProvider {...deps}>
       <Navigation {...navProps} />

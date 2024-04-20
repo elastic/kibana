@@ -34,13 +34,15 @@ interface Props {
   experimentalFeatures?: ExperimentalFeatures;
 }
 
-export const EnabledFeaturesContextProvider: FC<Props> = ({
-  children,
-  isServerless,
-  showMLNavMenu = true,
-  mlFeatures,
-  experimentalFeatures,
-}) => {
+export const EnabledFeaturesContextProvider = (
+  {
+    children,
+    isServerless,
+    showMLNavMenu = true,
+    mlFeatures,
+    experimentalFeatures
+  }: Props
+) => {
   const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
     showMLNavMenu,

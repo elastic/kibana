@@ -16,7 +16,12 @@ export interface SearchSessionNameProps {
   editName: (newName: string) => Promise<unknown>;
 }
 
-export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, editName }) => {
+export const SearchSessionName = (
+  {
+    name,
+    editName
+  }: SearchSessionNameProps
+) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [newName, setNewName] = React.useState(name);
 

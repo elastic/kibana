@@ -16,7 +16,12 @@ export interface TopValuesPreviewProps extends FieldDataRowProps {
   isNumeric?: boolean;
 }
 
-export const TopValuesPreview: FC<TopValuesPreviewProps> = ({ config, isNumeric }) => {
+export const TopValuesPreview = (
+  {
+    config,
+    isNumeric
+  }: TopValuesPreviewProps
+) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { topValues, cardinality } = stats;

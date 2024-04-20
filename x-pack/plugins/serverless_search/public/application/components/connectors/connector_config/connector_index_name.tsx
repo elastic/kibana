@@ -22,7 +22,11 @@ interface ConnectorIndexNameProps {
   connector: Connector;
 }
 
-export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connector }) => {
+export const ConnectorIndexName = (
+  {
+    connector
+  }: ConnectorIndexNameProps
+) => {
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);

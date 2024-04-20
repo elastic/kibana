@@ -37,16 +37,25 @@ interface Props {
   cellActions?: Action[];
 }
 
-const StoryCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
-  <>
-    {getMappedNonEcsValue({
-      data,
-      fieldName: columnId,
-    })?.reduce((x) => x[0]) ?? ''}
-  </>
-);
+const StoryCellRenderer = (
+  {
+    columnId,
+    data
+  }: DeprecatedCellValueElementProps
+) => (<>
+  {getMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  })?.reduce((x) => x[0]) ?? ''}
+</>);
 
-const StoryProviders: React.FC<Props> = ({ children, onDragEnd = () => {}, cellActions = [] }) => {
+const StoryProviders = (
+  {
+    children,
+    onDragEnd = () => {},
+    cellActions = []
+  }: Props
+) => {
   const store = createStore(mockGlobalState);
   const queryClient = new QueryClient();
 

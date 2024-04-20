@@ -16,11 +16,13 @@ interface ComponentOpts {
   disabled: boolean;
 }
 
-export const AlertMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
-  alert,
-  onMuteAction,
-  disabled,
-}: ComponentOpts) => {
+export const AlertMutedSwitch = (
+  {
+    alert,
+    onMuteAction,
+    disabled
+  }: ComponentOpts
+) => {
   const [isMuted, setIsMuted] = useState<boolean>(alert?.isMuted);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 

@@ -14,7 +14,13 @@ import {
   TEXT_EXPANSION_FRIENDLY_TYPE,
 } from '../../../../../../common/ml_inference_pipeline';
 
-export const MLModelTypeBadge: React.FC<{ type: string }> = ({ type }) => {
+export const MLModelTypeBadge = (
+  {
+    type
+  }: {
+    type: string;
+  }
+) => {
   if (type === TEXT_EXPANSION_TYPE) {
     return <EuiBadge color="success">{TEXT_EXPANSION_FRIENDLY_TYPE}</EuiBadge>;
   }

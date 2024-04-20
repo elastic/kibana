@@ -23,7 +23,7 @@ import {
   languageForContentType,
 } from '../utilities';
 
-export const MonacoEditorOutput: FunctionComponent = () => {
+export const MonacoEditorOutput = () => {
   const { settings: readOnlySettings } = useEditorReadContext();
   const {
     lastResult: { data },

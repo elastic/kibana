@@ -31,12 +31,14 @@ export interface ValidationSummary {
   success: number;
 }
 
-export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
-  state,
-  setCurrentStep,
-  step,
-  stepActivated,
-}) => {
+export const ValidationStepWrapper = (
+  {
+    state,
+    setCurrentStep,
+    step,
+    stepActivated
+  }: CreateAnalyticsStepProps
+) => {
   const [checksInProgress, setChecksInProgress] = useState<boolean>(false);
   const [validationMessages, setValidationMessages] = useState<CalloutMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<CalloutMessage | undefined>();

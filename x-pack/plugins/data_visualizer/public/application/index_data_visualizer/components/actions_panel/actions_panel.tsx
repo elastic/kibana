@@ -31,12 +31,14 @@ interface Props {
 
 const ACTIONS_PANEL_WIDTH = '240px';
 
-export const ActionsPanel: FC<Props> = ({
-  dataView,
-  searchString,
-  searchQueryLanguage,
-  getAdditionalLinks,
-}) => {
+export const ActionsPanel = (
+  {
+    dataView,
+    searchString,
+    searchQueryLanguage,
+    getAdditionalLinks
+  }: Props
+) => {
   const [globalState] = useUrlState('_g');
 
   const [discoverLink, setDiscoverLink] = useState('');

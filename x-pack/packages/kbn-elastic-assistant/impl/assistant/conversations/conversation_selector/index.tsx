@@ -55,244 +55,244 @@ export type ConversationSelectorOption = EuiComboBoxOptionOption<{
   isDefault: boolean;
 }>;
 
-export const ConversationSelector: React.FC<Props> = React.memo(
-  ({
+export const ConversationSelector = React.memo((
+  {
     selectedConversationId = DEFAULT_CONVERSATION_TITLE,
     defaultConnector,
     onConversationSelected,
     onConversationDeleted,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
-    conversations,
-  }) => {
-    const { allSystemPrompts } = useAssistantContext();
+    conversations
+  }: Props
+) => {
+  const { allSystemPrompts } = useAssistantContext();
 
-    const { createConversation } = useConversation();
-    const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
-    const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
-      return Object.values(conversations).map((conversation) => ({
-        value: { isDefault: conversation.isDefault ?? false },
-        id: conversation.id !== '' ? conversation.id : conversation.title,
-        label: conversation.title,
-      }));
-    }, [conversations]);
+  const { createConversation } = useConversation();
+  const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
+  const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
+    return Object.values(conversations).map((conversation) => ({
+      value: { isDefault: conversation.isDefault ?? false },
+      id: conversation.id !== '' ? conversation.id : conversation.title,
+      label: conversation.title,
+    }));
+  }, [conversations]);
 
-    const [selectedOptions, setSelectedOptions] = useState<ConversationSelectorOption[]>(() => {
-      return conversationOptions.filter((c) => c.id === selectedConversationId) ?? [];
-    });
+  const [selectedOptions, setSelectedOptions] = useState<ConversationSelectorOption[]>(() => {
+    return conversationOptions.filter((c) => c.id === selectedConversationId) ?? [];
+  });
 
-    // Callback for when user types to create a new system prompt
-    const onCreateOption = useCallback(
-      async (searchValue, flattenedOptions = []) => {
-        if (!searchValue || !searchValue.trim().toLowerCase()) {
-          return;
-        }
+  // Callback for when user types to create a new system prompt
+  const onCreateOption = useCallback(
+    async (searchValue, flattenedOptions = []) => {
+      if (!searchValue || !searchValue.trim().toLowerCase()) {
+        return;
+      }
 
-        const normalizedSearchValue = searchValue.trim().toLowerCase();
-        const defaultSystemPrompt = allSystemPrompts.find(
-          (systemPrompt) => systemPrompt.isNewConversationDefault
-        );
-        const optionExists =
-          flattenedOptions.findIndex(
-            (option: SystemPromptSelectorOption) =>
-              option.label.trim().toLowerCase() === normalizedSearchValue
-          ) !== -1;
-
-        let createdConversation;
-        if (!optionExists) {
-          const config = getGenAiConfig(defaultConnector);
-          const newConversation: Conversation = {
-            id: '',
-            title: searchValue,
-            category: 'assistant',
-            messages: [],
-            replacements: {},
-            ...(defaultConnector
-              ? {
-                  apiConfig: {
-                    connectorId: defaultConnector.id,
-                    actionTypeId: defaultConnector.actionTypeId,
-                    provider: defaultConnector.apiProvider,
-                    defaultSystemPromptId: defaultSystemPrompt?.id,
-                    model: config?.defaultModel,
-                  },
-                }
-              : {}),
-          };
-          createdConversation = await createConversation(newConversation);
-        }
-
-        onConversationSelected(
-          createdConversation
-            ? { cId: createdConversation.id, cTitle: createdConversation.title }
-            : { cId: '', cTitle: DEFAULT_CONVERSATION_TITLE }
-        );
-      },
-      [allSystemPrompts, onConversationSelected, defaultConnector, createConversation]
-    );
-
-    // Callback for when user deletes a conversation
-    const onDelete = useCallback(
-      (conversationId: string) => {
-        onConversationDeleted(conversationId);
-        if (selectedConversationId === conversationId) {
-          const prevConversationId = getPreviousConversationId(
-            conversationIds,
-            selectedConversationId
-          );
-
-          onConversationSelected({
-            cId: getConvoId(conversations[prevConversationId].id, prevConversationId),
-            cTitle: prevConversationId,
-          });
-        }
-      },
-      [
-        selectedConversationId,
-        onConversationDeleted,
-        onConversationSelected,
-        conversationIds,
-        conversations,
-      ]
-    );
-
-    const onChange = useCallback(
-      async (newOptions: ConversationSelectorOption[]) => {
-        if (newOptions.length === 0 || !newOptions?.[0].id) {
-          setSelectedOptions([]);
-        } else if (conversationOptions.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
-          const { id, label } = newOptions?.[0];
-
-          await onConversationSelected({ cId: getConvoId(id, label), cTitle: label });
-        }
-      },
-      [conversationOptions, onConversationSelected]
-    );
-
-    const onLeftArrowClick = useCallback(() => {
-      const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
-
-      onConversationSelected({
-        cId: getConvoId(prevId, conversations[prevId]?.title),
-        cTitle: conversations[prevId]?.title,
-      });
-    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
-    const onRightArrowClick = useCallback(() => {
-      const nextId = getNextConversationId(conversationIds, selectedConversationId);
-
-      onConversationSelected({
-        cId: getConvoId(nextId, conversations[nextId]?.title),
-        cTitle: conversations[nextId]?.title,
-      });
-    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
-
-    useEffect(() => {
-      setSelectedOptions(conversationOptions.filter((c) => c.id === selectedConversationId));
-    }, [conversationOptions, selectedConversationId]);
-
-    const renderOption: (
-      option: ConversationSelectorOption,
-      searchValue: string,
-      OPTION_CONTENT_CLASSNAME: string
-    ) => React.ReactNode = (option, searchValue, contentClassName) => {
-      const { label, id, value } = option;
-
-      return (
-        <EuiFlexGroup
-          alignItems="center"
-          className={'parentFlexGroup'}
-          component={'span'}
-          justifyContent="spaceBetween"
-          data-test-subj={`convo-option-${label}`}
-        >
-          <EuiFlexItem
-            component={'span'}
-            grow={false}
-            css={css`
-              width: calc(100% - 60px);
-            `}
-          >
-            <EuiHighlight
-              search={searchValue}
-              css={css`
-                overflow: hidden;
-                text-overflow: ellipsis;
-              `}
-            >
-              {label}
-            </EuiHighlight>
-          </EuiFlexItem>
-          {!value?.isDefault && id && (
-            <EuiFlexItem grow={false} component={'span'}>
-              <EuiToolTip position="right" content={i18n.DELETE_CONVERSATION}>
-                <EuiButtonIcon
-                  iconType="cross"
-                  aria-label={i18n.DELETE_CONVERSATION}
-                  color="danger"
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    onDelete(id);
-                  }}
-                  data-test-subj="delete-option"
-                  css={css`
-                    visibility: hidden;
-                    .parentFlexGroup:hover & {
-                      visibility: visible;
-                    }
-                  `}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
+      const defaultSystemPrompt = allSystemPrompts.find(
+        (systemPrompt) => systemPrompt.isNewConversationDefault
       );
-    };
+      const optionExists =
+        flattenedOptions.findIndex(
+          (option: SystemPromptSelectorOption) =>
+            option.label.trim().toLowerCase() === normalizedSearchValue
+        ) !== -1;
+
+      let createdConversation;
+      if (!optionExists) {
+        const config = getGenAiConfig(defaultConnector);
+        const newConversation: Conversation = {
+          id: '',
+          title: searchValue,
+          category: 'assistant',
+          messages: [],
+          replacements: {},
+          ...(defaultConnector
+            ? {
+                apiConfig: {
+                  connectorId: defaultConnector.id,
+                  actionTypeId: defaultConnector.actionTypeId,
+                  provider: defaultConnector.apiProvider,
+                  defaultSystemPromptId: defaultSystemPrompt?.id,
+                  model: config?.defaultModel,
+                },
+              }
+            : {}),
+        };
+        createdConversation = await createConversation(newConversation);
+      }
+
+      onConversationSelected(
+        createdConversation
+          ? { cId: createdConversation.id, cTitle: createdConversation.title }
+          : { cId: '', cTitle: DEFAULT_CONVERSATION_TITLE }
+      );
+    },
+    [allSystemPrompts, onConversationSelected, defaultConnector, createConversation]
+  );
+
+  // Callback for when user deletes a conversation
+  const onDelete = useCallback(
+    (conversationId: string) => {
+      onConversationDeleted(conversationId);
+      if (selectedConversationId === conversationId) {
+        const prevConversationId = getPreviousConversationId(
+          conversationIds,
+          selectedConversationId
+        );
+
+        onConversationSelected({
+          cId: getConvoId(conversations[prevConversationId].id, prevConversationId),
+          cTitle: prevConversationId,
+        });
+      }
+    },
+    [
+      selectedConversationId,
+      onConversationDeleted,
+      onConversationSelected,
+      conversationIds,
+      conversations,
+    ]
+  );
+
+  const onChange = useCallback(
+    async (newOptions: ConversationSelectorOption[]) => {
+      if (newOptions.length === 0 || !newOptions?.[0].id) {
+        setSelectedOptions([]);
+      } else if (conversationOptions.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
+        const { id, label } = newOptions?.[0];
+
+        await onConversationSelected({ cId: getConvoId(id, label), cTitle: label });
+      }
+    },
+    [conversationOptions, onConversationSelected]
+  );
+
+  const onLeftArrowClick = useCallback(() => {
+    const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
+
+    onConversationSelected({
+      cId: getConvoId(prevId, conversations[prevId]?.title),
+      cTitle: conversations[prevId]?.title,
+    });
+  }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
+  const onRightArrowClick = useCallback(() => {
+    const nextId = getNextConversationId(conversationIds, selectedConversationId);
+
+    onConversationSelected({
+      cId: getConvoId(nextId, conversations[nextId]?.title),
+      cTitle: conversations[nextId]?.title,
+    });
+  }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
+
+  useEffect(() => {
+    setSelectedOptions(conversationOptions.filter((c) => c.id === selectedConversationId));
+  }, [conversationOptions, selectedConversationId]);
+
+  const renderOption: (
+    option: ConversationSelectorOption,
+    searchValue: string,
+    OPTION_CONTENT_CLASSNAME: string
+  ) => React.ReactNode = (option, searchValue, contentClassName) => {
+    const { label, id, value } = option;
 
     return (
-      <EuiFormRow
-        label={i18n.SELECTED_CONVERSATION_LABEL}
-        display="rowCompressed"
-        css={css`
-          min-width: 300px;
-        `}
+      <EuiFlexGroup
+        alignItems="center"
+        className={'parentFlexGroup'}
+        component={'span'}
+        justifyContent="spaceBetween"
+        data-test-subj={`convo-option-${label}`}
       >
-        <EuiComboBox
-          data-test-subj="conversation-selector"
-          aria-label={i18n.CONVERSATION_SELECTOR_ARIA_LABEL}
-          customOptionText={`${i18n.CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT} {searchValue}`}
-          placeholder={i18n.CONVERSATION_SELECTOR_PLACE_HOLDER}
-          singleSelection={{ asPlainText: true }}
-          options={conversationOptions}
-          selectedOptions={selectedOptions}
-          onChange={onChange}
-          onCreateOption={onCreateOption as unknown as () => void}
-          renderOption={renderOption}
-          compressed={true}
-          isDisabled={isDisabled}
-          prepend={
-            <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE}`} display="block">
+        <EuiFlexItem
+          component={'span'}
+          grow={false}
+          css={css`
+            width: calc(100% - 60px);
+          `}
+        >
+          <EuiHighlight
+            search={searchValue}
+            css={css`
+              overflow: hidden;
+              text-overflow: ellipsis;
+            `}
+          >
+            {label}
+          </EuiHighlight>
+        </EuiFlexItem>
+        {!value?.isDefault && id && (
+          <EuiFlexItem grow={false} component={'span'}>
+            <EuiToolTip position="right" content={i18n.DELETE_CONVERSATION}>
               <EuiButtonIcon
-                iconType="arrowLeft"
-                aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
-                onClick={onLeftArrowClick}
-                disabled={isDisabled || conversationIds.length <= 1}
+                iconType="cross"
+                aria-label={i18n.DELETE_CONVERSATION}
+                color="danger"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  onDelete(id);
+                }}
+                data-test-subj="delete-option"
+                css={css`
+                  visibility: hidden;
+                  .parentFlexGroup:hover & {
+                    visibility: visible;
+                  }
+                `}
               />
             </EuiToolTip>
-          }
-          append={
-            <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE}`} display="block">
-              <EuiButtonIcon
-                iconType="arrowRight"
-                aria-label={i18n.NEXT_CONVERSATION_TITLE}
-                onClick={onRightArrowClick}
-                disabled={isDisabled || conversationIds.length <= 1}
-              />
-            </EuiToolTip>
-          }
-        />
-      </EuiFormRow>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
-  }
-);
+  };
+
+  return (
+    <EuiFormRow
+      label={i18n.SELECTED_CONVERSATION_LABEL}
+      display="rowCompressed"
+      css={css`
+        min-width: 300px;
+      `}
+    >
+      <EuiComboBox
+        data-test-subj="conversation-selector"
+        aria-label={i18n.CONVERSATION_SELECTOR_ARIA_LABEL}
+        customOptionText={`${i18n.CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT} {searchValue}`}
+        placeholder={i18n.CONVERSATION_SELECTOR_PLACE_HOLDER}
+        singleSelection={{ asPlainText: true }}
+        options={conversationOptions}
+        selectedOptions={selectedOptions}
+        onChange={onChange}
+        onCreateOption={onCreateOption as unknown as () => void}
+        renderOption={renderOption}
+        compressed={true}
+        isDisabled={isDisabled}
+        prepend={
+          <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE}`} display="block">
+            <EuiButtonIcon
+              iconType="arrowLeft"
+              aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
+              onClick={onLeftArrowClick}
+              disabled={isDisabled || conversationIds.length <= 1}
+            />
+          </EuiToolTip>
+        }
+        append={
+          <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE}`} display="block">
+            <EuiButtonIcon
+              iconType="arrowRight"
+              aria-label={i18n.NEXT_CONVERSATION_TITLE}
+              onClick={onRightArrowClick}
+              disabled={isDisabled || conversationIds.length <= 1}
+            />
+          </EuiToolTip>
+        }
+      />
+    </EuiFormRow>
+  );
+});
 
 ConversationSelector.displayName = 'ConversationSelector';

@@ -63,7 +63,7 @@ const RELEVANCE_SORT_OPTIONS: SortOption[] = [
   },
 ];
 
-export const SearchExperience: React.FC = () => {
+export const SearchExperience = () => {
   const { engine } = useValues(EngineLogic);
   const { http } = useValues(HttpLogic);
   const endpointBase = http.basePath.prepend('/internal/app_search/search-ui');

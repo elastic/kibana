@@ -32,11 +32,13 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const HDFSSettings: React.FunctionComponent<Props> = ({
-  repository,
-  updateRepositorySettings,
-  settingErrors,
-}) => {
+export const HDFSSettings = (
+  {
+    repository,
+    updateRepositorySettings,
+    settingErrors
+  }: Props
+) => {
   const {
     name,
     settings: {

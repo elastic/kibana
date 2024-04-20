@@ -48,11 +48,13 @@ export interface ScheduleNowActionNameProps {
   forceDisable?: boolean;
   transformNodes: number;
 }
-export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
-  items,
-  forceDisable,
-  transformNodes,
-}) => {
+export const ScheduleNowActionName = (
+  {
+    items,
+    forceDisable,
+    transformNodes
+  }: ScheduleNowActionNameProps
+) => {
   const { canScheduleNowTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 

@@ -58,12 +58,14 @@ export interface SwimLaneWrapperProps {
  * Wrapper component for the swim lane
  * that handles the popover for the selected cells.
  */
-export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
-  children,
-  selection,
-  swimlaneContainerWidth,
-  swimLaneData,
-}) => {
+export const SwimLaneWrapper = (
+  {
+    children,
+    selection,
+    swimlaneContainerWidth,
+    swimLaneData
+  }: SwimLaneWrapperProps
+) => {
   const {
     services: { fieldFormats },
   } = useMlKibana();
@@ -223,7 +225,11 @@ export interface MiniAlertTableProps {
 
 const ALERT_PER_PAGE = 3;
 
-export const MiniAlertTable: FC<MiniAlertTableProps> = ({ data }) => {
+export const MiniAlertTable = (
+  {
+    data
+  }: MiniAlertTableProps
+) => {
   const {
     services: { fieldFormats },
   } = useMlKibana();

@@ -36,7 +36,7 @@ import {
   HeaderLeftContent,
 } from './components';
 
-export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
+export const AgentPolicyDetailsPage = () => {
   const {
     params: { policyId, tabId = '' },
   } = useRouteMatch<{ policyId: string; tabId?: string }>();
@@ -195,9 +195,13 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   );
 };
 
-const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPolicy }> = ({
-  agentPolicy,
-}) => {
+const AgentPolicyDetailsContent = (
+  {
+    agentPolicy
+  }: {
+    agentPolicy: AgentPolicy;
+  }
+) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
     <Routes>

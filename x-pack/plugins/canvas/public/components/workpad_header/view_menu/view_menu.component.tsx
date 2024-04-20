@@ -152,23 +152,25 @@ export interface Props {
   setAutoplayInterval: (interval: number) => void;
 }
 
-export const ViewMenu: FunctionComponent<Props> = ({
-  enterFullscreen,
-  fitToWindow,
-  isWriteable,
-  resetZoom,
-  setZoomScale,
-  toggleWriteable,
-  zoomIn,
-  zoomOut,
-  zoomScale,
-  doRefresh,
-  refreshInterval,
-  setRefreshInterval,
-  autoplayEnabled,
-  autoplayInterval,
-  setAutoplayInterval,
-}) => {
+export const ViewMenu = (
+  {
+    enterFullscreen,
+    fitToWindow,
+    isWriteable,
+    resetZoom,
+    setZoomScale,
+    toggleWriteable,
+    zoomIn,
+    zoomOut,
+    zoomScale,
+    doRefresh,
+    refreshInterval,
+    setRefreshInterval,
+    autoplayEnabled,
+    autoplayInterval,
+    setAutoplayInterval
+  }: Props
+) => {
   const setRefresh = (val: number) => setRefreshInterval(val);
 
   const disableInterval = () => {

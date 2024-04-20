@@ -26,16 +26,18 @@ export interface SettingsPageProps {
   deleteFleetProxy: (proxy: FleetProxy) => void;
 }
 
-export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
-  outputs,
-  proxies,
-  fleetServerHosts,
-  deleteOutput,
-  deleteFleetServerHost,
-  downloadSources,
-  deleteDownloadSource,
-  deleteFleetProxy,
-}) => {
+export const SettingsPage = (
+  {
+    outputs,
+    proxies,
+    fleetServerHosts,
+    deleteOutput,
+    deleteFleetServerHost,
+    downloadSources,
+    deleteDownloadSource,
+    deleteFleetProxy
+  }: SettingsPageProps
+) => {
   return (
     <>
       <EuiSpacer size="m" />

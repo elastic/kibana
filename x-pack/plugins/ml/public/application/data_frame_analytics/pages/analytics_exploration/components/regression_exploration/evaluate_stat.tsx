@@ -83,24 +83,29 @@ const tooltipContent = {
   ),
 };
 
-export const EvaluateStat: FC<Props> = ({ isLoading, statType, title, dataTestSubj }) => (
-  <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
-    <EuiFlexItem grow={false}>
-      <EuiStat
-        reverse
-        isLoading={isLoading}
-        title={title}
-        description={statDescriptions[statType]}
-        titleSize="xxs"
+export const EvaluateStat = (
+  {
+    isLoading,
+    statType,
+    title,
+    dataTestSubj
+  }: Props
+) => (<EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
+  <EuiFlexItem grow={false}>
+    <EuiStat
+      reverse
+      isLoading={isLoading}
+      title={title}
+      description={statDescriptions[statType]}
+      titleSize="xxs"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    {statType !== REGRESSION_STATS.HUBER && (
+      <EuiIconTip
+        anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
+        content={tooltipContent[statType]}
       />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {statType !== REGRESSION_STATS.HUBER && (
-        <EuiIconTip
-          anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
-          content={tooltipContent[statType]}
-        />
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+    )}
+  </EuiFlexItem>
+</EuiFlexGroup>);

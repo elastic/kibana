@@ -25,10 +25,12 @@ const KibanaNoDataPageContext = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component.
  */
-export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
-  children,
-  ...services
-}) => {
+export const KibanaNoDataPageProvider = (
+  {
+    children,
+    ...services
+  }: KibanaNoDataPageServices
+) => {
   const { hasESData, hasUserDataView } = services;
 
   return (
@@ -43,10 +45,12 @@ export const KibanaNoDataPageProvider: FC<KibanaNoDataPageServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const KibanaNoDataPageKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: KibanaNoDataPageKibanaDependencies
+) => {
   const { dataViews } = dependencies;
   const value: Services = {
     hasESData: dataViews.hasData.hasESData,

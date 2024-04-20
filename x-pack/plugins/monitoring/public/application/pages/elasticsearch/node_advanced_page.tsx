@@ -26,7 +26,11 @@ import {
 } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const ElasticsearchNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ElasticsearchNodeAdvancedPage = (
+  {
+    clusters
+  }: ComponentProps
+) => {
   const globalState = useContext(GlobalStateContext);
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { zoomInfo, onBrush } = useCharts();

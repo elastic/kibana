@@ -11,7 +11,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
-export const JobIdInput: FC = () => {
+export const JobIdInput = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [jobId, setJobId] = useState(jobCreator.jobId);

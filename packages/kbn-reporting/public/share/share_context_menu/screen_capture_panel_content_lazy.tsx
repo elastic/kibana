@@ -17,7 +17,7 @@ const LazyComponent = lazy(() =>
   }))
 );
 
-export const ScreenCapturePanelContent: FC<Props> = (props) => {
+export const ScreenCapturePanelContent = (props: Props) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />

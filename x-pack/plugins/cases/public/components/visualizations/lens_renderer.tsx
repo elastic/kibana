@@ -14,7 +14,13 @@ import type { LensProps } from './types';
 
 const LENS_VISUALIZATION_HEIGHT = 200;
 
-const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange, metadata }) => {
+const LensRendererComponent = (
+  {
+    attributes,
+    timeRange,
+    metadata
+  }: LensProps
+) => {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;

@@ -24,7 +24,11 @@ interface Props {
   createState: AgentPolicyCreateState;
 }
 
-export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ createState }) => {
+export const AgentPolicyCreatedCallOut = (
+  {
+    createState
+  }: Props
+) => {
   return (
     <>
       <EuiSpacer size="m" />

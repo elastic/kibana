@@ -19,7 +19,7 @@ import {
 import { Curation } from './curation';
 import { Curations, CurationCreation, CurationSuggestion } from './views';
 
-export const CurationsRouter: React.FC = () => {
+export const CurationsRouter = () => {
   return (
     <Routes>
       <Route exact path={ENGINE_CURATIONS_PATH}>

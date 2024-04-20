@@ -22,7 +22,12 @@ export interface Props {
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 
-export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks }) => {
+export const FileDataVisualizer = (
+  {
+    getAdditionalLinks,
+    resultLinks
+  }: Props
+) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, discover, share, security, fileUpload, cloud, fieldFormats } =
     getPluginsStart();
@@ -38,7 +43,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
     fieldFormats,
   };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (

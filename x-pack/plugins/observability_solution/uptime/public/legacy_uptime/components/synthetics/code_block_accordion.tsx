@@ -20,14 +20,16 @@ interface Props {
  * Utility for showing `EuiAccordions` with code blocks which we use frequently in synthetics to display
  * stack traces, long error messages, and synthetics journey code.
  */
-export const CodeBlockAccordion: FC<Props> = ({
-  buttonContent,
-  children,
-  id,
-  language,
-  overflowHeight,
-  initialIsOpen = false,
-}) => {
+export const CodeBlockAccordion = (
+  {
+    buttonContent,
+    children,
+    id,
+    language,
+    overflowHeight,
+    initialIsOpen = false
+  }: Props
+) => {
   return children && id ? (
     <EuiAccordion id={id} buttonContent={buttonContent} initialIsOpen={initialIsOpen}>
       <EuiCodeBlock isCopyable={true} overflowHeight={overflowHeight} language={language}>

@@ -33,63 +33,63 @@ interface ManageRulesProps {
   onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 
-export const ManageRules: FC<ManageRulesProps> = memo(
-  ({
+export const ManageRules = memo((
+  {
     linkedRules,
     showButtonLoader,
     saveIsDisabled = true,
     onSave,
     onCancel,
-    onRuleSelectionChange,
-  }) => {
-    const complicatedFlyoutTitleId = useGeneratedHtmlId({
-      prefix: 'complicatedFlyoutTitle',
-    });
+    onRuleSelectionChange
+  }: ManageRulesProps
+) => {
+  const complicatedFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'complicatedFlyoutTitle',
+  });
 
-    return (
-      <EuiFlyout
-        hideCloseButton
-        ownFocus
-        onClose={onCancel}
-        aria-labelledby={complicatedFlyoutTitleId}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={complicatedFlyoutTitleId}>{i18n.LINK_RULES_HEADER}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            {i18n.MANAGE_RULES_DESCRIPTION}
-          </EuiText>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <ExceptionsAddToRulesTable
-            initiallySelectedRules={linkedRules}
-            onRuleSelectionChange={onRuleSelectionChange}
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel} flush="left">
-                {i18n.MANAGE_RULES_CANCEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="manageListRulesSaveButton"
-                isLoading={showButtonLoader}
-                disabled={saveIsDisabled}
-                onClick={onSave}
-                fill
-              >
-                {i18n.MANAGE_RULES_SAVE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    );
-  }
-);
+  return (
+    <EuiFlyout
+      hideCloseButton
+      ownFocus
+      onClose={onCancel}
+      aria-labelledby={complicatedFlyoutTitleId}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={complicatedFlyoutTitleId}>{i18n.LINK_RULES_HEADER}</h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          {i18n.MANAGE_RULES_DESCRIPTION}
+        </EuiText>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <ExceptionsAddToRulesTable
+          initiallySelectedRules={linkedRules}
+          onRuleSelectionChange={onRuleSelectionChange}
+        />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onCancel} flush="left">
+              {i18n.MANAGE_RULES_CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="manageListRulesSaveButton"
+              isLoading={showButtonLoader}
+              disabled={saveIsDisabled}
+              onClick={onSave}
+              fill
+            >
+              {i18n.MANAGE_RULES_SAVE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+});
 ManageRules.displayName = 'ManageRules';

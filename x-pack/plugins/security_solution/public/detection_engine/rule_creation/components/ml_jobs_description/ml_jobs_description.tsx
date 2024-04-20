@@ -19,7 +19,11 @@ interface MlJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlJobsDescriptionComponent: FC<MlJobsDescriptionProps> = ({ jobIds }) => {
+const MlJobsDescriptionComponent = (
+  {
+    jobIds
+  }: MlJobsDescriptionProps
+) => {
   const mlCapabilities = useMlCapabilities();
 
   const isMlUser = hasMlUserPermissions(mlCapabilities);

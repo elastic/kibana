@@ -45,11 +45,13 @@ export interface VisualOptionsPopoverProps {
   datasourceLayers: FramePublicAPI['datasourceLayers'];
 }
 
-export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
-  state,
-  setState,
-  datasourceLayers,
-}) => {
+export const VisualOptionsPopover = (
+  {
+    state,
+    setState,
+    datasourceLayers
+  }: VisualOptionsPopoverProps
+) => {
   const dataLayers = getDataLayers(state.layers);
   const isAreaPercentage = dataLayers.some(
     ({ seriesType }) => seriesType === 'area_percentage_stacked'

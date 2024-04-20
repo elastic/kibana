@@ -37,13 +37,15 @@ interface Props {
   validation: ValidationResults;
 }
 
-export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
-  agentPolicy,
-  updateAgentPolicy,
-  withSysMonitoring,
-  updateSysMonitoring,
-  validation,
-}) => {
+export const AgentPolicyIntegrationForm = (
+  {
+    agentPolicy,
+    updateAgentPolicy,
+    withSysMonitoring,
+    updateSysMonitoring,
+    validation
+  }: Props
+) => {
   return (
     <EuiForm>
       <EuiDescribedFormGroup

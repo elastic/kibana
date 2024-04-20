@@ -21,7 +21,7 @@ import { API_LOGS_TITLE, RECENT_API_EVENTS } from './constants';
 
 import { ApiLogsLogic } from '.';
 
-export const ApiLogs: React.FC = () => {
+export const ApiLogs = () => {
   const { dataLoading, apiLogs, meta } = useValues(ApiLogsLogic);
   const { fetchApiLogs, pollForApiLogs } = useActions(ApiLogsLogic);
 

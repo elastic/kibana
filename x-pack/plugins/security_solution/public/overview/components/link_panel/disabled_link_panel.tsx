@@ -24,17 +24,19 @@ interface DisabledLinkPanelProps {
   titleCopy: string;
 }
 
-const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
-  bodyCopy,
-  buttonCopy,
-  dataTestSubjPrefix,
-  docLink,
-  learnMoreUrl,
-  LinkPanelViewComponent,
-  listItems,
-  moreButtons,
-  titleCopy,
-}) => {
+const DisabledLinkPanelComponent = (
+  {
+    bodyCopy,
+    buttonCopy,
+    dataTestSubjPrefix,
+    docLink,
+    learnMoreUrl,
+    LinkPanelViewComponent,
+    listItems,
+    moreButtons,
+    titleCopy
+  }: DisabledLinkPanelProps
+) => {
   return (
     <LinkPanelViewComponent
       listItems={listItems}

@@ -28,7 +28,7 @@ export interface UnifiedDataTableFooterProps {
   fieldFormats: FieldFormatsStart;
 }
 
-export const UnifiedDataTableFooter: React.FC<UnifiedDataTableFooterProps> = (props) => {
+export const UnifiedDataTableFooter = (props: UnifiedDataTableFooterProps) => {
   const {
     isLoadingMore,
     rowCount,
@@ -110,12 +110,14 @@ interface UnifiedDataTableFooterContainerProps extends UnifiedDataTableFooterPro
   hasButton: boolean;
 }
 
-const UnifiedDataTableFooterContainer: React.FC<UnifiedDataTableFooterContainerProps> = ({
-  hasButton,
-  rowCount,
-  children,
-  fieldFormats,
-}) => {
+const UnifiedDataTableFooterContainer = (
+  {
+    hasButton,
+    rowCount,
+    children,
+    fieldFormats
+  }: UnifiedDataTableFooterContainerProps
+) => {
   const { euiTheme } = useEuiTheme();
 
   const formattedRowCount = fieldFormats

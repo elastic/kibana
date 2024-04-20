@@ -14,17 +14,19 @@ import { HoverActionsPopover } from './hover_actions_popover';
 import { CellActionsMode } from '../constants';
 import type { CellActionsProps, CellActionExecutionContext } from '../types';
 
-export const CellActions: React.FC<CellActionsProps> = ({
-  data,
-  triggerId,
-  children,
-  mode,
-  showActionTooltips = true,
-  visibleCellActions = 3,
-  disabledActionTypes = [],
-  metadata,
-  className,
-}) => {
+export const CellActions = (
+  {
+    data,
+    triggerId,
+    children,
+    mode,
+    showActionTooltips = true,
+    visibleCellActions = 3,
+    disabledActionTypes = [],
+    metadata,
+    className
+  }: CellActionsProps
+) => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const dataArray = useMemo(() => (isArray(data) ? data : [data]), [data]);

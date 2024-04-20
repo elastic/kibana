@@ -22,7 +22,7 @@ import { PROMOTE_DOCUMENT_ACTION, HIDE_DOCUMENT_ACTION } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 import { CurationResult } from '../results';
 
-export const OrganicDocuments: React.FC = () => {
+export const OrganicDocuments = () => {
   const { addPromotedId, addHiddenId } = useActions(CurationLogic);
   const { curation, activeQuery, isAutomated, organicDocumentsLoading } = useValues(CurationLogic);
 

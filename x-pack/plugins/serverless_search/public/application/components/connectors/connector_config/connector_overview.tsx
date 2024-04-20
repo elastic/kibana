@@ -24,7 +24,11 @@ interface ConnectorOverviewProps {
   connector: Connector;
 }
 
-export const ConnectorOverview: React.FC<ConnectorOverviewProps> = ({ connector }) => {
+export const ConnectorOverview = (
+  {
+    connector
+  }: ConnectorOverviewProps
+) => {
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);

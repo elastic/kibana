@@ -12,7 +12,7 @@ import { createEndpointAlertsRowRenderer } from '../../timeline/body/renderers/s
 import { WAS_PREVENTED_FROM_EXECUTING_A_MALICIOUS_PROCESS } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const AlertsExampleComponent: React.FC = () => {
+const AlertsExampleComponent = () => {
   const alertsRowRenderer = createEndpointAlertsRowRenderer({
     eventAction: 'execution',
     eventCategory: 'process',

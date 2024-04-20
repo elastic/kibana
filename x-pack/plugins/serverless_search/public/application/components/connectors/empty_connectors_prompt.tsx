@@ -24,7 +24,7 @@ import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
-export const EmptyConnectorsPrompt: React.FC = () => {
+export const EmptyConnectorsPrompt = () => {
   const connectorTypes = useConnectorTypes();
   const { createConnector, isLoading } = useCreateConnector();
 

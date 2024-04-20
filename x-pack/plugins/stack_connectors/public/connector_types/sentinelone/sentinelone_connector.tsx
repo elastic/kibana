@@ -31,17 +31,17 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-const SentinelOneActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-}) => (
-  <SimpleConnectorForm
-    isEdit={isEdit}
-    readOnly={readOnly}
-    configFormSchema={configFormSchema}
-    secretsFormSchema={secretsFormSchema}
-  />
-);
+const SentinelOneActionConnectorFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => (<SimpleConnectorForm
+  isEdit={isEdit}
+  readOnly={readOnly}
+  configFormSchema={configFormSchema}
+  secretsFormSchema={secretsFormSchema}
+/>);
 
 // eslint-disable-next-line import/no-default-export
 export { SentinelOneActionConnectorFields as default };

@@ -30,14 +30,16 @@ import {
 import { RuleActions } from './rule_actions';
 import { RuleEdit } from '../../rule_form';
 
-export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
-  rule,
-  actionTypeRegistry,
-  ruleTypeRegistry,
-  onEditRule,
-  hideEditButton = false,
-  filteredRuleTypes = [],
-}) => {
+export const RuleDefinition = (
+  {
+    rule,
+    actionTypeRegistry,
+    ruleTypeRegistry,
+    onEditRule,
+    hideEditButton = false,
+    filteredRuleTypes = []
+  }: RuleDefinitionProps
+) => {
   const {
     application: { capabilities },
   } = useKibana().services;

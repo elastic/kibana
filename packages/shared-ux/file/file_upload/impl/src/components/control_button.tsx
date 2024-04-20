@@ -22,12 +22,14 @@ interface Props {
   compressed?: boolean;
 }
 
-export const ControlButton: FunctionComponent<Props> = ({
-  onCancel,
-  onUpload,
-  immediate,
-  compressed,
-}) => {
+export const ControlButton = (
+  {
+    onCancel,
+    onUpload,
+    immediate,
+    compressed
+  }: Props
+) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const files = useObservable(uploadState.files$, []);

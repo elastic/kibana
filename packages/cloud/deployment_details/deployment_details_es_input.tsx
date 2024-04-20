@@ -16,9 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const DeploymentDetailsEsInput: FC<{ elasticsearchUrl: string }> = ({
-  elasticsearchUrl,
-}) => {
+export const DeploymentDetailsEsInput = (
+  {
+    elasticsearchUrl
+  }: {
+    elasticsearchUrl: string;
+  }
+) => {
   return (
     <EuiFormRow
       label={i18n.translate('cloud.deploymentDetails.elasticEndpointLabel', {

@@ -64,30 +64,32 @@ interface OwnProps {
 
 export type AlertsTableComponentProps = OwnProps;
 
-export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
-  currentAlertStatusFilterValue,
-  defaultFilters = [],
-  from,
-  getGrouping,
-  globalFilters,
-  globalQuery,
-  groupingLevel,
-  hasIndexMaintenance,
-  hasIndexWrite,
-  loading,
-  onGroupClose,
-  pageIndex,
-  pageSize,
-  parentGroupingFilter,
-  renderChildComponent,
-  runtimeMappings,
-  selectedGroup,
-  setPageIndex,
-  setPageSize,
-  signalIndexName,
-  tableId,
-  to,
-}) => {
+export const GroupedSubLevelComponent = (
+  {
+    currentAlertStatusFilterValue,
+    defaultFilters = [],
+    from,
+    getGrouping,
+    globalFilters,
+    globalQuery,
+    groupingLevel,
+    hasIndexMaintenance,
+    hasIndexWrite,
+    loading,
+    onGroupClose,
+    pageIndex,
+    pageSize,
+    parentGroupingFilter,
+    renderChildComponent,
+    runtimeMappings,
+    selectedGroup,
+    setPageIndex,
+    setPageSize,
+    signalIndexName,
+    tableId,
+    to
+  }: AlertsTableComponentProps
+) => {
   const {
     services: { uiSettings },
   } = useKibana();

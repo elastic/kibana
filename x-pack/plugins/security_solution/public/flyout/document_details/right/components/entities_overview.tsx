@@ -21,7 +21,7 @@ import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
-export const EntitiesOverview: React.FC = () => {
+export const EntitiesOverview = () => {
   const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const hostName = getField(getFieldsData('host.name'));

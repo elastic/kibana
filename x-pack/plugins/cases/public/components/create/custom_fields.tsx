@@ -21,7 +21,11 @@ interface Props {
   isLoading: boolean;
 }
 
-const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
+const CustomFieldsComponent = (
+  {
+    isLoading
+  }: Props
+) => {
   const { owner } = useCasesContext();
   const [{ selectedOwner }] = useFormData<{ selectedOwner: string }>({ watch: ['selectedOwner'] });
   const { data: configurations, isLoading: isLoadingCaseConfiguration } =

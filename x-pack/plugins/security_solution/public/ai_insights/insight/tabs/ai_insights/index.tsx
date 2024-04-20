@@ -26,12 +26,14 @@ interface Props {
   showAnonymized?: boolean;
 }
 
-const AiInsightsComponent: React.FC<Props> = ({
-  insight,
-  promptContextId,
-  replacements,
-  showAnonymized = false,
-}) => {
+const AiInsightsComponent = (
+  {
+    insight,
+    promptContextId,
+    replacements,
+    showAnonymized = false
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => insight, [insight]);
 

@@ -25,10 +25,12 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-const SeverityBadgeComponent: React.FC<Props> = ({
-  value,
-  'data-test-subj': dataTestSubj = 'severity',
-}) => {
+const SeverityBadgeComponent = (
+  {
+    value,
+    'data-test-subj': dataTestSubj = 'severity'
+  }: Props
+) => {
   const displayValue = upperFirst(value);
   const color = severityToColorMap[value] ?? 'subdued';
 

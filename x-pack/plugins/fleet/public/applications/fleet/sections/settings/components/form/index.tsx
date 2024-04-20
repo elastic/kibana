@@ -27,35 +27,35 @@ interface InputProps {
   };
 }
 
-export const TextInput: React.FunctionComponent<InputProps> = ({
-  label,
-  inputProps,
-  placeholder,
-  dataTestSubj,
-}) => (
-  <EuiFormRow fullWidth label={label} {...inputProps.formRowProps}>
-    <EuiFieldText
-      data-test-subj={dataTestSubj}
-      fullWidth
-      {...inputProps.props}
-      placeholder={placeholder}
-    />
-  </EuiFormRow>
-);
+export const TextInput = (
+  {
+    label,
+    inputProps,
+    placeholder,
+    dataTestSubj
+  }: InputProps
+) => (<EuiFormRow fullWidth label={label} {...inputProps.formRowProps}>
+  <EuiFieldText
+    data-test-subj={dataTestSubj}
+    fullWidth
+    {...inputProps.props}
+    placeholder={placeholder}
+  />
+</EuiFormRow>);
 
-export const TextAreaInput: React.FunctionComponent<InputProps> = ({
-  label,
-  inputProps,
-  placeholder,
-  dataTestSubj,
-}) => (
-  <EuiFormRow fullWidth label={label} {...inputProps.formRowProps}>
-    <EuiTextArea
-      fullWidth
-      rows={5}
-      data-test-subj={dataTestSubj}
-      {...inputProps.props}
-      placeholder={placeholder}
-    />
-  </EuiFormRow>
-);
+export const TextAreaInput = (
+  {
+    label,
+    inputProps,
+    placeholder,
+    dataTestSubj
+  }: InputProps
+) => (<EuiFormRow fullWidth label={label} {...inputProps.formRowProps}>
+  <EuiTextArea
+    fullWidth
+    rows={5}
+    data-test-subj={dataTestSubj}
+    {...inputProps.props}
+    placeholder={placeholder}
+  />
+</EuiFormRow>);

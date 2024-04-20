@@ -32,21 +32,8 @@ const AgentPolicyName = styled(EuiDescriptionListDescription)`
   overflow: hidden;
 `;
 
-export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
-  from: EditPackagePolicyFrom;
-  cancelUrl: string;
-  onCancel?: React.ReactEventHandler;
-  agentPolicy?: AgentPolicy;
-  packageInfo?: PackageInfo;
-  integrationInfo?: RegistryPolicyTemplate;
-  'data-test-subj'?: string;
-  tabs?: Array<{
-    title: string;
-    isSelected: boolean;
-    onClick: React.ReactEventHandler;
-  }>;
-}> = memo(
-  ({
+export const CreatePackagePolicySinglePageLayout = memo((
+  {
     from,
     cancelUrl,
     onCancel,
@@ -55,209 +42,222 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     integrationInfo,
     children,
     'data-test-subj': dataTestSubj,
-    tabs = [],
-  }) => {
-    const isAdd = useMemo(() => ['package', 'policy'].includes(from), [from]);
-    const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
-    const isUpgrade = useMemo(
-      () =>
-        [
-          'upgrade-from-fleet-policy-list',
-          'upgrade-from-integrations-policy-list',
-          'upgrade-from-extension',
-        ].includes(from),
-      [from]
-    );
+    tabs = []
+  }: {
+    from: EditPackagePolicyFrom;
+    cancelUrl: string;
+    onCancel?: React.ReactEventHandler;
+    agentPolicy?: AgentPolicy;
+    packageInfo?: PackageInfo;
+    integrationInfo?: RegistryPolicyTemplate;
+    'data-test-subj'?: string;
+    tabs?: Array<{
+      title: string;
+      isSelected: boolean;
+      onClick: React.ReactEventHandler;
+    }>;
+  }
+) => {
+  const isAdd = useMemo(() => ['package', 'policy'].includes(from), [from]);
+  const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);
+  const isUpgrade = useMemo(
+    () =>
+      [
+        'upgrade-from-fleet-policy-list',
+        'upgrade-from-integrations-policy-list',
+        'upgrade-from-extension',
+      ].includes(from),
+    [from]
+  );
 
-    const pageTitle = useMemo(() => {
-      if ((isAdd || isEdit || isUpgrade) && packageInfo) {
-        let pageTitleText = (
+  const pageTitle = useMemo(() => {
+    if ((isAdd || isEdit || isUpgrade) && packageInfo) {
+      let pageTitleText = (
+        <FormattedMessage
+          id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
+          defaultMessage="Add {packageName} integration"
+          values={{
+            packageName: integrationInfo?.title || packageInfo.title,
+          }}
+        />
+      );
+
+      if (isEdit) {
+        pageTitleText = (
           <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
-            defaultMessage="Add {packageName} integration"
+            id="xpack.fleet.editPackagePolicy.editPageTitleWithPackageName"
+            defaultMessage="Edit {packageName} integration"
             values={{
-              packageName: integrationInfo?.title || packageInfo.title,
+              packageName: packageInfo.title,
             }}
           />
         );
-
-        if (isEdit) {
-          pageTitleText = (
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.editPageTitleWithPackageName"
-              defaultMessage="Edit {packageName} integration"
-              values={{
-                packageName: packageInfo.title,
-              }}
-            />
-          );
-        } else if (isUpgrade) {
-          pageTitleText = (
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.upgradePageTitleWithPackageName"
-              defaultMessage="Upgrade {packageName} integration"
-              values={{
-                packageName: packageInfo.title,
-              }}
-            />
-          );
-        }
-
-        return (
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <PackageIcon
-                packageName={packageInfo?.name || ''}
-                integrationName={integrationInfo?.name}
-                version={packageInfo?.version || ''}
-                icons={integrationInfo?.icons || packageInfo?.icons}
-                size="xl"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>{pageTitleText}</h1>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }
-
-      if (isEdit) {
-        return (
-          <EuiText>
-            <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
-              <FormattedMessage
-                id="xpack.fleet.editPackagePolicy.pageTitle"
-                defaultMessage="Edit integration"
-              />
-            </h1>
-          </EuiText>
-        );
-      }
-
-      if (isUpgrade) {
-        return (
-          <EuiText>
-            <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
-              <FormattedMessage
-                id="xpack.fleet.upgradePackagePolicy.pageTitle"
-                defaultMessage="Upgrade integration"
-              />
-            </h1>
-          </EuiText>
+      } else if (isUpgrade) {
+        pageTitleText = (
+          <FormattedMessage
+            id="xpack.fleet.editPackagePolicy.upgradePageTitleWithPackageName"
+            defaultMessage="Upgrade {packageName} integration"
+            values={{
+              packageName: packageInfo.title,
+            }}
+          />
         );
       }
 
       return (
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <PackageIcon
+              packageName={packageInfo?.name || ''}
+              integrationName={integrationInfo?.name}
+              version={packageInfo?.version || ''}
+              icons={integrationInfo?.icons || packageInfo?.icons}
+              size="xl"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>{pageTitleText}</h1>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (isEdit) {
+      return (
         <EuiText>
-          <h1>
+          <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.pageTitle"
-              defaultMessage="Add integration"
+              id="xpack.fleet.editPackagePolicy.pageTitle"
+              defaultMessage="Edit integration"
             />
           </h1>
         </EuiText>
       );
-    }, [
-      dataTestSubj,
-      integrationInfo?.icons,
-      integrationInfo?.name,
-      integrationInfo?.title,
-      packageInfo,
-      isAdd,
-      isEdit,
-      isUpgrade,
-    ]);
+    }
 
-    const pageDescription = useMemo(() => {
-      if (isEdit) {
-        return (
-          <FormattedMessage
-            id="xpack.fleet.editPackagePolicy.pageDescription"
-            defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
-          />
-        );
-      } else if (isAdd) {
-        return (
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
-            defaultMessage="Configure an integration for the selected agent policy."
-          />
-        );
-      } else if (isUpgrade) {
-        return (
-          <FormattedMessage
-            id="xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade"
-            defaultMessage="Upgrade this integration and deploy changes to the selected agent policy"
-          />
-        );
-      } else {
-        return (
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
-            defaultMessage="Follow these instructions to add this integration to an agent policy."
-          />
-        );
-      }
-    }, [isAdd, isEdit, isUpgrade]);
-
-    const leftColumn = (
-      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem>
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiButtonEmpty
-            size="xs"
-            iconType="arrowLeft"
-            flush="left"
-            href={cancelUrl}
-            onClick={onCancel}
-            data-test-subj={`${dataTestSubj}_cancelBackLink`}
-          >
+    if (isUpgrade) {
+      return (
+        <EuiText>
+          <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.cancelLinkText"
-              defaultMessage="Cancel"
+              id="xpack.fleet.upgradePackagePolicy.pageTitle"
+              defaultMessage="Upgrade integration"
             />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>{pageTitle}</EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued" size="s">
-            {pageDescription}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+          </h1>
+        </EuiText>
+      );
+    }
 
-    const rightColumn =
-      agentPolicy && (isAdd || isEdit) ? (
-        <EuiDescriptionList className="eui-textRight" textStyle="reverse">
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
-              defaultMessage="Agent policy"
-            />
-          </EuiDescriptionListTitle>
-          <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
-            {agentPolicy?.name || '-'}
-          </AgentPolicyName>
-        </EuiDescriptionList>
-      ) : undefined;
-
-    const maxWidth = 770;
     return (
-      <WithHeaderLayout
-        restrictHeaderWidth={maxWidth}
-        restrictWidth={maxWidth}
-        leftColumn={leftColumn}
-        rightColumn={rightColumn}
-        rightColumnGrow={false}
-        data-test-subj={dataTestSubj}
-        tabs={tabs.map(({ title, ...rest }) => ({ name: title, ...rest }))}
-      >
-        {children}
-      </WithHeaderLayout>
+      <EuiText>
+        <h1>
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.pageTitle"
+            defaultMessage="Add integration"
+          />
+        </h1>
+      </EuiText>
     );
-  }
-);
+  }, [
+    dataTestSubj,
+    integrationInfo?.icons,
+    integrationInfo?.name,
+    integrationInfo?.title,
+    packageInfo,
+    isAdd,
+    isEdit,
+    isUpgrade,
+  ]);
+
+  const pageDescription = useMemo(() => {
+    if (isEdit) {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.editPackagePolicy.pageDescription"
+          defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
+        />
+      );
+    } else if (isAdd) {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
+          defaultMessage="Configure an integration for the selected agent policy."
+        />
+      );
+    } else if (isUpgrade) {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade"
+          defaultMessage="Upgrade this integration and deploy changes to the selected agent policy"
+        />
+      );
+    } else {
+      return (
+        <FormattedMessage
+          id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
+          defaultMessage="Follow these instructions to add this integration to an agent policy."
+        />
+      );
+    }
+  }, [isAdd, isEdit, isUpgrade]);
+
+  const leftColumn = (
+    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+      <EuiFlexItem>
+        {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+        <EuiButtonEmpty
+          size="xs"
+          iconType="arrowLeft"
+          flush="left"
+          href={cancelUrl}
+          onClick={onCancel}
+          data-test-subj={`${dataTestSubj}_cancelBackLink`}
+        >
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.cancelLinkText"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem>{pageTitle}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s">
+          {pageDescription}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const rightColumn =
+    agentPolicy && (isAdd || isEdit) ? (
+      <EuiDescriptionList className="eui-textRight" textStyle="reverse">
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
+            defaultMessage="Agent policy"
+          />
+        </EuiDescriptionListTitle>
+        <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
+          {agentPolicy?.name || '-'}
+        </AgentPolicyName>
+      </EuiDescriptionList>
+    ) : undefined;
+
+  const maxWidth = 770;
+  return (
+    <WithHeaderLayout
+      restrictHeaderWidth={maxWidth}
+      restrictWidth={maxWidth}
+      leftColumn={leftColumn}
+      rightColumn={rightColumn}
+      rightColumnGrow={false}
+      data-test-subj={dataTestSubj}
+      tabs={tabs.map(({ title, ...rest }) => ({ name: title, ...rest }))}
+    >
+      {children}
+    </WithHeaderLayout>
+  );
+});

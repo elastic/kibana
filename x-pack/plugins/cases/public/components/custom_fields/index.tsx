@@ -31,14 +31,16 @@ export interface Props {
   handleDeleteCustomField: (key: string) => void;
   handleEditCustomField: (key: string) => void;
 }
-const CustomFieldsComponent: React.FC<Props> = ({
-  disabled,
-  isLoading,
-  handleAddCustomField,
-  handleDeleteCustomField,
-  handleEditCustomField,
-  customFields,
-}) => {
+const CustomFieldsComponent = (
+  {
+    disabled,
+    isLoading,
+    handleAddCustomField,
+    handleDeleteCustomField,
+    handleEditCustomField,
+    customFields
+  }: Props
+) => {
   const { permissions } = useCasesContext();
   const canAddCustomFields = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);

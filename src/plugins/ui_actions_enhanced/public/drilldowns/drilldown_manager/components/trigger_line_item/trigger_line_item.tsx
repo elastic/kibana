@@ -22,11 +22,13 @@ export interface TriggerLineItemProps {
   incompatible?: boolean;
 }
 
-export const TriggerLineItem: React.FC<TriggerLineItemProps> = ({
-  tooltip,
-  incompatible,
-  children,
-}) => {
+export const TriggerLineItem = (
+  {
+    tooltip,
+    incompatible,
+    children
+  }: TriggerLineItemProps
+) => {
   return (
     <TextWithIcon
       color={'subdued'}

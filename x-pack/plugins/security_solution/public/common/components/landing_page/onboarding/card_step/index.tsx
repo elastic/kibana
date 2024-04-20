@@ -37,23 +37,25 @@ import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
 import { useStepContext } from '../context/step_context';
 import { useCardStepStyles } from '../styles/card_step.styles';
 
-const CardStepComponent: React.FC<{
-  cardId: CardId;
-  expandedSteps: Set<StepId>;
-  finishedSteps: Set<StepId>;
-  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
-  onStepClicked: OnStepClicked;
-  sectionId: SectionId;
-  step: Step;
-}> = ({
-  cardId,
-  expandedSteps,
-  finishedSteps = new Set(),
-  toggleTaskCompleteStatus,
-  onStepClicked,
-  sectionId,
-  step,
-}) => {
+const CardStepComponent = (
+  {
+    cardId,
+    expandedSteps,
+    finishedSteps = new Set(),
+    toggleTaskCompleteStatus,
+    onStepClicked,
+    sectionId,
+    step
+  }: {
+    cardId: CardId;
+    expandedSteps: Set<StepId>;
+    finishedSteps: Set<StepId>;
+    toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
+    onStepClicked: OnStepClicked;
+    sectionId: SectionId;
+    step: Step;
+  }
+) => {
   const { navigateTo } = useNavigateTo();
 
   const isExpandedStep = expandedSteps.has(step.id);

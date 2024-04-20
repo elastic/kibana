@@ -49,20 +49,22 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-export const SearchPanel: FC<Props> = ({
-  dataView,
-  searchString,
-  searchQuery,
-  searchQueryLanguage,
-  overallStats,
-  indexedFieldTypes,
-  setVisibleFieldTypes,
-  visibleFieldTypes,
-  setVisibleFieldNames,
-  visibleFieldNames,
-  setSearchParams,
-  showEmptyFields,
-}) => {
+export const SearchPanel = (
+  {
+    dataView,
+    searchString,
+    searchQuery,
+    searchQueryLanguage,
+    overallStats,
+    indexedFieldTypes,
+    setVisibleFieldTypes,
+    visibleFieldTypes,
+    setVisibleFieldNames,
+    visibleFieldNames,
+    setSearchParams,
+    showEmptyFields
+  }: Props
+) => {
   const dvSearchPanelControls = css({
     marginLeft: '0px !important',
     paddingLeft: '0px !important',

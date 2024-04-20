@@ -39,7 +39,12 @@ interface StatsBarProps {
   dataTestSub: string;
 }
 
-export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
+export const StatsBar = (
+  {
+    stats,
+    dataTestSub
+  }: StatsBarProps
+) => {
   const { euiTheme } = useEuiTheme();
   const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
   return (

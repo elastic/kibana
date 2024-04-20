@@ -68,14 +68,16 @@ const defaultDefaultValues: UserFormValues = {
   roles: [],
 };
 
-export const UserForm: FunctionComponent<UserFormProps> = ({
-  isNewUser = false,
-  isReservedUser = false,
-  defaultValues = defaultDefaultValues,
-  onSuccess,
-  onCancel,
-  disabled = false,
-}) => {
+export const UserForm = (
+  {
+    isNewUser = false,
+    isReservedUser = false,
+    defaultValues = defaultDefaultValues,
+    onSuccess,
+    onCancel,
+    disabled = false
+  }: UserFormProps
+) => {
   const { services } = useKibana();
 
   const [rolesState, getRoles] = useAsyncFn(
@@ -228,7 +230,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
   }, []);
 
   return (
-    <EuiForm
+    (<EuiForm
       component="form"
       error={Object.values(form.errors)}
       isInvalid={form.isInvalid}
@@ -316,7 +318,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </>
         ) : undefined}
       </EuiDescribedFormGroup>
-
       {isNewUser ? (
         <EuiDescribedFormGroup
           title={
@@ -377,7 +378,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </EuiFormRow>
         </EuiDescribedFormGroup>
       ) : null}
-
       <EuiDescribedFormGroup
         title={
           <h2>
@@ -480,6 +480,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </EuiFlexGroup>
         )}
       </EuiDescribedFormGroup>
-    </EuiForm>
+    </EuiForm>)
   );
 };

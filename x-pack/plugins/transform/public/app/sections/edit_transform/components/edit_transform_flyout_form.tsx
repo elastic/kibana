@@ -16,7 +16,7 @@ import { EditTransformFlyoutFormTextArea } from './edit_transform_flyout_form_te
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
 
-export const EditTransformFlyoutForm: FC = () => (
+export const EditTransformFlyoutForm = () => (
   <EuiForm>
     <EditTransformFlyoutFormTextArea
       field="description"

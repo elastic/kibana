@@ -36,7 +36,11 @@ export interface LeftPanelProps extends FlyoutPanelProps {
   };
 }
 
-export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
+export const LeftPanel = memo((
+  {
+    path
+  }: Partial<LeftPanelProps>
+) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();

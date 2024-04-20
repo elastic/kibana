@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
-export const DataStreamBadge: FunctionComponent = () => {
+export const DataStreamBadge = () => {
   return (
     <EuiBadge data-test-subj="dataStreamBadge" color="primary">
       {i18n.translate('xpack.snapshotRestore.policyForm.setSettings.dataStreamBadgeContent', {

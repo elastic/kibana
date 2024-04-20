@@ -14,7 +14,7 @@ import { newJobCapsService } from '../../../../../../../services/new_job_capabil
 import type { GeoJobCreator } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const GeoField: FC = () => {
+export const GeoField = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as GeoJobCreator;
   const { geoFields } = newJobCapsService;

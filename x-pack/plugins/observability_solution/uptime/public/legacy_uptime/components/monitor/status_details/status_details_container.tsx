@@ -15,7 +15,11 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { AppState } from '../../../state';
 import { MonitorIdParam } from '../../../../../common/types';
 
-export const MonitorStatusDetails: React.FC<MonitorIdParam> = ({ monitorId }) => {
+export const MonitorStatusDetails = (
+  {
+    monitorId
+  }: MonitorIdParam
+) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();

@@ -49,7 +49,7 @@ interface ProgressControlProps {
  * @param props ProgressControls component props
  * @returns The ProgressControls component.
  */
-export const ProgressControls: FC<ProgressControlProps> = (props) => {
+export const ProgressControls = (props: ProgressControlProps) => {
   const {
     children,
     isBrushCleared,

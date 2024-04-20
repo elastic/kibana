@@ -62,17 +62,19 @@ export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
-  browserField,
-  data,
-  eventId,
-  index,
-  feedName,
-  scopeId,
-  value,
-  isDraggable,
-  isReadOnly,
-}) => {
+const EnrichmentDescription = (
+  {
+    browserField,
+    data,
+    eventId,
+    index,
+    feedName,
+    scopeId,
+    value,
+    isDraggable,
+    isReadOnly
+  }: ThreatSummaryDescription
+) => {
   const metadata = useMemo(() => ({ scopeId }), [scopeId]);
 
   if (!data || !value) return null;
@@ -120,15 +122,25 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   );
 };
 
-const EnrichmentSummaryComponent: React.FC<{
-  browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
-  enrichments: CtiEnrichment[];
-  scopeId: string;
-  eventId: string;
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
-}> = ({ browserFields, data, enrichments, scopeId, eventId, isDraggable, isReadOnly }) => {
+const EnrichmentSummaryComponent = (
+  {
+    browserFields,
+    data,
+    enrichments,
+    scopeId,
+    eventId,
+    isDraggable,
+    isReadOnly
+  }: {
+    browserFields: BrowserFields;
+    data: TimelineEventsDetailsItem[];
+    enrichments: CtiEnrichment[];
+    scopeId: string;
+    eventId: string;
+    isDraggable?: boolean;
+    isReadOnly?: boolean;
+  }
+) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
     const { field, type, feedName, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);

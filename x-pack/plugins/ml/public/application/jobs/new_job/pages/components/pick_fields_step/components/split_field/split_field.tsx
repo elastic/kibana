@@ -17,7 +17,7 @@ import { Description } from './description';
 import type { MultiMetricJobCreator, RareJobCreator } from '../../../../../common/job_creator';
 import { isMultiMetricJobCreator } from '../../../../../common/job_creator';
 
-export const SplitFieldSelector: FC = () => {
+export const SplitFieldSelector = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
 

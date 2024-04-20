@@ -35,7 +35,13 @@ interface Props {
   onDeleteJob: (i: number) => void;
 }
 
-export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) => {
+export const DetectorList = (
+  {
+    isActive,
+    onEditJob,
+    onDeleteJob
+  }: Props
+) => {
   const {
     jobCreator: jc,
     jobCreatorUpdated,
@@ -64,7 +70,13 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
-  const Buttons: FC<{ index: number }> = ({ index }) => {
+  const Buttons = (
+    {
+      index
+    }: {
+      index: number;
+    }
+  ) => {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -151,7 +163,13 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
   );
 };
 
-const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
+const NoDetectorsWarning = (
+  {
+    show
+  }: {
+    show: boolean;
+  }
+) => {
   if (show === false) {
     return null;
   }
@@ -175,7 +193,13 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
   );
 };
 
-const DetectorsValidationWarning: FC<{ validation: Validation }> = ({ validation }) => {
+const DetectorsValidationWarning = (
+  {
+    validation
+  }: {
+    validation: Validation;
+  }
+) => {
   if (validation.valid === true) {
     return null;
   }
@@ -189,6 +213,12 @@ const DetectorsValidationWarning: FC<{ validation: Validation }> = ({ validation
   );
 };
 
-const StringifiedDetector: FC<{ detector: Detector }> = ({ detector }) => {
+const StringifiedDetector = (
+  {
+    detector
+  }: {
+    detector: Detector;
+  }
+) => {
   return <div data-test-subj="mlDetectorIdentifier">{detectorToString(detector)}</div>;
 };

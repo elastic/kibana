@@ -46,17 +46,19 @@ export type ToolbarButtonProps = PropsOf<typeof EuiButton> & {
   textProps?: EuiButtonProps['textProps'];
 };
 
-export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
-  children,
-  className,
-  fontWeight = 'normal',
-  size = 'm',
-  hasArrow = true,
-  groupPosition = 'none',
-  dataTestSubj = '',
-  textProps,
-  ...rest
-}) => {
+export const ToolbarButton = (
+  {
+    children,
+    className,
+    fontWeight = 'normal',
+    size = 'm',
+    hasArrow = true,
+    groupPosition = 'none',
+    dataTestSubj = '',
+    textProps,
+    ...rest
+  }: ToolbarButtonProps
+) => {
   const classes = classNames(
     'kbnToolbarButton',
     groupPositionToClassMap[groupPosition],

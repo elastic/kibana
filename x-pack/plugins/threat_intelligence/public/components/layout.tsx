@@ -16,12 +16,14 @@ export interface LayoutProps {
   subHeader?: ReactNode;
 }
 
-export const DefaultPageLayout: FC<LayoutProps> = ({
-  children,
-  pageTitle,
-  border = true,
-  subHeader,
-}) => {
+export const DefaultPageLayout = (
+  {
+    children,
+    pageTitle,
+    border = true,
+    subHeader
+  }: LayoutProps
+) => {
   return (
     <SecuritySolutionPageWrapper>
       <EuiPageHeader alignItems="center" bottomBorder={border}>

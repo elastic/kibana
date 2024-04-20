@@ -29,7 +29,7 @@ import { SitemapsTable } from './components/sitemaps_table';
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerSingleDomainLogic } from './crawler_single_domain_logic';
 
-export const CrawlerSingleDomain: React.FC = () => {
+export const CrawlerSingleDomain = () => {
   const { domainId } = useParams() as { domainId: string };
   const { engineName } = EngineLogic.values;
 

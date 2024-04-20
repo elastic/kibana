@@ -40,11 +40,13 @@ export interface VisualOptionsProps {
   onValueLabelChange: (newMode: ValueLabelConfig) => void;
 }
 
-export const ValueLabelsSettings: FC<VisualOptionsProps> = ({
-  isVisible = true,
-  valueLabels = 'hide',
-  onValueLabelChange,
-}) => {
+export const ValueLabelsSettings = (
+  {
+    isVisible = true,
+    valueLabels = 'hide',
+    onValueLabelChange
+  }: VisualOptionsProps
+) => {
   if (!isVisible) {
     return null;
   }

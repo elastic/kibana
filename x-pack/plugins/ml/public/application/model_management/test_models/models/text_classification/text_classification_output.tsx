@@ -32,13 +32,17 @@ export const getTextClassificationOutputComponent = (
     | LangIdentInference
 ) => <TextClassificationOutput inferrer={inferrer} />;
 
-export const TextClassificationOutput: FC<{
-  inferrer:
-    | TextClassificationInference
-    | ZeroShotClassificationInference
-    | FillMaskInference
-    | LangIdentInference;
-}> = ({ inferrer }) => {
+export const TextClassificationOutput = (
+  {
+    inferrer
+  }: {
+    inferrer:
+      | TextClassificationInference
+      | ZeroShotClassificationInference
+      | FillMaskInference
+      | LangIdentInference;
+  }
+) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -56,10 +60,15 @@ export const TextClassificationOutput: FC<{
   );
 };
 
-export const PredictionProbabilityList: FC<{
-  response: FormattedTextClassificationResponse;
-  inputText?: string;
-}> = ({ response, inputText }) => {
+export const PredictionProbabilityList = (
+  {
+    response,
+    inputText
+  }: {
+    response: FormattedTextClassificationResponse;
+    inputText?: string;
+  }
+) => {
   return (
     <>
       {inputText !== undefined ? (

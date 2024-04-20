@@ -19,23 +19,23 @@ type Props = Omit<DescribedFormRowProps, 'switchProps'> & {
   switchProps: Omit<SwitchProps, 'label'> & { path: string };
 };
 
-export const ToggleFieldWithDescribedFormRow: FunctionComponent<Props> = ({
-  switchProps,
-  ...passThroughProps
-}) => (
-  <UseField<boolean> path={switchProps.path}>
-    {(field) => {
-      return (
-        <DescribedFormRow
-          {...passThroughProps}
-          switchProps={{
-            ...switchProps,
-            label: field.label,
-            checked: field.value,
-            onChange: field.setValue,
-          }}
-        />
-      );
-    }}
-  </UseField>
-);
+export const ToggleFieldWithDescribedFormRow = (
+  {
+    switchProps,
+    ...passThroughProps
+  }: Props
+) => (<UseField<boolean> path={switchProps.path}>
+  {(field) => {
+    return (
+      <DescribedFormRow
+        {...passThroughProps}
+        switchProps={{
+          ...switchProps,
+          label: field.label,
+          checked: field.value,
+          onChange: field.setValue,
+        }}
+      />
+    );
+  }}
+</UseField>);

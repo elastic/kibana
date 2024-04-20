@@ -52,11 +52,13 @@ export interface StartActionNameProps {
   forceDisable?: boolean;
   transformNodes: number;
 }
-export const StartActionName: FC<StartActionNameProps> = ({
-  items,
-  forceDisable,
-  transformNodes,
-}) => {
+export const StartActionName = (
+  {
+    items,
+    forceDisable,
+    transformNodes
+  }: StartActionNameProps
+) => {
   const { canStartStopTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 

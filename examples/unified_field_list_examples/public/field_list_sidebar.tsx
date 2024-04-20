@@ -49,13 +49,15 @@ export interface FieldListSidebarProps {
   onRemoveFieldFromWorkspace: UnifiedFieldListSidebarContainerProps['onRemoveFieldFromWorkspace'];
 }
 
-export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
-  dataView,
-  selectedFieldNames,
-  services,
-  onAddFieldToWorkspace,
-  onRemoveFieldFromWorkspace,
-}) => {
+export const FieldListSidebar = (
+  {
+    dataView,
+    selectedFieldNames,
+    services,
+    onAddFieldToWorkspace,
+    onRemoveFieldFromWorkspace
+  }: FieldListSidebarProps
+) => {
   const dragDropContext = useDragDropContext();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
   const filterManager = services.data?.query?.filterManager;

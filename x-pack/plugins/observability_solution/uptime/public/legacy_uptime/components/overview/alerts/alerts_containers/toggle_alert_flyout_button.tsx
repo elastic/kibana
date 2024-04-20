@@ -14,7 +14,7 @@ export interface ToggleAlertFlyoutButtonProps {
   alertOptions?: string[];
 }
 
-export const ToggleAlertFlyoutButton: React.FC<ToggleAlertFlyoutButtonProps> = (props) => {
+export const ToggleAlertFlyoutButton = (props: ToggleAlertFlyoutButtonProps) => {
   const dispatch = useDispatch();
   return (
     <ToggleAlertFlyoutButtonComponent

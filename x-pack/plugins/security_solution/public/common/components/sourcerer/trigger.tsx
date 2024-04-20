@@ -24,18 +24,20 @@ interface Props {
   selectedPatterns: string[];
   signalIndexName: string | null;
 }
-export const TriggerComponent: FC<Props> = ({
-  activePatterns,
-  disabled,
-  isModified,
-  isOnlyDetectionAlerts,
-  isPopoverOpen,
-  isTimelineSourcerer,
-  loading,
-  onClick,
-  selectedPatterns,
-  signalIndexName,
-}) => {
+export const TriggerComponent = (
+  {
+    activePatterns,
+    disabled,
+    isModified,
+    isOnlyDetectionAlerts,
+    isPopoverOpen,
+    isTimelineSourcerer,
+    loading,
+    onClick,
+    selectedPatterns,
+    signalIndexName
+  }: Props
+) => {
   const badge = useMemo(() => {
     switch (isModified) {
       case 'modified':

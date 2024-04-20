@@ -47,12 +47,14 @@ interface ComponentOpts {
   onChange: (schedule: RecurrenceSchedule) => void;
 }
 
-export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
-  startDate,
-  endDate,
-  onChange,
-  initialState,
-}) => {
+export const RecurrenceScheduler = (
+  {
+    startDate,
+    endDate,
+    onChange,
+    initialState
+  }: ComponentOpts
+) => {
   const hasInitialized = useRef(false);
   const [frequency, setFrequency] = useState<RRuleFrequency | 'CUSTOM'>(RRuleFrequency.DAILY);
   const [recurrenceEnds, setRecurrenceEnds] = useState('never');

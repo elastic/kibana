@@ -36,7 +36,12 @@ interface Props {
   chartsService: ChartsPluginStart;
 }
 
-export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
+export const AnomalyDetectionTable = (
+  {
+    items,
+    chartsService
+  }: Props
+) => {
   const groupsList = Object.values(items);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

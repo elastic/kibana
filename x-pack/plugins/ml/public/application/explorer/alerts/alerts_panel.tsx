@@ -26,7 +26,7 @@ import { AlertsSummary } from './alerts_summary';
 import { AnomalyDetectionAlertsOverviewChart } from './chart';
 import { statusNameMap } from './const';
 
-export const AlertsPanel: FC = () => {
+export const AlertsPanel = () => {
   const {
     services: { triggersActionsUi },
   } = useMlKibana();

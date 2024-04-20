@@ -60,7 +60,13 @@ interface Props {
   hasHorizontalRuleBefore?: boolean;
 }
 
-export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRuleBefore }) => {
+export const PanelGroup = (
+  {
+    navNode,
+    isFirstInList,
+    hasHorizontalRuleBefore
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');

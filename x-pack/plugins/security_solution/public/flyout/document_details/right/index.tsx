@@ -37,7 +37,11 @@ export interface RightPanelProps extends FlyoutPanelProps {
 /**
  * Panel to be displayed in the document details expandable flyout right section
  */
-export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
+export const RightPanel = memo((
+  {
+    path
+  }: Partial<RightPanelProps>
+) => {
   const { storage, telemetry } = useKibana().services;
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =

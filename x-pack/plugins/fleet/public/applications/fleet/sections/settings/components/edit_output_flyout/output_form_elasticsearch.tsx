@@ -18,7 +18,7 @@ interface Props {
   inputs: OutputFormInputsType;
 }
 
-export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (props) => {
+export const OutputFormElasticsearchSection = (props: Props) => {
   const { inputs } = props;
 
   return (

@@ -59,14 +59,17 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
 });
 const dataViewId = 'security-solution-default';
 
-export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
-  <>
-    {getMappedNonEcsValue({
-      data,
-      fieldName: columnId,
-    })?.reduce((x) => x[0]) ?? ''}
-  </>
-);
+export const TestCellRenderer = (
+  {
+    columnId,
+    data
+  }: DeprecatedCellValueElementProps
+) => (<>
+  {getMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  })?.reduce((x) => x[0]) ?? ''}
+</>);
 
 describe('DataTable', () => {
   const mount = useMountAppended();

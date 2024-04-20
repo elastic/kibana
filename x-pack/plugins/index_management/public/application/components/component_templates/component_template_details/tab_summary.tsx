@@ -30,10 +30,12 @@ interface Props {
 
 const INFINITE_AS_ICON = true;
 
-export const TabSummary: React.FunctionComponent<Props> = ({
-  componentTemplateDetails,
-  showCallToAction,
-}) => {
+export const TabSummary = (
+  {
+    componentTemplateDetails,
+    showCallToAction
+  }: Props
+) => {
   const { getUrlForApp } = useComponentTemplatesContext();
 
   const { version, _meta, _kbnMeta, template } = componentTemplateDetails;

@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 
 import type { ConnectorFieldsProps } from '../types';
 
-const CasesWebhookFieldsComponent: FunctionComponent<ConnectorFieldsProps> = () => null;
+const CasesWebhookFieldsComponent = () => null;
 
 CasesWebhookFieldsComponent.displayName = 'CasesWebhook';
 

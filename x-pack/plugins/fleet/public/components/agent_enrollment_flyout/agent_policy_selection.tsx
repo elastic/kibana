@@ -50,7 +50,7 @@ type Props = {
     }
 );
 
-export const AgentPolicySelection: React.FC<Props> = (props) => {
+export const AgentPolicySelection = (props: Props) => {
   const { docLinks } = useStartServices();
 
   const {

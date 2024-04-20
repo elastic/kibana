@@ -21,7 +21,7 @@ describe('toMountPoint', () => {
   const i18n = i18nServiceMock.createStartContract();
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();
 
-  const InnerComponent: FC = () => {
+  const InnerComponent = () => {
     const theme = useEuiTheme();
     useEffect(() => {
       euiTheme = theme;

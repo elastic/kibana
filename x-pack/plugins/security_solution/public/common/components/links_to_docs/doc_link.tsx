@@ -17,7 +17,13 @@ interface DocLinkProps {
   linkText: string;
 }
 
-const DocLink: FC<DocLinkProps> = ({ guidePath = 'security', docPath, linkText }) => {
+const DocLink = (
+  {
+    guidePath = 'security',
+    docPath,
+    linkText
+  }: DocLinkProps
+) => {
   const { services } = useKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = services.docLinks;
 

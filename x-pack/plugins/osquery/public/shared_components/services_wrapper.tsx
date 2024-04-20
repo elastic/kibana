@@ -20,15 +20,18 @@ export interface ServicesWrapperProps {
   children: React.ReactNode;
 }
 
-const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
-  <KibanaThemeProvider theme$={services.theme.theme$}>
-    <KibanaContextProvider services={services}>
-      <EuiErrorBoundary>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </EuiErrorBoundary>
-    </KibanaContextProvider>
-  </KibanaThemeProvider>
-);
+const ServicesWrapperComponent = (
+  {
+    services,
+    children
+  }: ServicesWrapperProps
+) => (<KibanaThemeProvider theme$={services.theme.theme$}>
+  <KibanaContextProvider services={services}>
+    <EuiErrorBoundary>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </EuiErrorBoundary>
+  </KibanaContextProvider>
+</KibanaThemeProvider>);
 
 const ServicesWrapper = React.memo(ServicesWrapperComponent);
 

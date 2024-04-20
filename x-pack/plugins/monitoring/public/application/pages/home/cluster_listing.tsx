@@ -34,7 +34,7 @@ const getAlerts = (clusters: any[]) => {
   );
 };
 
-export const ClusterListing: React.FC<ComponentProps> = () => {
+export const ClusterListing = () => {
   const globalState = useContext(GlobalStateContext);
   const externalConfig = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();

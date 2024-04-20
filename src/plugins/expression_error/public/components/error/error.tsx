@@ -30,7 +30,12 @@ const strings = {
     }),
 };
 
-export const Error: FC<Props> = ({ payload, onClose }) => {
+export const Error = (
+  {
+    payload,
+    onClose
+  }: Props
+) => {
   const message = payload.error?.message;
 
   const CloseIconButton = () => (

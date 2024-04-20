@@ -36,10 +36,15 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
 `;
 
-export const AgentDetailsOverviewSection: React.FunctionComponent<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+export const AgentDetailsOverviewSection = memo((
+  {
+    agent,
+    agentPolicy
+  }: {
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+  }
+) => {
   const latestAgentVersion = useAgentVersion();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 

@@ -50,17 +50,19 @@ interface Props {
   job: ExplorerJob;
 }
 
-export const AnomalyDetails: FC<Props> = ({
-  anomaly,
-  examples,
-  definition,
-  isAggregatedData,
-  filter,
-  influencersLimit,
-  influencerFilter,
-  tabIndex,
-  job,
-}) => {
+export const AnomalyDetails = (
+  {
+    anomaly,
+    examples,
+    definition,
+    isAggregatedData,
+    filter,
+    influencersLimit,
+    influencerFilter,
+    tabIndex,
+    job
+  }: Props
+) => {
   if (examples !== undefined && examples.length > 0) {
     const tabs = [
       {
@@ -114,14 +116,23 @@ export const AnomalyDetails: FC<Props> = ({
   );
 };
 
-const Contents: FC<{
-  anomaly: MlAnomaliesTableRecordExtended;
-  isAggregatedData: boolean;
-  filter: EntityCellFilter;
-  influencersLimit: number;
-  influencerFilter: EntityCellFilter;
-  job: ExplorerJob;
-}> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
+const Contents = (
+  {
+    anomaly,
+    isAggregatedData,
+    filter,
+    influencersLimit,
+    influencerFilter,
+    job
+  }: {
+    anomaly: MlAnomaliesTableRecordExtended;
+    isAggregatedData: boolean;
+    filter: EntityCellFilter;
+    influencersLimit: number;
+    influencerFilter: EntityCellFilter;
+    job: ExplorerJob;
+  }
+) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
@@ -163,7 +174,13 @@ const Contents: FC<{
   );
 };
 
-const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly }) => {
+const Description = (
+  {
+    anomaly
+  }: {
+    anomaly: MlAnomaliesTableRecordExtended;
+  }
+) => {
   const { anomalyDescription, mvDescription } = getAnomalyDescription(anomaly);
 
   return (
@@ -182,12 +199,19 @@ const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly 
   );
 };
 
-const Details: FC<{
-  anomaly: MlAnomaliesTableRecordExtended;
-  isAggregatedData: boolean;
-  filter: EntityCellFilter;
-  job: ExplorerJob;
-}> = ({ anomaly, isAggregatedData, filter, job }) => {
+const Details = (
+  {
+    anomaly,
+    isAggregatedData,
+    filter,
+    job
+  }: {
+    anomaly: MlAnomaliesTableRecordExtended;
+    isAggregatedData: boolean;
+    filter: EntityCellFilter;
+    job: ExplorerJob;
+  }
+) => {
   const isInterimResult = anomaly.source?.is_interim ?? false;
   return (
     <>
@@ -227,11 +251,17 @@ const Details: FC<{
   );
 };
 
-const Influencers: FC<{
-  anomaly: MlAnomaliesTableRecordExtended;
-  influencersLimit: number;
-  influencerFilter: EntityCellFilter;
-}> = ({ anomaly, influencersLimit, influencerFilter }) => {
+const Influencers = (
+  {
+    anomaly,
+    influencersLimit,
+    influencerFilter
+  }: {
+    anomaly: MlAnomaliesTableRecordExtended;
+    influencersLimit: number;
+    influencerFilter: EntityCellFilter;
+  }
+) => {
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
   const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
 
@@ -302,10 +332,15 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] }> = ({
-  definition,
-  examples,
-}) => {
+const CategoryExamples = (
+  {
+    definition,
+    examples
+  }: {
+    definition: CategoryDefinition;
+    examples: string[];
+  }
+) => {
   return (
     <EuiFlexGroup
       direction="column"

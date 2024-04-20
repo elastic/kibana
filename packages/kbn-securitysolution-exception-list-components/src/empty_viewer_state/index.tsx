@@ -38,15 +38,17 @@ const panelCss = css`
   margin: ${euiThemeVars.euiSizeL} 0;
   padding: ${euiThemeVars.euiSizeL} 0;
 `;
-const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
-  title,
-  body,
-  buttonText,
-  listType,
-  isReadOnly,
-  viewerStatus,
-  onEmptyButtonStateClick,
-}) => {
+const EmptyViewerStateComponent = (
+  {
+    title,
+    body,
+    buttonText,
+    listType,
+    isReadOnly,
+    viewerStatus,
+    onEmptyButtonStateClick
+  }: EmptyViewerStateProps
+) => {
   const { euiTheme } = useEuiTheme();
 
   const euiEmptyPromptProps = useMemo(() => {

@@ -29,7 +29,12 @@ interface ApiKeyPanelContent {
   openApiKeyModal: () => void;
 }
 
-export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, openApiKeyModal }) => {
+export const ApiKeyPanelContent = (
+  {
+    apiKeys,
+    openApiKeyModal
+  }: ApiKeyPanelContent
+) => {
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column">

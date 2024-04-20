@@ -90,19 +90,21 @@ const generateId = htmlIdGenerator('SolutionNav');
 /**
  * A wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo.
  */
-export const SolutionNav: FC<SolutionNavProps> = ({
-  children,
-  headingProps,
-  icon,
-  isOpenOnDesktop = false,
-  items,
-  mobileBreakpoints = ['xs', 's'],
-  closeFlyoutButtonPosition = 'outside',
-  name,
-  onCollapse,
-  canBeCollapsed = true,
-  ...rest
-}) => {
+export const SolutionNav = (
+  {
+    children,
+    headingProps,
+    icon,
+    isOpenOnDesktop = false,
+    items,
+    mobileBreakpoints = ['xs', 's'],
+    closeFlyoutButtonPosition = 'outside',
+    name,
+    onCollapse,
+    canBeCollapsed = true,
+    ...rest
+  }: SolutionNavProps
+) => {
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
@@ -204,61 +206,59 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     });
   }, [navWidth, setGlobalCSSVariables]);
 
-  return (
-    <>
-      {isSmallerBreakpoint && (
-        // @ts-expect-error Mismatch in collapsible vs unconllapsible props
-        <EuiCollapsibleNavGroup
-          className={sideNavClasses}
-          paddingSize="none"
-          background="none"
-          title={titleText}
-          titleElement="span"
-          isCollapsible={canBeCollapsed}
-          initialIsOpen={false}
-        >
-          <EuiPanel color="transparent" paddingSize="s">
-            {sideNavContent}
-          </EuiPanel>
-        </EuiCollapsibleNavGroup>
-      )}
-      {isMediumBreakpoint && (
-        <>
-          {(isSideNavOpenOnMobile || !canBeCollapsed) && (
-            <EuiFlyout
-              ownFocus={false}
-              outsideClickCloses
-              onClose={() => setIsSideNavOpenOnMobile(false)}
-              side="left"
-              size={FLYOUT_SIZE}
-              closeButtonPosition={closeFlyoutButtonPosition}
-              className="kbnSolutionNav__flyout"
-              hideCloseButton={!canBeCollapsed}
-            >
-              <EuiPageSidebar className={sideNavClasses} hasEmbellish={true}>
-                {titleText}
-                <EuiSpacer size="l" />
-                {sideNavContent}
-              </EuiPageSidebar>
-            </EuiFlyout>
-          )}
-          {canBeCollapsed && (
-            <SolutionNavCollapseButton isCollapsed={true} onClick={toggleOpenOnMobile} />
-          )}
-        </>
-      )}
-      {isLargerBreakpoint && (
-        <>
-          <div className={sideNavClasses}>
-            {titleText}
-            <EuiSpacer size="l" />
-            {sideNavContent}
-          </div>
-          {canBeCollapsed && (
-            <SolutionNavCollapseButton isCollapsed={!isOpenOnDesktop} onClick={onCollapse} />
-          )}
-        </>
-      )}
-    </>
-  );
+  return (<>
+    {isSmallerBreakpoint && (
+      // @ts-expect-error Mismatch in collapsible vs unconllapsible props
+      (<EuiCollapsibleNavGroup
+        className={sideNavClasses}
+        paddingSize="none"
+        background="none"
+        title={titleText}
+        titleElement="span"
+        isCollapsible={canBeCollapsed}
+        initialIsOpen={false}
+      >
+        <EuiPanel color="transparent" paddingSize="s">
+          {sideNavContent}
+        </EuiPanel>
+      </EuiCollapsibleNavGroup>)
+    )}
+    {isMediumBreakpoint && (
+      <>
+        {(isSideNavOpenOnMobile || !canBeCollapsed) && (
+          <EuiFlyout
+            ownFocus={false}
+            outsideClickCloses
+            onClose={() => setIsSideNavOpenOnMobile(false)}
+            side="left"
+            size={FLYOUT_SIZE}
+            closeButtonPosition={closeFlyoutButtonPosition}
+            className="kbnSolutionNav__flyout"
+            hideCloseButton={!canBeCollapsed}
+          >
+            <EuiPageSidebar className={sideNavClasses} hasEmbellish={true}>
+              {titleText}
+              <EuiSpacer size="l" />
+              {sideNavContent}
+            </EuiPageSidebar>
+          </EuiFlyout>
+        )}
+        {canBeCollapsed && (
+          <SolutionNavCollapseButton isCollapsed={true} onClick={toggleOpenOnMobile} />
+        )}
+      </>
+    )}
+    {isLargerBreakpoint && (
+      <>
+        <div className={sideNavClasses}>
+          {titleText}
+          <EuiSpacer size="l" />
+          {sideNavContent}
+        </div>
+        {canBeCollapsed && (
+          <SolutionNavCollapseButton isCollapsed={!isOpenOnDesktop} onClick={onCollapse} />
+        )}
+      </>
+    )}
+  </>);
 };

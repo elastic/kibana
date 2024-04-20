@@ -16,11 +16,13 @@ interface Props {
   customDataTestSubj?: string;
 }
 
-const UserActionPropertyActionsComponent: React.FC<Props> = ({
-  isLoading,
-  propertyActions,
-  customDataTestSubj = 'user-action',
-}) => {
+const UserActionPropertyActionsComponent = (
+  {
+    isLoading,
+    propertyActions,
+    customDataTestSubj = 'user-action'
+  }: Props
+) => {
   if (propertyActions.length === 0) {
     return null;
   }

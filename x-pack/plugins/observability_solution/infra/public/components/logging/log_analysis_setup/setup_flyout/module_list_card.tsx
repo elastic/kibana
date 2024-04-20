@@ -13,21 +13,23 @@ import { SetupStatus } from '../../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { CreateJobButton, RecreateJobButton } from '../create_job_button';
 
-export const LogAnalysisModuleListCard: React.FC<{
-  jobId: string;
-  hasSetupCapabilities: boolean;
-  moduleDescription: string;
-  moduleName: string;
-  moduleStatus: SetupStatus;
-  onViewSetup: () => void;
-}> = ({
-  jobId,
-  hasSetupCapabilities,
-  moduleDescription,
-  moduleName,
-  moduleStatus,
-  onViewSetup,
-}) => {
+export const LogAnalysisModuleListCard = (
+  {
+    jobId,
+    hasSetupCapabilities,
+    moduleDescription,
+    moduleName,
+    moduleStatus,
+    onViewSetup
+  }: {
+    jobId: string;
+    hasSetupCapabilities: boolean;
+    moduleDescription: string;
+    moduleName: string;
+    moduleStatus: SetupStatus;
+    onViewSetup: () => void;
+  }
+) => {
   const {
     services: {
       ml,

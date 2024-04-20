@@ -55,16 +55,18 @@ const CalculatingProbabilityMessage = (
   </div>
 );
 
-export const DocumentCountContent: FC<Props> = ({
-  documentCountStats,
-  totalCount,
-  samplingProbability,
-  setSamplingProbability,
-  loading,
-  randomSamplerPreference,
-  setRandomSamplerPreference,
-  showSettings = true,
-}) => {
+export const DocumentCountContent = (
+  {
+    documentCountStats,
+    totalCount,
+    samplingProbability,
+    setSamplingProbability,
+    loading,
+    randomSamplerPreference,
+    setRandomSamplerPreference,
+    showSettings = true
+  }: Props
+) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
   const onShowSamplingOptions = useCallback(() => {

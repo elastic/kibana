@@ -12,12 +12,14 @@ import type { AppContext } from './types';
 
 const FilesManagementAppContext = createContext<AppContext>(null as unknown as AppContext);
 
-export const FilesManagementAppContextProvider: FC<AppContext> = ({
-  children,
-  filesClient,
-  getFileKindDefinition,
-  getAllFindKindDefinitions,
-}) => {
+export const FilesManagementAppContextProvider = (
+  {
+    children,
+    filesClient,
+    getFileKindDefinition,
+    getAllFindKindDefinitions
+  }: AppContext
+) => {
   return (
     <FilesManagementAppContext.Provider
       value={{ filesClient, getFileKindDefinition, getAllFindKindDefinitions }}

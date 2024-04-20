@@ -17,12 +17,14 @@ interface Props {
   setRuleParams: (key: string, value: any) => void;
 }
 
-export const DownNoExpressionSelect: React.FC<Props> = ({
-  defaultNumTimes,
-  hasFilters,
-  isEnabled,
-  setRuleParams,
-}) => {
+export const DownNoExpressionSelect = (
+  {
+    defaultNumTimes,
+    hasFilters,
+    isEnabled,
+    setRuleParams
+  }: Props
+) => {
   const [numTimes, setNumTimes] = useState<number>(defaultNumTimes ?? 5);
 
   useEffect(() => {

@@ -36,7 +36,7 @@ interface Props {
   onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
-export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) => {
+export const OutputFormKafkaSection = (props: Props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
   const { docLinks } = useStartServices();

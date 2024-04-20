@@ -66,14 +66,16 @@ interface EditProps {
   id?: string;
 }
 
-export const PipelineEditView: React.FC<EditProps> = ({
-  pipelineService,
-  logstashLicenseService,
-  toasts,
-  history,
-  setBreadcrumbs,
-  id,
-}) => {
+export const PipelineEditView = (
+  {
+    pipelineService,
+    logstashLicenseService,
+    toasts,
+    history,
+    setBreadcrumbs,
+    id
+  }: EditProps
+) => {
   const params = new URLSearchParams(history.location.search);
   const shouldClone = params.get('clone') === '';
 

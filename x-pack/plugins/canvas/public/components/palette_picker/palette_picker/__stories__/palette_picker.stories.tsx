@@ -13,7 +13,7 @@ import { PalettePicker } from '..';
 import { paulTor14, ColorPalette } from '../../../../../common/lib/palettes';
 import { CustomColorPalette } from '../../types';
 
-const Interactive: FC = () => {
+const Interactive = () => {
   const [palette, setPalette] = useState<ColorPalette | CustomColorPalette | null>(paulTor14);
   return <PalettePicker palette={palette} onChange={setPalette} clearable={true} />;
 };

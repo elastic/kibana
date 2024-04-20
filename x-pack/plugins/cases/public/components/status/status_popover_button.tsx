@@ -18,7 +18,13 @@ interface Props {
   onClick: () => void;
 }
 
-const StatusPopoverButtonComponent: React.FC<Props> = ({ status, disabled = false, onClick }) => {
+const StatusPopoverButtonComponent = (
+  {
+    status,
+    disabled = false,
+    onClick
+  }: Props
+) => {
   return (
     <EuiBadge
       iconType="arrowDown"

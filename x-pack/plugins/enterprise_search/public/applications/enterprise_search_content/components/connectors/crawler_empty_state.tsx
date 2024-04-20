@@ -15,7 +15,7 @@ import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { NEW_CRAWLER_PATH } from '../../routes';
 
-export const CrawlerEmptyState: React.FC = () => {
+export const CrawlerEmptyState = () => {
   const { errorConnectingMessage } = useValues(HttpLogic);
   return (
     <EuiPanel hasBorder>

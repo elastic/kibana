@@ -95,15 +95,17 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
-  list,
-  itemToEdit,
-  rule,
-  showAlertCloseOptions,
-  openedFromListDetailPage,
-  onCancel,
-  onConfirm,
-}): JSX.Element => {
+const EditExceptionFlyoutComponent = (
+  {
+    list,
+    itemToEdit,
+    rule,
+    showAlertCloseOptions,
+    openedFromListDetailPage,
+    onCancel,
+    onConfirm
+  }: EditExceptionFlyoutProps
+): JSX.Element => {
   const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);

@@ -16,18 +16,22 @@ interface Props {
   width: number;
 }
 
-export const HoverAnnotation: FC<Props> = ({ transformMatrix, width, height }) => (
-  <div
-    className="canvasHoverAnnotation canvasLayoutAnnotation"
-    style={{
-      width,
-      height,
-      marginLeft: -width / 2,
-      marginTop: -height / 2,
-      transform: matrixToCSS(transformMatrix),
-    }}
-  />
-);
+export const HoverAnnotation = (
+  {
+    transformMatrix,
+    width,
+    height
+  }: Props
+) => (<div
+  className="canvasHoverAnnotation canvasLayoutAnnotation"
+  style={{
+    width,
+    height,
+    marginLeft: -width / 2,
+    marginTop: -height / 2,
+    transform: matrixToCSS(transformMatrix),
+  }}
+/>);
 
 HoverAnnotation.propTypes = {
   height: PropTypes.number.isRequired,

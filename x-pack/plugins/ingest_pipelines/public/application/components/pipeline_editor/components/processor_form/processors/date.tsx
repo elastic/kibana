@@ -111,7 +111,7 @@ const fieldsConfig: FieldsConfig = {
 /**
  * Disambiguate from global Date object
  */
-export const DateProcessor: FunctionComponent = () => {
+export const DateProcessor = () => {
   return (
     <>
       <FieldNameField

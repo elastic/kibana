@@ -15,7 +15,7 @@ import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 
-export const ElasticsearchCard: React.FC = () => {
+export const ElasticsearchCard = () => {
   return (
     <EuiPanel paddingSize="l">
       <EuiFlexGroup gutterSize="xl" alignItems="center" justifyContent="spaceBetween">

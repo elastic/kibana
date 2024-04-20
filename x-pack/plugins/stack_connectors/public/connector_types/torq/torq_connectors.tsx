@@ -21,7 +21,15 @@ import * as i18n from './translations';
 
 const { urlField, emptyField } = fieldValidators;
 
-const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dataTestSubj }) => {
+const Callout = (
+  {
+    title,
+    dataTestSubj
+  }: {
+    title: string;
+    dataTestSubj: string;
+  }
+) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -45,9 +53,11 @@ const torqWebhookEndpoint =
     return hostname === 'hooks.torq.io' ? undefined : error;
   };
 
-const TorqActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-}) => {
+const TorqActionConnectorFields = (
+  {
+    readOnly
+  }: ActionConnectorFieldsProps
+) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">

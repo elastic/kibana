@@ -30,7 +30,11 @@ const areaSeriesStyle = {
   },
 };
 
-export const ModelBounds: FC<Props> = ({ modelData }) => {
+export const ModelBounds = (
+  {
+    modelData
+  }: Props
+) => {
   const { MODEL_COLOR } = useChartColors();
   const model = modelData === undefined ? [] : modelData;
   return (

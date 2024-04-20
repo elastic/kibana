@@ -27,9 +27,11 @@ interface MatchParams {
   repositoryName?: Repository['name'];
 }
 
-export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  history,
-}) => {
+export const RepositoryList = (
+  {
+    history
+  }: RouteComponentProps<MatchParams>
+) => {
   const { repositoryName } = useDecodedParams<MatchParams>();
   const {
     error,

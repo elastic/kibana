@@ -16,7 +16,7 @@ import { useRightPanelContext } from '../context';
 /**
  * Document details risk score displayed in flyout right section header
  */
-export const RiskScore: FC = memo(() => {
+export const RiskScore = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const fieldsData = getFieldsData(ALERT_RISK_SCORE);
 

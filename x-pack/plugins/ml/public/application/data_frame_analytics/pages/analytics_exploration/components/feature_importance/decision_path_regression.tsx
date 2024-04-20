@@ -27,12 +27,14 @@ interface RegressionDecisionPathProps {
   topClasses?: TopClasses;
 }
 
-export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
-  baseline,
-  featureImportance,
-  predictedValue,
-  predictionFieldName,
-}) => {
+export const RegressionDecisionPath = (
+  {
+    baseline,
+    featureImportance,
+    predictedValue,
+    predictionFieldName
+  }: RegressionDecisionPathProps
+) => {
   const { decisionPathData } = useDecisionPathData({
     baseline,
     featureImportance,

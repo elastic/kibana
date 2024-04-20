@@ -16,7 +16,7 @@ import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 
-export const AnalyticsEmptyPrompt: FC = () => {
+export const AnalyticsEmptyPrompt = () => {
   const {
     services: { docLinks },
   } = useMlKibana();

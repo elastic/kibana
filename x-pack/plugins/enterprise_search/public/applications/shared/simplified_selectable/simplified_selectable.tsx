@@ -21,12 +21,14 @@ export interface OptionMap {
   [key: string]: boolean;
 }
 
-export const SimplifiedSelectable: React.FC<Props> = ({
-  emptyMessage,
-  options,
-  selectedOptions,
-  onChange,
-}) => {
+export const SimplifiedSelectable = (
+  {
+    emptyMessage,
+    options,
+    selectedOptions,
+    onChange
+  }: Props
+) => {
   const selectedOptionsMap: OptionMap = selectedOptions.reduce(
     (acc, selectedOption) => ({
       ...acc,

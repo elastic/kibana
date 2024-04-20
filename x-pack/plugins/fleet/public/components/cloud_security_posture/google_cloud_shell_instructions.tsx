@@ -17,11 +17,13 @@ interface Props {
   projectId?: string;
 }
 
-export const GoogleCloudShellInstructions: React.FunctionComponent<Props> = ({
-  cloudShellUrl,
-  cloudShellCommand,
-  projectId,
-}) => {
+export const GoogleCloudShellInstructions = (
+  {
+    cloudShellUrl,
+    cloudShellCommand,
+    projectId
+  }: Props
+) => {
   return (
     <>
       <GoogleCloudShellGuide commandText={cloudShellCommand} hasProjectId={!!projectId} />

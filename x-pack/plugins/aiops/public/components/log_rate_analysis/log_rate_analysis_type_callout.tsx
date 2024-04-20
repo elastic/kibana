@@ -17,10 +17,12 @@ interface LogRateAnalysisTypeCallOutProps {
   zeroDocsFallback: boolean;
 }
 
-export const LogRateAnalysisTypeCallOut: FC<LogRateAnalysisTypeCallOutProps> = ({
-  analysisType,
-  zeroDocsFallback,
-}) => {
+export const LogRateAnalysisTypeCallOut = (
+  {
+    analysisType,
+    zeroDocsFallback
+  }: LogRateAnalysisTypeCallOutProps
+) => {
   let callOutTitle: string;
   let callOutText: string;
 

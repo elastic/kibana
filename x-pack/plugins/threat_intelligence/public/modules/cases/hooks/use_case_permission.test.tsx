@@ -43,7 +43,7 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC = getProviderComponent(mockedServices);
+    const ProviderComponent = getProviderComponent(mockedServices);
 
     const indicatorName: string = 'abc';
 
@@ -67,7 +67,7 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC = getProviderComponent(mockedServices);
+    const ProviderComponent = getProviderComponent(mockedServices);
 
     const indicatorName: string = 'abc';
 
@@ -91,7 +91,7 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC = getProviderComponent(mockedServices);
+    const ProviderComponent = getProviderComponent(mockedServices);
 
     const indicatorName: string = EMPTY_VALUE;
 

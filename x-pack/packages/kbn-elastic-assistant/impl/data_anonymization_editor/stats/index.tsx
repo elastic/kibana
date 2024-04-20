@@ -29,13 +29,15 @@ interface Props {
   replacements?: Replacements;
 }
 
-const StatsComponent: React.FC<Props> = ({
-  isDataAnonymizable,
-  anonymizationFields,
-  rawData,
-  inline,
-  replacements,
-}) => {
+const StatsComponent = (
+  {
+    isDataAnonymizable,
+    anonymizationFields,
+    rawData,
+    inline,
+    replacements
+  }: Props
+) => {
   const { allowed, anonymized, total } = useMemo(
     () =>
       getStats({

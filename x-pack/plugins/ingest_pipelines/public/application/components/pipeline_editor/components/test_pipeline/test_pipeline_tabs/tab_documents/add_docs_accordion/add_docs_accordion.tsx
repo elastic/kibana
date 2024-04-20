@@ -36,7 +36,11 @@ interface Props {
   onAddDocuments: (document: any) => void;
 }
 
-export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments }) => {
+export const AddDocumentsAccordion = (
+  {
+    onAddDocuments
+  }: Props
+) => {
   const { services } = useKibana();
   const isMounted = useIsMounted();
   const [discoverLink, setDiscoverLink] = useState<string | undefined>(undefined);

@@ -44,12 +44,14 @@ interface ExceptionsUtilityComponentProps {
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
 
-const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
-  dataTestSubj,
-  pagination,
-  lastUpdated,
-  exceptionsTitle,
-}) => {
+const ExceptionsUtilityComponent = (
+  {
+    dataTestSubj,
+    pagination,
+    lastUpdated,
+    exceptionsTitle
+  }: ExceptionsUtilityComponentProps
+) => {
   const { pageSize, totalItemCount } = pagination;
   return (
     <MyUtilities alignItems="center" justifyContent="spaceBetween">

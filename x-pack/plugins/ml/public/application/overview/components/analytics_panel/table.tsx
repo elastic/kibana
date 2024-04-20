@@ -24,7 +24,11 @@ import { useTableActions } from './actions';
 interface Props {
   items: DataFrameAnalyticsListRow[];
 }
-export const AnalyticsTable: FC<Props> = ({ items }) => {
+export const AnalyticsTable = (
+  {
+    items
+  }: Props
+) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 

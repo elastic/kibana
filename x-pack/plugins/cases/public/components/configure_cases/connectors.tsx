@@ -40,17 +40,19 @@ export interface Props {
   selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
-const ConnectorsComponent: React.FC<Props> = ({
-  actionTypes,
-  connectors,
-  disabled,
-  handleShowEditFlyout,
-  isLoading,
-  mappings,
-  onChangeConnector,
-  selectedConnector,
-  updateConnectorDisabled,
-}) => {
+const ConnectorsComponent = (
+  {
+    actionTypes,
+    connectors,
+    disabled,
+    handleShowEditFlyout,
+    isLoading,
+    mappings,
+    onChangeConnector,
+    selectedConnector,
+    updateConnectorDisabled
+  }: Props
+) => {
   const { actions } = useApplicationCapabilities();
   const connector = useMemo(
     () => connectors.find((c) => c.id === selectedConnector.id),

@@ -33,7 +33,7 @@ type Props = Partial<FieldConfig>;
 
 export const TARGET_FIELD_PATH = 'fields.target_field';
 
-export const TargetField: FunctionComponent<Props> = (props) => {
+export const TargetField = (props: Props) => {
   return (
     <UseField
       config={{

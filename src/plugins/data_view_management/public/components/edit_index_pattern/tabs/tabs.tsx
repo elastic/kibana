@@ -161,18 +161,20 @@ const SCHEMA_ITEMS: FilterItems[] = [
   },
 ];
 
-export const Tabs: React.FC<TabsProps> = ({
-  indexPattern,
-  saveIndexPattern,
-  fields,
-  history,
-  refreshFields,
-  relationships,
-  allowedTypes,
-  compositeRuntimeFields,
-  refreshIndexPatternClick,
-  isRefreshing,
-}) => {
+export const Tabs = (
+  {
+    indexPattern,
+    saveIndexPattern,
+    fields,
+    history,
+    refreshFields,
+    relationships,
+    allowedTypes,
+    compositeRuntimeFields,
+    refreshIndexPatternClick,
+    isRefreshing
+  }: TabsProps
+) => {
   const {
     uiSettings,
     docLinks,

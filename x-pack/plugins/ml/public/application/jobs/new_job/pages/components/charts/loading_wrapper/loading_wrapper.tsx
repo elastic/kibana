@@ -15,7 +15,14 @@ interface Props {
   loading?: boolean;
 }
 
-export const LoadingWrapper: FC<Props> = ({ hasData, loading = false, height, children }) => {
+export const LoadingWrapper = (
+  {
+    hasData,
+    loading = false,
+    height,
+    children
+  }: Props
+) => {
   const opacity = loading === true ? (hasData === true ? 0.3 : 0) : 1;
 
   return (

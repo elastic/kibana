@@ -34,12 +34,14 @@ export interface TestPipelineFlyoutForm {
   documents: string | Document[];
 }
 
-export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
-  onClose,
-  activeTab,
-  setActiveTab,
-  processors,
-}) => {
+export const TestPipelineFlyout = (
+  {
+    onClose,
+    activeTab,
+    setActiveTab,
+    processors
+  }: Props
+) => {
   const { services } = useKibana();
   const isMounted = useIsMounted();
 

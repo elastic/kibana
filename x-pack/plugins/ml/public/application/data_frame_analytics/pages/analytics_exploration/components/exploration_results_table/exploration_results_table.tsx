@@ -31,37 +31,42 @@ interface Props {
   searchQuery: ResultsSearchQuery;
 }
 
-export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ dataView, jobConfig, needsDestDataView, searchQuery }) => {
-    const {
-      services: {
-        mlServices: { mlApiServices },
-      },
-    } = useMlKibana();
+export const ExplorationResultsTable = React.memo((
+  {
+    dataView,
+    jobConfig,
+    needsDestDataView,
+    searchQuery
+  }: Props
+) => {
+  const {
+    services: {
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
 
-    const classificationData = useExplorationResults(
-      dataView,
-      jobConfig,
-      searchQuery,
-      getToastNotifications(),
-      mlApiServices
-    );
+  const classificationData = useExplorationResults(
+    dataView,
+    jobConfig,
+    searchQuery,
+    getToastNotifications(),
+    mlApiServices
+  );
 
-    if (jobConfig === undefined || classificationData === undefined) {
-      return null;
-    }
-
-    return (
-      <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
-        <ExpandableSectionResults
-          indexData={classificationData}
-          dataView={dataView}
-          resultsField={jobConfig?.dest.results_field}
-          jobConfig={jobConfig}
-          needsDestDataView={needsDestDataView}
-          searchQuery={searchQuery}
-        />
-      </div>
-    );
+  if (jobConfig === undefined || classificationData === undefined) {
+    return null;
   }
-);
+
+  return (
+    <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
+      <ExpandableSectionResults
+        indexData={classificationData}
+        dataView={dataView}
+        resultsField={jobConfig?.dest.results_field}
+        jobConfig={jobConfig}
+        needsDestDataView={needsDestDataView}
+        searchQuery={searchQuery}
+      />
+    </div>
+  );
+});

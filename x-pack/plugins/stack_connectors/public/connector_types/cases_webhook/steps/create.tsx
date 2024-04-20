@@ -22,113 +22,116 @@ interface Props {
   readOnly: boolean;
 }
 
-export const CreateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
-  <span data-test-subj="createStep" style={{ display: display ? 'block' : 'none' }}>
-    <EuiText>
-      <h3>{i18n.STEP_2}</h3>
-      <small>
-        <p>{i18n.STEP_2_DESCRIPTION}</p>
-      </small>
-    </EuiText>
-    <EuiSpacer size="s" />
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <UseField
-          path="config.createIncidentMethod"
-          component={Field}
-          config={{
-            label: i18n.CREATE_INCIDENT_METHOD,
-            defaultValue: 'post',
-            type: FIELD_TYPES.SELECT,
-            validations: [
-              {
-                validator: emptyField(i18n.CREATE_METHOD_REQUIRED),
-              },
-            ],
-          }}
-          componentProps={{
-            euiFieldProps: {
-              'data-test-subj': 'webhookCreateMethodSelect',
-              options: HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb })),
-              readOnly,
+export const CreateStep = (
+  {
+    display,
+    readOnly
+  }: Props
+) => (<span data-test-subj="createStep" style={{ display: display ? 'block' : 'none' }}>
+  <EuiText>
+    <h3>{i18n.STEP_2}</h3>
+    <small>
+      <p>{i18n.STEP_2_DESCRIPTION}</p>
+    </small>
+  </EuiText>
+  <EuiSpacer size="s" />
+  <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexItem grow={false}>
+      <UseField
+        path="config.createIncidentMethod"
+        component={Field}
+        config={{
+          label: i18n.CREATE_INCIDENT_METHOD,
+          defaultValue: 'post',
+          type: FIELD_TYPES.SELECT,
+          validations: [
+            {
+              validator: emptyField(i18n.CREATE_METHOD_REQUIRED),
             },
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <UseField
-          path="config.createIncidentUrl"
-          config={{
-            label: i18n.CREATE_INCIDENT_URL,
-            validations: [
-              {
-                validator: urlField(i18n.CREATE_URL_REQUIRED),
-              },
-            ],
-          }}
-          component={Field}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              'data-test-subj': 'webhookCreateUrlText',
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'webhookCreateMethodSelect',
+            options: HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb })),
+            readOnly,
+          },
+        }}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <UseField
+        path="config.createIncidentUrl"
+        config={{
+          label: i18n.CREATE_INCIDENT_URL,
+          validations: [
+            {
+              validator: urlField(i18n.CREATE_URL_REQUIRED),
             },
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UseField
-          path="config.createIncidentJson"
-          config={{
-            helpText: i18n.CREATE_INCIDENT_JSON_HELP,
-            label: i18n.CREATE_INCIDENT_JSON,
-            validations: [
-              {
-                validator: emptyField(i18n.CREATE_INCIDENT_REQUIRED),
-              },
-              {
-                validator: containsTitleAndDesc(),
-              },
-            ],
-          }}
-          component={JsonFieldWrapper}
-          componentProps={{
-            euiCodeEditorProps: {
-              isReadOnly: readOnly,
-              ['aria-label']: i18n.CODE_EDITOR,
+          ],
+        }}
+        component={Field}
+        componentProps={{
+          euiFieldProps: {
+            readOnly,
+            'data-test-subj': 'webhookCreateUrlText',
+          },
+        }}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <UseField
+        path="config.createIncidentJson"
+        config={{
+          helpText: i18n.CREATE_INCIDENT_JSON_HELP,
+          label: i18n.CREATE_INCIDENT_JSON,
+          validations: [
+            {
+              validator: emptyField(i18n.CREATE_INCIDENT_REQUIRED),
             },
-            dataTestSubj: 'webhookCreateIncidentJson',
-            messageVariables: casesVars,
-            paramsProperty: 'createIncidentJson',
-            buttonTitle: i18n.ADD_CASES_VARIABLE,
-            showButtonTitle: true,
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UseField
-          path="config.createIncidentResponseKey"
-          config={{
-            helpText: i18n.CREATE_INCIDENT_RESPONSE_KEY_HELP,
-            label: i18n.CREATE_INCIDENT_RESPONSE_KEY,
-            validations: [
-              {
-                validator: emptyField(i18n.CREATE_RESPONSE_KEY_REQUIRED),
-              },
-            ],
-          }}
-          component={Field}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              'data-test-subj': 'createIncidentResponseKeyText',
+            {
+              validator: containsTitleAndDesc(),
             },
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </span>
-);
+          ],
+        }}
+        component={JsonFieldWrapper}
+        componentProps={{
+          euiCodeEditorProps: {
+            isReadOnly: readOnly,
+            ['aria-label']: i18n.CODE_EDITOR,
+          },
+          dataTestSubj: 'webhookCreateIncidentJson',
+          messageVariables: casesVars,
+          paramsProperty: 'createIncidentJson',
+          buttonTitle: i18n.ADD_CASES_VARIABLE,
+          showButtonTitle: true,
+        }}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <UseField
+        path="config.createIncidentResponseKey"
+        config={{
+          helpText: i18n.CREATE_INCIDENT_RESPONSE_KEY_HELP,
+          label: i18n.CREATE_INCIDENT_RESPONSE_KEY,
+          validations: [
+            {
+              validator: emptyField(i18n.CREATE_RESPONSE_KEY_REQUIRED),
+            },
+          ],
+        }}
+        component={Field}
+        componentProps={{
+          euiFieldProps: {
+            readOnly,
+            'data-test-subj': 'createIncidentResponseKeyText',
+          },
+        }}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</span>);

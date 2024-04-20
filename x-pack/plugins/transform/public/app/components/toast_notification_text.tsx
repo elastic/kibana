@@ -32,12 +32,14 @@ interface ToastNotificationTextProps {
   forceModal?: boolean;
 }
 
-export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
-  text,
-  previewTextLength,
-  inline = false,
-  forceModal = false,
-}) => {
+export const ToastNotificationText = (
+  {
+    text,
+    previewTextLength,
+    inline = false,
+    forceModal = false
+  }: ToastNotificationTextProps
+) => {
   const { overlays, theme, i18n: i18nStart } = useAppDependencies();
 
   if (!forceModal && typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {

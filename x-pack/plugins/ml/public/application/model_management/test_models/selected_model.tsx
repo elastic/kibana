@@ -45,14 +45,16 @@ interface Props {
   setCurrentContext?: React.Dispatch<TestTrainedModelsContextType>;
 }
 
-export const SelectedModel: FC<Props> = ({
-  model,
-  inputType,
-  deploymentId,
-  handlePipelineConfigUpdate,
-  externalPipelineConfig,
-  setCurrentContext,
-}) => {
+export const SelectedModel = (
+  {
+    model,
+    inputType,
+    deploymentId,
+    handlePipelineConfigUpdate,
+    externalPipelineConfig,
+    setCurrentContext
+  }: Props
+) => {
   const { trainedModels } = useMlApiContext();
 
   const inferrer = useMemo<InferrerType | undefined>(() => {

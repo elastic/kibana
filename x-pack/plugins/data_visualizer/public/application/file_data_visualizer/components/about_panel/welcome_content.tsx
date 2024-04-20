@@ -31,7 +31,11 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
-export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
+export const WelcomeContent = (
+  {
+    hasPermissionToImport
+  }: Props
+) => {
   const {
     services: {
       fileUpload: { getMaxBytesFormatted },

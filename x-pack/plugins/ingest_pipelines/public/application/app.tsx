@@ -42,7 +42,7 @@ export const AppWithoutRouter = () => (
   </Routes>
 );
 
-export const App: FunctionComponent = () => {
+export const App = () => {
   const { apiError } = useAuthorizationContext();
   const { history } = useKibana().services;
 

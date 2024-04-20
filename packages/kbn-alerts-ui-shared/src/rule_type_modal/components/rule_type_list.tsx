@@ -38,15 +38,17 @@ const producerToDisplayName = (producer: string) => {
   return Reflect.get(PRODUCER_DISPLAY_NAMES, producer) ?? producer;
 };
 
-export const RuleTypeList: React.FC<RuleTypeListProps> = ({
-  ruleTypes,
-  onSelectRuleType,
-  onFilterByProducer,
-  selectedProducer,
-  ruleTypeCountsByProducer,
-  onClearFilters,
-  showCategories = true,
-}) => {
+export const RuleTypeList = (
+  {
+    ruleTypes,
+    onSelectRuleType,
+    onFilterByProducer,
+    selectedProducer,
+    ruleTypeCountsByProducer,
+    onClearFilters,
+    showCategories = true
+  }: RuleTypeListProps
+) => {
   const ruleTypesList = [...ruleTypes].sort((a, b) => a.name.localeCompare(b.name));
   const { euiTheme } = useEuiTheme();
 

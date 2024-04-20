@@ -15,9 +15,11 @@ interface ExplorerChartsErrorCalloutsProps {
   errorMessagesByType: ExplorerChartSeriesErrorMessages;
 }
 
-export const ExplorerChartsErrorCallOuts: FC<ExplorerChartsErrorCalloutsProps> = ({
-  errorMessagesByType,
-}) => {
+export const ExplorerChartsErrorCallOuts = (
+  {
+    errorMessagesByType
+  }: ExplorerChartsErrorCalloutsProps
+) => {
   if (!errorMessagesByType || Object.keys(errorMessagesByType).length === 0) return null;
   const content = Object.keys(errorMessagesByType).map((errorType) => (
     <EuiCallOut color={'warning'} size="s" key={errorType}>

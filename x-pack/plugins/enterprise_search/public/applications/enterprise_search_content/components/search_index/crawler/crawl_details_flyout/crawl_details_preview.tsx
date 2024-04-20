@@ -17,7 +17,7 @@ import { AccordionList } from '../../../../../shared/accordion_list/accordion_li
 import { CrawlDetailLogic } from './crawl_detail_logic';
 import { CrawlDetailsSummary } from './crawl_details_summary';
 
-export const CrawlDetailsPreview: React.FC = () => {
+export const CrawlDetailsPreview = () => {
   const { crawlRequest } = useValues(CrawlDetailLogic);
 
   if (crawlRequest === null) {

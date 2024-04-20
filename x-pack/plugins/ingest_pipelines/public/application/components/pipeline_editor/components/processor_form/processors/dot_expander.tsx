@@ -48,7 +48,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const DotExpander: FunctionComponent = () => {
+export const DotExpander = () => {
   return (
     <>
       <FieldNameField

@@ -24,7 +24,11 @@ interface StopActionNameProps {
   isDisabled: boolean;
 }
 
-export const StopActionName: FC<StopActionNameProps> = ({ isDisabled }) => {
+export const StopActionName = (
+  {
+    isDisabled
+  }: StopActionNameProps
+) => {
   if (isDisabled) {
     return (
       <EuiToolTip

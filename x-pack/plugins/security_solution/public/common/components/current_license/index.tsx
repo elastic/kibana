@@ -13,7 +13,7 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseService } from '../../hooks/use_license';
 import type { AppAction } from '../../store/actions';
 
-export const CurrentLicense: FC = memo(({ children }) => {
+export const CurrentLicense = memo(({ children }) => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
   useEffect(() => {
     const subscription = licenseService

@@ -19,7 +19,7 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 /**
  * Document details expandable right section header for the isolate host panel
  */
-export const PanelHeader: FC = () => {
+export const PanelHeader = () => {
   const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
   const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(

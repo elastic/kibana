@@ -59,7 +59,7 @@ const dataViewTitleHeader = css({
   minWidth: '300px',
 });
 
-export const PageHeader: FC = () => {
+export const PageHeader = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -145,7 +145,11 @@ interface Props {
 const isBarBetween = (start: number, end: number, min: number, max: number) => {
   return start >= min && end <= max;
 };
-export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
+export const DataDriftPage = (
+  {
+    initialSettings
+  }: Props
+) => {
   const {
     services: { data: dataService },
   } = useDataVisualizerKibana();

@@ -40,7 +40,7 @@ import { SourcesLogic } from './sources_logic';
 
 import './sources.scss';
 
-export const SourcesRouter: React.FC = () => {
+export const SourcesRouter = () => {
   const { pathname } = useLocation() as Location;
   const { resetSourcesState } = useActions(SourcesLogic);
   const {

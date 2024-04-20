@@ -17,10 +17,15 @@ import type { ActiveSections } from './types';
 import { useStepContext } from './context/step_context';
 import type { ProductLine } from './configs';
 
-const TogglePanelComponent: React.FC<{
-  activeProducts: Set<ProductLine>;
-  activeSections: ActiveSections | null;
-}> = ({ activeSections, activeProducts }) => {
+const TogglePanelComponent = (
+  {
+    activeSections,
+    activeProducts
+  }: {
+    activeProducts: Set<ProductLine>;
+    activeSections: ActiveSections | null;
+  }
+) => {
   const { euiTheme } = useEuiTheme();
 
   const { expandedCardSteps, finishedSteps, toggleTaskCompleteStatus, onStepClicked } =

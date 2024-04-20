@@ -20,10 +20,12 @@ interface Props {
   deprecation: EnrichedDeprecationInfo;
 }
 
-export const HealthIndicatorTableRow: React.FunctionComponent<Props> = ({
-  rowFieldNames,
-  deprecation,
-}) => {
+export const HealthIndicatorTableRow = (
+  {
+    rowFieldNames,
+    deprecation
+  }: Props
+) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =

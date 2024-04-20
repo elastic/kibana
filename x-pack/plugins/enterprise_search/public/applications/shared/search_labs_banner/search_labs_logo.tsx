@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-export const SearchLabsLogo: React.FC = () => {
+export const SearchLabsLogo = () => {
   return (
     <svg
       width="214"

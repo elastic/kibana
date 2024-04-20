@@ -20,10 +20,12 @@ interface CreateTransformButtonProps {
   transformNodes: number;
 }
 
-export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
-  onClick,
-  transformNodes,
-}) => {
+export const CreateTransformButton = (
+  {
+    onClick,
+    transformNodes
+  }: CreateTransformButtonProps
+) => {
   const capabilities = useTransformCapabilities();
 
   const disabled =

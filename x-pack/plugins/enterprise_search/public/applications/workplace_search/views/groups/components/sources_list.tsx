@@ -20,12 +20,14 @@ interface SourcesListProps {
   removeFilteredSource(sourceId: string): void;
 }
 
-export const SourcesList: React.FC<SourcesListProps> = ({
-  contentSources,
-  filteredSources,
-  addFilteredSource,
-  removeFilteredSource,
-}) => {
+export const SourcesList = (
+  {
+    contentSources,
+    filteredSources,
+    addFilteredSource,
+    removeFilteredSource
+  }: SourcesListProps
+) => {
   const { euiTheme } = useEuiTheme();
 
   const sourceIds = contentSources.map(({ id }) => id);
@@ -44,8 +46,8 @@ export const SourcesList: React.FC<SourcesListProps> = ({
     // EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
     // instead of EuiFilterSelectItem (which is pending deprecation).
     // @see https://elastic.github.io/eui/#/forms/filter-group#multi-select
-    <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
+    (<div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
       {sources}
-    </div>
+    </div>)
   );
 };

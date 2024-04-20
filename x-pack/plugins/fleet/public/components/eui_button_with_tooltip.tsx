@@ -12,9 +12,14 @@ import { EuiButton } from '@elastic/eui';
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 
-export const EuiButtonWithTooltip: React.FC<
-  EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }
-> = ({ tooltip: tooltipProps, ...buttonProps }) => {
+export const EuiButtonWithTooltip = (
+  {
+    tooltip: tooltipProps,
+    ...buttonProps
+  }: EuiButtonPropsFull & {
+    tooltip?: Partial<EuiToolTipProps>;
+  }
+) => {
   return tooltipProps ? (
     <EuiToolTip {...tooltipProps}>
       <EuiButton {...buttonProps} />

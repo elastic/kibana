@@ -17,7 +17,13 @@ export interface Props {
   theme$: AppMountParameters['theme$'];
 }
 
-export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, theme$ }) => {
+export const HeaderPortal = (
+  {
+    children,
+    setHeaderActionMenu,
+    theme$
+  }: Props
+) => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {

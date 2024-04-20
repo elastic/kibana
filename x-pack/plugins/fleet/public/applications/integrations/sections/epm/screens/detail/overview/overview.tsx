@@ -73,7 +73,7 @@ const StyledSideNav = styled(EuiSideNav)`
   overflow-x: hidden;
 `;
 
-const UnverifiedCallout: React.FC = () => {
+const UnverifiedCallout = () => {
   const { docLinks } = useStartServices();
 
   return (
@@ -107,11 +107,17 @@ const UnverifiedCallout: React.FC = () => {
   );
 };
 
-export const PrereleaseCallout: React.FC<{
-  packageName: string;
-  latestGAVersion?: string;
-  packageTitle: string;
-}> = ({ packageName, packageTitle, latestGAVersion }) => {
+export const PrereleaseCallout = (
+  {
+    packageName,
+    packageTitle,
+    latestGAVersion
+  }: {
+    packageName: string;
+    latestGAVersion?: string;
+    packageTitle: string;
+  }
+) => {
   const { getHref } = useLink();
   const overviewPathLatestGA = getHref('integration_details_overview', {
     pkgkey: `${packageName}-${latestGAVersion}`,
@@ -153,188 +159,192 @@ export const getAnchorId = (name: string | undefined, index?: number) => {
   return index ? `${baseId}-${index}` : baseId;
 };
 
-export const OverviewPage: React.FC<Props> = memo(
-  ({ packageInfo, integrationInfo, latestGAVersion }) => {
-    const screenshots = useMemo(
-      () => integrationInfo?.screenshots || packageInfo.screenshots || [],
-      [integrationInfo, packageInfo.screenshots]
-    );
-    const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
-    const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
-    const isPrerelease = isPackagePrerelease(packageInfo.version);
-    const [markdown, setMarkdown] = useState<string | undefined>(undefined);
-    const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
-    const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
-    const anchorsRefs = useRef(new Map<string, HTMLDivElement | null>());
+export const OverviewPage = memo((
+  {
+    packageInfo,
+    integrationInfo,
+    latestGAVersion
+  }: Props
+) => {
+  const screenshots = useMemo(
+    () => integrationInfo?.screenshots || packageInfo.screenshots || [],
+    [integrationInfo, packageInfo.screenshots]
+  );
+  const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
+  const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
+  const isPrerelease = isPackagePrerelease(packageInfo.version);
+  const [markdown, setMarkdown] = useState<string | undefined>(undefined);
+  const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
+  const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
+  const anchorsRefs = useRef(new Map<string, HTMLDivElement | null>());
 
-    const selectItem = (id: string) => {
-      setSelectedItem(id);
-      anchorsRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth' });
-    };
+  const selectItem = (id: string) => {
+    setSelectedItem(id);
+    anchorsRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-    const toggleOpenOnMobile = () => {
-      setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
-    };
+  const toggleOpenOnMobile = () => {
+    setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
+  };
 
-    const readmePath =
-      integrationInfo && isIntegrationPolicyTemplate(integrationInfo) && integrationInfo?.readme
-        ? integrationInfo?.readme
-        : packageInfo.readme || '';
+  const readmePath =
+    integrationInfo && isIntegrationPolicyTemplate(integrationInfo) && integrationInfo?.readme
+      ? integrationInfo?.readme
+      : packageInfo.readme || '';
 
-    useEffect(() => {
-      sendGetFileByPath(readmePath).then((res) => {
-        setMarkdown(res.data || '');
-      });
-    }, [readmePath]);
+  useEffect(() => {
+    sendGetFileByPath(readmePath).then((res) => {
+      setMarkdown(res.data || '');
+    });
+  }, [readmePath]);
 
-    const extractHeadingsWithIndices = (markDown: string | undefined): HeadingWithPosition[] => {
-      if (!markDown) return [];
-      const regex = /^\s*#+\s+(.+)/;
-      return markDown
-        .split('\n')
-        .map((line, position) => {
-          return {
-            line,
-            position,
-          };
-        })
-        .filter((obj) => obj.line.match(regex));
-    };
-
-    const getName = (heading: string) => heading.replace(/^#+\s*/, '');
-
-    const createItem = useCallback(
-      (heading: HeadingWithPosition, options: any = {}): Item => {
-        // NOTE: Duplicate `name` values will cause `id` collisions
-        const name = getName(heading.line);
-        const id = getAnchorId(name, heading.position + 1);
+  const extractHeadingsWithIndices = (markDown: string | undefined): HeadingWithPosition[] => {
+    if (!markDown) return [];
+    const regex = /^\s*#+\s+(.+)/;
+    return markDown
+      .split('\n')
+      .map((line, position) => {
         return {
-          id,
-          name,
-          isSelected: selectedItemId === id,
-          onClick: () => selectItem(id),
-          ...options,
-          // skip rendering empty items while preserving the header hierarchy
-          renderItem: name === '' ? () => null : undefined,
+          line,
+          position,
         };
-      },
-      [selectedItemId]
-    );
+      })
+      .filter((obj) => obj.line.match(regex));
+  };
 
-    // get the headings and creates a nested structure as requested by EuiSideNav
-    const headingsToNavItems = useCallback(
-      (headings: HeadingWithPosition[]): Item[] => {
-        const options = { forceOpen: true };
-        return headings.reduce((acc: Item[], heading: HeadingWithPosition, index: number) => {
-          if (heading.line.startsWith('## ')) {
-            const item = createItem(heading, options);
-            acc.push(item);
-          } else if (heading.line.startsWith('### ')) {
-            const subGroup = createItem(heading, options);
-            let i = index + 1;
-            while (i < headings.length && headings[i].line.startsWith('#### ')) {
-              const subGroupItem = createItem(headings[i], options);
-              if (!subGroup?.items) subGroup.items = [];
-              subGroup.items?.push(subGroupItem);
-              i++;
-            }
-            const prevIndex = acc.length - 1;
+  const getName = (heading: string) => heading.replace(/^#+\s*/, '');
 
-            if (prevIndex >= 0) {
-              if (!acc[prevIndex]?.items) acc[prevIndex].items = [];
-              acc[prevIndex]?.items?.push(subGroup);
-            } else {
-              // this handles a case where the headings only have ### and no ##
-              const fakeItem = createItem({ line: '', position: heading.position }, options);
-              acc.push(fakeItem);
-              if (!acc[0]?.items) acc[0].items = [];
-              acc[0]?.items?.push(subGroup);
-            }
+  const createItem = useCallback(
+    (heading: HeadingWithPosition, options: any = {}): Item => {
+      // NOTE: Duplicate `name` values will cause `id` collisions
+      const name = getName(heading.line);
+      const id = getAnchorId(name, heading.position + 1);
+      return {
+        id,
+        name,
+        isSelected: selectedItemId === id,
+        onClick: () => selectItem(id),
+        ...options,
+        // skip rendering empty items while preserving the header hierarchy
+        renderItem: name === '' ? () => null : undefined,
+      };
+    },
+    [selectedItemId]
+  );
+
+  // get the headings and creates a nested structure as requested by EuiSideNav
+  const headingsToNavItems = useCallback(
+    (headings: HeadingWithPosition[]): Item[] => {
+      const options = { forceOpen: true };
+      return headings.reduce((acc: Item[], heading: HeadingWithPosition, index: number) => {
+        if (heading.line.startsWith('## ')) {
+          const item = createItem(heading, options);
+          acc.push(item);
+        } else if (heading.line.startsWith('### ')) {
+          const subGroup = createItem(heading, options);
+          let i = index + 1;
+          while (i < headings.length && headings[i].line.startsWith('#### ')) {
+            const subGroupItem = createItem(headings[i], options);
+            if (!subGroup?.items) subGroup.items = [];
+            subGroup.items?.push(subGroupItem);
+            i++;
           }
-          return acc;
-        }, []);
+          const prevIndex = acc.length - 1;
+
+          if (prevIndex >= 0) {
+            if (!acc[prevIndex]?.items) acc[prevIndex].items = [];
+            acc[prevIndex]?.items?.push(subGroup);
+          } else {
+            // this handles a case where the headings only have ### and no ##
+            const fakeItem = createItem({ line: '', position: heading.position }, options);
+            acc.push(fakeItem);
+            if (!acc[0]?.items) acc[0].items = [];
+            acc[0]?.items?.push(subGroup);
+          }
+        }
+        return acc;
+      }, []);
+    },
+    [createItem]
+  );
+  const headingsWithIndices = useMemo(() => extractHeadingsWithIndices(markdown), [markdown]);
+
+  const navItems = useMemo(
+    () => headingsToNavItems(headingsWithIndices),
+    [headingsToNavItems, headingsWithIndices]
+  );
+
+  const h1: HeadingWithPosition | undefined = useMemo(
+    () => headingsWithIndices.find((h) => h.line.startsWith('# ')),
+    [headingsWithIndices]
+  );
+
+  const sideNavItems = useMemo(() => {
+    const name = `${h1 ? getName(h1.line) : ''}`;
+    const id = getAnchorId(name, h1 ? h1?.position + 1 : 1);
+    return [
+      {
+        name,
+        id,
+        onClick: () => selectItem(id),
+        items: navItems,
       },
-      [createItem]
-    );
-    const headingsWithIndices = useMemo(() => extractHeadingsWithIndices(markdown), [markdown]);
+    ];
+  }, [h1, navItems]);
 
-    const navItems = useMemo(
-      () => headingsToNavItems(headingsWithIndices),
-      [headingsToNavItems, headingsWithIndices]
-    );
+  const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
 
-    const h1: HeadingWithPosition | undefined = useMemo(
-      () => headingsWithIndices.find((h) => h.line.startsWith('# ')),
-      [headingsWithIndices]
-    );
-
-    const sideNavItems = useMemo(() => {
-      const name = `${h1 ? getName(h1.line) : ''}`;
-      const id = getAnchorId(name, h1 ? h1?.position + 1 : 1);
-      return [
-        {
-          name,
-          id,
-          onClick: () => selectItem(id),
-          items: navItems,
-        },
-      ];
-    }, [h1, navItems]);
-
-    const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
-
-    return (
-      <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
-        <SideBar grow={2}>
-          {sideNavItems ? (
-            <StyledSideNav
-              mobileTitle="Nav Items"
-              toggleOpenOnMobile={toggleOpenOnMobile}
-              isOpenOnMobile={isSideNavOpenOnMobile}
-              items={sideNavItems}
-            />
-          ) : null}
-        </SideBar>
-        <EuiFlexItem grow={9} className="eui-textBreakWord">
-          {isUnverified && <UnverifiedCallout />}
-          {isPrerelease && (
-            <PrereleaseCallout
-              packageName={packageInfo.name}
-              packageTitle={packageInfo.title}
-              latestGAVersion={latestGAVersion}
-            />
-          )}
-          {packageInfo.readme ? (
-            <Readme
-              markdown={markdown}
-              packageName={packageInfo.name}
-              version={packageInfo.version}
-              refs={anchorsRefs}
-            />
-          ) : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={3}>
-          <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
-            {requireAgentRootPrivileges ? (
-              <EuiFlexItem>
-                <Requirements />
-              </EuiFlexItem>
-            ) : null}
-            {screenshots.length ? (
-              <EuiFlexItem>
-                <Screenshots
-                  images={screenshots}
-                  packageName={packageInfo.name}
-                  version={packageInfo.version}
-                />
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem className="eui-textBreakWord">
-              <Details packageInfo={packageInfo} integrationInfo={integrationInfo} />
+  return (
+    <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
+      <SideBar grow={2}>
+        {sideNavItems ? (
+          <StyledSideNav
+            mobileTitle="Nav Items"
+            toggleOpenOnMobile={toggleOpenOnMobile}
+            isOpenOnMobile={isSideNavOpenOnMobile}
+            items={sideNavItems}
+          />
+        ) : null}
+      </SideBar>
+      <EuiFlexItem grow={9} className="eui-textBreakWord">
+        {isUnverified && <UnverifiedCallout />}
+        {isPrerelease && (
+          <PrereleaseCallout
+            packageName={packageInfo.name}
+            packageTitle={packageInfo.title}
+            latestGAVersion={latestGAVersion}
+          />
+        )}
+        {packageInfo.readme ? (
+          <Readme
+            markdown={markdown}
+            packageName={packageInfo.name}
+            version={packageInfo.version}
+            refs={anchorsRefs}
+          />
+        ) : null}
+      </EuiFlexItem>
+      <EuiFlexItem grow={3}>
+        <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
+          {requireAgentRootPrivileges ? (
+            <EuiFlexItem>
+              <Requirements />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+          ) : null}
+          {screenshots.length ? (
+            <EuiFlexItem>
+              <Screenshots
+                images={screenshots}
+                packageName={packageInfo.name}
+                version={packageInfo.version}
+              />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem className="eui-textBreakWord">
+            <Details packageInfo={packageInfo} integrationInfo={integrationInfo} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});

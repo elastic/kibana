@@ -44,17 +44,19 @@ interface Props {
   onBrushEnd?: BrushEndListener;
 }
 
-export const EventRateChart: FC<Props> = ({
-  eventRateChartData,
-  anomalyData,
-  height,
-  width,
-  showAxis,
-  loading = false,
-  fadeChart,
-  overlayRanges,
-  onBrushEnd,
-}) => {
+export const EventRateChart = (
+  {
+    eventRateChartData,
+    anomalyData,
+    height,
+    width,
+    showAxis,
+    loading = false,
+    fadeChart,
+    overlayRanges,
+    onBrushEnd
+  }: Props
+) => {
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
 

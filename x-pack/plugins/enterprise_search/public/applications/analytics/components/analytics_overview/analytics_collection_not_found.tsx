@@ -19,25 +19,25 @@ interface AnalyticsCollectionNotFoundProps {
   query: string;
 }
 
-export const AnalyticsCollectionNotFound: React.FC<AnalyticsCollectionNotFoundProps> = ({
-  query,
-}) => (
-  <EuiEmptyPrompt
-    icon={<EuiImage size={ICON_WIDTH} src={noMlModelsGraphicDark} alt="icon" />}
-    title={
-      <h2>
-        {i18n.translate('xpack.enterpriseSearch.analytics.collections.notFound.headingTitle', {
-          defaultMessage: 'No results found for “{query}”',
-          values: { query },
-        })}
-      </h2>
-    }
-    body={
-      <p>
-        {i18n.translate('xpack.enterpriseSearch.analytics.collections.notFound.subHeading', {
-          defaultMessage: 'Try searching for another term.',
-        })}
-      </p>
-    }
-  />
-);
+export const AnalyticsCollectionNotFound = (
+  {
+    query
+  }: AnalyticsCollectionNotFoundProps
+) => (<EuiEmptyPrompt
+  icon={<EuiImage size={ICON_WIDTH} src={noMlModelsGraphicDark} alt="icon" />}
+  title={
+    <h2>
+      {i18n.translate('xpack.enterpriseSearch.analytics.collections.notFound.headingTitle', {
+        defaultMessage: 'No results found for “{query}”',
+        values: { query },
+      })}
+    </h2>
+  }
+  body={
+    <p>
+      {i18n.translate('xpack.enterpriseSearch.analytics.collections.notFound.subHeading', {
+        defaultMessage: 'Try searching for another term.',
+      })}
+    </p>
+  }
+/>);

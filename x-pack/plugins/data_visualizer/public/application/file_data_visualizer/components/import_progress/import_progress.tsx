@@ -33,7 +33,13 @@ export interface Statuses {
   permissionCheckStatus: IMPORT_STATUS;
 }
 
-export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
+export const ImportProgress = (
+  {
+    statuses
+  }: {
+    statuses: Statuses;
+  }
+) => {
   const {
     reading,
     readStatus,
@@ -296,7 +302,13 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   );
 };
 
-const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
+const UploadFunctionProgress = (
+  {
+    progress
+  }: {
+    progress: number;
+  }
+) => {
   return (
     <React.Fragment>
       <p>

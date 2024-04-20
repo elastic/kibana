@@ -60,30 +60,32 @@ const visualizationResponseHasData = (response: VisualizationResponse[]): boolea
   ).some(({ buckets }) => buckets.length > 0);
 };
 
-export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
-  chartHeight,
-  defaultStackByOption,
-  endDate,
-  filterQuery,
-  getLensAttributes,
-  headerChildren,
-  hideHistogramIfEmpty = false,
-  id,
-  isPtrIncluded,
-  lensAttributes,
-  paddingSize = 'm',
-  panelHeight = DEFAULT_PANEL_HEIGHT,
-  setQuery,
-  showSpacer = true,
-  stackByOptions,
-  startDate,
-  subtitle,
-  sourcererScopeId,
-  title,
-  titleSize,
-  hideQueryToggle = false,
-  applyGlobalQueriesAndFilters = true,
-}) => {
+export const MatrixHistogramComponent = (
+  {
+    chartHeight,
+    defaultStackByOption,
+    endDate,
+    filterQuery,
+    getLensAttributes,
+    headerChildren,
+    hideHistogramIfEmpty = false,
+    id,
+    isPtrIncluded,
+    lensAttributes,
+    paddingSize = 'm',
+    panelHeight = DEFAULT_PANEL_HEIGHT,
+    setQuery,
+    showSpacer = true,
+    stackByOptions,
+    startDate,
+    subtitle,
+    sourcererScopeId,
+    title,
+    titleSize,
+    hideQueryToggle = false,
+    applyGlobalQueriesAndFilters = true
+  }: MatrixHistogramComponentProps
+) => {
   const visualizationId = `${id}-embeddable`;
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);

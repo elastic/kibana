@@ -11,7 +11,7 @@ import { LazyLoadProps } from '../types';
 
 import type { AlertsTableStateProps } from '../application/sections/alerts_table/alerts_table_state';
 
-const AlertsTableStateLazy: React.FC<AlertsTableStateProps> = lazy(
+const AlertsTableStateLazy = lazy(
   () => import('../application/sections/alerts_table/alerts_table_state')
 );
 

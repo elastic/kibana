@@ -24,13 +24,16 @@ interface MatchParams {
   name: string;
 }
 
-export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  location,
-  history,
-}) => {
+export const TemplateClone = (
+  {
+    match: {
+      params: { name },
+    },
+
+    location,
+    history
+  }: RouteComponentProps<MatchParams>
+) => {
   const decodedTemplateName = attemptToURIDecode(name)!;
   const {
     config: { enableLegacyTemplates },

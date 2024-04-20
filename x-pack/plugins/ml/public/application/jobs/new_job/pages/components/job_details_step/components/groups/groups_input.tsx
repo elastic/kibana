@@ -14,7 +14,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { tabColor } from '../../../../../../../../../common/util/group_color_utils';
 import { Description } from './description';
 
-export const GroupsInput: FC = () => {
+export const GroupsInput = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const { existingJobsAndGroups } = useContext(JobCreatorContext);

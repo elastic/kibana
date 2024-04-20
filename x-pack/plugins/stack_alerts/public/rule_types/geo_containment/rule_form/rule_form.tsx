@@ -13,9 +13,7 @@ import type { GeoContainmentAlertParams } from '../types';
 import { BoundaryForm } from './boundary_form';
 import { EntityForm } from './entity_form';
 
-export const RuleForm: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
-> = (props) => {
+export const RuleForm = (props: RuleTypeParamsExpressionProps<GeoContainmentAlertParams>) => {
   function getValidationError(key: string) {
     return props.errors[key]?.length > 0 && key in props.ruleParams
       ? (props.errors[key] as string[])[0]

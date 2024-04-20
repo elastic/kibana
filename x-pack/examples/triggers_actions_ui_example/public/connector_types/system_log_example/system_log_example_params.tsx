@@ -11,9 +11,15 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { SystemLogActionParams } from '../types';
 
-export const ServerLogParamsFields: React.FunctionComponent<
-  ActionParamsProps<SystemLogActionParams>
-> = ({ actionParams, editAction, index, errors, messageVariables }) => {
+export const ServerLogParamsFields = (
+  {
+    actionParams,
+    editAction,
+    index,
+    errors,
+    messageVariables
+  }: ActionParamsProps<SystemLogActionParams>
+) => {
   const { message = 'Alerts have been triggered.' } = actionParams;
 
   // This params component is derived primarily from server_log_params.tsx, see that file and its

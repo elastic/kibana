@@ -17,11 +17,13 @@ interface CreateDataViewTimeFieldProps {
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export const CreateDataViewTimeField: FC<CreateDataViewTimeFieldProps> = ({
-  dataViewAvailableTimeFields,
-  dataViewTimeField,
-  onTimeFieldChanged,
-}) => {
+export const CreateDataViewTimeField = (
+  {
+    dataViewAvailableTimeFields,
+    dataViewTimeField,
+    onTimeFieldChanged
+  }: CreateDataViewTimeFieldProps
+) => {
   const noTimeFieldLabel = i18n.translate('xpack.ml.dataViewUtils.noTimeFieldOptionLabel', {
     defaultMessage: "I don't want to use the time field option",
   });

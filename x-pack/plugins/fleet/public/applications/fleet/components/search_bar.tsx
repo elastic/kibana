@@ -110,14 +110,16 @@ export const getFieldSpecs = (indexPattern: string) => {
   return fieldSpecs;
 };
 
-export const SearchBar: React.FunctionComponent<Props> = ({
-  value,
-  fieldPrefix,
-  onChange,
-  placeholder,
-  indexPattern = INDEX_NAME,
-  dataTestSubj,
-}) => {
+export const SearchBar = (
+  {
+    value,
+    fieldPrefix,
+    onChange,
+    placeholder,
+    indexPattern = INDEX_NAME,
+    dataTestSubj
+  }: Props
+) => {
   const {
     data,
     dataViews,

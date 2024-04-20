@@ -16,18 +16,22 @@ interface Props {
   width: number;
 }
 
-export const DragBoxAnnotation: FC<Props> = ({ transformMatrix, width, height }) => (
-  <div
-    className="canvasDragBoxAnnotation canvasLayoutAnnotation"
-    style={{
-      height,
-      marginLeft: -width / 2,
-      marginTop: -height / 2,
-      transform: matrixToCSS(transformMatrix),
-      width,
-    }}
-  />
-);
+export const DragBoxAnnotation = (
+  {
+    transformMatrix,
+    width,
+    height
+  }: Props
+) => (<div
+  className="canvasDragBoxAnnotation canvasLayoutAnnotation"
+  style={{
+    height,
+    marginLeft: -width / 2,
+    marginTop: -height / 2,
+    transform: matrixToCSS(transformMatrix),
+    width,
+  }}
+/>);
 
 DragBoxAnnotation.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,

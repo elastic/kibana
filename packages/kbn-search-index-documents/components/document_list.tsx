@@ -42,16 +42,18 @@ interface DocumentListProps {
   setDocsPerPage: (docsPerPage: number) => void;
 }
 
-export const DocumentList: React.FC<DocumentListProps> = ({
-  dataTelemetryIdPrefix,
-  docs,
-  docsPerPage,
-  isLoading,
-  mappings,
-  meta,
-  onPaginate,
-  setDocsPerPage,
-}) => {
+export const DocumentList = (
+  {
+    dataTelemetryIdPrefix,
+    docs,
+    docsPerPage,
+    isLoading,
+    mappings,
+    meta,
+    onPaginate,
+    setDocsPerPage
+  }: DocumentListProps
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const resultToField = (result: SearchHit) => {
     if (mappings && result._source && !Array.isArray(result._source)) {

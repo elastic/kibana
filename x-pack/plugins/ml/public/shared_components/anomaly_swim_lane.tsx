@@ -23,18 +23,20 @@ export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInp
   executionContext: KibanaExecutionContext;
 }
 
-export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
-  id,
-  jobIds,
-  swimlaneType,
-  viewBy,
-  timeRange,
-  filters,
-  query,
-  refreshConfig,
-  perPage,
-  executionContext,
-}) => {
+export const AnomalySwimLane = (
+  {
+    id,
+    jobIds,
+    swimlaneType,
+    viewBy,
+    timeRange,
+    filters,
+    query,
+    refreshConfig,
+    perPage,
+    executionContext
+  }: AnomalySwimLaneProps
+) => {
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
   const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {

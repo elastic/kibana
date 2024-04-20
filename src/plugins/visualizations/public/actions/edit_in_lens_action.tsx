@@ -45,7 +45,7 @@ const displayName = i18n.translate('visualizations.actions.editInLens.displayNam
   defaultMessage: 'Convert to Lens',
 });
 
-const MenuItem: React.FC = () => {
+const MenuItem = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>{displayName}</EuiFlexItem>

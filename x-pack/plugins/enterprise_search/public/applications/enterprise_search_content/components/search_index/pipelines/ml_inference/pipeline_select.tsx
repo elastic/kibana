@@ -14,7 +14,7 @@ import { EuiSelectable, useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/e
 import { MLInferencePipelineOption, PipelineSelectLogic } from './pipeline_select_logic';
 import { PipelineSelectOption, PipelineSelectOptionProps } from './pipeline_select_option';
 
-export const PipelineSelect: React.FC = () => {
+export const PipelineSelect = () => {
   const {
     addInferencePipelineModal: {
       configuration: { pipelineName },

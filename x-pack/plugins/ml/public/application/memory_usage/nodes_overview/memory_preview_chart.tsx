@@ -32,7 +32,11 @@ interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
 }
 
-export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview }) => {
+export const MemoryPreviewChart = (
+  {
+    memoryOverview
+  }: MemoryPreviewChartProps
+) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const {
     services: { charts: chartsService },

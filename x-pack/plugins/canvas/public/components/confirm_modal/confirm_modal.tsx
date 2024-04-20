@@ -20,7 +20,7 @@ export interface Props {
   className?: string;
 }
 
-export const ConfirmModal: FunctionComponent<Props> = (props) => {
+export const ConfirmModal = (props: Props) => {
   const {
     isOpen,
     title,

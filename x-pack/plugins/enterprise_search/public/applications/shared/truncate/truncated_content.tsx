@@ -18,12 +18,14 @@ interface TruncatedContentProps {
   tooltipType?: 'inline' | 'title';
 }
 
-export const TruncatedContent: React.FC<TruncatedContentProps> = ({
-  content,
-  length,
-  beginning = false,
-  tooltipType = 'inline',
-}) => {
+export const TruncatedContent = (
+  {
+    content,
+    length,
+    beginning = false,
+    tooltipType = 'inline'
+  }: TruncatedContentProps
+) => {
   if (content.length <= length) return <>{content}</>;
 
   const inline = tooltipType === 'inline';

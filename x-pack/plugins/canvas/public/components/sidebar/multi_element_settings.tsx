@@ -25,7 +25,7 @@ const strings = {
     }),
 };
 
-export const MultiElementSettings: FunctionComponent = () => (
+export const MultiElementSettings = () => (
   <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">
     <EuiText size="s">
       <p>{strings.getMultipleElementsDescription()}</p>

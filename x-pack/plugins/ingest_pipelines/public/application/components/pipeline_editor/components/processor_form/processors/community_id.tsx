@@ -191,7 +191,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const CommunityId: FunctionComponent = () => {
+export const CommunityId = () => {
   const [{ fields }] = useFormData({ watch: ['fields.iana_number', 'fields.transport'] });
 
   return (

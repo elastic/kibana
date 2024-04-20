@@ -15,9 +15,11 @@ export interface NoResultsSuggestionDefaultProps {
   dataView: DataView;
 }
 
-export const NoResultsSuggestionDefault: React.FC<NoResultsSuggestionDefaultProps> = ({
-  dataView,
-}) => {
+export const NoResultsSuggestionDefault = (
+  {
+    dataView
+  }: NoResultsSuggestionDefaultProps
+) => {
   const dataViewName = dataView?.getName();
   const dataViewPattern = dataView?.getIndexPattern();
 

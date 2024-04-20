@@ -18,7 +18,11 @@ interface Props {
   connectorIntervals: GenerationInterval[];
 }
 
-const LastTimesPopoverComponent: React.FC<Props> = ({ connectorIntervals }) => {
+const LastTimesPopoverComponent = (
+  {
+    connectorIntervals
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const { theme } = useKibana().services;
   const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);

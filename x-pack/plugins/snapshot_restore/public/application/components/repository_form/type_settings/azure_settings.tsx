@@ -29,12 +29,14 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const AzureSettings: React.FunctionComponent<Props> = ({
-  repository,
-  isManagedRepository,
-  updateRepositorySettings,
-  settingErrors,
-}) => {
+export const AzureSettings = (
+  {
+    repository,
+    isManagedRepository,
+    updateRepositorySettings,
+    settingErrors
+  }: Props
+) => {
   const {
     settings: {
       client,

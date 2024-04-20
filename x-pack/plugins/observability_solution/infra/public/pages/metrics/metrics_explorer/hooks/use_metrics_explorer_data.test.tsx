@@ -36,7 +36,7 @@ const queryClient = new QueryClient({
 });
 
 const renderUseMetricsExplorerDataHook = () => {
-  const wrapper: React.FC = ({ children }) => {
+  const wrapper = ({ children }) => {
     const services = {
       http: {
         post: mockedFetch,

@@ -11,7 +11,7 @@ import { BulkActionsVerbs } from '../../../../../types';
 import { COLUMN_HEADER_ARIA_LABEL } from '../translations';
 import { AlertsTableContext } from '../../contexts/alerts_table_context';
 
-const BulkActionsHeaderComponent: React.FunctionComponent = () => {
+const BulkActionsHeaderComponent = () => {
   const {
     bulkActions: [{ isAllSelected, areAllVisibleRowsSelected }, updateSelectedRows],
   } = useContext(AlertsTableContext);

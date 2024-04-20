@@ -22,39 +22,41 @@ interface Props {
   onClose: () => void;
 }
 
-export const LoadingCategorization: FC<Props> = ({ onClose }) => (
-  <>
-    <EuiSpacer size="l" />
-    <EuiFlexGroup justifyContent="spaceAround">
-      <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
-        <EuiFlexGrid columns={1}>
-          <EuiFlexItem>
-            <EuiLoadingElastic size="xxl" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText>
-              <h2>
-                <FormattedMessage
-                  id="xpack.aiops.categorizeFlyout.loading.title"
-                  defaultMessage="Loading pattern analysis"
-                />
-              </h2>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="spaceAround">
-              <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
-                <EuiButton
-                  data-test-subj="aiopsLoadingCategorizationCancelButton"
-                  onClick={() => onClose()}
-                >
-                  Cancel
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGrid>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </>
-);
+export const LoadingCategorization = (
+  {
+    onClose
+  }: Props
+) => (<>
+  <EuiSpacer size="l" />
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
+      <EuiFlexGrid columns={1}>
+        <EuiFlexItem>
+          <EuiLoadingElastic size="xxl" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h2>
+              <FormattedMessage
+                id="xpack.aiops.categorizeFlyout.loading.title"
+                defaultMessage="Loading pattern analysis"
+              />
+            </h2>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
+              <EuiButton
+                data-test-subj="aiopsLoadingCategorizationCancelButton"
+                onClick={() => onClose()}
+              >
+                Cancel
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</>);

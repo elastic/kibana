@@ -24,11 +24,13 @@ export interface AssigneesColumnProps {
   compressedDisplayLimit?: number;
 }
 
-const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
-  assignees,
-  userProfiles,
-  compressedDisplayLimit = COMPRESSED_AVATAR_LIMIT,
-}) => {
+const AssigneesColumnComponent = (
+  {
+    assignees,
+    userProfiles,
+    compressedDisplayLimit = COMPRESSED_AVATAR_LIMIT
+  }: AssigneesColumnProps
+) => {
   const [isAvatarListExpanded, setIsAvatarListExpanded] = useState<boolean>(false);
 
   const { allAssignees } = useAssignees({

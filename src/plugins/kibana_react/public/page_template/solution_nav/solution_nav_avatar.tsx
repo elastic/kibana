@@ -22,12 +22,16 @@ export type KibanaPageTemplateSolutionNavAvatarProps = DistributiveOmit<EuiAvata
 /**
  * Applies extra styling to a typical EuiAvatar
  */
-export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<
-  KibanaPageTemplateSolutionNavAvatarProps
-> = ({ className, size, ...rest }) => {
+export const KibanaPageTemplateSolutionNavAvatar = (
+  {
+    className,
+    size,
+    ...rest
+  }: KibanaPageTemplateSolutionNavAvatarProps
+) => {
   return (
     // @ts-ignore Complains about ExclusiveUnion between `iconSize` and `iconType`, but works fine
-    <EuiAvatar
+    (<EuiAvatar
       className={classNames(
         'kbnPageTemplateSolutionNavAvatar',
         {
@@ -39,6 +43,6 @@ export const KibanaPageTemplateSolutionNavAvatar: FunctionComponent<
       size={size === 'xxl' ? 'xl' : size}
       iconSize={size}
       {...rest}
-    />
+    />)
   );
 };

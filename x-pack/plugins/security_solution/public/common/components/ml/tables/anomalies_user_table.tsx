@@ -39,13 +39,15 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
-  startDate,
-  endDate,
-  userName,
-  skip,
-  type,
-}) => {
+const AnomaliesUserTableComponent = (
+  {
+    startDate,
+    endDate,
+    userName,
+    skip,
+    type
+  }: AnomaliesUserTableProps
+) => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
 

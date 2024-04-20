@@ -39,15 +39,17 @@ const defaultFormValue: Pipeline = Object.freeze({
   _meta: {},
 });
 
-export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
-  defaultValue = defaultFormValue,
-  onSave,
-  isSaving,
-  saveError,
-  isEditing,
-  onCancel,
-  canEditName,
-}) => {
+export const PipelineForm = (
+  {
+    defaultValue = defaultFormValue,
+    onSave,
+    isSaving,
+    saveError,
+    isEditing,
+    onCancel,
+    canEditName
+  }: PipelineFormProps
+) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const {

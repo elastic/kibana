@@ -29,7 +29,11 @@ export interface EventKindDescriptionProps {
  * Display description of a document at the event kind level
  * Shows the ecs description of the event kind, and a list of event categories
  */
-export const EventKindDescription: React.FC<EventKindDescriptionProps> = ({ eventKind }) => {
+export const EventKindDescription = (
+  {
+    eventKind
+  }: EventKindDescriptionProps
+) => {
   const { getFieldsData } = useRightPanelContext();
   const eventCategories = useMemo(
     () => getFieldArray(getFieldsData('event.category')),

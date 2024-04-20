@@ -21,7 +21,7 @@ const defaultContext: UptimeRefreshContext = {
 
 export const UptimeRefreshContext = createContext(defaultContext);
 
-export const UptimeRefreshContextProvider: React.FC = ({ children }) => {
+export const UptimeRefreshContextProvider = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   const refreshApp = () => {

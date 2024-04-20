@@ -32,11 +32,13 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const CloseJobsConfirmModal: FC<Props> = ({
-  setShowFunction,
-  unsetShowFunction,
-  refreshJobs,
-}) => {
+export const CloseJobsConfirmModal = (
+  {
+    setShowFunction,
+    unsetShowFunction,
+    refreshJobs
+  }: Props
+) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToReset, setJobsToReset] = useState<MlSummaryJob[]>([]);

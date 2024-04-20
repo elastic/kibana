@@ -12,7 +12,7 @@ import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
 import { JobCreatorContext } from '../../job_creator_context';
 import { Description } from './description';
 
-export const ModelMemoryLimitInput: FC = () => {
+export const ModelMemoryLimitInput = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.modelMemoryLimit);

@@ -9,7 +9,13 @@ import type { FC, ReactNode } from 'react';
 import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-export const HelpIcon: FC<{ content: ReactNode | string }> = ({ content }) => {
+export const HelpIcon = (
+  {
+    content
+  }: {
+    content: ReactNode | string;
+  }
+) => {
   return (
     <EuiToolTip position="top" content={content}>
       <EuiIcon

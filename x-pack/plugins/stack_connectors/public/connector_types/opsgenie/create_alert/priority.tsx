@@ -18,7 +18,12 @@ interface PriorityComponentProps {
   onChange: EditActionCallback;
 }
 
-const PriorityComponent: React.FC<PriorityComponentProps> = ({ priority, onChange }) => {
+const PriorityComponent = (
+  {
+    priority,
+    onChange
+  }: PriorityComponentProps
+) => {
   const onPriorityChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       onChange('priority', event.target.value);

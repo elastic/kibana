@@ -27,7 +27,11 @@ interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
 }
 
-export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
+export const EditTransformUpdateButton = (
+  {
+    closeFlyout
+  }: EditTransformUpdateButtonProps
+) => {
   const { config } = useEditTransformFlyoutContext();
   const isFormValid = useIsFormValid();
   const isFormTouched = useIsFormTouched();

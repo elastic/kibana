@@ -55,11 +55,13 @@ interface FilterOption {
 const stringSortAscending = (a: string, b: string): number => a.localeCompare(b);
 const toFilterOption = (value: string): FilterOption => ({ name: value, value });
 
-export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
-  packagePolicies: originalPackagePolicies,
-  agentPolicy,
-  ...rest
-}) => {
+export const PackagePoliciesTable = (
+  {
+    packagePolicies: originalPackagePolicies,
+    agentPolicy,
+    ...rest
+  }: Props
+) => {
   const { application } = useStartServices();
   const authz = useAuthz();
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;

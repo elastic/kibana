@@ -23,14 +23,16 @@ export interface ESDataViewSelectProps {
 const defaultIndex = '_all';
 const defaultOption = { value: defaultIndex, label: defaultIndex };
 
-export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = ({
-  value = defaultIndex,
-  loading,
-  dataViews,
-  onChange,
-  onFocus,
-  onBlur,
-}) => {
+export const ESDataViewSelect = (
+  {
+    value = defaultIndex,
+    loading,
+    dataViews,
+    onChange,
+    onFocus,
+    onBlur
+  }: ESDataViewSelectProps
+) => {
   const selectedDataView = dataViews.find((view) => value === view.title) as DataViewOption;
 
   const selectedOption = selectedDataView

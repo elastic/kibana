@@ -20,10 +20,15 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
 `;
 
-export const AgentDetailsContent: React.FunctionComponent<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+export const AgentDetailsContent = memo((
+  {
+    agent,
+    agentPolicy
+  }: {
+    agent: Agent;
+    agentPolicy?: AgentPolicy;
+  }
+) => {
   return (
     <>
       <EuiFlexGroup alignItems="flexStart">

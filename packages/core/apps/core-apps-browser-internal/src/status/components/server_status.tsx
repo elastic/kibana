@@ -17,27 +17,30 @@ interface ServerStateProps {
   serverState: StatusState;
 }
 
-export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, serverState }) => (
-  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" style={{ flexGrow: 0 }}>
-    <EuiFlexItem grow={false}>
-      <EuiTitle>
-        <h2 data-test-subj="serverStatusTitle">
-          <FormattedMessage
-            id="core.statusPage.serverStatus.statusTitle"
-            defaultMessage="Kibana status is {kibanaStatus}"
-            values={{
-              kibanaStatus: (
-                <StatusBadge status={serverState} data-test-subj="serverStatusTitleBadge" />
-              ),
-            }}
-          />
-        </h2>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText>
-        <p>{name}</p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const ServerStatus = (
+  {
+    name,
+    serverState
+  }: ServerStateProps
+) => (<EuiFlexGroup alignItems="center" justifyContent="spaceBetween" style={{ flexGrow: 0 }}>
+  <EuiFlexItem grow={false}>
+    <EuiTitle>
+      <h2 data-test-subj="serverStatusTitle">
+        <FormattedMessage
+          id="core.statusPage.serverStatus.statusTitle"
+          defaultMessage="Kibana status is {kibanaStatus}"
+          values={{
+            kibanaStatus: (
+              <StatusBadge status={serverState} data-test-subj="serverStatusTitleBadge" />
+            ),
+          }}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiText>
+      <p>{name}</p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>);

@@ -47,15 +47,25 @@ export const renderApp = (
   };
 };
 
-const LogsApp: React.FC<{
-  core: CoreStart;
-  history: History<unknown>;
-  pluginStart: InfraClientStartExports;
-  plugins: InfraClientStartDeps;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  storage: Storage;
-  theme$: AppMountParameters['theme$'];
-}> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
+const LogsApp = (
+  {
+    core,
+    history,
+    pluginStart,
+    plugins,
+    setHeaderActionMenu,
+    storage,
+    theme$
+  }: {
+    core: CoreStart;
+    history: History<unknown>;
+    pluginStart: InfraClientStartExports;
+    plugins: InfraClientStartDeps;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    storage: Storage;
+    theme$: AppMountParameters['theme$'];
+  }
+) => {
   const uiCapabilities = core.application.capabilities;
 
   return (

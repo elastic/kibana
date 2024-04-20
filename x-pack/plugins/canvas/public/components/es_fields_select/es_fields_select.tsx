@@ -16,7 +16,7 @@ import {
 
 type ESFieldsSelectProps = Omit<Props, 'fields'> & { index: string };
 
-export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (props) => {
+export const ESFieldsSelect = (props: ESFieldsSelectProps) => {
   const { index, selected, onChange } = props;
   const [fields, setFields] = useState<string[]>([]);
   const prevIndex = usePrevious(index);

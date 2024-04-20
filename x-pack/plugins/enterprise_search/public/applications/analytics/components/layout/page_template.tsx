@@ -24,9 +24,15 @@ interface EnterpriseSearchAnalyticsPageTemplateProps extends PageTemplateProps {
   analyticsName?: string;
 }
 
-export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
-  EnterpriseSearchAnalyticsPageTemplateProps
-> = ({ children, analyticsName, pageChrome, pageViewTelemetry, ...pageTemplateProps }) => {
+export const EnterpriseSearchAnalyticsPageTemplate = (
+  {
+    children,
+    analyticsName,
+    pageChrome,
+    pageViewTelemetry,
+    ...pageTemplateProps
+  }: EnterpriseSearchAnalyticsPageTemplateProps
+) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}

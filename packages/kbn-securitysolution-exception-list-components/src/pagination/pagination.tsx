@@ -13,12 +13,14 @@ import { EuiTablePagination } from '@elastic/eui';
 import type { PaginationProps } from '../types';
 import { usePagination } from './use_pagination';
 
-const PaginationComponent: FC<PaginationProps> = ({
-  dataTestSubj,
-  ariaLabel,
-  pagination,
-  onPaginationChange,
-}) => {
+const PaginationComponent = (
+  {
+    dataTestSubj,
+    ariaLabel,
+    pagination,
+    onPaginationChange
+  }: PaginationProps
+) => {
   const {
     pageIndex,
     pageCount,

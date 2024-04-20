@@ -70,7 +70,13 @@ export interface Props {
   onDelete: (asset: AssetType) => void;
 }
 
-export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
+export const Asset = (
+  {
+    asset,
+    onCreate,
+    onDelete
+  }: Props
+) => {
   const { success } = useNotifyService();
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 

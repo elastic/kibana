@@ -28,7 +28,13 @@ const TruncatedEuiText = styled(EuiText)`
   text-overflow: ellipsis;
 `;
 
-export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
+export const ViewErrors = (
+  {
+    action
+  }: {
+    action: ActionStatus;
+  }
+) => {
   const coreStart = useStartServices();
   const isLogsUIAvailable = !coreStart.cloud?.isServerlessEnabled;
 

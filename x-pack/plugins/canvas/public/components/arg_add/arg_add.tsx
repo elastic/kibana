@@ -19,7 +19,13 @@ interface Props {
   onValueAdd?: ReactEventHandler;
 }
 
-export const ArgAdd: FC<Props> = ({ onValueAdd = () => {}, displayName, help }) => {
+export const ArgAdd = (
+  {
+    onValueAdd = () => {},
+    displayName,
+    help
+  }: Props
+) => {
   return (
     <button className="canvasArg__add" onClick={onValueAdd}>
       <EuiDescriptionList compressed>

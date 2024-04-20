@@ -60,14 +60,16 @@ const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.mana
   defaultMessage: 'Managed',
 });
 
-export const PipelineTable: FunctionComponent<Props> = ({
-  pipelines,
-  isLoading,
-  onReloadClick,
-  onEditPipelineClick,
-  onClonePipelineClick,
-  onDeletePipelineClick,
-}) => {
+export const PipelineTable = (
+  {
+    pipelines,
+    isLoading,
+    onReloadClick,
+    onEditPipelineClick,
+    onClonePipelineClick,
+    onDeletePipelineClick
+  }: Props
+) => {
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
     { key: 'managed', label: managedFilterLabel },
     { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },

@@ -60,7 +60,14 @@ export interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
-export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {
+export const PageLoader = (
+  {
+    context,
+    children
+  }: {
+    context: RouteResolverContext;
+  }
+) => {
   const isLoading = !context.initialized;
 
   if (context?.resolvedComponent) {
@@ -80,17 +87,19 @@ export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, chi
  * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
  * use in components further down via `useUrlState()`.
  */
-export const MlRouter: FC<{
-  pageDeps: PageDependencies;
-}> = ({ pageDeps }) => (
-  <Router history={pageDeps.history}>
-    <UrlStateProvider>
-      <MlNotificationsContextProvider>
-        <MlPage pageDeps={pageDeps} />
-      </MlNotificationsContextProvider>
-    </UrlStateProvider>
-  </Router>
-);
+export const MlRouter = (
+  {
+    pageDeps
+  }: {
+    pageDeps: PageDependencies;
+  }
+) => (<Router history={pageDeps.history}>
+  <UrlStateProvider>
+    <MlNotificationsContextProvider>
+      <MlPage pageDeps={pageDeps} />
+    </MlNotificationsContextProvider>
+  </UrlStateProvider>
+</Router>);
 
 export function createPath(page: MlPages, additionalPrefix?: string) {
   return `/${page}${additionalPrefix ? `${additionalPrefix}` : ''}`;

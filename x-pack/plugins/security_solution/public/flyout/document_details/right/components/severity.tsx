@@ -19,7 +19,7 @@ const isSeverity = (x: unknown): x is Severity =>
 /**
  * Document details severity displayed in flyout right section header
  */
-export const DocumentSeverity: FC = memo(() => {
+export const DocumentSeverity = memo(() => {
   const { getFieldsData } = useRightPanelContext();
   const fieldsData = getFieldsData(ALERT_SEVERITY);
 

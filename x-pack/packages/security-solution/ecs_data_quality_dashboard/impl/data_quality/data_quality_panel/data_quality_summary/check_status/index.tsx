@@ -25,15 +25,17 @@ interface Props {
   setLastChecked: (lastChecked: string) => void;
 }
 
-const CheckStatusComponent: React.FC<Props> = ({
-  addSuccessToast,
-  checkAllIndiciesChecked,
-  checkAllTotalIndiciesToCheck,
-  errorSummary,
-  indexToCheck,
-  lastChecked,
-  setLastChecked,
-}) => {
+const CheckStatusComponent = (
+  {
+    addSuccessToast,
+    checkAllIndiciesChecked,
+    checkAllTotalIndiciesToCheck,
+    errorSummary,
+    indexToCheck,
+    lastChecked,
+    setLastChecked
+  }: Props
+) => {
   const [formattedDate, setFormattedDate] = useState<string>(EMPTY_LAST_CHECKED_DATE);
 
   useEffect(() => {

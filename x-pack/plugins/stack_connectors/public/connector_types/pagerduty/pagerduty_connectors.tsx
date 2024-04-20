@@ -61,10 +61,12 @@ const getRoutingKeyConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ],
 });
 
-const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-}) => {
+const PagerDutyActionConnectorFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => {
   const { docLinks } = useKibana().services;
 
   return (

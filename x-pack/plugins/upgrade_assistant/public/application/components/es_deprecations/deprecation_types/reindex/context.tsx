@@ -32,11 +32,13 @@ interface Props {
   indexName: string;
 }
 
-export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
-  api,
-  indexName,
-  children,
-}) => {
+export const ReindexStatusProvider = (
+  {
+    api,
+    indexName,
+    children
+  }: Props
+) => {
   const { reindexState, startReindex, cancelReindex } = useReindexStatus({
     indexName,
     api,

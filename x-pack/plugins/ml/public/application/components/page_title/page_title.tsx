@@ -17,4 +17,8 @@ interface PageTitleProps {
   title: string;
 }
 
-export const PageTitle: FC<PageTitleProps> = ({ title }) => <div css={cssPageTitle}>{title}</div>;
+export const PageTitle = (
+  {
+    title
+  }: PageTitleProps
+) => <div css={cssPageTitle}>{title}</div>;

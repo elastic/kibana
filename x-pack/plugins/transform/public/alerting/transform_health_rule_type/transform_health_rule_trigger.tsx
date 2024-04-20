@@ -21,11 +21,13 @@ import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 export type TransformHealthRuleTriggerProps =
   RuleTypeParamsExpressionProps<TransformHealthRuleParams>;
 
-const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
-  ruleParams,
-  setRuleParams,
-  errors,
-}) => {
+const TransformHealthRuleTrigger = (
+  {
+    ruleParams,
+    setRuleParams,
+    errors
+  }: TransformHealthRuleTriggerProps
+) => {
   const formErrors = Object.values(errors).flat();
   const isFormInvalid = formErrors.length > 0;
 

@@ -61,7 +61,11 @@ interface LogCategorizationPageProps {
   embeddingOrigin: string;
 }
 
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddingOrigin }) => {
+export const LogCategorizationPage = (
+  {
+    embeddingOrigin
+  }: LogCategorizationPageProps
+) => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();

@@ -70,19 +70,8 @@ export const shouldShowStreamsByDefault = (
   );
 };
 
-export const PackagePolicyInputPanel: React.FunctionComponent<{
-  packageInput: RegistryInput;
-  packageInfo: PackageInfo;
-  packagePolicy: NewPackagePolicy;
-  packageInputStreams: RegistryStreamWithDataStream[];
-  packagePolicyInput: NewPackagePolicyInput;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
-  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
-  inputValidationResults: PackagePolicyInputValidationResults;
-  forceShowErrors?: boolean;
-  isEditPage?: boolean;
-}> = memo(
-  ({
+export const PackagePolicyInputPanel = memo((
+  {
     packageInput,
     packageInfo,
     packageInputStreams,
@@ -92,185 +81,196 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
-    isEditPage = false,
-  }) => {
-    const defaultDataStreamId = useDataStreamId();
-    // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
-      shouldShowStreamsByDefault(
-        packageInput,
-        packageInputStreams,
-        packagePolicyInput,
-        defaultDataStreamId
-      )
-    );
+    isEditPage = false
+  }: {
+    packageInput: RegistryInput;
+    packageInfo: PackageInfo;
+    packagePolicy: NewPackagePolicy;
+    packageInputStreams: RegistryStreamWithDataStream[];
+    packagePolicyInput: NewPackagePolicyInput;
+    updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
+    updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
+    inputValidationResults: PackagePolicyInputValidationResults;
+    forceShowErrors?: boolean;
+    isEditPage?: boolean;
+  }
+) => {
+  const defaultDataStreamId = useDataStreamId();
+  // Showing streams toggle state
+  const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
+    shouldShowStreamsByDefault(
+      packageInput,
+      packageInputStreams,
+      packagePolicyInput,
+      defaultDataStreamId
+    )
+  );
 
-    // Errors state
-    const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
-    const hasErrors = forceShowErrors && errorCount;
+  // Errors state
+  const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
+  const hasErrors = forceShowErrors && errorCount;
 
-    const hasInputStreams = useMemo(
-      () => packageInputStreams.length > 0,
-      [packageInputStreams.length]
-    );
-    const inputStreams = useMemo(
-      () =>
-        packageInputStreams
-          .map((packageInputStream) => {
-            return {
-              packageInputStream,
-              packagePolicyInputStream: packagePolicyInput.streams.find(
-                (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
-              ),
-            };
-          })
-          .filter((stream) => Boolean(stream.packagePolicyInputStream)),
-      [packageInputStreams, packagePolicyInput.streams]
-    );
+  const hasInputStreams = useMemo(
+    () => packageInputStreams.length > 0,
+    [packageInputStreams.length]
+  );
+  const inputStreams = useMemo(
+    () =>
+      packageInputStreams
+        .map((packageInputStream) => {
+          return {
+            packageInputStream,
+            packagePolicyInputStream: packagePolicyInput.streams.find(
+              (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
+            ),
+          };
+        })
+        .filter((stream) => Boolean(stream.packagePolicyInputStream)),
+    [packageInputStreams, packagePolicyInput.streams]
+  );
 
-    const titleElementId = useMemo(() => htmlIdGenerator()(), []);
+  const titleElementId = useMemo(() => htmlIdGenerator()(), []);
 
-    return (
-      <>
-        {/* Header / input-level toggle */}
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <h4 id={titleElementId}>{packageInput.title || packageInput.type}</h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              checked={packagePolicyInput.enabled}
-              disabled={packagePolicyInput.keep_enabled}
-              onChange={(e) => {
-                const enabled = e.target.checked;
-                updatePackagePolicyInput({
-                  enabled,
-                  streams: packagePolicyInput.streams.map((stream) => ({
-                    ...stream,
-                    enabled,
-                  })),
-                });
-                if (!enabled && isShowingStreams) {
-                  setIsShowingStreams(false);
-                }
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {hasErrors ? (
+  return (
+    <>
+      {/* Header / input-level toggle */}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={
+              <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiText color="danger" size="s">
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-                      defaultMessage="{count, plural, one {# error} other {# errors}}"
-                      values={{ count: errorCount }}
-                    />
+                  <EuiText>
+                    <h4 id={titleElementId}>{packageInput.title || packageInput.type}</h4>
                   </EuiText>
                 </EuiFlexItem>
-              ) : null}
+              </EuiFlexGroup>
+            }
+            checked={packagePolicyInput.enabled}
+            disabled={packagePolicyInput.keep_enabled}
+            onChange={(e) => {
+              const enabled = e.target.checked;
+              updatePackagePolicyInput({
+                enabled,
+                streams: packagePolicyInput.streams.map((stream) => ({
+                  ...stream,
+                  enabled,
+                })),
+              });
+              if (!enabled && isShowingStreams) {
+                setIsShowingStreams(false);
+              }
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {hasErrors ? (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color={hasErrors ? 'danger' : 'primary'}
-                  onClick={() => setIsShowingStreams(!isShowingStreams)}
-                  iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
-                  iconSide="right"
-                  aria-expanded={isShowingStreams}
-                  aria-labelledby={titleElementId}
-                >
-                  {
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
-                      defaultMessage="Change defaults"
-                    />
-                  }
-                </EuiButtonEmpty>
+                <EuiText color="danger" size="s">
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                    defaultMessage="{count, plural, one {# error} other {# errors}}"
+                    values={{ count: errorCount }}
+                  />
+                </EuiText>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        {/* Header rule break */}
-        {isShowingStreams ? <EuiSpacer size="l" /> : null}
-        {/* Input level policy */}
-        {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
-          <Fragment>
-            <PackagePolicyInputConfig
-              hasInputStreams={hasInputStreams}
-              packageInputVars={packageInput.vars}
-              packagePolicyInput={packagePolicyInput}
-              updatePackagePolicyInput={updatePackagePolicyInput}
-              inputVarsValidationResults={{ vars: inputValidationResults?.vars }}
-              forceShowErrors={forceShowErrors}
-              isEditPage={isEditPage}
-            />
-            {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
-          </Fragment>
-        ) : null}
-
-        {/* Per-stream policy */}
-        {isShowingStreams ? (
-          <EuiFlexGroup direction="column">
-            {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
-              <EuiFlexItem key={index}>
-                <PackagePolicyInputStreamConfig
-                  packageInfo={packageInfo}
-                  packagePolicy={packagePolicy}
-                  packageInputStream={packageInputStream}
-                  packagePolicyInputStream={packagePolicyInputStream!}
-                  updatePackagePolicy={updatePackagePolicy}
-                  updatePackagePolicyInputStream={(
-                    updatedStream: Partial<PackagePolicyInputStream>
-                  ) => {
-                    const indexOfUpdatedStream = packagePolicyInput.streams.findIndex(
-                      (stream) =>
-                        stream.data_stream.dataset === packageInputStream.data_stream.dataset
-                    );
-                    const newStreams = [...packagePolicyInput.streams];
-                    newStreams[indexOfUpdatedStream] = {
-                      ...newStreams[indexOfUpdatedStream],
-                      ...updatedStream,
-                    };
-
-                    const updatedInput: Partial<NewPackagePolicyInput> = {
-                      streams: newStreams,
-                    };
-
-                    // Update input enabled state if needed
-                    if (!packagePolicyInput.enabled && updatedStream.enabled) {
-                      updatedInput.enabled = true;
-                    } else if (
-                      packagePolicyInput.enabled &&
-                      !newStreams.find((stream) => stream.enabled)
-                    ) {
-                      updatedInput.enabled = false;
-                    }
-
-                    updatePackagePolicyInput(updatedInput);
-                  }}
-                  inputStreamValidationResults={
-                    inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
-                  }
-                  forceShowErrors={forceShowErrors}
-                  isEditPage={isEditPage}
-                />
-                {index !== inputStreams.length - 1 ? (
-                  <>
-                    <EuiSpacer size="m" />
-                    <ShortenedHorizontalRule margin="none" />
-                  </>
-                ) : null}
-              </EuiFlexItem>
-            ))}
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color={hasErrors ? 'danger' : 'primary'}
+                onClick={() => setIsShowingStreams(!isShowingStreams)}
+                iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
+                iconSide="right"
+                aria-expanded={isShowingStreams}
+                aria-labelledby={titleElementId}
+              >
+                {
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
+                    defaultMessage="Change defaults"
+                  />
+                }
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </EuiFlexGroup>
-        ) : null}
-      </>
-    );
-  }
-);
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {/* Header rule break */}
+      {isShowingStreams ? <EuiSpacer size="l" /> : null}
+      {/* Input level policy */}
+      {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
+        <Fragment>
+          <PackagePolicyInputConfig
+            hasInputStreams={hasInputStreams}
+            packageInputVars={packageInput.vars}
+            packagePolicyInput={packagePolicyInput}
+            updatePackagePolicyInput={updatePackagePolicyInput}
+            inputVarsValidationResults={{ vars: inputValidationResults?.vars }}
+            forceShowErrors={forceShowErrors}
+            isEditPage={isEditPage}
+          />
+          {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
+        </Fragment>
+      ) : null}
+
+      {/* Per-stream policy */}
+      {isShowingStreams ? (
+        <EuiFlexGroup direction="column">
+          {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
+            <EuiFlexItem key={index}>
+              <PackagePolicyInputStreamConfig
+                packageInfo={packageInfo}
+                packagePolicy={packagePolicy}
+                packageInputStream={packageInputStream}
+                packagePolicyInputStream={packagePolicyInputStream!}
+                updatePackagePolicy={updatePackagePolicy}
+                updatePackagePolicyInputStream={(
+                  updatedStream: Partial<PackagePolicyInputStream>
+                ) => {
+                  const indexOfUpdatedStream = packagePolicyInput.streams.findIndex(
+                    (stream) =>
+                      stream.data_stream.dataset === packageInputStream.data_stream.dataset
+                  );
+                  const newStreams = [...packagePolicyInput.streams];
+                  newStreams[indexOfUpdatedStream] = {
+                    ...newStreams[indexOfUpdatedStream],
+                    ...updatedStream,
+                  };
+
+                  const updatedInput: Partial<NewPackagePolicyInput> = {
+                    streams: newStreams,
+                  };
+
+                  // Update input enabled state if needed
+                  if (!packagePolicyInput.enabled && updatedStream.enabled) {
+                    updatedInput.enabled = true;
+                  } else if (
+                    packagePolicyInput.enabled &&
+                    !newStreams.find((stream) => stream.enabled)
+                  ) {
+                    updatedInput.enabled = false;
+                  }
+
+                  updatePackagePolicyInput(updatedInput);
+                }}
+                inputStreamValidationResults={
+                  inputValidationResults?.streams![packagePolicyInputStream!.data_stream!.dataset]
+                }
+                forceShowErrors={forceShowErrors}
+                isEditPage={isEditPage}
+              />
+              {index !== inputStreams.length - 1 ? (
+                <>
+                  <EuiSpacer size="m" />
+                  <ShortenedHorizontalRule margin="none" />
+                </>
+              ) : null}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ) : null}
+    </>
+  );
+});

@@ -23,15 +23,17 @@ interface Props {
   createPipeline: boolean;
 }
 
-export const ImportSummary: FC<Props> = ({
-  index,
-  dataView,
-  ingestPipelineId,
-  docCount,
-  importFailures,
-  createDataView,
-  createPipeline,
-}) => {
+export const ImportSummary = (
+  {
+    index,
+    dataView,
+    ingestPipelineId,
+    docCount,
+    importFailures,
+    createDataView,
+    createPipeline
+  }: Props
+) => {
   const items = createDisplayItems(
     index,
     dataView,

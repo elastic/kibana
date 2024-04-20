@@ -28,7 +28,7 @@ import { AlertConfiguration } from './configuration';
 interface Props {
   alerts: AlertsByName;
 }
-export const AlertsCallout: React.FC<Props> = (props: Props) => {
+export const AlertsCallout = (props: Props) => {
   const { alerts } = props;
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
 

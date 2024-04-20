@@ -64,21 +64,23 @@ const getFieldsFromState = (state: State) => {
   };
   return fields();
 };
-export const DetailsPageMappingsContent: FunctionComponent<{
-  index: Index;
-  data: string;
-  showAboutMappings: boolean;
-  jsonData: any;
-  refetchMapping: () => void;
-  isSemanticTextEnabled?: boolean;
-}> = ({
-  index,
-  data,
-  jsonData,
-  refetchMapping,
-  showAboutMappings,
-  isSemanticTextEnabled = false,
-}) => {
+export const DetailsPageMappingsContent = (
+  {
+    index,
+    data,
+    jsonData,
+    refetchMapping,
+    showAboutMappings,
+    isSemanticTextEnabled = false
+  }: {
+    index: Index;
+    data: string;
+    showAboutMappings: boolean;
+    jsonData: any;
+    refetchMapping: () => void;
+    isSemanticTextEnabled?: boolean;
+  }
+) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
@@ -326,7 +328,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   );
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
-    <>
+    (<>
       <EuiFlexGroup
         wrap
         direction="rowReverse"
@@ -518,6 +520,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-    </>
+    </>)
   );
 };

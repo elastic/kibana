@@ -34,7 +34,13 @@ export interface UserToolTipProps extends Omit<EuiToolTipProps, 'content' | 'tit
 /**
  * Renders a tooltip with user information
  */
-export const UserToolTip: FunctionComponent<UserToolTipProps> = ({ user, avatar, ...rest }) => {
+export const UserToolTip = (
+  {
+    user,
+    avatar,
+    ...rest
+  }: UserToolTipProps
+) => {
   const displayName = getUserDisplayName(user);
   return (
     <EuiToolTip

@@ -34,17 +34,19 @@ const TooltipContainer = styled.div`
   padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const RiskScoreLevel: React.FC<{
-  severity: RiskSeverity;
-  hideBackgroundColor?: boolean;
-  toolTipContent?: JSX.Element;
-  ['data-test-subj']?: string;
-}> = ({
-  severity,
-  hideBackgroundColor = false,
-  toolTipContent,
-  'data-test-subj': dataTestSubj,
-}) => {
+export const RiskScoreLevel = (
+  {
+    severity,
+    hideBackgroundColor = false,
+    toolTipContent,
+    'data-test-subj': dataTestSubj
+  }: {
+    severity: RiskSeverity;
+    hideBackgroundColor?: boolean;
+    toolTipContent?: JSX.Element;
+    ['data-test-subj']?: string;
+  }
+) => {
   const badge = (
     <RiskBadge
       color={euiLightVars.euiColorDanger}

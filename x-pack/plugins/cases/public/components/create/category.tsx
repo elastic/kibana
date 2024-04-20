@@ -14,7 +14,11 @@ interface Props {
   isLoading: boolean;
 }
 
-const CategoryComponent: React.FC<Props> = ({ isLoading }) => {
+const CategoryComponent = (
+  {
+    isLoading
+  }: Props
+) => {
   const { isLoading: isLoadingCategories, data: categories = [] } = useGetCategories();
 
   return (

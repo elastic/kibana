@@ -35,7 +35,13 @@ const createTickRender =
     );
   };
 
-export const GradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) => {
+export const GradientLegend = (
+  {
+    legend,
+    bounds,
+    formatter
+  }: Props
+) => {
   const maxValue = legend.rules.reduce((acc, rule) => {
     return acc < rule.value ? rule.value : acc;
   }, 0);

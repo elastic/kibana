@@ -26,7 +26,12 @@ interface Props {
   initialValue: CustomFieldConfiguration | null;
 }
 
-const FormComponent: React.FC<Props> = ({ onChange, initialValue }) => {
+const FormComponent = (
+  {
+    onChange,
+    initialValue
+  }: Props
+) => {
   const keyDefaultValue = useMemo(() => uuidv4(), []);
 
   const { form } = useForm({

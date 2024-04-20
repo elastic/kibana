@@ -22,7 +22,7 @@ export interface CustomUrlsWrapperProps {
   isPartialDFAJob?: boolean;
 }
 
-export const CustomUrlsWrapper: FC<CustomUrlsWrapperProps> = (props) => {
+export const CustomUrlsWrapper = (props: CustomUrlsWrapperProps) => {
   const {
     services: {
       data: {

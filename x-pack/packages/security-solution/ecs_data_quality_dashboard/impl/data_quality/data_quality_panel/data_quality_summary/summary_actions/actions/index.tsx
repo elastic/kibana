@@ -29,13 +29,15 @@ export interface Props {
   }) => void;
 }
 
-const ActionsComponent: React.FC<Props> = ({
-  addSuccessToast,
-  canUserCreateAndReadCases,
-  getMarkdownComments,
-  ilmPhases,
-  openCreateCaseFlyout,
-}) => {
+const ActionsComponent = (
+  {
+    addSuccessToast,
+    canUserCreateAndReadCases,
+    getMarkdownComments,
+    ilmPhases,
+    openCreateCaseFlyout
+  }: Props
+) => {
   const { disabled: addToNewCaseDisabled, onAddToNewCase } = useAddToNewCase({
     canUserCreateAndReadCases,
     openCreateCaseFlyout,

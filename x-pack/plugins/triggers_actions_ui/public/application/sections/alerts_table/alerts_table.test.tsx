@@ -337,9 +337,11 @@ describe('AlertsTable', () => {
   const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
   useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView: jest.fn() });
 
-  const AlertsTableWithProviders: React.FunctionComponent<
-    AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
-  > = (props) => {
+  const AlertsTableWithProviders = (
+    props: AlertsTableProps & {
+      initialBulkActionsState?: BulkActionsState;
+    }
+  ) => {
     const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 

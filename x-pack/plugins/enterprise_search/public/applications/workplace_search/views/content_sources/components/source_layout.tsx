@@ -28,11 +28,13 @@ import { SourceLogic } from '../source_logic';
 import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceInfoCard } from './source_info_card';
 
-export const SourceLayout: React.FC<PageTemplateProps> = ({
-  children,
-  pageChrome = [],
-  ...props
-}) => {
+export const SourceLayout = (
+  {
+    children,
+    pageChrome = [],
+    ...props
+  }: PageTemplateProps
+) => {
   const { contentSource, dataLoading, diagnosticDownloadButtonVisible } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 

@@ -19,9 +19,11 @@ interface ConnectorConfigurationPanels {
   connector: Connector;
 }
 
-export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels> = ({
-  connector,
-}) => {
+export const ConnectorConfigurationPanels = (
+  {
+    connector
+  }: ConnectorConfigurationPanels
+) => {
   const { data, isLoading, isSuccess, mutate, reset } = useEditConnectorConfiguration(connector.id);
   const { queryKey } = useConnector(connector.id);
   const queryClient = useQueryClient();

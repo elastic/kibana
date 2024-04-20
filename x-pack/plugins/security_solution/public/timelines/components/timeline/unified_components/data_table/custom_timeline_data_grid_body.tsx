@@ -34,8 +34,8 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
  * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
  *
  * */
-export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
-  function CustomTimelineDataGridBody(props) {
+export const CustomTimelineDataGridBody = memo(
+  function CustomTimelineDataGridBody(props: CustomTimelineDataGridBodyProps) {
     const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers } = props;
 
     const visibleRows = useMemo(

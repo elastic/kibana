@@ -33,7 +33,7 @@ import { IndexViewLogic } from '../index_view_logic';
 import { PipelineJSONBadges } from './pipeline_json_badges';
 import { IndexPipelinesConfigurationsLogic } from './pipelines_json_configurations_logic';
 
-export const PipelinesJSONConfigurations: React.FC = () => {
+export const PipelinesJSONConfigurations = () => {
   const { http } = useValues(HttpLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { pipelineNames, selectedPipeline, selectedPipelineId, selectedPipelineJSON } = useValues(

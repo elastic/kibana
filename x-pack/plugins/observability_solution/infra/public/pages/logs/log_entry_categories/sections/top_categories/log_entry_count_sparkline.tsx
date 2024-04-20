@@ -12,11 +12,17 @@ import { TimeRange } from '../../../../../../common/time';
 import { SingleMetricComparison } from './single_metric_comparison';
 import { SingleMetricSparkline } from './single_metric_sparkline';
 
-export const LogEntryCountSparkline: React.FunctionComponent<{
-  currentCount: number;
-  histograms: LogEntryCategoryHistogram[];
-  timeRange: TimeRange;
-}> = ({ currentCount, histograms, timeRange }) => {
+export const LogEntryCountSparkline = (
+  {
+    currentCount,
+    histograms,
+    timeRange
+  }: {
+    currentCount: number;
+    histograms: LogEntryCategoryHistogram[];
+    timeRange: TimeRange;
+  }
+) => {
   const metric = useMemo(
     () =>
       histograms

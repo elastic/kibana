@@ -25,7 +25,7 @@ import { ConnectorNameAndDescriptionApiLogic } from '../../../../api/connector/u
 import { ConnectorNameAndDescriptionFormContent } from './connector_name_and_description_form_content';
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
-export const ConnectorNameAndDescriptionForm: React.FC = () => {
+export const ConnectorNameAndDescriptionForm = () => {
   const { status } = useValues(ConnectorNameAndDescriptionApiLogic);
 
   const { saveNameAndDescription, setIsEditing } = useActions(ConnectorNameAndDescriptionLogic);

@@ -17,7 +17,7 @@ import {
 } from '../shared_imports';
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../constants';
 
-export const ComponentTemplatesWithPrivileges: FunctionComponent = ({
+export const ComponentTemplatesWithPrivileges = ({
   children,
 }: {
   children?: React.ReactNode;

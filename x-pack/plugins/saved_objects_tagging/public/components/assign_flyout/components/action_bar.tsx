@@ -18,14 +18,16 @@ export interface AssignFlyoutActionBarProps {
   onDeselectAll: () => void;
 }
 
-export const AssignFlyoutActionBar: FC<AssignFlyoutActionBarProps> = ({
-  resultCount,
-  initiallyAssigned,
-  pendingChanges,
-  onReset,
-  onSelectAll,
-  onDeselectAll,
-}) => {
+export const AssignFlyoutActionBar = (
+  {
+    resultCount,
+    initiallyAssigned,
+    pendingChanges,
+    onReset,
+    onSelectAll,
+    onDeselectAll
+  }: AssignFlyoutActionBarProps
+) => {
   return (
     <div className="tagAssignFlyout__actionBar">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-export const EngineIcon: React.FC = ({ ...props }) => (
+export const EngineIcon = ({ ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="euiIcon"

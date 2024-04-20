@@ -25,16 +25,16 @@ export type EnterpriseSearchApplicationsPageTemplateProps = Omit<
   searchApplicationName?: string;
 };
 
-export const EnterpriseSearchApplicationsPageTemplate: React.FC<
-  EnterpriseSearchApplicationsPageTemplateProps
-> = ({
-  children,
-  pageChrome,
-  pageViewTelemetry,
-  searchApplicationName,
-  hasSchemaConflicts,
-  ...pageTemplateProps
-}) => {
+export const EnterpriseSearchApplicationsPageTemplate = (
+  {
+    children,
+    pageChrome,
+    pageViewTelemetry,
+    searchApplicationName,
+    hasSchemaConflicts,
+    ...pageTemplateProps
+  }: EnterpriseSearchApplicationsPageTemplateProps
+) => {
   const navItems = useEnterpriseSearchApplicationNav(
     searchApplicationName,
     pageTemplateProps.isEmptyState,

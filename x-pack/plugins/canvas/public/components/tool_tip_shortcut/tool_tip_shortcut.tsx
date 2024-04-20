@@ -17,11 +17,13 @@ export interface Props {
   shortcut: string;
 }
 
-export const ToolTipShortcut: FunctionComponent<Props> = ({ shortcut }) => (
-  <EuiText size="xs" textAlign="center" color="ghost">
-    {shortcut.replace(/\+/g, ' + ')}
-  </EuiText>
-);
+export const ToolTipShortcut = (
+  {
+    shortcut
+  }: Props
+) => (<EuiText size="xs" textAlign="center" color="ghost">
+  {shortcut.replace(/\+/g, ' + ')}
+</EuiText>);
 
 ToolTipShortcut.propTypes = {
   shortcut: PropTypes.string.isRequired,

@@ -17,7 +17,7 @@ import { Description } from './description';
 import type { PopulationJobCreator, RareJobCreator } from '../../../../../common/job_creator';
 import { isPopulationJobCreator } from '../../../../../common/job_creator';
 
-export const PopulationFieldSelector: FC = () => {
+export const PopulationFieldSelector = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator | RareJobCreator;
 

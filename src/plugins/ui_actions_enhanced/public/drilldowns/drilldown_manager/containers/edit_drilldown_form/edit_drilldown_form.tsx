@@ -36,7 +36,11 @@ export interface EditDrilldownFormProps {
   eventId: string;
 }
 
-export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ eventId }) => {
+export const EditDrilldownForm = (
+  {
+    eventId
+  }: EditDrilldownFormProps
+) => {
   const isMounted = useMountedState();
   const drilldowns = useDrilldownManager();
   const drilldownState = React.useMemo(

@@ -18,7 +18,11 @@ interface Props {
   item: ChromeProjectNavigationNode;
 }
 
-export const PanelNavItem: FC<Props> = ({ item }) => {
+export const PanelNavItem = (
+  {
+    item
+  }: Props
+) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab } = item;

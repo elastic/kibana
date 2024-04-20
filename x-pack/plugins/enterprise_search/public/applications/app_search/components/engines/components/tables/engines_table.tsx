@@ -38,13 +38,15 @@ const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   render: (language: string) => language || UNIVERSAL_LANGUAGE,
 };
 
-export const EnginesTable: React.FC<EnginesTableProps> = ({
-  items,
-  loading,
-  noItemsMessage,
-  pagination,
-  onChange,
-}) => {
+export const EnginesTable = (
+  {
+    items,
+    loading,
+    noItemsMessage,
+    pagination,
+    onChange
+  }: EnginesTableProps
+) => {
   const {
     myRole: { canManageEngines },
   } = useValues(AppLogic);

@@ -42,7 +42,11 @@ interface ExplorationProps {
   jobId: string;
 }
 
-export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
+export const OutlierExploration = React.memo((
+  {
+    jobId
+  }: ExplorationProps
+) => {
   const { dataView, dataViewErrorMessage, jobConfig, needsDestDataView } =
     useResultsViewConfig(jobId);
   const [pageUrlState, setPageUrlState] = useExplorationUrlState();

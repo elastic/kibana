@@ -31,11 +31,13 @@ export type DeleteRoleMappings = (
 type OnSuccessCallback = (deletedRoleMappings: string[]) => void;
 type OnCancelCallback = () => void;
 
-export const DeleteProvider: React.FunctionComponent<Props> = ({
-  roleMappingsAPI,
-  children,
-  notifications,
-}) => {
+export const DeleteProvider = (
+  {
+    roleMappingsAPI,
+    children,
+    notifications
+  }: Props
+) => {
   const [roleMappings, setRoleMappings] = useState<RoleMapping[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteInProgress, setIsDeleteInProgress] = useState(false);

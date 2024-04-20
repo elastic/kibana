@@ -16,7 +16,13 @@ export interface Props {
   onDrop?: (files: FileList) => void;
 }
 
-export const UploadDropzone: FC<Props> = ({ onDrop = () => {}, disabled, children }) => {
+export const UploadDropzone = (
+  {
+    onDrop = () => {},
+    disabled,
+    children
+  }: Props
+) => {
   return (
     <Dropzone
       {...{ onDrop, disabled }}

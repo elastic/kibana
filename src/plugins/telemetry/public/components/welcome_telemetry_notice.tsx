@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { OptInMessage, type OptInMessageProps } from './opt_in_message';
 
-export const WelcomeTelemetryNotice: React.FC<OptInMessageProps> = (props) => {
+export const WelcomeTelemetryNotice = (props: OptInMessageProps) => {
   return (
     <>
       <EuiTextColor className="euiText--small" color="subdued">

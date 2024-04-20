@@ -23,7 +23,7 @@ import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 
-export const AuthenticationPanelActions: React.FC = () => {
+export const AuthenticationPanelActions = () => {
   const { domain } = useValues(CrawlerDomainDetailLogic);
 
   const currentAuth: CrawlerAuth = domain?.auth ?? null;

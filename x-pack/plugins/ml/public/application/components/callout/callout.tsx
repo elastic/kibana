@@ -40,30 +40,42 @@ export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   }
 };
 
-const Link: FC<{ url: string }> = ({ url }) => (
-  <EuiLink href={url} target="_BLANK">
-    <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
-  </EuiLink>
-);
+const Link = (
+  {
+    url
+  }: {
+    url: string;
+  }
+) => (<EuiLink href={url} target="_BLANK">
+  <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
+</EuiLink>);
 
-const Message: FC<Pick<CalloutMessage, 'text' | 'url'>> = ({ text, url }) => (
-  <>
-    {text} {url && <Link url={url} />}
-  </>
-);
+const Message = (
+  {
+    text,
+    url
+  }: Pick<CalloutMessage, 'text' | 'url'>
+) => (<>
+  {text} {url && <Link url={url} />}
+</>);
 
-export const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => (
-  <>
-    <EuiCallOut
-      data-test-subj={'mlValidationCallout'}
-      // @ts-ignore
-      color={statusToEuiColor(status)}
-      size="s"
-      title={heading || <Message text={text} url={url} />}
-      iconType={status ? statusToEuiIconType(status) : defaultIconType}
-    >
-      {heading && <Message text={text} url={url} />}
-    </EuiCallOut>
-    <EuiSpacer size="m" />
-  </>
-);
+export const Callout = (
+  {
+    heading,
+    status,
+    text,
+    url
+  }: CalloutMessage
+) => (<>
+  <EuiCallOut
+    data-test-subj={'mlValidationCallout'}
+    // @ts-ignore
+    color={statusToEuiColor(status)}
+    size="s"
+    title={heading || <Message text={text} url={url} />}
+    iconType={status ? statusToEuiIconType(status) : defaultIconType}
+  >
+    {heading && <Message text={text} url={url} />}
+  </EuiCallOut>
+  <EuiSpacer size="m" />
+</>);

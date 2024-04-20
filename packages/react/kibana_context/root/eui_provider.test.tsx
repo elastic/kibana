@@ -37,7 +37,7 @@ describe('KibanaEuiProvider', () => {
     });
   };
 
-  const InnerComponent: FC = () => {
+  const InnerComponent = () => {
     const theme = useEuiTheme();
     useEffect(() => {
       euiTheme = theme;

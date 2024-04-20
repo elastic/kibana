@@ -56,7 +56,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const InstalledIntegrationsInfoCallout: React.FC = () => (
+const InstalledIntegrationsInfoCallout = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -75,28 +75,32 @@ const InstalledIntegrationsInfoCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
-  <EuiCallOut
-    title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
-      defaultMessage:
-        '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
-      values: {
-        count,
-      },
-    })}
-    iconType="warning"
-    color="warning"
-  >
-    <p>
-      <FormattedMessage
-        id="xpack.fleet.epmList.updatesAvailableCalloutText"
-        defaultMessage="Update your integrations to get the latest features."
-      />
-    </p>
-  </EuiCallOut>
-);
+const UpdatesAvailableCallout = (
+  {
+    count
+  }: {
+    count: number;
+  }
+) => (<EuiCallOut
+  title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
+    defaultMessage:
+      '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
+    values: {
+      count,
+    },
+  })}
+  iconType="warning"
+  color="warning"
+>
+  <p>
+    <FormattedMessage
+      id="xpack.fleet.epmList.updatesAvailableCalloutText"
+      defaultMessage="Update your integrations to get the latest features."
+    />
+  </p>
+</EuiCallOut>);
 
-const VerificationWarningCallout: React.FC = () => {
+const VerificationWarningCallout = () => {
   const { docLinks } = useStartServices();
 
   return (
@@ -127,10 +131,15 @@ const VerificationWarningCallout: React.FC = () => {
   );
 };
 
-export const InstalledPackages: React.FC<{
-  installedPackages: PackageListItem[];
-  isLoading: boolean;
-}> = ({ installedPackages, isLoading }) => {
+export const InstalledPackages = (
+  {
+    installedPackages,
+    isLoading
+  }: {
+    installedPackages: PackageListItem[];
+    isLoading: boolean;
+  }
+) => {
   useBreadcrumbs('integrations_installed');
 
   const { packageVerificationKeyId } = useGetPackageVerificationKeyId();

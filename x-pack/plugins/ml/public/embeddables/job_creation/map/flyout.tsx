@@ -31,7 +31,12 @@ interface Props {
   onClose: () => void;
 }
 
-export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
+export const GeoJobFlyout = (
+  {
+    onClose,
+    embeddable
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
 

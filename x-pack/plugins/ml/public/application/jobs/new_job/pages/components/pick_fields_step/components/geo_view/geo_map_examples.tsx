@@ -24,13 +24,15 @@ interface Props {
   layerList: LayerDescriptor[];
 }
 
-export const GeoMapExamples: FC<Props> = ({
-  geoField,
-  splitField,
-  fieldValues,
-  geoAgg,
-  layerList,
-}) => {
+export const GeoMapExamples = (
+  {
+    geoField,
+    splitField,
+    fieldValues,
+    geoAgg,
+    layerList
+  }: Props
+) => {
   const animateSplit = useAnimateSplit();
 
   return (

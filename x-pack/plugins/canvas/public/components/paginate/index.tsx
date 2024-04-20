@@ -17,12 +17,14 @@ export interface InPaginateProps {
   children: (props: PaginateChildProps) => React.ReactNode;
 }
 
-export const Paginate: React.FunctionComponent<InPaginateProps> = ({
-  perPage = 10,
-  startPage = 0,
-  rows,
-  children,
-}) => {
+export const Paginate = (
+  {
+    perPage = 10,
+    startPage = 0,
+    rows,
+    children
+  }: InPaginateProps
+) => {
   const totalPages = Math.ceil(rows.length / perPage);
   const initialCurrentPage = totalPages > 0 ? Math.min(startPage, totalPages - 1) : 0;
   const [currentPage, setPage] = useState(initialCurrentPage);

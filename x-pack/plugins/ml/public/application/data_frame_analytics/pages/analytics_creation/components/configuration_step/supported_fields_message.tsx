@@ -69,7 +69,11 @@ interface Props {
   jobType: AnalyticsJobType;
 }
 
-export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
+export const SupportedFieldsMessage = (
+  {
+    jobType
+  }: Props
+) => {
   const [sourceIndexContainsSupportedFields, setSourceIndexContainsSupportedFields] =
     useState<boolean>(true);
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);

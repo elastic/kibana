@@ -17,10 +17,12 @@ interface NavigationButtonsProps {
   agentPolicyId?: string | undefined;
 }
 
-const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
-  isDisabled = false,
-  agentPolicyId,
-}) => {
+const NavigationButtonsComponent = (
+  {
+    isDisabled = false,
+    agentPolicyId
+  }: NavigationButtonsProps
+) => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;

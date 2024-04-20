@@ -48,7 +48,7 @@ interface SharedProps {
 
 type CriteriaProps = SharedProps;
 
-export const Criteria: React.FC<CriteriaProps> = (props) => {
+export const Criteria = (props: CriteriaProps) => {
   const { criteria, errors } = props;
   if (!criteria || criteria.length === 0) return null;
 
@@ -71,7 +71,7 @@ interface CriteriaWrapperProps {
   isRatio?: boolean;
 }
 
-const CriteriaWrapper: React.FC<CriteriaWrapperProps> = (props) => {
+const CriteriaWrapper = (props: CriteriaWrapperProps) => {
   const {
     updateCriterion,
     removeCriterion,
@@ -124,7 +124,7 @@ interface RatioCriteriaProps extends SharedProps {
   criteria: PartialRatioCriteriaType;
 }
 
-const RatioCriteria: React.FC<RatioCriteriaProps> = (props) => {
+const RatioCriteria = (props: RatioCriteriaProps) => {
   const { criteria, defaultCriterion, errors, updateCriteria } = props;
 
   const handleUpdateNumeratorCriteria = useCallback(
@@ -192,7 +192,7 @@ interface CountCriteriaProps extends SharedProps {
   criteria: PartialCountCriteriaType;
 }
 
-const CountCriteria: React.FC<CountCriteriaProps> = (props) => {
+const CountCriteria = (props: CountCriteriaProps) => {
   const { criteria, defaultCriterion, updateCriteria, errors } = props;
 
   const { updateCriterion, addCriterion, removeCriterion } = useCriteriaState(

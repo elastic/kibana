@@ -33,7 +33,13 @@ interface Props {
   onChange: (v: CanvasVariable['value']) => void;
 }
 
-export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
+export const VarValueField = (
+  {
+    type,
+    value,
+    onChange
+  }: Props
+) => {
   const idPrefix = htmlIdGenerator()();
 
   const options = [

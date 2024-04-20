@@ -32,29 +32,33 @@ interface Props {
   onClick(): void;
 }
 
-export const RoleMappingsHeading: React.FC<Props> = ({ productName, docsLink, onClick }) => (
-  <header>
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem>
-        <EuiTitle>
-          <h2>{ROLE_MAPPINGS_HEADING_TITLE}</h2>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText color="subdued">
-          <p>
-            {ROLE_MAPPINGS_HEADING_DESCRIPTION(productName)}{' '}
-            <EuiLink external href={docsLink} target="_blank">
-              {ROLE_MAPPINGS_HEADING_DOCS_LINK}
-            </EuiLink>
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onClick}>
-          {ROLE_MAPPINGS_HEADING_BUTTON}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-  </header>
-);
+export const RoleMappingsHeading = (
+  {
+    productName,
+    docsLink,
+    onClick
+  }: Props
+) => (<header>
+  <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexItem>
+      <EuiTitle>
+        <h2>{ROLE_MAPPINGS_HEADING_TITLE}</h2>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText color="subdued">
+        <p>
+          {ROLE_MAPPINGS_HEADING_DESCRIPTION(productName)}{' '}
+          <EuiLink external href={docsLink} target="_blank">
+            {ROLE_MAPPINGS_HEADING_DOCS_LINK}
+          </EuiLink>
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiButton fill onClick={onClick}>
+        {ROLE_MAPPINGS_HEADING_BUTTON}
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer />
+</header>);

@@ -70,13 +70,15 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
   };
 }
 
-export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
-  selectedJobs,
-  selectedCells,
-  bounds,
-  interval,
-  chartsCount,
-}) => {
+export const AnomalyContextMenu = (
+  {
+    selectedJobs,
+    selectedCells,
+    bounds,
+    interval,
+    chartsCount
+  }: AnomalyContextMenuProps
+) => {
   const {
     services: {
       application: { capabilities },

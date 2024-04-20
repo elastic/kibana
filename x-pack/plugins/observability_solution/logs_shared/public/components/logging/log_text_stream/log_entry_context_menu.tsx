@@ -41,14 +41,16 @@ const DEFAULT_MENU_LABEL = i18n.translate(
   }
 );
 
-export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
-  'aria-label': ariaLabel,
-  isOpen,
-  onOpen,
-  onClose,
-  items,
-  externalItems,
-}) => {
+export const LogEntryContextMenu = (
+  {
+    'aria-label': ariaLabel,
+    isOpen,
+    onOpen,
+    onClose,
+    items,
+    externalItems
+  }: LogEntryContextMenuProps
+) => {
   const closeMenuAndCall = useMemo(() => {
     return (callback: LogEntryContextMenuItem['onClick'] | EuiContextMenuItemProps['onClick']) => {
       return (e: React.MouseEvent) => {

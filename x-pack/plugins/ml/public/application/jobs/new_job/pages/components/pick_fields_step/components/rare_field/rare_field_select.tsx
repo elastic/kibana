@@ -25,13 +25,15 @@ interface Props {
   placeholder?: string;
 }
 
-export const RareFieldSelect: FC<Props> = ({
-  fields,
-  changeHandler,
-  selectedField,
-  testSubject,
-  placeholder,
-}) => {
+export const RareFieldSelect = (
+  {
+    fields,
+    changeHandler,
+    selectedField,
+    testSubject,
+    placeholder
+  }: Props
+) => {
   const { renderOption, optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = fields.map(

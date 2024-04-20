@@ -61,16 +61,18 @@ interface GlobalState {
 
 const RECHECK_DELAY_MS = 3000;
 
-export const ResultsLinks: FC<Props> = ({
-  fieldStats,
-  index,
-  dataViewId,
-  timeFieldName,
-  createDataView,
-  showFilebeatFlyout,
-  getAdditionalLinks,
-  resultLinks,
-}) => {
+export const ResultsLinks = (
+  {
+    fieldStats,
+    index,
+    dataViewId,
+    timeFieldName,
+    createDataView,
+    showFilebeatFlyout,
+    getAdditionalLinks,
+    resultLinks
+  }: Props
+) => {
   const {
     services: {
       fileUpload,

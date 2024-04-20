@@ -41,7 +41,12 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SampleDataCardProvider: FC<Services> = ({ children, ...services }) => {
+export const SampleDataCardProvider = (
+  {
+    children,
+    ...services
+  }: Services
+) => {
   const {
     addBasePath,
     getAppNavigationHandler,
@@ -99,10 +104,12 @@ export interface KibanaDependencies {
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SampleDataCardKibanaProvider: FC<KibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const SampleDataCardKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: KibanaDependencies
+) => {
   const { application, http, notifications, uiSettings } = dependencies.coreStart;
   const clearDataViewsCache = dependencies.dataViews.clearCache;
 

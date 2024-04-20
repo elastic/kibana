@@ -57,52 +57,56 @@ const useStyles = () => {
   };
 };
 
-export const LandingLinksImages: React.FC<LandingLinksImagesProps> = React.memo(
-  function LandingLinksImages({ items, urlState, onLinkClick }) {
-    const styles = useStyles();
-    return (
-      <EuiFlexGroup direction="column">
-        {items.map((item) => {
-          const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
-          const { id, title, description, landingImage, isBeta, betaOptions } = item;
-          return (
-            <EuiFlexItem key={id} data-test-subj="LandingItem">
-              <LinkAnchor {...linkProps} tabIndex={-1} css={styles.link}>
-                {/* Empty onClick is to force hover style on `EuiPanel` */}
-                <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false} css={styles.image}>
-                      {landingImage && (
-                        <EuiImage
-                          data-test-subj="LandingLinksImage"
-                          size="l"
-                          role="presentation"
-                          alt=""
-                          src={landingImage}
-                        />
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem css={styles.content}>
-                      <div css={styles.titleContainer}>
-                        <EuiTitle size="s" css={styles.title}>
-                          <h2>{title}</h2>
-                        </EuiTitle>
-                        {isBeta && <BetaBadge text={betaOptions?.text} />}
-                      </div>
-                      <EuiText size="s" css={styles.description}>
-                        {description}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </LinkAnchor>
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
-    );
-  }
-);
+export const LandingLinksImages = React.memo(function LandingLinksImages(
+  {
+    items,
+    urlState,
+    onLinkClick
+  }: LandingLinksImagesProps
+) {
+  const styles = useStyles();
+  return (
+    <EuiFlexGroup direction="column">
+      {items.map((item) => {
+        const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
+        const { id, title, description, landingImage, isBeta, betaOptions } = item;
+        return (
+          <EuiFlexItem key={id} data-test-subj="LandingItem">
+            <LinkAnchor {...linkProps} tabIndex={-1} css={styles.link}>
+              {/* Empty onClick is to force hover style on `EuiPanel` */}
+              <EuiPanel hasBorder hasShadow={false} paddingSize="m" onClick={noop}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false} css={styles.image}>
+                    {landingImage && (
+                      <EuiImage
+                        data-test-subj="LandingLinksImage"
+                        size="l"
+                        role="presentation"
+                        alt=""
+                        src={landingImage}
+                      />
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem css={styles.content}>
+                    <div css={styles.titleContainer}>
+                      <EuiTitle size="s" css={styles.title}>
+                        <h2>{title}</h2>
+                      </EuiTitle>
+                      {isBeta && <BetaBadge text={betaOptions?.text} />}
+                    </div>
+                    <EuiText size="s" css={styles.description}>
+                      {description}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </LinkAnchor>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+});
 
 // eslint-disable-next-line import/no-default-export
 export default LandingLinksImages;

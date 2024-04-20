@@ -36,16 +36,18 @@ interface Props {
   firstWizardStep: WIZARD_STEPS;
 }
 
-export const Wizard: FC<Props> = ({
-  jobCreator,
-  chartLoader,
-  mapLoader,
-  resultsLoader,
-  chartInterval,
-  jobValidator,
-  existingJobsAndGroups,
-  firstWizardStep = WIZARD_STEPS.TIME_RANGE,
-}) => {
+export const Wizard = (
+  {
+    jobCreator,
+    chartLoader,
+    mapLoader,
+    resultsLoader,
+    chartInterval,
+    jobValidator,
+    existingJobsAndGroups,
+    firstWizardStep = WIZARD_STEPS.TIME_RANGE
+  }: Props
+) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useState(0);
   const jobCreatorUpdate = useCallback(() => {
     setJobCreatorUpdate((prev) => prev + 1);

@@ -27,7 +27,7 @@ const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
  * Instead please use locators registered for the infra plugin
  * LogsLocator & NodeLogsLocator
  */
-export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
+export const LinkToLogsPage = (props: LinkToPageProps) => {
   return (
     <Routes>
       <Route

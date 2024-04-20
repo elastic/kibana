@@ -23,7 +23,11 @@ interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const PipelineEditor: React.FunctionComponent<Props> = ({ onLoadJson }) => {
+export const PipelineEditor = (
+  {
+    onLoadJson
+  }: Props
+) => {
   const {
     state: { processors: allProcessors },
   } = usePipelineProcessorsContext();

@@ -47,20 +47,22 @@ const tooManyBucketsCalloutMsg = i18n.translate(
   }
 );
 
-export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
-  id,
-  chartsData,
-  showCharts,
-  severity,
-  setSeverity,
-  mlLocator,
-  timeBuckets,
-  timefilter,
-  onSelectEntity,
-  showSelectedInterval,
-  chartsService,
-  timeRange,
-}) => {
+export const ExplorerAnomaliesContainer = (
+  {
+    id,
+    chartsData,
+    showCharts,
+    severity,
+    setSeverity,
+    mlLocator,
+    timeBuckets,
+    timefilter,
+    onSelectEntity,
+    showSelectedInterval,
+    chartsService,
+    timeRange
+  }: ExplorerAnomaliesContainerProps
+) => {
   return (
     <>
       <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>

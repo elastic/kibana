@@ -21,12 +21,14 @@ interface PipelineSettingsFormProps {
   setPipeline: (pipeline: IngestPipelineParams) => void;
 }
 
-export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
-  extractionDisabled,
-  ingestionMethod,
-  setPipeline,
-  pipeline,
-}) => {
+export const PipelineSettingsForm = (
+  {
+    extractionDisabled,
+    ingestionMethod,
+    setPipeline,
+    pipeline
+  }: PipelineSettingsFormProps
+) => {
   const {
     extract_binary_content: extractBinaryContent,
     reduce_whitespace: reduceWhitespace,

@@ -22,12 +22,14 @@ interface Props {
   onClick?: ActionsNavigation['onClick'];
 }
 
-const HostIsolationCommentEventComponent: React.FC<Props> = ({
-  type,
-  endpoints,
-  href,
-  onClick,
-}) => {
+const HostIsolationCommentEventComponent = (
+  {
+    type,
+    endpoints,
+    href,
+    onClick
+  }: Props
+) => {
   const endpointDetailsHref = href ? href(endpoints[0].endpointId) : '';
 
   const onLinkClick = useCallback(

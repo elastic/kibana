@@ -40,11 +40,13 @@ interface Props extends Omit<EuiFlyoutProps, 'onClose'> {
   onClose: (createdAgentPolicy?: AgentPolicy) => void;
 }
 
-export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
-  onClose,
-  as,
-  ...restOfProps
-}) => {
+export const CreateAgentPolicyFlyout = (
+  {
+    onClose,
+    as,
+    ...restOfProps
+  }: Props
+) => {
   const { notifications } = useStartServices();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(

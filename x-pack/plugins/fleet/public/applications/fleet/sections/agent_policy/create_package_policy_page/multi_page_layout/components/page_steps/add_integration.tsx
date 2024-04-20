@@ -30,7 +30,7 @@ import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 
-const ExpandableAdvancedSettings: React.FC = ({ children }) => {
+const ExpandableAdvancedSettings = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   return (
@@ -60,26 +60,29 @@ const ExpandableAdvancedSettings: React.FC = ({ children }) => {
     </EuiFlexItem>
   );
 };
-const AddIntegrationError: React.FC<{ error: Error | string; title?: JSX.Element }> = ({
-  error,
-  title,
-}) => (
-  <Error
-    title={
-      title ? (
-        title
-      ) : (
-        <FormattedMessage
-          id="xpack.fleet.addIntegration.errorTitle"
-          defaultMessage="Error adding integration"
-        />
-      )
-    }
-    error={error}
-  />
-);
+const AddIntegrationError = (
+  {
+    error,
+    title
+  }: {
+    error: Error | string;
+    title?: JSX.Element;
+  }
+) => (<Error
+  title={
+    title ? (
+      title
+    ) : (
+      <FormattedMessage
+        id="xpack.fleet.addIntegration.errorTitle"
+        defaultMessage="Error adding integration"
+      />
+    )
+  }
+  error={error}
+/>);
 
-export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
+export const AddIntegrationPageStep = (props: MultiPageStepLayoutProps) => {
   const { onNext, onBack, isManaged, setIsManaged, packageInfo, integrationInfo, agentPolicy } =
     props;
 

@@ -20,10 +20,12 @@ import { BASE_PATH, Section } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
-export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
-  history,
-  location: { search },
-}) => {
+export const RepositoryAdd = (
+  {
+    history,
+    location: { search }
+  }: RouteComponentProps
+) => {
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);

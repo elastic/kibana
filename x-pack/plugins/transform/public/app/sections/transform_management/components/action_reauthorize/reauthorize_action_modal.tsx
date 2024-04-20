@@ -11,11 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 import type { ReauthorizeAction } from './use_reauthorize_action';
 
-export const ReauthorizeActionModal: FC<ReauthorizeAction> = ({
-  closeModal,
-  items,
-  reauthorizeAndCloseModal,
-}) => {
+export const ReauthorizeActionModal = (
+  {
+    closeModal,
+    items,
+    reauthorizeAndCloseModal
+  }: ReauthorizeAction
+) => {
   const isBulkAction = items.length > 1;
 
   const bulkReauthorizeModalTitle = i18n.translate(

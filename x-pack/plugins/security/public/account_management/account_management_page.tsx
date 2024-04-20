@@ -19,7 +19,7 @@ import { canUserHaveProfile } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
 
-export const AccountManagementPage: FunctionComponent = () => {
+export const AccountManagementPage = () => {
   const { services } = useKibana<CoreStart>();
 
   const currentUser = useCurrentUser();

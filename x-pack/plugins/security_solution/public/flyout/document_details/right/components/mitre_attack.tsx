@@ -12,7 +12,7 @@ import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test
 import { getMitreComponentParts } from '../../../../detections/mitre/get_mitre_threat_component';
 import { useRightPanelContext } from '../context';
 
-export const MitreAttack: FC = () => {
+export const MitreAttack = () => {
   const { searchHit } = useRightPanelContext();
   const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
 

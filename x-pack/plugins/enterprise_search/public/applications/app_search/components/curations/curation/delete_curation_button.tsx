@@ -18,7 +18,7 @@ import { DELETE_CONFIRMATION_MESSAGE } from '../constants';
 
 import { CurationLogic } from '.';
 
-export const DeleteCurationButton: React.FC = () => {
+export const DeleteCurationButton = () => {
   const { curationId } = useParams() as { curationId: string };
   const { deleteCuration } = useActions(CurationLogic({ curationId }));
 

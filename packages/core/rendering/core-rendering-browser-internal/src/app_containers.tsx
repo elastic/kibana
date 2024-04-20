@@ -12,9 +12,14 @@ import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
-export const AppWrapper: React.FunctionComponent<{
-  chromeVisible$: Observable<boolean>;
-}> = ({ chromeVisible$, children }) => {
+export const AppWrapper = (
+  {
+    chromeVisible$,
+    children
+  }: {
+    chromeVisible$: Observable<boolean>;
+  }
+) => {
   const visible = useObservable(chromeVisible$);
   return (
     <div

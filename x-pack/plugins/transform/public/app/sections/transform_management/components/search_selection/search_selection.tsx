@@ -21,11 +21,13 @@ interface SearchSelectionProps {
 
 const fixedPageSize: number = 8;
 
-export const SearchSelection: FC<SearchSelectionProps> = ({
-  onSearchSelected,
-  createNewDataView,
-  canEditDataView,
-}) => {
+export const SearchSelection = (
+  {
+    onSearchSelected,
+    createNewDataView,
+    canEditDataView
+  }: SearchSelectionProps
+) => {
   const { contentManagement, uiSettings } = useAppDependencies();
 
   return (

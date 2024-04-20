@@ -18,7 +18,13 @@ interface Props {
   scheduling: ConnectorScheduling;
 }
 
-export const EnterpriseSearchCronEditor: React.FC<Props> = ({ disabled, onChange, scheduling }) => {
+export const EnterpriseSearchCronEditor = (
+  {
+    disabled,
+    onChange,
+    scheduling
+  }: Props
+) => {
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
   const [simpleCron, setSimpleCron] = useState<{
     expression: string;

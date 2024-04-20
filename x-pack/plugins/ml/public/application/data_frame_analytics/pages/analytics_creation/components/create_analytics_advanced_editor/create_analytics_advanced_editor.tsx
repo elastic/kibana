@@ -20,7 +20,7 @@ import type { CreateAnalyticsFormProps } from '../../../analytics_management/hoo
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
+export const CreateAnalyticsAdvancedEditor = (props: CreateAnalyticsFormProps) => {
   const { actions, state } = props;
   const { setAdvancedEditorRawString, setFormState } = actions;
 

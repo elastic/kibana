@@ -31,12 +31,14 @@ const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean })
     (rule.isSnoozedUntil && new Date(rule.isSnoozedUntil).getTime() > Date.now()) || rule.muteAll
   );
 
-export const RuleSnoozeModal: React.FunctionComponent<RuleSnoozeModalProps> = ({
-  rule,
-  onClose,
-  onLoading,
-  onRuleChanged,
-}) => {
+export const RuleSnoozeModal = (
+  {
+    rule,
+    onClose,
+    onLoading,
+    onRuleChanged
+  }: RuleSnoozeModalProps
+) => {
   const {
     http,
     notifications: { toasts },

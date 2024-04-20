@@ -19,7 +19,11 @@ export interface AccessDeniedCalloutProps {
   missingCapabilities?: MlCapabilitiesKey[];
 }
 
-export const AccessDeniedCallout: FC<AccessDeniedCalloutProps> = ({ missingCapabilities }) => {
+export const AccessDeniedCallout = (
+  {
+    missingCapabilities
+  }: AccessDeniedCalloutProps
+) => {
   const {
     services: { docLinks },
   } = useMlKibana();

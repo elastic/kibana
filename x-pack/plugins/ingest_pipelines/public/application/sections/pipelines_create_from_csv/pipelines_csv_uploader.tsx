@@ -37,15 +37,17 @@ function getOptions(actions: FieldCopyAction[]) {
   }));
 }
 
-export const PipelinesCsvUploader: FC<Props> = ({
-  actionOptions,
-  onFilePickerChange,
-  onFileUpload,
-  isLoading,
-  isUploaded,
-  hasError,
-  hasFile,
-}) => {
+export const PipelinesCsvUploader = (
+  {
+    actionOptions,
+    onFilePickerChange,
+    onFileUpload,
+    isLoading,
+    isUploaded,
+    hasError,
+    hasFile
+  }: Props
+) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
   const { services } = useKibana();
 

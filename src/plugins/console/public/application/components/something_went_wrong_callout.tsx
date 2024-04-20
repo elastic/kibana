@@ -16,7 +16,12 @@ interface Props {
   onButtonClick: () => void;
 }
 
-export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onButtonClick }) => {
+export const SomethingWentWrongCallout = (
+  {
+    error,
+    onButtonClick
+  }: Props
+) => {
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.error(error);

@@ -22,7 +22,12 @@ interface Props extends Omit<EuiIconTipProps, 'type' | 'color'> {
   icon: IconType;
 }
 
-export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {
+export const TooltipIcon = (
+  {
+    icon = IconType.info,
+    ...rest
+  }: Props
+) => {
   const icons = {
     [IconType.error]: { type: 'error', color: 'danger' },
     [IconType.warning]: { type: 'warning', color: 'warning' },

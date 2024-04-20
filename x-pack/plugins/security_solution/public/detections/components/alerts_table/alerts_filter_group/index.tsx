@@ -17,10 +17,12 @@ interface Props {
   onFilterGroupChanged: (filterGroup: Status) => void;
 }
 
-const AlertsTableFilterGroupComponent: React.FC<Props> = ({
-  status = FILTER_OPEN,
-  onFilterGroupChanged,
-}) => {
+const AlertsTableFilterGroupComponent = (
+  {
+    status = FILTER_OPEN,
+    onFilterGroupChanged
+  }: Props
+) => {
   const options: EuiButtonGroupOptionProps[] = [
     {
       id: 'open',

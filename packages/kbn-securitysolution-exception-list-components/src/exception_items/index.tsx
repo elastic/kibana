@@ -59,30 +59,32 @@ interface ExceptionItemsProps {
   showValueListModal: ElementType;
 }
 
-const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
-  lastUpdated,
-  viewerStatus,
-  isReadOnly,
-  exceptions,
-  listType,
-  ruleReferences,
-  emptyViewerTitle,
-  emptyViewerBody,
-  emptyViewerButtonText,
-  pagination,
-  dataTestSubj,
-  editActionLabel,
-  deleteActionLabel,
-  securityLinkAnchorComponent,
-  exceptionsUtilityComponent,
-  formattedDateComponent,
-  getFormattedComments,
-  onPaginationChange,
-  onDeleteException,
-  onEditExceptionItem,
-  onCreateExceptionListItem,
-  showValueListModal,
-}) => {
+const ExceptionItemsComponent = (
+  {
+    lastUpdated,
+    viewerStatus,
+    isReadOnly,
+    exceptions,
+    listType,
+    ruleReferences,
+    emptyViewerTitle,
+    emptyViewerBody,
+    emptyViewerButtonText,
+    pagination,
+    dataTestSubj,
+    editActionLabel,
+    deleteActionLabel,
+    securityLinkAnchorComponent,
+    exceptionsUtilityComponent,
+    formattedDateComponent,
+    getFormattedComments,
+    onPaginationChange,
+    onDeleteException,
+    onEditExceptionItem,
+    onCreateExceptionListItem,
+    showValueListModal
+  }: ExceptionItemsProps
+) => {
   const ExceptionsUtility = exceptionsUtilityComponent;
   if (!exceptions.length || viewerStatus)
     return (

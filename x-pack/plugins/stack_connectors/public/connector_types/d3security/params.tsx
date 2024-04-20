@@ -15,14 +15,16 @@ import { D3SecurityRunActionParams } from '../../../common/d3security/types';
 import { SUB_ACTION } from '../../../common/d3security/constants';
 import { D3SecurityActionParams } from './types';
 
-const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityActionParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  messageVariables,
-  executionMode,
-  errors,
-}) => {
+const D3ParamsFields = (
+  {
+    actionParams,
+    editAction,
+    index,
+    messageVariables,
+    executionMode,
+    errors
+  }: ActionParamsProps<D3SecurityActionParams>
+) => {
   const { subAction, subActionParams } = actionParams;
   const { body, severity, eventType } = subActionParams ?? {};
 

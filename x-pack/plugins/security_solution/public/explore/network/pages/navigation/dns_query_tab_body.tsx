@@ -46,16 +46,18 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   getLensAttributes: getDnsTopDomainsLensAttributes,
 };
 
-const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
-  deleteQuery,
-  endDate,
-  filterQuery,
-  indexNames,
-  skip,
-  startDate,
-  setQuery,
-  type,
-}) => {
+const DnsQueryTabBodyComponent = (
+  {
+    deleteQuery,
+    endDate,
+    filterQuery,
+    indexNames,
+    skip,
+    startDate,
+    setQuery,
+    type
+  }: NetworkComponentQueryProps
+) => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
   const isPtrIncluded = useShallowEqualSelector(
     (state) => getNetworkDnsSelector(state).isPtrIncluded

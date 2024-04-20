@@ -33,11 +33,13 @@ interface SummarizationModelProps {
 
 const getOptionValue = (model: LLMModel): string => model.connectorId + model.name;
 
-export const SummarizationModel: React.FC<SummarizationModelProps> = ({
-  selectedModel,
-  models,
-  onSelect,
-}) => {
+export const SummarizationModel = (
+  {
+    selectedModel,
+    models,
+    onSelect
+  }: SummarizationModelProps
+) => {
   const managementLink = useManagementLink(selectedModel.connectorId);
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);

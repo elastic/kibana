@@ -47,7 +47,12 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ rule, alert }) => {
+export const LogRateAnalysis = (
+  {
+    rule,
+    alert
+  }: AlertDetailsLogRateAnalysisSectionProps
+) => {
   const { services } = useKibanaContextForPlugin();
   const { dataViews, logsShared, observabilityAIAssistant } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();

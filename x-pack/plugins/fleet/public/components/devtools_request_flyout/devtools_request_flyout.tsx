@@ -24,9 +24,15 @@ interface DevtoolsRequestFlyoutButtonProps {
   btnProps?: EuiButtonEmptyProps;
 }
 
-export const DevtoolsRequestFlyoutButton: React.FunctionComponent<
-  DevtoolsRequestFlyoutButtonProps
-> = ({ isDisabled, request, title, description, btnProps = {} }) => {
+export const DevtoolsRequestFlyoutButton = (
+  {
+    isDisabled,
+    request,
+    title,
+    description,
+    btnProps = {}
+  }: DevtoolsRequestFlyoutButtonProps
+) => {
   const flyoutRef = useRef<ReturnType<typeof services.overlays.openFlyout>>();
 
   const services = useStartServices();
@@ -72,16 +78,21 @@ export interface ApiRequestFlyoutProps {
   closeFlyout: () => void;
 }
 
-export const ApiRequestFlyout: React.FunctionComponent<ApiRequestFlyoutProps> = ({
-  closeFlyout,
-  title = i18n.translate('xpack.fleet.apiRequestFlyout.title', {
-    defaultMessage: 'Kibana API Request',
-  }),
-  request,
-  description = i18n.translate('xpack.fleet.apiRequestFlyout.description', {
-    defaultMessage: 'Perform these request against Kibana',
-  }),
-}) => {
+export const ApiRequestFlyout = (
+  {
+    closeFlyout,
+
+    title = i18n.translate('xpack.fleet.apiRequestFlyout.title', {
+      defaultMessage: 'Kibana API Request',
+    }),
+
+    request,
+
+    description = i18n.translate('xpack.fleet.apiRequestFlyout.description', {
+      defaultMessage: 'Perform these request against Kibana',
+    })
+  }: ApiRequestFlyoutProps
+) => {
   const { docLinks, application, share } = useStartServices();
 
   return (

@@ -25,7 +25,11 @@ interface Props {
   phase: 'hot' | 'warm';
 }
 
-export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
+export const ShrinkField = (
+  {
+    phase
+  }: Props
+) => {
   const globalFields = useGlobalFields();
   const { setValue: setIsUsingShardSize } =
     globalFields[`${phase}IsUsingShardSize` as 'hotIsUsingShardSize'];

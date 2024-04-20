@@ -21,12 +21,19 @@ const ProgressContainer = styled.div`
   }
 `;
 
-const StatValueComponent: React.FC<{
-  count: number;
-  isGroupStat: boolean;
-  isLoading: boolean;
-  max: number;
-}> = ({ count, isGroupStat, isLoading, max }) => {
+const StatValueComponent = (
+  {
+    count,
+    isGroupStat,
+    isLoading,
+    max
+  }: {
+    count: number;
+    isGroupStat: boolean;
+    isLoading: boolean;
+    max: number;
+  }
+) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 

@@ -25,13 +25,15 @@ type LandingLinkProps = EuiLinkAnchorProps &
   };
 
 // Renders a link to either an external URL or an internal Kibana URL
-export const LandingLink: React.FC<LandingLinkProps> = React.memo(function LandingLink({
-  item,
-  urlState,
-  onLinkClick,
-  children,
-  ...rest
-}) {
+export const LandingLink = React.memo(function LandingLink(
+  {
+    item,
+    urlState,
+    onLinkClick,
+    children,
+    ...rest
+  }: LandingLinkProps
+) {
   const linkProps = {
     ...getKibanaLinkProps({ item, urlState, onLinkClick }),
     ...rest,
@@ -55,24 +57,28 @@ const useSubLinkStyles = () => {
 };
 
 // Renders a list of links in a column layout
-export const LandingColumnLinks: React.FC<LandingLinksProps> = React.memo(
-  function LandingColumnLinks({ items, urlState, onLinkClick }) {
-    const subLinkStyles = useSubLinkStyles();
-    return (
-      <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">
-        {items.map((subItem) => (
-          <EuiFlexItem
-            key={subItem.id}
-            grow={false}
-            css={subLinkStyles.container}
-            data-test-subj="LandingSubItem"
-          >
-            <LandingLink item={subItem} urlState={urlState} onLinkClick={onLinkClick}>
-              {subItem.title}
-            </LandingLink>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
-);
+export const LandingColumnLinks = React.memo(function LandingColumnLinks(
+  {
+    items,
+    urlState,
+    onLinkClick
+  }: LandingLinksProps
+) {
+  const subLinkStyles = useSubLinkStyles();
+  return (
+    <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">
+      {items.map((subItem) => (
+        <EuiFlexItem
+          key={subItem.id}
+          grow={false}
+          css={subLinkStyles.container}
+          data-test-subj="LandingSubItem"
+        >
+          <LandingLink item={subItem} urlState={urlState} onLinkClick={onLinkClick}>
+            {subItem.title}
+          </LandingLink>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+});

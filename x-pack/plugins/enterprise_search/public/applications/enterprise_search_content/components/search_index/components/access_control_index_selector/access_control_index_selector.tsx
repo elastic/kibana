@@ -54,10 +54,7 @@ interface IndexSelectorProps {
   valueOfSelected?: AccessControlSelectorOption['value'];
 }
 
-export const AccessControlIndexSelector: React.FC<IndexSelectorProps> = ({
-  valueOfSelected,
-  onChange,
-}) => {
+export const AccessControlIndexSelector = ({ valueOfSelected, onChange }: IndexSelectorProps) => {
   return (
     <EuiSuperSelect
       valueOfSelected={valueOfSelected}

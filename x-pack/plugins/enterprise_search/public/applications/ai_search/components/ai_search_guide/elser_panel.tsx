@@ -97,7 +97,7 @@ const steps: EuiContainedStepProps[] = [
   },
 ];
 
-export const ElserPanel: React.FC = () => (
+export const ElserPanel = () => (
   <>
     <EuiSpacer />
     <EuiFlexGroup direction="column">

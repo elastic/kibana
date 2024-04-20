@@ -315,27 +315,29 @@ function useFeatures(
   return features;
 }
 
-export const EditRolePage: FunctionComponent<Props> = ({
-  userAPIClient,
-  dataViews,
-  rolesAPIClient,
-  indicesAPIClient,
-  privilegesAPIClient,
-  getFeatures,
-  http,
-  roleName,
-  action,
-  fatalErrors,
-  license,
-  docLinks,
-  uiCapabilities,
-  notifications,
-  history,
-  spacesApiUi,
-  buildFlavor,
-  cloudOrgUrl,
-  ...startServices
-}) => {
+export const EditRolePage = (
+  {
+    userAPIClient,
+    dataViews,
+    rolesAPIClient,
+    indicesAPIClient,
+    privilegesAPIClient,
+    getFeatures,
+    http,
+    roleName,
+    action,
+    fatalErrors,
+    license,
+    docLinks,
+    uiCapabilities,
+    notifications,
+    history,
+    spacesApiUi,
+    buildFlavor,
+    cloudOrgUrl,
+    ...startServices
+  }: Props
+) => {
   const isDarkMode = useDarkMode();
 
   if (!dataViews) {

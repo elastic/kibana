@@ -36,10 +36,12 @@ const truncateFields = (doc: Doc) =>
     .slice(0, RESULT_FIELDS_TRUNCATE_AT)
     .map(([field, value]) => ({ field, value }));
 
-export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
-  onClose,
-  retrievalDocs,
-}) => {
+export const RetrievalDocsFlyout = (
+  {
+    onClose,
+    retrievalDocs
+  }: RetrievalDocsFlyoutProps
+) => {
   const columns: Array<EuiBasicTableColumn<{ field: string; value: unknown }>> = [
     {
       field: 'field',

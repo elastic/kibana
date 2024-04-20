@@ -10,6 +10,6 @@ import { PageTemplateProps } from '../page_template';
 
 type EntSearchTemplateProps = PageTemplateProps;
 
-export const EntSearchTemplate: React.FC<EntSearchTemplateProps> = (props) => {
+export const EntSearchTemplate = (props: EntSearchTemplateProps) => {
   return <PageTemplate {...props} product="enterprise_search" />;
 };

@@ -23,12 +23,14 @@ interface Props {
   hideDefaultActions: boolean;
 }
 
-const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
-  isLoading,
-  registeredAttachmentActions,
-  onDelete,
-  hideDefaultActions,
-}) => {
+const RegisteredAttachmentsPropertyActionsComponent = (
+  {
+    isLoading,
+    registeredAttachmentActions,
+    onDelete,
+    hideDefaultActions
+  }: Props
+) => {
   const { permissions } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,

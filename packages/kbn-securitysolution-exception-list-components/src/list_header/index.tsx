@@ -41,22 +41,24 @@ export interface BackOptions {
   dataTestSubj?: string;
   onNavigate: (path: string) => void;
 }
-const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
-  name,
-  description,
-  listId,
-  linkedRules,
-  isReadonly,
-  dataTestSubj,
-  securityLinkAnchorComponent,
-  backOptions,
-  canUserEditList = true,
-  onEditListDetails,
-  onDeleteList,
-  onManageRules,
-  onExportList,
-  onDuplicateList,
-}) => {
+const ExceptionListHeaderComponent = (
+  {
+    name,
+    description,
+    listId,
+    linkedRules,
+    isReadonly,
+    dataTestSubj,
+    securityLinkAnchorComponent,
+    backOptions,
+    canUserEditList = true,
+    onEditListDetails,
+    onDeleteList,
+    onManageRules,
+    onExportList,
+    onDuplicateList
+  }: ExceptionListHeaderComponentProps
+) => {
   const { isModalVisible, listDetails, onEdit, onSave, onCancel } = useExceptionListHeader({
     name,
     description,

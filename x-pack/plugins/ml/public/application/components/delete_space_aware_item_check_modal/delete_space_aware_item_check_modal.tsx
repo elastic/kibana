@@ -231,15 +231,17 @@ interface Props {
   hasManagedJob?: boolean;
 }
 
-export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
-  canDeleteCallback,
-  onCloseCallback,
-  refreshJobsCallback,
-  mlSavedObjectType,
-  ids,
-  setDidUntag,
-  hasManagedJob,
-}) => {
+export const DeleteSpaceAwareItemCheckModal = (
+  {
+    canDeleteCallback,
+    onCloseCallback,
+    refreshJobsCallback,
+    mlSavedObjectType,
+    ids,
+    setDidUntag,
+    hasManagedJob
+  }: Props
+) => {
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
   const [hasUntagged, setHasUntagged] = useState<boolean>(false);

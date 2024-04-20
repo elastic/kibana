@@ -40,25 +40,29 @@ interface TimeSeriesChartWithTooltipsProps {
   };
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
-export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
-  bounds,
-  detectorIndex,
-  embeddableMode,
-  renderFocusChartOnly,
-  selectedJob,
-  selectedEntities,
-  showAnnotations,
-  showForecast,
-  showModelBounds,
-  chartProps,
-  lastRefresh,
-  contextAggregationInterval,
-  tableData = {
-    anomalies: [],
-    interval: 'second',
-  },
-  sourceIndicesWithGeoFields,
-}) => {
+export const TimeSeriesChartWithTooltips = (
+  {
+    bounds,
+    detectorIndex,
+    embeddableMode,
+    renderFocusChartOnly,
+    selectedJob,
+    selectedEntities,
+    showAnnotations,
+    showForecast,
+    showModelBounds,
+    chartProps,
+    lastRefresh,
+    contextAggregationInterval,
+
+    tableData = {
+      anomalies: [],
+      interval: 'second',
+    },
+
+    sourceIndicesWithGeoFields
+  }: TimeSeriesChartWithTooltipsProps
+) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
     services: {

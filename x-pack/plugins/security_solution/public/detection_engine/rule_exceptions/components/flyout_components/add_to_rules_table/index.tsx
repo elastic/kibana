@@ -17,10 +17,12 @@ interface ExceptionsAddToRulesComponentProps {
   onRuleSelectionChange: (rulesSelectedToAdd: RuleResponse[]) => void;
 }
 
-const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponentProps> = ({
-  initiallySelectedRules,
-  onRuleSelectionChange,
-}) => {
+const ExceptionsAddToRulesTableComponent = (
+  {
+    initiallySelectedRules,
+    onRuleSelectionChange
+  }: ExceptionsAddToRulesComponentProps
+) => {
   const {
     isLoading,
 

@@ -11,7 +11,11 @@ interface TruncatedTextProps {
   text: string | null | undefined;
 }
 
-const TruncatedTextComponent: React.FC<TruncatedTextProps> = ({ text }) => {
+const TruncatedTextComponent = (
+  {
+    text
+  }: TruncatedTextProps
+) => {
   return text != null ? <span className="eui-fullWidth eui-textTruncate">{text}</span> : null;
 };
 

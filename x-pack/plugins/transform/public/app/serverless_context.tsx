@@ -16,9 +16,11 @@ export const EnabledFeaturesContext = createContext({
   showNodeInfo: true,
 });
 
-export const EnabledFeaturesContextProvider: FC<{
-  enabledFeatures: TransformEnabledFeatures;
-}> = (props) => {
+export const EnabledFeaturesContextProvider = (
+  props: {
+    enabledFeatures: TransformEnabledFeatures;
+  }
+) => {
   const { children, enabledFeatures } = props;
   return (
     <EnabledFeaturesContext.Provider value={enabledFeatures}>
@@ -30,9 +32,11 @@ export const EnabledFeaturesContextProvider: FC<{
 export const ExperimentalFeaturesContext = createContext<ExperimentalFeatures>({
   ruleFormV2Enabled: false,
 });
-export const ExperimentalFeaturesContextProvider: FC<{
-  experimentalFeatures: ExperimentalFeatures;
-}> = (props) => {
+export const ExperimentalFeaturesContextProvider = (
+  props: {
+    experimentalFeatures: ExperimentalFeatures;
+  }
+) => {
   const { children, experimentalFeatures } = props;
   return (
     <ExperimentalFeaturesContext.Provider value={experimentalFeatures}>

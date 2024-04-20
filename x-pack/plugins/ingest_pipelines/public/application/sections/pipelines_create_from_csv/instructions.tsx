@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
-export const Instructions: FC = () => {
+export const Instructions = () => {
   return (
     <div>
       <EuiFlexGroup data-test-subj="createFromCsvInstructions">

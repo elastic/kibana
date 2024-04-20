@@ -27,12 +27,12 @@ interface AddDataPanelContentProps {
   setSelectedLanguage: (selectedLanguage: LanguageDefinition) => void;
 }
 
-export const AddDataPanelContent: React.FC<AddDataPanelContentProps> = ({
+export const AddDataPanelContent = ({
   assetBasePath,
   codeArgs,
   selectedLanguage,
   setSelectedLanguage,
-}) => {
+}: AddDataPanelContentProps) => {
   const { services } = useKibana<KibanaDeps>();
   return (
     <CodeBox

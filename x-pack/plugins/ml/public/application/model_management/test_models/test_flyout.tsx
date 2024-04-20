@@ -18,24 +18,27 @@ interface Props {
   model: ModelItem;
   onClose: () => void;
 }
-export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => (
-  <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2>
-          <FormattedMessage
-            id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
-            defaultMessage="Test trained model"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <h4>{model.model_id}</h4>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      <TestTrainedModelContent model={model} />
-    </EuiFlyoutBody>
-  </EuiFlyout>
-);
+export const TestTrainedModelFlyout = (
+  {
+    model,
+    onClose
+  }: Props
+) => (<EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
+  <EuiFlyoutHeader hasBorder>
+    <EuiTitle size="m">
+      <h2>
+        <FormattedMessage
+          id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
+          defaultMessage="Test trained model"
+        />
+      </h2>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+    <EuiTitle size="xs">
+      <h4>{model.model_id}</h4>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <TestTrainedModelContent model={model} />
+  </EuiFlyoutBody>
+</EuiFlyout>);

@@ -44,19 +44,21 @@ export interface DocumentCountContentProps {
   deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
-export const DocumentCountContent: FC<DocumentCountContentProps> = ({
-  brushSelectionUpdateHandler,
-  documentCountStats,
-  documentCountStatsSplit,
-  documentCountStatsSplitLabel = '',
-  isBrushCleared,
-  totalCount,
-  sampleProbability,
-  barColorOverride,
-  barHighlightColorOverride,
-  windowParameters,
-  ...docCountChartProps
-}) => {
+export const DocumentCountContent = (
+  {
+    brushSelectionUpdateHandler,
+    documentCountStats,
+    documentCountStatsSplit,
+    documentCountStatsSplitLabel = '',
+    isBrushCleared,
+    totalCount,
+    sampleProbability,
+    barColorOverride,
+    barHighlightColorOverride,
+    windowParameters,
+    ...docCountChartProps
+  }: DocumentCountContentProps
+) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);

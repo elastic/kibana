@@ -14,24 +14,24 @@ type MarkdownLinkProps = { disableLinks?: boolean } & EuiLinkAnchorProps;
 /** prevents search engine manipulation by noting the linked document is not trusted or endorsed by us */
 const REL_NOFOLLOW = 'nofollow';
 
-const MarkdownLinkComponent: React.FC<MarkdownLinkProps> = ({
-  disableLinks,
-  href,
-  target,
-  children,
-  ...props
-}) => (
-  <EuiToolTip content={href}>
-    <EuiLink
-      href={disableLinks ? undefined : href}
-      data-test-subj="markdown-link"
-      rel={`${REL_NOFOLLOW}`}
-      target="_blank"
-    >
-      {children}
-    </EuiLink>
-  </EuiToolTip>
-);
+const MarkdownLinkComponent = (
+  {
+    disableLinks,
+    href,
+    target,
+    children,
+    ...props
+  }: MarkdownLinkProps
+) => (<EuiToolTip content={href}>
+  <EuiLink
+    href={disableLinks ? undefined : href}
+    data-test-subj="markdown-link"
+    rel={`${REL_NOFOLLOW}`}
+    target="_blank"
+  >
+    {children}
+  </EuiLink>
+</EuiToolTip>);
 MarkdownLinkComponent.displayName = 'MarkdownLink';
 
 export const MarkdownLink = memo(MarkdownLinkComponent);

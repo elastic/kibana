@@ -34,15 +34,17 @@ interface SyncJobEvent {
   title: string;
 }
 
-export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
-  cancelationRequestedAt,
-  canceledAt,
-  completed,
-  lastUpdated,
-  syncRequestedAt,
-  syncStarted,
-  triggerMethod,
-}) => {
+export const SyncJobEventsPanel = (
+  {
+    cancelationRequestedAt,
+    canceledAt,
+    completed,
+    lastUpdated,
+    syncRequestedAt,
+    syncStarted,
+    triggerMethod
+  }: SyncJobsEventPanelProps
+) => {
   const events: SyncJobEvent[] = [
     {
       date: syncRequestedAt,

@@ -31,12 +31,14 @@ export interface SearchBarProps {
  * @param onFiltersChange
  * @constructor
  */
-export const SearchBarWrapper: FC<SearchBarProps> = ({
-  query,
-  filters,
-  onQueryChange,
-  onFiltersChange,
-}) => {
+export const SearchBarWrapper = (
+  {
+    query,
+    filters,
+    onQueryChange,
+    onFiltersChange
+  }: SearchBarProps
+) => {
   const { dataView } = useDataSource();
   const {
     unifiedSearch: {

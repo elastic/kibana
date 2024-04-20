@@ -33,7 +33,7 @@ import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_f
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
-export const CrawlCustomSettingsFlyout: React.FC = () => {
+export const CrawlCustomSettingsFlyout = () => {
   const { isDataLoading, isFormSubmitting, isFlyoutVisible, selectedDomainUrls } = useValues(
     CrawlCustomSettingsFlyoutLogic
   );

@@ -62,30 +62,32 @@ interface Props {
   isDarkMode: boolean;
 }
 
-export const DataLayers: FC<Props> = ({
-  titles = {},
-  layers,
-  endValue,
-  timeZone,
-  syncColors,
-  valueLabels,
-  fillOpacity,
-  minBarHeight,
-  formatFactory,
-  paletteService,
-  fittingFunction,
-  emphasizeFitting,
-  yAxesConfiguration,
-  xAxisConfiguration,
-  shouldShowValueLabels,
-  formattedDatatables,
-  chartHasMoreThanOneBarSeries,
-  defaultXScaleType,
-  fieldFormats,
-  uiState,
-  singleTable,
-  isDarkMode,
-}) => {
+export const DataLayers = (
+  {
+    titles = {},
+    layers,
+    endValue,
+    timeZone,
+    syncColors,
+    valueLabels,
+    fillOpacity,
+    minBarHeight,
+    formatFactory,
+    paletteService,
+    fittingFunction,
+    emphasizeFitting,
+    yAxesConfiguration,
+    xAxisConfiguration,
+    shouldShowValueLabels,
+    formattedDatatables,
+    chartHasMoreThanOneBarSeries,
+    defaultXScaleType,
+    fieldFormats,
+    uiState,
+    singleTable,
+    isDarkMode
+  }: Props
+) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
   const allColumnsToLabel = layers.reduce((acc, layer) => {

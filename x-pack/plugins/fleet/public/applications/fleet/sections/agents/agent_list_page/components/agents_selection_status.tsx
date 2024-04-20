@@ -31,23 +31,25 @@ const Button = styled(EuiButtonEmpty)`
   }
 `;
 
-export const AgentsSelectionStatus: React.FunctionComponent<{
-  totalAgents: number;
-  selectableAgents: number;
-  managedAgentsOnCurrentPage: number;
-  selectionMode: SelectionMode;
-  setSelectionMode: (mode: SelectionMode) => void;
-  selectedAgents: Agent[];
-  setSelectedAgents: (agents: Agent[]) => void;
-}> = ({
-  totalAgents,
-  selectableAgents,
-  managedAgentsOnCurrentPage,
-  selectionMode,
-  setSelectionMode,
-  selectedAgents,
-  setSelectedAgents,
-}) => {
+export const AgentsSelectionStatus = (
+  {
+    totalAgents,
+    selectableAgents,
+    managedAgentsOnCurrentPage,
+    selectionMode,
+    setSelectionMode,
+    selectedAgents,
+    setSelectedAgents
+  }: {
+    totalAgents: number;
+    selectableAgents: number;
+    managedAgentsOnCurrentPage: number;
+    selectionMode: SelectionMode;
+    setSelectionMode: (mode: SelectionMode) => void;
+    selectedAgents: Agent[];
+    setSelectedAgents: (agents: Agent[]) => void;
+  }
+) => {
   const showSelectionInfoAndOptions =
     (selectionMode === 'manual' && selectedAgents.length > 0) ||
     (selectionMode === 'query' && totalAgents > 0);

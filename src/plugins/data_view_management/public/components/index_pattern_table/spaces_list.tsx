@@ -26,14 +26,16 @@ const noun = i18n.translate('indexPatternManagement.indexPatternTable.savedObjec
   defaultMessage: 'data view',
 });
 
-export const SpacesList: FC<Props> = ({
-  spacesApi,
-  capabilities,
-  spaceIds,
-  id,
-  title,
-  refresh,
-}) => {
+export const SpacesList = (
+  {
+    spacesApi,
+    capabilities,
+    spaceIds,
+    id,
+    title,
+    refresh
+  }: Props
+) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   function onClose() {

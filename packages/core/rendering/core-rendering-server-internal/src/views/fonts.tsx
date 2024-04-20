@@ -217,7 +217,11 @@ const getRoboto = (url: string): FontFace => {
   };
 };
 
-export const Fonts: FunctionComponent<Props> = ({ url }) => {
+export const Fonts = (
+  {
+    url
+  }: Props
+) => {
   const sansFont = getInter(url);
   const codeFont = getRoboto(url);
 

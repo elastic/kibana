@@ -15,11 +15,13 @@ interface Props {
   message?: string;
 }
 
-export const LoadingError: FunctionComponent<Props> = ({
-  statusCode,
-  message,
-  onResendRequest,
-}) => {
+export const LoadingError = (
+  {
+    statusCode,
+    message,
+    onResendRequest
+  }: Props
+) => {
   return (
     <>
       <EuiSpacer size="s" />

@@ -30,11 +30,13 @@ export interface CaseActionBarProps {
   onUpdateField: (args: OnUpdateFields) => void;
 }
 
-const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
-  caseData,
-  isLoading,
-  onUpdateField,
-}) => {
+const CaseActionBarComponent = (
+  {
+    caseData,
+    isLoading,
+    onUpdateField
+  }: CaseActionBarProps
+) => {
   const { permissions } = useCasesContext();
   const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
   const { euiTheme } = useEuiTheme();

@@ -65,10 +65,12 @@ const getUnknownUsers = (
   return unknownUsers;
 };
 
-const EditAssigneesSelectableComponent: React.FC<Props> = ({
-  selectedCases,
-  onChangeAssignees,
-}) => {
+const EditAssigneesSelectableComponent = (
+  {
+    selectedCases,
+    onChangeAssignees
+  }: Props
+) => {
   const { owner: owners } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();

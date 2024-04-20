@@ -59,18 +59,22 @@ const cancelButtonText = i18n.translate(
   }
 );
 
-export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, type }) => (
-  <EuiConfirmModal
-    title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={cancelButtonText}
-    confirmButtonText={
-      type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
-    }
-    buttonColor="danger"
-    defaultFocusedButton="confirm"
-  >
-    <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
-  </EuiConfirmModal>
-);
+export const SwitchModal = (
+  {
+    onCancel,
+    onConfirm,
+    type
+  }: Props
+) => (<EuiConfirmModal
+  title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
+  onCancel={onCancel}
+  onConfirm={onConfirm}
+  cancelButtonText={cancelButtonText}
+  confirmButtonText={
+    type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
+  }
+  buttonColor="danger"
+  defaultFocusedButton="confirm"
+>
+  <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
+</EuiConfirmModal>);

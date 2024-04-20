@@ -154,7 +154,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
     },
   ].filter(Boolean) as SelectOptions[];
 
-export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
+export const DataTierAllocation = (props: SharedProps) => {
   const { phase, hasNodeAttributes, isCloudEnabled, isUsingDeprecatedDataRoleConfig, isLoading } =
     props;
 

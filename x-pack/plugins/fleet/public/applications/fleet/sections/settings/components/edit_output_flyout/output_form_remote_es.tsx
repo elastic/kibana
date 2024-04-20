@@ -21,7 +21,7 @@ interface Props {
   onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
-export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
+export const OutputFormRemoteEsSection = (props: Props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     serviceToken: false,

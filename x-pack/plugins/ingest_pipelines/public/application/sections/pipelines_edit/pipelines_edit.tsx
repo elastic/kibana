@@ -66,12 +66,15 @@ const DeprecatedPipelineCallout = () => (
   </EuiCallOut>
 );
 
-export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  history,
-}) => {
+export const PipelinesEdit = (
+  {
+    match: {
+      params: { name },
+    },
+
+    history
+  }: RouteComponentProps<MatchParams>
+) => {
   const { services } = useKibana();
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

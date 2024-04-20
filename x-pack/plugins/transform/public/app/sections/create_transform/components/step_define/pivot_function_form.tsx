@@ -38,12 +38,14 @@ interface PivotFunctionFormProps {
   stepDefineForm: StepDefineFormHook;
 }
 
-export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
-  applyPivotChangesHandler,
-  copyToClipboardPivot,
-  copyToClipboardPivotDescription,
-  stepDefineForm,
-}) => {
+export const PivotFunctionForm = (
+  {
+    applyPivotChangesHandler,
+    copyToClipboardPivot,
+    copyToClipboardPivotDescription,
+    stepDefineForm
+  }: PivotFunctionFormProps
+) => {
   const { esTransformPivot } = useDocumentationLinks();
 
   const { isAdvancedPivotEditorEnabled, isAdvancedPivotEditorApplyButtonEnabled } =

@@ -11,10 +11,15 @@ import type { CaseUser } from '../../containers/types';
 import { convertToUserInfo } from './user_converter';
 import { HoverableAvatar } from './hoverable_avatar';
 
-const HoverableAvatarResolverComponent: React.FC<{
-  user: CaseUser;
-  userProfiles?: Map<string, UserProfileWithAvatar>;
-}> = ({ user, userProfiles }) => {
+const HoverableAvatarResolverComponent = (
+  {
+    user,
+    userProfiles
+  }: {
+    user: CaseUser;
+    userProfiles?: Map<string, UserProfileWithAvatar>;
+  }
+) => {
   const { userInfo } = convertToUserInfo(user, userProfiles) ?? { userInfo: undefined };
 
   return <HoverableAvatar userInfo={userInfo} />;

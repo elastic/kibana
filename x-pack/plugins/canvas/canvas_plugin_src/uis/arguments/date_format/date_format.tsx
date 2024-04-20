@@ -28,20 +28,20 @@ export interface Props extends ArgumentProps {
   argId: string;
 }
 
-export const DateFormatArgInput: FunctionComponent<Props> = ({
-  dateFormats,
-  onValueChange,
-  argValue,
-  argId,
-}) => (
-  <FormatSelect
-    argId={argId}
-    argValue={argValue}
-    formatOptions={dateFormats}
-    onValueChange={onValueChange}
-    defaultCustomFormat="M/D/YY h:ma"
-  />
-);
+export const DateFormatArgInput = (
+  {
+    dateFormats,
+    onValueChange,
+    argValue,
+    argId
+  }: Props
+) => (<FormatSelect
+  argId={argId}
+  argValue={argValue}
+  formatOptions={dateFormats}
+  onValueChange={onValueChange}
+  defaultCustomFormat="M/D/YY h:ma"
+/>);
 
 DateFormatArgInput.propTypes = {
   dateFormats: PropTypes.arrayOf(

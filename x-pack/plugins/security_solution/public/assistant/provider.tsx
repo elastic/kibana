@@ -118,7 +118,7 @@ export const createConversations = async (
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
-export const AssistantProvider: React.FC = ({ children }) => {
+export const AssistantProvider = ({ children }) => {
   const {
     http,
     notifications,

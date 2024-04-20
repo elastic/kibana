@@ -122,12 +122,14 @@ interface ConfigurationPopOverProps {
   showConfiguration: boolean;
 }
 
-const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
-  searchApplicationName,
-  hasSchemaConflicts,
-  setCloseConfiguration,
-  showConfiguration,
-}) => {
+const ConfigurationPopover = (
+  {
+    searchApplicationName,
+    hasSchemaConflicts,
+    setCloseConfiguration,
+    showConfiguration
+  }: ConfigurationPopOverProps
+) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { openDeleteSearchApplicationModal } = useActions(SearchApplicationViewLogic);
@@ -346,7 +348,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
     </>
   );
 };
-export const SearchApplicationDocsExplorer: React.FC = () => {
+export const SearchApplicationDocsExplorer = () => {
   const { http } = useValues(HttpLogic);
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);

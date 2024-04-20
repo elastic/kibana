@@ -13,11 +13,13 @@ import type { TimelineProps } from './types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 
-export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
-  id,
-  title,
-  graphEventId,
-}) => {
+export const TimelineMarkDownRendererComponent = (
+  {
+    id,
+    title,
+    graphEventId
+  }: TimelineProps
+) => {
   const { addError } = useAppToasts();
 
   const handleTimelineClick = useTimelineClick();

@@ -53,7 +53,7 @@ export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
 
-export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
+export const IndexDataVisualizerESQL = (dataVisualizerProps: IndexDataVisualizerESQLProps) => {
   const { services } = useDataVisualizerKibana();
   const { data } = services;
   const euiTheme = useCurrentEuiTheme();

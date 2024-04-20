@@ -97,7 +97,12 @@ const OwnerSelector = ({
 
 OwnerSelector.displayName = 'OwnerSelector';
 
-const CaseOwnerSelector: React.FC<Props> = ({ availableOwners, isLoading }) => {
+const CaseOwnerSelector = (
+  {
+    availableOwners,
+    isLoading
+  }: Props
+) => {
   const defaultValue = availableOwners.includes(SECURITY_SOLUTION_OWNER)
     ? SECURITY_SOLUTION_OWNER
     : availableOwners[0] ?? SECURITY_SOLUTION_OWNER;

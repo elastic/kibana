@@ -50,18 +50,20 @@ export interface EmbeddableAnomalyChartsContainerProps {
   onError: (error: Error) => void;
 }
 
-export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
-  id,
-  embeddableContext,
-  embeddableInput,
-  services,
-  refresh,
-  onInputChange,
-  onOutputChange,
-  onRenderComplete,
-  onError,
-  onLoading,
-}) => {
+export const EmbeddableAnomalyChartsContainer = (
+  {
+    id,
+    embeddableContext,
+    embeddableInput,
+    services,
+    refresh,
+    onInputChange,
+    onOutputChange,
+    onRenderComplete,
+    onError,
+    onLoading
+  }: EmbeddableAnomalyChartsContainerProps
+) => {
   useEmbeddableExecutionContext<AnomalyChartsEmbeddableInput>(
     services[0].executionContext,
     embeddableInput,

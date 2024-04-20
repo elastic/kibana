@@ -48,27 +48,29 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const AdvancedSettings: FC<Props> = ({
-  index,
-  dataView,
-  initialized,
-  onIndexChange,
-  createDataView,
-  onCreateDataViewChange,
-  onDataViewChange,
-  indexSettingsString,
-  mappingsString,
-  pipelineString,
-  onIndexSettingsStringChange,
-  onMappingsStringChange,
-  onPipelineStringChange,
-  indexNameError,
-  dataViewNameError,
-  combinedFields,
-  onCombinedFieldsChange,
-  results,
-  canCreateDataView,
-}) => {
+export const AdvancedSettings = (
+  {
+    index,
+    dataView,
+    initialized,
+    onIndexChange,
+    createDataView,
+    onCreateDataViewChange,
+    onDataViewChange,
+    indexSettingsString,
+    mappingsString,
+    pipelineString,
+    onIndexSettingsStringChange,
+    onMappingsStringChange,
+    onPipelineStringChange,
+    indexNameError,
+    dataViewNameError,
+    combinedFields,
+    onCombinedFieldsChange,
+    results,
+    canCreateDataView
+  }: Props
+) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -185,7 +187,13 @@ interface JsonEditorProps {
   onChange(value: string): void;
 }
 
-const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const IndexSettings = (
+  {
+    initialized,
+    data,
+    onChange
+  }: JsonEditorProps
+) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -209,7 +217,13 @@ const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => 
   );
 };
 
-const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const Mappings = (
+  {
+    initialized,
+    data,
+    onChange
+  }: JsonEditorProps
+) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -233,7 +247,13 @@ const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
   );
 };
 
-const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const IngestPipeline = (
+  {
+    initialized,
+    data,
+    onChange
+  }: JsonEditorProps
+) => {
   return (
     <React.Fragment>
       <EuiFormRow

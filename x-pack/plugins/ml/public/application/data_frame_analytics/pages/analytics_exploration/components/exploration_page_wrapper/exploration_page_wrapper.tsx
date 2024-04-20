@@ -78,12 +78,14 @@ interface Props {
   FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps>;
 }
 
-export const ExplorationPageWrapper: FC<Props> = ({
-  jobId,
-  title,
-  EvaluatePanel,
-  FeatureImportanceSummaryPanel,
-}) => {
+export const ExplorationPageWrapper = (
+  {
+    jobId,
+    title,
+    EvaluatePanel,
+    FeatureImportanceSummaryPanel
+  }: Props
+) => {
   const {
     dataView,
     dataViewErrorMessage,

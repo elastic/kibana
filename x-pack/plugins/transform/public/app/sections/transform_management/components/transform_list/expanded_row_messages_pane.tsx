@@ -30,7 +30,11 @@ interface Sorting {
   direction: 'asc' | 'desc';
 }
 
-export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
+export const ExpandedRowMessagesPane = (
+  {
+    transformId
+  }: ExpandedRowMessagesPaneProps
+) => {
   const { showNodeInfo } = useEnabledFeatures();
 
   const [pageIndex, setPageIndex] = useState(0);

@@ -53,7 +53,11 @@ const i18nTexts = {
     }),
 };
 
-export const ReportStatusIndicator: FC<Props> = ({ job }) => {
+export const ReportStatusIndicator = (
+  {
+    job
+  }: Props
+) => {
   const hasIssues = useMemo<boolean>(() => jobHasIssues(job), [job]);
 
   let icon: JSX.Element;

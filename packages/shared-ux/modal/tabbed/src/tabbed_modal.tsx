@@ -60,7 +60,13 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
   modalTitle?: string;
 }
 
-const TabbedModalInner: FC<ITabbedModalInner> = ({ onClose, modalTitle, modalWidth }) => {
+const TabbedModalInner = (
+  {
+    onClose,
+    modalTitle,
+    modalWidth
+  }: ITabbedModalInner
+) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
 

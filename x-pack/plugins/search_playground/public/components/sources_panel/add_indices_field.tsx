@@ -18,11 +18,13 @@ interface AddIndicesFieldProps {
   loading: boolean;
 }
 
-export const AddIndicesField: React.FC<AddIndicesFieldProps> = ({
-  selectedIndices,
-  onIndexSelect,
-  loading,
-}) => {
+export const AddIndicesField = (
+  {
+    selectedIndices,
+    onIndexSelect,
+    loading
+  }: AddIndicesFieldProps
+) => {
   const [query, setQuery] = useState<string>('');
   const { indices, isLoading } = useQueryIndices(query);
   const handleChange = (value: Array<EuiComboBoxOptionOption<IndexName>>) => {

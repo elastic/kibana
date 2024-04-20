@@ -25,7 +25,13 @@ interface Props {
   name: string;
 }
 
-export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
+export const BoostItemContent = (
+  {
+    boost,
+    index,
+    name
+  }: Props
+) => {
   const { deleteBoost, updateBoostFactor } = useActions(RelevanceTuningLogic);
   const { type } = boost;
 

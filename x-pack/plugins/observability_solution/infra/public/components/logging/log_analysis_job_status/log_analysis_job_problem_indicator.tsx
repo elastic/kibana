@@ -12,25 +12,27 @@ import { JobDefinitionOutdatedCallout } from './job_definition_outdated_callout'
 import { JobStoppedCallout } from './job_stopped_callout';
 import { FirstUseCallout } from '../log_analysis_results';
 
-export const LogAnalysisJobProblemIndicator: React.FC<{
-  hasOutdatedJobConfigurations: boolean;
-  hasOutdatedJobDefinitions: boolean;
-  hasSetupCapabilities: boolean;
-  hasStoppedJobs: boolean;
-  isFirstUse: boolean;
-  moduleName: string;
-  onRecreateMlJobForReconfiguration: () => void;
-  onRecreateMlJobForUpdate: () => void;
-}> = ({
-  hasOutdatedJobConfigurations,
-  hasOutdatedJobDefinitions,
-  hasSetupCapabilities,
-  hasStoppedJobs,
-  isFirstUse,
-  moduleName,
-  onRecreateMlJobForReconfiguration,
-  onRecreateMlJobForUpdate,
-}) => {
+export const LogAnalysisJobProblemIndicator = (
+  {
+    hasOutdatedJobConfigurations,
+    hasOutdatedJobDefinitions,
+    hasSetupCapabilities,
+    hasStoppedJobs,
+    isFirstUse,
+    moduleName,
+    onRecreateMlJobForReconfiguration,
+    onRecreateMlJobForUpdate
+  }: {
+    hasOutdatedJobConfigurations: boolean;
+    hasOutdatedJobDefinitions: boolean;
+    hasSetupCapabilities: boolean;
+    hasStoppedJobs: boolean;
+    isFirstUse: boolean;
+    moduleName: string;
+    onRecreateMlJobForReconfiguration: () => void;
+    onRecreateMlJobForUpdate: () => void;
+  }
+) => {
   return (
     <>
       {hasOutdatedJobDefinitions ? (

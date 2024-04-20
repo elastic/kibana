@@ -42,7 +42,12 @@ import {
 } from '../../../common/job_creator/util/general';
 import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
-export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+export const SummaryStep = (
+  {
+    setCurrentStep,
+    isCurrentStep
+  }: StepProps
+) => {
   const {
     services: {
       notifications,

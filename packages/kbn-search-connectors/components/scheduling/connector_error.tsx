@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const ConnectorError: React.FC = () => {
+export const ConnectorError = () => {
   return (
     <>
       <EuiCallOut

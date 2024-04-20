@@ -38,7 +38,7 @@ export const getDomain = (series: Array<{ name?: string; data: Coordinate[] }>) 
   };
 };
 
-const EmptyContainer: React.FC = ({ children }) => (
+const EmptyContainer = ({ children }) => (
   <div
     style={{
       width: '100%',

@@ -13,9 +13,18 @@ import { ObsAIAssistantActionParams } from './types';
 import { ObservabilityAIAssistantService } from '../types';
 import { useGenAIConnectorsWithoutContext } from '../hooks/use_genai_connectors';
 
-const ObsAIAssistantParamsFields: React.FunctionComponent<
-  ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }
-> = ({ errors, index, messageVariables, editAction, actionParams, service }) => {
+const ObsAIAssistantParamsFields = (
+  {
+    errors,
+    index,
+    messageVariables,
+    editAction,
+    actionParams,
+    service
+  }: ActionParamsProps<ObsAIAssistantActionParams> & {
+    service: ObservabilityAIAssistantService;
+  }
+) => {
   const { connectors, loading, selectConnector, selectedConnector } =
     useGenAIConnectorsWithoutContext(service);
 

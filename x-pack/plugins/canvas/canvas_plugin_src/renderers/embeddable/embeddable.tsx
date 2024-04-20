@@ -75,7 +75,13 @@ const renderReactEmbeddable = ({
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
-  const EmbeddableRenderer: FC<{ embeddable: IEmbeddable }> = ({ embeddable }) => {
+  const EmbeddableRenderer = (
+    {
+      embeddable
+    }: {
+      embeddable: IEmbeddable;
+    }
+  ) => {
     const currentAppId = useObservable(core.application.currentAppId$, undefined);
 
     if (!currentAppId) {

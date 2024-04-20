@@ -49,14 +49,16 @@ interface Props {
   onTimeFieldChange: (timeField: string) => void;
 }
 
-export const IndexSelectPopover: React.FunctionComponent<Props> = ({
-  index,
-  esFields,
-  timeField,
-  errors,
-  onIndexChange,
-  onTimeFieldChange,
-}) => {
+export const IndexSelectPopover = (
+  {
+    index,
+    esFields,
+    timeField,
+    errors,
+    onIndexChange,
+    onTimeFieldChange
+  }: Props
+) => {
   const { http } = useKibana<KibanaDeps>().services;
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);

@@ -18,7 +18,7 @@ import { VisualizationsSection } from '../components/visualizations_section';
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
-export const OverviewTab: FC = memo(() => {
+export const OverviewTab = memo(() => {
   return (
     <EuiPanel
       hasBorder={false}

@@ -23,7 +23,12 @@ interface TimelineEditorProps {
   onInsert: (markdown: string, config: { block: boolean }) => void;
 }
 
-const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover, onInsert }) => {
+const TimelineEditorComponent = (
+  {
+    onClosePopover,
+    onInsert
+  }: TimelineEditorProps
+) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
 
   const handleGetSelectableOptions = useCallback(

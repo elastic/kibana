@@ -150,19 +150,21 @@ const ThreatTacticDescription = styled.div`
   padding-left: ${(props) => props.theme.eui.euiSizeL};
 `;
 
-const EventDetailsComponent: React.FC<Props> = ({
-  browserFields,
-  data,
-  detailsEcsData,
-  id,
-  isAlert,
-  isDraggable,
-  rawEventData,
-  scopeId,
-  timelineTabType,
-  handleOnEventClosed,
-  isReadOnly,
-}) => {
+const EventDetailsComponent = (
+  {
+    browserFields,
+    data,
+    detailsEcsData,
+    id,
+    isAlert,
+    isDraggable,
+    rawEventData,
+    scopeId,
+    timelineTabType,
+    handleOnEventClosed,
+    isReadOnly
+  }: Props
+) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),

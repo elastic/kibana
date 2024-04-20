@@ -33,10 +33,12 @@ interface Props {
   totalWarningDeprecations: number;
 }
 
-export const DeprecationCount: FunctionComponent<Props> = ({
-  totalCriticalDeprecations,
-  totalWarningDeprecations,
-}) => {
+export const DeprecationCount = (
+  {
+    totalCriticalDeprecations,
+    totalWarningDeprecations
+  }: Props
+) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>

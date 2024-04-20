@@ -12,7 +12,7 @@ import { NumericField } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
 import { ROLLOVER_FORM_PATHS } from '../../../../constants';
 
-export const MaxDocumentCountField: FunctionComponent = () => {
+export const MaxDocumentCountField = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 400 }}>

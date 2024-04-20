@@ -20,7 +20,12 @@ interface CurrentTimeProps {
 /**
  * Render current time line annotation on @elastic/charts `Chart`
  */
-export const CurrentTime: FC<CurrentTimeProps> = ({ isDarkMode, domainEnd }) => {
+export const CurrentTime = (
+  {
+    isDarkMode,
+    domainEnd
+  }: CurrentTimeProps
+) => {
   const lineAnnotationStyle: Partial<LineAnnotationStyle> = {
     line: {
       strokeWidth: 2,

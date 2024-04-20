@@ -48,10 +48,12 @@ const TABS: Tab[] = [
   },
 ];
 
-export const ComponentTemplateTabs: React.FunctionComponent<Props> = ({
-  setActiveTab,
-  activeTab,
-}) => {
+export const ComponentTemplateTabs = (
+  {
+    setActiveTab,
+    activeTab
+  }: Props
+) => {
   return (
     <EuiTabs>
       {TABS.map((tab) => (

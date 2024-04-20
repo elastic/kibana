@@ -12,11 +12,13 @@ interface CategoryViewerProps {
   category: string;
 }
 
-const CategoryViewerComponent: React.FC<CategoryViewerProps> = ({ category }) => (
-  <EuiText data-test-subj={`category-viewer-${category}`} key={category} size="s">
-    {category}
-  </EuiText>
-);
+const CategoryViewerComponent = (
+  {
+    category
+  }: CategoryViewerProps
+) => (<EuiText data-test-subj={`category-viewer-${category}`} key={category} size="s">
+  {category}
+</EuiText>);
 
 CategoryViewerComponent.displayName = 'CategoryViewer';
 

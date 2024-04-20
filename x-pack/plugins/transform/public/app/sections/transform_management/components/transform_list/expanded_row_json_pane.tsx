@@ -15,7 +15,11 @@ interface Props {
   json: object;
 }
 
-export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
+export const ExpandedRowJsonPane = (
+  {
+    json
+  }: Props
+) => {
   return (
     <div data-test-subj="transformJsonTabContent">
       <EuiFlexGroup>

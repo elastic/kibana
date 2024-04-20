@@ -17,11 +17,17 @@ import type { HeaderProps } from './header';
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/packages/core/rendering/core-rendering-server-internal/src/views/template.tsx#L34
 const SEPARATOR = ' - ';
 
-export const ScreenReaderRouteAnnouncements: FC<{
-  breadcrumbs$: HeaderProps['breadcrumbs$'];
-  customBranding$: HeaderProps['customBranding$'];
-  appId$: InternalApplicationStart['currentAppId$'];
-}> = ({ breadcrumbs$, customBranding$, appId$ }) => {
+export const ScreenReaderRouteAnnouncements = (
+  {
+    breadcrumbs$,
+    customBranding$,
+    appId$
+  }: {
+    breadcrumbs$: HeaderProps['breadcrumbs$'];
+    customBranding$: HeaderProps['customBranding$'];
+    appId$: InternalApplicationStart['currentAppId$'];
+  }
+) => {
   const [routeTitle, setRouteTitle] = useState('');
   const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
   const breadcrumbs = useObservable(breadcrumbs$, []);

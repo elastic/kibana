@@ -15,9 +15,11 @@ export interface FleetServerMissingEncryptionKeyCalloutProps {
   onClickHandler: () => void;
 }
 
-export const FleetServerMissingEncryptionKeyCallout: React.FunctionComponent<
-  FleetServerMissingEncryptionKeyCalloutProps
-> = ({ onClickHandler }) => {
+export const FleetServerMissingEncryptionKeyCallout = (
+  {
+    onClickHandler
+  }: FleetServerMissingEncryptionKeyCalloutProps
+) => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut

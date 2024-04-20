@@ -24,10 +24,12 @@ interface FilteringRulesTableProps {
   showOrder: boolean;
 }
 
-export const FilteringRulesTable: React.FC<FilteringRulesTableProps> = ({
-  showOrder,
-  filteringRules,
-}) => {
+export const FilteringRulesTable = (
+  {
+    showOrder,
+    filteringRules
+  }: FilteringRulesTableProps
+) => {
   const columns: Array<EuiBasicTableColumn<FilteringRule>> = [
     ...(showOrder
       ? [

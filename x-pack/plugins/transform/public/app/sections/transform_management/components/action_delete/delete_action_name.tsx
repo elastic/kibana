@@ -79,13 +79,15 @@ export const getDeleteActionDisabledMessage = ({
   }
 };
 
-export const DeleteActionName: FC<DeleteActionNameProps> = ({
-  items,
-  canDeleteTransform,
-  disabled,
-  isBulkAction,
-  forceDisable,
-}) => {
+export const DeleteActionName = (
+  {
+    items,
+    canDeleteTransform,
+    disabled,
+    isBulkAction,
+    forceDisable
+  }: DeleteActionNameProps
+) => {
   const content = getDeleteActionDisabledMessage({ items, canDeleteTransform, forceDisable });
   if (content) {
     return (

@@ -64,7 +64,12 @@ const Replacements = euiStyled(EuiFlexItem)`
   }
 `;
 
-export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
+export const Details = memo((
+  {
+    packageInfo,
+    integrationInfo
+  }: Props
+) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
 
   const mergedCategories: Array<string | undefined> = useMemo(() => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { PropsWithChildren, useContext } from 'react';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { NotificationsStart, ToastOptions } from '@kbn/core-notifications-browser';
@@ -30,7 +30,7 @@ const UserProfilesContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const UserProfilesProvider: FC<Services> = ({ children, ...services }) => {
+export const UserProfilesProvider = ({ children, ...services }: PropsWithChildren<Services>) => {
   return <UserProfilesContext.Provider value={services}>{children}</UserProfilesContext.Provider>;
 };
 
@@ -60,10 +60,10 @@ export interface UserProfilesKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const UserProfilesKibanaProvider: FC<UserProfilesKibanaDependencies> = ({
+export const UserProfilesKibanaProvider = ({
   children,
   ...services
-}) => {
+}: PropsWithChildren<UserProfilesKibanaDependencies>) => {
   const {
     core: { notifications, i18n, theme },
     security: { userProfiles: userProfileApiClient },

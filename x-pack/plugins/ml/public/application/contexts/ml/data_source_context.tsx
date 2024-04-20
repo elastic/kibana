@@ -34,7 +34,7 @@ export const DataSourceContext = React.createContext<DataSourceContextValue>(
  * @param children
  * @constructor
  */
-export const DataSourceContextProvider: FC = ({ children }) => {
+export const DataSourceContextProvider = ({ children }) => {
   const [value, setValue] = useState<DataSourceContextValue>();
   const [error, setError] = useState<Error>();
 

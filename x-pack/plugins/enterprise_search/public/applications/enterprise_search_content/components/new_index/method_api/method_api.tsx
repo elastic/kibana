@@ -15,7 +15,7 @@ import { NewSearchIndexTemplate } from '../new_search_index_template';
 
 import { MethodApiLogic } from './method_api_logic';
 
-export const MethodApi: React.FC = () => {
+export const MethodApi = () => {
   const { makeRequest } = useActions(MethodApiLogic);
   const { status } = useValues(MethodApiLogic);
   return (

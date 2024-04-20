@@ -32,12 +32,14 @@ export interface TestQueryRowProps {
   showTable?: boolean;
 }
 
-export const TestQueryRow: React.FC<TestQueryRowProps> = ({
-  fetch,
-  copyQuery,
-  hasValidationErrors,
-  showTable,
-}) => {
+export const TestQueryRow = (
+  {
+    fetch,
+    copyQuery,
+    hasValidationErrors,
+    showTable
+  }: TestQueryRowProps
+) => {
   const {
     onTestQuery,
     testQueryResult,

@@ -78,9 +78,11 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ],
 });
 
-const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-}) => {
+const IndexActionConnectorFields = (
+  {
+    readOnly
+  }: ActionConnectorFieldsProps
+) => {
   const { http, docLinks } = useKibana().services;
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({

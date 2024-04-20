@@ -16,7 +16,13 @@ interface XYCurrentTime {
   domain?: DomainRange;
 }
 
-export const XYCurrentTime: FC<XYCurrentTime> = ({ enabled, isDarkMode, domain }) => {
+export const XYCurrentTime = (
+  {
+    enabled,
+    isDarkMode,
+    domain
+  }: XYCurrentTime
+) => {
   if (!enabled) {
     return null;
   }

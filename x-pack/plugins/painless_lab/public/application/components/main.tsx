@@ -18,7 +18,7 @@ import { MainControls } from './main_controls';
 import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
 
-export const Main: React.FunctionComponent = () => {
+export const Main = () => {
   const {
     store: { payload, validation },
     updatePayload,

@@ -50,20 +50,22 @@ export type ComponentOpts = {
   'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
 >;
 
-export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
-  item,
-  onLoading,
-  onRuleChanged,
-  bulkDisableRules,
-  bulkEnableRules,
-  onDeleteRule,
-  onEditRule,
-  onUpdateAPIKey,
-  snoozeRule,
-  unsnoozeRule,
-  onRunRule,
-  onCloneRule,
-}: ComponentOpts) => {
+export const CollapsedItemActions = (
+  {
+    item,
+    onLoading,
+    onRuleChanged,
+    bulkDisableRules,
+    bulkEnableRules,
+    onDeleteRule,
+    onEditRule,
+    onUpdateAPIKey,
+    snoozeRule,
+    unsnoozeRule,
+    onRunRule,
+    onCloneRule
+  }: ComponentOpts
+) => {
   const {
     ruleTypeRegistry,
     notifications: { toasts },

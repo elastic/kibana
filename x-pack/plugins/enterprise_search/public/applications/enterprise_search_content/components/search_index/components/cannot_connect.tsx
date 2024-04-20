@@ -17,7 +17,7 @@ import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { ERROR_STATE_PATH } from '../../../routes';
 
-export const CannotConnect: React.FC = () => {
+export const CannotConnect = () => {
   return (
     <EuiCallOut
       iconType="warning"

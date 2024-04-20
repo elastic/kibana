@@ -48,15 +48,17 @@ const Error = () => (
   </EuiFlexGroup>
 );
 
-export const ChartPanel: React.FC<ChartPanelProps> = ({
-  title,
-  hasBorder = true,
-  isLoading,
-  isError,
-  children,
-  rightSideItems,
-  styles,
-}) => {
+export const ChartPanel = (
+  {
+    title,
+    hasBorder = true,
+    isLoading,
+    isError,
+    children,
+    rightSideItems,
+    styles
+  }: ChartPanelProps
+) => {
   const { euiTheme } = useEuiTheme();
   const renderChart = () => {
     if (isLoading) return <Loading />;

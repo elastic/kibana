@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { MLInferenceLogic } from './ml_inference_logic';
 
-export const ReviewPipeline: React.FC = () => {
+export const ReviewPipeline = () => {
   const { mlInferencePipeline } = useValues(MLInferenceLogic);
   return (
     <>

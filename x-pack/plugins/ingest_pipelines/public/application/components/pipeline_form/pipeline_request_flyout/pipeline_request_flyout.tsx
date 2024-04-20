@@ -18,10 +18,12 @@ interface Props {
   readProcessors: ReadProcessorsFunction;
 }
 
-export const PipelineRequestFlyout: FunctionComponent<Props> = ({
-  closeFlyout,
-  readProcessors,
-}) => {
+export const PipelineRequestFlyout = (
+  {
+    closeFlyout,
+    readProcessors
+  }: Props
+) => {
   const { services } = useKibana();
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);

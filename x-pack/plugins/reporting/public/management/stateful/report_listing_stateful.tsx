@@ -25,7 +25,7 @@ import { ReportListingTable } from '../report_listing_table';
  * Used in Stateful deployments only
  * Renders controls for ILM and Screenshotting Diagnostics which are only applicable in Stateful
  */
-export const ReportListingStateful: FC<ListingPropsInternal> = (props) => {
+export const ReportListingStateful = (props: ListingPropsInternal) => {
   const { apiClient, capabilities, config, navigateToUrl, toasts, urlService, ...listingProps } =
     props;
   const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');

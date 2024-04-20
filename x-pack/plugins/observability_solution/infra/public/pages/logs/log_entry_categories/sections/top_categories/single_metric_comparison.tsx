@@ -12,10 +12,15 @@ import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const SingleMetricComparison: React.FunctionComponent<{
-  currentValue: number;
-  previousValue: number;
-}> = ({ currentValue, previousValue }) => {
+export const SingleMetricComparison = (
+  {
+    currentValue,
+    previousValue
+  }: {
+    currentValue: number;
+    previousValue: number;
+  }
+) => {
   const changeFactor = currentValue / previousValue - 1;
 
   if (changeFactor < 0) {

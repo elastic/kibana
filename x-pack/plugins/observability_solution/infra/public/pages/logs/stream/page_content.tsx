@@ -23,7 +23,7 @@ import { StreamPageLogsContentForState } from './page_logs_content';
 import { StreamPageMissingIndicesContent } from './page_missing_indices_content';
 import { LogStreamPageContentProviders } from './page_providers';
 
-export const ConnectedStreamPageContent: React.FC = () => {
+export const ConnectedStreamPageContent = () => {
   const logStreamPageStateService = useLogStreamPageStateContext();
   const [logStreamPageState, logStreamPageSend] = useActor(logStreamPageStateService);
 
@@ -64,10 +64,15 @@ export const ConnectedStreamPageContent: React.FC = () => {
   );
 };
 
-export const StreamPageContentForState: React.FC<{
-  logStreamPageState: LogStreamPageState;
-  logStreamPageCallbacks: LogStreamPageCallbacks;
-}> = ({ logStreamPageState, logStreamPageCallbacks }) => {
+export const StreamPageContentForState = (
+  {
+    logStreamPageState,
+    logStreamPageCallbacks
+  }: {
+    logStreamPageState: LogStreamPageState;
+    logStreamPageCallbacks: LogStreamPageCallbacks;
+  }
+) => {
   if (
     logStreamPageState.matches('uninitialized') ||
     logStreamPageState.matches({ hasLogViewIndices: 'uninitialized' }) ||

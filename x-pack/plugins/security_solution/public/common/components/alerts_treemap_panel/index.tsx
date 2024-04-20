@@ -56,30 +56,32 @@ export interface Props {
   title: React.ReactNode;
 }
 
-const AlertsTreemapPanelComponent: React.FC<Props> = ({
-  addFilter,
-  alignHeader,
-  chartOptionsContextMenu,
-  inspectTitle,
-  isPanelExpanded,
-  filters,
-  height = DEFAULT_HEIGHT,
-  query,
-  riskSubAggregationField,
-  runtimeMappings,
-  setIsPanelExpanded,
-  setStackByField0,
-  setStackByField0ComboboxInputRef,
-  setStackByField1,
-  setStackByField1ComboboxInputRef,
-  signalIndexName,
-  stackByField0,
-  stackByField0ComboboxRef,
-  stackByField1,
-  stackByField1ComboboxRef,
-  stackByWidth,
-  title,
-}: Props) => {
+const AlertsTreemapPanelComponent = (
+  {
+    addFilter,
+    alignHeader,
+    chartOptionsContextMenu,
+    inspectTitle,
+    isPanelExpanded,
+    filters,
+    height = DEFAULT_HEIGHT,
+    query,
+    riskSubAggregationField,
+    runtimeMappings,
+    setIsPanelExpanded,
+    setStackByField0,
+    setStackByField0ComboboxInputRef,
+    setStackByField1,
+    setStackByField1ComboboxInputRef,
+    signalIndexName,
+    stackByField0,
+    stackByField0ComboboxRef,
+    stackByField1,
+    stackByField1ComboboxRef,
+    stackByWidth,
+    title
+  }: Props
+) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
   // create a unique, but stable (across re-renders) query id

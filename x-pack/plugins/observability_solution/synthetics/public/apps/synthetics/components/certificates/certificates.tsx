@@ -25,7 +25,7 @@ const getPageSizeValue = () => {
   return value;
 };
 
-export const CertificatesPage: React.FC = () => {
+export const CertificatesPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'certificates' });
   useTrackPageview({ app: 'synthetics', path: 'certificates', delay: 15000 });
 

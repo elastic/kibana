@@ -65,7 +65,7 @@ interface LogRateAnalysisStateProviderProps {
  * including children components to be wrapped by the Provider.
  * @returns A context provider wrapping children with access to log rate analysis state.
  */
-export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps> = (props) => {
+export const LogRateAnalysisStateProvider = (props: LogRateAnalysisStateProviderProps) => {
   const { children, initialAnalysisStart: incomingInitialAnalysisStart } = props;
 
   const [autoRunAnalysis, setAutoRunAnalysis] = useState(true);
@@ -141,9 +141,9 @@ export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps>
 
   return (
     // Provider managing the state
-    <LogRateAnalysisStateContext.Provider value={contextValue}>
+    (<LogRateAnalysisStateContext.Provider value={contextValue}>
       {children}
-    </LogRateAnalysisStateContext.Provider>
+    </LogRateAnalysisStateContext.Provider>)
   );
 };
 

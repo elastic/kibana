@@ -60,14 +60,16 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
   );
 };
 
-export const AddProcessorForm: FunctionComponent<Props> = ({
-  isOnFailure,
-  onOpen,
-  form,
-  esDocsBasePath,
-  closeFlyout,
-  handleSubmit,
-}) => {
+export const AddProcessorForm = (
+  {
+    isOnFailure,
+    onOpen,
+    form,
+    esDocsBasePath,
+    closeFlyout,
+    handleSubmit
+  }: Props
+) => {
   useEffect(
     () => {
       onOpen();

@@ -33,11 +33,13 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const DropdownFilter: FunctionComponent<Props> = ({
-  initialValue = '',
-  commit,
-  choices = [],
-}) => {
+export const DropdownFilter = (
+  {
+    initialValue = '',
+    commit,
+    choices = []
+  }: Props
+) => {
   const [value, setValue] = useState<string>(initialValue);
 
   useEffect(() => {

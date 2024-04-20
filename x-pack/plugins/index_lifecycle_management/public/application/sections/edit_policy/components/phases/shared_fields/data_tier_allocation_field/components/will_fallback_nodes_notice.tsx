@@ -21,10 +21,12 @@ interface Props {
   targetNodeRole: DataTierRole;
 }
 
-export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Props> = ({
-  phase,
-  targetNodeRole,
-}) => {
+export const WillUseFallbackTierUsingNodeAttributesNotice = (
+  {
+    phase,
+    targetNodeRole
+  }: Props
+) => {
   return (
     <EuiCallOut
       data-test-subj="willUseFallbackTierUsingNodeAttributesNotice"

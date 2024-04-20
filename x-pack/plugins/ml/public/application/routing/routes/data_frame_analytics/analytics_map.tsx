@@ -43,7 +43,7 @@ export const analyticsMapRouteFactory = (
   'data-test-subj': 'mlPageAnalyticsMap',
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
 
   return (

@@ -74,7 +74,7 @@ const i18nTexts = {
     // NOTE: hardcoding the missing privilege because the WithPrivileges HOC
     // doesnt provide a way to retrieve which specific privileges an index
     // is missing.
-    <FormattedMessage
+    (<FormattedMessage
       id="xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription"
       defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
       values={{
@@ -83,7 +83,7 @@ const i18nTexts = {
         ),
         privilegesCount: privilegesMissing?.index?.length,
       }}
-    />
+    />)
   ),
 };
 
@@ -92,7 +92,12 @@ interface Props {
   privilegesMissing: MissingPrivileges;
 }
 
-const FixDeprecationLogsUI: FunctionComponent<Props> = ({ hasPrivileges, privilegesMissing }) => {
+const FixDeprecationLogsUI = (
+  {
+    hasPrivileges,
+    privilegesMissing
+  }: Props
+) => {
   const {
     services: {
       core: { docLinks },

@@ -27,27 +27,29 @@ export const NotObscuredByBottomBar = styled('div')`
   padding-bottom: 100px;
 `;
 
-export const CreatePackagePolicyBottomBar: React.FC<{
-  isLoading?: boolean;
-  isDisabled?: boolean;
-  cancelClickHandler?: React.ReactEventHandler;
-  cancelUrl?: string;
-  cancelMessage?: React.ReactElement;
-  actionMessage: React.ReactElement;
-  onNext: () => void;
-  noAnimation?: boolean;
-  loadingMessage?: React.ReactElement;
-}> = ({
-  isLoading,
-  loadingMessage,
-  onNext,
-  cancelClickHandler,
-  cancelUrl,
-  actionMessage,
-  cancelMessage,
-  isDisabled = false,
-  noAnimation = false,
-}) => {
+export const CreatePackagePolicyBottomBar = (
+  {
+    isLoading,
+    loadingMessage,
+    onNext,
+    cancelClickHandler,
+    cancelUrl,
+    actionMessage,
+    cancelMessage,
+    isDisabled = false,
+    noAnimation = false
+  }: {
+    isLoading?: boolean;
+    isDisabled?: boolean;
+    cancelClickHandler?: React.ReactEventHandler;
+    cancelUrl?: string;
+    cancelMessage?: React.ReactElement;
+    actionMessage: React.ReactElement;
+    onNext: () => void;
+    noAnimation?: boolean;
+    loadingMessage?: React.ReactElement;
+  }
+) => {
   const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
   return (
     <Bar position="sticky">
@@ -89,12 +91,19 @@ export const CreatePackagePolicyBottomBar: React.FC<{
   );
 };
 
-export const AgentStandaloneBottomBar: React.FC<{
-  cancelClickHandler?: React.ReactEventHandler;
-  cancelUrl?: string;
-  onNext: () => void;
-  noAnimation?: boolean;
-}> = ({ onNext, cancelClickHandler, cancelUrl, noAnimation = false }) => {
+export const AgentStandaloneBottomBar = (
+  {
+    onNext,
+    cancelClickHandler,
+    cancelUrl,
+    noAnimation = false
+  }: {
+    cancelClickHandler?: React.ReactEventHandler;
+    cancelUrl?: string;
+    onNext: () => void;
+    noAnimation?: boolean;
+  }
+) => {
   const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
   return (
     <Bar>
@@ -123,9 +132,13 @@ export const AgentStandaloneBottomBar: React.FC<{
   );
 };
 
-export const CreatePackagePolicyFinalBottomBar: React.FC<{
-  pkgkey: string;
-}> = ({ pkgkey }) => {
+export const CreatePackagePolicyFinalBottomBar = (
+  {
+    pkgkey
+  }: {
+    pkgkey: string;
+  }
+) => {
   const isK8s = pkgkey.includes(FLEET_KUBERNETES_PACKAGE);
   const { getHref } = useLink();
   const { getAbsolutePath } = useLink();
@@ -181,11 +194,17 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
   );
 };
 
-export const AgentDataTimedOutBottomBar: React.FC<{
-  troubleshootLink: string;
-  agentIds: string[];
-  integration?: string;
-}> = ({ troubleshootLink, agentIds, integration }) => {
+export const AgentDataTimedOutBottomBar = (
+  {
+    troubleshootLink,
+    agentIds,
+    integration
+  }: {
+    troubleshootLink: string;
+    agentIds: string[];
+    integration?: string;
+  }
+) => {
   const discoverLogsLink = useGetDiscoverLogsLinkForAgents(agentIds);
 
   return (

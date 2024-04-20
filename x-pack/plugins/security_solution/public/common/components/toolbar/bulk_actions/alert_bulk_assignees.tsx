@@ -22,14 +22,16 @@ interface BulkAlertAssigneesPanelComponentProps {
   closePopoverMenu: () => void;
   onSubmit: SetAlertAssigneesFunc;
 }
-const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponentProps> = ({
-  alertItems,
-  refresh,
-  setIsLoading,
-  clearSelection,
-  closePopoverMenu,
-  onSubmit,
-}) => {
+const BulkAlertAssigneesPanelComponent = (
+  {
+    alertItems,
+    refresh,
+    setIsLoading,
+    clearSelection,
+    closePopoverMenu,
+    onSubmit
+  }: BulkAlertAssigneesPanelComponentProps
+) => {
   const alertIds = useMemo(() => alertItems.map((item) => item._id), [alertItems]);
   const assignedUserIds = useMemo(
     () =>

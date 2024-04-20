@@ -29,16 +29,18 @@ interface ResultTabsProps {
   error?: string;
 }
 
-const ResultTabsComponent: React.FC<ResultTabsProps> = ({
-  actionId,
-  agentIds,
-  ecsMapping,
-  endDate,
-  failedAgentsCount,
-  startDate,
-  liveQueryActionId,
-  error,
-}) => {
+const ResultTabsComponent = (
+  {
+    actionId,
+    agentIds,
+    ecsMapping,
+    endDate,
+    failedAgentsCount,
+    startDate,
+    liveQueryActionId,
+    error
+  }: ResultTabsProps
+) => {
   const tabs = useMemo(
     () => [
       {

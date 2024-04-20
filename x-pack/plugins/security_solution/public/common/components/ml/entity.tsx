@@ -13,7 +13,12 @@ interface Props {
   entityValue: string;
 }
 
-export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) => {
+export const EntityComponent = (
+  {
+    entityName,
+    entityValue
+  }: Props
+) => {
   return (
     <SecurityCellActions
       data={{

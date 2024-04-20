@@ -100,15 +100,17 @@ const renderOption = (option: TagComboBoxOption, searchValue: string, contentCla
   }
 };
 
-export const TagSelector: FC<TagSelectorProps> = ({
-  tags,
-  selected,
-  onTagsSelected,
-  allowCreate,
-  openCreateModal,
-  fullWidth = true,
-  ...otherProps
-}) => {
+export const TagSelector = (
+  {
+    tags,
+    selected,
+    onTagsSelected,
+    allowCreate,
+    openCreateModal,
+    fullWidth = true,
+    ...otherProps
+  }: TagSelectorProps
+) => {
   const [currentSearch, setCurrentSearch] = useState('');
 
   // We are forcing the 'create tag' option to always appear by having its

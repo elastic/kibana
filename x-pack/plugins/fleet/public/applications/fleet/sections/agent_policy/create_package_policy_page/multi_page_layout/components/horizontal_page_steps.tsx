@@ -45,11 +45,17 @@ const getStepStatus = (currentStep: number, stepIndex: number, currentStepComple
   return 'incomplete';
 };
 
-export const PageSteps: React.FC<{
-  steps: string[];
-  currentStep?: number;
-  currentStepComplete?: boolean;
-}> = ({ steps: stepTitles, currentStep = 0, currentStepComplete = false }) => {
+export const PageSteps = (
+  {
+    steps: stepTitles,
+    currentStep = 0,
+    currentStepComplete = false
+  }: {
+    steps: string[];
+    currentStep?: number;
+    currentStepComplete?: boolean;
+  }
+) => {
   const steps = stepTitles.map((title, index) => {
     return {
       title,

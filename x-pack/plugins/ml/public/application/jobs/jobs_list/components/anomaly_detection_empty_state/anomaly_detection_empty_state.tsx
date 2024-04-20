@@ -15,7 +15,7 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contex
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
-export const AnomalyDetectionEmptyState: FC = () => {
+export const AnomalyDetectionEmptyState = () => {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 

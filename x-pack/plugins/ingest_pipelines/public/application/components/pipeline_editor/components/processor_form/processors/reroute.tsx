@@ -135,7 +135,7 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
   };
 };
 
-export const Reroute: FunctionComponent = () => {
+export const Reroute = () => {
   const form = useFormContext();
   const [{ fields }] = useFormData({ watch: ['fields.dataset', 'fields.namespace'] });
   const { services } = useKibana();

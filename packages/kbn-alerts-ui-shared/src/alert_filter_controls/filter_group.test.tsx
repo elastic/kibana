@@ -58,7 +58,7 @@ const MockedControlGroupRenderer = getMockedControlGroupRenderer(
 const onFilterChangeMock = jest.fn();
 const onInitMock = jest.fn();
 
-const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
+const TestComponent = (props: Partial<FilterGroupProps>) => {
   return (
     <FilterGroup
       spaceId={spaceId}

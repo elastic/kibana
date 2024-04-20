@@ -52,7 +52,11 @@ interface IndexStatusDetailsProps {
   option?: SearchIndexSelectableOption;
 }
 
-export const IndexStatusDetails: React.FC<IndexStatusDetailsProps> = ({ option }) => {
+export const IndexStatusDetails = (
+  {
+    option
+  }: IndexStatusDetailsProps
+) => {
   return !option ? (
     <></>
   ) : (

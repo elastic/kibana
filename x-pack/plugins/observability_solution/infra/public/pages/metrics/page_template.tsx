@@ -20,11 +20,13 @@ interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
   hasData?: boolean;
 }
 
-export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
-  hasData = true,
-  'data-test-subj': _dataTestSubj,
-  ...pageTemplateProps
-}) => {
+export const MetricsPageTemplate = (
+  {
+    hasData = true,
+    'data-test-subj': _dataTestSubj,
+    ...pageTemplateProps
+  }: MetricsPageTemplateProps
+) => {
   const {
     services: {
       observabilityAIAssistant,

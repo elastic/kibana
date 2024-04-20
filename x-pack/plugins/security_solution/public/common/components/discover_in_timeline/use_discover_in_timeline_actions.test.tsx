@@ -63,9 +63,11 @@ jest.mock('./use_discover_in_timeline_actions', () => {
 const getTestProviderWithCustomState = (state: State = mockState) => {
   const store = createMockStore(state);
 
-  const MockTestProvider: FC<PropsWithChildren<{}>> = ({ children }) => (
-    <TestProviders store={store}> {children}</TestProviders>
-  );
+  const MockTestProvider = (
+    {
+      children
+    }: PropsWithChildren<{}>
+  ) => (<TestProviders store={store}> {children}</TestProviders>);
 
   return MockTestProvider;
 };

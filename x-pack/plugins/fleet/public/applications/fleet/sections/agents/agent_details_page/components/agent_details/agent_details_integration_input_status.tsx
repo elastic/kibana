@@ -17,9 +17,13 @@ const StyledEuiText = styled(EuiText)`
   white-space: normal;
 `;
 
-export const AgentDetailsIntegrationInputStatus: React.FunctionComponent<{
-  inputStatusFormatter: InputStatusFormatter;
-}> = memo(({ inputStatusFormatter }) => {
+export const AgentDetailsIntegrationInputStatus = memo((
+  {
+    inputStatusFormatter
+  }: {
+    inputStatusFormatter: InputStatusFormatter;
+  }
+) => {
   return inputStatusFormatter.hasError ? (
     <EuiCallOut
       title={inputStatusFormatter.getErrorTitleFromStatus()}

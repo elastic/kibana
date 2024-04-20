@@ -37,7 +37,7 @@ type AddEmbeddable = (pageId: string, partialElement: { expression: string }) =>
 
 type FlyoutProps = Pick<ComponentProps, 'onClose'> & Partial<Omit<ComponentProps, 'onClose'>>;
 
-export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (props) => {
+export const EmbeddableFlyoutPortal = (props: ComponentProps) => {
   const el: HTMLElement = useMemo(() => document.createElement('div'), []);
 
   useEffect(() => {
@@ -63,10 +63,12 @@ export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (
   );
 };
 
-export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
-  availableEmbeddables,
-  ...restProps
-}) => {
+export const AddEmbeddablePanel = (
+  {
+    availableEmbeddables,
+    ...restProps
+  }: FlyoutProps
+) => {
   const labsService = useLabsService();
   const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
 

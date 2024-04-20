@@ -17,7 +17,7 @@ import { Status } from '../../../../../common/types/api';
 
 import { FetchSyncJobsStatsApiLogic } from '../../api/stats/fetch_sync_jobs_stats_api_logic';
 
-export const IndicesStats: React.FC = () => {
+export const IndicesStats = () => {
   const { makeRequest } = useActions(FetchSyncJobsStatsApiLogic);
   const { data, status } = useValues(FetchSyncJobsStatsApiLogic);
   const isLoading = status === Status.LOADING;

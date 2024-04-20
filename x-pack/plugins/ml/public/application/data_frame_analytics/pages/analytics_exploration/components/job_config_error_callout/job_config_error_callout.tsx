@@ -28,11 +28,13 @@ interface Props {
   title: string;
 }
 
-export const JobConfigErrorCallout: FC<Props> = ({
-  jobCapsServiceErrorMessage,
-  jobConfigErrorMessage,
-  title,
-}) => {
+export const JobConfigErrorCallout = (
+  {
+    jobCapsServiceErrorMessage,
+    jobConfigErrorMessage,
+    title
+  }: Props
+) => {
   const {
     services: {
       application: { getUrlForApp },

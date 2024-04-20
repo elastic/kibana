@@ -26,11 +26,13 @@ interface ForceStopModelConfirmDialogProps {
  * Confirmation is required when there are multiple model deployments
  * or associated pipelines.
  */
-export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogProps> = ({
-  model,
-  onConfirm,
-  onCancel,
-}) => {
+export const StopModelDeploymentsConfirmDialog = (
+  {
+    model,
+    onConfirm,
+    onCancel
+  }: ForceStopModelConfirmDialogProps
+) => {
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     {}
   );

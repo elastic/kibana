@@ -17,7 +17,7 @@ import { EntSearchLogStream } from '../../../../../../shared/log_stream';
 import { DataPanel } from '../../../../data_panel';
 import { EngineLogic } from '../../../../engine';
 
-export const AutomatedCurationsHistoryPanel: React.FC = () => {
+export const AutomatedCurationsHistoryPanel = () => {
   const { engineName } = useValues(EngineLogic);
   const [endTimestamp, setEndTimestamp] = useState(Date.now());
 

@@ -145,7 +145,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   return diffFile;
 };
 
-const CustomStyles: React.FC = ({ children }) => {
+const CustomStyles = ({ children }) => {
   const { euiTheme } = useEuiTheme();
 
   const customCss = css`

@@ -47,7 +47,13 @@ export function textFromStatus(status?: string) {
   }
 }
 
-export const StatusBadge: FC<StatusBadgeProps> = ({ status, stepNo, isMobile }) => {
+export const StatusBadge = (
+  {
+    status,
+    stepNo,
+    isMobile
+  }: StatusBadgeProps
+) => {
   const theme = useContext(UptimeThemeContext);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">

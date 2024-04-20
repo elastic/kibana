@@ -22,9 +22,13 @@ export interface PipelineSelectOptionProps {
 }
 
 // TODO: Make disabledReason required and remove EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS call without args
-export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }> = ({
-  disabledReason,
-}) => {
+export const PipelineSelectOptionDisabled = (
+  {
+    disabledReason
+  }: {
+    disabledReason?: string;
+  }
+) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -39,11 +43,15 @@ export const PipelineSelectOptionDisabled: React.FC<{ disabledReason?: string }>
   );
 };
 
-export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipeline }) => {
+export const PipelineSelectOption = (
+  {
+    pipeline
+  }: PipelineSelectOptionProps
+) => {
   const modelIdDisplay = pipeline.modelId.length > 0 ? pipeline.modelId : MODEL_REDACTED_VALUE;
   return (
     // TODO: Add model state & pipeline info link. Make sure to check mobile rendering when doing this!
-    <EuiFlexGroup direction="column" gutterSize="xs">
+    (<EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h4>{pipeline.pipelineName}</h4>
@@ -73,6 +81,6 @@ export const PipelineSelectOption: React.FC<PipelineSelectOptionProps> = ({ pipe
           <EuiText size="s">{pipeline.sourceFields.join(', ')}</EuiText>
         )}
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGroup>)
   );
 };

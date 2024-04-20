@@ -71,17 +71,19 @@ interface LogRateAnalysisResultsTableProps {
   zeroDocsFallback?: boolean;
 }
 
-export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
-  significantItems,
-  dataView,
-  loading,
-  isExpandedRow,
-  searchQuery,
-  timeRangeMs,
-  barColorOverride,
-  barHighlightColorOverride,
-  zeroDocsFallback = false,
-}) => {
+export const LogRateAnalysisResultsTable = (
+  {
+    significantItems,
+    dataView,
+    loading,
+    isExpandedRow,
+    searchQuery,
+    timeRangeMs,
+    barColorOverride,
+    barHighlightColorOverride,
+    zeroDocsFallback = false
+  }: LogRateAnalysisResultsTableProps
+) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const dataViewId = dataView.id;

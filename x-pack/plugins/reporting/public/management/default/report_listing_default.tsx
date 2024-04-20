@@ -17,7 +17,7 @@ import { ReportListingTable } from '../report_listing_table';
  * Used in non-stateful (Serverless)
  * Does not render controls for features only applicable in Stateful
  */
-export const ReportListingDefault: FC<ListingPropsInternal> = (props) => {
+export const ReportListingDefault = (props: ListingPropsInternal) => {
   const { apiClient, capabilities, config, navigateToUrl, toasts, urlService, ...listingProps } =
     props;
   return (

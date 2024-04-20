@@ -23,7 +23,12 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NoDataCardProvider: FC<NoDataCardServices> = ({ children, ...services }) => {
+export const NoDataCardProvider = (
+  {
+    children,
+    ...services
+  }: NoDataCardServices
+) => {
   const { addBasePath, canAccessFleet } = services;
 
   return (
@@ -36,10 +41,12 @@ export const NoDataCardProvider: FC<NoDataCardServices> = ({ children, ...servic
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NoDataCardKibanaProvider: FC<NoDataCardKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const NoDataCardKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: NoDataCardKibanaDependencies
+) => {
   const value: Services = {
     addBasePath: dependencies.coreStart.http.basePath.prepend,
     canAccessFleet: dependencies.coreStart.application.capabilities.navLinks.integrations,

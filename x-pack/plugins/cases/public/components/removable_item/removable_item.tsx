@@ -17,13 +17,15 @@ interface Props {
   dataTestSubjPrefix?: string;
 }
 
-const RemovableItemComponent: React.FC<Props> = ({
-  children,
-  tooltipContent,
-  buttonAriaLabel,
-  onRemoveItem,
-  dataTestSubjPrefix = '',
-}) => {
+const RemovableItemComponent = (
+  {
+    children,
+    tooltipContent,
+    buttonAriaLabel,
+    onRemoveItem,
+    dataTestSubjPrefix = ''
+  }: Props
+) => {
   const { permissions } = useCasesContext();
   const [isHovering, setIsHovering] = useState(false);
 

@@ -23,13 +23,15 @@ interface InlineActionsProps {
   disabledActionTypes: string[];
 }
 
-export const InlineActions: React.FC<InlineActionsProps> = ({
-  actionContext,
-  anchorPosition,
-  showActionTooltips,
-  visibleCellActions,
-  disabledActionTypes,
-}) => {
+export const InlineActions = (
+  {
+    actionContext,
+    anchorPosition,
+    showActionTooltips,
+    visibleCellActions,
+    disabledActionTypes
+  }: InlineActionsProps
+) => {
   const { value: actions } = useLoadActions(actionContext, { disabledActionTypes });
   const { extraActions, visibleActions } = usePartitionActions(actions ?? [], visibleCellActions);
 

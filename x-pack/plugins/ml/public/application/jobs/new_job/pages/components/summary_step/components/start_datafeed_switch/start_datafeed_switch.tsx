@@ -15,11 +15,13 @@ interface Props {
   disabled?: boolean;
 }
 
-export const StartDatafeedSwitch: FC<Props> = ({
-  startDatafeed,
-  setStartDatafeed,
-  disabled = false,
-}) => {
+export const StartDatafeedSwitch = (
+  {
+    startDatafeed,
+    setStartDatafeed,
+    disabled = false
+  }: Props
+) => {
   return (
     <>
       <EuiSpacer />

@@ -46,26 +46,28 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const ActionsComponent: React.FC<ActionProps> = ({
-  ariaRowindex,
-  checked,
-  columnValues,
-  ecsData,
-  eventId,
-  eventIdToNoteIds,
-  isEventPinned = false,
-  isEventViewer = false,
-  loadingEventIds,
-  onEventDetailsPanelOpened,
-  onRowSelected,
-  onRuleChange,
-  showCheckboxes,
-  showNotes,
-  timelineId,
-  toggleShowNotes,
-  refetch,
-  setEventsLoading,
-}) => {
+const ActionsComponent = (
+  {
+    ariaRowindex,
+    checked,
+    columnValues,
+    ecsData,
+    eventId,
+    eventIdToNoteIds,
+    isEventPinned = false,
+    isEventViewer = false,
+    loadingEventIds,
+    onEventDetailsPanelOpened,
+    onRowSelected,
+    onRuleChange,
+    showCheckboxes,
+    showNotes,
+    timelineId,
+    toggleShowNotes,
+    refetch,
+    setEventsLoading
+  }: ActionProps
+) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];

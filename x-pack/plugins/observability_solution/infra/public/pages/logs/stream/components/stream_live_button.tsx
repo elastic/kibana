@@ -9,35 +9,40 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const StreamLiveButton: React.FC<{
-  isStreaming: boolean;
-  onStartStreaming: () => void;
-  onStopStreaming: () => void;
-}> = ({ isStreaming, onStartStreaming, onStopStreaming }) =>
-  isStreaming ? (
-    <EuiButtonEmpty
-      data-test-subj="infraStreamLiveButtonStopStreamingButton"
-      color="warning"
-      iconSide="left"
-      iconType="pause"
-      onClick={onStopStreaming}
-    >
-      <FormattedMessage
-        id="xpack.infra.logs.stopStreamingButtonLabel"
-        defaultMessage="Stop streaming"
-      />
-    </EuiButtonEmpty>
-  ) : (
-    <EuiButtonEmpty
-      data-test-subj="infraStreamLiveButtonStreamLiveButton"
-      color="primary"
-      iconSide="left"
-      iconType="play"
-      onClick={onStartStreaming}
-    >
-      <FormattedMessage
-        id="xpack.infra.logs.startStreamingButtonLabel"
-        defaultMessage="Stream live"
-      />
-    </EuiButtonEmpty>
-  );
+export const StreamLiveButton = (
+  {
+    isStreaming,
+    onStartStreaming,
+    onStopStreaming
+  }: {
+    isStreaming: boolean;
+    onStartStreaming: () => void;
+    onStopStreaming: () => void;
+  }
+) => isStreaming ? (
+  <EuiButtonEmpty
+    data-test-subj="infraStreamLiveButtonStopStreamingButton"
+    color="warning"
+    iconSide="left"
+    iconType="pause"
+    onClick={onStopStreaming}
+  >
+    <FormattedMessage
+      id="xpack.infra.logs.stopStreamingButtonLabel"
+      defaultMessage="Stop streaming"
+    />
+  </EuiButtonEmpty>
+) : (
+  <EuiButtonEmpty
+    data-test-subj="infraStreamLiveButtonStreamLiveButton"
+    color="primary"
+    iconSide="left"
+    iconType="play"
+    onClick={onStartStreaming}
+  >
+    <FormattedMessage
+      id="xpack.infra.logs.startStreamingButtonLabel"
+      defaultMessage="Stream live"
+    />
+  </EuiButtonEmpty>
+);

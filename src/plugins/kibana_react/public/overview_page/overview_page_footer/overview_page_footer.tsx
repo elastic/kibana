@@ -25,12 +25,14 @@ interface Props {
   onChangeDefaultRoute?: (event: MouseEvent) => void;
 }
 
-export const OverviewPageFooter: FC<Props> = ({
-  addBasePath,
-  path,
-  onSetDefaultRoute,
-  onChangeDefaultRoute,
-}) => {
+export const OverviewPageFooter = (
+  {
+    addBasePath,
+    path,
+    onSetDefaultRoute,
+    onChangeDefaultRoute
+  }: Props
+) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
     services: {
@@ -95,12 +97,12 @@ export const OverviewPageFooter: FC<Props> = ({
 
   return (
     // Note: Using KibanaPageTemplate.Section instead of EuiPageTemplate causes Jest failures and bundle size issues
-    <EuiPageTemplate.Section component="footer" className="kbnOverviewPageFooter">
+    (<EuiPageTemplate.Section component="footer" className="kbnOverviewPageFooter">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <div>{defaultRouteButton}</div>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageTemplate.Section>
+    </EuiPageTemplate.Section>)
   );
 };

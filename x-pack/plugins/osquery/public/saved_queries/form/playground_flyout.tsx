@@ -25,7 +25,12 @@ interface PlaygroundFlyoutProps {
   onClose: () => void;
 }
 
-const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, onClose }) => {
+const PlaygroundFlyoutComponent = (
+  {
+    enabled,
+    onClose
+  }: PlaygroundFlyoutProps
+) => {
   // @ts-expect-error update types
   const { serializer, watch } = useFormContext();
   const watchedValues = watch();

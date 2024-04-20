@@ -18,11 +18,15 @@ describe('useFullScreen', () => {
     let waitForNextUpdate: WaitForNextUpdate;
     test('Default values with no data grid in the dom', async () => {
       await act(async () => {
-        const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
-          <div className="euiDataGrid--fullScreen">
-            <TestProviders>{children}</TestProviders>
-          </div>
-        );
+        const WrapperContainer = (
+          {
+            children
+          }: {
+            children?: React.ReactNode;
+          }
+        ) => (<div className="euiDataGrid--fullScreen">
+          <TestProviders>{children}</TestProviders>
+        </div>);
         ({ result, waitForNextUpdate } = renderHook(() => useGlobalFullScreen(), {
           wrapper: WrapperContainer,
         }));
@@ -45,7 +49,13 @@ describe('useFullScreen', () => {
     });
     test('setting globalFullScreen to true should not remove the chrome removal class and data grid remains open and full screen', async () => {
       await act(async () => {
-        const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+        const WrapperContainer = (
+          {
+            children
+          }: {
+            children?: React.ReactNode;
+          }
+        ) => {
           useEffect(() => {
             document.body.classList.add('euiDataGrid__restrictBody');
           }, []);
@@ -67,7 +77,13 @@ describe('useFullScreen', () => {
     });
     test('setting globalFullScreen to false should remove the chrome removal class and data grid remains open and full screen', async () => {
       await act(async () => {
-        const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+        const WrapperContainer = (
+          {
+            children
+          }: {
+            children?: React.ReactNode;
+          }
+        ) => {
           useEffect(() => {
             document.body.classList.add('euiDataGrid__restrictBody');
           }, []);

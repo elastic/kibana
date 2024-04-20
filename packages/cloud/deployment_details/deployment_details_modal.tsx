@@ -25,7 +25,11 @@ interface Props {
   closeModal: () => void;
 }
 
-export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
+export const DeploymentDetailsModal = (
+  {
+    closeModal
+  }: Props
+) => {
   const { apiKeysLearnMoreUrl } = useDeploymentDetails();
 
   return (

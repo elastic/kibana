@@ -68,13 +68,16 @@ function filterTemplates(templates: TemplateListItem[], types: string[]): Templa
   });
 }
 
-export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { templateName },
-  },
-  location,
-  history,
-}) => {
+export const TemplateList = (
+  {
+    match: {
+      params: { templateName },
+    },
+
+    location,
+    history
+  }: RouteComponentProps<MatchParams>
+) => {
   const { uiMetricService } = useServices();
   const {
     core: { executionContext },
@@ -159,7 +162,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const renderHeader = () => (
     // flex-grow: 0 is needed here because the parent element is a flex column and the header would otherwise expand.
-    <EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
+    (<EuiFlexGroup alignItems="center" gutterSize="s" style={{ flexGrow: 0 }}>
       <EuiFlexItem grow={true}>
         <EuiText color="subdued">
           <FormattedMessage
@@ -201,7 +204,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           />
         </EuiButton>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGroup>)
   );
 
   const renderTemplatesTable = () => {

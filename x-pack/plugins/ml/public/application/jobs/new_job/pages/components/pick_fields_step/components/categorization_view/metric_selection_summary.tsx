@@ -17,7 +17,7 @@ import { CategoryStoppedPartitions } from './category_stopped_partitions';
 
 const DTR_IDX = 0;
 
-export const CategorizationDetectorsSummary: FC = () => {
+export const CategorizationDetectorsSummary = () => {
   const {
     jobCreator: jc,
     chartLoader,

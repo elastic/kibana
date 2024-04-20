@@ -17,7 +17,11 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const RareSettings: FC<Props> = ({ setIsValid }) => {
+export const RareSettings = (
+  {
+    setIsValid
+  }: Props
+) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xl">

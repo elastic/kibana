@@ -23,7 +23,13 @@ interface Props {
   selectedField: Field | null;
 }
 
-export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const GeoFieldSelect = (
+  {
+    fields,
+    changeHandler,
+    selectedField
+  }: Props
+) => {
   const { renderOption, optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = useMemo(

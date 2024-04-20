@@ -33,7 +33,7 @@ interface CrawlCustomSettingsFlyoutDomainsPanelProps {
   onSelectDomainUrls: (selectedUrls: string[]) => void;
 }
 
-export const CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps: React.FC = () => {
+export const CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps = () => {
   const { selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { domainUrls } = useValues(CrawlCustomSettingsFlyoutDomainConfigLogic);
   const { onSelectDomainUrls } = useActions(CrawlCustomSettingsFlyoutLogic);
@@ -47,9 +47,13 @@ export const CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps: React.FC = () 
   );
 };
 
-export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC<
-  CrawlCustomSettingsFlyoutDomainsPanelProps
-> = ({ domainUrls, selectedDomainUrls, onSelectDomainUrls }) => {
+export const CrawlCustomSettingsFlyoutDomainsPanel = (
+  {
+    domainUrls,
+    selectedDomainUrls,
+    onSelectDomainUrls
+  }: CrawlCustomSettingsFlyoutDomainsPanelProps
+) => {
   return (
     <EuiPanel hasBorder>
       <EuiAccordion

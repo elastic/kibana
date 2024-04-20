@@ -19,16 +19,19 @@ export interface AppRoutesProps {
   subPluginRoutes: RouteProps[];
 }
 
-export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPluginRoutes }) => (
-  <Routes>
-    {subPluginRoutes.map((route, index) => {
-      return <Route key={`route-${index}`} {...route} />;
-    })}
-    <Route>
-      <RedirectRoute capabilities={services.application.capabilities} />
-    </Route>
-  </Routes>
-));
+export const AppRoutes = React.memo((
+  {
+    services,
+    subPluginRoutes
+  }: AppRoutesProps
+) => (<Routes>
+  {subPluginRoutes.map((route, index) => {
+    return <Route key={`route-${index}`} {...route} />;
+  })}
+  <Route>
+    <RedirectRoute capabilities={services.application.capabilities} />
+  </Route>
+</Routes>));
 AppRoutes.displayName = 'AppRoutes';
 
 export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {

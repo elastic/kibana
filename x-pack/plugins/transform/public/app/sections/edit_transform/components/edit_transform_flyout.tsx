@@ -32,61 +32,62 @@ import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import { EditTransformUpdateButton } from './edit_transform_update_button';
 
-export const EditTransformFlyout: FC<EditAction> = ({
-  closeFlyout,
-  config,
-  dataViewId,
-  isFlyoutVisible,
-}) =>
-  config && isFlyoutVisible ? (
-    <EditTransformFlyoutProvider config={config} dataViewId={dataViewId}>
-      <EuiFlyout
-        onClose={closeFlyout}
-        hideCloseButton
-        aria-labelledby="transformEditFlyoutTitle"
-        data-test-subj="transformEditFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id="transformEditFlyoutTitle">
-              {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
-                defaultMessage: 'Edit {transformId}',
-                values: {
-                  transformId: config.id,
-                },
+export const EditTransformFlyout = (
+  {
+    closeFlyout,
+    config,
+    dataViewId,
+    isFlyoutVisible
+  }: EditAction
+) => config && isFlyoutVisible ? (
+  <EditTransformFlyoutProvider config={config} dataViewId={dataViewId}>
+    <EuiFlyout
+      onClose={closeFlyout}
+      hideCloseButton
+      aria-labelledby="transformEditFlyoutTitle"
+      data-test-subj="transformEditFlyout"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="transformEditFlyoutTitle">
+            {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
+              defaultMessage: 'Edit {transformId}',
+              values: {
+                transformId: config.id,
+              },
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      {isManagedTransform({ config }) ? (
+        <ManagedTransformsWarningCallout
+          count={1}
+          action={i18n.translate(
+            'xpack.transform.transformList.editManagedTransformsDescription',
+            {
+              defaultMessage: 'editing',
+            }
+          )}
+        />
+      ) : null}
+      <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
+        <EditTransformFlyoutForm />
+        <EditTransformApiErrorCallout />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
+                defaultMessage: 'Cancel',
               })}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        {isManagedTransform({ config }) ? (
-          <ManagedTransformsWarningCallout
-            count={1}
-            action={i18n.translate(
-              'xpack.transform.transformList.editManagedTransformsDescription',
-              {
-                defaultMessage: 'editing',
-              }
-            )}
-          />
-        ) : null}
-        <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-          <EditTransformFlyoutForm />
-          <EditTransformApiErrorCallout />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EditTransformUpdateButton closeFlyout={closeFlyout} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    </EditTransformFlyoutProvider>
-  ) : null;
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EditTransformUpdateButton closeFlyout={closeFlyout} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  </EditTransformFlyoutProvider>
+) : null;

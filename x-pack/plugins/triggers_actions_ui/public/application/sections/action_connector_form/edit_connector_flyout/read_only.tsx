@@ -11,12 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionTypeModel } from '../../../..';
 
-export const ReadOnlyConnectorMessage: React.FC<{
-  connectorId: string;
-  connectorName: string;
-  extraComponent?: ActionTypeModel['actionReadOnlyExtraComponent'];
-  href: string;
-}> = ({ connectorId, connectorName, extraComponent, href }) => {
+export const ReadOnlyConnectorMessage = (
+  {
+    connectorId,
+    connectorName,
+    extraComponent,
+    href
+  }: {
+    connectorId: string;
+    connectorName: string;
+    extraComponent?: ActionTypeModel['actionReadOnlyExtraComponent'];
+    href: string;
+  }
+) => {
   const ExtraComponent = extraComponent;
   return (
     <>

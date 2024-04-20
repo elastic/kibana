@@ -58,23 +58,25 @@ interface Props {
   theme?: PartialTheme;
 }
 
-const BodyComponent: React.FC<Props> = ({
-  addSuccessToast,
-  canUserCreateAndReadCases,
-  endDate,
-  formatBytes,
-  formatNumber,
-  getGroupByFieldsOnClick,
-  ilmPhases,
-  isAssistantEnabled,
-  lastChecked,
-  openCreateCaseFlyout,
-  patterns,
-  setLastChecked,
-  startDate,
-  theme,
-  baseTheme,
-}) => {
+const BodyComponent = (
+  {
+    addSuccessToast,
+    canUserCreateAndReadCases,
+    endDate,
+    formatBytes,
+    formatNumber,
+    getGroupByFieldsOnClick,
+    ilmPhases,
+    isAssistantEnabled,
+    lastChecked,
+    openCreateCaseFlyout,
+    patterns,
+    setLastChecked,
+    startDate,
+    theme,
+    baseTheme
+  }: Props
+) => {
   const {
     onCheckCompleted,
     patternIndexNames,

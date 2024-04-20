@@ -30,10 +30,12 @@ interface AllocatedModelsProps {
   hideColumns?: string[];
 }
 
-export const AllocatedModels: FC<AllocatedModelsProps> = ({
-  models,
-  hideColumns = ['node_name'],
-}) => {
+export const AllocatedModels = (
+  {
+    models,
+    hideColumns = ['node_name']
+  }: AllocatedModelsProps
+) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
   const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);

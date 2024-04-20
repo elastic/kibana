@@ -18,12 +18,14 @@ interface Props {
   isDisabled: boolean;
 }
 
-export const SeveritySidebarSelector: React.FC<Props> = ({
-  selectedSeverity,
-  onSeverityChange,
-  isLoading,
-  isDisabled,
-}) => {
+export const SeveritySidebarSelector = (
+  {
+    selectedSeverity,
+    onSeverityChange,
+    isLoading,
+    isDisabled
+  }: Props
+) => {
   return (
     <EuiFlexItem grow={false} data-test-subj="sidebar-severity">
       <EuiTitle size="xs">

@@ -30,97 +30,101 @@ interface Props {
   defaultValue?: { [key: string]: any };
 }
 
-export const StepSettings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue = {}, onChange, esDocsBase }) => {
-    const { jsonContent, setJsonContent, error } = useJsonStep({
-      defaultValue,
-      onChange,
-    });
+export const StepSettings = React.memo((
+  {
+    defaultValue = {},
+    onChange,
+    esDocsBase
+  }: Props
+) => {
+  const { jsonContent, setJsonContent, error } = useJsonStep({
+    defaultValue,
+    onChange,
+  });
 
-    return (
-      <div data-test-subj="stepSettings">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2 data-test-subj="stepTitle">
-                <FormattedMessage
-                  id="xpack.idxMgmt.formWizard.stepSettings.stepTitle"
-                  defaultMessage="Index settings (optional)"
-                />
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.formWizard.stepSettings.settingsDescription"
-                  defaultMessage="Define the behavior of your indices."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              flush="right"
-              href={documentationService.getSettingsDocumentationLink()}
-              target="_blank"
-              iconType="help"
-            >
+  return (
+    <div data-test-subj="stepSettings">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2 data-test-subj="stepTitle">
               <FormattedMessage
-                id="xpack.idxMgmt.formWizard.stepSettings.docsButtonLabel"
-                defaultMessage="Index settings docs"
+                id="xpack.idxMgmt.formWizard.stepSettings.stepTitle"
+                defaultMessage="Index settings (optional)"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
 
-        <EuiSpacer size="l" />
+          <EuiSpacer size="s" />
 
-        {/* Settings code editor */}
-        <EuiFormRow
-          label={
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.formWizard.stepSettings.settingsDescription"
+                defaultMessage="Define the behavior of your indices."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            flush="right"
+            href={documentationService.getSettingsDocumentationLink()}
+            target="_blank"
+            iconType="help"
+          >
             <FormattedMessage
-              id="xpack.idxMgmt.formWizard.stepSettings.fieldIndexSettingsLabel"
-              defaultMessage="Index settings"
+              id="xpack.idxMgmt.formWizard.stepSettings.docsButtonLabel"
+              defaultMessage="Index settings docs"
             />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.idxMgmt.formWizard.stepSettings.settingsEditorHelpText"
-              defaultMessage="Use JSON format: {code}"
-              values={{
-                code: <EuiCode>{JSON.stringify({ number_of_replicas: 1 })}</EuiCode>,
-              }}
-            />
-          }
-          isInvalid={Boolean(error)}
-          error={error}
-          fullWidth
-        >
-          <CodeEditor
-            languageId="json"
-            value={jsonContent}
-            data-test-subj="settingsEditor"
-            height={500}
-            options={{
-              lineNumbers: 'off',
-              tabSize: 2,
-              automaticLayout: true,
-            }}
-            aria-label={i18n.translate(
-              'xpack.idxMgmt.formWizard.stepSettings.fieldIndexSettingsAriaLabel',
-              {
-                defaultMessage: 'Index settings editor',
-              }
-            )}
-            onChange={setJsonContent}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
+
+      {/* Settings code editor */}
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.idxMgmt.formWizard.stepSettings.fieldIndexSettingsLabel"
+            defaultMessage="Index settings"
           />
-        </EuiFormRow>
-      </div>
-    );
-  }
-);
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.idxMgmt.formWizard.stepSettings.settingsEditorHelpText"
+            defaultMessage="Use JSON format: {code}"
+            values={{
+              code: <EuiCode>{JSON.stringify({ number_of_replicas: 1 })}</EuiCode>,
+            }}
+          />
+        }
+        isInvalid={Boolean(error)}
+        error={error}
+        fullWidth
+      >
+        <CodeEditor
+          languageId="json"
+          value={jsonContent}
+          data-test-subj="settingsEditor"
+          height={500}
+          options={{
+            lineNumbers: 'off',
+            tabSize: 2,
+            automaticLayout: true,
+          }}
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.formWizard.stepSettings.fieldIndexSettingsAriaLabel',
+            {
+              defaultMessage: 'Index settings editor',
+            }
+          )}
+          onChange={setJsonContent}
+        />
+      </EuiFormRow>
+    </div>
+  );
+});

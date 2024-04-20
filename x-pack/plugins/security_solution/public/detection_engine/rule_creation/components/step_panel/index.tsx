@@ -23,19 +23,23 @@ const MyPanel = styled(EuiPanel)`
 
 MyPanel.displayName = 'MyPanel';
 
-const StepPanelComponent: React.FC<StepPanelProps> = ({ children, loading, title }) => (
-  <MyPanel hasBorder>
-    {loading && (
-      <EuiProgress
-        size="xs"
-        color="accent"
-        position="absolute"
-        data-test-subj="stepPanelProgress"
-      />
-    )}
-    {title && <HeaderSection title={title} />}
-    {children}
-  </MyPanel>
-);
+const StepPanelComponent = (
+  {
+    children,
+    loading,
+    title
+  }: StepPanelProps
+) => (<MyPanel hasBorder>
+  {loading && (
+    <EuiProgress
+      size="xs"
+      color="accent"
+      position="absolute"
+      data-test-subj="stepPanelProgress"
+    />
+  )}
+  {title && <HeaderSection title={title} />}
+  {children}
+</MyPanel>);
 
 export const StepPanel = memo(StepPanelComponent);

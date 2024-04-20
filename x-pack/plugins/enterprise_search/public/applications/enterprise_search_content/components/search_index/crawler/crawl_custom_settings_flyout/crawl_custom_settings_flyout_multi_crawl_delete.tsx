@@ -13,7 +13,7 @@ import { EuiButton } from '@elastic/eui';
 
 import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 
-export const CrawlCustomSettingsFlyoutMultipleCrawlDelete: React.FC = () => {
+export const CrawlCustomSettingsFlyoutMultipleCrawlDelete = () => {
   const { crawlerConfigActiveTab, crawlerConfigurations } = useValues(
     CrawlCustomSettingsFlyoutMultiCrawlLogic
   );

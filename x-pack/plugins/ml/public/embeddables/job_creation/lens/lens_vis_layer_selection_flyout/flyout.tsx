@@ -31,7 +31,12 @@ interface Props {
   onClose: () => void;
 }
 
-export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
+export const LensLayerSelectionFlyout = (
+  {
+    onClose,
+    embeddable
+  }: Props
+) => {
   const {
     services: { data, lens },
   } = useMlFromLensKibanaContext();

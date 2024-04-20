@@ -17,7 +17,11 @@ export interface HeaderMenuPortalProps {
   children: ReactNode;
 }
 
-export const HeaderMenuPortal: FC<HeaderMenuPortalProps> = ({ children }) => {
+export const HeaderMenuPortal = (
+  {
+    children
+  }: HeaderMenuPortalProps
+) => {
   const { services } = useMlKibana();
   const { theme, i18n } = services;
 

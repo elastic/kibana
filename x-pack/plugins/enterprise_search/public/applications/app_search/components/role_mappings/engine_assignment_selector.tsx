@@ -25,7 +25,7 @@ import {
 } from './constants';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-export const EngineAssignmentSelector: React.FC = () => {
+export const EngineAssignmentSelector = () => {
   const { handleAccessAllEnginesChange, handleEngineSelectionChange } =
     useActions(RoleMappingsLogic);
 

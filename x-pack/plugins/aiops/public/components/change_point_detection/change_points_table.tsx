@@ -71,13 +71,15 @@ function getFilterConfig(
 
 const pageSizeOptions = [5, 10, 15];
 
-export const ChangePointsTable: FC<ChangePointsTableProps> = ({
-  isLoading,
-  annotations,
-  fieldConfig,
-  onSelectionChange,
-  onRenderComplete,
-}) => {
+export const ChangePointsTable = (
+  {
+    isLoading,
+    annotations,
+    fieldConfig,
+    onSelectionChange,
+    onRenderComplete
+  }: ChangePointsTableProps
+) => {
   const {
     fieldFormats,
     data: {
@@ -346,12 +348,14 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   );
 };
 
-export const MiniChartPreview: FC<ChartComponentProps> = ({
-  fieldConfig,
-  annotation,
-  onRenderComplete,
-  onLoading,
-}) => {
+export const MiniChartPreview = (
+  {
+    fieldConfig,
+    annotation,
+    onRenderComplete,
+    onLoading
+  }: ChartComponentProps
+) => {
   const {
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();

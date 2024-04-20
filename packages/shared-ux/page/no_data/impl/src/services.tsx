@@ -18,16 +18,23 @@ import type {
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const NoDataPageProvider: FC<NoDataPageServices> = ({ children, ...services }) => {
+export const NoDataPageProvider = (
+  {
+    children,
+    ...services
+  }: NoDataPageServices
+) => {
   return <NoDataCardProvider {...services}>{children}</NoDataCardProvider>;
 };
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const NoDataPageKibanaProvider: FC<NoDataPageKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const NoDataPageKibanaProvider = (
+  {
+    children,
+    ...dependencies
+  }: NoDataPageKibanaDependencies
+) => {
   return <NoDataCardKibanaProvider {...dependencies}>{children}</NoDataCardKibanaProvider>;
 };

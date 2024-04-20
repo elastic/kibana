@@ -19,7 +19,11 @@ export interface NumberContentPreviewProps {
   config: FieldVisConfig;
 }
 
-export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ config }) => {
+export const IndexBasedNumberContentPreview = (
+  {
+    config
+  }: NumberContentPreviewProps
+) => {
   const { stats, fieldFormat, fieldName } = config;
   const dataTestSubj = `dataVisualizerDataGridChart-${fieldName}`;
 

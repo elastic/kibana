@@ -69,18 +69,21 @@ interface OptionLabelWithIconTipProps {
   tooltip: string;
 }
 
-const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
-  <>
-    {label}
-    <EuiIconTip
-      content={tooltip}
-      iconProps={{
-        className: 'eui-alignTop',
-      }}
-      size="s"
-    />
-  </>
-);
+const OptionLabelWithIconTip = (
+  {
+    label,
+    tooltip
+  }: OptionLabelWithIconTipProps
+) => (<>
+  {label}
+  <EuiIconTip
+    content={tooltip}
+    iconProps={{
+      className: 'eui-alignTop',
+    }}
+    size="s"
+  />
+</>);
 
 function filterChartableItems(items: estypes.SearchHit[], resultsField?: string) {
   return (
@@ -106,17 +109,19 @@ export interface ScatterplotMatrixProps {
   query?: Query;
 }
 
-export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
-  fields: allFields,
-  index,
-  resultsField,
-  color,
-  legendType,
-  searchQuery,
-  runtimeMappings,
-  dataView,
-  query,
-}) => {
+export const ScatterplotMatrix = (
+  {
+    fields: allFields,
+    index,
+    resultsField,
+    color,
+    legendType,
+    searchQuery,
+    runtimeMappings,
+    dataView,
+    query
+  }: ScatterplotMatrixProps
+) => {
   const { esSearch } = useMlApiContext();
   const kibana = useMlKibana();
   const {

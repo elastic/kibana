@@ -30,7 +30,7 @@ import {
 /**
  * Displays the rule description of a signal document.
  */
-export const AlertDescription: FC = () => {
+export const AlertDescription = () => {
   const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
     useRightPanelContext();

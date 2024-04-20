@@ -18,7 +18,7 @@ export type GetCasesContextProps = Omit<
   | 'getFilesClient'
 >;
 
-const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = lazy(
+const CasesProviderLazy = lazy(
   () => import('../../components/cases_context')
 );
 
@@ -61,19 +61,19 @@ export const getCasesContextLazy = ({
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
 >): (() => React.FC<GetCasesContextProps>) => {
-  const CasesProviderLazyWrapperWithRegistry: React.FC<GetCasesContextProps> = ({
-    children,
-    ...props
-  }) => (
-    <CasesProviderLazyWrapper
-      {...props}
-      externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
-      persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
-      getFilesClient={getFilesClient}
-    >
-      {children}
-    </CasesProviderLazyWrapper>
-  );
+  const CasesProviderLazyWrapperWithRegistry = (
+    {
+      children,
+      ...props
+    }: GetCasesContextProps
+  ) => (<CasesProviderLazyWrapper
+    {...props}
+    externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+    persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
+    getFilesClient={getFilesClient}
+  >
+    {children}
+  </CasesProviderLazyWrapper>);
 
   CasesProviderLazyWrapperWithRegistry.displayName = 'CasesProviderLazyWrapperWithRegistry';
 

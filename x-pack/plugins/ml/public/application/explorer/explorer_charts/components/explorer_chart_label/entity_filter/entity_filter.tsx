@@ -23,11 +23,13 @@ interface EntityFilterProps {
   influencerFieldName: string;
   influencerFieldValue: string;
 }
-export const EntityFilter: FC<EntityFilterProps> = ({
-  onFilter,
-  influencerFieldName,
-  influencerFieldValue,
-}) => {
+export const EntityFilter = (
+  {
+    onFilter,
+    influencerFieldName,
+    influencerFieldValue
+  }: EntityFilterProps
+) => {
   return (
     <React.Fragment>
       <EuiToolTip

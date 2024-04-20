@@ -80,7 +80,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Circle: FunctionComponent = () => {
+export const Circle = () => {
   return (
     <>
       <FieldNameField

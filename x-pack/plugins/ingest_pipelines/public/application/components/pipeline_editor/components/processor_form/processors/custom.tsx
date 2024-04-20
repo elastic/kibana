@@ -71,7 +71,11 @@ interface Props {
  *
  * We store the settings in a field called "customOptions"
  **/
-export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
+export const Custom = (
+  {
+    defaultOptions
+  }: Props
+) => {
   return (
     <UseField
       path="customOptions"

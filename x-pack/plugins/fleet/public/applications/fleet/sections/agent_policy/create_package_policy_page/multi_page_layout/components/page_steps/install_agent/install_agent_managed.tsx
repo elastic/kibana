@@ -23,7 +23,7 @@ import { KubernetesManifestApplyStep } from '../../../../../../../../../componen
 
 import type { InstallAgentPageProps } from './types';
 
-export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
+export const InstallElasticAgentManagedPageStep = (props: InstallAgentPageProps) => {
   const {
     cancelUrl,
     onNext,

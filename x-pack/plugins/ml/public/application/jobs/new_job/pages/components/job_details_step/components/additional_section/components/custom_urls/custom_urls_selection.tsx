@@ -14,7 +14,7 @@ import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import type { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
 
-export const CustomUrlsSelection: FC = () => {
+export const CustomUrlsSelection = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
 
   const setCustomUrls = (customUrls: MlUrlConfig[]) => {

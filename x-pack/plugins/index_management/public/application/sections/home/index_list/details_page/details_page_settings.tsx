@@ -13,9 +13,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLoadIndexSettings } from '../../../../services';
 import { DetailsPageSettingsContent } from './details_page_settings_content';
 
-export const DetailsPageSettings: FunctionComponent<{
-  indexName: string;
-}> = ({ indexName }) => {
+export const DetailsPageSettings = (
+  {
+    indexName
+  }: {
+    indexName: string;
+  }
+) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexSettings(indexName);
 
   if (isLoading) {

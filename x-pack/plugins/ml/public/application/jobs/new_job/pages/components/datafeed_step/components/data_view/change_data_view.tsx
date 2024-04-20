@@ -53,7 +53,11 @@ interface Props {
   onClose: () => void;
 }
 
-export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
+export const ChangeDataViewModal = (
+  {
+    onClose
+  }: Props
+) => {
   const {
     services: {
       data: { dataViews },
@@ -236,10 +240,15 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   );
 };
 
-const ValidationMessage: FC<{
-  validationResponse: DatafeedValidationResponse | null;
-  dataViewTitle: string;
-}> = ({ validationResponse, dataViewTitle }) => {
+const ValidationMessage = (
+  {
+    validationResponse,
+    dataViewTitle
+  }: {
+    validationResponse: DatafeedValidationResponse | null;
+    dataViewTitle: string;
+  }
+) => {
   if (validationResponse === null) {
     return (
       <EuiCallOut

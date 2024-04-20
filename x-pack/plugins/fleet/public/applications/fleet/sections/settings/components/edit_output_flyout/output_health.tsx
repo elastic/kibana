@@ -23,7 +23,12 @@ interface Props {
 }
 const REFRESH_INTERVAL_MS = 10000;
 
-export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge }) => {
+export const OutputHealth = (
+  {
+    output,
+    showBadge
+  }: Props
+) => {
   const { notifications } = useStartServices();
   const [outputHealth, setOutputHealth] = useState<GetOutputHealthResponse | null>();
 

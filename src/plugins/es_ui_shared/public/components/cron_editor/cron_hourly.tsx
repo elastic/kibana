@@ -17,25 +17,29 @@ interface Props {
   onChange: ({ minute }: { minute?: string }) => void;
 }
 
-export const CronHourly: React.FunctionComponent<Props> = ({ minute, minuteOptions, onChange }) => (
-  <Fragment>
-    <EuiFormRow
-      label={
-        <FormattedMessage id="esUi.cronEditor.cronHourly.fieldTimeLabel" defaultMessage="Minute" />
-      }
+export const CronHourly = (
+  {
+    minute,
+    minuteOptions,
+    onChange
+  }: Props
+) => (<Fragment>
+  <EuiFormRow
+    label={
+      <FormattedMessage id="esUi.cronEditor.cronHourly.fieldTimeLabel" defaultMessage="Minute" />
+    }
+    fullWidth
+    data-test-subj="cronFrequencyConfiguration"
+  >
+    <EuiSelect
+      options={minuteOptions}
+      value={minute}
+      onChange={(e) => onChange({ minute: e.target.value })}
       fullWidth
-      data-test-subj="cronFrequencyConfiguration"
-    >
-      <EuiSelect
-        options={minuteOptions}
-        value={minute}
-        onChange={(e) => onChange({ minute: e.target.value })}
-        fullWidth
-        prepend={i18n.translate('esUi.cronEditor.cronHourly.fieldMinute.textAtLabel', {
-          defaultMessage: 'At',
-        })}
-        data-test-subj="cronFrequencyHourlyMinuteSelect"
-      />
-    </EuiFormRow>
-  </Fragment>
-);
+      prepend={i18n.translate('esUi.cronEditor.cronHourly.fieldMinute.textAtLabel', {
+        defaultMessage: 'At',
+      })}
+      data-test-subj="cronFrequencyHourlyMinuteSelect"
+    />
+  </EuiFormRow>
+</Fragment>);

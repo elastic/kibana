@@ -20,7 +20,12 @@ interface Props {
   model: ModelItem;
   onClose: (refreshList?: boolean) => void;
 }
-export const TestModelAndPipelineCreationFlyout: FC<Props> = ({ model, onClose }) => {
+export const TestModelAndPipelineCreationFlyout = (
+  {
+    model,
+    onClose
+  }: Props
+) => {
   const [currentContext, setCurrentContext] = useState<TestTrainedModelsContextType>({
     pipelineConfig: undefined,
     createPipelineFlyoutOpen: false,

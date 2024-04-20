@@ -58,19 +58,21 @@ export interface JobSelectorFlyoutProps {
   onTimeRangeConfigChange?: (v: boolean) => void;
 }
 
-export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
-  dateFormatTz,
-  selectedIds = [],
-  singleSelection,
-  timeseriesOnly,
-  onJobsFetched,
-  onSelectionConfirmed,
-  onFlyoutClose,
-  maps,
-  applyTimeRangeConfig,
-  onTimeRangeConfigChange,
-  withTimeRangeSelector = true,
-}) => {
+export const JobSelectorFlyoutContent = (
+  {
+    dateFormatTz,
+    selectedIds = [],
+    singleSelection,
+    timeseriesOnly,
+    onJobsFetched,
+    onSelectionConfirmed,
+    onFlyoutClose,
+    maps,
+    applyTimeRangeConfig,
+    onTimeRangeConfigChange,
+    withTimeRangeSelector = true
+  }: JobSelectorFlyoutProps
+) => {
   const {
     services: {
       notifications,

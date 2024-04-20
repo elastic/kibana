@@ -115,7 +115,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const GeoGrid: FunctionComponent = () => {
+export const GeoGrid = () => {
   return (
     <>
       <EuiFlexGroup>

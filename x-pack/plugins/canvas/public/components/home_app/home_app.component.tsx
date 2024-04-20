@@ -13,7 +13,11 @@ export interface Props {
   onLoad: () => void;
 }
 
-export const HomeApp: FC<Props> = ({ onLoad = () => {} }) => {
+export const HomeApp = (
+  {
+    onLoad = () => {}
+  }: Props
+) => {
   onLoad();
   setDocTitle('Canvas');
   return <Home />;

@@ -30,7 +30,14 @@ interface Props extends CreateAnalyticsFormProps {
   showCreateDataView?: boolean;
 }
 
-export const CreateStep: FC<Props> = ({ actions, state, step, showCreateDataView = false }) => {
+export const CreateStep = (
+  {
+    actions,
+    state,
+    step,
+    showCreateDataView = false
+  }: Props
+) => {
   const canCreateDataView = useCanCreateDataView();
   const { dataViewAvailableTimeFields, onTimeFieldChanged } = useDataViewTimeFields({
     actions,

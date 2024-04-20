@@ -18,7 +18,12 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const GeoView: FC<Props> = ({ isActive, setCanProceed }) => {
+export const GeoView = (
+  {
+    isActive,
+    setCanProceed
+  }: Props
+) => {
   const [geoFieldValid, setGeoFieldValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 

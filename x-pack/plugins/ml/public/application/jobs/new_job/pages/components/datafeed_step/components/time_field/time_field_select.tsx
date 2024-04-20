@@ -20,7 +20,13 @@ interface Props {
   selectedField: string;
 }
 
-export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const TimeFieldSelect = (
+  {
+    fields,
+    changeHandler,
+    selectedField
+  }: Props
+) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = createFieldOptions(
     fields,

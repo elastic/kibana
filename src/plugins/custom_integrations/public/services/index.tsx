@@ -29,14 +29,14 @@ const CustomIntegrationsServicesContext = createContext<CustomIntegrationsServic
  * Within a plugin, you can  use the CustomIntegrations plugin and retrieve a fully-configured
  * context from the `start` contract.
  */
-export const CustomIntegrationsServicesProvider: FC<CustomIntegrationsServices> = ({
-  children,
-  ...services
-}) => (
-  <CustomIntegrationsServicesContext.Provider value={services}>
-    {children}
-  </CustomIntegrationsServicesContext.Provider>
-);
+export const CustomIntegrationsServicesProvider = (
+  {
+    children,
+    ...services
+  }: CustomIntegrationsServices
+) => (<CustomIntegrationsServicesContext.Provider value={services}>
+  {children}
+</CustomIntegrationsServicesContext.Provider>);
 
 /**
  * React hook for accessing pre-wired `SharedUxServices`.

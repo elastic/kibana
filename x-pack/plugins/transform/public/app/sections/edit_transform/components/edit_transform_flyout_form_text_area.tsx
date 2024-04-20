@@ -24,12 +24,14 @@ interface EditTransformFlyoutFormTextInputProps {
   placeHolder?: boolean;
 }
 
-export const EditTransformFlyoutFormTextArea: FC<EditTransformFlyoutFormTextInputProps> = ({
-  field,
-  label,
-  helpText,
-  placeHolder = false,
-}) => {
+export const EditTransformFlyoutFormTextArea = (
+  {
+    field,
+    label,
+    helpText,
+    placeHolder = false
+  }: EditTransformFlyoutFormTextInputProps
+) => {
   const { defaultValue, errorMessages, value } = useFormField(field);
   const { setFormField } = useEditTransformFlyoutActions();
   const upperCaseField = capitalizeFirstLetter(field);

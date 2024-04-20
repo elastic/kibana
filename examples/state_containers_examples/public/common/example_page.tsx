@@ -20,7 +20,7 @@ interface NavProps {
   exampleLinks: ExampleLink[];
 }
 
-const SideNav: React.FC<NavProps> = ({ navigateToApp, exampleLinks }: NavProps) => {
+const SideNav = ({ navigateToApp, exampleLinks }: NavProps) => {
   const navItems = exampleLinks.map((example) => ({
     id: example.appId,
     name: example.title,
@@ -46,7 +46,7 @@ interface Props {
   exampleLinks: ExampleLink[];
 }
 
-export const StateContainersExamplesPage: React.FC<Props> = ({
+export const StateContainersExamplesPage = ({
   navigateToApp,
   children,
   exampleLinks,

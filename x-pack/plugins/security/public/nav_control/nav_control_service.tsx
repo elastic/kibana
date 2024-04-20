@@ -143,19 +143,19 @@ export interface ProvidersProps {
   securityApiClients: SecurityApiClients;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
-  authc,
-  services,
-  securityApiClients,
-  children,
-}) => (
-  <KibanaRenderContextProvider {...services}>
-    <KibanaContextProvider services={services}>
-      <AuthenticationProvider authc={authc}>
-        <SecurityApiClientsProvider {...securityApiClients}>
-          <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
-        </SecurityApiClientsProvider>
-      </AuthenticationProvider>
-    </KibanaContextProvider>
-  </KibanaRenderContextProvider>
-);
+export const Providers = (
+  {
+    authc,
+    services,
+    securityApiClients,
+    children
+  }: ProvidersProps
+) => (<KibanaRenderContextProvider {...services}>
+  <KibanaContextProvider services={services}>
+    <AuthenticationProvider authc={authc}>
+      <SecurityApiClientsProvider {...securityApiClients}>
+        <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+      </SecurityApiClientsProvider>
+    </AuthenticationProvider>
+  </KibanaContextProvider>
+</KibanaRenderContextProvider>);

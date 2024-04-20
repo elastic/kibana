@@ -15,7 +15,11 @@ interface Props {
   repository: HDFSRepository;
 }
 
-export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
+export const HDFSDetails = (
+  {
+    repository
+  }: Props
+) => {
   const { settings } = repository;
   const {
     uri,

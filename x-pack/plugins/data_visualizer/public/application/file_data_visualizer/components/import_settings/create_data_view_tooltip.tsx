@@ -15,7 +15,12 @@ interface Props {
   showTooltip: boolean;
 }
 
-export const CreateDataViewToolTip: FC<Props> = ({ children, showTooltip }) => {
+export const CreateDataViewToolTip = (
+  {
+    children,
+    showTooltip
+  }: Props
+) => {
   return (
     <EuiToolTip
       position="top"

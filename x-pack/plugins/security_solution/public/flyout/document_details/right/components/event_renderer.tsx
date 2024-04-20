@@ -25,7 +25,7 @@ const ReasonPreviewContainer = styled.div``;
 /**
  * Event renderer of an event document
  */
-export const EventRenderer: FC = () => {
+export const EventRenderer = () => {
   const { dataAsNestedObject, scopeId } = useRightPanelContext();
 
   const renderer = useMemo(

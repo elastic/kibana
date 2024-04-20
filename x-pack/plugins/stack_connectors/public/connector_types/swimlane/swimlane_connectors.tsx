@@ -22,9 +22,11 @@ import { SwimlaneConnection, SwimlaneFields } from './steps';
 import { useGetApplication } from './use_get_application';
 import * as i18n from './translations';
 
-const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-}) => {
+const SwimlaneActionConnectorFields = (
+  {
+    readOnly
+  }: ActionConnectorFieldsProps
+) => {
   const {
     notifications: { toasts },
   } = useKibana().services;

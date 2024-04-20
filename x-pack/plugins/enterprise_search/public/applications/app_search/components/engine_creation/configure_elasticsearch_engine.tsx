@@ -53,7 +53,7 @@ const renderIndexOption = (option: SearchIndexSelectableOption, searchValue: str
   );
 };
 
-export const ConfigureElasticsearchEngine: React.FC = () => {
+export const ConfigureElasticsearchEngine = () => {
   const {
     aliasName,
     aliasNameErrorMessage,

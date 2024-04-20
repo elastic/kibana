@@ -41,17 +41,19 @@ interface RowProps {
   isMultiRow?: boolean;
 }
 
-const Row: FunctionComponent<RowProps> = ({
-  index,
-  value,
-  fieldLabel,
-  onChange,
-  onDelete,
-  onBlur,
-  autoFocus,
-  isDisabled,
-  isMultiRow,
-}) => {
+const Row = (
+  {
+    index,
+    value,
+    fieldLabel,
+    onChange,
+    onDelete,
+    onBlur,
+    autoFocus,
+    isDisabled,
+    isMultiRow
+  }: RowProps
+) => {
   const onDeleteHandler = useCallback(() => {
     onDelete(index);
   }, [onDelete, index]);
@@ -112,16 +114,18 @@ function defaultValue(value: string[]) {
   return value.length > 0 ? value : [''];
 }
 
-export const MultiTextInput: FunctionComponent<Props> = ({
-  fieldLabel,
-  value,
-  onChange,
-  onBlur,
-  isInvalid,
-  isDisabled,
-  errors,
-  'data-test-subj': dataTestSubj,
-}) => {
+export const MultiTextInput = (
+  {
+    fieldLabel,
+    value,
+    onChange,
+    onBlur,
+    isInvalid,
+    isDisabled,
+    errors,
+    'data-test-subj': dataTestSubj
+  }: Props
+) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const [rows, setRows] = useState(() => defaultValue(value));
   const [previousRows, setPreviousRows] = useState(rows);

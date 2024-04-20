@@ -14,9 +14,13 @@ import { reactRouterNavigate, WithPrivileges } from '../../../../../shared_impor
 import { linkToAddPolicy, linkToPolicies } from '../../../../services/navigation';
 import { useCore } from '../../../../app_context';
 
-export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: number }> = ({
-  policiesCount,
-}) => {
+export const SnapshotEmptyPrompt = (
+  {
+    policiesCount
+  }: {
+    policiesCount: number;
+  }
+) => {
   const { docLinks } = useCore();
   const history = useHistory();
   return (

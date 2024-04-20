@@ -25,7 +25,12 @@ const isTargetBlank = (event: MouseEvent) => {
   return target && target !== '_self';
 };
 
-export const RoutingLink: FC<RoutingLinkProps> = ({ to, ...rest }) => {
+export const RoutingLink = (
+  {
+    to,
+    ...rest
+  }: RoutingLinkProps
+) => {
   const history = useHistory();
 
   const onClick = useCallback(
@@ -58,7 +63,12 @@ export const RoutingLink: FC<RoutingLinkProps> = ({ to, ...rest }) => {
 
 type RoutingButtonIconProps = Omit<EuiButtonIconProps, 'href' | 'onClick'> & RoutingProps;
 
-export const RoutingButtonIcon: FC<RoutingButtonIconProps> = ({ to, ...rest }) => {
+export const RoutingButtonIcon = (
+  {
+    to,
+    ...rest
+  }: RoutingButtonIconProps
+) => {
   const history = useHistory();
 
   const onClick = useCallback(

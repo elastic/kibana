@@ -36,16 +36,18 @@ export interface SelectClientPanelProps {
   sharePlugin: SharePluginStart;
 }
 
-export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
-  docLinks,
-  children,
-  isPanelLeft = true,
-  overviewPanelProps,
-  callout,
-  application,
-  consolePlugin,
-  sharePlugin,
-}) => {
+export const SelectClientPanel = (
+  {
+    docLinks,
+    children,
+    isPanelLeft = true,
+    overviewPanelProps,
+    callout,
+    application,
+    consolePlugin,
+    sharePlugin
+  }: SelectClientPanelProps
+) => {
   const panelContent = (
     <>
       <EuiFlexGroup direction="column">

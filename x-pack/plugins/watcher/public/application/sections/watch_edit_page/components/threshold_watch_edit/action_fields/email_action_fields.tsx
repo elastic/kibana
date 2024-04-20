@@ -19,12 +19,14 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const EmailActionFields: React.FunctionComponent<Props> = ({
-  action,
-  editAction,
-  errors,
-  hasErrors,
-}) => {
+export const EmailActionFields = (
+  {
+    action,
+    editAction,
+    errors,
+    hasErrors
+  }: Props
+) => {
   const { to, subject, body } = action;
   const toOptions = to ? to.map((label) => ({ label })) : [];
 

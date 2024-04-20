@@ -17,11 +17,13 @@ interface FieldFilterApplyButtonProps {
   tooltipContent?: string;
 }
 
-export const FieldFilterApplyButton: FC<FieldFilterApplyButtonProps> = ({
-  disabled,
-  onClick,
-  tooltipContent,
-}) => {
+export const FieldFilterApplyButton = (
+  {
+    disabled,
+    onClick,
+    tooltipContent
+  }: FieldFilterApplyButtonProps
+) => {
   const button = (
     <EuiButton
       data-test-subj={`aiopsFieldFilterApplyButton${disabled ? ' disabled' : ''}`}

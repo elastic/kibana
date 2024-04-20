@@ -47,10 +47,12 @@ function displayOutputType(type: string) {
   }
 }
 
-export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
-  outputs,
-  deleteOutput,
-}) => {
+export const OutputsTable = (
+  {
+    outputs,
+    deleteOutput
+  }: OutputsTableProps
+) => {
   const authz = useAuthz();
   const { getHref } = useLink();
 

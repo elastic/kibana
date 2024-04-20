@@ -17,7 +17,7 @@ import { CustomCrawlType } from '../../../../api/crawler/types';
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutCrawlTypeSelection: React.FC = () => {
+export const CrawlCustomSettingsFlyoutCrawlTypeSelection = () => {
   const { crawlType } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { onSelectCrawlType } = useActions(CrawlCustomSettingsFlyoutLogic);
 

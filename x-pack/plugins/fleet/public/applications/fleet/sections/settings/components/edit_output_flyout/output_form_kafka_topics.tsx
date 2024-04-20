@@ -11,9 +11,13 @@ import React from 'react';
 
 import type { OutputFormInputsType } from './use_output_form';
 
-export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
-  inputs,
-}) => {
+export const OutputFormKafkaTopics = (
+  {
+    inputs
+  }: {
+    inputs: OutputFormInputsType;
+  }
+) => {
   return (
     <EuiPanel
       borderRadius="m"

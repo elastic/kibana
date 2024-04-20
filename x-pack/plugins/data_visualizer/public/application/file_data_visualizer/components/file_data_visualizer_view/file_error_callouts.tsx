@@ -20,7 +20,12 @@ interface FileTooLargeProps {
   maxFileSize: number;
 }
 
-export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) => {
+export const FileTooLarge = (
+  {
+    fileSize,
+    maxFileSize
+  }: FileTooLargeProps
+) => {
   const fileSizeFormatted = numeral(fileSize).format(FILE_SIZE_DISPLAY_FORMAT);
   const maxFileSizeFormatted = numeral(maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
 
@@ -82,11 +87,13 @@ interface FileCouldNotBeReadProps {
   showEditFlyout(): void;
 }
 
-export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
-  error,
-  loaded,
-  showEditFlyout,
-}) => {
+export const FileCouldNotBeRead = (
+  {
+    error,
+    loaded,
+    showEditFlyout
+  }: FileCouldNotBeReadProps
+) => {
   const message = error?.body?.message || '';
   return (
     <>
@@ -133,7 +140,13 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
   );
 };
 
-export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ error }) => {
+export const Explanation = (
+  {
+    error
+  }: {
+    error: FindFileStructureErrorResponse;
+  }
+) => {
   if (!error?.body?.attributes?.body?.error?.suppressed?.length) {
     return null;
   }
@@ -148,7 +161,7 @@ export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ err
   );
 };
 
-export const FindFileStructurePermissionDenied: FC = () => {
+export const FindFileStructurePermissionDenied = () => {
   return (
     <>
       <EuiCallOut

@@ -40,17 +40,17 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-const CrowdstrikeActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-}) => (
-  <SimpleConnectorForm
-    isEdit={isEdit}
-    readOnly={readOnly}
-    configFormSchema={configFormSchema}
-    secretsFormSchema={secretsFormSchema}
-  />
-);
+const CrowdstrikeActionConnectorFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => (<SimpleConnectorForm
+  isEdit={isEdit}
+  readOnly={readOnly}
+  configFormSchema={configFormSchema}
+  secretsFormSchema={secretsFormSchema}
+/>);
 
 // eslint-disable-next-line import/no-default-export
 export { CrowdstrikeActionConnectorFields as default };

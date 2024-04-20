@@ -13,7 +13,7 @@ import { CloningNotification } from './cloning_notification';
 
 const FIVE_SECONDS = 5e3;
 
-export const DrilldownList: React.FC = ({}) => {
+export const DrilldownList = ({}) => {
   const drilldowns = useDrilldownManager();
   const events = drilldowns.useEvents();
   const cloningNotificationCount = React.useMemo<number>(

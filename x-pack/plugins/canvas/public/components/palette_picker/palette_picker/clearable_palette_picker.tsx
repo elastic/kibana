@@ -18,7 +18,7 @@ const strings = {
     }),
 };
 
-export const ClearablePalettePicker: FC<ClearableComponentProps> = (props) => {
+export const ClearablePalettePicker = (props: ClearableComponentProps) => {
   const { palette, palettes, onChange = () => {} } = props;
   const colorPalettes = palettes.map(prepareColorPalette);
 

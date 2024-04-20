@@ -14,7 +14,11 @@ interface Props {
   count: number;
 }
 
-const AnimatedCounterComponent: React.FC<Props> = ({ count }) => {
+const AnimatedCounterComponent = (
+  {
+    count
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const d3Ref = useRef(null);
   const zero = 0; // counter starts at zero

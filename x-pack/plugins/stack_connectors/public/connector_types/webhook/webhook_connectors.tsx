@@ -44,9 +44,11 @@ const HTTP_VERBS = ['post', 'put'];
 const { emptyField, urlField } = fieldValidators;
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-}) => {
+const WebhookActionConnectorFields = (
+  {
+    readOnly
+  }: ActionConnectorFieldsProps
+) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [

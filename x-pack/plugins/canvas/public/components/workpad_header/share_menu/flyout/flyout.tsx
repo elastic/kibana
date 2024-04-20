@@ -42,7 +42,11 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ShareWebsiteFlyout: FC<Pick<Props, 'onClose'>> = ({ onClose }) => {
+export const ShareWebsiteFlyout = (
+  {
+    onClose
+  }: Pick<Props, 'onClose'>
+) => {
   const { renderedWorkpad, unsupportedRenderers } = useSelector((state: State) => ({
     renderedWorkpad: getRenderedWorkpad(state),
     unsupportedRenderers: getUnsupportedRenderers(state),

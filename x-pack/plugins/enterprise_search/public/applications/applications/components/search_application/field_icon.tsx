@@ -24,7 +24,7 @@ export interface FieldIconProps {
   type: string;
 }
 
-export const FieldIcon: React.FC<FieldIconProps> = (props) => {
+export const FieldIcon = (props: FieldIconProps) => {
   const type = typeToFieldIconType[props.type] || props.type;
   const overrides = typeToEuiIconMap[type] || {};
   return <KbnFieldIcon type={type} {...overrides} />;

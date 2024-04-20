@@ -45,7 +45,12 @@ const ContentEditorContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const ContentEditorProvider: FC<Services> = ({ children, ...services }) => {
+export const ContentEditorProvider = (
+  {
+    children,
+    ...services
+  }: Services
+) => {
   return <ContentEditorContext.Provider value={services}>{children}</ContentEditorContext.Provider>;
 };
 
@@ -109,10 +114,12 @@ export interface ContentEditorKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const ContentEditorKibanaProvider = (
+  {
+    children,
+    ...services
+  }: ContentEditorKibanaDependencies
+) => {
   const { core, toMountPoint, savedObjectsTagging } = services;
   const { openFlyout: coreOpenFlyout } = core.overlays;
   const { theme$ } = core.theme;

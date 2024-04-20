@@ -21,12 +21,14 @@ interface Props {
   onConnectorIdSelected: (connectorId: string) => void;
 }
 
-const HeaderComponent: React.FC<Props> = ({
-  connectorId,
-  isLoading,
-  onGenerate,
-  onConnectorIdSelected,
-}) => {
+const HeaderComponent = (
+  {
+    connectorId,
+    isLoading,
+    onGenerate,
+    onConnectorIdSelected
+  }: Props
+) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
   const disabled = !hasAssistantPrivilege || isLoading || connectorId == null;

@@ -25,7 +25,11 @@ interface Props {
   file: FileJSON;
 }
 
-export const FileCard: FunctionComponent<Props> = ({ file }) => {
+export const FileCard = (
+  {
+    file
+  }: Props
+) => {
   const { kind, state, client, shouldAllowDelete } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });

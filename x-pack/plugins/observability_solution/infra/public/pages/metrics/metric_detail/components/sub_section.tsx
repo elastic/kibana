@@ -15,15 +15,17 @@ type SubSectionProps = LayoutProps & {
   label?: string;
 };
 
-export const SubSection: FunctionComponent<SubSectionProps> = ({
-  id,
-  label,
-  children,
-  metrics,
-  onChangeRangeTime,
-  isLiveStreaming,
-  stopLiveStreaming,
-}) => {
+export const SubSection = (
+  {
+    id,
+    label,
+    children,
+    metrics,
+    onChangeRangeTime,
+    isLiveStreaming,
+    stopLiveStreaming
+  }: SubSectionProps
+) => {
   const metric = useMemo(() => metrics?.find((m) => m.id === id), [id, metrics]);
 
   if (!children || !metric) {

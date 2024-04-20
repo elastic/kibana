@@ -24,7 +24,11 @@ interface ChatSidebarProps {
   selectedIndicesCount: number;
 }
 
-export const ChatSidebar: React.FC<ChatSidebarProps> = ({ selectedIndicesCount }) => {
+export const ChatSidebar = (
+  {
+    selectedIndicesCount
+  }: ChatSidebarProps
+) => {
   const { euiTheme } = useEuiTheme();
   const accordions = [
     {

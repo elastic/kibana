@@ -13,7 +13,12 @@ interface HelpCenterContentProps {
   appName: string;
 }
 
-export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLink, appName }) => {
+export const HelpCenterContent = (
+  {
+    feedbackLink,
+    appName
+  }: HelpCenterContentProps
+) => {
   const chrome = useKibana().services.chrome;
 
   useEffect(() => {

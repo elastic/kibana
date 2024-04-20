@@ -71,7 +71,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Pipeline: FunctionComponent = () => {
+export const Pipeline = () => {
   return (
     <>
       <UseField

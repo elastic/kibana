@@ -122,10 +122,12 @@ interface TransformStatsBarProps {
   transformsList: TransformListRow[];
 }
 
-export const TransformStatsBar: FC<TransformStatsBarProps> = ({
-  transformNodes,
-  transformsList,
-}) => {
+export const TransformStatsBar = (
+  {
+    transformNodes,
+    transformsList
+  }: TransformStatsBarProps
+) => {
   const { showNodeInfo } = useEnabledFeatures();
   const refreshTransformList = useRefreshTransformList();
   const { esNodeRoles } = useDocumentationLinks();

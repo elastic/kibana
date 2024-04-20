@@ -28,7 +28,11 @@ export enum EDITOR_MODE {
 interface Props {
   isDisabled: boolean;
 }
-export const DatafeedPreviewFlyout: FC<Props> = ({ isDisabled }) => {
+export const DatafeedPreviewFlyout = (
+  {
+    isDisabled
+  }: Props
+) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const [showFlyout, setShowFlyout] = useState(false);
 
@@ -68,7 +72,15 @@ export const DatafeedPreviewFlyout: FC<Props> = ({ isDisabled }) => {
   );
 };
 
-const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled, onClick }) => {
+const FlyoutButton = (
+  {
+    isDisabled,
+    onClick
+  }: {
+    isDisabled: boolean;
+    onClick(): void;
+  }
+) => {
   return (
     <EuiButtonEmpty
       onClick={onClick}

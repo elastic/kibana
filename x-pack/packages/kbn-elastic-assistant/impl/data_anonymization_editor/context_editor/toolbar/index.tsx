@@ -19,40 +19,38 @@ export interface Props {
   totalFields: number;
 }
 
-const ToolbarComponent: React.FC<Props> = ({
-  onListUpdated,
-  onSelectAll,
-  selected,
-  totalFields,
-}) => (
-  <EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
-    <EuiFlexItem grow={false}>
-      <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
-        {i18n.SELECTED_FIELDS(selected.length)}
-      </EuiText>
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        data-test-subj="selectAllFields"
-        iconType="pagesSelect"
-        onClick={onSelectAll}
-        size="xs"
-      >
-        {i18n.SELECT_ALL_FIELDS(totalFields)}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-
-    <EuiFlexItem grow={false}>
-      <BulkActions
-        appliesTo="multipleRows"
-        disabled={selected.length === 0}
-        onListUpdated={onListUpdated}
-        selected={selected}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const ToolbarComponent = (
+  {
+    onListUpdated,
+    onSelectAll,
+    selected,
+    totalFields
+  }: Props
+) => (<EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
+  <EuiFlexItem grow={false}>
+    <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
+      {i18n.SELECTED_FIELDS(selected.length)}
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiButtonEmpty
+      data-test-subj="selectAllFields"
+      iconType="pagesSelect"
+      onClick={onSelectAll}
+      size="xs"
+    >
+      {i18n.SELECT_ALL_FIELDS(totalFields)}
+    </EuiButtonEmpty>
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <BulkActions
+      appliesTo="multipleRows"
+      disabled={selected.length === 0}
+      onListUpdated={onListUpdated}
+      selected={selected}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>);
 
 ToolbarComponent.displayName = 'ToolbarComponent';
 

@@ -43,10 +43,12 @@ export interface CreatePipelineForModelFlyoutProps {
   model: ModelItem;
 }
 
-export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps> = ({
-  onClose,
-  model,
-}) => {
+export const CreatePipelineForModelFlyout = (
+  {
+    onClose,
+    model
+  }: CreatePipelineForModelFlyoutProps
+) => {
   const {
     currentContext: { pipelineConfig },
   } = useTestTrainedModelsContext();

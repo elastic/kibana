@@ -29,14 +29,16 @@ BulkActionsContainer.displayName = 'BulkActionsContainer';
 /**
  * Stateless component integrating the bulk actions menu and the select all button
  */
-const BulkActionsComponent: React.FC<OwnProps> = ({
-  selectText,
-  selectClearAllText,
-  showClearSelection,
-  onSelectAll,
-  onClearSelection,
-  bulkActionItems,
-}) => {
+const BulkActionsComponent = (
+  {
+    selectText,
+    selectClearAllText,
+    showClearSelection,
+    onSelectAll,
+    onClearSelection,
+    bulkActionItems
+  }: OwnProps
+) => {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const toggleIsActionOpen = useCallback(() => {

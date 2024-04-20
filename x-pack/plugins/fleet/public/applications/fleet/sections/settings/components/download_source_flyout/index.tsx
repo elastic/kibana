@@ -40,11 +40,13 @@ export interface EditDownloadSourceFlyoutProps {
   proxies: FleetProxy[];
 }
 
-export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourceFlyoutProps> = ({
-  onClose,
-  downloadSource,
-  proxies,
-}) => {
+export const EditDownloadSourceFlyout = (
+  {
+    onClose,
+    downloadSource,
+    proxies
+  }: EditDownloadSourceFlyoutProps
+) => {
   useBreadcrumbs('settings');
   const form = useDowloadSourceFlyoutForm(onClose, downloadSource);
   const inputs = form.inputs;

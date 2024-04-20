@@ -44,15 +44,17 @@ interface Props {
   onClosePopover: () => void;
 }
 
-export const TagsAddRemove: React.FC<Props> = ({
-  agentId,
-  agents,
-  allTags,
-  selectedTags,
-  button,
-  onTagsUpdated,
-  onClosePopover,
-}: Props) => {
+export const TagsAddRemove = (
+  {
+    agentId,
+    agents,
+    allTags,
+    selectedTags,
+    button,
+    onTagsUpdated,
+    onClosePopover
+  }: Props
+) => {
   const labelsFromTags = useCallback(
     (tags: string[], selected: string[]) =>
       tags.map((tag: string) => ({

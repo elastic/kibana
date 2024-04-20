@@ -26,9 +26,13 @@ import {
   validateSchema,
 } from './settings_field_wrapper';
 
-export const SettingsFieldGroup: React.FC<{ settingsConfig: SettingsConfig }> = ({
-  settingsConfig,
-}) => {
+export const SettingsFieldGroup = (
+  {
+    settingsConfig
+  }: {
+    settingsConfig: SettingsConfig;
+  }
+) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const agentPolicyFormContext = useAgentPolicyFormContext();
   const shape = settingsConfig.schema._def.innerType._def.shape();

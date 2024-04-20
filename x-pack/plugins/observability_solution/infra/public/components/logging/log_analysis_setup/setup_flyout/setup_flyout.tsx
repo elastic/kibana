@@ -23,9 +23,13 @@ import { ModuleId, moduleIds, useLogAnalysisSetupFlyoutStateContext } from './se
 
 const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 
-export const LogAnalysisSetupFlyout: React.FC<{
-  allowedModules?: ModuleId[];
-}> = ({ allowedModules = moduleIds }) => {
+export const LogAnalysisSetupFlyout = (
+  {
+    allowedModules = moduleIds
+  }: {
+    allowedModules?: ModuleId[];
+  }
+) => {
   const { closeFlyout, flyoutView, showModuleList, showModuleSetup } =
     useLogAnalysisSetupFlyoutStateContext();
 
@@ -65,11 +69,17 @@ export const LogAnalysisSetupFlyout: React.FC<{
   );
 };
 
-const ModuleSetupView: React.FC<{
-  moduleId: ModuleId;
-  onClose: () => void;
-  onViewModuleList?: () => void;
-}> = ({ moduleId, onClose, onViewModuleList }) => {
+const ModuleSetupView = (
+  {
+    moduleId,
+    onClose,
+    onViewModuleList
+  }: {
+    moduleId: ModuleId;
+    onClose: () => void;
+    onViewModuleList?: () => void;
+  }
+) => {
   switch (moduleId) {
     case 'logs_ui_analysis':
       return (
@@ -86,26 +96,29 @@ const ModuleSetupView: React.FC<{
   }
 };
 
-const LogAnalysisSetupFlyoutSubPage: React.FC<{
-  onViewModuleList?: () => void;
-}> = ({ children, onViewModuleList }) => (
-  <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-    {onViewModuleList ? (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButton"
-          flush="left"
-          iconSide="left"
-          iconType="arrowLeft"
-          onClick={onViewModuleList}
-        >
-          <FormattedMessage
-            id="xpack.infra.logs.analysis.setupFlyoutGotoListButtonLabel"
-            defaultMessage="All Machine Learning jobs"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    ) : null}
-    <EuiFlexItem>{children}</EuiFlexItem>
-  </EuiFlexGroup>
-);
+const LogAnalysisSetupFlyoutSubPage = (
+  {
+    children,
+    onViewModuleList
+  }: {
+    onViewModuleList?: () => void;
+  }
+) => (<EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+  {onViewModuleList ? (
+    <EuiFlexItem grow={false}>
+      <EuiButtonEmpty
+        data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButton"
+        flush="left"
+        iconSide="left"
+        iconType="arrowLeft"
+        onClick={onViewModuleList}
+      >
+        <FormattedMessage
+          id="xpack.infra.logs.analysis.setupFlyoutGotoListButtonLabel"
+          defaultMessage="All Machine Learning jobs"
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  ) : null}
+  <EuiFlexItem>{children}</EuiFlexItem>
+</EuiFlexGroup>);

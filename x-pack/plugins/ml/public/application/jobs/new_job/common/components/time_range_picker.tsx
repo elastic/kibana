@@ -25,7 +25,12 @@ interface Props {
   timeRange: TimeRange;
 }
 
-export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
+export const TimeRangePicker = (
+  {
+    setTimeRange,
+    timeRange
+  }: Props
+) => {
   const {
     services: { uiSettings },
   } = useMlKibana();

@@ -64,7 +64,13 @@ export const indexESQLBasedRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<{ esql: boolean }> = ({ esql }) => {
+const PageWrapper = (
+  {
+    esql
+  }: {
+    esql: boolean;
+  }
+) => {
   const { context } = useRouteResolver('basic', []);
 
   return (

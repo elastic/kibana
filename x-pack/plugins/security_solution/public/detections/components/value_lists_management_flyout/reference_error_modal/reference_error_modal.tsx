@@ -43,17 +43,19 @@ interface ReferenceErrorModalProps {
   titleText: string;
 }
 
-export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = ({
-  cancelText,
-  confirmText,
-  contentText,
-  onClose,
-  onCancel,
-  onConfirm,
-  references = [],
-  showModal,
-  titleText,
-}) => {
+export const ReferenceErrorModalComponent = (
+  {
+    cancelText,
+    confirmText,
+    contentText,
+    onClose,
+    onCancel,
+    onConfirm,
+    references = [],
+    showModal,
+    titleText
+  }: ReferenceErrorModalProps
+) => {
   if (!showModal) {
     return null;
   }

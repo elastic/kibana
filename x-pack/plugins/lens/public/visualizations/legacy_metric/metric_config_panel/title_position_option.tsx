@@ -32,7 +32,12 @@ const titlePositions = [
   },
 ];
 
-export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
+export const TitlePositionOptions = (
+  {
+    state,
+    setState
+  }: TitlePositionProps
+) => {
   return (
     <EuiFormRow
       display="columnCompressed"

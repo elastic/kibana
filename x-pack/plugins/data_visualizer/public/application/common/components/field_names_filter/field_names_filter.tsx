@@ -20,11 +20,13 @@ interface Props {
   visibleFieldNames: string[];
 }
 
-export const DataVisualizerFieldNamesFilter: FC<Props> = ({
-  fields,
-  setVisibleFieldNames,
-  visibleFieldNames,
-}) => {
+export const DataVisualizerFieldNamesFilter = (
+  {
+    fields,
+    setVisibleFieldNames,
+    visibleFieldNames
+  }: Props
+) => {
   const fieldNameTitle = useMemo(
     () =>
       i18n.translate('xpack.dataVisualizer.fieldNameSelect', {

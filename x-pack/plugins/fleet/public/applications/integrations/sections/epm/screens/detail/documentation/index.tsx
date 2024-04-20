@@ -34,7 +34,12 @@ interface Props {
   integration?: string | null;
 }
 
-export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo, integration }) => {
+export const DocumentationPage = (
+  {
+    packageInfo,
+    integration
+  }: Props
+) => {
   const { docLinks } = useStartServices();
 
   const content = (
@@ -80,9 +85,13 @@ type RegistryInputWithStreams = RegistryInput & {
   streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
 };
 
-const StreamsSection: React.FunctionComponent<{
-  streams: RegistryInputWithStreams['streams'];
-}> = ({ streams }) => {
+const StreamsSection = (
+  {
+    streams
+  }: {
+    streams: RegistryInputWithStreams['streams'];
+  }
+) => {
   if (streams.length === 0) {
     return null;
   }
@@ -123,10 +132,15 @@ const StreamsSection: React.FunctionComponent<{
   );
 };
 
-const Inputs: React.FunctionComponent<{
-  packageInfo: PackageInfo;
-  integration?: string | null;
-}> = ({ packageInfo, integration }) => {
+const Inputs = (
+  {
+    packageInfo,
+    integration
+  }: {
+    packageInfo: PackageInfo;
+    integration?: string | null;
+  }
+) => {
   const inputs = useMemo(
     () =>
       packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
@@ -188,7 +202,13 @@ const Inputs: React.FunctionComponent<{
   );
 };
 
-const PackageVars: React.FunctionComponent<{ vars: PackageInfo['vars'] }> = ({ vars }) => {
+const PackageVars = (
+  {
+    vars
+  }: {
+    vars: PackageInfo['vars'];
+  }
+) => {
   if (!vars) {
     return null;
   }
@@ -210,7 +230,13 @@ const PackageVars: React.FunctionComponent<{ vars: PackageInfo['vars'] }> = ({ v
   );
 };
 
-const VarsTable: React.FunctionComponent<{ vars: RegistryVarsEntry[] }> = ({ vars }) => {
+const VarsTable = (
+  {
+    vars
+  }: {
+    vars: RegistryVarsEntry[];
+  }
+) => {
   const columns = useMemo((): EuiInMemoryTableProps<RegistryVarsEntry>['columns'] => {
     return [
       {

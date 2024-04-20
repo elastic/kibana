@@ -35,55 +35,55 @@ export interface Props {
   useLensCompatibleFields?: boolean;
 }
 
-const FieldSelectionComponent: React.FC<Props> = ({
-  chartOptionsContextMenu,
-  setStackByField0,
-  setStackByField0ComboboxInputRef,
-  setStackByField1,
-  setStackByField1ComboboxInputRef,
-  stackByField0,
-  stackByField0ComboboxRef,
-  stackByField1,
-  stackByField1ComboboxRef,
-  stackByWidth,
-  uniqueQueryId,
-  useLensCompatibleFields,
-}: Props) => (
-  <EuiFlexGroup alignItems="flexStart" data-test-subj="fieldSelection" gutterSize="none">
-    <EuiFlexItem grow={false}>
-      <StackByComboBox
-        aria-label={GROUP_BY_LABEL}
-        ref={stackByField0ComboboxRef}
-        data-test-subj="groupBy"
-        onSelect={setStackByField0}
-        prepend={GROUP_BY_LABEL}
-        selected={stackByField0}
-        inputRef={setStackByField0ComboboxInputRef}
-        width={stackByWidth}
-        useLensCompatibleFields={useLensCompatibleFields}
-      />
-      <EuiSpacer size="s" />
-      <StackByComboBox
-        aria-label={GROUP_BY_TOP_LABEL}
-        ref={stackByField1ComboboxRef}
-        data-test-subj="groupByTop"
-        onSelect={setStackByField1}
-        prepend={GROUP_BY_TOP_LABEL}
-        selected={stackByField1 ?? ''}
-        inputRef={setStackByField1ComboboxInputRef}
-        width={stackByWidth}
-        useLensCompatibleFields={useLensCompatibleFields}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {chartOptionsContextMenu != null && (
-        <ChartOptionsFlexItem grow={false}>
-          {chartOptionsContextMenu(uniqueQueryId)}
-        </ChartOptionsFlexItem>
-      )}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const FieldSelectionComponent = (
+  {
+    chartOptionsContextMenu,
+    setStackByField0,
+    setStackByField0ComboboxInputRef,
+    setStackByField1,
+    setStackByField1ComboboxInputRef,
+    stackByField0,
+    stackByField0ComboboxRef,
+    stackByField1,
+    stackByField1ComboboxRef,
+    stackByWidth,
+    uniqueQueryId,
+    useLensCompatibleFields
+  }: Props
+) => (<EuiFlexGroup alignItems="flexStart" data-test-subj="fieldSelection" gutterSize="none">
+  <EuiFlexItem grow={false}>
+    <StackByComboBox
+      aria-label={GROUP_BY_LABEL}
+      ref={stackByField0ComboboxRef}
+      data-test-subj="groupBy"
+      onSelect={setStackByField0}
+      prepend={GROUP_BY_LABEL}
+      selected={stackByField0}
+      inputRef={setStackByField0ComboboxInputRef}
+      width={stackByWidth}
+      useLensCompatibleFields={useLensCompatibleFields}
+    />
+    <EuiSpacer size="s" />
+    <StackByComboBox
+      aria-label={GROUP_BY_TOP_LABEL}
+      ref={stackByField1ComboboxRef}
+      data-test-subj="groupByTop"
+      onSelect={setStackByField1}
+      prepend={GROUP_BY_TOP_LABEL}
+      selected={stackByField1 ?? ''}
+      inputRef={setStackByField1ComboboxInputRef}
+      width={stackByWidth}
+      useLensCompatibleFields={useLensCompatibleFields}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    {chartOptionsContextMenu != null && (
+      <ChartOptionsFlexItem grow={false}>
+        {chartOptionsContextMenu(uniqueQueryId)}
+      </ChartOptionsFlexItem>
+    )}
+  </EuiFlexItem>
+</EuiFlexGroup>);
 
 FieldSelectionComponent.displayName = 'FieldSelectionComponent';
 

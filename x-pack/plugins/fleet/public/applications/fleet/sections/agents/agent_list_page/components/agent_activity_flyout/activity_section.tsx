@@ -14,13 +14,21 @@ import type { ActionStatus, AgentPolicy } from '../../../../../types';
 import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
 import { ActivityItem } from './activity_item';
 
-export const ActivitySection: React.FunctionComponent<{
-  title: ReactNode;
-  actions: ActionStatus[];
-  abortUpgrade: (action: ActionStatus) => Promise<void>;
-  onClickViewAgents: (action: ActionStatus) => void;
-  agentPolicies: AgentPolicy[];
-}> = ({ title, actions, abortUpgrade, onClickViewAgents, agentPolicies }) => {
+export const ActivitySection = (
+  {
+    title,
+    actions,
+    abortUpgrade,
+    onClickViewAgents,
+    agentPolicies
+  }: {
+    title: ReactNode;
+    actions: ActionStatus[];
+    abortUpgrade: (action: ActionStatus) => Promise<void>;
+    onClickViewAgents: (action: ActionStatus) => void;
+    agentPolicies: AgentPolicy[];
+  }
+) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">

@@ -12,7 +12,11 @@ interface Props {
   prompt?: string;
 }
 
-export const Prompt: React.FC<Props> = ({ prompt }) => {
+export const Prompt = (
+  {
+    prompt
+  }: Props
+) => {
   const { setPrompt } = useNavigationWarningPrompt();
 
   useEffect(() => {

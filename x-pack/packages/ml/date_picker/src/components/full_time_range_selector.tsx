@@ -83,7 +83,7 @@ export interface FullTimeRangeSelectorProps {
  * @param props - `FullTimeRangeSelectorProps` component props
  * @returns {React.ReactElement} The FullTimeRangeSelector component.
  */
-export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => {
+export const FullTimeRangeSelector = (props: FullTimeRangeSelectorProps) => {
   const {
     frozenDataPreference,
     setFrozenDataPreference,

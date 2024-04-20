@@ -42,8 +42,8 @@ interface Props {
   showClearFiltersButton: boolean;
 }
 
-export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
-  ({
+export const CasesTableUtilityBar = React.memo((
+  {
     isSelectorView,
     totalCases,
     selectedCases,
@@ -52,217 +52,217 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     selectedColumns,
     onSelectedColumnsChange,
     onClearFilters,
-    showClearFiltersButton,
-  }) => {
-    const { euiTheme } = useEuiTheme();
-    const refreshCases = useRefreshCases();
-    const { permissions } = useCasesContext();
+    showClearFiltersButton
+  }: Props
+) => {
+  const { euiTheme } = useEuiTheme();
+  const refreshCases = useRefreshCases();
+  const { permissions } = useCasesContext();
 
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const [isMessageDismissed, setIsMessageDismissed] = useState(false);
-    const localStorageKey = `cases.utilityBar.hideMaxLimitWarning`;
-    const [doNotShowAgain, setDoNotShowAgain] = useCasesLocalStorage<boolean>(
-      localStorageKey,
-      false
-    );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isMessageDismissed, setIsMessageDismissed] = useState(false);
+  const localStorageKey = `cases.utilityBar.hideMaxLimitWarning`;
+  const [doNotShowAgain, setDoNotShowAgain] = useCasesLocalStorage<boolean>(
+    localStorageKey,
+    false
+  );
 
-    const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    const toggleWarning = useCallback(
-      () => setIsMessageDismissed(!isMessageDismissed),
-      [isMessageDismissed]
-    );
+  const toggleWarning = useCallback(
+    () => setIsMessageDismissed(!isMessageDismissed),
+    [isMessageDismissed]
+  );
 
-    const onRefresh = useCallback(() => {
-      deselectCases();
-      refreshCases();
-    }, [deselectCases, refreshCases]);
+  const onRefresh = useCallback(() => {
+    deselectCases();
+    refreshCases();
+  }, [deselectCases, refreshCases]);
 
-    const { panels, modals, flyouts } = useBulkActions({
-      selectedCases,
-      onAction: closePopover,
-      onActionSuccess: onRefresh,
-    });
+  const { panels, modals, flyouts } = useBulkActions({
+    selectedCases,
+    onAction: closePopover,
+    onActionSuccess: onRefresh,
+  });
 
-    const handleNotShowAgain = () => {
-      setDoNotShowAgain(true);
-    };
+  const handleNotShowAgain = () => {
+    setDoNotShowAgain(true);
+  };
 
-    /**
-     * At least update or delete permissions needed to show bulk actions.
-     * Granular permission check for each action is performed
-     * in the useBulkActions hook.
-     */
-    const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
+  /**
+   * At least update or delete permissions needed to show bulk actions.
+   * Granular permission check for each action is performed
+   * in the useBulkActions hook.
+   */
+  const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
 
-    const visibleCases =
-      pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
+  const visibleCases =
+    pagination?.pageSize && totalCases > pagination.pageSize ? pagination.pageSize : totalCases;
 
-    const hasReachedMaxCases =
-      pagination.pageSize &&
-      totalCases >= MAX_DOCS_PER_PAGE &&
-      pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
+  const hasReachedMaxCases =
+    pagination.pageSize &&
+    totalCases >= MAX_DOCS_PER_PAGE &&
+    pagination.pageSize * (pagination.pageIndex + 1) >= MAX_DOCS_PER_PAGE;
 
-    const renderMaxLimitWarning = (): React.ReactNode => (
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiText
-            color="default"
-            size="m"
-            css={css`
-              margin-top: ${euiTheme.size.xs};
-            `}
-          >
-            {i18n.MAX_CASES(MAX_DOCS_PER_PAGE)}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="warning"
-            data-test-subj="dismiss-warning"
-            onClick={toggleWarning}
-          >
-            {i18n.DISMISS}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="warning"
-            data-test-subj="do-not-show-warning"
-            onClick={handleNotShowAgain}
-          >
-            {i18n.NOT_SHOW_AGAIN}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-
-    return (
-      <>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="s"
+  const renderMaxLimitWarning = (): React.ReactNode => (
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiText
+          color="default"
+          size="m"
           css={css`
-            border-bottom: ${euiTheme.border.thin};
-            padding-top: ${euiTheme.size.s};
-            padding-bottom: ${euiTheme.size.s};
+            margin-top: ${euiTheme.size.xs};
           `}
         >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
-              <EuiFlexItem
-                data-test-subj="case-table-case-count"
-                grow={false}
-                css={css`
-                  border-right: ${euiTheme.border.thin};
-                  padding-right: ${euiTheme.size.s};
-                `}
-              >
-                <EuiText size="xs" color="subdued">
-                  {i18n.SHOWING_CASES(totalCases, visibleCases)}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
-                <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-                  {!isSelectorView && showBulkActions && (
-                    <>
-                      <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
-                        <EuiText size="xs" color="subdued">
-                          {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiPopover
-                          isOpen={isPopoverOpen}
-                          closePopover={closePopover}
-                          panelPaddingSize="none"
-                          data-test-subj="case-table-bulk-actions-popover"
-                          button={
-                            <EuiButtonEmpty
-                              onClick={togglePopover}
-                              size="xs"
-                              iconSide="right"
-                              iconType="arrowDown"
-                              flush="left"
-                              data-test-subj="case-table-bulk-actions-link-icon"
-                            >
-                              {i18n.BULK_ACTIONS}
-                            </EuiButtonEmpty>
-                          }
-                        >
-                          <EuiContextMenu
-                            panels={panels}
-                            initialPanelId={0}
-                            data-test-subj="case-table-bulk-actions-context-menu"
-                          />
-                        </EuiPopover>
-                      </EuiFlexItem>
-                    </>
-                  )}
+          {i18n.MAX_CASES(MAX_DOCS_PER_PAGE)}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          color="warning"
+          data-test-subj="dismiss-warning"
+          onClick={toggleWarning}
+        >
+          {i18n.DISMISS}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          color="warning"
+          data-test-subj="do-not-show-warning"
+          onClick={handleNotShowAgain}
+        >
+          {i18n.NOT_SHOW_AGAIN}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return (
+    <>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        gutterSize="s"
+        css={css`
+          border-bottom: ${euiTheme.border.thin};
+          padding-top: ${euiTheme.size.s};
+          padding-bottom: ${euiTheme.size.s};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
+            <EuiFlexItem
+              data-test-subj="case-table-case-count"
+              grow={false}
+              css={css`
+                border-right: ${euiTheme.border.thin};
+                padding-right: ${euiTheme.size.s};
+              `}
+            >
+              <EuiText size="xs" color="subdued">
+                {i18n.SHOWING_CASES(totalCases, visibleCases)}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                {!isSelectorView && showBulkActions && (
+                  <>
+                    <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        isOpen={isPopoverOpen}
+                        closePopover={closePopover}
+                        panelPaddingSize="none"
+                        data-test-subj="case-table-bulk-actions-popover"
+                        button={
+                          <EuiButtonEmpty
+                            onClick={togglePopover}
+                            size="xs"
+                            iconSide="right"
+                            iconType="arrowDown"
+                            flush="left"
+                            data-test-subj="case-table-bulk-actions-link-icon"
+                          >
+                            {i18n.BULK_ACTIONS}
+                          </EuiButtonEmpty>
+                        }
+                      >
+                        <EuiContextMenu
+                          panels={panels}
+                          initialPanelId={0}
+                          data-test-subj="case-table-bulk-actions-context-menu"
+                        />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                  </>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={onRefresh}
+                    size="xs"
+                    iconSide="left"
+                    iconType="refresh"
+                    flush="left"
+                    data-test-subj="all-cases-refresh-link-icon"
+                  >
+                    {i18n.REFRESH}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {showClearFiltersButton ? (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      onClick={onRefresh}
+                      onClick={onClearFilters}
                       size="xs"
                       iconSide="left"
-                      iconType="refresh"
+                      iconType="cross"
                       flush="left"
-                      data-test-subj="all-cases-refresh-link-icon"
+                      data-test-subj="all-cases-clear-filters-link-icon"
                     >
-                      {i18n.REFRESH}
+                      {i18n.CLEAR_FILTERS}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
-                  {showClearFiltersButton ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        onClick={onClearFilters}
-                        size="xs"
-                        iconSide="left"
-                        iconType="cross"
-                        flush="left"
-                        data-test-subj="all-cases-clear-filters-link-icon"
-                      >
-                        {i18n.CLEAR_FILTERS}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        {!isSelectorView && (
+          <EuiFlexItem grow={false}>
+            <ColumnsPopover
+              selectedColumns={selectedColumns}
+              onSelectedColumnsChange={onSelectedColumnsChange}
+            />
           </EuiFlexItem>
-          {!isSelectorView && (
-            <EuiFlexItem grow={false}>
-              <ColumnsPopover
-                selectedColumns={selectedColumns}
-                onSelectedColumnsChange={onSelectedColumnsChange}
+        )}
+      </EuiFlexGroup>
+      {modals}
+      {flyouts}
+      {hasReachedMaxCases && !isMessageDismissed && !doNotShowAgain && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCallOut
+                title={renderMaxLimitWarning()}
+                color="warning"
+                size="s"
+                data-test-subj="all-cases-maximum-limit-warning"
               />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        {modals}
-        {flyouts}
-        {hasReachedMaxCases && !isMessageDismissed && !doNotShowAgain && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiCallOut
-                  title={renderMaxLimitWarning()}
-                  color="warning"
-                  size="s"
-                  data-test-subj="all-cases-maximum-limit-warning"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-          </>
-        )}
-      </>
-    );
-  }
-);
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
+    </>
+  );
+});
 
 CasesTableUtilityBar.displayName = 'CasesTableUtilityBar';

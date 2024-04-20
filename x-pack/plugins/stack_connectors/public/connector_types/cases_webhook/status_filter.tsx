@@ -39,7 +39,12 @@ export const statuses = {
   },
 } as const;
 
-export const StatusFilter: React.FC<Props> = ({ selectedStatus, onStatusChanged }) => {
+export const StatusFilter = (
+  {
+    selectedStatus,
+    onStatusChanged
+  }: Props
+) => {
   const options: Array<EuiSuperSelectOption<CaseStatuses>> = caseStatuses.map((status) => ({
     value: status,
     inputDisplay: (

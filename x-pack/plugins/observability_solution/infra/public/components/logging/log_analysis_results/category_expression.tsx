@@ -10,10 +10,15 @@ import React, { memo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const RegularExpressionRepresentation: React.FunctionComponent<{
-  maximumSegmentCount?: number;
-  regularExpression: string;
-}> = memo(({ maximumSegmentCount = 30, regularExpression }) => {
+export const RegularExpressionRepresentation = memo((
+  {
+    maximumSegmentCount = 30,
+    regularExpression
+  }: {
+    maximumSegmentCount?: number;
+    regularExpression: string;
+  }
+) => {
   const segments = regularExpression.split(collapsedRegularExpressionCharacters);
 
   return (

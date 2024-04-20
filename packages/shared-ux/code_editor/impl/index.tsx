@@ -25,7 +25,13 @@ const LazyCodeEditorBase = React.lazy(() =>
   }))
 );
 
-const Fallback: React.FunctionComponent<{ height: CodeEditorProps['height'] }> = ({ height }) => {
+const Fallback = (
+  {
+    height
+  }: {
+    height: CodeEditorProps['height'];
+  }
+) => {
   return (
     <>
       {/* when height is known, set minHeight to avoid layout shift */}
@@ -43,7 +49,7 @@ const Fallback: React.FunctionComponent<{ height: CodeEditorProps['height'] }> =
  *
  * @see CodeEditorField to render a code editor in the same style as other EUI form fields.
  */
-export const CodeEditor: React.FunctionComponent<CodeEditorProps> = (props) => {
+export const CodeEditor = (props: CodeEditorProps) => {
   return (
     <EuiErrorBoundary>
       <React.Suspense fallback={<Fallback height={props.height} />}>
@@ -56,7 +62,7 @@ export const CodeEditor: React.FunctionComponent<CodeEditorProps> = (props) => {
 /**
  * Renders a Monaco code editor in the same style as other EUI form fields.
  */
-export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props) => {
+export const CodeEditorField = (props: CodeEditorProps) => {
   const { width, height, options, fullWidth, useDarkTheme: useDarkThemeProp } = props;
   const { colorMode } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';

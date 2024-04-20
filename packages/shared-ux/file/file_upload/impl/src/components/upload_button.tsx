@@ -18,7 +18,11 @@ interface Props {
   onClick: () => void;
 }
 
-export const UploadButton: FunctionComponent<Props> = ({ onClick }) => {
+export const UploadButton = (
+  {
+    onClick
+  }: Props
+) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const error = useBehaviorSubject(uploadState.error$);

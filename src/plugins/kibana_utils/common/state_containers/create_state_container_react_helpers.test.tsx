@@ -62,12 +62,15 @@ test('<Provider> passes state to connect()()', () => {
   const stateContainer = createStateContainer({ hello: 'Bob' });
   const { Provider, connect } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  const Demo: React.FC<Props1> = ({ message, stop }) => (
-    <>
-      {message}
-      {stop}
-    </>
-  );
+  const Demo = (
+    {
+      message,
+      stop
+    }: Props1
+  ) => (<>
+    {message}
+    {stop}
+  </>);
   const mergeProps = ({ hello }: State1) => ({ message: hello });
   const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 
@@ -104,7 +107,7 @@ describe('hooks', () => {
     test('can select store using useContainer hook', () => {
       const stateContainer = createStateContainer({ foo: 'bar' });
       const { Provider, useContainer } = createStateContainerReactHelpers<typeof stateContainer>();
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         // eslint-disable-next-line @typescript-eslint/no-shadow
         const stateContainer = useContainer();
         return <>{stateContainer.get().foo}</>;
@@ -125,7 +128,7 @@ describe('hooks', () => {
     test('can select state using useState hook', () => {
       const stateContainer = createStateContainer({ foo: 'qux' });
       const { Provider, useState } = createStateContainerReactHelpers<typeof stateContainer>();
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         const { foo } = useState();
         return <>{foo}</>;
       };
@@ -148,7 +151,7 @@ describe('hooks', () => {
         }
       );
       const { Provider, useState } = createStateContainerReactHelpers<typeof stateContainer>();
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         const { foo } = useState();
         return <>{foo}</>;
       };
@@ -184,7 +187,7 @@ describe('hooks', () => {
 
       const { Provider, useState, useTransitions } =
         createStateContainerReactHelpers<typeof stateContainer>();
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         const { cnt } = useState();
         const { increment } = useTransitions();
         return (
@@ -225,7 +228,7 @@ describe('hooks', () => {
       });
       const selector = (state: { foo: { bar: { baz: string } } }) => state.foo.bar.baz;
       const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         const value = useSelector(selector);
         return <>{value}</>;
       };
@@ -250,7 +253,7 @@ describe('hooks', () => {
       });
       const selector = (state: { foo: { bar: { baz: string } } }) => state.foo.bar.baz;
       const { Provider, useSelector } = createStateContainerReactHelpers();
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         const value = useSelector(selector);
         return <>{value}</>;
       };
@@ -281,7 +284,7 @@ describe('hooks', () => {
       const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
 
       let cnt = 0;
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         cnt++;
         const value = useSelector(selector);
         return <>{value}</>;
@@ -317,7 +320,7 @@ describe('hooks', () => {
       const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
 
       let cnt = 0;
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         cnt++;
         const value = useSelector(selector);
         return <>{JSON.stringify(value)}</>;
@@ -359,7 +362,7 @@ describe('hooks', () => {
       const { Provider, useSelector } = createStateContainerReactHelpers<typeof stateContainer>();
 
       let cnt = 0;
-      const Demo: React.FC<{}> = () => {
+      const Demo = () => {
         cnt++;
         const value = useSelector(selector, comparator);
         return <>{JSON.stringify(value)}</>;

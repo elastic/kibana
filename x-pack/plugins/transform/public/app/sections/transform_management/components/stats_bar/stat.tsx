@@ -16,7 +16,11 @@ interface StatProps {
   stat: StatsBarStat;
 }
 
-export const Stat: FC<StatProps> = ({ stat }) => {
+export const Stat = (
+  {
+    stat
+  }: StatProps
+) => {
   return (
     <span className="transformStat">
       <span>{stat.label}</span>: <strong>{stat.value}</strong>

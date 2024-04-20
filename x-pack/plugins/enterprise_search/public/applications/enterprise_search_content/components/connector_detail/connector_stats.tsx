@@ -46,7 +46,13 @@ export interface StatCardProps {
   title: string;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) => {
+export const StatCard = (
+  {
+    title,
+    content,
+    footer
+  }: StatCardProps
+) => {
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder grow>
       <EuiSplitPanel.Inner>
@@ -87,7 +93,12 @@ const configureLabel = i18n.translate(
   }
 );
 
-export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
+export const ConnectorStats = (
+  {
+    connector,
+    indexData
+  }: ConnectorStatsProps
+) => {
   const { connectorTypes } = useValues(KibanaLogic);
   const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
   return (

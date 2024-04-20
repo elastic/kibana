@@ -19,7 +19,12 @@ interface Props {
   multiple: boolean;
 }
 
-export const EmptyPrompt: FunctionComponent<Props> = ({ kind, multiple }) => {
+export const EmptyPrompt = (
+  {
+    kind,
+    multiple
+  }: Props
+) => {
   const { state, uploadMeta } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   return (

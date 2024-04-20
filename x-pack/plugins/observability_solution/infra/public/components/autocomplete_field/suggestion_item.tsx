@@ -18,7 +18,7 @@ interface Props {
   suggestion: QuerySuggestion;
 }
 
-export const SuggestionItem: React.FC<Props> = (props) => {
+export const SuggestionItem = (props: Props) => {
   const { isSelected, onClick, onMouseEnter, suggestion } = props;
 
   return (

@@ -18,7 +18,7 @@ import { schema } from './schema';
 describe('Title', () => {
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { title: 'My title' },
       schema: {

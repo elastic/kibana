@@ -12,7 +12,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { buildContextMenuForActions, Action } from '@kbn/ui-actions-plugin/public';
 import { sampleAction } from './util';
 
-export const PanelEditWithDrilldownsAndContextActions: React.FC = () => {
+export const PanelEditWithDrilldownsAndContextActions = () => {
   const [open, setOpen] = React.useState(false);
 
   const context = {};

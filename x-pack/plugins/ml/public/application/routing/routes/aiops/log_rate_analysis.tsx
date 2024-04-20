@@ -53,7 +53,7 @@ export const explainLogRateSpikesRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const RedirectWithQueryString: FC = () => {
+const RedirectWithQueryString = () => {
   const location = useLocation();
   return (
     <Redirect
@@ -62,7 +62,7 @@ const RedirectWithQueryString: FC = () => {
   );
 };
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canUseAiops']);
 
   return (

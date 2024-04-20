@@ -24,7 +24,14 @@ interface Props {
   size?: 'm' | 's';
 }
 
-export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...rest }: Props) => {
+export const FilterButtonGroup = (
+  {
+    items,
+    attached,
+    size = 'm',
+    ...rest
+  }: Props
+) => {
   return (
     <EuiFlexGroup
       className={classNames('kbnFilterButtonGroup', {

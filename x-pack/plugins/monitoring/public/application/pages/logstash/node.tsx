@@ -30,7 +30,11 @@ import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
+export const LogStashNodePage = (
+  {
+    clusters
+  }: ComponentProps
+) => {
   const match = useRouteMatch<{ uuid: string | undefined }>();
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();

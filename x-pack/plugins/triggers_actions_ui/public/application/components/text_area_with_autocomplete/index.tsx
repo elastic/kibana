@@ -37,16 +37,18 @@ export interface TextAreaWithAutocompleteProps {
 }
 const selectableListProps = { className: 'euiSelectableMsgAutoComplete' };
 
-export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutocompleteProps> = ({
-  editAction,
-  errors,
-  index,
-  inputTargetValue,
-  isDisabled = false,
-  label,
-  messageVariables,
-  paramsProperty,
-}) => {
+export const TextAreaWithAutocomplete = (
+  {
+    editAction,
+    errors,
+    index,
+    inputTargetValue,
+    isDisabled = false,
+    label,
+    messageVariables,
+    paramsProperty
+  }: TextAreaWithAutocompleteProps
+) => {
   const { euiTheme } = useEuiTheme();
   const backgroundColor = useEuiBackgroundColor('plain');
 

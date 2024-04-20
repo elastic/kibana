@@ -42,10 +42,12 @@ export interface AddInferencePipelineFlyoutProps {
   model: ModelItem;
 }
 
-export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = ({
-  onClose,
-  model,
-}) => {
+export const AddInferencePipelineFlyout = (
+  {
+    onClose,
+    model
+  }: AddInferencePipelineFlyoutProps
+) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialState = useMemo(() => getInitialState(model), [model.model_id]);
   const [formState, setFormState] = useState<MlInferenceState>(initialState);

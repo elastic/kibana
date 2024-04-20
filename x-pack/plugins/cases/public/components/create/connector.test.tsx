@@ -65,7 +65,7 @@ describe('Connector', () => {
   let appMockRender: AppMockRenderer;
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { connectorId: connectorsMock[0].id, fields: null },
       schema: {

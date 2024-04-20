@@ -47,27 +47,29 @@ const columns = [
   },
 ];
 
-export const EvaluationQualityMetricsTable: FC<{
-  evaluationMetricsItems: ClassificationMetricItem[];
-}> = ({ evaluationMetricsItems }) => (
-  <>
-    <EuiAccordion
-      id="recall-and-accuracy"
-      buttonContent={
-        <FormattedMessage
-          id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRecallAndAccuracy"
-          defaultMessage="Per class recall and accuracy"
-        />
-      }
-    >
-      <EuiPanel>
-        <EuiInMemoryTable<ClassificationMetricItem>
-          items={evaluationMetricsItems}
-          columns={columns}
-          pagination
-          sorting
-        />
-      </EuiPanel>
-    </EuiAccordion>
-  </>
-);
+export const EvaluationQualityMetricsTable = (
+  {
+    evaluationMetricsItems
+  }: {
+    evaluationMetricsItems: ClassificationMetricItem[];
+  }
+) => (<>
+  <EuiAccordion
+    id="recall-and-accuracy"
+    buttonContent={
+      <FormattedMessage
+        id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRecallAndAccuracy"
+        defaultMessage="Per class recall and accuracy"
+      />
+    }
+  >
+    <EuiPanel>
+      <EuiInMemoryTable<ClassificationMetricItem>
+        items={evaluationMetricsItems}
+        columns={columns}
+        pagination
+        sorting
+      />
+    </EuiPanel>
+  </EuiAccordion>
+</>);

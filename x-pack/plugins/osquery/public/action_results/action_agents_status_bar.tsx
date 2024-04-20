@@ -19,9 +19,13 @@ const euiColorPaletteDisplayCss = {
   },
 };
 
-export const AgentStatusBar: React.FC<{
-  agentStatus: { [k in ActionAgentStatus]: number };
-}> = ({ agentStatus }) => {
+export const AgentStatusBar = (
+  {
+    agentStatus
+  }: {
+    agentStatus: { [k in ActionAgentStatus]: number };
+  }
+) => {
   const palette = useMemo(() => {
     let stop = 0;
 

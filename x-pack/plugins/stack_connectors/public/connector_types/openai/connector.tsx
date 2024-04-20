@@ -30,7 +30,12 @@ import {
 } from './constants';
 const { emptyField } = fieldValidators;
 
-const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const ConnectorFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, id, name }] = useFormData({
     watch: ['config.apiProvider'],

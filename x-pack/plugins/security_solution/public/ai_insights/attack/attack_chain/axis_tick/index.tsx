@@ -15,7 +15,11 @@ interface Props {
   width?: number;
 }
 
-const AxisTickComponent: React.FC<Props> = ({ width = DEFAULT_WIDTH }) => {
+const AxisTickComponent = (
+  {
+    width = DEFAULT_WIDTH
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
 
   const TOP_CELL_HEIGHT = 3; // px

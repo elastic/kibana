@@ -125,15 +125,17 @@ interface ExpandableSectionResultsProps {
   searchQuery: estypes.QueryDslQueryContainer;
 }
 
-export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
-  colorRange,
-  indexData,
-  dataView,
-  jobConfig,
-  needsDestDataView,
-  resultsField,
-  searchQuery,
-}) => {
+export const ExpandableSectionResults = (
+  {
+    colorRange,
+    indexData,
+    dataView,
+    jobConfig,
+    needsDestDataView,
+    resultsField,
+    searchQuery
+  }: ExpandableSectionResultsProps
+) => {
   const {
     services: {
       application,

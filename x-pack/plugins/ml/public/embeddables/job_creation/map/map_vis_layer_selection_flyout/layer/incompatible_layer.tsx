@@ -14,7 +14,11 @@ interface Props {
   noDataView: boolean;
 }
 
-export const IncompatibleLayer: FC<Props> = ({ noDataView }) => {
+export const IncompatibleLayer = (
+  {
+    noDataView
+  }: Props
+) => {
   return (
     <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlMapLayerIncompatible">
       <EuiFlexItem grow={false}>

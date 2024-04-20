@@ -29,7 +29,12 @@ interface Props {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
-export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
+export const ExpandedRow = (
+  {
+    item,
+    onAlertEdit
+  }: Props
+) => {
   const tabId = stringHash(item.id);
 
   const tabs = [

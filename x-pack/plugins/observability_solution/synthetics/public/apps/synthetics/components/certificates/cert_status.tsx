@@ -24,7 +24,11 @@ const DateText = styled(EuiText)`
   margin-left: 5px;
 `;
 
-export const CertStatus: React.FC<Props> = ({ cert }) => {
+export const CertStatus = (
+  {
+    cert
+  }: Props
+) => {
   const certStatus = useCertStatus(cert?.not_after, cert?.not_before);
 
   const relativeDate = moment(cert?.not_after).fromNow();

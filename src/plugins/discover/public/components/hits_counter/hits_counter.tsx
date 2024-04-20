@@ -25,7 +25,12 @@ export interface HitsCounterProps {
   stateContainer: DiscoverStateContainer;
 }
 
-export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }) => {
+export const HitsCounter = (
+  {
+    mode,
+    stateContainer
+  }: HitsCounterProps
+) => {
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
   const hitsTotal = totalHitsState.result;

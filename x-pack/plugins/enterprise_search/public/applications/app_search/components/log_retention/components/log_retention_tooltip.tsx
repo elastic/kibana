@@ -19,7 +19,12 @@ interface Props {
   type: LogRetentionOptions;
   position?: 'top' | 'right' | 'bottom' | 'left';
 }
-export const LogRetentionTooltip: React.FC<Props> = ({ type, position = 'bottom' }) => {
+export const LogRetentionTooltip = (
+  {
+    type,
+    position = 'bottom'
+  }: Props
+) => {
   const { fetchLogRetention } = useActions(LogRetentionLogic);
   const { logRetention } = useValues(LogRetentionLogic);
   const {

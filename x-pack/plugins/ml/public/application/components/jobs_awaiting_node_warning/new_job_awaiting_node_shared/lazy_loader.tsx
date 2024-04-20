@@ -16,7 +16,11 @@ interface Props {
   jobIds: string[];
 }
 
-export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
+export const MLJobsAwaitingNodeWarning = (
+  {
+    jobIds
+  }: Props
+) => {
   return (
     <React.Suspense fallback={<div />}>
       <MLJobsAwaitingNodeWarningComponent jobIds={jobIds} />

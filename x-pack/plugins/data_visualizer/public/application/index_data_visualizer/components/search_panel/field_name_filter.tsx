@@ -19,12 +19,14 @@ interface Props {
   showEmptyFields: boolean;
 }
 
-export const DataVisualizerFieldNamesFilter: FC<Props> = ({
-  overallStats,
-  setVisibleFieldNames,
-  visibleFieldNames,
-  showEmptyFields,
-}) => {
+export const DataVisualizerFieldNamesFilter = (
+  {
+    overallStats,
+    setVisibleFieldNames,
+    visibleFieldNames,
+    showEmptyFields
+  }: Props
+) => {
   const items: Option[] = useMemo(() => {
     const options: Option[] = [];
     if (overallStats) {

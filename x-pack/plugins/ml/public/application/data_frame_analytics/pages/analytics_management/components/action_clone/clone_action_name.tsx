@@ -493,7 +493,11 @@ interface CloneActionNameProps {
   isDisabled: boolean;
 }
 
-export const CloneActionName: FC<CloneActionNameProps> = ({ isDisabled }) => {
+export const CloneActionName = (
+  {
+    isDisabled
+  }: CloneActionNameProps
+) => {
   if (isDisabled) {
     return (
       <EuiToolTip

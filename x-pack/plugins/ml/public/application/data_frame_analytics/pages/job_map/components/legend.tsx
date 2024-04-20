@@ -33,10 +33,15 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType }> = ({
-  hasMissingJobNode,
-  theme,
-}) => {
+export const JobMapLegend = (
+  {
+    hasMissingJobNode,
+    theme
+  }: {
+    hasMissingJobNode: boolean;
+    theme: EuiThemeType;
+  }
+) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
 
   return (

@@ -61,7 +61,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const UserAgent: FunctionComponent = () => {
+export const UserAgent = () => {
   return (
     <>
       <FieldNameField

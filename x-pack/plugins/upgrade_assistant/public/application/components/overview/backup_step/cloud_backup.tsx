@@ -36,11 +36,13 @@ const isMissingFoundSnapshotsRepo = (error: ResponseError) => {
   return error.statusCode === 404 && error.message.toString().includes(CLOUD_SNAPSHOT_REPOSITORY);
 };
 
-export const CloudBackup: React.FunctionComponent<Props> = ({
-  cloudSnapshotsUrl,
-  setIsComplete,
-  setForceOnPremStep,
-}) => {
+export const CloudBackup = (
+  {
+    cloudSnapshotsUrl,
+    setIsComplete,
+    setForceOnPremStep
+  }: Props
+) => {
   const {
     services: { api },
   } = useAppContext();

@@ -11,11 +11,17 @@ import * as i18n from './translations';
 import { RiskScoreDocLink } from '../../entity_analytics/components/risk_score_onboarding/risk_score_doc_link';
 import type { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 
-export const RiskScoreInfoTooltip: React.FC<{
-  toolTipContent: React.ReactNode;
-  toolTipTitle?: React.ReactNode;
-  width?: number;
-}> = ({ toolTipContent, toolTipTitle, width = 270 }) => {
+export const RiskScoreInfoTooltip = (
+  {
+    toolTipContent,
+    toolTipTitle,
+    width = 270
+  }: {
+    toolTipContent: React.ReactNode;
+    toolTipTitle?: React.ReactNode;
+    width?: number;
+  }
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onClick = useCallback(() => {

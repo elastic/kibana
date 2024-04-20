@@ -95,7 +95,7 @@ interface DualBrushProps {
  * @param props DualBrushProps component props
  * @returns The DualBrush component.
  */
-export const DualBrush: FC<DualBrushProps> = (props) => {
+export const DualBrush = (props: DualBrushProps) => {
   const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);

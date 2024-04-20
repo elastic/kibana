@@ -45,11 +45,9 @@ export const fieldsConfig: FieldsConfig = {
 
 type Props = Partial<FieldConfig>;
 
-export const IgnoreMissingField: FunctionComponent<Props> = (props) => (
-  <UseField
-    config={{ ...fieldsConfig.ignore_missing, ...props }}
-    component={ToggleField}
-    path="fields.ignore_missing"
-    data-test-subj="ignoreMissingSwitch"
-  />
-);
+export const IgnoreMissingField = (props: Props) => (<UseField
+  config={{ ...fieldsConfig.ignore_missing, ...props }}
+  component={ToggleField}
+  path="fields.ignore_missing"
+  data-test-subj="ignoreMissingSwitch"
+/>);

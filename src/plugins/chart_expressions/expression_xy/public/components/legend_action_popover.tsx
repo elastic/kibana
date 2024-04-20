@@ -36,11 +36,13 @@ export interface LegendActionPopoverProps {
   legendCellValueActions?: LegendCellValueActions;
 }
 
-export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
-  label,
-  onFilter,
-  legendCellValueActions = [],
-}) => {
+export const LegendActionPopover = (
+  {
+    label,
+    onFilter,
+    legendCellValueActions = []
+  }: LegendActionPopoverProps
+) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
 

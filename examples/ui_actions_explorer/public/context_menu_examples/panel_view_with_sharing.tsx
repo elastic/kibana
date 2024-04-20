@@ -12,7 +12,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { buildContextMenuForActions, Action } from '@kbn/ui-actions-plugin/public';
 import { sampleAction } from './util';
 
-export const PanelViewWithSharing: React.FC = () => {
+export const PanelViewWithSharing = () => {
   const [open, setOpen] = React.useState(false);
 
   const context = {};

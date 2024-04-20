@@ -21,7 +21,11 @@ interface InspectFlyoutProps {
   searchSession: UISession;
 }
 
-const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
+const InspectFlyout = (
+  {
+    searchSession
+  }: InspectFlyoutProps
+) => {
   const renderInfo = () => {
     return (
       <Fragment>
@@ -82,12 +86,14 @@ interface InspectFlyoutWrapperProps {
   theme: CoreStart['theme'];
 }
 
-const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
-  searchSession,
-  uiSettings,
-  settings,
-  theme,
-}) => {
+const InspectFlyoutWrapper = (
+  {
+    searchSession,
+    uiSettings,
+    settings,
+    theme
+  }: InspectFlyoutWrapperProps
+) => {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,

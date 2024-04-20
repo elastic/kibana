@@ -35,7 +35,11 @@ interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-export const ExpandedRow: FC<Props> = ({ item }) => {
+export const ExpandedRow = (
+  {
+    item
+  }: Props
+) => {
   const analysisType = getAnalysisType(item.config.analysis);
   const stateValues: any = { ...item.stats };
 

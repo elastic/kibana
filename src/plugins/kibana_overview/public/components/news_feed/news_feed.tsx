@@ -15,44 +15,44 @@ interface Props {
   newsFetchResult: FetchResult;
 }
 
-export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
-  <section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
-    <EuiTitle size="s">
-      <h2 id="kbnOverviewNews__title">
-        <FormattedMessage id="kibanaOverview.news.title" defaultMessage="What's new" />
-      </h2>
-    </EuiTitle>
+export const NewsFeed = (
+  {
+    newsFetchResult
+  }: Props
+) => (<section aria-labelledby="kbnOverviewNews__title" className="kbnOverviewNews">
+  <EuiTitle size="s">
+    <h2 id="kbnOverviewNews__title">
+      <FormattedMessage id="kibanaOverview.news.title" defaultMessage="What's new" />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer size="m" />
+  <div className="kbnOverviewNews__content">
+    {newsFetchResult.feedItems
+      .slice(0, 3)
+      .map(({ title, description, linkUrl, publishOn }, index) => (
+        <article key={title} aria-labelledby={`kbnOverviewNews__title${index}`}>
+          <header>
+            <EuiTitle size="xxs">
+              <h3 id={`kbnOverviewNews__title${index}`}>
+                <EuiLink href={linkUrl} target="_blank">
+                  {title}
+                </EuiLink>
+              </h3>
+            </EuiTitle>
 
-    <EuiSpacer size="m" />
-
-    <div className="kbnOverviewNews__content">
-      {newsFetchResult.feedItems
-        .slice(0, 3)
-        .map(({ title, description, linkUrl, publishOn }, index) => (
-          <article key={title} aria-labelledby={`kbnOverviewNews__title${index}`}>
-            <header>
-              <EuiTitle size="xxs">
-                <h3 id={`kbnOverviewNews__title${index}`}>
-                  <EuiLink href={linkUrl} target="_blank">
-                    {title}
-                  </EuiLink>
-                </h3>
-              </EuiTitle>
-
-              <EuiText size="xs" color="subdued">
-                <p>
-                  <time dateTime={publishOn.format('YYYY-MM-DD')}>
-                    {publishOn.format('DD MMMM YYYY')}
-                  </time>
-                </p>
-              </EuiText>
-            </header>
-
-            <EuiText size="xs">
-              <p>{description}</p>
+            <EuiText size="xs" color="subdued">
+              <p>
+                <time dateTime={publishOn.format('YYYY-MM-DD')}>
+                  {publishOn.format('DD MMMM YYYY')}
+                </time>
+              </p>
             </EuiText>
-          </article>
-        ))}
-    </div>
-  </section>
-);
+          </header>
+
+          <EuiText size="xs">
+            <p>{description}</p>
+          </EuiText>
+        </article>
+      ))}
+  </div>
+</section>);

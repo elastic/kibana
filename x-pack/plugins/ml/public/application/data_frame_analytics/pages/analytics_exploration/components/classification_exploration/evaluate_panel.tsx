@@ -109,7 +109,13 @@ function getHelpText(dataSubsetTitle: string): string {
   return helpText;
 }
 
-export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, searchQuery }) => {
+export const EvaluatePanel = (
+  {
+    jobConfig,
+    jobStatus,
+    searchQuery
+  }: EvaluatePanelProps
+) => {
   const {
     services: { docLinks },
   } = useMlKibana();

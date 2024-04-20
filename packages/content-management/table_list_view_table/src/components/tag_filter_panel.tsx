@@ -54,16 +54,18 @@ interface Props {
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
 }
 
-export const TagFilterPanel: FC<Props> = ({
-  isPopoverOpen,
-  isInUse,
-  options,
-  totalActiveFilters,
-  onFilterButtonClick,
-  onSelectChange,
-  closePopover,
-  clearTagSelection,
-}) => {
+export const TagFilterPanel = (
+  {
+    isPopoverOpen,
+    isInUse,
+    options,
+    totalActiveFilters,
+    onFilterButtonClick,
+    onSelectChange,
+    closePopover,
+    clearTagSelection
+  }: Props
+) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
   const isSearchVisible = options.length > 10;

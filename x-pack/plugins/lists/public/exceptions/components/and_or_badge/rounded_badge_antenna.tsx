@@ -41,19 +41,23 @@ const BottomAntenna = styled(EuiFlexItem)`
   }
 `;
 
-export const RoundedBadgeAntenna: React.FC<{ type: AndOr }> = ({ type }) => (
-  <EuiFlexGroup
-    className="andBadgeContainer"
-    gutterSize="none"
-    direction="column"
-    alignItems="center"
-  >
-    <TopAntenna data-test-subj="andOrBadgeBarTop" grow={1} />
-    <EuiFlexItem grow={false}>
-      <RoundedBadge type={type} />
-    </EuiFlexItem>
-    <BottomAntenna data-test-subj="andOrBadgeBarBottom" grow={1} />
-  </EuiFlexGroup>
-);
+export const RoundedBadgeAntenna = (
+  {
+    type
+  }: {
+    type: AndOr;
+  }
+) => (<EuiFlexGroup
+  className="andBadgeContainer"
+  gutterSize="none"
+  direction="column"
+  alignItems="center"
+>
+  <TopAntenna data-test-subj="andOrBadgeBarTop" grow={1} />
+  <EuiFlexItem grow={false}>
+    <RoundedBadge type={type} />
+  </EuiFlexItem>
+  <BottomAntenna data-test-subj="andOrBadgeBarBottom" grow={1} />
+</EuiFlexGroup>);
 
 RoundedBadgeAntenna.displayName = 'RoundedBadgeAntenna';

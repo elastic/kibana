@@ -64,7 +64,7 @@ const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashb
 /**
  * Contains panels with controls and change point results.
  */
-export const FieldsConfig: FC = () => {
+export const FieldsConfig = () => {
   const {
     requestParams: { fieldConfigs },
     updateRequestParams,
@@ -162,15 +162,17 @@ export interface FieldPanelProps {
  * @param removeDisabled
  * @constructor
  */
-const FieldPanel: FC<FieldPanelProps> = ({
-  panelIndex,
-  fieldConfig,
-  onChange,
-  onRemove,
-  removeDisabled,
-  onSelectionChange,
-  'data-test-subj': dataTestSubj,
-}) => {
+const FieldPanel = (
+  {
+    panelIndex,
+    fieldConfig,
+    onChange,
+    onRemove,
+    removeDisabled,
+    onSelectionChange,
+    'data-test-subj': dataTestSubj
+  }: FieldPanelProps
+) => {
   const {
     embeddable,
     application: { capabilities },
@@ -631,7 +633,13 @@ interface FieldsControlsProps {
 /**
  * Renders controls for fields selection and emits updates on change.
  */
-export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
+export const FieldsControls = (
+  {
+    fieldConfig,
+    onChange,
+    children
+  }: FieldsControlsProps
+) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
   const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
@@ -710,13 +718,15 @@ interface ChangePointResultsProps {
 /**
  * Handles request and rendering results of the change point  with provided config.
  */
-export const ChangePointResults: FC<ChangePointResultsProps> = ({
-  fieldConfig,
-  splitFieldCardinality,
-  isLoading,
-  annotations,
-  onSelectionChange,
-}) => {
+export const ChangePointResults = (
+  {
+    fieldConfig,
+    splitFieldCardinality,
+    isLoading,
+    annotations,
+    onSelectionChange
+  }: ChangePointResultsProps
+) => {
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 

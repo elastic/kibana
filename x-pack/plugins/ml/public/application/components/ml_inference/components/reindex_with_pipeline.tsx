@@ -61,7 +61,12 @@ interface Props {
   sourceIndex?: string;
 }
 
-export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) => {
+export const ReindexWithPipeline = (
+  {
+    pipelineName,
+    sourceIndex
+  }: Props
+) => {
   const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>(
     sourceIndex ? [{ label: sourceIndex }] : []
   );

@@ -19,9 +19,11 @@ interface IntegrationVersionMismatchIconProps {
   integration: IntegrationDetails;
 }
 
-const IntegrationVersionMismatchIconComponent: React.FC<IntegrationVersionMismatchIconProps> = ({
-  integration,
-}) => {
+const IntegrationVersionMismatchIconComponent = (
+  {
+    integration
+  }: IntegrationVersionMismatchIconProps
+) => {
   const { installationStatus } = integration;
 
   if (

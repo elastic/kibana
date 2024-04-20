@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { API_DOCS_URL } from '../../../routes';
 
-export const EmptyState: React.FC = () => (
+export const EmptyState = () => (
   <EuiEmptyPrompt
     iconType="clock"
     title={

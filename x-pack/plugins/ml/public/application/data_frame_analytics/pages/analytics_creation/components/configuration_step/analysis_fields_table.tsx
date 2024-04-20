@@ -37,18 +37,8 @@ const minimumFieldsMessage = i18n.translate(
 const checkboxDisabledCheck = (item: FieldSelectionItem) =>
   item.is_required === true || (item.reason && item.reason.includes('unsupported type'));
 
-export const AnalysisFieldsTable: FC<{
-  dependentVariable?: string;
-  includes: string[];
-  isJobTypeWithDepVar: boolean;
-  setFormState: React.Dispatch<React.SetStateAction<any>>;
-  minimumFieldsRequiredMessage?: string;
-  setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
-  tableItems: FieldSelectionItem[];
-  unsupportedFieldsError?: string;
-  setUnsupportedFieldsError: React.Dispatch<React.SetStateAction<any>>;
-}> = React.memo(
-  ({
+export const AnalysisFieldsTable = React.memo((
+  {
     dependentVariable,
     includes,
     isJobTypeWithDepVar,
@@ -57,258 +47,260 @@ export const AnalysisFieldsTable: FC<{
     setMinimumFieldsRequiredMessage,
     tableItems,
     unsupportedFieldsError,
-    setUnsupportedFieldsError,
-  }) => {
-    const [sortableProperties, setSortableProperties] = useState<SortableProperties<any>>();
-    const [currentPaginationData, setCurrentPaginationData] = useState<{
-      pageIndex: number;
-      itemsPerPage: number;
-    }>({ pageIndex: 0, itemsPerPage: 5 });
-
-    const { handleFieldStatsButtonClick } = useFieldStatsTrigger();
-
-    const columns = [
-      {
-        id: 'checkbox',
-        isCheckbox: true,
-        textOnly: false,
-        width: '32px',
-      },
-      {
-        label: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.analysisFieldsTable.fieldNameColumn',
-          {
-            defaultMessage: 'Field name',
-          }
-        ),
-        id: 'name',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        render: ({ name, mapping_types }: { name: string; mapping_types: string[] }) => {
-          const field: FieldForStats = {
-            id: name,
-            type: (Array.isArray(mapping_types) && mapping_types.length > 0
-              ? mapping_types[0]
-              : 'number') as ES_FIELD_TYPES,
-          };
-          return (
-            <>
-              <FieldStatsInfoButton
-                field={field}
-                label={name}
-                onButtonClick={handleFieldStatsButtonClick}
-              />
-            </>
-          );
-        },
-
-        isSortable: true,
-        alignment: LEFT_ALIGNMENT,
-      },
-      {
-        id: 'mapping_types',
-        label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.mappingColumn', {
-          defaultMessage: 'Mapping',
-        }),
-        isSortable: false,
-        alignment: LEFT_ALIGNMENT,
-      },
-      {
-        label: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.analyticsTable.isIncludedColumn',
-          {
-            defaultMessage: 'Is included',
-          }
-        ),
-        id: 'is_included',
-        alignment: LEFT_ALIGNMENT,
-        isSortable: true,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        render: ({ is_included }: { is_included: boolean }) => (is_included ? 'Yes' : 'No'),
-      },
-      {
-        label: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.analyticsTable.isRequiredColumn',
-          {
-            defaultMessage: 'Is required',
-          }
-        ),
-        id: 'is_required',
-        alignment: LEFT_ALIGNMENT,
-        isSortable: true,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        render: ({ is_required }: { is_required: boolean }) => (is_required ? 'Yes' : 'No'),
-      },
-      {
-        label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.reasonColumn', {
-          defaultMessage: 'Reason',
-        }),
-        id: 'reason',
-        alignment: LEFT_ALIGNMENT,
-        isSortable: false,
-      },
-    ];
-
-    useEffect(() => {
-      if (includes.length === 0 && tableItems.length > 0) {
-        const includedFields: string[] = [];
-        tableItems.forEach((field) => {
-          if (field.is_included === true) {
-            includedFields.push(field.name);
-          }
-        });
-        setFormState({ includes: includedFields });
-      } else if (includes.length > 0) {
-        setFormState({
-          includes:
-            (dependentVariable && includes.includes(dependentVariable)) || !isJobTypeWithDepVar
-              ? includes
-              : [...includes, dependentVariable],
-        });
-      }
-      setMinimumFieldsRequiredMessage(undefined);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tableItems]);
-
-    useEffect(() => {
-      let sortablePropertyItems = [];
-      const defaultSortProperty = 'name';
-
-      sortablePropertyItems = [
-        {
-          name: 'name',
-          getValue: (item: any) => item.name.toLowerCase(),
-          isAscending: true,
-        },
-        {
-          name: 'is_included',
-          getValue: (item: any) => item.is_included,
-          isAscending: true,
-        },
-        {
-          name: 'is_required',
-          getValue: (item: any) => item.is_required,
-          isAscending: true,
-        },
-      ];
-      const sortableProps = new SortableProperties(sortablePropertyItems, defaultSortProperty);
-
-      setSortableProperties(sortableProps);
-    }, []);
-
-    const filters = [
-      {
-        type: 'field_value_toggle_group',
-        field: 'is_included',
-        items: [
-          {
-            value: true,
-            name: i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
-              defaultMessage: 'Is included',
-            }),
-          },
-          {
-            value: false,
-            name: i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
-              defaultMessage: 'Is not included',
-            }),
-          },
-        ],
-      },
-    ];
-
-    return (
-      <Fragment>
-        <EuiFormRow
-          data-test-subj="mlAnalyticsCreateJobWizardIncludesTable"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsLabel', {
-            defaultMessage: 'Included fields',
-          })}
-          fullWidth
-          isInvalid={
-            minimumFieldsRequiredMessage !== undefined || unsupportedFieldsError !== undefined
-          }
-          error={[
-            ...(minimumFieldsRequiredMessage !== undefined ? [minimumFieldsRequiredMessage] : []),
-            ...(unsupportedFieldsError !== undefined
-              ? [
-                  i18n.translate('xpack.ml.dataframe.analytics.create.unsupportedFieldsError', {
-                    defaultMessage: 'Invalid. {message}',
-                    values: { message: unsupportedFieldsError },
-                  }),
-                ]
-              : []),
-          ]}
-        >
-          <Fragment />
-        </EuiFormRow>
-        {tableItems.length > 0 && minimumFieldsRequiredMessage === undefined && (
-          <EuiText size="xs">
-            {i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsCount', {
-              defaultMessage:
-                '{numFields, plural, one {# field} other {# fields}} included in the analysis',
-              values: { numFields: includes.length },
-            })}
-          </EuiText>
-        )}
-        {tableItems.length === 0 && (
-          <EuiCallOut
-            title={i18n.translate('xpack.ml.dataframe.analytics.create.calloutTitle', {
-              defaultMessage: 'Analysis fields not available',
-            })}
-          >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.create.calloutMessage"
-              defaultMessage="Additional data required to load analysis fields."
-            />
-          </EuiCallOut>
-        )}
-        {tableItems.length > 0 && (
-          <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardIncludesSelect">
-            <CustomSelectionTable
-              currentPage={currentPaginationData.pageIndex}
-              data-test-subj="mlAnalyticsCreationAnalysisFieldsTable"
-              checkboxDisabledCheck={checkboxDisabledCheck}
-              columns={columns}
-              filters={filters}
-              items={tableItems}
-              itemsPerPage={currentPaginationData.itemsPerPage}
-              onTableChange={(selection: string[]) => {
-                // dependent variable must always be in includes
-                if (
-                  isJobTypeWithDepVar &&
-                  dependentVariable !== undefined &&
-                  dependentVariable !== '' &&
-                  selection.length === 0
-                ) {
-                  selection = [dependentVariable];
-                }
-                // If includes is empty show minimum fields required message and don't update form yet
-                if (selection.length === 0) {
-                  setMinimumFieldsRequiredMessage(minimumFieldsMessage);
-                  setUnsupportedFieldsError(undefined);
-                } else {
-                  setMinimumFieldsRequiredMessage(undefined);
-                  setFormState({ includes: selection });
-                }
-              }}
-              selectedIds={includes}
-              setCurrentPaginationData={setCurrentPaginationData}
-              singleSelection={false}
-              sortableProperties={sortableProperties}
-              tableItemId={'name'}
-            />
-          </EuiPanel>
-        )}
-        <EuiSpacer />
-      </Fragment>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.dependentVariable === nextProps.dependentVariable &&
-      isEqual(prevProps.includes, nextProps.includes) &&
-      isEqual(prevProps.tableItems, nextProps.tableItems) &&
-      prevProps.unsupportedFieldsError === nextProps.unsupportedFieldsError
-    );
+    setUnsupportedFieldsError
+  }: {
+    dependentVariable?: string;
+    includes: string[];
+    isJobTypeWithDepVar: boolean;
+    setFormState: React.Dispatch<React.SetStateAction<any>>;
+    minimumFieldsRequiredMessage?: string;
+    setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
+    tableItems: FieldSelectionItem[];
+    unsupportedFieldsError?: string;
+    setUnsupportedFieldsError: React.Dispatch<React.SetStateAction<any>>;
   }
-);
+) => {
+  const [sortableProperties, setSortableProperties] = useState<SortableProperties<any>>();
+  const [currentPaginationData, setCurrentPaginationData] = useState<{
+    pageIndex: number;
+    itemsPerPage: number;
+  }>({ pageIndex: 0, itemsPerPage: 5 });
+
+  const { handleFieldStatsButtonClick } = useFieldStatsTrigger();
+
+  const columns = [
+    {
+      id: 'checkbox',
+      isCheckbox: true,
+      textOnly: false,
+      width: '32px',
+    },
+    {
+      label: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.analysisFieldsTable.fieldNameColumn',
+        {
+          defaultMessage: 'Field name',
+        }
+      ),
+      id: 'name',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      render: ({ name, mapping_types }: { name: string; mapping_types: string[] }) => {
+        const field: FieldForStats = {
+          id: name,
+          type: (Array.isArray(mapping_types) && mapping_types.length > 0
+            ? mapping_types[0]
+            : 'number') as ES_FIELD_TYPES,
+        };
+        return (
+          <>
+            <FieldStatsInfoButton
+              field={field}
+              label={name}
+              onButtonClick={handleFieldStatsButtonClick}
+            />
+          </>
+        );
+      },
+
+      isSortable: true,
+      alignment: LEFT_ALIGNMENT,
+    },
+    {
+      id: 'mapping_types',
+      label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.mappingColumn', {
+        defaultMessage: 'Mapping',
+      }),
+      isSortable: false,
+      alignment: LEFT_ALIGNMENT,
+    },
+    {
+      label: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.analyticsTable.isIncludedColumn',
+        {
+          defaultMessage: 'Is included',
+        }
+      ),
+      id: 'is_included',
+      alignment: LEFT_ALIGNMENT,
+      isSortable: true,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      render: ({ is_included }: { is_included: boolean }) => (is_included ? 'Yes' : 'No'),
+    },
+    {
+      label: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.analyticsTable.isRequiredColumn',
+        {
+          defaultMessage: 'Is required',
+        }
+      ),
+      id: 'is_required',
+      alignment: LEFT_ALIGNMENT,
+      isSortable: true,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      render: ({ is_required }: { is_required: boolean }) => (is_required ? 'Yes' : 'No'),
+    },
+    {
+      label: i18n.translate('xpack.ml.dataframe.analytics.create.analyticsTable.reasonColumn', {
+        defaultMessage: 'Reason',
+      }),
+      id: 'reason',
+      alignment: LEFT_ALIGNMENT,
+      isSortable: false,
+    },
+  ];
+
+  useEffect(() => {
+    if (includes.length === 0 && tableItems.length > 0) {
+      const includedFields: string[] = [];
+      tableItems.forEach((field) => {
+        if (field.is_included === true) {
+          includedFields.push(field.name);
+        }
+      });
+      setFormState({ includes: includedFields });
+    } else if (includes.length > 0) {
+      setFormState({
+        includes:
+          (dependentVariable && includes.includes(dependentVariable)) || !isJobTypeWithDepVar
+            ? includes
+            : [...includes, dependentVariable],
+      });
+    }
+    setMinimumFieldsRequiredMessage(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableItems]);
+
+  useEffect(() => {
+    let sortablePropertyItems = [];
+    const defaultSortProperty = 'name';
+
+    sortablePropertyItems = [
+      {
+        name: 'name',
+        getValue: (item: any) => item.name.toLowerCase(),
+        isAscending: true,
+      },
+      {
+        name: 'is_included',
+        getValue: (item: any) => item.is_included,
+        isAscending: true,
+      },
+      {
+        name: 'is_required',
+        getValue: (item: any) => item.is_required,
+        isAscending: true,
+      },
+    ];
+    const sortableProps = new SortableProperties(sortablePropertyItems, defaultSortProperty);
+
+    setSortableProperties(sortableProps);
+  }, []);
+
+  const filters = [
+    {
+      type: 'field_value_toggle_group',
+      field: 'is_included',
+      items: [
+        {
+          value: true,
+          name: i18n.translate('xpack.ml.dataframe.analytics.create.isIncludedOption', {
+            defaultMessage: 'Is included',
+          }),
+        },
+        {
+          value: false,
+          name: i18n.translate('xpack.ml.dataframe.analytics.create.isNotIncludedOption', {
+            defaultMessage: 'Is not included',
+          }),
+        },
+      ],
+    },
+  ];
+
+  return (
+    <Fragment>
+      <EuiFormRow
+        data-test-subj="mlAnalyticsCreateJobWizardIncludesTable"
+        label={i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsLabel', {
+          defaultMessage: 'Included fields',
+        })}
+        fullWidth
+        isInvalid={
+          minimumFieldsRequiredMessage !== undefined || unsupportedFieldsError !== undefined
+        }
+        error={[
+          ...(minimumFieldsRequiredMessage !== undefined ? [minimumFieldsRequiredMessage] : []),
+          ...(unsupportedFieldsError !== undefined
+            ? [
+                i18n.translate('xpack.ml.dataframe.analytics.create.unsupportedFieldsError', {
+                  defaultMessage: 'Invalid. {message}',
+                  values: { message: unsupportedFieldsError },
+                }),
+              ]
+            : []),
+        ]}
+      >
+        <Fragment />
+      </EuiFormRow>
+      {tableItems.length > 0 && minimumFieldsRequiredMessage === undefined && (
+        <EuiText size="xs">
+          {i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsCount', {
+            defaultMessage:
+              '{numFields, plural, one {# field} other {# fields}} included in the analysis',
+            values: { numFields: includes.length },
+          })}
+        </EuiText>
+      )}
+      {tableItems.length === 0 && (
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataframe.analytics.create.calloutTitle', {
+            defaultMessage: 'Analysis fields not available',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.calloutMessage"
+            defaultMessage="Additional data required to load analysis fields."
+          />
+        </EuiCallOut>
+      )}
+      {tableItems.length > 0 && (
+        <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardIncludesSelect">
+          <CustomSelectionTable
+            currentPage={currentPaginationData.pageIndex}
+            data-test-subj="mlAnalyticsCreationAnalysisFieldsTable"
+            checkboxDisabledCheck={checkboxDisabledCheck}
+            columns={columns}
+            filters={filters}
+            items={tableItems}
+            itemsPerPage={currentPaginationData.itemsPerPage}
+            onTableChange={(selection: string[]) => {
+              // dependent variable must always be in includes
+              if (
+                isJobTypeWithDepVar &&
+                dependentVariable !== undefined &&
+                dependentVariable !== '' &&
+                selection.length === 0
+              ) {
+                selection = [dependentVariable];
+              }
+              // If includes is empty show minimum fields required message and don't update form yet
+              if (selection.length === 0) {
+                setMinimumFieldsRequiredMessage(minimumFieldsMessage);
+                setUnsupportedFieldsError(undefined);
+              } else {
+                setMinimumFieldsRequiredMessage(undefined);
+                setFormState({ includes: selection });
+              }
+            }}
+            selectedIds={includes}
+            setCurrentPaginationData={setCurrentPaginationData}
+            singleSelection={false}
+            sortableProperties={sortableProperties}
+            tableItemId={'name'}
+          />
+        </EuiPanel>
+      )}
+      <EuiSpacer />
+    </Fragment>
+  );
+});

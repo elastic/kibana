@@ -44,7 +44,7 @@ import { useDeps } from '../../../../hooks/use_deps';
 
 import { getStatusMessage } from './get_status_message';
 
-export const PageReducerStream: FC = () => {
+export const PageReducerStream = () => {
   const {
     core: { http, notifications },
   } = useDeps();

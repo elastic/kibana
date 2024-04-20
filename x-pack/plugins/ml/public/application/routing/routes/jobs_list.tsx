@@ -50,7 +50,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   enableDatePicker: true,
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
 
   const timefilter = useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });

@@ -75,14 +75,16 @@ const addNewConnector = (euiTheme: EuiThemeComputed<{}>) => ({
   'data-test-subj': 'dropdown-connector-add-connector',
 });
 
-const ConnectorsDropdownComponent: React.FC<Props> = ({
-  connectors,
-  disabled,
-  isLoading,
-  onChange,
-  selectedConnector,
-  appendAddConnectorButton = false,
-}) => {
+const ConnectorsDropdownComponent = (
+  {
+    connectors,
+    disabled,
+    isLoading,
+    onChange,
+    selectedConnector,
+    appendAddConnectorButton = false
+  }: Props
+) => {
   const { triggersActionsUi } = useKibana().services;
   const { actions } = useApplicationCapabilities();
   const canSave = actions.crud;

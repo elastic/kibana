@@ -17,7 +17,7 @@ import {
 
 type ESDataViewSelectProps = Omit<Props, 'indices' | 'loading'>;
 
-export const ESDataViewSelect: FC<ESDataViewSelectProps> = (props) => {
+export const ESDataViewSelect = (props: ESDataViewSelectProps) => {
   const { value, onChange } = props;
 
   const [dataViews, setDataViews] = useState<Array<Pick<DataView, 'id' | 'name' | 'title'>>>([]);

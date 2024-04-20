@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LicensingLogic } from '../../../shared/licensing';
 
-export const TrialCallout: React.FC = () => {
+export const TrialCallout = () => {
   const { license, isTrial } = useValues(LicensingLogic);
 
   if (!isTrial) return null;

@@ -92,7 +92,11 @@ const typeConfig: FieldConfig<string> = {
   ],
 };
 
-export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
+export const ProcessorTypeField = (
+  {
+    initialType
+  }: Props
+) => {
   const {
     services: { documentation, license },
   } = useKibana();

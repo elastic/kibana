@@ -22,7 +22,11 @@ export const fromPatternAnalysisRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location }) => {
+const PageWrapper = (
+  {
+    location
+  }: PageProps
+) => {
   const {
     categorizationType,
     dataViewId,

@@ -22,11 +22,13 @@ interface CustomUrlTimeRangePickerProps {
 /*
  * React component for the form for adding a custom time range.
  */
-export const CustomTimeRangePicker: FC<CustomUrlTimeRangePickerProps> = ({
-  onCustomTimeRangeChange,
-  customTimeRange,
-  disabled,
-}) => {
+export const CustomTimeRangePicker = (
+  {
+    onCustomTimeRangeChange,
+    customTimeRange,
+    disabled
+  }: CustomUrlTimeRangePickerProps
+) => {
   const [showCustomTimeRangeSelector, setShowCustomTimeRangeSelector] = useState<boolean>(false);
   const {
     services: {

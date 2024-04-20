@@ -65,14 +65,16 @@ interface LiveQueryFormProps {
   hideAgentsField?: boolean;
 }
 
-const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
-  defaultValue,
-  onSuccess,
-  queryField = true,
-  formType = 'steps',
-  enabled = true,
-  hideAgentsField = false,
-}) => {
+const LiveQueryFormComponent = (
+  {
+    defaultValue,
+    onSuccess,
+    queryField = true,
+    formType = 'steps',
+    enabled = true,
+    hideAgentsField = false
+  }: LiveQueryFormProps
+) => {
   const alertAttachmentContext = useContext(AlertAttachmentContext);
 
   const { application } = useKibana().services;

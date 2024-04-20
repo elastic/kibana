@@ -30,13 +30,15 @@ interface ExceptionsAddToListsOptionsComponentProps {
   onRadioChange: (option: string) => void;
 }
 
-const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptionsComponentProps> = ({
-  rulesCount,
-  selectedRadioOption,
-  sharedLists,
-  onListsSelectionChange,
-  onRadioChange,
-}): JSX.Element => {
+const ExceptionsAddToListsOptionsComponent = (
+  {
+    rulesCount,
+    selectedRadioOption,
+    sharedLists,
+    onListsSelectionChange,
+    onRadioChange
+  }: ExceptionsAddToListsOptionsComponentProps
+): JSX.Element => {
   const { navigateToApp } = useKibana().services.application;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const closePopover = () => setIsPopoverOpen(false);

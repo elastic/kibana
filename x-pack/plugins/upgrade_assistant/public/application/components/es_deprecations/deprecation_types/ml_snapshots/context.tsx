@@ -35,13 +35,15 @@ interface Props {
   mlUpgradeModeEnabled: boolean;
 }
 
-export const MlSnapshotsStatusProvider: React.FunctionComponent<Props> = ({
-  api,
-  snapshotId,
-  jobId,
-  mlUpgradeModeEnabled,
-  children,
-}) => {
+export const MlSnapshotsStatusProvider = (
+  {
+    api,
+    snapshotId,
+    jobId,
+    mlUpgradeModeEnabled,
+    children
+  }: Props
+) => {
   const { updateSnapshotStatus, snapshotState, upgradeSnapshot, deleteSnapshot } = useSnapshotState(
     {
       jobId,

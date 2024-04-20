@@ -27,10 +27,15 @@ import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 
-export const Page: FC<{
-  jobId: string;
-  analysisType: DataFrameAnalysisConfigType;
-}> = ({ jobId, analysisType }) => {
+export const Page = (
+  {
+    jobId,
+    analysisType
+  }: {
+    jobId: string;
+    analysisType: DataFrameAnalysisConfigType;
+  }
+) => {
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
   const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!jobId);
   const [jobsExist, setJobsExist] = useState(true);

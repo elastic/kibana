@@ -25,7 +25,12 @@ interface Props {
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailable = true }) => {
+export const TestProvidersComponent = (
+  {
+    children,
+    isILMAvailable = true
+  }: Props
+) => {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   const { toasts } = notificationServiceMock.createSetupContract();
   const actionTypeRegistry = actionTypeRegistryMock.create();

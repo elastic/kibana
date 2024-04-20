@@ -21,7 +21,13 @@ interface Props extends CreateAnalyticsFormProps {
   advancedParamErrors: AdvancedParamErrors;
 }
 
-export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedParamErrors }) => {
+export const OutlierHyperParameters = (
+  {
+    actions,
+    state,
+    advancedParamErrors
+  }: Props
+) => {
   const { setFormState } = actions;
 
   const { method, nNeighbors, outlierFraction, standardizationEnabled } = state.form;

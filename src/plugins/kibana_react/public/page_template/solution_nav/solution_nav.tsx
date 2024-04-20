@@ -53,9 +53,16 @@ const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) =>
 /**
  * A wrapper around EuiSideNav but also creates the appropriate title with optional solution logo
  */
-export const KibanaPageTemplateSolutionNav: FunctionComponent<
-  KibanaPageTemplateSolutionNavProps
-> = ({ name, icon, items, isOpenOnDesktop = false, onCollapse, ...rest }) => {
+export const KibanaPageTemplateSolutionNav = (
+  {
+    name,
+    icon,
+    items,
+    isOpenOnDesktop = false,
+    onCollapse,
+    ...rest
+  }: KibanaPageTemplateSolutionNavProps
+) => {
   // The EuiShowFor and EuiHideFor components are not in sync with the euiBreakpoint() function :(
   const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);

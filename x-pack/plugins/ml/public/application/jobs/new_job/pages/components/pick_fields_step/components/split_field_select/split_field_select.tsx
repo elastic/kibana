@@ -27,14 +27,16 @@ interface Props {
   placeholder?: string;
 }
 
-export const SplitFieldSelect: FC<Props> = ({
-  fields,
-  changeHandler,
-  selectedField,
-  isClearable,
-  testSubject,
-  placeholder,
-}) => {
+export const SplitFieldSelect = (
+  {
+    fields,
+    changeHandler,
+    selectedField,
+    isClearable,
+    testSubject,
+    placeholder
+  }: Props
+) => {
   const { renderOption, optionCss } = useFieldStatsTrigger();
   const options: EuiComboBoxOptionOption[] = fields.map(
     (f) =>

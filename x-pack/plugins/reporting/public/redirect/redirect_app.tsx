@@ -41,7 +41,13 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMode, share }) => {
+export const RedirectApp = (
+  {
+    apiClient,
+    screenshotMode,
+    share
+  }: Props
+) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {
@@ -75,7 +81,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
   }, [apiClient, screenshotMode, share]);
 
   return (
-    <div className="reportingRedirectApp__interstitialPage">
+    (<div className="reportingRedirectApp__interstitialPage">
       {error ? (
         <EuiCallOut title={i18nTexts.errorTitle} color="danger">
           <p>{error.message}</p>
@@ -84,8 +90,8 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
       ) : (
         // We don't show anything on this page, the share service will handle showing any issues with
         // using the locator
-        <div />
+        (<div />)
       )}
-    </div>
+    </div>)
   );
 };

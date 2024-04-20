@@ -18,31 +18,31 @@ interface NoDataProps {
   testString?: string;
 }
 
-export const NoData: React.FC<NoDataProps> = ({
-  titleText,
-  bodyText,
-  refetchText,
-  onRefetch,
-  testString,
-}) => (
-  <CenteredEmptyPrompt
-    title={<h2>{titleText}</h2>}
-    titleSize="m"
-    body={<p>{bodyText}</p>}
-    actions={
-      <EuiButton
-        data-test-subj="infraNoDataButton"
-        iconType="refresh"
-        color="primary"
-        fill
-        onClick={onRefetch}
-      >
-        {refetchText}
-      </EuiButton>
-    }
-    data-test-subj={testString}
-  />
-);
+export const NoData = (
+  {
+    titleText,
+    bodyText,
+    refetchText,
+    onRefetch,
+    testString
+  }: NoDataProps
+) => (<CenteredEmptyPrompt
+  title={<h2>{titleText}</h2>}
+  titleSize="m"
+  body={<p>{bodyText}</p>}
+  actions={
+    <EuiButton
+      data-test-subj="infraNoDataButton"
+      iconType="refresh"
+      color="primary"
+      fill
+      onClick={onRefetch}
+    >
+      {refetchText}
+    </EuiButton>
+  }
+  data-test-subj={testString}
+/>);
 
 const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
   align-self: center;

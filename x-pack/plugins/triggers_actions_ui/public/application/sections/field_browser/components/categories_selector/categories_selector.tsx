@@ -71,11 +71,13 @@ const renderOption = (option: CategoryOption, searchValue: string) => {
   );
 };
 
-const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
-  filteredBrowserFields,
-  setSelectedCategoryIds,
-  selectedCategoryIds,
-}) => {
+const CategoriesSelectorComponent = (
+  {
+    filteredBrowserFields,
+    setSelectedCategoryIds,
+    selectedCategoryIds
+  }: CategoriesSelectorProps
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const togglePopover = useCallback(() => {

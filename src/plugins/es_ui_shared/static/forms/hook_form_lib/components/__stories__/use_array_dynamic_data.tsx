@@ -204,7 +204,13 @@ const processorNameConfig = {
   validations: [{ validator: emptyField('A name is required.') }],
 };
 
-const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
+const ProcessorsConfigurator = (
+  {
+    ruleType
+  }: {
+    ruleType: string;
+  }
+) => {
   return (
     <UseArray path="processors" initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}>
       {({ items, addItem, removeItem }) => {
@@ -258,7 +264,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
   );
 };
 
-const FormContent: FC = () => {
+const FormContent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { updateFieldValues } = useFormContext();
   const [{ ruleType }] = useFormData({ watch: 'ruleType' });

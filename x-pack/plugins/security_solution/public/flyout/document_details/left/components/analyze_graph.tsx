@@ -19,7 +19,7 @@ export const ANALYZE_GRAPH_ID = 'analyze_graph';
 /**
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
-export const AnalyzeGraph: FC = () => {
+export const AnalyzeGraph = () => {
   const { eventId } = useLeftPanelContext();
   const scopeId = 'flyout'; // Different scope Id to distinguish flyout and data table analyzers
   const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(

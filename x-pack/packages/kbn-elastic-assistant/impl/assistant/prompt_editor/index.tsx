@@ -37,19 +37,21 @@ const PreviewText = styled(EuiText)`
   white-space: pre-line;
 `;
 
-const PromptEditorComponent: React.FC<Props> = ({
-  conversation,
-  editingSystemPromptId,
-  isNewConversation,
-  isSettingsModalVisible,
-  promptContexts,
-  promptTextPreview,
-  onSystemPromptSelectionChange,
-  selectedPromptContexts,
-  setIsSettingsModalVisible,
-  setSelectedPromptContexts,
-  isFlyoutMode,
-}) => {
+const PromptEditorComponent = (
+  {
+    conversation,
+    editingSystemPromptId,
+    isNewConversation,
+    isSettingsModalVisible,
+    promptContexts,
+    promptTextPreview,
+    onSystemPromptSelectionChange,
+    selectedPromptContexts,
+    setIsSettingsModalVisible,
+    setSelectedPromptContexts,
+    isFlyoutMode
+  }: Props
+) => {
   const commentBody = useMemo(
     () => (
       <>

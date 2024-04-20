@@ -20,9 +20,11 @@ interface IntegrationStatusBadgeProps {
   integration: IntegrationDetails;
 }
 
-const IntegrationStatusBadgeComponent: React.FC<IntegrationStatusBadgeProps> = ({
-  integration,
-}) => {
+const IntegrationStatusBadgeComponent = (
+  {
+    integration
+  }: IntegrationStatusBadgeProps
+) => {
   const { installationStatus } = integration;
 
   if (!installationStatus.isKnown) {

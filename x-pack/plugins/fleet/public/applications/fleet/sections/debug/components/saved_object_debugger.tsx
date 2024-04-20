@@ -67,7 +67,7 @@ const fetchSavedObjects = async (type?: string, name?: string) => {
   return response.data?.hits;
 };
 
-export const SavedObjectDebugger: React.FunctionComponent = () => {
+export const SavedObjectDebugger = () => {
   const types = [
     {
       value: `${AGENT_POLICY_SAVED_OBJECT_TYPE}`,

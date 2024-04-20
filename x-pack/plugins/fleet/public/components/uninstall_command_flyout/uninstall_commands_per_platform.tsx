@@ -36,7 +36,11 @@ interface Props {
   token: string;
 }
 
-export const UninstallCommandsPerPlatform: React.FunctionComponent<Props> = ({ token }) => {
+export const UninstallCommandsPerPlatform = (
+  {
+    token
+  }: Props
+) => {
   const [platform, setPlatform] = useState<PLATFORMS_FOR_UNINSTALL>('linuxOrMac');
 
   const commands: Commands = useMemo(() => generateUninstallCommands(token), [token]);

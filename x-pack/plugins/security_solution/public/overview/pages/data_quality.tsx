@@ -130,7 +130,7 @@ const renderOption = (
   </EuiToolTip>
 );
 
-const DataQualityComponent: React.FC = () => {
+const DataQualityComponent = () => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();

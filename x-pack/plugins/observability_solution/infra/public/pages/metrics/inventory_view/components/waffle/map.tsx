@@ -32,18 +32,20 @@ interface Props {
   detailsItemId: string | null;
 }
 
-export const Map: React.FC<Props> = ({
-  nodes,
-  options,
-  currentTime,
-  onFilter,
-  formatter,
-  bounds,
-  nodeType,
-  bottomMargin,
-  staticHeight,
-  detailsItemId,
-}) => {
+export const Map = (
+  {
+    nodes,
+    options,
+    currentTime,
+    onFilter,
+    formatter,
+    bounds,
+    nodeType,
+    bottomMargin,
+    staticHeight,
+    detailsItemId
+  }: Props
+) => {
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
   return (

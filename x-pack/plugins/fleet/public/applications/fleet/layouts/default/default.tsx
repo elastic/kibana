@@ -22,11 +22,13 @@ interface Props {
   rightColumn?: JSX.Element;
 }
 
-export const DefaultLayout: React.FunctionComponent<Props> = ({
-  section,
-  children,
-  rightColumn,
-}) => {
+export const DefaultLayout = (
+  {
+    section,
+    children,
+    rightColumn
+  }: Props
+) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
   const authz = useAuthz();

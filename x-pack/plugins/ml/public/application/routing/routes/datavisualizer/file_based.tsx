@@ -42,7 +42,7 @@ export const fileBasedRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('basic', ['canFindFileStructure']);
 
   return (

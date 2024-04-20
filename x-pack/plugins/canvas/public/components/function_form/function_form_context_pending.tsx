@@ -18,7 +18,7 @@ interface FunctionFormContextPendingProps {
   updateContext: (element?: CanvasElement) => void;
 }
 
-export const FunctionFormContextPending: FC<FunctionFormContextPendingProps> = (props) => {
+export const FunctionFormContextPending = (props: FunctionFormContextPendingProps) => {
   const { contextExpression, expressionType, context, updateContext } = props;
   const prevContextExpression = usePrevious(contextExpression);
   const fetchContext = useCallback(

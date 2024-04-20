@@ -32,15 +32,17 @@ interface LogHighlightsMenuProps {
   goToNextHighlight: () => void;
 }
 
-export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
-  onChange,
-  isLoading,
-  activeHighlights,
-  hasPreviousHighlight,
-  goToPreviousHighlight,
-  hasNextHighlight,
-  goToNextHighlight,
-}) => {
+export const LogHighlightsMenu = (
+  {
+    onChange,
+    isLoading,
+    activeHighlights,
+    hasPreviousHighlight,
+    goToPreviousHighlight,
+    hasNextHighlight,
+    goToNextHighlight
+  }: LogHighlightsMenuProps
+) => {
   const {
     isVisible: isPopoverOpen,
     hide: closePopover,

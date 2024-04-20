@@ -19,11 +19,13 @@ interface DetailPageLinkProps {
   linkParameters: string | undefined;
 }
 
-export const MonitorPageLink: FC<DetailPageLinkProps> = ({
-  children,
-  monitorId,
-  linkParameters,
-}) => {
+export const MonitorPageLink = (
+  {
+    children,
+    monitorId,
+    linkParameters
+  }: DetailPageLinkProps
+) => {
   const getLocationTo = () => {
     // encode monitorId param as 64 base string to make it a valid URL, since it can be a url
     return linkParameters

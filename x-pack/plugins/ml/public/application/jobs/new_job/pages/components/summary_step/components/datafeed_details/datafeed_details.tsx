@@ -19,7 +19,7 @@ import { defaultLabel, Italic } from '../common';
 
 const EDITOR_HEIGHT = '200px';
 
-export const DatafeedDetails: FC = () => {
+export const DatafeedDetails = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { datafeeds } = getNewJobDefaults();
 

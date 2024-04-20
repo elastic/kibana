@@ -78,10 +78,12 @@ const defaultContext: SyntheticsSettingsContextValues = {
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
-export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = ({
-  children,
-  ...props
-}) => {
+export const SyntheticsSettingsContextProvider = (
+  {
+    children,
+    ...props
+  }: SyntheticsAppProps
+) => {
   const {
     basePath,
     isApmAvailable,

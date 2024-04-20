@@ -26,16 +26,18 @@ interface ReferenceLineLayerProps {
   yAxesMap: AxesMap;
 }
 
-export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
-  layer,
-  axesConfiguration,
-  formatters,
-  xAxisFormatter,
-  paddingMap,
-  isHorizontal,
-  titles,
-  yAxesMap,
-}) => {
+export const ReferenceLineLayer = (
+  {
+    layer,
+    axesConfiguration,
+    formatters,
+    xAxisFormatter,
+    paddingMap,
+    isHorizontal,
+    titles,
+    yAxesMap
+  }: ReferenceLineLayerProps
+) => {
   if (!layer.decorations) {
     return null;
   }

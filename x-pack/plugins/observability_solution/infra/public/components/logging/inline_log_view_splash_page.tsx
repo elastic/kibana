@@ -17,7 +17,7 @@ type InlineLogViewSplashPageProps = {
   revertToDefaultLogView: () => void;
 } & LazyObservabilityPageTemplateProps;
 
-export const InlineLogViewSplashPage: React.FC<InlineLogViewSplashPageProps> = (props) => {
+export const InlineLogViewSplashPage = (props: InlineLogViewSplashPageProps) => {
   const { revertToDefaultLogView, ...templateProps } = props;
   return (
     <PageTemplate {...templateProps} isEmptyState={true}>
@@ -26,9 +26,13 @@ export const InlineLogViewSplashPage: React.FC<InlineLogViewSplashPageProps> = (
   );
 };
 
-export const InlineLogViewSplashPrompt: React.FC<{
-  revertToDefaultLogView: InlineLogViewSplashPageProps['revertToDefaultLogView'];
-}> = ({ revertToDefaultLogView }) => {
+export const InlineLogViewSplashPrompt = (
+  {
+    revertToDefaultLogView
+  }: {
+    revertToDefaultLogView: InlineLogViewSplashPageProps['revertToDefaultLogView'];
+  }
+) => {
   const title = (
     <FormattedMessage
       id="xpack.infra.ml.splash.inlineLogView.title"

@@ -10,7 +10,7 @@ import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiFlyout } f
 import { useUiActions } from '../../context';
 import { sampleApp2ClickContext, SAMPLE_APP2_CLICK_TRIGGER } from '../../triggers';
 
-export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
+export const DrilldownsWithoutEmbeddableSingleButtonExample = () => {
   const { plugins, managerWithoutEmbeddableSingleButton } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
 

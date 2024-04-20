@@ -28,7 +28,7 @@ import { USERNAME_LABEL, PASSWORD_LABEL } from '../../../../../../shared/constan
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 import { AUTHENTICATION_LABELS } from './constants';
 
-export const AuthenticationPanelEditContent: React.FC = () => {
+export const AuthenticationPanelEditContent = () => {
   const { selectAuthOption, setHeaderContent, setPassword, setUsername } =
     useActions(AuthenticationPanelLogic);
 

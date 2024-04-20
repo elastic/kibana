@@ -29,12 +29,12 @@ export type InvalidateApiKeys = (
 
 type OnSuccessCallback = (apiKeysInvalidated: ApiKeyToInvalidate[]) => void;
 
-export const InvalidateProvider: React.FunctionComponent<Props> = ({
+export const InvalidateProvider = ({
   isAdmin,
   children,
   notifications,
   apiKeysAPIClient,
-}) => {
+}: Props) => {
   const [apiKeys, setApiKeys] = useState<ApiKeyToInvalidate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);

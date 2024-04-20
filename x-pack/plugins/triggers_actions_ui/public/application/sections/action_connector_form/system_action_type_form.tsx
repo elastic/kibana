@@ -283,13 +283,21 @@ function getAvailableActionVariables(
   }, []);
 }
 
-const ButtonContent: React.FC<{
-  showActionGroupErrorIcon: boolean;
-  iconClass: string | IconType;
-  connectorName: string;
-  showWarning: boolean;
-  isExperimental: boolean;
-}> = ({ showActionGroupErrorIcon, iconClass, showWarning, isExperimental, connectorName }) => {
+const ButtonContent = (
+  {
+    showActionGroupErrorIcon,
+    iconClass,
+    showWarning,
+    isExperimental,
+    connectorName
+  }: {
+    showActionGroupErrorIcon: boolean;
+    iconClass: string | IconType;
+    connectorName: string;
+    showWarning: boolean;
+    isExperimental: boolean;
+  }
+) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       {showActionGroupErrorIcon ? (

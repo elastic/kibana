@@ -28,11 +28,13 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const FSSettings: React.FunctionComponent<Props> = ({
-  repository,
-  updateRepositorySettings,
-  settingErrors,
-}) => {
+export const FSSettings = (
+  {
+    repository,
+    updateRepositorySettings,
+    settingErrors
+  }: Props
+) => {
   const {
     settings: {
       location,

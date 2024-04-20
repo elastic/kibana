@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../shared_imports';
 
-export const OnFailureProcessorsTitle: FunctionComponent = () => {
+export const OnFailureProcessorsTitle = () => {
   const { services } = useKibana();
 
   return (

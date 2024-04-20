@@ -62,7 +62,12 @@ export const LogstashInstructions = () => {
   );
 };
 
-const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children, ...props }) => {
+const CollapsibleCallout = (
+  {
+    children,
+    ...props
+  }: EuiCallOutProps
+) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

@@ -16,10 +16,11 @@ export interface CallOutPersistentSwitcherProps {
   message: CallOutMessage;
 }
 
-const CallOutPersistentSwitcherComponent: FC<CallOutPersistentSwitcherProps> = ({
-  condition,
-  message,
-}): JSX.Element | null =>
-  condition ? <CallOut message={message} showDismissButton={false} /> : null;
+const CallOutPersistentSwitcherComponent = (
+  {
+    condition,
+    message
+  }: CallOutPersistentSwitcherProps
+): JSX.Element | null => condition ? <CallOut message={message} showDismissButton={false} /> : null;
 
 export const CallOutPersistentSwitcher = memo(CallOutPersistentSwitcherComponent);

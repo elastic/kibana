@@ -71,7 +71,13 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
-const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
+const EditRulePageComponent = (
+  {
+    rule
+  }: {
+    rule: RuleResponse;
+  }
+) => {
   const [, dispatchToaster] = useStateToaster();
   const [
     {
@@ -597,7 +603,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   );
 };
 
-const EditRulePageWrapper: FC = () => {
+const EditRulePageWrapper = () => {
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { data: rule } = useRule(ruleId, true);
   return rule != null ? <EditRulePageComponent rule={rule} /> : <></>;

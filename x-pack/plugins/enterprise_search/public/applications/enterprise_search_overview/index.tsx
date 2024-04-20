@@ -20,10 +20,12 @@ import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
 import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
 
-export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
-  enterpriseSearchVersion,
-  kibanaVersion,
-}) => {
+export const EnterpriseSearchOverview = (
+  {
+    enterpriseSearchVersion,
+    kibanaVersion
+  }: InitialAppData
+) => {
   const { config } = useValues(KibanaLogic);
 
   const incompatibleVersions = !!(

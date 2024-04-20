@@ -45,7 +45,7 @@ import {
   ADD_SOURCE_EMPTY_BODY,
 } from './constants';
 
-export const AddSourceList: React.FC = () => {
+export const AddSourceList = () => {
   const { contentSources, dataLoading, availableSources, configuredSources } =
     useValues(SourcesLogic);
 

@@ -18,7 +18,12 @@ interface FieldTypeIconProps {
   type: string;
 }
 
-export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, type }) => {
+export const FieldTypeIcon = (
+  {
+    tooltipEnabled = false,
+    type
+  }: FieldTypeIconProps
+) => {
   const label =
     getFieldTypeName(type) ??
     i18n.translate('xpack.dataVisualizer.fieldTypeIcon.fieldTypeTooltip', {

@@ -42,7 +42,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Join: FunctionComponent = () => {
+export const Join = () => {
   return (
     <>
       <FieldNameField

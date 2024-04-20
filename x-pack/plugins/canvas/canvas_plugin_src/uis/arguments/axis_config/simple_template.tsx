@@ -14,7 +14,12 @@ export interface Props {
   argValue: boolean;
 }
 
-export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
+export const SimpleTemplate = (
+  {
+    onValueChange,
+    argValue
+  }: Props
+) => {
   return (
     <EuiSwitch
       compressed

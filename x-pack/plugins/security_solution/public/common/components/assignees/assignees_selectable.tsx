@@ -46,90 +46,95 @@ export interface AssigneesSelectableProps {
 /**
  * Renders a selectable component given a list of assignees ids
  */
-export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
-  ({ searchInputId, assignedUserIds, showUnassignedOption, onSelectionChange }) => {
-    const { data: currentUserProfile } = useGetCurrentUserProfile();
-    const existingIds = useMemo(
-      () => new Set(removeNoAssigneesSelection(assignedUserIds)),
-      [assignedUserIds]
-    );
-    const { isLoading: isLoadingUserProfiles, data: assignedUserProfiles } = useBulkGetUserProfiles(
-      {
-        uids: existingIds,
+export const AssigneesSelectable = memo((
+  {
+    searchInputId,
+    assignedUserIds,
+    showUnassignedOption,
+    onSelectionChange
+  }: AssigneesSelectableProps
+) => {
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const existingIds = useMemo(
+    () => new Set(removeNoAssigneesSelection(assignedUserIds)),
+    [assignedUserIds]
+  );
+  const { isLoading: isLoadingUserProfiles, data: assignedUserProfiles } = useBulkGetUserProfiles(
+    {
+      uids: existingIds,
+    }
+  );
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const { isLoading: isLoadingSuggestedUsers, data: userProfiles } = useSuggestUsers({
+    searchTerm,
+  });
+
+  const searchResultProfiles = useMemo(() => {
+    const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
+
+    if (showUnassignedOption && isEmpty(searchTerm)) {
+      return [NO_ASSIGNEES_VALUE, ...sortedUsers];
+    }
+
+    return sortedUsers;
+  }, [currentUserProfile, searchTerm, showUnassignedOption, userProfiles]);
+
+  /**
+   * Holds user profiles of currently selected users
+   */
+  const [selectedUserProfiles, setSelectedUserProfiles] = useState<AssigneesProfilesSelection[]>(
+    []
+  );
+  useEffect(() => {
+    if (isLoadingUserProfiles || !assignedUserProfiles) {
+      return;
+    }
+    const hasNoAssigneesSelection = assignedUserIds.find((uid) => uid === NO_ASSIGNEES_VALUE);
+    const newAssignees =
+      hasNoAssigneesSelection !== undefined
+        ? [NO_ASSIGNEES_VALUE, ...assignedUserProfiles]
+        : assignedUserProfiles;
+    setSelectedUserProfiles(newAssignees);
+  }, [assignedUserIds, assignedUserProfiles, isLoadingUserProfiles]);
+
+  const handleSelectedAssignees = useCallback(
+    (newAssignees: AssigneesProfilesSelection[]) => {
+      if (!isEqual(newAssignees, selectedUserProfiles)) {
+        setSelectedUserProfiles(newAssignees);
+        onSelectionChange?.(newAssignees.map((assignee) => assignee?.uid ?? NO_ASSIGNEES_VALUE));
       }
-    );
+    },
+    [onSelectionChange, selectedUserProfiles]
+  );
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const { isLoading: isLoadingSuggestedUsers, data: userProfiles } = useSuggestUsers({
-      searchTerm,
-    });
+  const selectedStatusMessage = useCallback(
+    (total: number) => i18n.ASSIGNEES_SELECTION_STATUS_MESSAGE(total),
+    []
+  );
 
-    const searchResultProfiles = useMemo(() => {
-      const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
+  const isLoading = isLoadingUserProfiles || isLoadingSuggestedUsers;
 
-      if (showUnassignedOption && isEmpty(searchTerm)) {
-        return [NO_ASSIGNEES_VALUE, ...sortedUsers];
-      }
-
-      return sortedUsers;
-    }, [currentUserProfile, searchTerm, showUnassignedOption, userProfiles]);
-
-    /**
-     * Holds user profiles of currently selected users
-     */
-    const [selectedUserProfiles, setSelectedUserProfiles] = useState<AssigneesProfilesSelection[]>(
-      []
-    );
-    useEffect(() => {
-      if (isLoadingUserProfiles || !assignedUserProfiles) {
-        return;
-      }
-      const hasNoAssigneesSelection = assignedUserIds.find((uid) => uid === NO_ASSIGNEES_VALUE);
-      const newAssignees =
-        hasNoAssigneesSelection !== undefined
-          ? [NO_ASSIGNEES_VALUE, ...assignedUserProfiles]
-          : assignedUserProfiles;
-      setSelectedUserProfiles(newAssignees);
-    }, [assignedUserIds, assignedUserProfiles, isLoadingUserProfiles]);
-
-    const handleSelectedAssignees = useCallback(
-      (newAssignees: AssigneesProfilesSelection[]) => {
-        if (!isEqual(newAssignees, selectedUserProfiles)) {
-          setSelectedUserProfiles(newAssignees);
-          onSelectionChange?.(newAssignees.map((assignee) => assignee?.uid ?? NO_ASSIGNEES_VALUE));
-        }
-      },
-      [onSelectionChange, selectedUserProfiles]
-    );
-
-    const selectedStatusMessage = useCallback(
-      (total: number) => i18n.ASSIGNEES_SELECTION_STATUS_MESSAGE(total),
-      []
-    );
-
-    const isLoading = isLoadingUserProfiles || isLoadingSuggestedUsers;
-
-    return (
-      <div data-test-subj={ASSIGNEES_SELECTABLE_TEST_ID}>
-        <UserProfilesSelectable
-          searchInputId={searchInputId}
-          onSearchChange={(term: string) => {
-            setSearchTerm(term);
-          }}
-          onChange={handleSelectedAssignees}
-          selectedStatusMessage={selectedStatusMessage}
-          options={searchResultProfiles}
-          selectedOptions={selectedUserProfiles}
-          isLoading={isLoading}
-          height={'full'}
-          singleSelection={false}
-          searchPlaceholder={i18n.ASSIGNEES_SEARCH_USERS}
-          clearButtonLabel={i18n.ASSIGNEES_CLEAR_FILTERS}
-          nullOptionLabel={i18n.ASSIGNEES_NO_ASSIGNEES}
-        />
-      </div>
-    );
-  }
-);
+  return (
+    <div data-test-subj={ASSIGNEES_SELECTABLE_TEST_ID}>
+      <UserProfilesSelectable
+        searchInputId={searchInputId}
+        onSearchChange={(term: string) => {
+          setSearchTerm(term);
+        }}
+        onChange={handleSelectedAssignees}
+        selectedStatusMessage={selectedStatusMessage}
+        options={searchResultProfiles}
+        selectedOptions={selectedUserProfiles}
+        isLoading={isLoading}
+        height={'full'}
+        singleSelection={false}
+        searchPlaceholder={i18n.ASSIGNEES_SEARCH_USERS}
+        clearButtonLabel={i18n.ASSIGNEES_CLEAR_FILTERS}
+        nullOptionLabel={i18n.ASSIGNEES_NO_ASSIGNEES}
+      />
+    </div>
+  );
+});
 
 AssigneesSelectable.displayName = 'AssigneesSelectable';

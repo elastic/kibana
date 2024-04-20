@@ -50,10 +50,12 @@ const mapStatusCodeToBadgeColor = (statusCode: number) => {
   return 'danger';
 };
 
-export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
-  requestInProgress,
-  requestResult,
-}) => {
+export const NetworkRequestStatusBar = (
+  {
+    requestInProgress,
+    requestResult
+  }: Props
+) => {
   let content: React.ReactNode = null;
 
   if (requestInProgress) {

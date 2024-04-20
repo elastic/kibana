@@ -80,18 +80,21 @@ interface DocsColumnResultsProps {
   isLive?: boolean;
 }
 
-const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center">
-    <EuiFlexItem grow={false}>
-      {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
+const DocsColumnResults = (
+  {
+    count,
+    isLive
+  }: DocsColumnResultsProps
+) => (<EuiFlexGroup gutterSize="s" alignItems="center">
+  <EuiFlexItem grow={false}>
+    {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
+  </EuiFlexItem>
+  {!isLive ? (
+    <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
+      <EuiLoadingSpinner />
     </EuiFlexItem>
-    {!isLive ? (
-      <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
-        <EuiLoadingSpinner />
-      </EuiFlexItem>
-    ) : null}
-  </EuiFlexGroup>
-);
+  ) : null}
+</EuiFlexGroup>);
 
 interface AgentsColumnResultsProps {
   successful?: number;
@@ -99,23 +102,23 @@ interface AgentsColumnResultsProps {
   failed?: number;
 }
 
-const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
-  successful,
-  pending,
-  failed,
-}) => (
-  <EuiFlexGroup gutterSize="s" alignItems="center">
-    <EuiFlexItem grow={false}>
-      <EuiText color="subdued">
-        <EuiBadge color="success">{successful}</EuiBadge>
-        {' / '}
-        <EuiBadge color="default">{pending}</EuiBadge>
-        {' / '}
-        <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const AgentsColumnResults = (
+  {
+    successful,
+    pending,
+    failed
+  }: AgentsColumnResultsProps
+) => (<EuiFlexGroup gutterSize="s" alignItems="center">
+  <EuiFlexItem grow={false}>
+    <EuiText color="subdued">
+      <EuiBadge color="success">{successful}</EuiBadge>
+      {' / '}
+      <EuiBadge color="default">{pending}</EuiBadge>
+      {' / '}
+      <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>);
 
 type PackQueryStatusItem = Partial<{
   action_id: string;
@@ -142,15 +145,17 @@ interface PackQueriesStatusTableProps {
   showResultsHeader?: boolean;
 }
 
-const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
-  actionId,
-  queryId,
-  agentIds,
-  data,
-  startDate,
-  expirationDate,
-  showResultsHeader,
-}) => {
+const PackQueriesStatusTableComponent = (
+  {
+    actionId,
+    queryId,
+    agentIds,
+    data,
+    startDate,
+    expirationDate,
+    showResultsHeader
+  }: PackQueriesStatusTableProps
+) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;

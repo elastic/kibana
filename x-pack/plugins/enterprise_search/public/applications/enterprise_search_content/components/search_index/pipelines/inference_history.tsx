@@ -18,7 +18,7 @@ import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
 import { InferenceHistoryLogic } from './inference_history_logic';
 
-export const InferenceHistory: React.FC = () => {
+export const InferenceHistory = () => {
   const { indexName, isLoading, inferenceHistory } = useValues(InferenceHistoryLogic);
   const { fetchIndexInferenceHistory } = useActions(InferenceHistoryLogic);
 

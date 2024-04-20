@@ -48,7 +48,7 @@ import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
 
-export const NativeConnectorConfiguration: React.FC = () => {
+export const NativeConnectorConfiguration = () => {
   const { connector } = useValues(ConnectorViewLogic);
   const { config, connectorTypes: connectors } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);

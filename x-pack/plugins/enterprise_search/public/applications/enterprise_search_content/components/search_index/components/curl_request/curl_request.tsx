@@ -20,12 +20,14 @@ interface CurlRequestParams {
   pipeline?: IngestPipelineParams;
 }
 
-export const CurlRequest: React.FC<CurlRequestParams> = ({
-  indexName,
-  apiKey,
-  document,
-  pipeline,
-}) => {
+export const CurlRequest = (
+  {
+    indexName,
+    apiKey,
+    document,
+    pipeline
+  }: CurlRequestParams
+) => {
   const cloudContext = useCloudDetails();
 
   const DEFAULT_URL = 'https://localhost:9200';

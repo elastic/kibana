@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from './translations';
 
-const PlatinumLicenseCalloutComponent: React.FC = () => {
+const PlatinumLicenseCalloutComponent = () => {
   return (
     <EuiCallOut
       title={i18n.UPGRADE_TO_PLATINUM}

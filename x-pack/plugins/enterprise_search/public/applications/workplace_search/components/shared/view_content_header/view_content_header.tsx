@@ -19,14 +19,16 @@ interface ViewContentHeaderProps {
   titleSize?: 's' | 'm' | 'l';
 }
 
-export const ViewContentHeader: React.FC<ViewContentHeaderProps> = ({
-  title,
-  titleSize = 'm',
-  headingLevel = 2,
-  description,
-  action,
-  alignItems = 'center',
-}) => {
+export const ViewContentHeader = (
+  {
+    title,
+    titleSize = 'm',
+    headingLevel = 2,
+    description,
+    action,
+    alignItems = 'center'
+  }: ViewContentHeaderProps
+) => {
   let titleElement;
 
   switch (headingLevel) {

@@ -18,7 +18,11 @@ export interface Props {
   onClick: (selectedFiles: FileJSON[]) => void;
 }
 
-export const SelectButton: FunctionComponent<Props> = ({ onClick }) => {
+export const SelectButton = (
+  {
+    onClick
+  }: Props
+) => {
   const { state } = useFilePickerContext();
   const isUploading = useBehaviorSubject(state.isUploading$);
   const selectedFiles = useBehaviorSubject(state.selectedFiles$);

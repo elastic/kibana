@@ -17,7 +17,11 @@ interface OwnProps {
   toastLifeTimeMs?: number;
 }
 
-const ErrorToastDispatcherComponent: React.FC<OwnProps> = ({ toastLifeTimeMs = 5000 }) => {
+const ErrorToastDispatcherComponent = (
+  {
+    toastLifeTimeMs = 5000
+  }: OwnProps
+) => {
   const dispatch = useDispatch();
   const getErrorSelector = useMemo(() => appSelectors.errorsSelector(), []);
   const errors = useDeepEqualSelector(getErrorSelector);

@@ -47,7 +47,7 @@ export const modelsListRouteFactory = (
   'data-test-subj': 'mlPageModelManagement',
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetTrainedModels'], basicResolvers());
 
   return (

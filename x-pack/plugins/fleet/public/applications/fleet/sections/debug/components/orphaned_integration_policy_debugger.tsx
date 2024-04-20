@@ -39,7 +39,7 @@ const fetchOrphanedPolicies = async () => {
   return response.data?.items ?? [];
 };
 
-export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => {
+export const OrphanedIntegrationPolicyDebugger = () => {
   const { notifications } = useStartServices();
 
   const [selectedPolicyId, setSelectedPolicyId] = useState<string>();

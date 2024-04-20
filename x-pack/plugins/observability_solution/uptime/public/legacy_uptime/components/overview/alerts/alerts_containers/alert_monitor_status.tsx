@@ -34,15 +34,17 @@ interface Props {
   };
 }
 
-export const AlertMonitorStatus: React.FC<Props> = ({
-  id,
-  enabled,
-  numTimes,
-  setRuleParams,
-  timerange,
-  ruleParams,
-  stackVersion,
-}) => {
+export const AlertMonitorStatus = (
+  {
+    id,
+    enabled,
+    numTimes,
+    setRuleParams,
+    timerange,
+    ruleParams,
+    stackVersion
+  }: Props
+) => {
   const dispatch = useDispatch();
 
   useEffect(() => {

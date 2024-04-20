@@ -71,10 +71,15 @@ const storybookStubOptionsListRequest = async (
   );
 replaceOptionsListMethod(storybookStubOptionsListRequest);
 
-export const ControlGroupStoryComponent: FC<{
-  panels?: ControlsPanels;
-  edit?: boolean;
-}> = ({ panels, edit }) => {
+export const ControlGroupStoryComponent = (
+  {
+    panels,
+    edit
+  }: {
+    panels?: ControlsPanels;
+    edit?: boolean;
+  }
+) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [embeddable, setEmbeddable] = useState<ControlGroupContainer>();
   const [viewMode, setViewMode] = useState<ViewMode>(

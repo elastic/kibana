@@ -19,14 +19,16 @@ interface Props {
   exampleCount: number;
   onReload: () => void;
 }
-export const LogEntryExampleMessages: React.FunctionComponent<Props> = ({
-  isLoading,
-  hasFailedLoading,
-  exampleCount,
-  hasResults,
-  onReload,
-  children,
-}) => {
+export const LogEntryExampleMessages = (
+  {
+    isLoading,
+    hasFailedLoading,
+    exampleCount,
+    hasResults,
+    onReload,
+    children
+  }: Props
+) => {
   return (
     <Wrapper>
       {isLoading ? (

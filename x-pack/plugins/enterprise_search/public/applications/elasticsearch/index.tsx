@@ -17,7 +17,7 @@ import { ElasticsearchGuide } from './components/elasticsearch_guide/elasticsear
 
 import { ROOT_PATH } from './routes';
 
-export const Elasticsearch: React.FC<InitialAppData> = (props) => {
+export const Elasticsearch = (props: InitialAppData) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 

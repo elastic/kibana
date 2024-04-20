@@ -28,48 +28,55 @@ export interface UnifiedFieldListItemStatsProps {
   onAddFilter: FieldStatsProps['onAddFilter'];
 }
 
-export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
-  ({ stateService, services, field, dataView, multiFields, onAddFilter }) => {
-    const querySubscriberResult = useQuerySubscriber({
+export const UnifiedFieldListItemStats = React.memo((
+  {
+    stateService,
+    services,
+    field,
+    dataView,
+    multiFields,
+    onAddFilter
+  }: UnifiedFieldListItemStatsProps
+) => {
+  const querySubscriberResult = useQuerySubscriber({
+    data: services.data,
+    timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
+  });
+  // prioritize an aggregatable multi field if available or take the parent field
+  const fieldForStats = useMemo(
+    () =>
+      (multiFields?.length &&
+        multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
+      field,
+    [field, multiFields]
+  );
+
+  const statsServices: FieldStatsServices = useMemo(
+    () => ({
       data: services.data,
-      timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
-    });
-    // prioritize an aggregatable multi field if available or take the parent field
-    const fieldForStats = useMemo(
-      () =>
-        (multiFields?.length &&
-          multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
-        field,
-      [field, multiFields]
-    );
+      dataViews: services.dataViews,
+      fieldFormats: services.fieldFormats,
+      charts: services.charts,
+      uiSettings: services.core.uiSettings,
+    }),
+    [services]
+  );
 
-    const statsServices: FieldStatsServices = useMemo(
-      () => ({
-        data: services.data,
-        dataViews: services.dataViews,
-        fieldFormats: services.fieldFormats,
-        charts: services.charts,
-        uiSettings: services.core.uiSettings,
-      }),
-      [services]
-    );
-
-    if (!hasQuerySubscriberData(querySubscriberResult)) {
-      return null;
-    }
-
-    return (
-      <FieldStats
-        services={statsServices}
-        query={querySubscriberResult.query}
-        filters={querySubscriberResult.filters}
-        fromDate={querySubscriberResult.fromDate}
-        toDate={querySubscriberResult.toDate}
-        dataViewOrDataViewId={dataView}
-        field={fieldForStats}
-        data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemStatsDataTestSubj}
-        onAddFilter={onAddFilter}
-      />
-    );
+  if (!hasQuerySubscriberData(querySubscriberResult)) {
+    return null;
   }
-);
+
+  return (
+    <FieldStats
+      services={statsServices}
+      query={querySubscriberResult.query}
+      filters={querySubscriberResult.filters}
+      fromDate={querySubscriberResult.fromDate}
+      toDate={querySubscriberResult.toDate}
+      dataViewOrDataViewId={dataView}
+      field={fieldForStats}
+      data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemStatsDataTestSubj}
+      onAddFilter={onAddFilter}
+    />
+  );
+});

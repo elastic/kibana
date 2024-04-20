@@ -24,7 +24,12 @@ interface RouterProps {
   history: History;
 }
 
-const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
+const PageRouterComponent = (
+  {
+    children,
+    history
+  }: RouterProps
+) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);

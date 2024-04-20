@@ -29,12 +29,14 @@ export interface Props {
   isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
-  onSelect,
-  availableEmbeddables,
-  onClose,
-  isByValueEnabled,
-}) => {
+export const AddEmbeddableFlyout = (
+  {
+    onSelect,
+    availableEmbeddables,
+    onClose,
+    isByValueEnabled
+  }: Props
+) => {
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;

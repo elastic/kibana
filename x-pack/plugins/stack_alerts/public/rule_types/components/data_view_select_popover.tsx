@@ -51,13 +51,15 @@ const toDataViewListItem = (dataView: DataView): DataViewListItemEnhanced => {
   };
 };
 
-export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
-  dependencies: { dataViews, dataViewEditor },
-  metadata = { adHocDataViewList: [], isManagementPage: true },
-  dataView,
-  onSelectDataView,
-  onChangeMetaData,
-}) => {
+export const DataViewSelectPopover = (
+  {
+    dependencies: { dataViews, dataViewEditor },
+    metadata = { adHocDataViewList: [], isManagementPage: true },
+    dataView,
+    onSelectDataView,
+    onChangeMetaData
+  }: DataViewSelectPopoverProps
+) => {
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 

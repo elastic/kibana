@@ -64,10 +64,14 @@ const documentsSelector = (state: PreviewState) => {
   };
 };
 
-export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewController }> = ({
-  controller,
-  children,
-}) => {
+export const FieldPreviewProvider = (
+  {
+    controller,
+    children
+  }: {
+    controller: PreviewController;
+  }
+) => {
   const {
     dataView,
     services: {

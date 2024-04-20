@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobMemoryTreeMap } from './tree_map';
 
-export const MemoryPage: FC = () => {
+export const MemoryPage = () => {
   return (
     <>
       <EuiSpacer size="s" />

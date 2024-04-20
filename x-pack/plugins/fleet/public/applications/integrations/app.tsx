@@ -51,20 +51,8 @@ const EmptyContext = () => <></>;
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
  * and no routes defined
  */
-export const IntegrationsAppContext: React.FC<{
-  basepath: string;
-  startServices: FleetStartServices;
-  config: FleetConfigType;
-  history: AppMountParameters['history'];
-  kibanaVersion: string;
-  extensions: UIExtensionsStorage;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-  /** For testing purposes only */
-  routerHistory?: History<any>; // TODO remove
-  fleetStatus?: FleetStatusProviderProps;
-}> = memo(
-  ({
+export const IntegrationsAppContext = memo((
+  {
     children,
     startServices,
     config,
@@ -73,113 +61,121 @@ export const IntegrationsAppContext: React.FC<{
     extensions,
     setHeaderActionMenu,
     theme$,
-    fleetStatus,
-  }) => {
-    const theme = useObservable(theme$);
-    const isDarkMode = theme && theme.darkMode;
-
-    const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
-
-    return (
-      <RedirectAppLinks
-        coreStart={{
-          application: startServices.application,
-        }}
-      >
-        <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices }}>
-            <EuiErrorBoundary>
-              <ConfigContext.Provider value={config}>
-                <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <KibanaThemeProvider theme$={theme$}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={false} />
-                        <UIExtensionsContext.Provider value={extensions}>
-                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
-                            <startServices.customIntegrations.ContextProvider>
-                              <CloudContext>
-                                <Router history={history}>
-                                  <AgentPolicyContextProvider>
-                                    <PackageInstallProvider
-                                      notifications={startServices.notifications}
-                                      theme$={theme$}
-                                    >
-                                      <FlyoutContextProvider>
-                                        <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
-                                        {children}
-                                      </FlyoutContextProvider>
-                                    </PackageInstallProvider>
-                                  </AgentPolicyContextProvider>
-                                </Router>
-                              </CloudContext>
-                            </startServices.customIntegrations.ContextProvider>
-                          </FleetStatusProvider>
-                        </UIExtensionsContext.Provider>
-                      </QueryClientProvider>
-                    </EuiThemeProvider>
-                  </KibanaThemeProvider>
-                </KibanaVersionContext.Provider>
-              </ConfigContext.Provider>
-            </EuiErrorBoundary>
-          </KibanaContextProvider>
-        </startServices.i18n.Context>
-      </RedirectAppLinks>
-    );
+    fleetStatus
+  }: {
+    basepath: string;
+    startServices: FleetStartServices;
+    config: FleetConfigType;
+    history: AppMountParameters['history'];
+    kibanaVersion: string;
+    extensions: UIExtensionsStorage;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    theme$: AppMountParameters['theme$'];
+    /** For testing purposes only */
+    routerHistory?: History<any> // TODO remove;
+    fleetStatus?: FleetStatusProviderProps;
   }
-);
+) => {
+  const theme = useObservable(theme$);
+  const isDarkMode = theme && theme.darkMode;
+
+  const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
+
+  return (
+    <RedirectAppLinks
+      coreStart={{
+        application: startServices.application,
+      }}
+    >
+      <startServices.i18n.Context>
+        <KibanaContextProvider services={{ ...startServices }}>
+          <EuiErrorBoundary>
+            <ConfigContext.Provider value={config}>
+              <KibanaVersionContext.Provider value={kibanaVersion}>
+                <KibanaThemeProvider theme$={theme$}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <QueryClientProvider client={queryClient}>
+                      <ReactQueryDevtools initialIsOpen={false} />
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                          <startServices.customIntegrations.ContextProvider>
+                            <CloudContext>
+                              <Router history={history}>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider
+                                    notifications={startServices.notifications}
+                                    theme$={theme$}
+                                  >
+                                    <FlyoutContextProvider>
+                                      <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                      {children}
+                                    </FlyoutContextProvider>
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </Router>
+                            </CloudContext>
+                          </startServices.customIntegrations.ContextProvider>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </QueryClientProvider>
+                  </EuiThemeProvider>
+                </KibanaThemeProvider>
+              </KibanaVersionContext.Provider>
+            </ConfigContext.Provider>
+          </EuiErrorBoundary>
+        </KibanaContextProvider>
+      </startServices.i18n.Context>
+    </RedirectAppLinks>
+  );
+});
 
 export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
 
-  return (
-    <>
-      <Routes>
-        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
-          <EPMApp />
-        </Route>
-        <Route
-          render={({ location }) => {
-            // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
-            const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
-            if (!shouldRedirectHash) {
-              return <Redirect to={pagePathGetters.integrations_all({})[1]} />;
-            }
-            const pathname = location.hash.replace(/^#/, '');
+  return (<>
+    <Routes>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
+        <EPMApp />
+      </Route>
+      <Route
+        render={({ location }) => {
+          // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+          const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+          if (!shouldRedirectHash) {
+            return <Redirect to={pagePathGetters.integrations_all({})[1]} />;
+          }
+          const pathname = location.hash.replace(/^#/, '');
 
-            return (
-              <Redirect
-                to={{
-                  ...location,
-                  pathname,
-                  hash: undefined,
-                }}
-              />
-            );
-          }}
+          return (
+            <Redirect
+              to={{
+                ...location,
+                pathname,
+                hash: undefined,
+              }}
+            />
+          );
+        }}
+      />
+    </Routes>
+    {flyoutContext.isEnrollmentFlyoutOpen && (
+      <EuiPortal>
+        <AgentEnrollmentFlyout
+          defaultMode={
+            fleetStatus.isReady && fleetStatus.missingRequirements?.includes('fleet_server')
+              ? 'managed'
+              : 'standalone'
+          }
+          isIntegrationFlow={true}
+          onClose={() => flyoutContext.closeEnrollmentFlyout()}
         />
-      </Routes>
-
-      {flyoutContext.isEnrollmentFlyoutOpen && (
-        <EuiPortal>
-          <AgentEnrollmentFlyout
-            defaultMode={
-              fleetStatus.isReady && fleetStatus.missingRequirements?.includes('fleet_server')
-                ? 'managed'
-                : 'standalone'
-            }
-            isIntegrationFlow={true}
-            onClose={() => flyoutContext.closeEnrollmentFlyout()}
-          />
-        </EuiPortal>
-      )}
-
-      {flyoutContext.isFleetServerFlyoutOpen && (
-        <EuiPortal>
-          <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
-        </EuiPortal>
-      )}
-    </>
-  );
+      </EuiPortal>
+    )}
+    {flyoutContext.isFleetServerFlyoutOpen && (
+      <EuiPortal>
+        <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+      </EuiPortal>
+    )}
+  </>);
 });

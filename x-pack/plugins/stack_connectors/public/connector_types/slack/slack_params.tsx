@@ -11,15 +11,17 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { SlackActionParams } from '../types';
 
-const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  errors,
-  messageVariables,
-  defaultMessage,
-  useDefaultMessage,
-}) => {
+const SlackParamsFields = (
+  {
+    actionParams,
+    editAction,
+    index,
+    errors,
+    messageVariables,
+    defaultMessage,
+    useDefaultMessage
+  }: ActionParamsProps<SlackActionParams>
+) => {
   const { message } = actionParams;
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
     [boolean, string | undefined]

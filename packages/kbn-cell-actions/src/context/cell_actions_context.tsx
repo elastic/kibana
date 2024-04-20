@@ -15,10 +15,12 @@ interface CellActionsContextValue {
 }
 const CellActionsContext = createContext<CellActionsContextValue | null>(null);
 
-export const CellActionsProvider: FC<CellActionsProviderProps> = ({
-  children,
-  getTriggerCompatibleActions,
-}) => {
+export const CellActionsProvider = (
+  {
+    children,
+    getTriggerCompatibleActions
+  }: CellActionsProviderProps
+) => {
   const value = useMemo<CellActionsContextValue>(
     () => ({
       getActions: (context) =>

@@ -30,7 +30,11 @@ interface Props {
   alerts: {};
 }
 
-export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
+export const EnableAlertsModal = (
+  {
+    alerts
+  }: Props
+) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promptForMigration, setPromptForMigration] = useState(false);
   const alertsEnableModalProvider = useAlertsModal();

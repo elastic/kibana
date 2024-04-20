@@ -22,7 +22,12 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   { id: 'token', label: i18n.D3_TOKEN_LABEL, isPasswordField: true },
 ];
 
-const D3SecurityConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const D3SecurityConnectorFields = (
+  {
+    readOnly,
+    isEdit
+  }: ActionConnectorFieldsProps
+) => {
   return (
     <>
       <SimpleConnectorForm

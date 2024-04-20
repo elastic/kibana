@@ -24,12 +24,14 @@ interface Props {
   pipelineName: string;
 }
 
-export const PipelineNameAndDescription: FC<Props> = ({
-  pipelineName,
-  pipelineNameError,
-  pipelineDescription,
-  handlePipelineConfigUpdate,
-}) => {
+export const PipelineNameAndDescription = (
+  {
+    pipelineName,
+    pipelineNameError,
+    pipelineDescription,
+    handlePipelineConfigUpdate
+  }: Props
+) => {
   const handleConfigChange = (value: string, type: string) => {
     handlePipelineConfigUpdate({ [type]: value });
   };

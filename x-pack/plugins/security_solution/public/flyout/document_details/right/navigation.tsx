@@ -21,7 +21,11 @@ interface PanelNavigationProps {
   flyoutIsExpandable: boolean;
 }
 
-export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpandable }) => {
+export const PanelNavigation = memo((
+  {
+    flyoutIsExpandable
+  }: PanelNavigationProps
+) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useRightPanelContext();

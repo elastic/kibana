@@ -31,7 +31,12 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+export const NumberContent = (
+  {
+    config,
+    onAddFilter
+  }: FieldDataRowProps
+) => {
   const { stats } = config;
 
   const distributionChartData = useMemo(

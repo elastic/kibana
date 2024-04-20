@@ -58,12 +58,14 @@ const search: EuiSearchBarProps = {
   ],
 };
 
-const ContextEditorComponent: React.FC<Props> = ({
-  anonymizationFields,
-  onListUpdated,
-  rawData,
-  pageSize = DEFAULT_PAGE_SIZE,
-}) => {
+const ContextEditorComponent = (
+  {
+    anonymizationFields,
+    onListUpdated,
+    rawData,
+    pageSize = DEFAULT_PAGE_SIZE
+  }: Props
+) => {
   const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
   const {
     assistantAvailability: { hasUpdateAIAssistantAnonymization },

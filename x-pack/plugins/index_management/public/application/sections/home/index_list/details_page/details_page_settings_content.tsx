@@ -71,11 +71,13 @@ interface Props {
   reloadIndexSettings: () => void;
 }
 
-export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
-  data,
-  indexName,
-  reloadIndexSettings,
-}) => {
+export const DetailsPageSettingsContent = (
+  {
+    data,
+    indexName,
+    reloadIndexSettings
+  }: Props
+) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const {
     config: { editableIndexSettings },
@@ -154,7 +156,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
   );
   return (
     // using "rowReverse" to keep the card on the left side to be on top of the code block on smaller screens
-    <EuiFlexGroup
+    (<EuiFlexGroup
       wrap
       direction="rowReverse"
       css={css`
@@ -310,6 +312,6 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           )}
         </EuiPanel>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </EuiFlexGroup>)
   );
 };

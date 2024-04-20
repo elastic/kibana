@@ -21,7 +21,7 @@ interface Props {
   waitForControlOutputConsumersToLoad$?: Observable<void>;
 }
 
-export const TimeSliderPrepend: FC<Props> = (props: Props) => {
+export const TimeSliderPrepend = (props: Props) => {
   const timeSlider = useTimeSlider();
   const controlGroup = useControlGroupContainer();
 

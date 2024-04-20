@@ -123,11 +123,13 @@ export type AdvancedParamErrors = {
   [key in ANALYSIS_ADVANCED_FIELDS]?: string;
 };
 
-export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
-  actions,
-  state,
-  setCurrentStep,
-}) => {
+export const AdvancedStepForm = (
+  {
+    actions,
+    state,
+    setCurrentStep
+  }: CreateAnalyticsStepProps
+) => {
   const [advancedParamErrors, setAdvancedParamErrors] = useState<AdvancedParamErrors>({});
   const [fetchingAdvancedParamErrors, setFetchingAdvancedParamErrors] = useState<boolean>(false);
 

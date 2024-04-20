@@ -15,7 +15,11 @@ interface PlatformIconsProps {
   platform: string;
 }
 
-const PlatformIconsComponent: React.FC<PlatformIconsProps> = ({ platform }) => {
+const PlatformIconsComponent = (
+  {
+    platform
+  }: PlatformIconsProps
+) => {
   const [platforms, setPlatforms] = useState<string[]>(SUPPORTED_PLATFORMS);
 
   useEffect(() => {

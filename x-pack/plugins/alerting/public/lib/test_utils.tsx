@@ -78,13 +78,17 @@ export const createAppMockRenderer = ({
       setBadge: mockedSetBadge,
     },
   };
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
-    <KibanaRenderContextProvider {...core}>
-      <KibanaContextProvider services={services}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
-  ));
+  const AppWrapper = React.memo((
+    {
+      children
+    }: {
+      children: React.ReactElement;
+    }
+  ) => (<KibanaRenderContextProvider {...core}>
+    <KibanaContextProvider services={services}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>));
 
   AppWrapper.displayName = 'AppWrapper';
 

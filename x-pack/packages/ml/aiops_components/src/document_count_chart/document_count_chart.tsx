@@ -175,7 +175,7 @@ function getBaselineBadgeOverflow(
  * @param props DocumentCountChart component props
  * @returns The DocumentCountChart component.
  */
-export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
+export const DocumentCountChart = (props: DocumentCountChartProps) => {
   const {
     changePoint,
     dataTestSubj,
@@ -567,7 +567,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
  * @param props - The properties passed to the DocumentCountChart component.
  * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
  */
-export const DocumentCountChartWithAutoAnalysisStart: FC<DocumentCountChartProps> = (props) => {
+export const DocumentCountChartWithAutoAnalysisStart = (props: DocumentCountChartProps) => {
   const { initialAnalysisStart, setAutoRunAnalysis } = useLogRateAnalysisStateContext();
 
   return (

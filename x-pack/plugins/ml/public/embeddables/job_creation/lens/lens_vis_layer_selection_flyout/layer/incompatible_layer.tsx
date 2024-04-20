@@ -19,7 +19,11 @@ interface Props {
   layer: LayerResult;
 }
 
-export const IncompatibleLayer: FC<Props> = ({ layer }) => {
+export const IncompatibleLayer = (
+  {
+    layer
+  }: Props
+) => {
   return (
     <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlLensLayerIncompatible">
       <EuiFlexItem grow={false}>

@@ -40,18 +40,20 @@ interface Props {
   showPlainSpinner?: boolean;
 }
 
-export const AppContainer: FC<Props> = ({
-  mounter,
-  appId,
-  appPath,
-  setAppLeaveHandler,
-  setAppActionMenu,
-  createScopedHistory,
-  appStatus,
-  setIsMounting,
-  theme$,
-  showPlainSpinner,
-}: Props) => {
+export const AppContainer = (
+  {
+    mounter,
+    appId,
+    appPath,
+    setAppLeaveHandler,
+    setAppActionMenu,
+    createScopedHistory,
+    appStatus,
+    setIsMounting,
+    theme$,
+    showPlainSpinner
+  }: Props
+) => {
   const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
@@ -127,7 +129,13 @@ export const AppContainer: FC<Props> = ({
   );
 };
 
-const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+const AppLoadingPlaceholder = (
+  {
+    showPlainSpinner
+  }: {
+    showPlainSpinner: boolean;
+  }
+) => {
   if (showPlainSpinner) {
     return (
       <EuiLoadingSpinner

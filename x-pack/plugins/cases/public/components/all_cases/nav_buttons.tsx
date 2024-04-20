@@ -22,7 +22,11 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
+export const NavButtons = (
+  {
+    actionsErrors
+  }: Props
+) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const { euiTheme } = useEuiTheme();

@@ -54,13 +54,16 @@ interface OverviewCardProps {
   title: string;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({ title, children }) => (
-  <OverviewPanel borderRadius="none" hasShadow={false} hasBorder={false} paddingSize="s">
-    <EuiText size="s">{title}</EuiText>
-    <EuiSpacer size="s" />
-    {children}
-  </OverviewPanel>
-);
+export const OverviewCard = (
+  {
+    title,
+    children
+  }: OverviewCardProps
+) => (<OverviewPanel borderRadius="none" hasShadow={false} hasBorder={false} paddingSize="s">
+  <EuiText size="s">{title}</EuiText>
+  <EuiSpacer size="s" />
+  {children}
+</OverviewPanel>);
 
 OverviewCard.displayName = 'OverviewCard';
 
@@ -80,32 +83,32 @@ type OverviewCardWithActionsProps = OverviewCardProps & {
   dataTestSubj?: string;
 };
 
-export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
-  title,
-  children,
-  contextId,
-  dataTestSubj,
-  enrichedFieldInfo,
-}) => (
-  <OverviewCard title={title}>
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
+export const OverviewCardWithActions = (
+  {
+    title,
+    children,
+    contextId,
+    dataTestSubj,
+    enrichedFieldInfo
+  }: OverviewCardWithActionsProps
+) => (<OverviewCard title={title}>
+  <EuiFlexGroup alignItems="center" gutterSize="none">
+    <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>
 
-      <ActionWrapper>
-        <SecurityCellActions
-          data={{
-            field: enrichedFieldInfo.data.field,
-            value: enrichedFieldInfo?.values,
-          }}
-          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-          mode={CellActionsMode.INLINE}
-          sourcererScopeId={getSourcererScopeId(contextId)}
-          metadata={{ scopeId: contextId }}
-          visibleCellActions={3}
-        />
-      </ActionWrapper>
-    </EuiFlexGroup>
-  </OverviewCard>
-);
+    <ActionWrapper>
+      <SecurityCellActions
+        data={{
+          field: enrichedFieldInfo.data.field,
+          value: enrichedFieldInfo?.values,
+        }}
+        triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+        mode={CellActionsMode.INLINE}
+        sourcererScopeId={getSourcererScopeId(contextId)}
+        metadata={{ scopeId: contextId }}
+        visibleCellActions={3}
+      />
+    </ActionWrapper>
+  </EuiFlexGroup>
+</OverviewCard>);
 
 OverviewCardWithActions.displayName = 'OverviewCardWithActions';

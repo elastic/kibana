@@ -33,38 +33,41 @@ interface TimelineWrapperProps {
  * This component renders the timeline EuiPortal as well as the bottom bar, and handles the interaction between the two.
  * Using EuiFocusTrap, we can trap the focus within the portal when it is open, which prevents closing the portal when clicking outside of it.
  */
-export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
-  ({ timelineId, onAppLeave }) => {
-    const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-    const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
-    const dispatch = useDispatch();
-    const openToggleRef = useRef(null);
-    const handleClose = useCallback(() => {
-      dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
-    }, [dispatch, timelineId]);
+export const TimelineWrapper = React.memo((
+  {
+    timelineId,
+    onAppLeave
+  }: TimelineWrapperProps
+) => {
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
+  const dispatch = useDispatch();
+  const openToggleRef = useRef(null);
+  const handleClose = useCallback(() => {
+    dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
+  }, [dispatch, timelineId]);
 
-    // pressing the ESC key closes the timeline portal
-    const onKeyDown = useCallback(
-      (ev: KeyboardEvent) => {
-        if (ev.key === keys.ESCAPE) {
-          handleClose();
-        }
-      },
-      [handleClose]
-    );
+  // pressing the ESC key closes the timeline portal
+  const onKeyDown = useCallback(
+    (ev: KeyboardEvent) => {
+      if (ev.key === keys.ESCAPE) {
+        handleClose();
+      }
+    },
+    [handleClose]
+  );
 
-    useTimelineSavePrompt(timelineId, onAppLeave);
+  useTimelineSavePrompt(timelineId, onAppLeave);
 
-    return (
-      <>
-        <EuiFocusTrap disabled={!show}>
-          <TimelineModal timelineId={timelineId} visible={show} openToggleRef={openToggleRef} />
-        </EuiFocusTrap>
-        <TimelineBottomBar show={show} timelineId={timelineId} openToggleRef={openToggleRef} />
-        <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <EuiFocusTrap disabled={!show}>
+        <TimelineModal timelineId={timelineId} visible={show} openToggleRef={openToggleRef} />
+      </EuiFocusTrap>
+      <TimelineBottomBar show={show} timelineId={timelineId} openToggleRef={openToggleRef} />
+      <EuiWindowEvent event="keydown" handler={onKeyDown} />
+    </>
+  );
+});
 
 TimelineWrapper.displayName = 'TimelineWrapper';

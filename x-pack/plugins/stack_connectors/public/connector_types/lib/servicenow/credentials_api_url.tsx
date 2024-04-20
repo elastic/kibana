@@ -23,7 +23,13 @@ interface Props {
 
 const { urlField } = fieldValidators;
 
-const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
+const CredentialsApiUrlComponent = (
+  {
+    isLoading,
+    readOnly,
+    pathPrefix = ''
+  }: Props
+) => {
   const { docLinks } = useKibana().services;
 
   return (

@@ -28,13 +28,15 @@ export interface Props {
 
 const INDENTATION_PX = 34;
 
-export const TreeNode: FunctionComponent<Props> = ({
-  processor,
-  processorInfo,
-  onAction,
-  movingProcessor,
-  level,
-}) => {
+export const TreeNode = (
+  {
+    processor,
+    processorInfo,
+    onAction,
+    movingProcessor,
+    level
+  }: Props
+) => {
   const stringSelector = processorInfo.selector.join('.');
   const handlers = useMemo((): Handlers => {
     return {

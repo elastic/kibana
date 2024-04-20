@@ -137,7 +137,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const CSV: FunctionComponent = () => {
+export const CSV = () => {
   return (
     <>
       <FieldNameField

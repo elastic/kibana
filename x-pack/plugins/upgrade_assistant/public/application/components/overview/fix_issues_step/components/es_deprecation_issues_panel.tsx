@@ -15,7 +15,11 @@ interface Props {
   setIsFixed: (isFixed: boolean) => void;
 }
 
-export const EsDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed }) => {
+export const EsDeprecationIssuesPanel = (
+  {
+    setIsFixed
+  }: Props
+) => {
   const {
     services: { api },
   } = useAppContext();

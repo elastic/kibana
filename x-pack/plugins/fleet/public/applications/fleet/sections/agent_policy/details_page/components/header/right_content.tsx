@@ -43,16 +43,18 @@ const Divider = styled.div`
   border-left: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
-export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps> = ({
-  isLoading,
-  policyId,
-  agentPolicy,
-  agentStatus,
-  addAgent,
-  onCancelEnrollment,
-  isAddAgentHelpPopoverOpen,
-  setIsAddAgentHelpPopoverOpen,
-}) => {
+export const HeaderRightContent = (
+  {
+    isLoading,
+    policyId,
+    agentPolicy,
+    agentStatus,
+    addAgent,
+    onCancelEnrollment,
+    isAddAgentHelpPopoverOpen,
+    setIsAddAgentHelpPopoverOpen
+  }: HeaderRightContentProps
+) => {
   const authz = useAuthz();
   const { getPath } = useLink();
   const history = useHistory();

@@ -20,7 +20,11 @@ interface StartNewChatProps {
   onStartClick: () => void;
 }
 
-export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
+export const StartNewChat = (
+  {
+    onStartClick
+  }: StartNewChatProps
+) => {
   const { euiTheme } = useEuiTheme();
   const { data: connectors } = useLoadConnectors();
   const { watch } = useFormContext();

@@ -33,13 +33,15 @@ interface Props {
   onClose: () => void;
 }
 
-export const CreateCategorizationJobFlyout: FC<Props> = ({
-  onClose,
-  dataView,
-  field,
-  query,
-  timeRange,
-}) => {
+export const CreateCategorizationJobFlyout = (
+  {
+    onClose,
+    dataView,
+    field,
+    query,
+    timeRange
+  }: Props
+) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>

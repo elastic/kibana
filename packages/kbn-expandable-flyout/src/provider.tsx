@@ -86,10 +86,12 @@ interface ExpandableFlyoutProviderProps {
 /**
  * Wrap your plugin with this context for the ExpandableFlyout React component.
  */
-export const ExpandableFlyoutProvider: FC<PropsWithChildren<ExpandableFlyoutProviderProps>> = ({
-  children,
-  urlKey,
-}) => {
+export const ExpandableFlyoutProvider = (
+  {
+    children,
+    urlKey
+  }: PropsWithChildren<ExpandableFlyoutProviderProps>
+) => {
   return (
     <ExpandableFlyoutContextProvider urlKey={urlKey}>
       <ReduxProvider context={Context} store={store}>

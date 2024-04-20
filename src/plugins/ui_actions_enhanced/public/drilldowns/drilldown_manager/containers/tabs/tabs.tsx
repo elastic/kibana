@@ -53,7 +53,7 @@ const tabs: EuiTabbedContentProps['tabs'] = [
   },
 ];
 
-export const Tabs: React.FC = ({}) => {
+export const Tabs = ({}) => {
   const drilldowns = useDrilldownManager();
   const route = drilldowns.useRoute();
 

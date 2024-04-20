@@ -104,13 +104,15 @@ interface ECSComboboxFieldProps {
   error?: string;
 }
 
-const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
-  euiFieldProps = {},
-  idAria,
-  index,
-  watch,
-  control,
-}) => {
+const ECSComboboxFieldComponent = (
+  {
+    euiFieldProps = {},
+    idAria,
+    index,
+    watch,
+    control
+  }: ECSComboboxFieldProps
+) => {
   const { ecsMappingArray } = watch();
   const ecsCurrentMapping = get(ecsMappingArray, `[${index}].result.value`);
 
@@ -320,15 +322,17 @@ interface OsqueryColumnFieldProps {
   isLastItem: boolean;
 }
 
-const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
-  euiFieldProps,
-  idAria,
-  index,
-  isLastItem,
-  control,
-  watch,
-  trigger,
-}) => {
+const OsqueryColumnFieldComponent = (
+  {
+    euiFieldProps,
+    idAria,
+    index,
+    isLastItem,
+    control,
+    watch,
+    trigger
+  }: OsqueryColumnFieldProps
+) => {
   const { ecsMappingArray } = watch();
 
   const osqueryResultFieldValidator = useCallback(
@@ -593,16 +597,18 @@ export const defaultEcsFormData = {
   },
 };
 
-export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
-  isDisabled,
-  osquerySchemaOptions,
-  isLastItem,
-  index,
-  onDelete,
-  control,
-  watch,
-  trigger,
-}) => {
+export const ECSMappingEditorForm = (
+  {
+    isDisabled,
+    osquerySchemaOptions,
+    isLastItem,
+    index,
+    onDelete,
+    control,
+    watch,
+    trigger
+  }: ECSMappingEditorFormProps
+) => {
   const handleDeleteClick = useCallback(() => {
     if (onDelete) {
       onDelete(index);

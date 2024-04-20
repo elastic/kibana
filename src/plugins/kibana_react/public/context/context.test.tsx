@@ -72,7 +72,7 @@ test('createContext() creates context that can be consumed by useKibana() hook',
 
 test('services, notifications and overlays objects are always available', () => {
   const { Provider } = createKibanaReactContext({});
-  const Test: React.FC = () => {
+  const Test = () => {
     const kibana = useKibana();
     expect(kibana).toMatchObject({
       services: expect.any(Object),
@@ -91,7 +91,7 @@ test('services, notifications and overlays objects are always available', () => 
 });
 
 test('<KibanaContextProvider> provider provides default kibana-react context', () => {
-  const Test: React.FC = () => {
+  const Test = () => {
     const kibana = useKibana();
     expect(kibana).toMatchObject({
       services: expect.any(Object),
@@ -110,7 +110,7 @@ test('<KibanaContextProvider> provider provides default kibana-react context', (
 });
 
 test('<KibanaContextProvider> can set custom services in context', () => {
-  const Test: React.FC = () => {
+  const Test = () => {
     const { services } = useKibana<{ test: string }>();
     expect(services.test).toBe('quux');
     return null;
@@ -125,7 +125,7 @@ test('<KibanaContextProvider> can set custom services in context', () => {
 });
 
 test('nested <KibanaContextProvider> override and merge services', () => {
-  const Test: React.FC = () => {
+  const Test = () => {
     const { services } = useKibana<{ foo: string; bar: string; baz: string }>();
     expect(services.foo).toBe('foo2');
     expect(services.bar).toBe('bar');
@@ -146,7 +146,7 @@ test('nested <KibanaContextProvider> override and merge services', () => {
 });
 
 test('overlays wrapper uses the closest overlays service', () => {
-  const Test: React.FC = () => {
+  const Test = () => {
     const { overlays } = useKibana();
     overlays.openFlyout({} as any);
     overlays.openModal({} as any);
@@ -177,7 +177,7 @@ test('overlays wrapper uses the closest overlays service', () => {
 });
 
 test('notifications wrapper uses the closest notifications service', () => {
-  const Test: React.FC = () => {
+  const Test = () => {
     const { notifications } = useKibana();
     notifications.toasts.show({} as any);
     return null;
@@ -213,7 +213,7 @@ test('notifications wrapper uses the closest notifications service', () => {
 });
 
 test('overlays wrapper uses available overlays service, higher up in <KibanaContextProvider> tree', () => {
-  const Test: React.FC = () => {
+  const Test = () => {
     const { overlays } = useKibana();
     overlays.openFlyout({} as any);
     return null;

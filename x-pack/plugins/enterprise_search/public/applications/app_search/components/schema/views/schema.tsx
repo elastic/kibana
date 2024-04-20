@@ -21,7 +21,7 @@ import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
 import { SCHEMA_TITLE } from '../constants';
 import { SchemaLogic } from '../schema_logic';
 
-export const Schema: React.FC = () => {
+export const Schema = () => {
   const {
     myRole: { canManageEngines },
   } = useValues(AppLogic);

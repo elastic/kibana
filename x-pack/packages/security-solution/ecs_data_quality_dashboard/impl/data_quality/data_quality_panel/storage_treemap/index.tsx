@@ -84,18 +84,20 @@ export const getGroupByFieldsOnClick = (
   };
 };
 
-const StorageTreemapComponent: React.FC<Props> = ({
-  accessor,
-  baseTheme,
-  flattenedBuckets,
-  maxChartHeight,
-  minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
-  onIndexSelected,
-  patternRollups,
-  patterns,
-  theme = {},
-  valueFormatter,
-}: Props) => {
+const StorageTreemapComponent = (
+  {
+    accessor,
+    baseTheme,
+    flattenedBuckets,
+    maxChartHeight,
+    minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
+    onIndexSelected,
+    patternRollups,
+    patterns,
+    theme = {},
+    valueFormatter
+  }: Props
+) => {
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,
     [theme?.background?.color, baseTheme.background.color]

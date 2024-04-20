@@ -209,33 +209,35 @@ export interface Props {
   hasPasteData: boolean;
 }
 
-export const EditMenu: FunctionComponent<Props> = ({
-  cutNodes,
-  copyNodes,
-  pasteNodes,
-  deleteNodes,
-  cloneNodes,
-  bringToFront,
-  bringForward,
-  sendBackward,
-  sendToBack,
-  alignLeft,
-  alignCenter,
-  alignRight,
-  alignTop,
-  alignMiddle,
-  alignBottom,
-  distributeHorizontally,
-  distributeVertically,
-  createCustomElement,
-  selectedNodes,
-  groupIsSelected,
-  groupNodes,
-  ungroupNodes,
-  undoHistory,
-  redoHistory,
-  hasPasteData,
-}) => {
+export const EditMenu = (
+  {
+    cutNodes,
+    copyNodes,
+    pasteNodes,
+    deleteNodes,
+    cloneNodes,
+    bringToFront,
+    bringForward,
+    sendBackward,
+    sendToBack,
+    alignLeft,
+    alignCenter,
+    alignRight,
+    alignTop,
+    alignMiddle,
+    alignBottom,
+    distributeHorizontally,
+    distributeVertically,
+    createCustomElement,
+    selectedNodes,
+    groupIsSelected,
+    groupNodes,
+    ungroupNodes,
+    undoHistory,
+    redoHistory,
+    hasPasteData
+  }: Props
+) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const showModal = () => setModalVisible(true);
   const hideModal = () => setModalVisible(false);

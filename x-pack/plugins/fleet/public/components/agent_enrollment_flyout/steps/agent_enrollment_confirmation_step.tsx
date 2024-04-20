@@ -16,9 +16,13 @@ import { EuiLink, EuiText } from '@elastic/eui';
 
 import { ConfirmAgentEnrollment } from '../confirm_agent_enrollment';
 
-const AgentEnrollmentPrePollInstructions: React.FC<{ troubleshootLink: string }> = ({
-  troubleshootLink,
-}) => {
+const AgentEnrollmentPrePollInstructions = (
+  {
+    troubleshootLink
+  }: {
+    troubleshootLink: string;
+  }
+) => {
   return (
     <EuiText>
       <FormattedMessage

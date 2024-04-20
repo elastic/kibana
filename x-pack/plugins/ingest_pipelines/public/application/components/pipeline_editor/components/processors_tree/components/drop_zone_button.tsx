@@ -33,7 +33,7 @@ const cannotMoveHereLabel = i18n.translate(
   { defaultMessage: 'Cannot move here' }
 );
 
-export const DropZoneButton: FunctionComponent<Props> = (props) => {
+export const DropZoneButton = (props: Props) => {
   const { onClick, isDisabled, isVisible, compressed } = props;
   const isUnavailable = isVisible && isDisabled;
   const containerClasses = classNames({

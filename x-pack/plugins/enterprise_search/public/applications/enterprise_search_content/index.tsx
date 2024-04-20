@@ -35,7 +35,7 @@ import {
   PLAYGROUND_PATH,
 } from './routes';
 
-export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
+export const EnterpriseSearchContent = (props: InitialAppData) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
@@ -71,7 +71,7 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   );
 };
 
-export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
+export const EnterpriseSearchContentConfigured = () => {
   return (
     <Routes>
       <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />

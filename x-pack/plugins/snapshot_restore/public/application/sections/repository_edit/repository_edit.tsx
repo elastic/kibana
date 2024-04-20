@@ -24,9 +24,11 @@ interface MatchParams {
   name: string;
 }
 
-export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  history,
-}) => {
+export const RepositoryEdit = (
+  {
+    history
+  }: RouteComponentProps<MatchParams>
+) => {
   const { i18n } = useServices();
   const { name } = useDecodedParams<MatchParams>();
   const section = 'repositories' as Section;

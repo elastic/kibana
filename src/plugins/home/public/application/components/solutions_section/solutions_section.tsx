@@ -23,7 +23,12 @@ interface Props {
   solutions: FeatureCatalogueSolution[];
 }
 
-export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
+export const SolutionsSection = (
+  {
+    addBasePath,
+    solutions
+  }: Props
+) => {
   if (solutions.length) {
     solutions = solutions.sort(sortByOrder);
 

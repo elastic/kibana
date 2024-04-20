@@ -47,20 +47,22 @@ import {
   IncomingDataConfirmationStep,
 } from '.';
 
-export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
-  agentPolicy,
-  agentPolicies,
-  selectedPolicy,
-  setSelectedPolicyId,
-  refreshAgentPolicies,
-  mode,
-  setMode,
-  selectionType,
-  selectedApiKeyId,
-  setSelectedAPIKeyId,
-  isK8s,
-  cloudSecurityIntegration,
-}) => {
+export const StandaloneSteps = (
+  {
+    agentPolicy,
+    agentPolicies,
+    selectedPolicy,
+    setSelectedPolicyId,
+    refreshAgentPolicies,
+    mode,
+    setMode,
+    selectionType,
+    selectedApiKeyId,
+    setSelectedAPIKeyId,
+    isK8s,
+    cloudSecurityIntegration
+  }: InstructionProps
+) => {
   const core = useStartServices();
   const { notifications } = core;
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
@@ -197,25 +199,27 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   return <EuiSteps steps={instructionsSteps} />;
 };
 
-export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
-  agentPolicy,
-  agentPolicies,
-  selectedPolicy,
-  setSelectedPolicyId,
-  selectedApiKeyId,
-  setSelectedAPIKeyId,
-  fleetServerHosts,
-  fleetProxy,
-  downloadSource,
-  refreshAgentPolicies,
-  mode,
-  setMode,
-  selectionType,
-  onClickViewAgents,
-  isK8s,
-  cloudSecurityIntegration,
-  installedPackagePolicy,
-}) => {
+export const ManagedSteps = (
+  {
+    agentPolicy,
+    agentPolicies,
+    selectedPolicy,
+    setSelectedPolicyId,
+    selectedApiKeyId,
+    setSelectedAPIKeyId,
+    fleetServerHosts,
+    fleetProxy,
+    downloadSource,
+    refreshAgentPolicies,
+    mode,
+    setMode,
+    selectionType,
+    onClickViewAgents,
+    isK8s,
+    cloudSecurityIntegration,
+    installedPackagePolicy
+  }: InstructionProps
+) => {
   const core = useStartServices();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;

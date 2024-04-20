@@ -15,11 +15,13 @@ interface ConfirmDeleteCaseModalProps {
   onConfirm: () => void;
 }
 
-const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
-  totalCasesToBeDeleted,
-  onCancel,
-  onConfirm,
-}) => {
+const ConfirmDeleteCaseModalComp = (
+  {
+    totalCasesToBeDeleted,
+    onCancel,
+    onConfirm
+  }: ConfirmDeleteCaseModalProps
+) => {
   return (
     <EuiConfirmModal
       buttonColor="danger"

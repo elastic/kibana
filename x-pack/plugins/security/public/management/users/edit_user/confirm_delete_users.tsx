@@ -22,11 +22,13 @@ export interface ConfirmDeleteUsersProps {
   onSuccess?(): void;
 }
 
-export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
-  usernames,
-  onCancel,
-  onSuccess,
-}) => {
+export const ConfirmDeleteUsers = (
+  {
+    usernames,
+    onCancel,
+    onSuccess
+  }: ConfirmDeleteUsersProps
+) => {
   const { services } = useKibana();
 
   const [state, deleteUsers] = useAsyncFn(async () => {

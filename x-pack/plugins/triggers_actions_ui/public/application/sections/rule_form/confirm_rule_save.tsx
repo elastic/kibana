@@ -15,7 +15,12 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ConfirmRuleSave: React.FC<Props> = ({ onConfirm, onCancel }) => {
+export const ConfirmRuleSave = (
+  {
+    onConfirm,
+    onCancel
+  }: Props
+) => {
   return (
     <EuiConfirmModal
       title={i18n.translate(

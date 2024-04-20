@@ -25,7 +25,11 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ElasticsearchMLJobsPage = (
+  {
+    clusters
+  }: ComponentProps
+) => {
   const globalState = useContext(GlobalStateContext);
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { services } = useKibana<{ data: any }>();

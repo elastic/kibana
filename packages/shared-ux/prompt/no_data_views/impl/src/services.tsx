@@ -19,10 +19,12 @@ const NoDataViewsPromptContext = React.createContext<NoDataViewsPromptServices |
 /**
  * Abstract external service Provider.
  */
-export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
-  children,
-  ...services
-}) => {
+export const NoDataViewsPromptProvider = (
+  {
+    children,
+    ...services
+  }: NoDataViewsPromptServices
+) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, onTryESQL, esqlDocLink } =
@@ -46,10 +48,12 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const NoDataViewsPromptKibanaProvider = (
+  {
+    children,
+    ...services
+  }: NoDataViewsPromptKibanaDependencies
+) => {
   const {
     share,
     coreStart: {

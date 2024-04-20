@@ -18,7 +18,13 @@ interface StatusSectionProps {
   statuses: FormattedStatus[];
 }
 
-export const StatusSection: FC<StatusSectionProps> = ({ id, title, statuses }) => {
+export const StatusSection = (
+  {
+    id,
+    title,
+    statuses
+  }: StatusSectionProps
+) => {
   const highestStatus = useMemo(() => getHighestStatus(statuses), [statuses]);
 
   return (

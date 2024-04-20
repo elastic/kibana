@@ -42,7 +42,11 @@ interface Props {
   dataStreamsCount: number;
 }
 
-export const DataStreamsGlobalStateCallOut: FunctionComponent<Props> = ({ dataStreamsCount }) => {
+export const DataStreamsGlobalStateCallOut = (
+  {
+    dataStreamsCount
+  }: Props
+) => {
   const { docLinks } = useCore();
   return (
     <EuiCallOut

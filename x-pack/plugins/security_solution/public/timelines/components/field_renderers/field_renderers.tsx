@@ -203,16 +203,18 @@ interface DefaultFieldRendererProps {
   sourcererScopeId?: SourcererScopeName;
 }
 
-export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
-  attrName,
-  displayCount = 1,
-  idPrefix,
-  isDraggable = false,
-  moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
-  render,
-  rowItems,
-  sourcererScopeId,
-}) => {
+export const DefaultFieldRendererComponent = (
+  {
+    attrName,
+    displayCount = 1,
+    idPrefix,
+    isDraggable = false,
+    moreMaxHeight = DEFAULT_MORE_MAX_HEIGHT,
+    render,
+    rowItems,
+    sourcererScopeId
+  }: DefaultFieldRendererProps
+) => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(

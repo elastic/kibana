@@ -30,15 +30,17 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   query: Query;
 }
 
-const EventCountsComponent: React.FC<Props> = ({
-  filters,
-  from,
-  indexNames,
-  indexPattern,
-  query,
-  setQuery,
-  to,
-}) => {
+const EventCountsComponent = (
+  {
+    filters,
+    from,
+    indexNames,
+    indexPattern,
+    query,
+    setQuery,
+    to
+  }: Props
+) => {
   const { uiSettings } = useKibana().services;
 
   const [hostFilterQuery, hostKqlError] = useMemo(

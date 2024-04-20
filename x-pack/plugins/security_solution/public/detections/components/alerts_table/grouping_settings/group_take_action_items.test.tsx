@@ -11,9 +11,13 @@ import { TestProviders } from '../../../../common/mock';
 import { useGroupTakeActionsItems } from '.';
 
 describe('useGroupTakeActionsItems', () => {
-  const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
-    <TestProviders>{children}</TestProviders>
-  );
+  const wrapperContainer = (
+    {
+      children
+    }: {
+      children?: React.ReactNode;
+    }
+  ) => (<TestProviders>{children}</TestProviders>);
   const getActionItemsParams = {
     tableId: 'mock-id',
     groupNumber: 0,

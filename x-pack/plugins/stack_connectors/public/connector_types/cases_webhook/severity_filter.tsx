@@ -47,7 +47,12 @@ interface Props {
   onSeverityChange: (status: CaseSeverity) => void;
 }
 
-export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
+export const SeverityFilter = (
+  {
+    selectedSeverity,
+    onSeverityChange
+  }: Props
+) => {
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
     const severityData = severities[severity];

@@ -82,17 +82,19 @@ export interface LogRateAnalysisContentProps {
   embeddingOrigin: string;
 }
 
-export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
-  dataView,
-  timeRange,
-  esSearchQuery = DEFAULT_SEARCH_QUERY,
-  stickyHistogram,
-  barColorOverride,
-  barHighlightColorOverride,
-  onAnalysisCompleted,
-  onWindowParametersChange,
-  embeddingOrigin,
-}) => {
+export const LogRateAnalysisContent = (
+  {
+    dataView,
+    timeRange,
+    esSearchQuery = DEFAULT_SEARCH_QUERY,
+    stickyHistogram,
+    barColorOverride,
+    barHighlightColorOverride,
+    onAnalysisCompleted,
+    onWindowParametersChange,
+    embeddingOrigin
+  }: LogRateAnalysisContentProps
+) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(

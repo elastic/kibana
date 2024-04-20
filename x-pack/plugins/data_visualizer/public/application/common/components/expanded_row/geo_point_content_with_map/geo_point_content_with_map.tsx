@@ -18,13 +18,21 @@ import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { EmbeddedMapComponent } from '../../embedded_map';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
-export const GeoPointContentWithMap: FC<{
-  config: FieldVisConfig;
-  dataView: DataView | undefined;
-  combinedQuery?: CombinedQuery;
-  esql?: string;
-  timeFieldName?: string;
-}> = ({ config, dataView, combinedQuery, esql, timeFieldName }) => {
+export const GeoPointContentWithMap = (
+  {
+    config,
+    dataView,
+    combinedQuery,
+    esql,
+    timeFieldName
+  }: {
+    config: FieldVisConfig;
+    dataView: DataView | undefined;
+    combinedQuery?: CombinedQuery;
+    esql?: string;
+    timeFieldName?: string;
+  }
+) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {

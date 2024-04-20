@@ -17,7 +17,7 @@ import {
 } from '../../../shared_imports';
 import { ENRICH_POLICIES_REQUIRED_PRIVILEGES } from '../../constants';
 
-export const EnrichPoliciesWithPrivileges: FunctionComponent = ({
+export const EnrichPoliciesWithPrivileges = ({
   children,
 }: {
   children?: React.ReactNode;

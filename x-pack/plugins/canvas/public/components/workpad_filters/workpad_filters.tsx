@@ -18,7 +18,11 @@ interface Props {
   element?: PositionedElement | null;
 }
 
-export const WorkpadFilters: FC<Props> = ({ element }) => {
+export const WorkpadFilters = (
+  {
+    element
+  }: Props
+) => {
   const groupFiltersByField: FilterField = useSelector((state: State) =>
     getGroupFiltersByOption(state)
   );

@@ -19,7 +19,11 @@ interface Props {
   phase: 'warm' | 'cold' | 'frozen';
 }
 
-export const ReplicasField: FunctionComponent<Props> = ({ phase }) => {
+export const ReplicasField = (
+  {
+    phase
+  }: Props
+) => {
   const { policy } = useEditPolicyContext();
   const initialValue = policy.phases[phase]?.actions?.allocate?.number_of_replicas != null;
   return (

@@ -20,7 +20,7 @@ const KEY = 'visualizations';
 /**
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
-export const VisualizationsSection: FC = memo(() => {
+export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({ title: KEY, defaultValue: false });
 
   return (

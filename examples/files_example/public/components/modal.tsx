@@ -18,7 +18,13 @@ interface Props {
   onUploaded: () => void;
 }
 
-export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client }) => {
+export const Modal = (
+  {
+    onDismiss,
+    onUploaded,
+    client
+  }: Props
+) => {
   return (
     <EuiModal onClose={onDismiss}>
       <EuiModalHeader>

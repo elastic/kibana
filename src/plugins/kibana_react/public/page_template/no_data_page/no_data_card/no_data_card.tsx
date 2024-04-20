@@ -14,13 +14,15 @@ import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 // Custom cards require all the props the EuiCard does
 type NoDataCard = EuiCardProps & NoDataPageActions;
 
-export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
-  recommended,
-  title,
-  button,
-  layout,
-  ...cardRest
-}) => {
+export const NoDataCard = (
+  {
+    recommended,
+    title,
+    button,
+    layout,
+    ...cardRest
+  }: NoDataPageActions
+) => {
   const footer =
     typeof button !== 'string' ? button : <EuiButton fill>{button || title}</EuiButton>;
 

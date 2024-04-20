@@ -61,24 +61,26 @@ interface Props {
   displayExamples?: boolean;
 }
 
-export const CategoryTable: FC<Props> = ({
-  categories,
-  eventRate,
-  dataViewId,
-  selectedField,
-  timefilter,
-  aiopsListState,
-  pinnedCategory,
-  setPinnedCategory,
-  selectedCategory,
-  setSelectedCategory,
-  onAddFilter,
-  onClose = () => {},
-  enableRowActions = true,
-  additionalFilter,
-  navigateToDiscover = true,
-  displayExamples = true,
-}) => {
+export const CategoryTable = (
+  {
+    categories,
+    eventRate,
+    dataViewId,
+    selectedField,
+    timefilter,
+    aiopsListState,
+    pinnedCategory,
+    setPinnedCategory,
+    selectedCategory,
+    setSelectedCategory,
+    onAddFilter,
+    onClose = () => {},
+    enableRowActions = true,
+    additionalFilter,
+    navigateToDiscover = true,
+    displayExamples = true
+  }: Props
+) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();

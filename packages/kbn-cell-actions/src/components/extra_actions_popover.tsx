@@ -32,33 +32,33 @@ interface ActionsPopOverProps {
   button: JSX.Element;
 }
 
-export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
-  anchorPosition,
-  actions,
-  actionContext,
-  isOpen,
-  closePopOver,
-  button,
-}) => (
-  <EuiPopover
-    button={button}
-    isOpen={isOpen}
-    closePopover={closePopOver}
-    panelPaddingSize="xs"
-    anchorPosition={anchorPosition}
-    hasArrow
-    repositionOnScroll
-    ownFocus
-    data-test-subj="extraActionsPopOver"
-    aria-label={EXTRA_ACTIONS_ARIA_LABEL}
-  >
-    <ExtraActionsPopOverContent
-      actions={actions}
-      actionContext={actionContext}
-      closePopOver={closePopOver}
-    />
-  </EuiPopover>
-);
+export const ExtraActionsPopOver = (
+  {
+    anchorPosition,
+    actions,
+    actionContext,
+    isOpen,
+    closePopOver,
+    button
+  }: ActionsPopOverProps
+) => (<EuiPopover
+  button={button}
+  isOpen={isOpen}
+  closePopover={closePopOver}
+  panelPaddingSize="xs"
+  anchorPosition={anchorPosition}
+  hasArrow
+  repositionOnScroll
+  ownFocus
+  data-test-subj="extraActionsPopOver"
+  aria-label={EXTRA_ACTIONS_ARIA_LABEL}
+>
+  <ExtraActionsPopOverContent
+    actions={actions}
+    actionContext={actionContext}
+    closePopOver={closePopOver}
+  />
+</EuiPopover>);
 
 interface ExtraActionsPopOverWithAnchorProps
   extends Pick<
@@ -104,11 +104,13 @@ type ExtraActionsPopOverContentProps = Pick<
   'actionContext' | 'closePopOver' | 'actions'
 >;
 
-const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
-  actionContext,
-  actions,
-  closePopOver,
-}) => {
+const ExtraActionsPopOverContent = (
+  {
+    actionContext,
+    actions,
+    closePopOver
+  }: ExtraActionsPopOverContentProps
+) => {
   const items = useMemo(
     () =>
       actions.map((action) => (

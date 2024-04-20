@@ -13,12 +13,14 @@ import { i18n } from '@kbn/i18n';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const DatePickerApplySwitch: FC<StepDefineFormHook> = ({
-  datePicker: {
-    actions: { setDatePickerApplyEnabled },
-    state: { isDatePickerApplyEnabled },
-  },
-}) => {
+export const DatePickerApplySwitch = (
+  {
+    datePicker: {
+      actions: { setDatePickerApplyEnabled },
+      state: { isDatePickerApplyEnabled },
+    }
+  }: StepDefineFormHook
+) => {
   return (
     <EuiSwitch
       label={i18n.translate('xpack.transform.stepDefineForm.datePickerApplySwitchLabel', {

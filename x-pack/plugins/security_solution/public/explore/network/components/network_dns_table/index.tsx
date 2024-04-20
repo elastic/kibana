@@ -50,18 +50,20 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
-  data,
-  fakeTotalCount,
-  id,
-  isInspect,
-  loading,
-  loadPage,
-  showMorePagesIndicator,
-  setQuerySkip,
-  totalCount,
-  type,
-}) => {
+const NetworkDnsTableComponent = (
+  {
+    data,
+    fakeTotalCount,
+    id,
+    isInspect,
+    loading,
+    loadPage,
+    showMorePagesIndicator,
+    setQuerySkip,
+    totalCount,
+    type
+  }: NetworkDnsTableProps
+) => {
   const dispatch = useDispatch();
   const getNetworkDnsSelector = useMemo(() => networkSelectors.dnsSelector(), []);
   const { activePage, isPtrIncluded, limit, sort } = useDeepEqualSelector(getNetworkDnsSelector);

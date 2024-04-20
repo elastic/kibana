@@ -20,15 +20,25 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-const LearnMoreLink: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => (
-  <EuiLink href={learnMoreUrl}>
-    {i18n.translate('cloud.deploymentDetails.cloudIDLabelToolip.learnMoreLink', {
-      defaultMessage: 'Learn more',
-    })}
-  </EuiLink>
-);
+const LearnMoreLink = (
+  {
+    learnMoreUrl
+  }: {
+    learnMoreUrl: string;
+  }
+) => (<EuiLink href={learnMoreUrl}>
+  {i18n.translate('cloud.deploymentDetails.cloudIDLabelToolip.learnMoreLink', {
+    defaultMessage: 'Learn more',
+  })}
+</EuiLink>);
 
-const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
+const Label = (
+  {
+    learnMoreUrl
+  }: {
+    learnMoreUrl: string;
+  }
+) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -69,10 +79,15 @@ const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
   );
 };
 
-export const DeploymentDetailsCloudIdInput: FC<{ cloudId: string; learnMoreUrl: string }> = ({
-  cloudId,
-  learnMoreUrl,
-}) => {
+export const DeploymentDetailsCloudIdInput = (
+  {
+    cloudId,
+    learnMoreUrl
+  }: {
+    cloudId: string;
+    learnMoreUrl: string;
+  }
+) => {
   return (
     <EuiFormRow label={<Label learnMoreUrl={learnMoreUrl} />} fullWidth>
       <EuiFlexGroup gutterSize="s">

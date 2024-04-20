@@ -204,7 +204,7 @@ const getValueConfig: (toggleCustom: () => void) => Record<
 /**
  * Disambiguate name from the Set data structure
  */
-export const SetProcessor: FunctionComponent = () => {
+export const SetProcessor = () => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ fields }] = useFormData({ watch: ['fields.value', 'fields.copy_from'] });
 

@@ -31,10 +31,12 @@ export type DeleteAgentPolicy = (agentPolicy: string, onSuccess?: OnSuccessCallb
 
 type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 
-export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
-  children,
-  hasFleetServer,
-}) => {
+export const AgentPolicyDeleteProvider = (
+  {
+    children,
+    hasFleetServer
+  }: Props
+) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },

@@ -20,12 +20,14 @@ interface Props {
   showCreatePipelineButton?: boolean;
 }
 
-export const InputFormControls: FC<Props> = ({
-  testButtonDisabled,
-  createPipelineButtonDisabled,
-  inferrer,
-  showCreatePipelineButton,
-}) => {
+export const InputFormControls = (
+  {
+    testButtonDisabled,
+    createPipelineButtonDisabled,
+    inferrer,
+    showCreatePipelineButton
+  }: Props
+) => {
   return (
     <>
       <EuiFlexItem grow={false}>

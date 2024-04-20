@@ -31,7 +31,11 @@ export interface CloningNotificationProps {
   count?: number;
 }
 
-export const CloningNotification: React.FC<CloningNotificationProps> = ({ count = 1 }) => {
+export const CloningNotification = (
+  {
+    count = 1
+  }: CloningNotificationProps
+) => {
   const [dismissed, setDismissed] = React.useState(false);
 
   if (dismissed) return null;

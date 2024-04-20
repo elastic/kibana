@@ -17,10 +17,12 @@ interface TransformFunctionSelectorProps {
   onChange: (update: TransformFunction) => void;
 }
 
-export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
-  selectedFunction,
-  onChange,
-}) => {
+export const TransformFunctionSelector = (
+  {
+    selectedFunction,
+    onChange
+  }: TransformFunctionSelectorProps
+) => {
   const transformFunctions = [
     {
       name: TRANSFORM_FUNCTION.PIVOT,

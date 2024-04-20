@@ -33,7 +33,7 @@ import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_c
 import { CRAWLER_TITLE } from './constants';
 import { CrawlerLogic } from './crawler_logic';
 
-export const CrawlerOverview: React.FC = () => {
+export const CrawlerOverview = () => {
   const { events, dataLoading, domains } = useValues(CrawlerLogic);
   const { errors: addDomainErrors } = useValues(AddDomainLogic);
 

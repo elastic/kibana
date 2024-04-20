@@ -13,7 +13,12 @@ interface Props {
   children: ReactNode;
   dataTestSubj: string;
 }
-export const ExpandedRowContent: FC<Props> = ({ children, dataTestSubj }) => {
+export const ExpandedRowContent = (
+  {
+    children,
+    dataTestSubj
+  }: Props
+) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSubj} gutterSize={'s'} wrap={true}>
       {children}

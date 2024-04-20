@@ -48,7 +48,7 @@ const pathToHotPhaseSearchableSnapshot =
 const pathToColdPhaseSearchableSnapshot =
   'phases.cold.actions.searchable_snapshot.snapshot_repository';
 
-export const ConfigurationProvider: FunctionComponent = ({ children }) => {
+export const ConfigurationProvider = ({ children }) => {
   const [formData] = useFormData({
     watch: [
       pathToHotPhaseSearchableSnapshot,

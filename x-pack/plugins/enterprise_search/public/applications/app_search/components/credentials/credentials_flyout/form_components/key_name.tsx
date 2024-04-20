@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CredentialsLogic } from '../../credentials_logic';
 
-export const FormKeyName: React.FC = () => {
+export const FormKeyName = () => {
   const { setNameInputBlurred, setTokenName } = useActions(CredentialsLogic);
   const {
     activeApiToken: { name },

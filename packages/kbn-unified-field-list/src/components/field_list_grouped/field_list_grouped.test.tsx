@@ -67,7 +67,7 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   }
 
   async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
-    const Wrapper: React.FC<WrapperProps> = (props) => {
+    const Wrapper = (props: WrapperProps) => {
       const {
         fieldListFiltersProps,
         fieldListGroupedProps: { fieldGroups },

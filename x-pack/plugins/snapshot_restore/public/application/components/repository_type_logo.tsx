@@ -15,7 +15,12 @@ interface Props {
   [key: string]: any;
 }
 
-export const RepositoryTypeLogo: React.FC<Props> = ({ type, ...rest }) => {
+export const RepositoryTypeLogo = (
+  {
+    type,
+    ...rest
+  }: Props
+) => {
   const typeLogoMap: { [key: string]: any } = {
     [REPOSITORY_TYPES.fs]: 'storage',
     [REPOSITORY_TYPES.url]: 'eye',

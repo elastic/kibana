@@ -54,7 +54,7 @@ const DEFAULT_TO = 'now';
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
  */
-export const LicenseProtectedCell: React.FC = () => {
+export const LicenseProtectedCell = () => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -295,7 +295,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
 /**
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
-export const PrevalenceDetails: React.FC = () => {
+export const PrevalenceDetails = () => {
   const { dataFormattedForFieldBrowser, investigationFields } = useLeftPanelContext();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();

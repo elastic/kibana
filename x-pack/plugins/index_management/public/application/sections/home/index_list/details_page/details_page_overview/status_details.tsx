@@ -48,12 +48,19 @@ const healthToBadgeMapping: Record<
   },
 };
 
-export const StatusDetails: FunctionComponent<{
-  documents: Index['documents'];
-  documentsDeleted: Index['documents_deleted'];
-  status: Index['status'];
-  health: Index['health'];
-}> = ({ documents, documentsDeleted, status, health }) => {
+export const StatusDetails = (
+  {
+    documents,
+    documentsDeleted,
+    status,
+    health
+  }: {
+    documents: Index['documents'];
+    documentsDeleted: Index['documents_deleted'];
+    status: Index['status'];
+    health: Index['health'];
+  }
+) => {
   const { config } = useAppContext();
   if (!config.enableIndexStats || !health) {
     return null;

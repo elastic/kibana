@@ -24,7 +24,11 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent = (
+  {
+    children
+  }: SpacesContextProps
+) => <>{children}</>;
 
 const SavedObjectsTablePage = ({
   coreStart,

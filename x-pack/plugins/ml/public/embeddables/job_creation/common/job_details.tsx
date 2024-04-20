@@ -67,16 +67,18 @@ enum STATE {
   SAVE_FAILED,
 }
 
-export const JobDetails: FC<Props> = ({
-  children,
-  createADJobInWizard,
-  createADJob,
-  layer,
-  layerIndex,
-  timeRange,
-  incomingCreateError,
-  outerFormComplete,
-}) => {
+export const JobDetails = (
+  {
+    children,
+    createADJobInWizard,
+    createADJob,
+    layer,
+    layerIndex,
+    timeRange,
+    incomingCreateError,
+    outerFormComplete
+  }: Props
+) => {
   const {
     services: {
       share,

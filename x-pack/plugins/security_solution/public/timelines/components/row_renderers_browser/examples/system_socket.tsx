@@ -12,7 +12,7 @@ import { createSocketRowRenderer } from '../../timeline/body/renderers/system/ge
 import { demoEndgameIpv4ConnectionAcceptEvent } from '../../../../common/demo_data/endgame_ecs/ipv4';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SystemSocketExampleComponent: React.FC = () => {
+const SystemSocketExampleComponent = () => {
   const systemSocketRowRenderer = createSocketRowRenderer({
     actionName: 'ipv4_connection_accept_event',
     text: ACCEPTED_A_CONNECTION_VIA,

@@ -71,8 +71,8 @@ interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
 }
 
-export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
-  function TimelineDataTableMemo({
+export const TimelineDataTableComponent = memo(function TimelineDataTableMemo(
+  {
     columns,
     columnIds,
     dataView,
@@ -95,317 +95,317 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     isTextBasedQuery = false,
     onSetColumns,
     onSort,
-    onFilter,
-  }) {
-    const dispatch = useDispatch();
+    onFilter
+  }: DataTableProps
+) {
+  const dispatch = useDispatch();
 
-    // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-    const [activeStatefulEventContext] = useState({
-      timelineID: timelineId,
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      tabType: activeTab,
-    });
+  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+  const [activeStatefulEventContext] = useState({
+    timelineID: timelineId,
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+    tabType: activeTab,
+  });
 
-    const {
-      services: {
-        uiSettings,
-        fieldFormats,
-        storage,
-        dataViewFieldEditor,
-        notifications: { toasts: toastsService },
-        theme,
-        data: dataPluginContract,
-      },
-    } = useKibana();
+  const {
+    services: {
+      uiSettings,
+      fieldFormats,
+      storage,
+      dataViewFieldEditor,
+      notifications: { toasts: toastsService },
+      theme,
+      data: dataPluginContract,
+    },
+  } = useKibana();
 
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
-    const [fetchedPage, setFechedPage] = useState<number>(0);
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
+  const [fetchedPage, setFechedPage] = useState<number>(0);
 
-    const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
 
-    const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
+  const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
-    const { rowHeight, sampleSize, excludedRowRendererIds } = useSelector((state: State) =>
-      selectTimelineById(state, timelineId)
-    );
+  const { rowHeight, sampleSize, excludedRowRendererIds } = useSelector((state: State) =>
+    selectTimelineById(state, timelineId)
+  );
 
-    const tableRows = useMemo(
-      () => transformTimelineItemToUnifiedRows({ events, dataView }),
-      [events, dataView]
-    );
+  const tableRows = useMemo(
+    () => transformTimelineItemToUnifiedRows({ events, dataView }),
+    [events, dataView]
+  );
 
-    const handleOnEventDetailPanelOpened = useCallback(
-      (eventData: DataTableRecord & TimelineItem) => {
-        const updatedExpandedDetail: ExpandedDetailType = {
-          panelView: 'eventDetail',
-          params: {
-            eventId: eventData.id,
-            indexName: eventData._index ?? '', // TODO: fix type error
-            refetch,
-          },
-        };
-
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            tabType: TimelineTabs.query,
-            id: timelineId,
-          })
-        );
-
-        activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-      },
-      [dispatch, refetch, timelineId]
-    );
-
-    const handleOnPanelClosed = useCallback(() => {
-      if (
-        expandedDetail[TimelineTabs.query]?.panelView &&
-        timelineId === TimelineId.active &&
-        showExpandedDetails
-      ) {
-        activeTimeline.toggleExpandedDetail({});
-      }
-      setExpandedDoc(undefined);
-      onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
-    }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
-
-    const onSetExpandedDoc = useCallback(
-      (newDoc?: DataTableRecord) => {
-        if (newDoc) {
-          const timelineDoc = tableRows.find((r) => r.id === newDoc.id);
-          setExpandedDoc(timelineDoc);
-          if (timelineDoc) {
-            handleOnEventDetailPanelOpened(timelineDoc);
-          }
-        } else {
-          handleOnPanelClosed();
-        }
-      },
-      [tableRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
-    );
-
-    const onColumnResize = useCallback(
-      ({ columnId, width }: { columnId: string; width: number }) => {
-        dispatch(
-          timelineActions.updateColumnWidth({
-            columnId,
-            id: timelineId,
-            width, // initialWidth?
-          })
-        );
-      },
-      [dispatch, timelineId]
-    );
-
-    const onResizeDataGrid = useCallback(
-      (colSettings) => {
-        onColumnResize({ columnId: colSettings.columnId, width: Math.round(colSettings.width) });
-      },
-      [onColumnResize]
-    );
-
-    const onChangeItemsPerPage = useCallback(
-      (itemsChangedPerPage) => {
-        dispatch(
-          timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })
-        );
-      },
-      [dispatch, timelineId]
-    );
-
-    const customColumnRenderers = useMemo(
-      () =>
-        getFormattedFields({
-          dataTableRows: tableRows,
-          scopeId: 'timeline',
-          headers: columns,
-        }),
-      [columns, tableRows]
-    );
-
-    const handleFetchMoreRecords = useCallback(() => {
-      onChangePage(fetchedPage + 1);
-      setFechedPage(fetchedPage + 1);
-    }, [fetchedPage, onChangePage]);
-
-    const additionalControls = useMemo(
-      () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
-      [timelineId, updatedAt]
-    );
-
-    const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
-
-    const onUpdateSampleSize = useCallback(
-      (newSampleSize: number) => {
-        if (newSampleSize !== sampleSize) {
-          dispatch(timelineActions.updateSampleSize({ id: timelineId, sampleSize: newSampleSize }));
-          refetch();
-        }
-      },
-      [dispatch, sampleSize, timelineId, refetch]
-    );
-
-    const onUpdateRowHeight = useCallback(
-      (newRowHeight: number) => {
-        if (newRowHeight !== rowHeight) {
-          dispatch(timelineActions.updateRowHeight({ id: timelineId, rowHeight: newRowHeight }));
-        }
-      },
-      [dispatch, rowHeight, timelineId]
-    );
-
-    const dataGridServices = useMemo(() => {
-      return {
-        theme,
-        fieldFormats,
-        storage,
-        toastNotifications: toastsService,
-        uiSettings,
-        dataViewFieldEditor,
-        data: dataPluginContract,
+  const handleOnEventDetailPanelOpened = useCallback(
+    (eventData: DataTableRecord & TimelineItem) => {
+      const updatedExpandedDetail: ExpandedDetailType = {
+        panelView: 'eventDetail',
+        params: {
+          eventId: eventData.id,
+          indexName: eventData._index ?? '', // TODO: fix type error
+          refetch,
+        },
       };
-    }, [
+
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          ...updatedExpandedDetail,
+          tabType: TimelineTabs.query,
+          id: timelineId,
+        })
+      );
+
+      activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+    },
+    [dispatch, refetch, timelineId]
+  );
+
+  const handleOnPanelClosed = useCallback(() => {
+    if (
+      expandedDetail[TimelineTabs.query]?.panelView &&
+      timelineId === TimelineId.active &&
+      showExpandedDetails
+    ) {
+      activeTimeline.toggleExpandedDetail({});
+    }
+    setExpandedDoc(undefined);
+    onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
+  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+
+  const onSetExpandedDoc = useCallback(
+    (newDoc?: DataTableRecord) => {
+      if (newDoc) {
+        const timelineDoc = tableRows.find((r) => r.id === newDoc.id);
+        setExpandedDoc(timelineDoc);
+        if (timelineDoc) {
+          handleOnEventDetailPanelOpened(timelineDoc);
+        }
+      } else {
+        handleOnPanelClosed();
+      }
+    },
+    [tableRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
+  );
+
+  const onColumnResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number }) => {
+      dispatch(
+        timelineActions.updateColumnWidth({
+          columnId,
+          id: timelineId,
+          width, // initialWidth?
+        })
+      );
+    },
+    [dispatch, timelineId]
+  );
+
+  const onResizeDataGrid = useCallback(
+    (colSettings) => {
+      onColumnResize({ columnId: colSettings.columnId, width: Math.round(colSettings.width) });
+    },
+    [onColumnResize]
+  );
+
+  const onChangeItemsPerPage = useCallback(
+    (itemsChangedPerPage) => {
+      dispatch(
+        timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })
+      );
+    },
+    [dispatch, timelineId]
+  );
+
+  const customColumnRenderers = useMemo(
+    () =>
+      getFormattedFields({
+        dataTableRows: tableRows,
+        scopeId: 'timeline',
+        headers: columns,
+      }),
+    [columns, tableRows]
+  );
+
+  const handleFetchMoreRecords = useCallback(() => {
+    onChangePage(fetchedPage + 1);
+    setFechedPage(fetchedPage + 1);
+  }, [fetchedPage, onChangePage]);
+
+  const additionalControls = useMemo(
+    () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
+    [timelineId, updatedAt]
+  );
+
+  const cellActionsMetadata = useMemo(() => ({ scopeId: timelineId }), [timelineId]);
+
+  const onUpdateSampleSize = useCallback(
+    (newSampleSize: number) => {
+      if (newSampleSize !== sampleSize) {
+        dispatch(timelineActions.updateSampleSize({ id: timelineId, sampleSize: newSampleSize }));
+        refetch();
+      }
+    },
+    [dispatch, sampleSize, timelineId, refetch]
+  );
+
+  const onUpdateRowHeight = useCallback(
+    (newRowHeight: number) => {
+      if (newRowHeight !== rowHeight) {
+        dispatch(timelineActions.updateRowHeight({ id: timelineId, rowHeight: newRowHeight }));
+      }
+    },
+    [dispatch, rowHeight, timelineId]
+  );
+
+  const dataGridServices = useMemo(() => {
+    return {
       theme,
       fieldFormats,
       storage,
-      toastsService,
+      toastNotifications: toastsService,
       uiSettings,
       dataViewFieldEditor,
-      dataPluginContract,
-    ]);
+      data: dataPluginContract,
+    };
+  }, [
+    theme,
+    fieldFormats,
+    storage,
+    toastsService,
+    uiSettings,
+    dataViewFieldEditor,
+    dataPluginContract,
+  ]);
 
-    const enabledRowRenderers = useMemo(() => {
-      if (excludedRowRendererIds && excludedRowRendererIds.length === RowRendererCount) return [];
+  const enabledRowRenderers = useMemo(() => {
+    if (excludedRowRendererIds && excludedRowRendererIds.length === RowRendererCount) return [];
 
-      if (!excludedRowRendererIds) return rowRenderers;
+    if (!excludedRowRendererIds) return rowRenderers;
 
-      return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-    }, [excludedRowRendererIds, rowRenderers]);
+    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+  }, [excludedRowRendererIds, rowRenderers]);
 
-    /**
-     * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
-     */
-    const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = useMemo(
-      () => [
-        {
-          id: TIMELINE_EVENT_DETAIL_ROW_ID,
-          // The header cell should be visually hidden, but available to screen readers
-          width: 0,
-          headerCellRender: () => <></>,
-          headerCellProps: { className: 'euiScreenReaderOnly' },
+  /**
+   * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
+   */
+  const trailingControlColumns: EuiDataGridProps['trailingControlColumns'] = useMemo(
+    () => [
+      {
+        id: TIMELINE_EVENT_DETAIL_ROW_ID,
+        // The header cell should be visually hidden, but available to screen readers
+        width: 0,
+        headerCellRender: () => <></>,
+        headerCellProps: { className: 'euiScreenReaderOnly' },
 
-          // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
-          footerCellProps: { style: { display: 'none' } },
+        // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
+        footerCellProps: { style: { display: 'none' } },
 
-          // When rendering this custom cell, we'll want to override
-          // the automatic width/heights calculated by EuiDataGrid
-          rowCellRender: (props) => {
-            const { rowIndex, ...restProps } = props;
-            return (
-              <TimelineEventDetailRow
-                event={tableRows[rowIndex]}
-                rowIndex={rowIndex}
-                timelineId={timelineId}
-                enabledRowRenderers={enabledRowRenderers}
-                {...restProps}
-              />
-            );
-          },
-        },
-      ],
-      [enabledRowRenderers, tableRows, timelineId]
-    );
-
-    /**
-     * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
-     */
-    const renderCustomBodyCallback = useCallback(
-      ({
-        Cell,
-        visibleRowData,
-        visibleColumns,
-        setCustomGridBodyProps,
-      }: EuiDataGridCustomBodyProps) => (
-        <CustomTimelineDataGridBody
-          rows={tableRows}
-          Cell={Cell}
-          visibleColumns={visibleColumns}
-          visibleRowData={visibleRowData}
-          setCustomGridBodyProps={setCustomGridBodyProps}
-          enabledRowRenderers={enabledRowRenderers}
-        />
-      ),
-      [tableRows, enabledRowRenderers]
-    );
-
-    return (
-      <StatefulEventContext.Provider value={activeStatefulEventContext}>
-        <StyledTimelineUnifiedDataTable>
-          {(dataLoadingState === DataLoadingState.loading ||
-            dataLoadingState === DataLoadingState.loadingMore) && (
-            <StyledEuiProgress data-test-subj="discoverDataGridUpdating" size="xs" color="accent" />
-          )}
-          <DataGridMemoized
-            ariaLabelledBy="timelineDocumentsAriaLabel"
-            className={'udtTimeline'}
-            columns={columnIds}
-            expandedDoc={expandedDoc}
-            dataView={dataView}
-            showColumnTokens={true}
-            loadingState={dataLoadingState}
-            onFilter={onFilter}
-            onResize={onResizeDataGrid}
-            onSetColumns={onSetColumns}
-            onSort={!isTextBasedQuery ? onSort : undefined}
-            rows={tableRows}
-            sampleSizeState={sampleSize || 500}
-            onUpdateSampleSize={onUpdateSampleSize}
-            setExpandedDoc={onSetExpandedDoc}
-            showTimeCol={showTimeCol}
-            isSortEnabled={true}
-            sort={sort}
-            rowHeightState={rowHeight}
-            isPlainRecord={isTextBasedQuery}
-            rowsPerPageState={itemsPerPage}
-            onUpdateRowsPerPage={onChangeItemsPerPage}
-            onUpdateRowHeight={onUpdateRowHeight}
-            onFieldEdited={onFieldEdited}
-            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-            services={dataGridServices}
-            visibleCellActions={3}
-            externalCustomRenderers={customColumnRenderers}
-            renderDocumentView={EmptyComponent}
-            rowsPerPageOptions={itemsPerPageOptions}
-            showFullScreenButton={false}
-            useNewFieldsApi={true}
-            maxDocFieldsDisplayed={50}
-            consumer="timeline"
-            totalHits={totalCount}
-            onFetchMoreRecords={handleFetchMoreRecords}
-            configRowHeight={3}
-            showMultiFields={true}
-            cellActionsMetadata={cellActionsMetadata}
-            externalAdditionalControls={additionalControls}
-            trailingControlColumns={trailingControlColumns}
-            renderCustomGridBody={renderCustomBodyCallback}
-          />
-          {showExpandedDetails && (
-            <DetailsPanel
-              browserFields={browserFields}
-              handleOnPanelClosed={handleOnPanelClosed}
-              runtimeMappings={runtimeMappings}
-              tabType={activeTab}
-              scopeId={timelineId}
-              isFlyoutView
+        // When rendering this custom cell, we'll want to override
+        // the automatic width/heights calculated by EuiDataGrid
+        rowCellRender: (props) => {
+          const { rowIndex, ...restProps } = props;
+          return (
+            <TimelineEventDetailRow
+              event={tableRows[rowIndex]}
+              rowIndex={rowIndex}
+              timelineId={timelineId}
+              enabledRowRenderers={enabledRowRenderers}
+              {...restProps}
             />
-          )}
-        </StyledTimelineUnifiedDataTable>
-      </StatefulEventContext.Provider>
-    );
-  }
-);
+          );
+        },
+      },
+    ],
+    [enabledRowRenderers, tableRows, timelineId]
+  );
+
+  /**
+   * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
+   */
+  const renderCustomBodyCallback = useCallback(
+    ({
+      Cell,
+      visibleRowData,
+      visibleColumns,
+      setCustomGridBodyProps,
+    }: EuiDataGridCustomBodyProps) => (
+      <CustomTimelineDataGridBody
+        rows={tableRows}
+        Cell={Cell}
+        visibleColumns={visibleColumns}
+        visibleRowData={visibleRowData}
+        setCustomGridBodyProps={setCustomGridBodyProps}
+        enabledRowRenderers={enabledRowRenderers}
+      />
+    ),
+    [tableRows, enabledRowRenderers]
+  );
+
+  return (
+    <StatefulEventContext.Provider value={activeStatefulEventContext}>
+      <StyledTimelineUnifiedDataTable>
+        {(dataLoadingState === DataLoadingState.loading ||
+          dataLoadingState === DataLoadingState.loadingMore) && (
+          <StyledEuiProgress data-test-subj="discoverDataGridUpdating" size="xs" color="accent" />
+        )}
+        <DataGridMemoized
+          ariaLabelledBy="timelineDocumentsAriaLabel"
+          className={'udtTimeline'}
+          columns={columnIds}
+          expandedDoc={expandedDoc}
+          dataView={dataView}
+          showColumnTokens={true}
+          loadingState={dataLoadingState}
+          onFilter={onFilter}
+          onResize={onResizeDataGrid}
+          onSetColumns={onSetColumns}
+          onSort={!isTextBasedQuery ? onSort : undefined}
+          rows={tableRows}
+          sampleSizeState={sampleSize || 500}
+          onUpdateSampleSize={onUpdateSampleSize}
+          setExpandedDoc={onSetExpandedDoc}
+          showTimeCol={showTimeCol}
+          isSortEnabled={true}
+          sort={sort}
+          rowHeightState={rowHeight}
+          isPlainRecord={isTextBasedQuery}
+          rowsPerPageState={itemsPerPage}
+          onUpdateRowsPerPage={onChangeItemsPerPage}
+          onUpdateRowHeight={onUpdateRowHeight}
+          onFieldEdited={onFieldEdited}
+          cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+          services={dataGridServices}
+          visibleCellActions={3}
+          externalCustomRenderers={customColumnRenderers}
+          renderDocumentView={EmptyComponent}
+          rowsPerPageOptions={itemsPerPageOptions}
+          showFullScreenButton={false}
+          useNewFieldsApi={true}
+          maxDocFieldsDisplayed={50}
+          consumer="timeline"
+          totalHits={totalCount}
+          onFetchMoreRecords={handleFetchMoreRecords}
+          configRowHeight={3}
+          showMultiFields={true}
+          cellActionsMetadata={cellActionsMetadata}
+          externalAdditionalControls={additionalControls}
+          trailingControlColumns={trailingControlColumns}
+          renderCustomGridBody={renderCustomBodyCallback}
+        />
+        {showExpandedDetails && (
+          <DetailsPanel
+            browserFields={browserFields}
+            handleOnPanelClosed={handleOnPanelClosed}
+            runtimeMappings={runtimeMappings}
+            tabType={activeTab}
+            scopeId={timelineId}
+            isFlyoutView
+          />
+        )}
+      </StyledTimelineUnifiedDataTable>
+    </StatefulEventContext.Provider>
+  );
+});
 
 export const TimelineDataTable = withDataView<DataTableProps>(TimelineDataTableComponent);
 

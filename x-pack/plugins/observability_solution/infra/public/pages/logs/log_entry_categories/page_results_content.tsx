@@ -44,9 +44,13 @@ interface LogEntryCategoriesResultsContentProps {
   idFormat: IdFormat;
 }
 
-export const LogEntryCategoriesResultsContent: React.FunctionComponent<
-  LogEntryCategoriesResultsContentProps
-> = ({ onOpenSetup, pageTitle, idFormat }) => {
+export const LogEntryCategoriesResultsContent = (
+  {
+    onOpenSetup,
+    pageTitle,
+    idFormat
+  }: LogEntryCategoriesResultsContentProps
+) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_results', delay: 15000 });
 

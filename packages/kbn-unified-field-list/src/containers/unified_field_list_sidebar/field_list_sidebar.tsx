@@ -143,32 +143,34 @@ interface UnifiedFieldListSidebarInternalProps {
 export type UnifiedFieldListSidebarProps = UnifiedFieldListSidebarCustomizableProps &
   UnifiedFieldListSidebarInternalProps;
 
-export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarProps> = ({
-  stateService,
-  searchMode,
-  services,
-  workspaceSelectedFieldNames,
-  isProcessing,
-  alwaysShowActionButton,
-  buttonAddFieldVariant,
-  isSidebarCollapsed,
-  allFields,
-  dataView,
-  trackUiMetric,
-  showFieldList = true,
-  compressed = true,
-  fullWidth,
-  isAffectedByGlobalFilter,
-  prepend,
-  onAddFieldToWorkspace,
-  onRemoveFieldFromWorkspace,
-  onAddFilter,
-  onSelectedFieldFilter,
-  onEditField,
-  onDeleteField,
-  onToggleSidebar,
-  additionalFieldGroups,
-}) => {
+export const UnifiedFieldListSidebarComponent = (
+  {
+    stateService,
+    searchMode,
+    services,
+    workspaceSelectedFieldNames,
+    isProcessing,
+    alwaysShowActionButton,
+    buttonAddFieldVariant,
+    isSidebarCollapsed,
+    allFields,
+    dataView,
+    trackUiMetric,
+    showFieldList = true,
+    compressed = true,
+    fullWidth,
+    isAffectedByGlobalFilter,
+    prepend,
+    onAddFieldToWorkspace,
+    onRemoveFieldFromWorkspace,
+    onAddFilter,
+    onSelectedFieldFilter,
+    onEditField,
+    onDeleteField,
+    onToggleSidebar,
+    additionalFieldGroups
+  }: UnifiedFieldListSidebarProps
+) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
     () => !core.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),

@@ -66,7 +66,7 @@ function validateItem(filteringRule: FilteringRule): FormErrors {
   return {};
 }
 
-export const SyncRulesTable: React.FC = () => {
+export const SyncRulesTable = () => {
   const { editableFilteringRules } = useValues(ConnectorFilteringLogic);
   const { indexName } = useValues(IndexViewLogic);
   const { addFilteringRule, deleteFilteringRule, reorderFilteringRules, updateFilteringRule } =

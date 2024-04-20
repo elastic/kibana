@@ -33,7 +33,12 @@ interface Props {
   onClose: () => void;
 }
 
-export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
+export const FileFlyout = (
+  {
+    onClose,
+    file
+  }: Props
+) => {
   const { filesClient } = useFilesManagementContext();
   return (
     <EuiFlyout ownFocus onClose={onClose} size="m">

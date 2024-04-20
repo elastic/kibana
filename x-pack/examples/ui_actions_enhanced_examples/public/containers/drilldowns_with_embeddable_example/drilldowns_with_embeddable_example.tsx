@@ -31,7 +31,7 @@ export const job: SampleMlJob = {
 
 export const context: SampleApp1ClickContext = { job };
 
-export const DrilldownsWithEmbeddableExample: React.FC = () => {
+export const DrilldownsWithEmbeddableExample = () => {
   const { plugins, managerWithEmbeddable } = useUiActions();
   const embeddable = React.useMemo(
     () =>

@@ -16,7 +16,7 @@ const linkAnchorCss = css`
   text-decoration: underline;
 `;
 
-export const DashboardsLandingCalloutComponent: React.FC = () => {
+export const DashboardsLandingCalloutComponent = () => {
   return (
     <EuiCallOut
       size="s"

@@ -17,7 +17,14 @@ interface Props {
   text: React.ReactNode;
 }
 
-export const Key: React.FC<Props> = ({ copy, toggleIsHidden, isHidden, text }) => {
+export const Key = (
+  {
+    copy,
+    toggleIsHidden,
+    isHidden,
+    text
+  }: Props
+) => {
   const hideIcon = isHidden ? 'eye' : 'eyeClosed';
   const hideIconLabel = isHidden
     ? i18n.translate('xpack.enterpriseSearch.appSearch.credentials.showApiKey', {

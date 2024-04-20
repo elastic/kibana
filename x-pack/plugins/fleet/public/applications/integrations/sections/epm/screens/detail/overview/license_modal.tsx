@@ -27,11 +27,13 @@ interface Props {
   onClose: () => void;
 }
 
-export const LicenseModal: React.FunctionComponent<Props> = ({
-  licenseName = 'LICENSE.txt',
-  licensePath,
-  onClose,
-}) => {
+export const LicenseModal = (
+  {
+    licenseName = 'LICENSE.txt',
+    licensePath,
+    onClose
+  }: Props
+) => {
   const { notifications } = useStartServices();
 
   const {

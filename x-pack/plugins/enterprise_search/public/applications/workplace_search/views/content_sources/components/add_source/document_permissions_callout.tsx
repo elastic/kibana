@@ -25,7 +25,7 @@ import {
   SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE,
 } from './constants';
 
-export const DocumentPermissionsCallout: React.FC = () => {
+export const DocumentPermissionsCallout = () => {
   return (
     <>
       <EuiPanel paddingSize="l" data-test-subj="DocumentLevelPermissionsCallout">

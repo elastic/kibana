@@ -29,7 +29,12 @@ interface Props {
   setVariables: (variables: CanvasVariable[]) => void;
 }
 
-export const VarConfig: FC<Props> = ({ variables, setVariables }) => {
+export const VarConfig = (
+  {
+    variables,
+    setVariables
+  }: Props
+) => {
   const { success } = useNotifyService();
   const onDeleteVar = (v: CanvasVariable) => {
     const index = variables.findIndex((targetVar: CanvasVariable) => {

@@ -23,13 +23,15 @@ interface Props {
 
 const MAX_WIDTH = 560;
 
-export const MetricSelector: FC<Props> = ({
-  fields,
-  detectorChangeHandler,
-  selectedOptions,
-  maxWidth,
-  removeOptions,
-}) => {
+export const MetricSelector = (
+  {
+    fields,
+    detectorChangeHandler,
+    selectedOptions,
+    maxWidth,
+    removeOptions
+  }: Props
+) => {
   return (
     <EuiFlexGroup style={{ maxWidth: maxWidth !== undefined ? maxWidth : MAX_WIDTH }}>
       <EuiFlexItem>

@@ -20,11 +20,13 @@ interface MlAdminJobDescriptionProps {
   refreshJob: (job: SecurityJob) => void;
 }
 
-const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
-  job,
-  loading,
-  refreshJob,
-}) => {
+const MlAdminJobDescriptionComponent = (
+  {
+    job,
+    loading,
+    refreshJob
+  }: MlAdminJobDescriptionProps
+) => {
   const {
     enableDatafeed,
     disableDatafeed,

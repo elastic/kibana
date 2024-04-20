@@ -25,10 +25,12 @@ interface RuleExecutionStatusFilterProps {
 
 const sortedRuleExecutionStatusValues = [...RuleExecutionStatusValues].sort();
 
-export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionStatusFilterProps> = ({
-  selectedStatuses,
-  onChange,
-}: RuleExecutionStatusFilterProps) => {
+export const RuleExecutionStatusFilter = (
+  {
+    selectedStatuses,
+    onChange
+  }: RuleExecutionStatusFilterProps
+) => {
   const { euiTheme } = useEuiTheme();
   const [selectedValues, setSelectedValues] = useState<string[]>(selectedStatuses);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);

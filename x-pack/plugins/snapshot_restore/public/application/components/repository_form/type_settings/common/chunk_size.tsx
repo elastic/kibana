@@ -17,12 +17,14 @@ interface Props {
   error: RepositorySettingsValidation['chunkSize'];
 }
 
-export const ChunkSizeField: React.FunctionComponent<Props> = ({
-  isInvalid,
-  error,
-  defaultValue,
-  updateSettings,
-}) => {
+export const ChunkSizeField = (
+  {
+    isInvalid,
+    error,
+    defaultValue,
+    updateSettings
+  }: Props
+) => {
   return (
     <EuiDescribedFormGroup
       title={

@@ -16,12 +16,14 @@ interface Props {
   dataStreams: string[];
 }
 
-export const DataStreamsAndIndicesListHelpText: FunctionComponent<Props> = ({
-  onSelectionChange,
-  selectedIndicesAndDataStreams,
-  indices,
-  dataStreams,
-}) => {
+export const DataStreamsAndIndicesListHelpText = (
+  {
+    onSelectionChange,
+    selectedIndicesAndDataStreams,
+    indices,
+    dataStreams
+  }: Props
+) => {
   if (selectedIndicesAndDataStreams.length === 0) {
     return (
       <FormattedMessage

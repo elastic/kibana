@@ -16,7 +16,11 @@ interface Props {
   state: any;
 }
 
-export const SnapshotState: React.FC<Props> = ({ state }) => {
+export const SnapshotState = (
+  {
+    state
+  }: Props
+) => {
   const { i18n } = useServices();
 
   const stateMap: any = {

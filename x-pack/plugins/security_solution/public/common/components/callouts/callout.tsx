@@ -21,13 +21,15 @@ export interface CallOutProps {
   showDismissButton?: boolean;
 }
 
-const CallOutComponent: FC<CallOutProps> = ({
-  message,
-  iconType,
-  dismissButtonText,
-  onDismiss,
-  showDismissButton = true,
-}) => {
+const CallOutComponent = (
+  {
+    message,
+    iconType,
+    dismissButtonText,
+    onDismiss,
+    showDismissButton = true
+  }: CallOutProps
+) => {
   const { type, id, title, description } = message;
   const finalIconType = iconType ?? getDefaultIconType(type);
 

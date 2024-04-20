@@ -10,7 +10,7 @@ import React from 'react';
 import { DrilldownManagerProvider, DrilldownManagerProviderProps } from '../context';
 import { DrilldownManager } from './drilldown_manager';
 
-export const DrilldownManagerWithProvider: React.FC<DrilldownManagerProviderProps> = (props) => {
+export const DrilldownManagerWithProvider = (props: DrilldownManagerProviderProps) => {
   return (
     <DrilldownManagerProvider {...props}>
       <DrilldownManager />

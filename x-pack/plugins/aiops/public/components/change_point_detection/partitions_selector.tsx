@@ -89,12 +89,14 @@ interface PartitionsResponse {
   };
 }
 
-export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
-  value,
-  onChange,
-  splitField,
-  enableSearch = true,
-}) => {
+export const PartitionsSelector = (
+  {
+    value,
+    onChange,
+    splitField,
+    enableSearch = true
+  }: PartitionsSelectorProps
+) => {
   const { dataView } = useDataSource();
   const {
     notifications: { toasts },

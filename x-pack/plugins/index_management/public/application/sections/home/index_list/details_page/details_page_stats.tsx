@@ -27,10 +27,15 @@ import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SectionLoading, Error } from '../../../../../shared_imports';
 import { loadIndexStatistics, documentationService } from '../../../../services';
 
-export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpen: boolean }> = ({
-  indexName,
-  isIndexOpen,
-}) => {
+export const DetailsPageStats = (
+  {
+    indexName,
+    isIndexOpen
+  }: {
+    indexName: string;
+    isIndexOpen: boolean;
+  }
+) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>();
   const [indexStats, setIndexStats] = useState<IndicesStatsResponse | null>();

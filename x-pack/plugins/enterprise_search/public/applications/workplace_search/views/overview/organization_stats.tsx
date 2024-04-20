@@ -19,7 +19,7 @@ import { SOURCES_PATH, USERS_AND_ROLES_PATH } from '../../routes';
 import { OverviewLogic } from './overview_logic';
 import { StatisticCard } from './statistic_card';
 
-export const OrganizationStats: React.FC = () => {
+export const OrganizationStats = () => {
   const { sourcesCount, pendingInvitationsCount, accountsCount, privateSourcesCount } =
     useValues(OverviewLogic);
 

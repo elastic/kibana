@@ -101,11 +101,13 @@ const steps = (onDownload: OnDownloadFn, onCopy: OnCopyFn) => [
   },
 ];
 
-export const ShareWebsiteFlyout: FC<Props> = ({
-  onClose,
-  unsupportedRenderers,
-  renderedWorkpad,
-}) => {
+export const ShareWebsiteFlyout = (
+  {
+    onClose,
+    unsupportedRenderers,
+    renderedWorkpad
+  }: Props
+) => {
   const notifyService = useNotifyService();
 
   const onCopy = useCallback(

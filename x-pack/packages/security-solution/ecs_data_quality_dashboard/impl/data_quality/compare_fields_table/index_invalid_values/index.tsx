@@ -21,25 +21,28 @@ interface Props {
   indexInvalidValues: UnallowedValueCount[];
 }
 
-const IndexInvalidValuesComponent: React.FC<Props> = ({ indexInvalidValues }) =>
-  indexInvalidValues.length === 0 ? (
-    <EuiCode data-test-subj="emptyPlaceholder">{EMPTY_PLACEHOLDER}</EuiCode>
-  ) : (
-    <EuiFlexGroup data-test-subj="indexInvalidValues" direction="column" gutterSize="none">
-      {indexInvalidValues.map(({ fieldName, count }, i) => (
-        <IndexInvalidValueFlexItem grow={false} key={`${fieldName}_${i}`}>
-          <div>
-            <CodeDanger>{fieldName}</CodeDanger>{' '}
-            <span>
-              {'('}
-              {count}
-              {')'}
-            </span>
-          </div>
-        </IndexInvalidValueFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
+const IndexInvalidValuesComponent = (
+  {
+    indexInvalidValues
+  }: Props
+) => indexInvalidValues.length === 0 ? (
+  <EuiCode data-test-subj="emptyPlaceholder">{EMPTY_PLACEHOLDER}</EuiCode>
+) : (
+  <EuiFlexGroup data-test-subj="indexInvalidValues" direction="column" gutterSize="none">
+    {indexInvalidValues.map(({ fieldName, count }, i) => (
+      <IndexInvalidValueFlexItem grow={false} key={`${fieldName}_${i}`}>
+        <div>
+          <CodeDanger>{fieldName}</CodeDanger>{' '}
+          <span>
+            {'('}
+            {count}
+            {')'}
+          </span>
+        </div>
+      </IndexInvalidValueFlexItem>
+    ))}
+  </EuiFlexGroup>
+);
 
 IndexInvalidValuesComponent.displayName = 'IndexInvalidValuesComponent';
 

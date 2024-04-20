@@ -26,9 +26,11 @@ interface AnalyticsCollectionNoEventsCalloutProps {
   analyticsCollection: AnalyticsCollection;
 }
 
-export const AnalyticsCollectionNoEventsCallout: React.FC<
-  AnalyticsCollectionNoEventsCalloutProps
-> = ({ analyticsCollection }) => {
+export const AnalyticsCollectionNoEventsCallout = (
+  {
+    analyticsCollection
+  }: AnalyticsCollectionNoEventsCalloutProps
+) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { analyticsEventsExist } = useActions(AnalyticsCollectionNoEventsCalloutLogic);
   const { hasEvents, isLoading } = useValues(AnalyticsCollectionNoEventsCalloutLogic);

@@ -12,7 +12,7 @@ import { palettes as defaultPalettes } from '../../../../common/lib/palettes';
 import { PalettePickerProps } from '../types';
 import { DefaultPalettePicker } from './default_palette_picker';
 
-export const PalettePicker: FC<PalettePickerProps> = (props) => {
+export const PalettePicker = (props: PalettePickerProps) => {
   const { additionalPalettes = [] } = props;
   const palettes = [...defaultPalettes, ...additionalPalettes];
 

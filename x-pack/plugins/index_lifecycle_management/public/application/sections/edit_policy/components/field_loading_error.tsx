@@ -16,7 +16,7 @@ interface Props {
   'aria-label'?: string;
 }
 
-export const FieldLoadingError: FunctionComponent<Props> = (props) => {
+export const FieldLoadingError = (props: Props) => {
   const { title, body, resendRequest } = props;
   return (
     <>

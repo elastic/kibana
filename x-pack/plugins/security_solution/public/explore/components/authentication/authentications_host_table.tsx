@@ -29,16 +29,18 @@ const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 
 const tableType = hostsModel.HostsTableType.authentications;
 
-const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = ({
-  endDate,
-  filterQuery,
-  indexNames,
-  skip,
-  startDate,
-  type,
-  setQuery,
-  deleteQuery,
-}) => {
+const AuthenticationsHostTableComponent = (
+  {
+    endDate,
+    filterQuery,
+    indexNames,
+    skip,
+    startDate,
+    type,
+    setQuery,
+    deleteQuery
+  }: HostsComponentsQueryProps
+) => {
   const dispatch = useDispatch();
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);

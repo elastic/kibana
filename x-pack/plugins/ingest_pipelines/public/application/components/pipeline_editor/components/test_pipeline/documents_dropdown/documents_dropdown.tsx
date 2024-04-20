@@ -50,12 +50,14 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const DocumentsDropdown: FunctionComponent<Props> = ({
-  documents,
-  selectedDocumentIndex,
-  updateSelectedDocument,
-  openFlyout,
-}) => {
+export const DocumentsDropdown = (
+  {
+    documents,
+    selectedDocumentIndex,
+    updateSelectedDocument,
+    openFlyout
+  }: Props
+) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const managePipelineButton = (

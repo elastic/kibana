@@ -57,13 +57,15 @@ interface Props {
   refresh(): void;
 }
 
-export const RevertModelSnapshotFlyout: FC<Props> = ({
-  snapshot,
-  snapshots,
-  job,
-  closeFlyout,
-  refresh,
-}) => {
+export const RevertModelSnapshotFlyout = (
+  {
+    snapshot,
+    snapshots,
+    job,
+    closeFlyout,
+    refresh
+  }: Props
+) => {
   const { toasts } = useNotifications();
   const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
     () => chartLoaderProvider(mlResultsService),
@@ -170,244 +172,240 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
     }
   }
 
-  return (
-    <>
-      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m">
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h5>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.title"
-                defaultMessage="Revert to model snapshot {ssId}"
-                values={{ ssId: currentSnapshot.snapshot_id }}
-              />
-            </h5>
-          </EuiTitle>
-
-          <EuiText size="s">
-            <p>{currentSnapshot.description}</p>
-          </EuiText>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {false && ( // disabled for now
-            <>
-              <EuiSpacer size="s" />
-
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.changeSnapshotLabel',
-                  {
-                    defaultMessage: 'Change snapshot',
-                  }
-                )}
-              >
-                <EuiSuperSelect
-                  options={snapshots
-                    .map((s) => ({
-                      value: s.snapshot_id,
-                      inputDisplay: s.snapshot_id,
-                      dropdownDisplay: (
-                        <>
-                          <strong>{s.snapshot_id}</strong>
-                          <EuiText size="s" color="subdued">
-                            <p>{s.description}</p>
-                          </EuiText>
-                        </>
-                      ),
-                    }))
-                    .reverse()}
-                  valueOfSelected={currentSnapshot.snapshot_id}
-                  onChange={onSnapshotChange}
-                  itemLayoutAlign="top"
-                  hasDividers
-                />
-              </EuiFormRow>
-              <EuiHorizontalRule margin="m" />
-              <EuiSpacer size="l" />
-            </>
-          )}
-
-          <EventRateChart
-            eventRateChartData={eventRateData}
-            anomalyData={anomalies}
-            loading={chartReady === false}
-            height={'100px'}
-            width={'100%'}
-            fadeChart={true}
-            overlayRanges={[
-              {
-                start: currentSnapshot.latest_record_time_stamp!,
-                end: job.data_counts.latest_record_timestamp!,
-                color: '#ff0000',
-              },
-            ]}
-          />
-
-          <EuiSpacer size="l" />
-          <EuiSpacer size="l" />
-
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.title',
-              {
-                defaultMessage: 'Anomaly data will be deleted',
-              }
-            )}
-            color="warning"
-            iconType="warning"
-          >
+  return (<>
+    <EuiFlyout onClose={closeFlyout} hideCloseButton size="m">
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h5>
             <FormattedMessage
-              id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
-              defaultMessage="All anomaly detection results after {date} will be deleted."
-              values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp!) }}
+              id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.title"
+              defaultMessage="Revert to model snapshot {ssId}"
+              values={{ ssId: currentSnapshot.snapshot_id }}
             />
-          </EuiCallOut>
+          </h5>
+        </EuiTitle>
 
-          <EuiHorizontalRule margin="xl" />
-
-          <EuiFormRow
-            fullWidth
-            helpText={i18n.translate(
-              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.replaySwitchHelp',
-              {
-                defaultMessage: 'Reopen job and replay analysis after the revert has been applied.',
-              }
-            )}
-          >
-            <EuiSwitch
-              id="replaySwitch"
+        <EuiText size="s">
+          <p>{currentSnapshot.description}</p>
+        </EuiText>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {false && ( // disabled for now
+          (<>
+            <EuiSpacer size="s" />
+            <EuiFormRow
+              fullWidth
               label={i18n.translate(
-                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.replaySwitchLabel',
+                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.changeSnapshotLabel',
                 {
-                  defaultMessage: 'Replay analysis',
+                  defaultMessage: 'Change snapshot',
                 }
               )}
-              checked={replay}
-              onChange={(e) => setReplay(e.target.checked)}
-            />
-          </EuiFormRow>
+            >
+              <EuiSuperSelect
+                options={snapshots
+                  .map((s) => ({
+                    value: s.snapshot_id,
+                    inputDisplay: s.snapshot_id,
+                    dropdownDisplay: (
+                      <>
+                        <strong>{s.snapshot_id}</strong>
+                        <EuiText size="s" color="subdued">
+                          <p>{s.description}</p>
+                        </EuiText>
+                      </>
+                    ),
+                  }))
+                  .reverse()}
+                valueOfSelected={currentSnapshot.snapshot_id}
+                onChange={onSnapshotChange}
+                itemLayoutAlign="top"
+                hasDividers
+              />
+            </EuiFormRow>
+            <EuiHorizontalRule margin="m" />
+            <EuiSpacer size="l" />
+          </>)
+        )}
 
-          {replay && (
-            <>
-              <EuiFormRow
-                fullWidth
-                helpText={i18n.translate(
-                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.realTimeSwitchHelp',
-                  {
-                    defaultMessage:
-                      'Job will continue to run until manually stopped. All new data added to the index will be analyzed.',
-                  }
-                )}
-              >
-                <EuiSwitch
-                  id="realTimeSwitch"
-                  label={i18n.translate(
-                    'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.realTimeSwitchLabel',
-                    {
-                      defaultMessage: 'Run job in real time',
-                    }
-                  )}
-                  checked={runInRealTime}
-                  onChange={(e) => setRunInRealTime(e.target.checked)}
-                />
-              </EuiFormRow>
-
-              <EuiFormRow
-                fullWidth
-                helpText={i18n.translate(
-                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.createCalendarSwitchHelp',
-                  {
-                    defaultMessage:
-                      'Create a new calendar and event to skip over a period of time when analyzing the data.',
-                  }
-                )}
-              >
-                <EuiSwitch
-                  id="createCalendarSwitch"
-                  label={i18n.translate(
-                    'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.createCalendarSwitchLabel',
-                    {
-                      defaultMessage: 'Create calendar to skip a range of time',
-                    }
-                  )}
-                  checked={createCalendar}
-                  onChange={(e) => setCreateCalendar(e.target.checked)}
-                />
-              </EuiFormRow>
-
-              {createCalendar && (
-                <CreateCalendar
-                  calendarEvents={calendarEvents}
-                  setCalendarEvents={setCalendarEvents}
-                  minSelectableTimeStamp={snapshot.latest_record_time_stamp!}
-                  maxSelectableTimeStamp={job.data_counts.latest_record_timestamp!}
-                  eventRateData={eventRateData}
-                  anomalies={anomalies}
-                  chartReady={chartReady}
-                />
-              )}
-            </>
-          )}
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.closeButton"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={true} />
-
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={showRevertModal}
-                disabled={createCalendar === true && calendarEventsValid === false}
-                fill
-              >
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.saveButton"
-                  defaultMessage="Apply"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-
-      {revertModalVisible && (
-        <EuiConfirmModal
-          title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
-            defaultMessage: 'Apply snapshot revert',
-          })}
-          onCancel={hideRevertModal}
-          onConfirm={applyRevert}
-          cancelButtonText={i18n.translate(
-            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
+        <EventRateChart
+          eventRateChartData={eventRateData}
+          anomalyData={anomalies}
+          loading={chartReady === false}
+          height={'100px'}
+          width={'100%'}
+          fadeChart={true}
+          overlayRanges={[
             {
-              defaultMessage: 'Cancel',
+              start: currentSnapshot.latest_record_time_stamp!,
+              end: job.data_counts.latest_record_timestamp!,
+              color: '#ff0000',
+            },
+          ]}
+        />
+
+        <EuiSpacer size="l" />
+        <EuiSpacer size="l" />
+
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.title',
+            {
+              defaultMessage: 'Anomaly data will be deleted',
             }
           )}
-          confirmButtonText={i18n.translate(
-            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
-            {
-              defaultMessage: 'Apply',
-            }
-          )}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
+          color="warning"
+          iconType="warning"
         >
           <FormattedMessage
-            id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
-            defaultMessage="The snapshot revert will be carried out in the background and may take some time."
+            id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
+            defaultMessage="All anomaly detection results after {date} will be deleted."
+            values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp!) }}
           />
-        </EuiConfirmModal>
-      )}
-    </>
-  );
+        </EuiCallOut>
+
+        <EuiHorizontalRule margin="xl" />
+
+        <EuiFormRow
+          fullWidth
+          helpText={i18n.translate(
+            'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.replaySwitchHelp',
+            {
+              defaultMessage: 'Reopen job and replay analysis after the revert has been applied.',
+            }
+          )}
+        >
+          <EuiSwitch
+            id="replaySwitch"
+            label={i18n.translate(
+              'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.replaySwitchLabel',
+              {
+                defaultMessage: 'Replay analysis',
+              }
+            )}
+            checked={replay}
+            onChange={(e) => setReplay(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        {replay && (
+          <>
+            <EuiFormRow
+              fullWidth
+              helpText={i18n.translate(
+                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.realTimeSwitchHelp',
+                {
+                  defaultMessage:
+                    'Job will continue to run until manually stopped. All new data added to the index will be analyzed.',
+                }
+              )}
+            >
+              <EuiSwitch
+                id="realTimeSwitch"
+                label={i18n.translate(
+                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.realTimeSwitchLabel',
+                  {
+                    defaultMessage: 'Run job in real time',
+                  }
+                )}
+                checked={runInRealTime}
+                onChange={(e) => setRunInRealTime(e.target.checked)}
+              />
+            </EuiFormRow>
+
+            <EuiFormRow
+              fullWidth
+              helpText={i18n.translate(
+                'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.createCalendarSwitchHelp',
+                {
+                  defaultMessage:
+                    'Create a new calendar and event to skip over a period of time when analyzing the data.',
+                }
+              )}
+            >
+              <EuiSwitch
+                id="createCalendarSwitch"
+                label={i18n.translate(
+                  'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.createCalendarSwitchLabel',
+                  {
+                    defaultMessage: 'Create calendar to skip a range of time',
+                  }
+                )}
+                checked={createCalendar}
+                onChange={(e) => setCreateCalendar(e.target.checked)}
+              />
+            </EuiFormRow>
+
+            {createCalendar && (
+              <CreateCalendar
+                calendarEvents={calendarEvents}
+                setCalendarEvents={setCalendarEvents}
+                minSelectableTimeStamp={snapshot.latest_record_time_stamp!}
+                maxSelectableTimeStamp={job.data_counts.latest_record_timestamp!}
+                eventRateData={eventRateData}
+                anomalies={anomalies}
+                chartReady={chartReady}
+              />
+            )}
+          </>
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.closeButton"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true} />
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={showRevertModal}
+              disabled={createCalendar === true && calendarEventsValid === false}
+              fill
+            >
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.saveButton"
+                defaultMessage="Apply"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+    {revertModalVisible && (
+      <EuiConfirmModal
+        title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {
+          defaultMessage: 'Apply snapshot revert',
+        })}
+        onCancel={hideRevertModal}
+        onConfirm={applyRevert}
+        cancelButtonText={i18n.translate(
+          'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.cancelButton',
+          {
+            defaultMessage: 'Cancel',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteButton',
+          {
+            defaultMessage: 'Apply',
+          }
+        )}
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.modalBody"
+          defaultMessage="The snapshot revert will be carried out in the background and may take some time."
+        />
+      </EuiConfirmModal>
+    )}
+  </>);
 };
 
 function filterIncompleteEvents(event: CalendarEvent): event is CalendarEvent {

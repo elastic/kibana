@@ -105,27 +105,29 @@ interface Props {
   updatePatternRollup: (patternRollup: PatternRollup, requestTime?: number) => void;
 }
 
-const PatternComponent: React.FC<Props> = ({
-  addSuccessToast,
-  canUserCreateAndReadCases,
-  endDate,
-  formatBytes,
-  formatNumber,
-  getGroupByFieldsOnClick,
-  indexNames,
-  ilmPhases,
-  isAssistantEnabled,
-  openCreateCaseFlyout,
-  pattern,
-  patternRollup,
-  selectedIndex,
-  setSelectedIndex,
-  startDate,
-  theme,
-  baseTheme,
-  updatePatternIndexNames,
-  updatePatternRollup,
-}) => {
+const PatternComponent = (
+  {
+    addSuccessToast,
+    canUserCreateAndReadCases,
+    endDate,
+    formatBytes,
+    formatNumber,
+    getGroupByFieldsOnClick,
+    indexNames,
+    ilmPhases,
+    isAssistantEnabled,
+    openCreateCaseFlyout,
+    pattern,
+    patternRollup,
+    selectedIndex,
+    setSelectedIndex,
+    startDate,
+    theme,
+    baseTheme,
+    updatePatternIndexNames,
+    updatePatternRollup
+  }: Props
+) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { isILMAvailable } = useDataQualityContext();
   const [sorting, setSorting] = useState<SortConfig>(defaultSort);

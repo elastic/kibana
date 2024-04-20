@@ -21,7 +21,12 @@ interface FileDownloadButtonProps {
   isIcon?: boolean;
 }
 
-const FileDownloadButtonComponent: React.FC<FileDownloadButtonProps> = ({ fileId, isIcon }) => {
+const FileDownloadButtonComponent = (
+  {
+    fileId,
+    isIcon
+  }: FileDownloadButtonProps
+) => {
   const { owner } = useCasesContext();
   const { client: filesClient } = useFilesContext();
 

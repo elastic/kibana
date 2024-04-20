@@ -16,19 +16,23 @@ interface Props {
   width: number;
 }
 
-export const BorderConnection: FC<Props> = ({ transformMatrix, width, height }) => (
-  <div
-    className="canvasBorderConnection canvasLayoutAnnotation"
-    style={{
-      height,
-      marginLeft: -width / 2,
-      marginTop: -height / 2,
-      position: 'absolute',
-      transform: matrixToCSS(transformMatrix),
-      width,
-    }}
-  />
-);
+export const BorderConnection = (
+  {
+    transformMatrix,
+    width,
+    height
+  }: Props
+) => (<div
+  className="canvasBorderConnection canvasLayoutAnnotation"
+  style={{
+    height,
+    marginLeft: -width / 2,
+    marginTop: -height / 2,
+    position: 'absolute',
+    transform: matrixToCSS(transformMatrix),
+    width,
+  }}
+/>);
 
 BorderConnection.propTypes = {
   height: PropTypes.number.isRequired,

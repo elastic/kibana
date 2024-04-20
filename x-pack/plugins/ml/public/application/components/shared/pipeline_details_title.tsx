@@ -17,7 +17,11 @@ interface Props {
   modelId: string;
 }
 
-export const PipelineDetailsTitle: FC<Props> = ({ modelId }) => {
+export const PipelineDetailsTitle = (
+  {
+    modelId
+  }: Props
+) => {
   const {
     services: {
       docLinks: { links },

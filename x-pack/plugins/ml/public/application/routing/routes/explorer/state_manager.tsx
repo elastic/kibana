@@ -37,9 +37,11 @@ export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
-  jobsWithTimeRange,
-}) => {
+export const ExplorerUrlStateManager = (
+  {
+    jobsWithTimeRange
+  }: ExplorerUrlStateManagerProps
+) => {
   const {
     services: { cases, presentationUtil, uiSettings },
   } = useMlKibana();

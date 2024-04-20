@@ -15,7 +15,7 @@ import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
-const Wrapper: FC = ({ children }) => {
+const Wrapper = ({ children }) => {
   return (
     <IntlProvider locale="en">
       <>{children}</>

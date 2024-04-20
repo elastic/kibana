@@ -20,7 +20,12 @@ interface Props {
 
 const options = mapToMultiSelectOption(Object.keys(severities) as CaseSeverity[]);
 
-export const SeverityFilter: React.FC<Props> = ({ selectedOptionKeys, onChange }) => {
+export const SeverityFilter = (
+  {
+    selectedOptionKeys,
+    onChange
+  }: Props
+) => {
   const renderOption = (option: MultiSelectFilterOption<CaseSeverity>) => {
     const severityData = severities[option.label];
     return (

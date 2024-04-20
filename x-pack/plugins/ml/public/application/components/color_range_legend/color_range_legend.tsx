@@ -29,13 +29,15 @@ interface ColorRangeLegendProps {
  *
  * @param props ColorRangeLegendProps
  */
-export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
-  colorRange,
-  justifyTicks = false,
-  showTicks = true,
-  title,
-  width = 250,
-}) => {
+export const ColorRangeLegend = (
+  {
+    colorRange,
+    justifyTicks = false,
+    showTicks = true,
+    title,
+    width = 250
+  }: ColorRangeLegendProps
+) => {
   const d3Container = useRef<null | SVGSVGElement>(null);
 
   const scale = d3.range(COLOR_RANGE_RESOLUTION + 1).map((d) => ({

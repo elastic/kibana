@@ -33,13 +33,15 @@ interface Props {
   onSave: (repository: RestoreSettings) => void;
 }
 
-export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
-  snapshotDetails,
-  isSaving,
-  saveError,
-  clearSaveError,
-  onSave,
-}) => {
+export const RestoreSnapshotForm = (
+  {
+    snapshotDetails,
+    isSaving,
+    saveError,
+    clearSaveError,
+    onSave
+  }: Props
+) => {
   // Step state
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);

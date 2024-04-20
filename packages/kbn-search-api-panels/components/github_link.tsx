@@ -10,11 +10,17 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 
-export const GithubLink: React.FC<{
-  assetBasePath: string;
-  label: string;
-  href: string;
-}> = ({ assetBasePath, label, href }) => {
+export const GithubLink = (
+  {
+    assetBasePath,
+    label,
+    href
+  }: {
+    assetBasePath: string;
+    label: string;
+    href: string;
+  }
+) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>

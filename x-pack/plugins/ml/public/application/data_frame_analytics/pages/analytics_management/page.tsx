@@ -37,7 +37,7 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
 });
 
-export const Page: FC = () => {
+export const Page = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
 

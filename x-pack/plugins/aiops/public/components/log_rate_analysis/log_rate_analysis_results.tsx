@@ -122,22 +122,24 @@ interface LogRateAnalysisResultsProps {
   embeddingOrigin: string;
 }
 
-export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
-  dataView,
-  analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
-  earliest,
-  isBrushCleared,
-  latest,
-  stickyHistogram,
-  onReset,
-  windowParameters,
-  searchQuery,
-  sampleProbability,
-  barColorOverride,
-  barHighlightColorOverride,
-  onAnalysisCompleted,
-  embeddingOrigin,
-}) => {
+export const LogRateAnalysisResults = (
+  {
+    dataView,
+    analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
+    earliest,
+    isBrushCleared,
+    latest,
+    stickyHistogram,
+    onReset,
+    windowParameters,
+    searchQuery,
+    sampleProbability,
+    barColorOverride,
+    barHighlightColorOverride,
+    onAnalysisCompleted,
+    embeddingOrigin
+  }: LogRateAnalysisResultsProps
+) => {
   const { analytics, http } = useAiopsAppContext();
 
   // Store the performance metric's start time using a ref

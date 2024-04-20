@@ -24,7 +24,13 @@ interface Props {
   selectedField: string | null;
 }
 
-export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const SummaryCountFieldSelect = (
+  {
+    fields,
+    changeHandler,
+    selectedField
+  }: Props
+) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { renderOption, optionCss } = useFieldStatsTrigger();
 

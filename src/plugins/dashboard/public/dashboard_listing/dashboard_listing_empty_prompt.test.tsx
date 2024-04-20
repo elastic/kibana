@@ -43,9 +43,13 @@ function mountWith({
   props?: Partial<DashboardListingEmptyPromptProps>;
 }) {
   const props = { ...makeDefaultProps(), ...incomingProps };
-  const wrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => {
+  const wrappingComponent = (
+    {
+      children
+    }: {
+      children: React.ReactNode;
+    }
+  ) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
   const component = mount(<DashboardListingEmptyPrompt {...props} />, { wrappingComponent });

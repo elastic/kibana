@@ -9,29 +9,31 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const LogEntryExampleMessagesFailureIndicator: React.FunctionComponent<{
-  onRetry: () => void;
-}> = ({ onRetry }) => (
-  <EuiFlexGroup alignItems="center">
-    <EuiFlexItem grow={false} className="eui-textNoWrap">
-      <EuiTextColor color="danger">
-        <FormattedMessage
-          id="xpack.infra.logs.logEntryExamples.exampleLoadingFailureDescription"
-          defaultMessage="Failed to load examples."
-        />
-      </EuiTextColor>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        data-test-subj="infraLogEntryExampleMessagesFailureIndicatorRetryButton"
-        onClick={onRetry}
-        size="s"
-      >
-        <FormattedMessage
-          id="xpack.infra.logs.logEntryExamples.exampleLoadingFailureRetryButtonLabel"
-          defaultMessage="Retry"
-        />
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const LogEntryExampleMessagesFailureIndicator = (
+  {
+    onRetry
+  }: {
+    onRetry: () => void;
+  }
+) => (<EuiFlexGroup alignItems="center">
+  <EuiFlexItem grow={false} className="eui-textNoWrap">
+    <EuiTextColor color="danger">
+      <FormattedMessage
+        id="xpack.infra.logs.logEntryExamples.exampleLoadingFailureDescription"
+        defaultMessage="Failed to load examples."
+      />
+    </EuiTextColor>
+  </EuiFlexItem>
+  <EuiFlexItem grow={false}>
+    <EuiButton
+      data-test-subj="infraLogEntryExampleMessagesFailureIndicatorRetryButton"
+      onClick={onRetry}
+      size="s"
+    >
+      <FormattedMessage
+        id="xpack.infra.logs.logEntryExamples.exampleLoadingFailureRetryButtonLabel"
+        defaultMessage="Retry"
+      />
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>);

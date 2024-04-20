@@ -13,41 +13,43 @@ interface Props {
   checkGroup?: string;
 }
 
-export const EmptyJourney: FC<Props> = ({ checkGroup }) => (
-  <EuiEmptyPrompt
-    iconType="cross"
-    title={
-      <h2>
+export const EmptyJourney = (
+  {
+    checkGroup
+  }: Props
+) => (<EuiEmptyPrompt
+  iconType="cross"
+  title={
+    <h2>
+      <FormattedMessage
+        id="xpack.uptime.synthetics.emptyJourney.title"
+        defaultMessage="There are no steps for this journey"
+      />
+    </h2>
+  }
+  body={
+    <>
+      <p>
         <FormattedMessage
-          id="xpack.uptime.synthetics.emptyJourney.title"
-          defaultMessage="There are no steps for this journey"
+          id="xpack.uptime.synthetics.emptyJourney.message.heading"
+          defaultMessage="This journey did not contain any steps."
         />
-      </h2>
-    }
-    body={
-      <>
+      </p>
+      {!!checkGroup && (
         <p>
           <FormattedMessage
-            id="xpack.uptime.synthetics.emptyJourney.message.heading"
-            defaultMessage="This journey did not contain any steps."
+            id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
+            defaultMessage="The journey's check group is {codeBlock}."
+            values={{ codeBlock: <code>{checkGroup}</code> }}
           />
         </p>
-        {!!checkGroup && (
-          <p>
-            <FormattedMessage
-              id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
-              defaultMessage="The journey's check group is {codeBlock}."
-              values={{ codeBlock: <code>{checkGroup}</code> }}
-            />
-          </p>
-        )}
-        <p>
-          <FormattedMessage
-            id="xpack.uptime.synthetics.emptyJourney.message.footer"
-            defaultMessage="There is no further information to display."
-          />
-        </p>
-      </>
-    }
-  />
-);
+      )}
+      <p>
+        <FormattedMessage
+          id="xpack.uptime.synthetics.emptyJourney.message.footer"
+          defaultMessage="There is no further information to display."
+        />
+      </p>
+    </>
+  }
+/>);

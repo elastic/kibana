@@ -25,7 +25,7 @@ import type { FleetServerHost } from '../../../types';
 const POLLING_INTERVAL_S = 10; // 10 sec
 const POLLING_INTERVAL_MS = POLLING_INTERVAL_S * 1000;
 
-export const HealthCheckPanel: React.FunctionComponent = () => {
+export const HealthCheckPanel = () => {
   const [selectedFleetServerHost, setSelectedFleetServerHost] = useState<
     FleetServerHost | undefined
   >();

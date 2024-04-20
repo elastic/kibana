@@ -155,35 +155,41 @@ export interface CodeEditorProps {
   accessibilityOverlayEnabled?: boolean;
 }
 
-export const CodeEditor: React.FC<CodeEditorProps> = ({
-  languageId,
-  value,
-  onChange: _onChange,
-  width,
-  height,
-  options,
-  overrideEditorWillMount,
-  editorDidMount,
-  editorWillMount,
-  useDarkTheme: useDarkThemeProp,
-  transparentBackground,
-  suggestionProvider,
-  signatureProvider,
-  hoverProvider,
-  placeholder,
-  languageConfiguration,
-  codeActions,
-  'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
-    defaultMessage: 'Code Editor',
-  }),
-  isCopyable = false,
-  allowFullScreen = false,
-  readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
-    defaultMessage: 'Cannot edit in read-only editor',
-  }),
-  fitToContent,
-  accessibilityOverlayEnabled = true,
-}) => {
+export const CodeEditor = (
+  {
+    languageId,
+    value,
+    onChange: _onChange,
+    width,
+    height,
+    options,
+    overrideEditorWillMount,
+    editorDidMount,
+    editorWillMount,
+    useDarkTheme: useDarkThemeProp,
+    transparentBackground,
+    suggestionProvider,
+    signatureProvider,
+    hoverProvider,
+    placeholder,
+    languageConfiguration,
+    codeActions,
+
+    'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
+      defaultMessage: 'Code Editor',
+    }),
+
+    isCopyable = false,
+    allowFullScreen = false,
+
+    readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
+      defaultMessage: 'Cannot edit in read-only editor',
+    }),
+
+    fitToContent,
+    accessibilityOverlayEnabled = true
+  }: CodeEditorProps
+) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
 
@@ -575,7 +581,7 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
     }
   }, []);
 
-  const FullScreenButton: React.FC = () => {
+  const FullScreenButton = () => {
     if (!allowFullScreen) return null;
     return (
       <EuiI18n
@@ -704,7 +710,13 @@ const useBug175684OnChange = (onChange: CodeEditorProps['onChange']) => {
   return onChangeWrapper;
 };
 
-const UseBug177756ReBroadcastMouseDown: FC<{ children: React.ReactNode }> = ({ children }) => {
+const UseBug177756ReBroadcastMouseDown = (
+  {
+    children
+  }: {
+    children: React.ReactNode;
+  }
+) => {
   const [$codeWrapper, setCodeWrapper] = React.useState<HTMLElement | null>(null);
 
   useEffect(() => {

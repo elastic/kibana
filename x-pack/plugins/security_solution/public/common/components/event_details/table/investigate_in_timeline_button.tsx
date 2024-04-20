@@ -34,18 +34,18 @@ export interface InvestigateInTimelineButtonProps {
   iconType?: IconType;
 }
 
-export const InvestigateInTimelineButton: React.FunctionComponent<
-  InvestigateInTimelineButtonProps
-> = ({
-  asEmptyButton,
-  children,
-  dataProviders,
-  filters,
-  timeRange,
-  keepDataView,
-  iconType,
-  ...rest
-}) => {
+export const InvestigateInTimelineButton = (
+  {
+    asEmptyButton,
+    children,
+    dataProviders,
+    filters,
+    timeRange,
+    keepDataView,
+    iconType,
+    ...rest
+  }: InvestigateInTimelineButtonProps
+) => {
   const dispatch = useDispatch();
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);

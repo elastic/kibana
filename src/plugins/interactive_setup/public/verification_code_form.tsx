@@ -39,12 +39,15 @@ export interface VerificationCodeFormProps {
   onSuccess?(values: VerificationCodeFormValues): void;
 }
 
-export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> = ({
-  defaultValues = {
-    code: '',
-  },
-  onSuccess,
-}) => {
+export const VerificationCodeForm = (
+  {
+    defaultValues = {
+      code: '',
+    },
+
+    onSuccess
+  }: VerificationCodeFormProps
+) => {
   const { http } = useKibana();
   const [form, eventHandlers] = useForm({
     defaultValues,

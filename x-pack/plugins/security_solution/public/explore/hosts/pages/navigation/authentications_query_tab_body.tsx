@@ -13,16 +13,18 @@ import { histogramConfigs } from '../../../components/authentication/helpers';
 
 const HISTOGRAM_QUERY_ID = 'authenticationsHistogramQuery';
 
-const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
-  deleteQuery,
-  endDate,
-  filterQuery,
-  indexNames,
-  skip,
-  setQuery,
-  startDate,
-  type,
-}) => {
+const AuthenticationsQueryTabBodyComponent = (
+  {
+    deleteQuery,
+    endDate,
+    filterQuery,
+    indexNames,
+    skip,
+    setQuery,
+    startDate,
+    type
+  }: HostsComponentsQueryProps
+) => {
   return (
     <>
       <MatrixHistogram

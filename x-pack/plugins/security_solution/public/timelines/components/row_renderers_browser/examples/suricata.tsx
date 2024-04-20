@@ -11,7 +11,7 @@ import { demoTimelineData } from '../../../../common/demo_data/timeline';
 import { suricataRowRenderer } from '../../timeline/body/renderers/suricata/suricata_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SuricataExampleComponent: React.FC = () => (
+const SuricataExampleComponent = () => (
   <>
     {suricataRowRenderer.renderRow({
       data: demoTimelineData[2].ecs,

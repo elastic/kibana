@@ -15,21 +15,23 @@ export interface Props {
   stateSlice: typeof ON_FAILURE_STATE_SCOPE | typeof PROCESSOR_STATE_SCOPE;
 }
 
-export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
-  function PipelineProcessorsEditor({ stateSlice }) {
-    const {
-      onTreeAction,
-      state: { editor, processors },
-    } = usePipelineProcessorsContext();
-    const baseSelector = useMemo(() => [stateSlice], [stateSlice]);
+export const PipelineProcessorsEditor = memo(function PipelineProcessorsEditor(
+  {
+    stateSlice
+  }: Props
+) {
+  const {
+    onTreeAction,
+    state: { editor, processors },
+  } = usePipelineProcessorsContext();
+  const baseSelector = useMemo(() => [stateSlice], [stateSlice]);
 
-    return (
-      <ProcessorsTree
-        baseSelector={baseSelector}
-        processors={processors.state[stateSlice]}
-        onAction={onTreeAction}
-        movingProcessor={editor.mode.id === 'movingProcessor' ? editor.mode.arg : undefined}
-      />
-    );
-  }
-);
+  return (
+    <ProcessorsTree
+      baseSelector={baseSelector}
+      processors={processors.state[stateSlice]}
+      onAction={onTreeAction}
+      movingProcessor={editor.mode.id === 'movingProcessor' ? editor.mode.arg : undefined}
+    />
+  );
+});

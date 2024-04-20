@@ -7,6 +7,6 @@
 
 import React, { type FC } from 'react';
 
-export const StepCreateSummary: FC = React.memo(() => {
+export const StepCreateSummary = React.memo(() => {
   return null;
 });

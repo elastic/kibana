@@ -25,13 +25,15 @@ interface Props {
   hasFleetServer?: boolean;
 }
 
-export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
-  onClose,
-  agents,
-  agentCount,
-  useForceUnenroll,
-  hasFleetServer = false,
-}) => {
+export const AgentUnenrollAgentModal = (
+  {
+    onClose,
+    agents,
+    agentCount,
+    useForceUnenroll,
+    hasFleetServer = false
+  }: Props
+) => {
   const { notifications } = useStartServices();
   const [forceUnenroll, setForceUnenroll] = useState<boolean>(useForceUnenroll || false);
   const [isSubmitting, setIsSubmitting] = useState(false);

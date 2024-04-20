@@ -37,44 +37,47 @@ export interface UsersAvatarsPanelProps {
 /**
  * Displays users avatars
  */
-export const UsersAvatarsPanel: FC<UsersAvatarsPanelProps> = memo(
-  ({ userProfiles, maxVisibleAvatars }) => {
-    if (maxVisibleAvatars && userProfiles.length > maxVisibleAvatars) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={userProfiles.map((user) => (
-            <div>{user ? user.user.email ?? user.user.username : UNKNOWN_USER_PROFILE_NAME}</div>
-          ))}
-          repositionOnScroll={true}
-        >
-          <EuiNotificationBadge data-test-subj={USERS_AVATARS_COUNT_BADGE_TEST_ID} color="subdued">
-            {userProfiles.length}
-          </EuiNotificationBadge>
-        </EuiToolTip>
-      );
-    }
-
+export const UsersAvatarsPanel = memo((
+  {
+    userProfiles,
+    maxVisibleAvatars
+  }: UsersAvatarsPanelProps
+) => {
+  if (maxVisibleAvatars && userProfiles.length > maxVisibleAvatars) {
     return (
-      <EuiFlexGroup
-        data-test-subj={USERS_AVATARS_PANEL_TEST_ID}
-        alignItems="center"
-        direction="row"
-        gutterSize="xs"
-      >
-        {userProfiles.map((user, index) => (
-          <EuiFlexItem key={index} grow={false}>
-            <UserAvatar
-              data-test-subj={USER_AVATAR_ITEM_TEST_ID(user?.user.username ?? `Unknown-${index}`)}
-              user={user?.user}
-              avatar={user?.data.avatar}
-              size={'s'}
-            />
-          </EuiFlexItem>
+      <EuiToolTip
+        position="top"
+        content={userProfiles.map((user) => (
+          <div>{user ? user.user.email ?? user.user.username : UNKNOWN_USER_PROFILE_NAME}</div>
         ))}
-      </EuiFlexGroup>
+        repositionOnScroll={true}
+      >
+        <EuiNotificationBadge data-test-subj={USERS_AVATARS_COUNT_BADGE_TEST_ID} color="subdued">
+          {userProfiles.length}
+        </EuiNotificationBadge>
+      </EuiToolTip>
     );
   }
-);
+
+  return (
+    <EuiFlexGroup
+      data-test-subj={USERS_AVATARS_PANEL_TEST_ID}
+      alignItems="center"
+      direction="row"
+      gutterSize="xs"
+    >
+      {userProfiles.map((user, index) => (
+        <EuiFlexItem key={index} grow={false}>
+          <UserAvatar
+            data-test-subj={USER_AVATAR_ITEM_TEST_ID(user?.user.username ?? `Unknown-${index}`)}
+            user={user?.user}
+            avatar={user?.data.avatar}
+            size={'s'}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+});
 
 UsersAvatarsPanel.displayName = 'UsersAvatarsPanel';

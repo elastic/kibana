@@ -27,11 +27,13 @@ interface ConnectionDetailsProps {
   status: ConnectorStatus;
 }
 
-export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({
-  connectorId,
-  serviceType,
-  status,
-}) => {
+export const ConnectionDetails = (
+  {
+    connectorId,
+    serviceType,
+    status
+  }: ConnectionDetailsProps
+) => {
   const { elasticsearchUrl } = useElasticsearchUrl();
   return (
     <EuiPanel hasBorder>

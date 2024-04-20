@@ -49,11 +49,13 @@ export interface AnomalyChartsInitializerProps {
   onCancel: () => void;
 }
 
-export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
-  initialInput,
-  onCreate,
-  onCancel,
-}) => {
+export const ChangePointChartInitializer = (
+  {
+    initialInput,
+    onCreate,
+    onCancel
+  }: AnomalyChartsInitializerProps
+) => {
   const {
     unifiedSearch: {
       ui: { IndexPatternSelect },
@@ -179,11 +181,17 @@ export type FormControlsProps = Pick<
   'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
 >;
 
-export const FormControls: FC<{
-  formInput?: FormControlsProps;
-  onChange: (update: FormControlsProps) => void;
-  onValidationChange: (isValid: boolean) => void;
-}> = ({ formInput, onChange, onValidationChange }) => {
+export const FormControls = (
+  {
+    formInput,
+    onChange,
+    onValidationChange
+  }: {
+    formInput?: FormControlsProps;
+    onChange: (update: FormControlsProps) => void;
+    onValidationChange: (isValid: boolean) => void;
+  }
+) => {
   const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
   const prevMetricFieldOptions = usePrevious(metricFieldOptions);
 

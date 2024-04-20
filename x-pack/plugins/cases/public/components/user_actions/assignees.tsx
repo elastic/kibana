@@ -19,11 +19,17 @@ import type { UserActionBuilder } from './types';
 import * as i18n from './translations';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 
-const FormatListItem: React.FC<{
-  children: React.ReactElement;
-  index: number;
-  listSize: number;
-}> = ({ children, index, listSize }) => {
+const FormatListItem = (
+  {
+    children,
+    index,
+    listSize
+  }: {
+    children: React.ReactElement;
+    index: number;
+    listSize: number;
+  }
+) => {
   if (shouldAddAnd(index, listSize)) {
     return (
       <>
@@ -51,27 +57,34 @@ export const shouldAddAnd = (index: number, arrayLength: number) => {
   return arrayLength > 1 && index === arrayLength - 1;
 };
 
-const Themselves: React.FC<{
-  index: number;
-  numOfAssigness: number;
-}> = ({ index, numOfAssigness }) => (
-  <FormatListItem index={index} listSize={numOfAssigness}>
-    <>{i18n.THEMSELVES}</>
-  </FormatListItem>
-);
+const Themselves = (
+  {
+    index,
+    numOfAssigness
+  }: {
+    index: number;
+    numOfAssigness: number;
+  }
+) => (<FormatListItem index={index} listSize={numOfAssigness}>
+  <>{i18n.THEMSELVES}</>
+</FormatListItem>);
 Themselves.displayName = 'Themselves';
 
-const AssigneeComponent: React.FC<{
-  assignee: Assignee;
-  index: number;
-  numOfAssigness: number;
-}> = ({ assignee, index, numOfAssigness }) => (
-  <FormatListItem index={index} listSize={numOfAssigness}>
-    <UserToolTip userInfo={assignee.profile}>
-      <strong>{getName(assignee.profile?.user)}</strong>
-    </UserToolTip>
-  </FormatListItem>
-);
+const AssigneeComponent = (
+  {
+    assignee,
+    index,
+    numOfAssigness
+  }: {
+    assignee: Assignee;
+    index: number;
+    numOfAssigness: number;
+  }
+) => (<FormatListItem index={index} listSize={numOfAssigness}>
+  <UserToolTip userInfo={assignee.profile}>
+    <strong>{getName(assignee.profile?.user)}</strong>
+  </UserToolTip>
+</FormatListItem>);
 AssigneeComponent.displayName = 'Assignee';
 
 interface AssigneesProps {

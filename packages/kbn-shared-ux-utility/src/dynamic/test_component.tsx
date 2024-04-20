@@ -12,14 +12,22 @@ export interface TestComponentProps {
   customProp?: boolean;
 }
 
-export const TestComponent: React.FunctionComponent<TestComponentProps> = ({ children }) => {
+export const TestComponent = (
+  {
+    children
+  }: TestComponentProps
+) => {
   return <span>{children} Test component</span>;
 };
 
-export const ForwardeRefTestComponent: React.FunctionComponent<TestComponentProps> =
-  React.forwardRef<HTMLSpanElement, TestComponentProps>(({ children }, ref) => {
-    return <span ref={ref}>{children} Test component</span>;
-  });
+export const ForwardeRefTestComponent = React.forwardRef<HTMLSpanElement, TestComponentProps>((
+  {
+    children
+  }: TestComponentProps,
+  ref
+) => {
+  return <span ref={ref}>{children} Test component</span>;
+});
 
 // eslint-disable-next-line import/no-default-export
 export default TestComponent;

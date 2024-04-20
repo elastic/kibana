@@ -15,7 +15,11 @@ interface Props {
   action: RecordedAction | null;
 }
 
-export const StateChange: FC<Props> = ({ action }) => {
+export const StateChange = (
+  {
+    action
+  }: Props
+) => {
   if (!action) {
     return null;
   }

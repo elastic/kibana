@@ -71,7 +71,13 @@ export interface HostDetailsProps {
 /**
  * Host details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, scopeId }) => {
+export const HostDetails = (
+  {
+    hostName,
+    timestamp,
+    scopeId
+  }: HostDetailsProps
+) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
   const dispatch = useDispatch();

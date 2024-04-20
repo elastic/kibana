@@ -20,7 +20,7 @@ import illustration from '../document_creation/illustration.svg';
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
-export const EmptyEngineOverview: React.FC = () => {
+export const EmptyEngineOverview = () => {
   const {
     isElasticsearchEngine,
     engine: { elasticsearchIndexName },

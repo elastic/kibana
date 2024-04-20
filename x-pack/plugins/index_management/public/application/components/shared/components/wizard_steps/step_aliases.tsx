@@ -30,103 +30,107 @@ interface Props {
   esDocsBase: string;
 }
 
-export const StepAliases: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue = {}, onChange, esDocsBase }) => {
-    const { jsonContent, setJsonContent, error } = useJsonStep({
-      defaultValue,
-      onChange,
-    });
+export const StepAliases = React.memo((
+  {
+    defaultValue = {},
+    onChange,
+    esDocsBase
+  }: Props
+) => {
+  const { jsonContent, setJsonContent, error } = useJsonStep({
+    defaultValue,
+    onChange,
+  });
 
-    return (
-      <div data-test-subj="stepAliases">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2 data-test-subj="stepTitle">
-                <FormattedMessage
-                  id="xpack.idxMgmt.formWizard.stepAliases.stepTitle"
-                  defaultMessage="Aliases (optional)"
-                />
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.formWizard.stepAliases.aliasesDescription"
-                  defaultMessage="Set up aliases to associate with your indices."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              flush="right"
-              href={documentationService.getBulkIndexAlias()}
-              target="_blank"
-              iconType="help"
-            >
+  return (
+    <div data-test-subj="stepAliases">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2 data-test-subj="stepTitle">
               <FormattedMessage
-                id="xpack.idxMgmt.formWizard.stepAliases.docsButtonLabel"
-                defaultMessage="Index Aliases docs"
+                id="xpack.idxMgmt.formWizard.stepAliases.stepTitle"
+                defaultMessage="Aliases (optional)"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </h2>
+          </EuiTitle>
 
-        <EuiSpacer size="l" />
+          <EuiSpacer size="s" />
 
-        {/* Aliases code editor */}
-        <EuiFormRow
-          label={
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.formWizard.stepAliases.aliasesDescription"
+                defaultMessage="Set up aliases to associate with your indices."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            flush="right"
+            href={documentationService.getBulkIndexAlias()}
+            target="_blank"
+            iconType="help"
+          >
             <FormattedMessage
-              id="xpack.idxMgmt.formWizard.stepAliases.fieldAliasesLabel"
-              defaultMessage="Aliases"
+              id="xpack.idxMgmt.formWizard.stepAliases.docsButtonLabel"
+              defaultMessage="Index Aliases docs"
             />
-          }
-          helpText={
-            <FormattedMessage
-              id="xpack.idxMgmt.formWizard.stepAliases.aliasesEditorHelpText"
-              defaultMessage="Use JSON format: {code}"
-              values={{
-                code: (
-                  <EuiCode>
-                    {JSON.stringify({
-                      my_alias: {},
-                    })}
-                  </EuiCode>
-                ),
-              }}
-            />
-          }
-          isInvalid={Boolean(error)}
-          error={error}
-          fullWidth
-        >
-          <CodeEditor
-            languageId="json"
-            value={jsonContent}
-            data-test-subj="aliasesEditor"
-            height={500}
-            options={{
-              lineNumbers: 'off',
-              tabSize: 2,
-              automaticLayout: true,
-            }}
-            aria-label={i18n.translate(
-              'xpack.idxMgmt.formWizard.stepAliases.fieldAliasesAriaLabel',
-              {
-                defaultMessage: 'Aliases code editor',
-              }
-            )}
-            onChange={setJsonContent}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
+
+      {/* Aliases code editor */}
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.idxMgmt.formWizard.stepAliases.fieldAliasesLabel"
+            defaultMessage="Aliases"
           />
-        </EuiFormRow>
-      </div>
-    );
-  }
-);
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.idxMgmt.formWizard.stepAliases.aliasesEditorHelpText"
+            defaultMessage="Use JSON format: {code}"
+            values={{
+              code: (
+                <EuiCode>
+                  {JSON.stringify({
+                    my_alias: {},
+                  })}
+                </EuiCode>
+              ),
+            }}
+          />
+        }
+        isInvalid={Boolean(error)}
+        error={error}
+        fullWidth
+      >
+        <CodeEditor
+          languageId="json"
+          value={jsonContent}
+          data-test-subj="aliasesEditor"
+          height={500}
+          options={{
+            lineNumbers: 'off',
+            tabSize: 2,
+            automaticLayout: true,
+          }}
+          aria-label={i18n.translate(
+            'xpack.idxMgmt.formWizard.stepAliases.fieldAliasesAriaLabel',
+            {
+              defaultMessage: 'Aliases code editor',
+            }
+          )}
+          onChange={setJsonContent}
+        />
+      </EuiFormRow>
+    </div>
+  );
+});

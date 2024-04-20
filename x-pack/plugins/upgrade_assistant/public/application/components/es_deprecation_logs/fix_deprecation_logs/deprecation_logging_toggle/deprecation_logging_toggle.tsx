@@ -90,15 +90,17 @@ type Props = Pick<
   | 'toggleLogging'
 >;
 
-export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
-  isDeprecationLogIndexingEnabled,
-  isLoading,
-  isUpdating,
-  fetchError,
-  updateError,
-  resendRequest,
-  toggleLogging,
-}) => {
+export const DeprecationLoggingToggle = (
+  {
+    isDeprecationLogIndexingEnabled,
+    isLoading,
+    isUpdating,
+    fetchError,
+    updateError,
+    resendRequest,
+    toggleLogging
+  }: Props
+) => {
   if (isLoading) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" className="upgToggleLoading">

@@ -12,7 +12,7 @@ import type { Tag } from '@kbn/saved-objects-tagging-plugin/public';
 
 const MAX_TAGS_TO_SHOW = 3;
 
-const TagListWrapper: FC = ({ children }) => (
+const TagListWrapper = ({ children }) => (
   <ul
     className="kbnSearchOption__tagsList"
     aria-label={i18n.translate('xpack.globalSearchBar.searchBar.optionTagListAriaLabel', {
@@ -36,7 +36,12 @@ interface ResultTagListProps {
   searchTagIds: string[];
 }
 
-export const ResultTagList: FC<ResultTagListProps> = ({ tags, searchTagIds }) => {
+export const ResultTagList = (
+  {
+    tags,
+    searchTagIds
+  }: ResultTagListProps
+) => {
   const showOverflow = tags.length > MAX_TAGS_TO_SHOW;
 
   if (!showOverflow) {

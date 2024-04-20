@@ -31,13 +31,15 @@ interface SuggestionsCalloutProps {
   style?: React.CSSProperties;
 }
 
-export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
-  title,
-  description,
-  buttonTo,
-  lastUpdatedTimestamp,
-  style,
-}) => {
+export const SuggestionsCallout = (
+  {
+    title,
+    description,
+    buttonTo,
+    lastUpdatedTimestamp,
+    style
+  }: SuggestionsCalloutProps
+) => {
   const { pathname } = useLocation();
 
   const [lastDismissedTimestamp, setLastDismissedTimestamp] = useLocalStorage<string>(

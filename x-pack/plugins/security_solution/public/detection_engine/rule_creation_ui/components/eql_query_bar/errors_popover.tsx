@@ -16,7 +16,12 @@ export interface ErrorsPopoverProps {
   errors: string[];
 }
 
-export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => {
+export const ErrorsPopover = (
+  {
+    ariaLabel,
+    errors
+  }: ErrorsPopoverProps
+) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = useCallback(() => {

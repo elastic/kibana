@@ -23,7 +23,11 @@ interface EditActionNameProps {
   isDisabled: boolean;
 }
 
-export const EditActionName: FC<EditActionNameProps> = ({ isDisabled }) => {
+export const EditActionName = (
+  {
+    isDisabled
+  }: EditActionNameProps
+) => {
   if (isDisabled) {
     return (
       <EuiToolTip

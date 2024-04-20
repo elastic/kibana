@@ -53,11 +53,13 @@ const groupByOptions: Array<{ value: FilterField; text: string }> = [
   { value: 'column', text: strings.getGroupByColumnLabel() },
 ];
 
-export const WorkpadFilters: FC<Props> = ({
-  filtersGroups,
-  onGroupByChange,
-  groupFiltersByField,
-}) => {
+export const WorkpadFilters = (
+  {
+    filtersGroups,
+    onGroupByChange,
+    groupFiltersByField
+  }: Props
+) => {
   const groupedByFilterGroupField = groupFiltersByField === 'filterGroup';
   const formatter = groupFiltersByField ? formatByKey(groupFiltersByField) ?? identity : identity;
 

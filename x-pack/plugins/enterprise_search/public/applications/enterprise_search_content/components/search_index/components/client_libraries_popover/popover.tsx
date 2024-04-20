@@ -111,7 +111,7 @@ const libraries = [
   },
 ];
 
-export const ClientLibrariesPopover: React.FC = () => {
+export const ClientLibrariesPopover = () => {
   const { isClientsPopoverOpen } = useValues(OverviewLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { toggleClientsPopover } = useActions(OverviewLogic);

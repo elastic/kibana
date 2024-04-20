@@ -24,7 +24,14 @@ interface Props {
   index?: number;
 }
 
-export const CurationResult: React.FC<Props> = ({ actions, dragHandleProps, result, index }) => {
+export const CurationResult = (
+  {
+    actions,
+    dragHandleProps,
+    result,
+    index
+  }: Props
+) => {
   const {
     isMetaEngine,
     engine: { schema },
