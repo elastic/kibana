@@ -12,7 +12,7 @@ import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
 /**
- * Meta fields used when introspecting runtime validation. Mostly notably for
+ * Meta fields used when introspecting runtime validation. Most notably for
  * generating OpenAPI spec.
  */
 export interface TypeMeta {
