@@ -18,7 +18,7 @@ import type {
 import type { EditorContext, SuggestionRawDefinition } from './types';
 import {
   columnExists,
-  getColumnHit,
+  getColumnByName,
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
@@ -324,7 +324,9 @@ function workoutBuiltinOptions(
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): { skipAssign: boolean } {
   // skip assign operator if it's a function or an existing field to avoid promoting shadowing
-  return { skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnHit(nodeArg.name, references)) };
+  return {
+    skipAssign: Boolean(!isColumnItem(nodeArg) || getColumnByName(nodeArg.name, references)),
+  };
 }
 
 function areCurrentArgsValid(
@@ -391,7 +393,7 @@ function extractFinalTypeFromArg(
       return arg.literalType;
     }
     if (isColumnItem(arg)) {
-      const hit = getColumnHit(arg.name, references);
+      const hit = getColumnByName(arg.name, references);
       if (hit) {
         return hit.type;
       }

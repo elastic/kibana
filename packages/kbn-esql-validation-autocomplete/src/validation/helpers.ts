@@ -61,7 +61,7 @@ export function collapseWrongArgumentTypeMessages(
       messageId: 'wrongArgumentType',
       values: {
         name: funcName,
-        argType,
+        expectedType: argType,
         value: `(${getAllArrayValues(arg).join(', ')})`,
         givenType: `(${getAllArrayTypes(arg, parentCommand, references).join(', ')})`,
       },

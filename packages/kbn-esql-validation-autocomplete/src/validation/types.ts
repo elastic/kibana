@@ -41,8 +41,8 @@ export interface ValidationErrors {
     message: string;
     type: {
       name: string;
-      argType: string;
       value: string | number | Date;
+      expectedType: string;
       givenType: string;
     };
   };
