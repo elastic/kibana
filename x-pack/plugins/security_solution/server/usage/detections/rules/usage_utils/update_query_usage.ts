@@ -47,5 +47,20 @@ export const updateQueryUsage = ({
     legacy_investigation_fields: detectionRuleMetric.has_legacy_investigation_field
       ? usage[ruleType].legacy_investigation_fields + 1
       : usage[ruleType].legacy_investigation_fields,
+    suppression_enabled:
+      detectionRuleMetric.has_alert_suppression_per_execution ||
+      detectionRuleMetric.has_alert_suppression_per_period
+        ? (usage[ruleType].suppression_enabled || 0) + 1
+        : usage[ruleType].suppression_enabled,
+    suppression_enabled_missing_fields_suppress:
+      detectionRuleMetric.has_alert_suppression_missing_fields_strategy_suppress
+        ? (usage[ruleType].suppression_enabled_missing_fields_suppress || 0) + 1
+        : usage[ruleType].suppression_enabled_missing_fields_suppress,
+    suppression_enabled_per_rule_execution: detectionRuleMetric.has_alert_suppression_per_execution
+      ? (usage[ruleType].suppression_enabled_per_timeperiod || 0) + 1
+      : usage[ruleType].suppression_enabled_per_timeperiod,
+    suppression_enabled_per_timeperiod: detectionRuleMetric.has_alert_suppression_per_period
+      ? (usage[ruleType].suppression_enabled_per_timeperiod || 0) + 1
+      : usage[ruleType].suppression_enabled_per_timeperiod,
   };
 };

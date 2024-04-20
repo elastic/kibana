@@ -27,6 +27,10 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
+    suppression_enabled: 0,
+    suppression_enabled_per_rule_execution: 0,
+    suppression_enabled_per_timeperiod: 0,
+    suppression_enabled_missing_fields_suppress: 0,
   },
   threshold: {
     enabled: 0,
@@ -38,6 +42,7 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
+    suppression_enabled: 0,
   },
   eql: {
     enabled: 0,
@@ -49,6 +54,10 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
+    suppression_enabled: 0,
+    suppression_enabled_per_rule_execution: 0,
+    suppression_enabled_per_timeperiod: 0,
+    suppression_enabled_missing_fields_suppress: 0,
   },
   machine_learning: {
     enabled: 0,
@@ -71,6 +80,10 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
+    suppression_enabled: 0,
+    suppression_enabled_per_rule_execution: 0,
+    suppression_enabled_per_timeperiod: 0,
+    suppression_enabled_missing_fields_suppress: 0,
   },
   new_terms: {
     enabled: 0,
@@ -82,6 +95,10 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
+    suppression_enabled: 0,
+    suppression_enabled_per_rule_execution: 0,
+    suppression_enabled_per_timeperiod: 0,
+    suppression_enabled_missing_fields_suppress: 0,
   },
   esql: {
     enabled: 0,
@@ -104,6 +121,10 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
+    suppression_enabled: 0,
+    suppression_enabled_per_rule_execution: 0,
+    suppression_enabled_per_timeperiod: 0,
+    suppression_enabled_missing_fields_suppress: 0,
   },
   custom_total: {
     enabled: 0,
@@ -115,6 +136,10 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
     legacy_investigation_fields: 0,
+    suppression_enabled: 0,
+    suppression_enabled_per_rule_execution: 0,
+    suppression_enabled_per_timeperiod: 0,
+    suppression_enabled_missing_fields_suppress: 0,
   },
 });
 

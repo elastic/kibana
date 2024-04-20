@@ -78,6 +78,30 @@ export const registerCollector: RegisterCollector = ({
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
                 },
               },
+              suppression_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of query rules with suppression enabled' },
+              },
+              suppression_enabled_missing_fields_suppress: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of query rules with suppression enabled and missing field strategy set to suppress',
+                },
+              },
+              suppression_enabled_per_rule_execution: {
+                type: 'long',
+                _meta: {
+                  description: 'Number of query rules with suppression enabled per rule execution',
+                },
+              },
+              suppression_enabled_per_timeperiod: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of query rules with suppression enabled during a selected time period',
+                },
+              },
             },
             threshold: {
               enabled: {
@@ -121,6 +145,31 @@ export const registerCollector: RegisterCollector = ({
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
                 },
               },
+              suppression_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of threshold rules with suppression enabled' },
+              },
+              suppression_enabled_missing_fields_suppress: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of threshold rules with suppression enabled and missing field strategy set to suppress',
+                },
+              },
+              suppression_enabled_per_rule_execution: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of threshold rules with suppression enabled per rule execution',
+                },
+              },
+              suppression_enabled_per_timeperiod: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of threshold rules with suppression enabled during a selected time period',
+                },
+              },
             },
             eql: {
               enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -154,6 +203,30 @@ export const registerCollector: RegisterCollector = ({
                 _meta: {
                   description:
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
+              suppression_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of eql rules with suppression enabled' },
+              },
+              suppression_enabled_missing_fields_suppress: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of eql rules with suppression enabled and missing field strategy set to suppress',
+                },
+              },
+              suppression_enabled_per_rule_execution: {
+                type: 'long',
+                _meta: {
+                  description: 'Number of eql rules with suppression enabled per rule execution',
+                },
+              },
+              suppression_enabled_per_timeperiod: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of eql rules with suppression enabled during a selected time period',
                 },
               },
             },
@@ -242,6 +315,31 @@ export const registerCollector: RegisterCollector = ({
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
                 },
               },
+              suppression_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of threat match rules with suppression enabled' },
+              },
+              suppression_enabled_missing_fields_suppress: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of threat match rules with suppression enabled and missing field strategy set to suppress',
+                },
+              },
+              suppression_enabled_per_rule_execution: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of threat match rules with suppression enabled per rule execution',
+                },
+              },
+              suppression_enabled_per_timeperiod: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of threat match rules with suppression enabled during a selected time period',
+                },
+              },
             },
             new_terms: {
               enabled: {
@@ -283,6 +381,31 @@ export const registerCollector: RegisterCollector = ({
                 _meta: {
                   description:
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
+              suppression_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of new terms rules with suppression enabled' },
+              },
+              suppression_enabled_missing_fields_suppress: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of new terms rules with suppression enabled and missing field strategy set to suppress',
+                },
+              },
+              suppression_enabled_per_rule_execution: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of new terms rules with suppression enabled per rule execution',
+                },
+              },
+              suppression_enabled_per_timeperiod: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of new terms rules with suppression enabled during a selected time period',
                 },
               },
             },
@@ -366,6 +489,31 @@ export const registerCollector: RegisterCollector = ({
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
                 },
               },
+              suppression_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of prebuilt rules with suppression enabled' },
+              },
+              suppression_enabled_missing_fields_suppress: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of prebuilt rules with suppression enabled and missing field strategy set to suppress',
+                },
+              },
+              suppression_enabled_per_rule_execution: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of prebuilt rules with suppression enabled per rule execution',
+                },
+              },
+              suppression_enabled_per_timeperiod: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of prebuilt rules with suppression enabled during a selected time period',
+                },
+              },
             },
             custom_total: {
               enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -400,6 +548,30 @@ export const registerCollector: RegisterCollector = ({
                   description:
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
                 },
+              },
+            },
+            suppression_enabled: {
+              type: 'long',
+              _meta: { description: 'Number of custom rules with suppression enabled' },
+            },
+            suppression_enabled_missing_fields_suppress: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of custom rules with suppression enabled and missing field strategy set to suppress',
+              },
+            },
+            suppression_enabled_per_rule_execution: {
+              type: 'long',
+              _meta: {
+                description: 'Number of custom rules with suppression enabled per rule execution',
+              },
+            },
+            suppression_enabled_per_timeperiod: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of custom rules with suppression enabled during a selected time period',
               },
             },
           },
