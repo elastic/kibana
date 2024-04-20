@@ -8,7 +8,7 @@
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const reservedPrefix = 'reserved_';
-const basePrivilegeNames = ['all', 'read'];
+const basePrivilegeNames = ['all', 'read', '*'];
 const globalBasePrivileges = [...basePrivilegeNames];
 const spaceBasePrivileges = basePrivilegeNames.map(
   (privilegeName) => `${spacePrefix}${privilegeName}`
@@ -24,7 +24,9 @@ interface FeaturePrivilege {
 
 export class PrivilegeSerializer {
   public static isSerializedGlobalBasePrivilege(privilegeName: string) {
-    return globalBasePrivileges.includes(privilegeName);
+    return globalBasePrivileges.includes(
+      PrivilegeSerializer.normalizeBasePrivilageName(privilegeName)
+    );
   }
 
   public static isSerializedSpaceBasePrivilege(privilegeName: string) {
@@ -39,12 +41,22 @@ export class PrivilegeSerializer {
     return privilegeName.startsWith(featurePrefix);
   }
 
-  public static serializeGlobalBasePrivilege(privilegeName: string) {
-    if (!globalBasePrivileges.includes(privilegeName)) {
-      throw new Error('Unrecognized global base privilege');
+  public static normalizeBasePrivilageName(privilegeName: string) {
+    if (privilegeName === '*') {
+      return 'all';
     }
 
     return privilegeName;
+  }
+
+  public static serializeGlobalBasePrivilege(privilegeName: string) {
+    const normalizedPrivilageName = PrivilegeSerializer.normalizeBasePrivilageName(privilegeName);
+
+    if (!globalBasePrivileges.includes(normalizedPrivilageName)) {
+      throw new Error('Unrecognized global base privilege');
+    }
+
+    return normalizedPrivilageName;
   }
 
   public static serializeSpaceBasePrivilege(privilegeName: string) {

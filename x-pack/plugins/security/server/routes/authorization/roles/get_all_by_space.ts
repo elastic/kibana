@@ -42,8 +42,8 @@ export function defineGetAllRolesBySpaceRoutes({
         });
 
         if (!clusterPrivileges.manage_security && !clusterPrivileges.read_security) {
-          return response.unauthorized({
-            body: `User not authorized to view roles in space ${spaceId}`,
+          return response.forbidden({
+            body: { message: `User not authorized to view roles in space ${spaceId}` },
           });
         }
 
