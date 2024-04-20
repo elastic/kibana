@@ -10,25 +10,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Processor } from '../../../../common/types';
 
 import { getUseField, getFormRow, Field, JsonEditorField } from '../../../shared_imports';
 
-import {
-  ProcessorsEditorContextProvider,
-  OnUpdateHandler,
-  OnDoneLoadJsonHandler,
-  PipelineEditor,
-} from '../pipeline_editor';
+import { OnDoneLoadJsonHandler, PipelineEditor } from '../pipeline_editor';
 
 interface Props {
-  processors: Processor[];
-  onFailure?: Processor[];
   onLoadJson: OnDoneLoadJsonHandler;
-  onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
   hasMeta: boolean;
-  onEditorFlyoutOpen: () => void;
   isEditing?: boolean;
   canEditName?: boolean;
 }
@@ -37,15 +27,9 @@ const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
 export const PipelineFormFields: React.FunctionComponent<Props> = ({
-  processors,
-  onFailure,
   onLoadJson,
-  onProcessorsUpdate,
-  isEditing,
   hasVersion,
   hasMeta,
-  onEditorFlyoutOpen,
-  canEditName,
 }) => {
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
@@ -55,14 +39,14 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
     <>
       {/* Name field with optional version field */}
       <FormRow
-        title={<FormattedMessage id="xpack.ingestPipelines.form.nameTitle" defaultMessage="Name" />}
+        title={
+          <FormattedMessage
+            id="xpack.ingestPipelines.form.versionNumber"
+            defaultMessage="Version"
+          />
+        }
         description={
           <>
-            <FormattedMessage
-              id="xpack.ingestPipelines.form.nameDescription"
-              defaultMessage="A unique identifier for this pipeline."
-            />
-            <EuiSpacer size="m" />
             <EuiSwitch
               label={
                 <FormattedMessage
@@ -77,14 +61,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           </>
         }
       >
-        <UseField
-          path="name"
-          componentProps={{
-            ['data-test-subj']: 'nameField',
-            euiFieldProps: { disabled: canEditName === false || Boolean(isEditing) },
-          }}
-        />
-
         {isVersionVisible && (
           <UseField
             path="version"
@@ -95,40 +71,8 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
         )}
       </FormRow>
 
-      {/* Description field */}
-      <FormRow
-        title={
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.descriptionFieldTitle"
-            defaultMessage="Description"
-          />
-        }
-        description={
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.descriptionFieldDescription"
-            defaultMessage="A description of what this pipeline does."
-          />
-        }
-      >
-        <UseField
-          path="description"
-          componentProps={{
-            ['data-test-subj']: 'descriptionField',
-            euiFieldProps: {
-              compressed: true,
-            },
-          }}
-        />
-      </FormRow>
-
       {/* Pipeline Processors Editor */}
-      <ProcessorsEditorContextProvider
-        onFlyoutOpen={onEditorFlyoutOpen}
-        onUpdate={onProcessorsUpdate}
-        value={{ processors, onFailure }}
-      >
-        <PipelineEditor onLoadJson={onLoadJson} />
-      </ProcessorsEditorContextProvider>
+      <PipelineEditor onLoadJson={onLoadJson} />
 
       {/* _meta field */}
       <FormRow

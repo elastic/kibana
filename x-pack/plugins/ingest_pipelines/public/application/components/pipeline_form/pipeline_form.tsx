@@ -7,13 +7,37 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import {
+  EuiButton,
+  EuiSpacer,
+  EuiPageSection,
+  EuiPageHeader,
+  EuiInlineEditTitle,
+  EuiInlineEditText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
-import { useForm, Form, FormConfig } from '../../../shared_imports';
+import { useFormData, useForm, Form, FormConfig, UseField } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
+import { useKibana } from '../../../shared_imports';
 
-import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
+import {
+  ProcessorsEditorContextProvider,
+  OnUpdateHandlerArg,
+  OnUpdateHandler,
+} from '../pipeline_editor';
+import {
+  DeprecatedPipelineBadge,
+  DeprecatedPipelineCallout,
+  ManagedPipelineCallout,
+  ManagedPipelineBadge,
+} from '../pipeline_elements';
 
+import { EditActionsContextButton } from './edit_actions';
+import { TestPipelineActions } from '../pipeline_editor/components/test_pipeline';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
@@ -22,7 +46,6 @@ import { PipelineForm as IPipelineForm } from './types';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
-  onCancel: () => void;
   isSaving: boolean;
   saveError: any;
   defaultValue?: Pipeline;
@@ -39,15 +62,27 @@ const defaultFormValue: Pipeline = Object.freeze({
   _meta: {},
 });
 
+const i18nStrings = {
+  placeholderPipelineName: i18n.translate('xpack.ingestPipelines.create.placeholderPipelineName', {
+    defaultMessage: 'My pipeline name',
+  }),
+  placeholderPipelineDescription: i18n.translate(
+    'xpack.ingestPipelines.create.placeholderPipelineDescription',
+    {
+      defaultMessage: 'Add a description',
+    }
+  ),
+};
+
 export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   defaultValue = defaultFormValue,
   onSave,
   isSaving,
   saveError,
   isEditing,
-  onCancel,
   canEditName,
 }) => {
+  const { services } = useKibana();
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const {
@@ -84,6 +119,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     defaultValue: defaultFormValues,
     onSubmit: handleSave,
   });
+  const [formData] = useFormData({ form });
 
   const onEditorFlyoutOpen = useCallback(() => {
     setIsRequestVisible(false);
@@ -112,13 +148,157 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   );
 
   return (
-    <>
+    <ProcessorsEditorContextProvider
+      onFlyoutOpen={onEditorFlyoutOpen}
+      onUpdate={onProcessorsChangeHandler}
+      value={{
+        processors: processorsState.processors,
+        onFailure: processorsState.onFailure,
+      }}
+    >
       <Form
         form={form}
         data-test-subj="pipelineForm"
         isInvalid={form.isSubmitted && !form.isValid}
         error={form.getErrors()}
       >
+        <EuiPageSection paddingSize="none">
+          <EuiButton
+            data-test-subj="pipelineFormBackButton"
+            color="text"
+            iconType="arrowLeft"
+            {...reactRouterNavigate(services.history, {
+              pathname: '/',
+            })}
+          >
+            <FormattedMessage
+              id="xpack.ingestPipelines.form.backButtonLabel"
+              defaultMessage="Back to all pipelines"
+            />
+          </EuiButton>
+        </EuiPageSection>
+
+        <EuiSpacer size="l" />
+
+        <EuiPageHeader bottomBorder>
+          <div css={{ width: '100%' }}>
+            <EuiFlexGroup>
+              <EuiFlexItem css={{ display: 'block', overflow: 'hidden' }}>
+                <UseField<string> path="name">
+                  {({ value, setValue }) => {
+                    return (
+                      <EuiInlineEditTitle
+                        heading="h1"
+                        size="l"
+                        inputAriaLabel="Edit title inline"
+                        data-test-subj="pipelineName"
+                        onSave={setValue}
+                        defaultValue={value}
+                        placeholder={i18nStrings.placeholderPipelineName}
+                        isLoading={isSaving}
+                        isReadOnly={canEditName === false || Boolean(isEditing)}
+                      />
+                    );
+                  }}
+                </UseField>
+
+                {!isEditing && <EuiSpacer size="l" />}
+                {isEditing && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiFlexGroup gutterSize="s">
+                      {defaultFormValues?.isManaged && (
+                        <EuiFlexItem grow={false}>
+                          <ManagedPipelineBadge />
+                        </EuiFlexItem>
+                      )}
+                      {defaultFormValues?.deprecated && (
+                        <EuiFlexItem grow={false}>
+                          <DeprecatedPipelineBadge />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                    <EuiSpacer size="s" />
+                  </>
+                )}
+
+                <UseField<string> path="description">
+                  {({ value, setValue }) => {
+                    return (
+                      <EuiInlineEditText
+                        size="m"
+                        inputAriaLabel="Edit description inline"
+                        data-test-subj="pipelineDescription"
+                        onSave={setValue}
+                        defaultValue={value}
+                        placeholder={i18nStrings.placeholderPipelineDescription}
+                        isLoading={isSaving}
+                      />
+                    );
+                  }}
+                </UseField>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" direction="rowReverse">
+                  {isEditing && (
+                    <EuiFlexItem>
+                      <EditActionsContextButton pipelineName={formData.name} />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem>
+                    <EuiButton
+                      fill
+                      onClick={form.submit}
+                      data-test-subj="submitButton"
+                      disabled={form.isSubmitted && form.isValid === false}
+                      isLoading={isSaving}
+                    >
+                      {saveButtonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <TestPipelineActions />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButton
+                      data-test-subj="showRequestLink"
+                      iconType="console"
+                      onClick={() =>
+                        setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)
+                      }
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestPipelines.form.showRequestButtonLabel"
+                        defaultMessage="Show request"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </EuiPageHeader>
+
+        <EuiSpacer size="l" />
+
+        {isEditing && (
+          <>
+            {defaultFormValues?.isManaged && (
+              <>
+                <ManagedPipelineCallout />
+                <EuiSpacer size="l" />
+              </>
+            )}
+            {defaultFormValues?.deprecated && (
+              <>
+                <DeprecatedPipelineCallout />
+                <EuiSpacer size="l" />
+              </>
+            )}
+          </>
+        )}
+
         {/* Request error */}
         {saveError && <PipelineFormError error={saveError} />}
 
@@ -127,62 +307,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onLoadJson={({ processors, on_failure: onFailure }) => {
             setProcessorsState({ processors, onFailure });
           }}
-          onEditorFlyoutOpen={onEditorFlyoutOpen}
-          processors={processorsState.processors}
-          onFailure={processorsState.onFailure}
-          onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           hasMeta={Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)}
           isEditing={isEditing}
           canEditName={canEditName}
         />
-
-        {/* Form submission */}
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="success"
-                  iconType="check"
-                  onClick={form.submit}
-                  data-test-subj="submitButton"
-                  disabled={form.isSubmitted && form.isValid === false}
-                  isLoading={isSaving}
-                >
-                  {saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="primary" onClick={onCancel}>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.form.cancelButtonLabel"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="showRequestLink"
-              onClick={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
-            >
-              {isRequestVisible ? (
-                <FormattedMessage
-                  id="xpack.ingestPipelines.form.hideRequestButtonLabel"
-                  defaultMessage="Hide request"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.ingestPipelines.form.showRequestButtonLabel"
-                  defaultMessage="Show request"
-                />
-              )}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
 
         {/* ES request flyout */}
         {isRequestVisible ? (
@@ -196,6 +325,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       </Form>
 
       <EuiSpacer size="m" />
-    </>
+    </ProcessorsEditorContextProvider>
   );
 };

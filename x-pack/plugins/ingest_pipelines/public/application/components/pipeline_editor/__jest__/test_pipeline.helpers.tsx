@@ -59,9 +59,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
   const { find, component, form } = testBed;
 
   return {
-    clickAddDocumentsButton() {
-      act(() => {
-        find('addDocumentsButton').simulate('click');
+    async clickAddDocumentsButton() {
+      await act(async () => {
+        find('viewOutputButton').simulate('click');
       });
       component.update();
     },

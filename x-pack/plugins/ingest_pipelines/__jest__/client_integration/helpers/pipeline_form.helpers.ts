@@ -48,12 +48,37 @@ export const getFormActions = (testBed: TestBed) => {
     find('metaEditor').simulate('change');
   };
 
+  const setInlineEditValue = async (fieldName: string, name: string) => {
+    const wrapper = find(fieldName);
+
+    await act(async () => {
+      wrapper.find('button').simulate('click');
+    });
+
+    component.update();
+
+    await act(async () => {
+      find('euiInlineEditModeInput').simulate('change', {
+        target: { value: name },
+      });
+    });
+
+    component.update();
+
+    await act(async () => {
+      find('euiInlineEditModeSaveButton').simulate('click');
+    });
+
+    component.update();
+  };
+
   return {
     clickSubmitButton,
     clickShowRequestLink,
     toggleVersionSwitch,
     toggleMetaSwitch,
     setMetaField,
+    setInlineEditValue,
   };
 };
 
@@ -80,5 +105,7 @@ export type PipelineFormTestSubjects =
   | 'apiRequestFlyout.apiRequestFlyoutTitle'
   | 'deprecatedPipelineCallout'
   | 'testPipelineFlyout'
+  | 'pipelineName'
   | 'testPipelineFlyout.title'
+  | 'pipelineName > svg'
   | 'documentationLink';

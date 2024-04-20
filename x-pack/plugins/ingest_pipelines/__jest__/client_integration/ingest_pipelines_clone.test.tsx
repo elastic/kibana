@@ -31,13 +31,12 @@ describe('<PipelinesClone />', () => {
   test('should render the correct page header', () => {
     const { exists, find } = testBed;
 
-    // Verify page title
-    expect(exists('pageTitle')).toBe(true);
-    expect(find('pageTitle').text()).toEqual('Create pipeline');
+    // Verify pipeline name is visible
+    expect(exists('pipelineName')).toBe(true);
 
     // Verify documentation link
     expect(exists('documentationLink')).toBe(true);
-    expect(find('documentationLink').text()).toBe('Create pipeline docs');
+    expect(find('documentationLink').text()).toBe('Documentation');
   });
 
   describe('form submission', () => {

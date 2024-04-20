@@ -12,6 +12,7 @@ import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/moc
 import { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ProcessorsEditorContextProvider, Props, PipelineEditor } from '..';
+import { TestPipelineActions } from '../components/test_pipeline';
 
 import {
   breadcrumbService,
@@ -38,6 +39,7 @@ export const ProcessorsEditorWithDeps: React.FunctionComponent<Props> = (props) 
   return (
     <KibanaContextProvider services={appServices}>
       <ProcessorsEditorContextProvider {...props}>
+        <TestPipelineActions />
         <PipelineEditor onLoadJson={jest.fn()} />
       </ProcessorsEditorContextProvider>
     </KibanaContextProvider>
