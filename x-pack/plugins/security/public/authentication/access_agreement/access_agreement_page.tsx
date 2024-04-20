@@ -23,15 +23,15 @@ import ReactMarkdown from 'react-markdown';
 
 import type {
   AppMountParameters,
-  CoreStart,
   FatalErrorsStart,
   HttpStart,
   NotificationsStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
+import type { StartServices } from '../..';
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
@@ -128,16 +128,14 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
 }
 
 export function renderAccessAgreementPage(
-  i18nStart: CoreStart['i18n'],
-  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
+  services: StartServices,
+  { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
   ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <AccessAgreementPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
+    <KibanaRenderContextProvider {...services}>
+      <AccessAgreementPage {...props} />
+    </KibanaRenderContextProvider>,
     element
   );
 

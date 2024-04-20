@@ -200,7 +200,7 @@ export const getSummaryTableColumns = ({
       ),
     sortable: true,
     truncateText: false,
-    width: '50px',
+    width: '65px',
   },
   {
     field: 'indexName',

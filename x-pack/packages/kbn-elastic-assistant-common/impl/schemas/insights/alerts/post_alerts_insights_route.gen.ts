@@ -56,6 +56,8 @@ export const AlertsInsightsPostRequestBody = z.object({
   anonymizationFields: z.array(AnonymizationFieldResponse),
   connectorId: z.string(),
   actionTypeId: z.string(),
+  langSmithProject: z.string().optional(),
+  langSmithApiKey: z.string().optional(),
   model: z.string().optional(),
   replacements: Replacements.optional(),
   size: z.number(),

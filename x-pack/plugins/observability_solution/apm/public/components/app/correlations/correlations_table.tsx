@@ -44,11 +44,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantCorrelationTerm = useCallback(
-    () =>
-      debounce(
-        () => trackApmEvent({ metric: 'select_significant_term' }),
-        1000
-      ),
+    () => debounce(() => trackApmEvent({ metric: 'select_significant_term' }), 1000),
     [trackApmEvent]
   );
 
@@ -85,9 +81,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
   return (
     <EuiBasicTable
       items={pageOfItems ?? []}
-      noItemsMessage={
-        status === FETCH_STATUS.LOADING ? loadingText : noDataText
-      }
+      noItemsMessage={status === FETCH_STATUS.LOADING ? loadingText : noDataText}
       loading={status === FETCH_STATUS.LOADING}
       error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
       columns={columns}
@@ -120,17 +114,14 @@ export function CorrelationsTable<T extends FieldValuePair>({
   );
 }
 
-const loadingText = i18n.translate(
-  'xpack.apm.correlations.correlationsTable.loadingText',
-  { defaultMessage: 'Loading...' }
-);
+const loadingText = i18n.translate('xpack.apm.correlations.correlationsTable.loadingText', {
+  defaultMessage: 'Loading...',
+});
 
-const noDataText = i18n.translate(
-  'xpack.apm.correlations.correlationsTable.noDataText',
-  { defaultMessage: 'No data' }
-);
+const noDataText = i18n.translate('xpack.apm.correlations.correlationsTable.noDataText', {
+  defaultMessage: 'No data',
+});
 
-const errorMessage = i18n.translate(
-  'xpack.apm.correlations.correlationsTable.errorMessage',
-  { defaultMessage: 'Failed to fetch' }
-);
+const errorMessage = i18n.translate('xpack.apm.correlations.correlationsTable.errorMessage', {
+  defaultMessage: 'Failed to fetch',
+});
