@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
-import type { FunctionComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { Fragment, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
@@ -67,14 +67,12 @@ interface SecurityNavControlProps {
   buildFlavour: BuildFlavor;
 }
 
-export const SecurityNavControl = (
-  {
-    editProfileUrl,
-    logoutUrl,
-    userMenuLinks$,
-    buildFlavour
-  }: SecurityNavControlProps
-) => {
+export const SecurityNavControl = ({
+  editProfileUrl,
+  logoutUrl,
+  userMenuLinks$,
+  buildFlavour,
+}: SecurityNavControlProps) => {
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

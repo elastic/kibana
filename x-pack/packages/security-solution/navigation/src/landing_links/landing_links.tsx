@@ -25,15 +25,13 @@ type LandingLinkProps = EuiLinkAnchorProps &
   };
 
 // Renders a link to either an external URL or an internal Kibana URL
-export const LandingLink = React.memo(function LandingLink(
-  {
-    item,
-    urlState,
-    onLinkClick,
-    children,
-    ...rest
-  }: LandingLinkProps
-) {
+export const LandingLink = React.memo(function LandingLink({
+  item,
+  urlState,
+  onLinkClick,
+  children,
+  ...rest
+}: LandingLinkProps) {
   const linkProps = {
     ...getKibanaLinkProps({ item, urlState, onLinkClick }),
     ...rest,
@@ -57,13 +55,11 @@ const useSubLinkStyles = () => {
 };
 
 // Renders a list of links in a column layout
-export const LandingColumnLinks = React.memo(function LandingColumnLinks(
-  {
-    items,
-    urlState,
-    onLinkClick
-  }: LandingLinksProps
-) {
+export const LandingColumnLinks = React.memo(function LandingColumnLinks({
+  items,
+  urlState,
+  onLinkClick,
+}: LandingLinksProps) {
   const subLinkStyles = useSubLinkStyles();
   return (
     <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">

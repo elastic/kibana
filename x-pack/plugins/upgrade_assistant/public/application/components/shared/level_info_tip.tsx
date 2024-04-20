@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 
@@ -22,10 +22,6 @@ interface Props {
   level: 'critical' | 'warning';
 }
 
-export const LevelInfoTip = (
-  {
-    level
-  }: Props
-) => {
+export const LevelInfoTip = ({ level }: Props) => {
   return <EuiIconTip content={i18nTexts[level]} position="top" type="iInCircle" />;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import { TransformMatrix3d } from '../../lib/aeroelastic';
@@ -15,22 +15,19 @@ interface Props {
   zoomScale?: number;
 }
 
-export const RotationHandle = (
-  {
-    transformMatrix,
-    zoomScale = 1
-  }: Props
-) => (<div
-  className="canvasRotationHandle canvasLayoutAnnotation"
-  style={{
-    transform: matrixToCSS(transformMatrix),
-  }}
->
+export const RotationHandle = ({ transformMatrix, zoomScale = 1 }: Props) => (
   <div
-    className="canvasRotationHandle__handle"
-    style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
-  />
-</div>);
+    className="canvasRotationHandle canvasLayoutAnnotation"
+    style={{
+      transform: matrixToCSS(transformMatrix),
+    }}
+  >
+    <div
+      className="canvasRotationHandle__handle"
+      style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
+    />
+  </div>
+);
 
 RotationHandle.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,

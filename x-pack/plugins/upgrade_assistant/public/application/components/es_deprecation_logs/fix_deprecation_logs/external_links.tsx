@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -63,11 +63,7 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
   }
 };
 
-const DiscoverAppLink = (
-  {
-    checkpoint
-  }: Props
-) => {
+const DiscoverAppLink = ({ checkpoint }: Props) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -114,7 +110,7 @@ const DiscoverAppLink = (
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    (<EuiLink
+    <EuiLink
       href={discoveryUrl}
       onClick={() => {
         uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DISCOVER_CLICK);
@@ -125,15 +121,11 @@ const DiscoverAppLink = (
         id="xpack.upgradeAssistant.overview.viewDiscoverResultsAction"
         defaultMessage="Analyze logs in Discover"
       />
-    </EuiLink>)
+    </EuiLink>
   );
 };
 
-const ObservabilityAppLink = (
-  {
-    checkpoint
-  }: Props
-) => {
+const ObservabilityAppLink = ({ checkpoint }: Props) => {
   const {
     services: {
       core: { http },
@@ -157,7 +149,7 @@ const ObservabilityAppLink = (
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    (<EuiLink
+    <EuiLink
       href={logStreamUrl}
       onClick={() => {
         uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_OBSERVABILITY_CLICK);
@@ -168,15 +160,11 @@ const ObservabilityAppLink = (
         id="xpack.upgradeAssistant.overview.viewObservabilityResultsAction"
         defaultMessage="View deprecation logs in Observability"
       />
-    </EuiLink>)
+    </EuiLink>
   );
 };
 
-export const ExternalLinks = (
-  {
-    checkpoint
-  }: Props
-) => {
+export const ExternalLinks = ({ checkpoint }: Props) => {
   const { infra: hasInfraPlugin } = useAppContext().plugins;
 
   return (

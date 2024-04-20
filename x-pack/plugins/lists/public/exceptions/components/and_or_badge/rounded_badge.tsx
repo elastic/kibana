@@ -35,14 +35,10 @@ const RoundBadge = styled(EuiBadge)`
 
 RoundBadge.displayName = 'RoundBadge';
 
-export const RoundedBadge = (
-  {
-    type
-  }: {
-    type: AndOr;
-  }
-) => (<RoundBadge data-test-subj="and-or-badge" color="hollow">
-  {type === 'and' ? i18n.AND : i18n.OR}
-</RoundBadge>);
+export const RoundedBadge = ({ type }: { type: AndOr }) => (
+  <RoundBadge data-test-subj="and-or-badge" color="hollow">
+    {type === 'and' ? i18n.AND : i18n.OR}
+  </RoundBadge>
+);
 
 RoundedBadge.displayName = 'RoundedBadge';

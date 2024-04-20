@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -47,11 +46,7 @@ export interface Props {
   isDisabled: boolean;
 }
 
-export const ImportJobsFlyout = (
-  {
-    isDisabled
-  }: Props
-) => {
+export const ImportJobsFlyout = ({ isDisabled }: Props) => {
   const {
     services: {
       data: {
@@ -349,21 +344,17 @@ export const ImportJobsFlyout = (
     [jobIdObjects]
   );
 
-  const DeleteJobButton = (
-    {
-      index
-    }: {
-      index: number;
-    }
-  ) => (<EuiButtonIcon
-    iconType="trash"
-    aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
-      defaultMessage: 'Delete',
-    })}
-    color={deleteDisabled ? 'text' : 'danger'}
-    disabled={deleteDisabled}
-    onClick={() => deleteJob(index)}
-  />);
+  const DeleteJobButton = ({ index }: { index: number }) => (
+    <EuiButtonIcon
+      iconType="trash"
+      aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
+        defaultMessage: 'Delete',
+      })}
+      color={deleteDisabled ? 'text' : 'danger'}
+      disabled={deleteDisabled}
+      onClick={() => deleteJob(index)}
+    />
+  );
 
   if (isADEnabled === false && isDFAEnabled === false) {
     return null;
@@ -547,15 +538,7 @@ export const ImportJobsFlyout = (
   );
 };
 
-const FlyoutButton = (
-  {
-    isDisabled,
-    onClick
-  }: {
-    isDisabled: boolean;
-    onClick(): void;
-  }
-) => {
+const FlyoutButton = ({ isDisabled, onClick }: { isDisabled: boolean; onClick(): void }) => {
   return (
     <EuiButtonEmpty
       iconType="importAction"

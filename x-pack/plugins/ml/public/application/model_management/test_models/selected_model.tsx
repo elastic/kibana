@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FC } from 'react';
 import React, { useMemo, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 
@@ -45,16 +44,14 @@ interface Props {
   setCurrentContext?: React.Dispatch<TestTrainedModelsContextType>;
 }
 
-export const SelectedModel = (
-  {
-    model,
-    inputType,
-    deploymentId,
-    handlePipelineConfigUpdate,
-    externalPipelineConfig,
-    setCurrentContext
-  }: Props
-) => {
+export const SelectedModel = ({
+  model,
+  inputType,
+  deploymentId,
+  handlePipelineConfigUpdate,
+  externalPipelineConfig,
+  setCurrentContext,
+}: Props) => {
   const { trainedModels } = useMlApiContext();
 
   const inferrer = useMemo<InferrerType | undefined>(() => {

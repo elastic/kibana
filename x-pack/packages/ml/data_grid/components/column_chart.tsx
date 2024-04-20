@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { mathWithUnits, type UseEuiTheme, type EuiDataGridColumn } from '@elastic/eui';
@@ -54,15 +54,13 @@ const columnChartTheme = {
   scales: { barsPadding: 0.1 },
 };
 
-export const ColumnChart = (
-  {
-    chartData,
-    columnType,
-    dataTestSubj,
-    hideLabel,
-    maxChartColumns
-  }: Props
-) => {
+export const ColumnChart = ({
+  chartData,
+  columnType,
+  dataTestSubj,
+  hideLabel,
+  maxChartColumns,
+}: Props) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
 
   return (

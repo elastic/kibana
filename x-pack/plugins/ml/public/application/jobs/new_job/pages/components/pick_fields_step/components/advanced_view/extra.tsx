@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 

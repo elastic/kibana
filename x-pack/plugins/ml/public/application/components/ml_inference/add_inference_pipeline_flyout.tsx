@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 
 import {
@@ -42,12 +41,7 @@ export interface AddInferencePipelineFlyoutProps {
   model: ModelItem;
 }
 
-export const AddInferencePipelineFlyout = (
-  {
-    onClose,
-    model
-  }: AddInferencePipelineFlyoutProps
-) => {
+export const AddInferencePipelineFlyout = ({ onClose, model }: AddInferencePipelineFlyoutProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const initialState = useMemo(() => getInitialState(model), [model.model_id]);
   const [formState, setFormState] = useState<MlInferenceState>(initialState);

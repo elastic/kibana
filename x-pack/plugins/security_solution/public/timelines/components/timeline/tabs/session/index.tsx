@@ -34,11 +34,7 @@ interface Props {
   timelineId: TimelineId;
 }
 
-const SessionTabContent = (
-  {
-    timelineId
-  }: Props
-) => {
+const SessionTabContent = ({ timelineId }: Props) => {
   const [height, setHeight] = useState(0);
   const measuredRef = useCallback((node) => {
     if (node !== null) {

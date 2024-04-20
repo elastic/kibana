@@ -15,11 +15,7 @@ interface Props {
   repository: HDFSRepository;
 }
 
-export const HDFSDetails = (
-  {
-    repository
-  }: Props
-) => {
+export const HDFSDetails = ({ repository }: Props) => {
   const { settings } = repository;
   const {
     uri,

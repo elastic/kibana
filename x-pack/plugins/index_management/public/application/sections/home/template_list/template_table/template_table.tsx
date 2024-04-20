@@ -29,15 +29,13 @@ interface Props {
   history: ScopedHistory;
 }
 
-export const TemplateTable = (
-  {
-    templates,
-    reload,
-    editTemplate,
-    cloneTemplate,
-    history
-  }: Props
-) => {
+export const TemplateTable = ({
+  templates,
+  reload,
+  editTemplate,
+  cloneTemplate,
+  history,
+}: Props) => {
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<

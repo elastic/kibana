@@ -6,7 +6,6 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -78,33 +77,33 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers = (
-  {
-    services,
-    history,
-    authc,
-    securityApiClients,
-    onChange,
-    children
-  }: ProvidersProps
-) => (<KibanaRenderContextProvider {...services}>
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <SecurityApiClientsProvider {...securityApiClients}>
-        <Router history={history}>
-          <BreadcrumbsProvider onChange={onChange}>
-            <UserProfilesKibanaProvider
-              core={services}
-              security={{
-                userProfiles: securityApiClients.userProfiles,
-              }}
-              toMountPoint={toMountPoint}
-            >
-              {children}
-            </UserProfilesKibanaProvider>
-          </BreadcrumbsProvider>
-        </Router>
-      </SecurityApiClientsProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
-</KibanaRenderContextProvider>);
+export const Providers = ({
+  services,
+  history,
+  authc,
+  securityApiClients,
+  onChange,
+  children,
+}: ProvidersProps) => (
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <SecurityApiClientsProvider {...securityApiClients}>
+          <Router history={history}>
+            <BreadcrumbsProvider onChange={onChange}>
+              <UserProfilesKibanaProvider
+                core={services}
+                security={{
+                  userProfiles: securityApiClients.userProfiles,
+                }}
+                toMountPoint={toMountPoint}
+              >
+                {children}
+              </UserProfilesKibanaProvider>
+            </BreadcrumbsProvider>
+          </Router>
+        </SecurityApiClientsProvider>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
+);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
@@ -31,14 +30,12 @@ export interface SearchBarProps {
  * @param onFiltersChange
  * @constructor
  */
-export const SearchBarWrapper = (
-  {
-    query,
-    filters,
-    onQueryChange,
-    onFiltersChange
-  }: SearchBarProps
-) => {
+export const SearchBarWrapper = ({
+  query,
+  filters,
+  onQueryChange,
+  onFiltersChange,
+}: SearchBarProps) => {
   const { dataView } = useDataSource();
   const {
     unifiedSearch: {

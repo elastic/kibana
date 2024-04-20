@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiDescribedFormGroup, EuiForm, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,70 +26,66 @@ const disabledChecks = new Set<keyof Exclude<TransformHealthRuleTestsConfig, nul
   'errorMessages',
 ]);
 
-export const TestsSelectionControl = React.memo((
-  {
-    config,
-    onChange,
-    errors
-  }: TestsSelectionControlProps
-) => {
-  const uiConfig = getResultTestConfig(config);
+export const TestsSelectionControl = React.memo(
+  ({ config, onChange, errors }: TestsSelectionControlProps) => {
+    const uiConfig = getResultTestConfig(config);
 
-  const initConfig = useMemo(() => {
-    return uiConfig;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const initConfig = useMemo(() => {
+      return uiConfig;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  const updateCallback = useCallback(
-    (update: Partial<Exclude<TransformHealthRuleTestsConfig, undefined>>) => {
-      onChange({
-        ...(config ?? {}),
-        ...update,
-      });
-    },
-    [onChange, config]
-  );
+    const updateCallback = useCallback(
+      (update: Partial<Exclude<TransformHealthRuleTestsConfig, undefined>>) => {
+        onChange({
+          ...(config ?? {}),
+          ...update,
+        });
+      },
+      [onChange, config]
+    );
 
-  return (
-    <>
-      <EuiForm component="div" isInvalid={!!errors?.length} error={errors}>
-        {(
-          Object.entries(uiConfig) as Array<
-            [TransformHealthTests, typeof uiConfig[TransformHealthTests]]
-          >
-        )
-          .filter(([name]) => !disabledChecks.has(name) || initConfig[name].enabled)
-          .map(([name, conf], i) => {
-            return (
-              <EuiDescribedFormGroup
-                key={name}
-                title={<h4>{TRANSFORM_HEALTH_CHECK_NAMES[name]?.name}</h4>}
-                description={TRANSFORM_HEALTH_CHECK_NAMES[name]?.description}
-                fullWidth
-                gutterSize={'s'}
-              >
-                <EuiFormRow>
-                  <EuiSwitch
-                    label={
-                      <FormattedMessage
-                        id="xpack.transform.alertTypes.transformHealth.testsSelection.enableTestLabel"
-                        defaultMessage="Enable"
-                      />
-                    }
-                    onChange={updateCallback.bind(null, {
-                      [name]: {
-                        ...uiConfig[name],
-                        enabled: !uiConfig[name].enabled,
-                      },
-                    })}
-                    checked={uiConfig[name].enabled}
-                  />
-                </EuiFormRow>
-              </EuiDescribedFormGroup>
-            );
-          })}
-      </EuiForm>
-      <EuiSpacer size="l" />
-    </>
-  );
-});
+    return (
+      <>
+        <EuiForm component="div" isInvalid={!!errors?.length} error={errors}>
+          {(
+            Object.entries(uiConfig) as Array<
+              [TransformHealthTests, typeof uiConfig[TransformHealthTests]]
+            >
+          )
+            .filter(([name]) => !disabledChecks.has(name) || initConfig[name].enabled)
+            .map(([name, conf], i) => {
+              return (
+                <EuiDescribedFormGroup
+                  key={name}
+                  title={<h4>{TRANSFORM_HEALTH_CHECK_NAMES[name]?.name}</h4>}
+                  description={TRANSFORM_HEALTH_CHECK_NAMES[name]?.description}
+                  fullWidth
+                  gutterSize={'s'}
+                >
+                  <EuiFormRow>
+                    <EuiSwitch
+                      label={
+                        <FormattedMessage
+                          id="xpack.transform.alertTypes.transformHealth.testsSelection.enableTestLabel"
+                          defaultMessage="Enable"
+                        />
+                      }
+                      onChange={updateCallback.bind(null, {
+                        [name]: {
+                          ...uiConfig[name],
+                          enabled: !uiConfig[name].enabled,
+                        },
+                      })}
+                      checked={uiConfig[name].enabled}
+                    />
+                  </EuiFormRow>
+                </EuiDescribedFormGroup>
+              );
+            })}
+        </EuiForm>
+        <EuiSpacer size="l" />
+      </>
+    );
+  }
+);

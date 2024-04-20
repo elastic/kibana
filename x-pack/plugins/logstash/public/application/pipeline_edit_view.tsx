@@ -66,16 +66,14 @@ interface EditProps {
   id?: string;
 }
 
-export const PipelineEditView = (
-  {
-    pipelineService,
-    logstashLicenseService,
-    toasts,
-    history,
-    setBreadcrumbs,
-    id
-  }: EditProps
-) => {
+export const PipelineEditView = ({
+  pipelineService,
+  logstashLicenseService,
+  toasts,
+  history,
+  setBreadcrumbs,
+  id,
+}: EditProps) => {
   const params = new URLSearchParams(history.location.search);
   const shouldClone = params.get('clone') === '';
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 
@@ -18,12 +17,7 @@ export const getInferenceInfoComponent = (taskLabel: string, info: string[]) => 
   <InferenceInfo taskLabel={taskLabel} info={info} />
 );
 
-const InferenceInfo = (
-  {
-    taskLabel,
-    info
-  }: Props
-) => {
+const InferenceInfo = ({ taskLabel, info }: Props) => {
   if (info.length === 0) {
     return null;
   }

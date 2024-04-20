@@ -39,8 +39,8 @@ const StyledEuiContextMenuPanel = styled(EuiContextMenuPanel)`
   visibility: inherit;
 `;
 
-const OverflowButton = React.memo((
-  {
+const OverflowButton = React.memo(
+  ({
     closePopOver,
     Component,
     defaultFocusedButtonRef,
@@ -51,90 +51,90 @@ const OverflowButton = React.memo((
     ownFocus,
     onClick,
     showTooltip = false,
-    value
-  }: OverflowButtonProps
-) => {
-  useEffect(() => {
-    if (!ownFocus) {
-      return;
-    }
-    if (keyboardEvent?.key === FILTER_OUT_VALUE_KEYBOARD_SHORTCUT) {
-      stopPropagationAndPreventDefault(keyboardEvent);
-      if (onClick != null) {
-        onClick();
+    value,
+  }: OverflowButtonProps) => {
+    useEffect(() => {
+      if (!ownFocus) {
+        return;
       }
-    }
-  }, [keyboardEvent, onClick, ownFocus]);
-
-  const popover = useMemo(
-    () => (
-      <EuiPopover
-        button={
-          Component ? (
-            <Component
-              aria-label={MORE_ACTIONS}
-              buttonRef={defaultFocusedButtonRef}
-              data-test-subj={`more-actions-${field}`}
-              icon="boxesHorizontal"
-              iconType="boxesHorizontal"
-              onClick={onClick}
-              title={MORE_ACTIONS}
-            >
-              {MORE_ACTIONS}
-            </Component>
-          ) : (
-            <EuiButtonIcon
-              aria-label={MORE_ACTIONS}
-              buttonRef={defaultFocusedButtonRef}
-              className="timelines__hoverActionButton"
-              data-test-subj={`more-actions-${field}`}
-              iconSize="s"
-              iconType="boxesHorizontal"
-              onClick={onClick}
-            />
-          )
+      if (keyboardEvent?.key === FILTER_OUT_VALUE_KEYBOARD_SHORTCUT) {
+        stopPropagationAndPreventDefault(keyboardEvent);
+        if (onClick != null) {
+          onClick();
         }
-        isOpen={isOverflowPopoverOpen}
-        closePopover={closePopOver}
-        panelPaddingSize="none"
-        panelClassName="withHoverActions__popover"
-        repositionOnScroll={true}
-        anchorPosition="downLeft"
-      >
-        <StyledEuiContextMenuPanel items={items} />
-      </EuiPopover>
-    ),
-    [
-      Component,
-      defaultFocusedButtonRef,
-      field,
-      onClick,
-      isOverflowPopoverOpen,
-      closePopOver,
-      items,
-    ]
-  );
-
-  return showTooltip ? (
-    <EuiToolTip
-      content={
-        <TooltipWithKeyboardShortcut
-          additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-            field,
-            value,
-          })}
-          content={MORE_ACTIONS}
-          shortcut={FILTER_OUT_VALUE_KEYBOARD_SHORTCUT}
-          showShortcut={ownFocus}
-        />
       }
-    >
-      {popover}
-    </EuiToolTip>
-  ) : (
-    popover
-  );
-});
+    }, [keyboardEvent, onClick, ownFocus]);
+
+    const popover = useMemo(
+      () => (
+        <EuiPopover
+          button={
+            Component ? (
+              <Component
+                aria-label={MORE_ACTIONS}
+                buttonRef={defaultFocusedButtonRef}
+                data-test-subj={`more-actions-${field}`}
+                icon="boxesHorizontal"
+                iconType="boxesHorizontal"
+                onClick={onClick}
+                title={MORE_ACTIONS}
+              >
+                {MORE_ACTIONS}
+              </Component>
+            ) : (
+              <EuiButtonIcon
+                aria-label={MORE_ACTIONS}
+                buttonRef={defaultFocusedButtonRef}
+                className="timelines__hoverActionButton"
+                data-test-subj={`more-actions-${field}`}
+                iconSize="s"
+                iconType="boxesHorizontal"
+                onClick={onClick}
+              />
+            )
+          }
+          isOpen={isOverflowPopoverOpen}
+          closePopover={closePopOver}
+          panelPaddingSize="none"
+          panelClassName="withHoverActions__popover"
+          repositionOnScroll={true}
+          anchorPosition="downLeft"
+        >
+          <StyledEuiContextMenuPanel items={items} />
+        </EuiPopover>
+      ),
+      [
+        Component,
+        defaultFocusedButtonRef,
+        field,
+        onClick,
+        isOverflowPopoverOpen,
+        closePopOver,
+        items,
+      ]
+    );
+
+    return showTooltip ? (
+      <EuiToolTip
+        content={
+          <TooltipWithKeyboardShortcut
+            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+              field,
+              value,
+            })}
+            content={MORE_ACTIONS}
+            shortcut={FILTER_OUT_VALUE_KEYBOARD_SHORTCUT}
+            showShortcut={ownFocus}
+          />
+        }
+      >
+        {popover}
+      </EuiToolTip>
+    ) : (
+      popover
+    );
+  }
+);
 
 OverflowButton.displayName = 'OverflowButton';
 

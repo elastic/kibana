@@ -25,15 +25,13 @@ interface MatchParams {
   section: Section;
 }
 
-export const SnapshotRestoreHome = (
-  {
-    match: {
-      params: { section },
-    },
+export const SnapshotRestoreHome = ({
+  match: {
+    params: { section },
+  },
 
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
 

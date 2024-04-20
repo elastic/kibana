@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
@@ -44,15 +43,13 @@ export interface LogRateAnalysisAppStateProps {
   showFrozenDataTierChoice?: boolean;
 }
 
-export const LogRateAnalysisAppState = (
-  {
-    dataView,
-    savedSearch,
-    appDependencies,
-    stickyHistogram,
-    showFrozenDataTierChoice = true
-  }: LogRateAnalysisAppStateProps
-) => {
+export const LogRateAnalysisAppState = ({
+  dataView,
+  savedSearch,
+  appDependencies,
+  stickyHistogram,
+  showFrozenDataTierChoice = true,
+}: LogRateAnalysisAppStateProps) => {
   if (!dataView) return null;
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_rate_analysis');

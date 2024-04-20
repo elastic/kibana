@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../../common/lib/kibana';
@@ -21,11 +20,7 @@ interface PanelNavigationProps {
   flyoutIsExpandable: boolean;
 }
 
-export const PanelNavigation = memo((
-  {
-    flyoutIsExpandable
-  }: PanelNavigationProps
-) => {
+export const PanelNavigation = memo(({ flyoutIsExpandable }: PanelNavigationProps) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useRightPanelContext();

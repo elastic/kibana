@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -48,11 +47,7 @@ export const timeSeriesExplorerRouteFactory = (
   enableDatePicker: true,
 });
 
-const PageWrapper = (
-  {
-    deps
-  }: PageProps
-) => {
+const PageWrapper = ({ deps }: PageProps) => {
   const mlApi = useMlApiContext();
   const uiSettings = useUiSettings();
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {

@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
+import type { ChangeEvent, FocusEvent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import type { AsyncState } from 'react-use/lib/useAsync';
 import useAsync from 'react-use/lib/useAsync';
@@ -315,29 +315,27 @@ function useFeatures(
   return features;
 }
 
-export const EditRolePage = (
-  {
-    userAPIClient,
-    dataViews,
-    rolesAPIClient,
-    indicesAPIClient,
-    privilegesAPIClient,
-    getFeatures,
-    http,
-    roleName,
-    action,
-    fatalErrors,
-    license,
-    docLinks,
-    uiCapabilities,
-    notifications,
-    history,
-    spacesApiUi,
-    buildFlavor,
-    cloudOrgUrl,
-    ...startServices
-  }: Props
-) => {
+export const EditRolePage = ({
+  userAPIClient,
+  dataViews,
+  rolesAPIClient,
+  indicesAPIClient,
+  privilegesAPIClient,
+  getFeatures,
+  http,
+  roleName,
+  action,
+  fatalErrors,
+  license,
+  docLinks,
+  uiCapabilities,
+  notifications,
+  history,
+  spacesApiUi,
+  buildFlavor,
+  cloudOrgUrl,
+  ...startServices
+}: Props) => {
   const isDarkMode = useDarkMode();
 
   if (!dataViews) {

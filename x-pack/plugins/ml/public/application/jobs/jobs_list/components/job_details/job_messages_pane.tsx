@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,139 +26,132 @@ interface JobMessagesPaneProps {
   refreshJobList?: () => void;
 }
 
-export const JobMessagesPane = React.memo((
-  {
-    jobId,
-    start,
-    end,
-    actionHandler,
-    refreshJobList,
-    showClearButton
-  }: JobMessagesPaneProps
-) => {
-  const canCreateJob = checkPermission('canCreateJob');
+export const JobMessagesPane = React.memo(
+  ({ jobId, start, end, actionHandler, refreshJobList, showClearButton }: JobMessagesPaneProps) => {
+    const canCreateJob = checkPermission('canCreateJob');
 
-  const [messages, setMessages] = useState<JobMessage[]>([]);
-  const [notificationIndices, setNotificationIndices] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isClearing, setIsClearing] = useState<boolean>(false);
+    const [messages, setMessages] = useState<JobMessage[]>([]);
+    const [notificationIndices, setNotificationIndices] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isClearing, setIsClearing] = useState<boolean>(false);
 
-  const toastNotificationService = useToastNotificationService();
-  const {
-    jobs: { clearJobAuditMessages },
-  } = useMlApiContext();
+    const toastNotificationService = useToastNotificationService();
+    const {
+      jobs: { clearJobAuditMessages },
+    } = useMlApiContext();
 
-  const fetchMessages = async () => {
-    setIsLoading(true);
-    try {
-      const messagesResp = await ml.jobs.jobAuditMessages({ jobId, start, end });
+    const fetchMessages = async () => {
+      setIsLoading(true);
+      try {
+        const messagesResp = await ml.jobs.jobAuditMessages({ jobId, start, end });
 
-      setMessages(messagesResp.messages);
-      setNotificationIndices(messagesResp.notificationIndices);
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      toastNotificationService.displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.jobService.jobAuditMessagesErrorTitle', {
-          defaultMessage: 'Error loading job messages',
-        })
-      );
+        setMessages(messagesResp.messages);
+        setNotificationIndices(messagesResp.notificationIndices);
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
+        toastNotificationService.displayErrorToast(
+          error,
+          i18n.translate('xpack.ml.jobService.jobAuditMessagesErrorTitle', {
+            defaultMessage: 'Error loading job messages',
+          })
+        );
 
-      setErrorMessage(extractErrorMessage(error));
-    }
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const refreshMessage = useCallback(fetchMessages, [jobId]);
-
-  // Clear messages for last 24hrs and refresh jobs list
-  const clearMessages = useCallback(async () => {
-    setIsClearing(true);
-    try {
-      await clearJobAuditMessages(jobId, notificationIndices);
-      setIsClearing(false);
-      if (typeof refreshJobList === 'function') {
-        refreshJobList();
+        setErrorMessage(extractErrorMessage(error));
       }
-    } catch (e) {
-      setIsClearing(false);
-      toastNotificationService.displayErrorToast(
-        e,
-        i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle', {
-          defaultMessage: 'Error clearing job message warnings and errors',
-        })
-      );
-    }
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobId, JSON.stringify(notificationIndices)]);
+    const refreshMessage = useCallback(fetchMessages, [jobId]);
 
-  useEffect(() => {
-    fetchMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Clear messages for last 24hrs and refresh jobs list
+    const clearMessages = useCallback(async () => {
+      setIsClearing(true);
+      try {
+        await clearJobAuditMessages(jobId, notificationIndices);
+        setIsClearing(false);
+        if (typeof refreshJobList === 'function') {
+          refreshJobList();
+        }
+      } catch (e) {
+        setIsClearing(false);
+        toastNotificationService.displayErrorToast(
+          e,
+          i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle', {
+            defaultMessage: 'Error clearing job message warnings and errors',
+          })
+        );
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [jobId, JSON.stringify(notificationIndices)]);
 
-  const disabled = notificationIndices.length === 0;
+    useEffect(() => {
+      fetchMessages();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  const clearButton = (
-    <EuiButton
-      size="s"
-      isLoading={isClearing}
-      isDisabled={disabled}
-      onClick={blurButtonOnClick(() => {
-        clearMessages();
-      })}
-      data-test-subj="mlJobMessagesClearButton"
-    >
-      <FormattedMessage
-        id="xpack.ml.jobMessages.clearMessagesLabel"
-        defaultMessage="Clear notifications"
-      />
-    </EuiButton>
-  );
+    const disabled = notificationIndices.length === 0;
 
-  return (
-    <>
-      {canCreateJob && showClearButton ? <EuiSpacer /> : null}
-      <EuiFlexGroup direction="column">
-        {canCreateJob && showClearButton ? (
+    const clearButton = (
+      <EuiButton
+        size="s"
+        isLoading={isClearing}
+        isDisabled={disabled}
+        onClick={blurButtonOnClick(() => {
+          clearMessages();
+        })}
+        data-test-subj="mlJobMessagesClearButton"
+      >
+        <FormattedMessage
+          id="xpack.ml.jobMessages.clearMessagesLabel"
+          defaultMessage="Clear notifications"
+        />
+      </EuiButton>
+    );
+
+    return (
+      <>
+        {canCreateJob && showClearButton ? <EuiSpacer /> : null}
+        <EuiFlexGroup direction="column">
+          {canCreateJob && showClearButton ? (
+            <EuiFlexItem grow={false}>
+              <div>
+                {disabled === true ? (
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip',
+                      {
+                        defaultMessage: 'Notification clearing not supported.',
+                      }
+                    )}
+                  >
+                    {clearButton}
+                  </EuiToolTip>
+                ) : (
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesTooltip', {
+                      defaultMessage:
+                        'Clears warning icon from jobs list for messages produced in the last 24 hours.',
+                    })}
+                  >
+                    {clearButton}
+                  </EuiToolTip>
+                )}
+              </div>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
-            <div>
-              {disabled === true ? (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip',
-                    {
-                      defaultMessage: 'Notification clearing not supported.',
-                    }
-                  )}
-                >
-                  {clearButton}
-                </EuiToolTip>
-              ) : (
-                <EuiToolTip
-                  content={i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesTooltip', {
-                    defaultMessage:
-                      'Clears warning icon from jobs list for messages produced in the last 24 hours.',
-                  })}
-                >
-                  {clearButton}
-                </EuiToolTip>
-              )}
-            </div>
+            <JobMessages
+              refreshMessage={refreshMessage}
+              messages={messages}
+              loading={isLoading}
+              error={errorMessage}
+              actionHandler={actionHandler}
+            />
           </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <JobMessages
-            refreshMessage={refreshMessage}
-            messages={messages}
-            loading={isLoading}
-            error={errorMessage}
-            actionHandler={actionHandler}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-});
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);

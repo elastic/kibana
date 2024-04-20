@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public';
@@ -22,17 +21,15 @@ const FINISHED_CHECKS = 3;
 const ERROR_ATTEMPTS = 3;
 const BACK_FILL_BUCKETS = 8;
 
-export const DocCountChart = (
-  {
-    statuses,
-    dataStart,
-    importer
-  }: {
-    statuses: Statuses;
-    dataStart: DataPublicPluginStart;
-    importer: IImporter;
-  }
-) => {
+export const DocCountChart = ({
+  statuses,
+  dataStart,
+  importer,
+}: {
+  statuses: Statuses;
+  dataStart: DataPublicPluginStart;
+  importer: IImporter;
+}) => {
   const { services } = useDataVisualizerKibana();
   const { uiSettings } = services;
   const timeBuckets = useTimeBuckets(uiSettings);

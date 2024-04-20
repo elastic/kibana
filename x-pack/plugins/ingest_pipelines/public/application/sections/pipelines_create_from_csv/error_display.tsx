@@ -6,18 +6,14 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 interface Props {
   error: { title: string; message: string };
 }
 
-export const Error = (
-  {
-    error
-  }: Props
-) => {
+export const Error = ({ error }: Props) => {
   return (
     <EuiCallOut title={error.title} color="danger" iconType="warning" data-test-subj="errorCallout">
       <p>

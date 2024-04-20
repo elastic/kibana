@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -30,11 +30,7 @@ import { Legacy } from '../../legacy_shims';
 interface AddLicenseProps {
   uploadPath?: string;
 }
-const AddLicense = (
-  {
-    uploadPath
-  }: AddLicenseProps
-) => {
+const AddLicense = ({ uploadPath }: AddLicenseProps) => {
   return (
     <EuiCard
       title={
@@ -152,12 +148,10 @@ export interface LicenseUpdateInfoProps {
   uploadLicensePath?: string;
 }
 
-const LicenseUpdateInfoForPrimary = (
-  {
-    isPrimaryCluster,
-    uploadLicensePath
-  }: LicenseUpdateInfoProps
-) => {
+const LicenseUpdateInfoForPrimary = ({
+  isPrimaryCluster,
+  uploadLicensePath,
+}: LicenseUpdateInfoProps) => {
   if (!isPrimaryCluster) {
     return null;
   }
@@ -166,11 +160,7 @@ const LicenseUpdateInfoForPrimary = (
   return <AddLicense uploadPath={uploadLicensePath} />;
 };
 
-const LicenseUpdateInfoForRemote = (
-  {
-    isPrimaryCluster
-  }: LicenseUpdateInfoProps
-) => {
+const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }: LicenseUpdateInfoProps) => {
   if (isPrimaryCluster) {
     return null;
   }

@@ -39,12 +39,10 @@ const noWritePermissionsTooltipContent = i18n.translate(
   }
 );
 
-export const ToggleAlertFlyoutButtonComponent = (
-  {
-    alertOptions,
-    setAlertFlyoutVisible
-  }: Props
-) => {
+export const ToggleAlertFlyoutButtonComponent = ({
+  alertOptions,
+  setAlertFlyoutVisible,
+}: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const kibana = useKibana();
   const {

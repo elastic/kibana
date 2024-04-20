@@ -20,14 +20,12 @@ type AdditionalOptionsProps = Pick<
   'subActionParams' | 'editOptionalSubAction' | 'messageVariables' | 'index'
 >;
 
-const AdditionalOptionsComponent = (
-  {
-    subActionParams,
-    editOptionalSubAction,
-    messageVariables,
-    index
-  }: AdditionalOptionsProps
-) => {
+const AdditionalOptionsComponent = ({
+  subActionParams,
+  editOptionalSubAction,
+  messageVariables,
+  index,
+}: AdditionalOptionsProps) => {
   return (
     <>
       <EuiSpacer size={'m'} />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { AuditMessageBase } from '../../../common/types/messages';
@@ -17,12 +17,7 @@ interface Props {
 
 const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];
 
-export const JobIcon = (
-  {
-    message,
-    showTooltip = false
-  }: Props
-) => {
+export const JobIcon = ({ message, showTooltip = false }: Props) => {
   if (message === undefined) {
     return <span />;
   }

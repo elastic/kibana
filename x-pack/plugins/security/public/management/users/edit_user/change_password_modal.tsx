@@ -25,7 +25,6 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -87,20 +86,18 @@ export const validateChangePasswordForm = (
   return errors;
 };
 
-export const ChangePasswordModal = (
-  {
-    username,
+export const ChangePasswordModal = ({
+  username,
 
-    defaultValues = {
-      current_password: '',
-      password: '',
-      confirm_password: '',
-    },
+  defaultValues = {
+    current_password: '',
+    password: '',
+    confirm_password: '',
+  },
 
-    onSuccess,
-    onCancel
-  }: ChangePasswordModalProps
-) => {
+  onSuccess,
+  onCancel,
+}: ChangePasswordModalProps) => {
   const { services } = useKibana();
   const { value: currentUser, loading: isLoading } = useCurrentUser();
   const isCurrentUser = currentUser?.username === username;

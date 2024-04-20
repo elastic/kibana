@@ -21,12 +21,7 @@ interface Props {
   updatePolicies: () => void;
 }
 
-export const PolicyList = (
-  {
-    policies,
-    updatePolicies
-  }: Props
-) => {
+export const PolicyList = ({ policies, updatePolicies }: Props) => {
   const history = useHistory();
 
   const createPolicyButton = (

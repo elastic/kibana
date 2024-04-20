@@ -16,41 +16,37 @@ interface Props {
   onChange: () => void;
 }
 
-export const KeepPoliciesUpToDateSwitch = (
-  {
-    checked,
-    disabled = false,
-    onChange
-  }: Props
-) => (<>
-  <EuiSwitch
-    label={i18n.translate(
-      'xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateLabel',
-      { defaultMessage: 'Keep integration policies up to date automatically' }
-    )}
-    checked={checked}
-    onChange={onChange}
-    disabled={disabled}
-  />
-  <EuiSpacer size="s" />
-  <EuiText color="subdued" size="xs">
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="iInCircle" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {disabled ? (
-          <FormattedMessage
-            id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDisabledDescription"
-            defaultMessage="This integration requires Fleet to automatically upgrade its integration policies"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDescription"
-            defaultMessage="When enabled, Fleet will attempt to upgrade and deploy integration policies automatically"
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiText>
-</>);
+export const KeepPoliciesUpToDateSwitch = ({ checked, disabled = false, onChange }: Props) => (
+  <>
+    <EuiSwitch
+      label={i18n.translate(
+        'xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateLabel',
+        { defaultMessage: 'Keep integration policies up to date automatically' }
+      )}
+      checked={checked}
+      onChange={onChange}
+      disabled={disabled}
+    />
+    <EuiSpacer size="s" />
+    <EuiText color="subdued" size="xs">
+      <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="iInCircle" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {disabled ? (
+            <FormattedMessage
+              id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDisabledDescription"
+              defaultMessage="This integration requires Fleet to automatically upgrade its integration policies"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.integrations.settings.keepIntegrationPoliciesUpToDateDescription"
+              defaultMessage="When enabled, Fleet will attempt to upgrade and deploy integration policies automatically"
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiText>
+  </>
+);

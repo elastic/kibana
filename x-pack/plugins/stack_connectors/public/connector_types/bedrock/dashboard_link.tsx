@@ -17,13 +17,11 @@ interface Props {
   selectedProvider?: string;
 }
 // tested from ./connector.test.tsx
-export const DashboardLink = (
-  {
-    connectorId,
-    connectorName,
-    selectedProvider = 'Bedrock'
-  }: Props
-) => {
+export const DashboardLink = ({
+  connectorId,
+  connectorName,
+  selectedProvider = 'Bedrock',
+}: Props) => {
   const { dashboardUrl } = useGetDashboard({ connectorId, selectedProvider });
   const {
     services: {
@@ -43,9 +41,9 @@ export const DashboardLink = (
     // href gives us right click -> open in new tab
     // onclick prevents page reload
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    (<EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick} href={dashboardUrl}>
+    <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick} href={dashboardUrl}>
       {i18n.USAGE_DASHBOARD_LINK(selectedProvider, connectorName)}
-    </EuiLink>)
+    </EuiLink>
   ) : null;
 };
 

@@ -21,12 +21,7 @@ interface Props {
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }
 
-const AllTabComponent = (
-  {
-    indexName,
-    partitionedFieldMetadata
-  }: Props
-) => {
+const AllTabComponent = ({ indexName, partitionedFieldMetadata }: Props) => {
   const body = useMemo(() => <EmptyPromptBody body={i18n.ALL_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ALL_EMPTY_TITLE} />, []);
 

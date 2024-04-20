@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -30,14 +29,7 @@ interface Props extends CreateAnalyticsFormProps {
   showCreateDataView?: boolean;
 }
 
-export const CreateStep = (
-  {
-    actions,
-    state,
-    step,
-    showCreateDataView = false
-  }: Props
-) => {
+export const CreateStep = ({ actions, state, step, showCreateDataView = false }: Props) => {
   const canCreateDataView = useCanCreateDataView();
   const { dataViewAvailableTimeFields, onTimeFieldChanged } = useDataViewTimeFields({
     actions,

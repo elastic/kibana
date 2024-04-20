@@ -37,12 +37,10 @@ interface MatchParams {
   snapshotId?: string;
 }
 
-export const SnapshotList = (
-  {
-    location: { search },
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+export const SnapshotList = ({
+  location: { search },
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
   const [listParams, setListParams] = useState<SnapshotListParams>(DEFAULT_SNAPSHOT_LIST_PARAMS);
   const {

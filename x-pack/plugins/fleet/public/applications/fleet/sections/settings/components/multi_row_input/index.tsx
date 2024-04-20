@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useCallback, useState } from 'react';
-import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
+import type { ReactNode, ChangeEvent } from 'react';
 import sytled, { useTheme } from 'styled-components';
 
 import {
@@ -83,8 +83,8 @@ function displayErrors(errors?: string[]) {
     : null;
 }
 
-const SortableTextField = React.memo((
-  {
+const SortableTextField = React.memo(
+  ({
     id,
     index,
     multiline,
@@ -94,49 +94,114 @@ const SortableTextField = React.memo((
     placeholder,
     autoFocus,
     errors,
-    disabled
-  }: SortableTextFieldProps
-) => {
-  const onDeleteHandler = useCallback(() => {
-    onDelete(index);
-  }, [onDelete, index]);
+    disabled,
+  }: SortableTextFieldProps) => {
+    const onDeleteHandler = useCallback(() => {
+      onDelete(index);
+    }, [onDelete, index]);
 
-  const isInvalid = (errors?.length ?? 0) > 0;
-  const theme = useTheme() as EuiTheme;
+    const isInvalid = (errors?.length ?? 0) > 0;
+    const theme = useTheme() as EuiTheme;
 
-  return (
-    <EuiDraggable
-      spacing="m"
-      index={index}
-      draggableId={id}
-      isDragDisabled={disabled}
-      customDragHandle={true}
-      style={{
-        paddingLeft: 0,
-        paddingRight: 0,
-      }}
-    >
-      {(provided, state) => (
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-          style={
-            state.isDragging
-              ? { background: theme.eui.euiPanelBackgroundColorModifiers.plain }
-              : {}
-          }
-        >
-          <EuiFlexItem grow={false}>
-            <DraggableDiv
-              {...provided.dragHandleProps}
-              aria-label={i18n.translate('xpack.fleet.settings.sortHandle', {
-                defaultMessage: 'Sort host handle',
-              })}
-            >
-              <EuiIcon color="text" type="grab" />
-            </DraggableDiv>
-          </EuiFlexItem>
+    return (
+      <EuiDraggable
+        spacing="m"
+        index={index}
+        draggableId={id}
+        isDragDisabled={disabled}
+        customDragHandle={true}
+        style={{
+          paddingLeft: 0,
+          paddingRight: 0,
+        }}
+      >
+        {(provided, state) => (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+            style={
+              state.isDragging
+                ? { background: theme.eui.euiPanelBackgroundColorModifiers.plain }
+                : {}
+            }
+          >
+            <EuiFlexItem grow={false}>
+              <DraggableDiv
+                {...provided.dragHandleProps}
+                aria-label={i18n.translate('xpack.fleet.settings.sortHandle', {
+                  defaultMessage: 'Sort host handle',
+                })}
+              >
+                <EuiIcon color="text" type="grab" />
+              </DraggableDiv>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {multiline ? (
+                <EuiTextArea
+                  fullWidth
+                  value={value}
+                  onChange={onChange}
+                  autoFocus={autoFocus}
+                  isInvalid={isInvalid}
+                  disabled={disabled}
+                  placeholder={placeholder}
+                />
+              ) : (
+                <EuiFieldText
+                  fullWidth
+                  value={value}
+                  onChange={onChange}
+                  autoFocus={autoFocus}
+                  isInvalid={isInvalid}
+                  disabled={disabled}
+                  placeholder={placeholder}
+                />
+              )}
+              {displayErrors(errors)}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                color="text"
+                onClick={onDeleteHandler}
+                iconType="cross"
+                disabled={disabled}
+                aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                  defaultMessage: 'Delete row',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </EuiDraggable>
+    );
+  }
+);
+
+const NonSortableTextField = React.memo(
+  ({
+    index,
+    deletable,
+    multiline,
+    value,
+    onChange,
+    onDelete,
+    placeholder,
+    autoFocus,
+    errors,
+    disabled,
+  }: NonSortableTextFieldProps) => {
+    const onDeleteHandler = useCallback(() => {
+      onDelete(index);
+    }, [onDelete, index]);
+
+    const isInvalid = (errors?.length ?? 0) > 0;
+
+    return (
+      <>
+        {index > 0 && <EuiSpacer size="s" />}
+
+        <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem>
             {multiline ? (
               <EuiTextArea
@@ -161,106 +226,39 @@ const SortableTextField = React.memo((
             )}
             {displayErrors(errors)}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="text"
-              onClick={onDeleteHandler}
-              iconType="cross"
-              disabled={disabled}
-              aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
-                defaultMessage: 'Delete row',
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </EuiDraggable>
-  );
-});
-
-const NonSortableTextField = React.memo((
-  {
-    index,
-    deletable,
-    multiline,
-    value,
-    onChange,
-    onDelete,
-    placeholder,
-    autoFocus,
-    errors,
-    disabled
-  }: NonSortableTextFieldProps
-) => {
-  const onDeleteHandler = useCallback(() => {
-    onDelete(index);
-  }, [onDelete, index]);
-
-  const isInvalid = (errors?.length ?? 0) > 0;
-
-  return (
-    <>
-      {index > 0 && <EuiSpacer size="s" />}
-
-      <EuiFlexGroup alignItems="center" gutterSize="none">
-        <EuiFlexItem>
-          {multiline ? (
-            <EuiTextArea
-              fullWidth
-              value={value}
-              onChange={onChange}
-              autoFocus={autoFocus}
-              isInvalid={isInvalid}
-              disabled={disabled}
-              placeholder={placeholder}
-            />
-          ) : (
-            <EuiFieldText
-              fullWidth
-              value={value}
-              onChange={onChange}
-              autoFocus={autoFocus}
-              isInvalid={isInvalid}
-              disabled={disabled}
-              placeholder={placeholder}
-            />
+          {deletable && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                color="text"
+                onClick={onDeleteHandler}
+                iconType="cross"
+                disabled={disabled}
+                aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                  defaultMessage: 'Delete row',
+                })}
+              />
+            </EuiFlexItem>
           )}
-          {displayErrors(errors)}
-        </EuiFlexItem>
-        {deletable && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="text"
-              onClick={onDeleteHandler}
-              iconType="cross"
-              disabled={disabled}
-              aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
-                defaultMessage: 'Delete row',
-              })}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </>
-  );
-});
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);
 
-export const MultiRowInput = (
-  {
-    id,
-    value: valueFromProps,
-    onChange,
-    helpText,
-    label,
-    isInvalid,
-    errors,
-    disabled,
-    placeholder,
-    multiline = false,
-    sortable = true,
-    isUrl
-  }: MultiRowInputProps
-) => {
+export const MultiRowInput = ({
+  id,
+  value: valueFromProps,
+  onChange,
+  helpText,
+  label,
+  isInvalid,
+  errors,
+  disabled,
+  placeholder,
+  multiline = false,
+  sortable = true,
+  isUrl,
+}: MultiRowInputProps) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const value = useMemo(() => {
     return valueFromProps.length ? valueFromProps : [''];

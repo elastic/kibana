@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';

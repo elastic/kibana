@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiBadge,
@@ -30,12 +29,7 @@ interface AllocatedModelsProps {
   hideColumns?: string[];
 }
 
-export const AllocatedModels = (
-  {
-    models,
-    hideColumns = ['node_name']
-  }: AllocatedModelsProps
-) => {
+export const AllocatedModels = ({ models, hideColumns = ['node_name'] }: AllocatedModelsProps) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
   const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);

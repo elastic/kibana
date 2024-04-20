@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   EuiModal,
   EuiModalHeader,
@@ -35,18 +35,16 @@ export interface ExportModalProps {
   onIncludeReferenceChange: (newIncludeReference: boolean) => void;
 }
 
-export const ExportModal = (
-  {
-    onCancel,
-    onExport,
-    onSelectedOptionsChange,
-    options,
-    filteredItemCount,
-    selectedOptions,
-    includeReferences,
-    onIncludeReferenceChange
-  }: ExportModalProps
-) => {
+export const ExportModal = ({
+  onCancel,
+  onExport,
+  onSelectedOptionsChange,
+  options,
+  filteredItemCount,
+  selectedOptions,
+  includeReferences,
+  onIncludeReferenceChange,
+}: ExportModalProps) => {
   return (
     <EuiModal onClose={onCancel}>
       <EuiModalHeader>

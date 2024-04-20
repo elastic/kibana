@@ -31,16 +31,14 @@ export interface TriggerPickerItemProps extends TriggerPickerItemDescription {
   onSelect: (id: string) => void;
 }
 
-export const TriggerPickerItem = (
-  {
-    id,
-    title = txtUnknown,
-    description,
-    checked,
-    disabled,
-    onSelect
-  }: TriggerPickerItemProps
-) => {
+export const TriggerPickerItem = ({
+  id,
+  title = txtUnknown,
+  description,
+  checked,
+  disabled,
+  onSelect,
+}: TriggerPickerItemProps) => {
   const descriptionFragment = !!description && (
     <div>
       <EuiText size={'s'}>

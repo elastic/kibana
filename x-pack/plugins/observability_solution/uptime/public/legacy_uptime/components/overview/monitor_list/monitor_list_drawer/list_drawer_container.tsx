@@ -20,11 +20,7 @@ interface ContainerProps {
   summary: MonitorSummary;
 }
 
-export const MonitorListDrawer = (
-  {
-    summary
-  }: ContainerProps
-) => {
+export const MonitorListDrawer = ({ summary }: ContainerProps) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const monitorId = summary?.monitor_id;

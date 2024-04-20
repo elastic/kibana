@@ -50,13 +50,7 @@ function makeDefaultProps(): DashboardListingProps {
 
 function mountWith({ props: incomingProps }: { props?: Partial<DashboardListingProps> }) {
   const props = { ...makeDefaultProps(), ...incomingProps };
-  const wrappingComponent = (
-    {
-      children
-    }: {
-      children: React.ReactNode;
-    }
-  ) => {
+  const wrappingComponent = ({ children }: { children: React.ReactNode }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
   const component = mount(<DashboardListing {...props} />, { wrappingComponent });

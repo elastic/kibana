@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
@@ -25,15 +24,13 @@ interface Props {
   placeholder?: string;
 }
 
-export const RareFieldSelect = (
-  {
-    fields,
-    changeHandler,
-    selectedField,
-    testSubject,
-    placeholder
-  }: Props
-) => {
+export const RareFieldSelect = ({
+  fields,
+  changeHandler,
+  selectedField,
+  testSubject,
+  placeholder,
+}: Props) => {
   const { renderOption, optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = fields.map(

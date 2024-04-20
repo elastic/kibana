@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,29 +21,27 @@ const i18nTexts = {
   }),
 };
 
-export const ErrorUrlTooLongPanel = (
-  {
-    isUnsaved
-  }: Props
-) => (<EuiCallOut title={i18nTexts.title} size="s" iconType="warning" color="danger">
-  <EuiText size="s">
-    <p>
-      {isUnsaved ? (
-        <span data-test-subj="urlTooLongTrySavingMessage">
-          <FormattedMessage
-            id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthTrySaveDescription"
-            defaultMessage="This URL cannot be copied. Try saving your work."
-          />
-        </span>
-      ) : (
-        // Reaching this state is essentially just an error and should result in a user contacting us.
-        (<span data-test-subj="urlTooLongErrorMessage">
-          <FormattedMessage
-            id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthDescription"
-            defaultMessage="This URL cannot be copied."
-          />
-        </span>)
-      )}
-    </p>
-  </EuiText>
-</EuiCallOut>);
+export const ErrorUrlTooLongPanel = ({ isUnsaved }: Props) => (
+  <EuiCallOut title={i18nTexts.title} size="s" iconType="warning" color="danger">
+    <EuiText size="s">
+      <p>
+        {isUnsaved ? (
+          <span data-test-subj="urlTooLongTrySavingMessage">
+            <FormattedMessage
+              id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthTrySaveDescription"
+              defaultMessage="This URL cannot be copied. Try saving your work."
+            />
+          </span>
+        ) : (
+          // Reaching this state is essentially just an error and should result in a user contacting us.
+          <span data-test-subj="urlTooLongErrorMessage">
+            <FormattedMessage
+              id="reporting.share.panelContent.unsavedStateAndExceedsMaxLengthDescription"
+              defaultMessage="This URL cannot be copied."
+            />
+          </span>
+        )}
+      </p>
+    </EuiText>
+  </EuiCallOut>
+);

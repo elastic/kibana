@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import { first, lastValueFrom } from 'rxjs';
@@ -28,15 +28,13 @@ const getAttributes = (tag: Tag): TagAttributes => {
   return attributes;
 };
 
-export const EditTagModal = (
-  {
-    tag,
-    onSave,
-    onClose,
-    tagClient,
-    notifications
-  }: EditTagModalProps
-) => {
+export const EditTagModal = ({
+  tag,
+  onSave,
+  onClose,
+  tagClient,
+  notifications,
+}: EditTagModalProps) => {
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
   const { validation, setValidation, onNameChange, isValidating, validation$ } = useValidation({
     tagAttributes,

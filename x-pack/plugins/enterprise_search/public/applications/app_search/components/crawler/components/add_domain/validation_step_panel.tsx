@@ -27,13 +27,7 @@ interface ValidationStepPanelProps {
   action?: React.ReactNode;
 }
 
-export const ValidationStepPanel = (
-  {
-    step,
-    label,
-    action
-  }: ValidationStepPanelProps
-) => {
+export const ValidationStepPanel = ({ step, label, action }: ValidationStepPanelProps) => {
   const showErrorMessage = step.state === 'invalid' || step.state === 'warning';
 
   return (

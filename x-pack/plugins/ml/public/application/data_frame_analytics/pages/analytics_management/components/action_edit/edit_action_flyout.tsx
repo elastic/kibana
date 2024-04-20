@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -48,12 +47,7 @@ import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/
 
 let mmLValidator: (value: any) => MemoryInputValidatorResult;
 
-export const EditActionFlyout = (
-  {
-    closeFlyout,
-    item
-  }: Required<EditAction>
-) => {
+export const EditActionFlyout = ({ closeFlyout, item }: Required<EditAction>) => {
   const { id: jobId, config } = item;
   const { state } = item.stats;
   const initialAllowLazyStart =

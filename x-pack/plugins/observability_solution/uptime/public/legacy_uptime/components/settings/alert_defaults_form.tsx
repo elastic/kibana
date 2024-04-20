@@ -46,15 +46,13 @@ const ConnectorSpan = styled.span`
   }
 `;
 
-export const AlertDefaultsForm = (
-  {
-    onChange,
-    loading,
-    formFields,
-    fieldErrors,
-    isDisabled
-  }: SettingsFormProps
-) => {
+export const AlertDefaultsForm = ({
+  onChange,
+  loading,
+  formFields,
+  fieldErrors,
+  isDisabled,
+}: SettingsFormProps) => {
   const {
     services: {
       triggersActionsUi: { actionTypeRegistry },

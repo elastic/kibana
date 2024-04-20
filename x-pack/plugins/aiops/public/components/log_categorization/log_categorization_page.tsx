@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -61,11 +60,7 @@ interface LogCategorizationPageProps {
   embeddingOrigin: string;
 }
 
-export const LogCategorizationPage = (
-  {
-    embeddingOrigin
-  }: LogCategorizationPageProps
-) => {
+export const LogCategorizationPage = ({ embeddingOrigin }: LogCategorizationPageProps) => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();

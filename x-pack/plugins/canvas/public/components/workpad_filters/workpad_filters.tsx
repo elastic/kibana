@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { State, FilterField, PositionedElement } from '../../../types';
 import { groupFiltersBy, getFiltersExprsFromExpression } from '../../lib/filter';
@@ -18,11 +18,7 @@ interface Props {
   element?: PositionedElement | null;
 }
 
-export const WorkpadFilters = (
-  {
-    element
-  }: Props
-) => {
+export const WorkpadFilters = ({ element }: Props) => {
   const groupFiltersByField: FilterField = useSelector((state: State) =>
     getGroupFiltersByOption(state)
   );

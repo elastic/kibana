@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
@@ -21,11 +20,7 @@ interface MlAuditIconProps {
   message: MlSummaryJob['auditMessage'];
 }
 
-const MlAuditIconComponent = (
-  {
-    message
-  }: MlAuditIconProps
-) => {
+const MlAuditIconComponent = ({ message }: MlAuditIconProps) => {
   if (!message) {
     return null;
   }

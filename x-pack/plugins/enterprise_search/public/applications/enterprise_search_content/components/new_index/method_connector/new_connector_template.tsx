@@ -45,17 +45,15 @@ export interface Props {
   type: string;
 }
 
-export const NewConnectorTemplate = (
-  {
-    buttonLoading,
-    disabled,
-    error,
-    onNameChange,
-    onSubmit,
-    type,
-    isBeta
-  }: Props
-) => {
+export const NewConnectorTemplate = ({
+  buttonLoading,
+  disabled,
+  error,
+  onNameChange,
+  onSubmit,
+  type,
+  isBeta,
+}: Props) => {
   const { fullIndexName, fullIndexNameExists, fullIndexNameIsValid, rawName } =
     useValues(NewConnectorLogic);
   const { setRawName } = useActions(NewConnectorLogic);

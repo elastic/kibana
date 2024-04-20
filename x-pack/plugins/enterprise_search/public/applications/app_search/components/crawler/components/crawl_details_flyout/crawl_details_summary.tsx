@@ -31,15 +31,13 @@ interface ICrawlerSummaryProps {
   stats: CrawlRequestStats | null;
 }
 
-export const CrawlDetailsSummary = (
-  {
-    crawlDepth,
-    crawlType,
-    crawlerLogsEnabled,
-    domainCount,
-    stats
-  }: ICrawlerSummaryProps
-) => {
+export const CrawlDetailsSummary = ({
+  crawlDepth,
+  crawlType,
+  crawlerLogsEnabled,
+  domainCount,
+  stats,
+}: ICrawlerSummaryProps) => {
   const duration = () => {
     if (stats && stats.status && stats.status.crawlDurationMSec) {
       const milliseconds = moment.duration(stats.status.crawlDurationMSec, 'milliseconds');

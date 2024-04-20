@@ -82,31 +82,29 @@ const datasetColumnName = i18n.translate(
   }
 );
 
-export const AnomaliesTable = (
-  {
-    results,
-    timeRange,
-    changeSortOptions,
-    sortOptions,
-    changePaginationOptions,
-    paginationOptions,
-    fetchNextPage,
-    fetchPreviousPage,
-    page,
-    isLoading
-  }: {
-    results: LogEntryAnomalies;
-    timeRange: TimeRange;
-    changeSortOptions: ChangeSortOptions;
-    changePaginationOptions: ChangePaginationOptions;
-    sortOptions: SortOptions;
-    paginationOptions: PaginationOptions;
-    page: Page;
-    fetchNextPage?: FetchNextPage;
-    fetchPreviousPage?: FetchPreviousPage;
-    isLoading: boolean;
-  }
-) => {
+export const AnomaliesTable = ({
+  results,
+  timeRange,
+  changeSortOptions,
+  sortOptions,
+  changePaginationOptions,
+  paginationOptions,
+  fetchNextPage,
+  fetchPreviousPage,
+  page,
+  isLoading,
+}: {
+  results: LogEntryAnomalies;
+  timeRange: TimeRange;
+  changeSortOptions: ChangeSortOptions;
+  changePaginationOptions: ChangePaginationOptions;
+  sortOptions: SortOptions;
+  paginationOptions: PaginationOptions;
+  page: Page;
+  fetchNextPage?: FetchNextPage;
+  fetchPreviousPage?: FetchPreviousPage;
+  isLoading: boolean;
+}) => {
   const [dateFormat] = useKibanaUiSetting('dateFormat', 'Y-MM-DD HH:mm:ss');
 
   const tableSortOptions = useMemo(() => {

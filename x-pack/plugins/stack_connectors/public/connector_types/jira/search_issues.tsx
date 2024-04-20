@@ -22,15 +22,13 @@ interface Props {
   onChange: (parentIssueKey: string) => void;
 }
 
-const SearchIssuesComponent = (
-  {
-    selectedValue,
-    http,
-    toastNotifications,
-    actionConnector,
-    onChange
-  }: Props
-) => {
+const SearchIssuesComponent = ({
+  selectedValue,
+  http,
+  toastNotifications,
+  actionConnector,
+  onChange,
+}: Props) => {
   const [query, setQuery] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []

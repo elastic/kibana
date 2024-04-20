@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -14,11 +13,7 @@ interface Props {
   errorText: string | null;
 }
 
-export const ErrorMessage = (
-  {
-    errorText
-  }: Props
-) => {
+export const ErrorMessage = ({ errorText }: Props) => {
   return errorText === null ? null : (
     <>
       <EuiCallOut

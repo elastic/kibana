@@ -15,11 +15,7 @@ interface Props {
   repository: S3Repository;
 }
 
-export const S3Details = (
-  {
-    repository
-  }: Props
-) => {
+export const S3Details = ({ repository }: Props) => {
   const {
     settings: {
       bucket,

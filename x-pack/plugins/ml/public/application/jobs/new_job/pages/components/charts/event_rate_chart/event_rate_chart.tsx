@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { BrushEndListener, PartialTheme } from '@elastic/charts';
 import {
@@ -44,19 +43,17 @@ interface Props {
   onBrushEnd?: BrushEndListener;
 }
 
-export const EventRateChart = (
-  {
-    eventRateChartData,
-    anomalyData,
-    height,
-    width,
-    showAxis,
-    loading = false,
-    fadeChart,
-    overlayRanges,
-    onBrushEnd
-  }: Props
-) => {
+export const EventRateChart = ({
+  eventRateChartData,
+  anomalyData,
+  height,
+  width,
+  showAxis,
+  loading = false,
+  fadeChart,
+  overlayRanges,
+  onBrushEnd,
+}: Props) => {
   const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
 

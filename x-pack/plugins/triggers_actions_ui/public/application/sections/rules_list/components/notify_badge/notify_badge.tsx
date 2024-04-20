@@ -58,18 +58,16 @@ function getTimeRemaining(endtime: Date): string {
   return formattedTime;
 }
 
-export const RulesListNotifyBadge = (
-  {
-    snoozeSettings,
-    loading = false,
-    disabled = false,
-    onRuleChanged,
-    snoozeRule,
-    unsnoozeRule,
-    showOnHover = false,
-    showTooltipInline = false
-  }: RulesListNotifyBadgeProps
-) => {
+export const RulesListNotifyBadge = ({
+  snoozeSettings,
+  loading = false,
+  disabled = false,
+  onRuleChanged,
+  snoozeRule,
+  unsnoozeRule,
+  showOnHover = false,
+  showTooltipInline = false,
+}: RulesListNotifyBadgeProps) => {
   const [requestInFlight, setRequestInFlightLoading] = useState(false);
   const isLoading = loading || requestInFlight;
   const isDisabled = Boolean(disabled) || !snoozeSettings;

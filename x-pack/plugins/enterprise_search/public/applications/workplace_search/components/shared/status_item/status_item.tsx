@@ -22,11 +22,7 @@ interface StatusItemProps {
   details: string[];
 }
 
-export const StatusItem = (
-  {
-    details
-  }: StatusItemProps
-) => {
+export const StatusItem = ({ details }: StatusItemProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);

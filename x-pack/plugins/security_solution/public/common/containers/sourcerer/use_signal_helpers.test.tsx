@@ -36,13 +36,9 @@ jest.mock('../../lib/kibana', () => {
 });
 
 describe('useSignalHelpers', () => {
-  const wrapperContainer = (
-    {
-      children
-    }: {
-      children?: React.ReactNode;
-    }
-  ) => (<TestProviders>{children}</TestProviders>);
+  const wrapperContainer = ({ children }: { children?: React.ReactNode }) => (
+    <TestProviders>{children}</TestProviders>
+  );
 
   test('Default state, does not need init and does not need poll', async () => {
     await act(async () => {

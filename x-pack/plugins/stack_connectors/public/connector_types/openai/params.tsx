@@ -16,17 +16,15 @@ import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE } from './constants';
 import { OpenAIActionConnector, ActionParams } from './types';
 
-const ParamsFields = (
-  {
-    actionConnector,
-    actionParams,
-    editAction,
-    index,
-    messageVariables,
-    executionMode,
-    errors
-  }: ActionParamsProps<ActionParams>
-) => {
+const ParamsFields = ({
+  actionConnector,
+  actionParams,
+  editAction,
+  index,
+  messageVariables,
+  executionMode,
+  errors,
+}: ActionParamsProps<ActionParams>) => {
   const { subAction, subActionParams } = actionParams;
 
   const { body } = subActionParams ?? {};

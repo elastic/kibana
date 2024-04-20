@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -26,12 +25,7 @@ const i18nTexts = {
   }),
 };
 
-export const IlmPolicyLink = (
-  {
-    locator,
-    navigateToUrl
-  }: Props
-) => {
+export const IlmPolicyLink = ({ locator, navigateToUrl }: Props) => {
   return (
     <EuiButtonEmpty
       data-test-subj="ilmPolicyLink"

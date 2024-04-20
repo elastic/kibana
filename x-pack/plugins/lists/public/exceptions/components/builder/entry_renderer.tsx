@@ -90,28 +90,26 @@ export interface EntryItemProps {
   showValueListModal: ElementType;
 }
 
-export const BuilderEntryItem = (
-  {
-    allowLargeValueLists = false,
-    autocompleteService,
-    entry,
-    httpService,
-    indexPattern,
-    osTypes,
-    listType,
-    onChange,
-    onlyShowListOperators = false,
-    setErrorsExist,
-    setWarningsExist,
-    showLabel,
-    isDisabled = false,
-    operatorsList,
-    allowCustomOptions = false,
-    getExtendedFields,
-    exceptionItemIndex,
-    showValueListModal
-  }: EntryItemProps
-): JSX.Element => {
+export const BuilderEntryItem = ({
+  allowLargeValueLists = false,
+  autocompleteService,
+  entry,
+  httpService,
+  indexPattern,
+  osTypes,
+  listType,
+  onChange,
+  onlyShowListOperators = false,
+  setErrorsExist,
+  setWarningsExist,
+  showLabel,
+  isDisabled = false,
+  operatorsList,
+  allowCustomOptions = false,
+  getExtendedFields,
+  exceptionItemIndex,
+  showValueListModal,
+}: EntryItemProps): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
   const handleError = useCallback(

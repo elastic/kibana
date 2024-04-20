@@ -6,7 +6,7 @@
  */
 
 import { EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { FC, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { SecuritySolutionPageWrapper } from '../containers/security_solution_page_wrapper';
 import { TITLE_TEST_ID } from './test_ids';
 
@@ -16,14 +16,12 @@ export interface LayoutProps {
   subHeader?: ReactNode;
 }
 
-export const DefaultPageLayout = (
-  {
-    children,
-    pageTitle,
-    border = true,
-    subHeader
-  }: LayoutProps
-) => {
+export const DefaultPageLayout = ({
+  children,
+  pageTitle,
+  border = true,
+  subHeader,
+}: LayoutProps) => {
   return (
     <SecuritySolutionPageWrapper>
       <EuiPageHeader alignItems="center" bottomBorder={border}>

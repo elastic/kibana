@@ -7,7 +7,6 @@
  */
 
 import React, { useMemo } from 'react';
-import type { FC } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSkeletonText,
@@ -38,17 +37,15 @@ const panelCss = css`
   margin: ${euiThemeVars.euiSizeL} 0;
   padding: ${euiThemeVars.euiSizeL} 0;
 `;
-const EmptyViewerStateComponent = (
-  {
-    title,
-    body,
-    buttonText,
-    listType,
-    isReadOnly,
-    viewerStatus,
-    onEmptyButtonStateClick
-  }: EmptyViewerStateProps
-) => {
+const EmptyViewerStateComponent = ({
+  title,
+  body,
+  buttonText,
+  listType,
+  isReadOnly,
+  viewerStatus,
+  onEmptyButtonStateClick,
+}: EmptyViewerStateProps) => {
   const { euiTheme } = useEuiTheme();
 
   const euiEmptyPromptProps = useMemo(() => {

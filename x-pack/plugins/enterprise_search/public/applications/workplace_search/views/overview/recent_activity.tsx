@@ -80,15 +80,7 @@ export const RecentActivity = () => {
   );
 };
 
-export const RecentActivityItem = (
-  {
-    id,
-    status,
-    message,
-    timestamp,
-    sourceId
-  }: FeedActivity
-) => {
+export const RecentActivityItem = ({ id, status, message, timestamp, sourceId }: FeedActivity) => {
   const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>

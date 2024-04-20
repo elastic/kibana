@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlyoutHeader, EuiPanel } from '@elastic/eui';
 
@@ -16,12 +15,7 @@ interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader>
 /**
  * Wrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding using a EuiPanel.
  */
-export const FlyoutHeader = memo((
-  {
-    children,
-    ...flyoutHeaderProps
-  }: FlyoutHeaderProps
-) => {
+export const FlyoutHeader = memo(({ children, ...flyoutHeaderProps }: FlyoutHeaderProps) => {
   return (
     <EuiFlyoutHeader hasBorder {...flyoutHeaderProps}>
       <EuiPanel hasShadow={false} color="transparent">

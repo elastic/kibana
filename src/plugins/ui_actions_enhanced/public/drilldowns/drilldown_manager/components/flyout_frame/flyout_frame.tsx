@@ -30,16 +30,14 @@ export interface FlyoutFrameProps {
 /**
  * @todo This component can be moved to `kibana_react`.
  */
-export const FlyoutFrame = (
-  {
-    title = '',
-    footer,
-    onClose,
-    children,
-    onBack,
-    banner
-  }: FlyoutFrameProps
-) => {
+export const FlyoutFrame = ({
+  title = '',
+  footer,
+  onClose,
+  children,
+  onBack,
+  banner,
+}: FlyoutFrameProps) => {
   const headerFragment = (title || onBack) && (
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="s">

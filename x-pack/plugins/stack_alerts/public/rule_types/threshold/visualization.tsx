@@ -109,17 +109,15 @@ enum LoadingStateType {
 }
 
 type MetricResult = [number, number]; // [epochMillis, value]
-export const ThresholdVisualization = (
-  {
-    ruleParams,
-    alertInterval,
-    aggregationTypes,
-    comparators,
-    refreshRateInMilliseconds = DEFAULT_REFRESH_RATE,
-    charts,
-    dataFieldsFormats
-  }: Props
-) => {
+export const ThresholdVisualization = ({
+  ruleParams,
+  alertInterval,
+  aggregationTypes,
+  comparators,
+  refreshRateInMilliseconds = DEFAULT_REFRESH_RATE,
+  charts,
+  dataFieldsFormats,
+}: Props) => {
   const {
     index,
     timeField,

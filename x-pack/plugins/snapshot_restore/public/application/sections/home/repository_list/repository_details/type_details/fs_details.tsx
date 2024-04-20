@@ -15,11 +15,7 @@ interface Props {
   repository: FSRepository;
 }
 
-export const FSDetails = (
-  {
-    repository
-  }: Props
-) => {
+export const FSDetails = ({ repository }: Props) => {
   const {
     settings: {
       location,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,19 +45,17 @@ export interface JobSelectorControlProps {
   options?: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export const JobSelectorControl = (
-  {
-    jobsAndGroupIds,
-    onChange,
-    adJobsApiService,
-    errors,
-    multiSelect = false,
-    label,
-    allowSelectAll = false,
-    createJobUrl,
-    options: defaultOptions
-  }: JobSelectorControlProps
-) => {
+export const JobSelectorControl = ({
+  jobsAndGroupIds,
+  onChange,
+  adJobsApiService,
+  errors,
+  multiSelect = false,
+  label,
+  allowSelectAll = false,
+  createJobUrl,
+  options: defaultOptions,
+}: JobSelectorControlProps) => {
   const {
     services: {
       notifications: { toasts },

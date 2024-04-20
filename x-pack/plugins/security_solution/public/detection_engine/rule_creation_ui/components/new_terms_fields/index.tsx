@@ -21,12 +21,7 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'detectionEngineStepDefineRuleNewTermsField';
 
-export const NewTermsFieldsComponent = (
-  {
-    browserFields,
-    field
-  }: NewTermsFieldsProps
-) => {
+export const NewTermsFieldsComponent = ({ browserFields, field }: NewTermsFieldsProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
       fullWidth: true,

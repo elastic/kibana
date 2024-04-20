@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { BorderForm } from './border_form';
@@ -29,37 +29,33 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ExtendedTemplate = (
-  {
-    getArgValue,
-    setArgValue,
-    workpad
-  }: Props
-) => (<div>
-  <EuiTitle size="xxxs" textTransform="uppercase">
-    <h6>{strings.getAppearanceTitle()}</h6>
-  </EuiTitle>
-  <EuiSpacer size="xs" />
-  <EuiSpacer size="xs" />
-  <AppearanceForm
-    onChange={setArgValue}
-    opacity={getArgValue('opacity')}
-    overflow={getArgValue('overflow')}
-    padding={getArgValue('padding')}
-  />
-  <EuiSpacer size="m" />
-  <EuiTitle size="xxxs" textTransform="uppercase">
-    <h6>{strings.getBorderTitle()}</h6>
-  </EuiTitle>
-  <EuiSpacer size="xs" />
-  <EuiSpacer size="xs" />
-  <BorderForm
-    colors={workpad.colors}
-    onChange={setArgValue}
-    radius={getArgValue('borderRadius')}
-    value={getArgValue('border')}
-  />
-</div>);
+export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }: Props) => (
+  <div>
+    <EuiTitle size="xxxs" textTransform="uppercase">
+      <h6>{strings.getAppearanceTitle()}</h6>
+    </EuiTitle>
+    <EuiSpacer size="xs" />
+    <EuiSpacer size="xs" />
+    <AppearanceForm
+      onChange={setArgValue}
+      opacity={getArgValue('opacity')}
+      overflow={getArgValue('overflow')}
+      padding={getArgValue('padding')}
+    />
+    <EuiSpacer size="m" />
+    <EuiTitle size="xxxs" textTransform="uppercase">
+      <h6>{strings.getBorderTitle()}</h6>
+    </EuiTitle>
+    <EuiSpacer size="xs" />
+    <EuiSpacer size="xs" />
+    <BorderForm
+      colors={workpad.colors}
+      onChange={setArgValue}
+      radius={getArgValue('borderRadius')}
+      value={getArgValue('border')}
+    />
+  </div>
+);
 
 ExtendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
 

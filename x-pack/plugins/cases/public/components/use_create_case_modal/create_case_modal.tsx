@@ -18,22 +18,17 @@ export interface CreateCaseModalProps {
   onSuccess: (theCase: CaseUI) => Promise<void>;
 }
 
-const CreateModalComponent = (
-  {
-    isModalOpen,
-    onCloseCaseModal,
-    onSuccess
-  }: CreateCaseModalProps
-) => isModalOpen ? (
-  <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>{i18n.CREATE_CASE_TITLE}</EuiModalHeaderTitle>
-    </EuiModalHeader>
-    <EuiModalBody>
-      <CreateCase onCancel={onCloseCaseModal} onSuccess={onSuccess} withSteps={false} />
-    </EuiModalBody>
-  </EuiModal>
-) : null;
+const CreateModalComponent = ({ isModalOpen, onCloseCaseModal, onSuccess }: CreateCaseModalProps) =>
+  isModalOpen ? (
+    <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{i18n.CREATE_CASE_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <CreateCase onCancel={onCloseCaseModal} onSuccess={onSuccess} withSteps={false} />
+      </EuiModalBody>
+    </EuiModal>
+  ) : null;
 CreateModalComponent.displayName = 'CreateModal';
 
 export const CreateCaseModal = memo(CreateModalComponent);

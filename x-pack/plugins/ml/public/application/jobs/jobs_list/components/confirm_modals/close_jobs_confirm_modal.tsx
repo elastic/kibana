@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -32,13 +31,11 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const CloseJobsConfirmModal = (
-  {
-    setShowFunction,
-    unsetShowFunction,
-    refreshJobs
-  }: Props
-) => {
+export const CloseJobsConfirmModal = ({
+  setShowFunction,
+  unsetShowFunction,
+  refreshJobs,
+}: Props) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToReset, setJobsToReset] = useState<MlSummaryJob[]>([]);

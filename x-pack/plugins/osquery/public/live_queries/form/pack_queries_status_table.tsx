@@ -80,21 +80,18 @@ interface DocsColumnResultsProps {
   isLive?: boolean;
 }
 
-const DocsColumnResults = (
-  {
-    count,
-    isLive
-  }: DocsColumnResultsProps
-) => (<EuiFlexGroup gutterSize="s" alignItems="center">
-  <EuiFlexItem grow={false}>
-    {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
-  </EuiFlexItem>
-  {!isLive ? (
-    <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
-      <EuiLoadingSpinner />
+const DocsColumnResults = ({ count, isLive }: DocsColumnResultsProps) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexItem grow={false}>
+      {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
     </EuiFlexItem>
-  ) : null}
-</EuiFlexGroup>);
+    {!isLive ? (
+      <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
+        <EuiLoadingSpinner />
+      </EuiFlexItem>
+    ) : null}
+  </EuiFlexGroup>
+);
 
 interface AgentsColumnResultsProps {
   successful?: number;
@@ -102,23 +99,19 @@ interface AgentsColumnResultsProps {
   failed?: number;
 }
 
-const AgentsColumnResults = (
-  {
-    successful,
-    pending,
-    failed
-  }: AgentsColumnResultsProps
-) => (<EuiFlexGroup gutterSize="s" alignItems="center">
-  <EuiFlexItem grow={false}>
-    <EuiText color="subdued">
-      <EuiBadge color="success">{successful}</EuiBadge>
-      {' / '}
-      <EuiBadge color="default">{pending}</EuiBadge>
-      {' / '}
-      <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
-    </EuiText>
-  </EuiFlexItem>
-</EuiFlexGroup>);
+const AgentsColumnResults = ({ successful, pending, failed }: AgentsColumnResultsProps) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiText color="subdued">
+        <EuiBadge color="success">{successful}</EuiBadge>
+        {' / '}
+        <EuiBadge color="default">{pending}</EuiBadge>
+        {' / '}
+        <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 type PackQueryStatusItem = Partial<{
   action_id: string;
@@ -145,17 +138,15 @@ interface PackQueriesStatusTableProps {
   showResultsHeader?: boolean;
 }
 
-const PackQueriesStatusTableComponent = (
-  {
-    actionId,
-    queryId,
-    agentIds,
-    data,
-    startDate,
-    expirationDate,
-    showResultsHeader
-  }: PackQueriesStatusTableProps
-) => {
+const PackQueriesStatusTableComponent = ({
+  actionId,
+  queryId,
+  agentIds,
+  data,
+  startDate,
+  expirationDate,
+  showResultsHeader,
+}: PackQueriesStatusTableProps) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;

@@ -44,16 +44,14 @@ interface FormState {
   fields: ConnectorTypeFields['fields'];
 }
 
-const ConnectorsFormComponent = (
-  {
-    caseData,
-    caseConnectors,
-    supportedActionConnectors,
-    isLoading,
-    onSubmit,
-    onCancel
-  }: Props
-) => {
+const ConnectorsFormComponent = ({
+  caseData,
+  caseConnectors,
+  supportedActionConnectors,
+  isLoading,
+  onSubmit,
+  onCancel,
+}: Props) => {
   const initialConnectorId = caseData.connector.id;
   const initialConnectorFields = caseData.connector.fields;
 

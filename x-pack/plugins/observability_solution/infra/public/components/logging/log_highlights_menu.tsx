@@ -32,17 +32,15 @@ interface LogHighlightsMenuProps {
   goToNextHighlight: () => void;
 }
 
-export const LogHighlightsMenu = (
-  {
-    onChange,
-    isLoading,
-    activeHighlights,
-    hasPreviousHighlight,
-    goToPreviousHighlight,
-    hasNextHighlight,
-    goToNextHighlight
-  }: LogHighlightsMenuProps
-) => {
+export const LogHighlightsMenu = ({
+  onChange,
+  isLoading,
+  activeHighlights,
+  hasPreviousHighlight,
+  goToPreviousHighlight,
+  hasNextHighlight,
+  goToNextHighlight,
+}: LogHighlightsMenuProps) => {
   const {
     isVisible: isPopoverOpen,
     hide: closePopover,

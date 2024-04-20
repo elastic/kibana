@@ -68,11 +68,7 @@ interface StatefulRowRenderersBrowserProps {
   timelineId: string;
 }
 
-const StatefulRowRenderersBrowserComponent = (
-  {
-    timelineId
-  }: StatefulRowRenderersBrowserProps
-) => {
+const StatefulRowRenderersBrowserComponent = ({ timelineId }: StatefulRowRenderersBrowserProps) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const excludedRowRendererIds = useDeepEqualSelector(

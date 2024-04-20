@@ -39,13 +39,11 @@ export function getConfirmFleetServerConnectionStep({
   };
 }
 
-const ConfirmFleetServerConnectionStepContent = (
-  {
-    hasRecentlyEnrolledFleetServers
-  }: {
-    hasRecentlyEnrolledFleetServers: boolean;
-  }
-) => {
+const ConfirmFleetServerConnectionStepContent = ({
+  hasRecentlyEnrolledFleetServers,
+}: {
+  hasRecentlyEnrolledFleetServers: boolean;
+}) => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
 

@@ -52,13 +52,7 @@ interface AgentsTableProps {
 const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
 
-const AgentsTableComponent = (
-  {
-    agentSelection,
-    onChange,
-    error
-  }: AgentsTableProps
-) => {
+const AgentsTableComponent = ({ agentSelection, onChange, error }: AgentsTableProps) => {
   const { docLinks } = useKibana().services;
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
@@ -99,10 +93,10 @@ const AgentsTableComponent = (
 
       return (
         // filter out all the agents counted by selected policies and platforms
-        (selectedAgents.filter(checkAgent).length +
+        selectedAgents.filter(checkAgent).length +
         // add the number of agents added via policy and platform groups
         getNumAgentsInGrouping(selectedGroups) - // subtract the number of agents double counted by policy/platform selections
-        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {}))
+        getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {})
       );
     }
   }, [agentList?.groups?.overlap, agentList?.total, selectedOptions]);

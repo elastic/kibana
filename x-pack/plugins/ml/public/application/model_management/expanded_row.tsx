@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { omit, pick } from 'lodash';
 import type { EuiDescriptionListProps, EuiTabbedContentTab } from '@elastic/eui';
 import {
@@ -117,11 +117,7 @@ export function useListItemsFormatter() {
   );
 }
 
-export const ExpandedRow = (
-  {
-    item
-  }: ExpandedRowProps
-) => {
+export const ExpandedRow = ({ item }: ExpandedRowProps) => {
   const formatToListItems = useListItemsFormatter();
   const { showLicenseInfo, showNodeInfo } = useEnabledFeatures();
 

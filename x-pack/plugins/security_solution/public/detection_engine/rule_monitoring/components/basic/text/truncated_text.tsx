@@ -11,11 +11,7 @@ interface TruncatedTextProps {
   text: string | null | undefined;
 }
 
-const TruncatedTextComponent = (
-  {
-    text
-  }: TruncatedTextProps
-) => {
+const TruncatedTextComponent = ({ text }: TruncatedTextProps) => {
   return text != null ? <span className="eui-fullWidth eui-textTruncate">{text}</span> : null;
 };
 

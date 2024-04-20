@@ -15,13 +15,7 @@ interface Props {
   onCancel: () => void;
 }
 
-const FlyoutFooterComponent = (
-  {
-    hasConnectorTypeSelected,
-    onCancel,
-    onBack
-  }: Props
-) => {
+const FlyoutFooterComponent = ({ hasConnectorTypeSelected, onCancel, onBack }: Props) => {
   return (
     <EuiFlyoutFooter data-test-subj="create-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">

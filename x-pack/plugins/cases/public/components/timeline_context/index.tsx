@@ -52,20 +52,13 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
 );
 
 export const CasesTimelineIntegrationProvider = // TODO: Fix this manually. Issue #123375
-// eslint-disable-next-line react/display-name
-(
-  {
-    children,
-    timelineIntegration
-  }: {
-    timelineIntegration?: CasesTimelineIntegration;
-  }
-) => {
-  const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
+  // eslint-disable-next-line react/display-name
+  ({ children, timelineIntegration }: { timelineIntegration?: CasesTimelineIntegration }) => {
+    const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 
-  return (
-    <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
-      {children}
-    </CasesTimelineIntegrationContext.Provider>
-  );
-};
+    return (
+      <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
+        {children}
+      </CasesTimelineIntegrationContext.Provider>
+    );
+  };

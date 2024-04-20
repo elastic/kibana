@@ -6,7 +6,6 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
@@ -20,12 +19,7 @@ interface FileTooLargeProps {
   maxFileSize: number;
 }
 
-export const FileTooLarge = (
-  {
-    fileSize,
-    maxFileSize
-  }: FileTooLargeProps
-) => {
+export const FileTooLarge = ({ fileSize, maxFileSize }: FileTooLargeProps) => {
   const fileSizeFormatted = numeral(fileSize).format(FILE_SIZE_DISPLAY_FORMAT);
   const maxFileSizeFormatted = numeral(maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
 
@@ -87,13 +81,7 @@ interface FileCouldNotBeReadProps {
   showEditFlyout(): void;
 }
 
-export const FileCouldNotBeRead = (
-  {
-    error,
-    loaded,
-    showEditFlyout
-  }: FileCouldNotBeReadProps
-) => {
+export const FileCouldNotBeRead = ({ error, loaded, showEditFlyout }: FileCouldNotBeReadProps) => {
   const message = error?.body?.message || '';
   return (
     <>
@@ -140,13 +128,7 @@ export const FileCouldNotBeRead = (
   );
 };
 
-export const Explanation = (
-  {
-    error
-  }: {
-    error: FindFileStructureErrorResponse;
-  }
-) => {
+export const Explanation = ({ error }: { error: FindFileStructureErrorResponse }) => {
   if (!error?.body?.attributes?.body?.error?.suppressed?.length) {
     return null;
   }

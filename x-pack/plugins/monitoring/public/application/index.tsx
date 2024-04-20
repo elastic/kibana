@@ -91,21 +91,19 @@ export const renderApp = (
   };
 };
 
-const MonitoringApp = (
-  {
-    core,
-    plugins,
-    externalConfig,
-    setHeaderActionMenu,
-    theme$
-  }: {
-    core: CoreStart;
-    plugins: MonitoringStartPluginDependencies;
-    externalConfig: ExternalConfig;
-    setHeaderActionMenu: (element: MountPoint<HTMLElement> | undefined) => void;
-    theme$: Observable<CoreTheme>;
-  }
-) => {
+const MonitoringApp = ({
+  core,
+  plugins,
+  externalConfig,
+  setHeaderActionMenu,
+  theme$,
+}: {
+  core: CoreStart;
+  plugins: MonitoringStartPluginDependencies;
+  externalConfig: ExternalConfig;
+  setHeaderActionMenu: (element: MountPoint<HTMLElement> | undefined) => void;
+  theme$: Observable<CoreTheme>;
+}) => {
   const history = createPreserveQueryHistory();
   const startServices: MonitoringStartServices = { ...core, ...plugins };
 

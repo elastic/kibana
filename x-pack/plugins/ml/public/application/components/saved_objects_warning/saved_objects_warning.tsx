@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,13 +19,7 @@ interface Props {
   forceRefresh?: boolean;
 }
 
-export const SavedObjectsWarning = (
-  {
-    mlSavedObjectType,
-    onCloseFlyout,
-    forceRefresh
-  }: Props
-) => {
+export const SavedObjectsWarning = ({ mlSavedObjectType, onCloseFlyout, forceRefresh }: Props) => {
   const {
     savedObjects: { syncCheck },
   } = useMlApiContext();

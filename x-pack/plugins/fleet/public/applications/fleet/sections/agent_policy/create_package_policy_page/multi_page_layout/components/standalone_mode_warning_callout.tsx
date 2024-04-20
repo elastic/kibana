@@ -10,13 +10,11 @@ import { EuiText, EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui
 
 import type { MultiPageStepLayoutProps } from '../types';
 
-export const StandaloneModeWarningCallout = (
-  {
-    setIsManaged
-  }: {
-    setIsManaged: MultiPageStepLayoutProps['setIsManaged'];
-  }
-) => {
+export const StandaloneModeWarningCallout = ({
+  setIsManaged,
+}: {
+  setIsManaged: MultiPageStepLayoutProps['setIsManaged'];
+}) => {
   return (
     <EuiCallOut
       title="Setting up to run Elastic Agent in standalone mode"

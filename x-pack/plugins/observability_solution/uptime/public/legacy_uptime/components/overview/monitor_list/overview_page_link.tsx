@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useUrlParams } from '../../../hooks';
@@ -21,13 +21,11 @@ interface OverviewPageLinkProps {
   pagination: string;
 }
 
-export const OverviewPageLink = (
-  {
-    dataTestSubj,
-    direction,
-    pagination
-  }: OverviewPageLinkProps
-) => {
+export const OverviewPageLink = ({
+  dataTestSubj,
+  direction,
+  pagination,
+}: OverviewPageLinkProps) => {
   const [, updateUrlParams] = useUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 

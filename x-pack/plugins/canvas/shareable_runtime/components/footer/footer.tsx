@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBottomBar } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
 import { Scrubber } from './scrubber';
@@ -32,12 +32,7 @@ export interface Props {
 /**
  * The Footer of the Shareable Canvas Workpad.
  */
-export const FooterComponent = (
-  {
-    isAutohide = false,
-    isHidden = false
-  }: Props
-) => {
+export const FooterComponent = ({ isAutohide = false, isHidden = false }: Props) => {
   const { root, title } = css;
 
   return (
@@ -63,11 +58,7 @@ export const FooterComponent = (
 /**
  * A store-connected container for the `Footer` component.
  */
-export const Footer = (
-  {
-    isHidden = false
-  }: Pick<Props, 'isHidden'>
-) => {
+export const Footer = ({ isHidden = false }: Pick<Props, 'isHidden'>) => {
   const [{ workpad, settings }] = useCanvasShareableState();
 
   if (!workpad) {

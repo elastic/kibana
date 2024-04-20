@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import type { FC } from 'react';
 
 import { ContentEditorFlyoutContent } from './editor_flyout_content';
 import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_content';

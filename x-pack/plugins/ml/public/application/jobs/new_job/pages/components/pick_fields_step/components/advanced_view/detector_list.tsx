@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -35,13 +34,7 @@ interface Props {
   onDeleteJob: (i: number) => void;
 }
 
-export const DetectorList = (
-  {
-    isActive,
-    onEditJob,
-    onDeleteJob
-  }: Props
-) => {
+export const DetectorList = ({ isActive, onEditJob, onDeleteJob }: Props) => {
   const {
     jobCreator: jc,
     jobCreatorUpdated,
@@ -70,13 +63,7 @@ export const DetectorList = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
-  const Buttons = (
-    {
-      index
-    }: {
-      index: number;
-    }
-  ) => {
+  const Buttons = ({ index }: { index: number }) => {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -163,13 +150,7 @@ export const DetectorList = (
   );
 };
 
-const NoDetectorsWarning = (
-  {
-    show
-  }: {
-    show: boolean;
-  }
-) => {
+const NoDetectorsWarning = ({ show }: { show: boolean }) => {
   if (show === false) {
     return null;
   }
@@ -193,13 +174,7 @@ const NoDetectorsWarning = (
   );
 };
 
-const DetectorsValidationWarning = (
-  {
-    validation
-  }: {
-    validation: Validation;
-  }
-) => {
+const DetectorsValidationWarning = ({ validation }: { validation: Validation }) => {
   if (validation.valid === true) {
     return null;
   }
@@ -213,12 +188,6 @@ const DetectorsValidationWarning = (
   );
 };
 
-const StringifiedDetector = (
-  {
-    detector
-  }: {
-    detector: Detector;
-  }
-) => {
+const StringifiedDetector = ({ detector }: { detector: Detector }) => {
   return <div data-test-subj="mlDetectorIdentifier">{detectorToString(detector)}</div>;
 };

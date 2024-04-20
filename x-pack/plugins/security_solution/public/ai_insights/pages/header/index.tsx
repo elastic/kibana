@@ -21,14 +21,7 @@ interface Props {
   onConnectorIdSelected: (connectorId: string) => void;
 }
 
-const HeaderComponent = (
-  {
-    connectorId,
-    isLoading,
-    onGenerate,
-    onConnectorIdSelected
-  }: Props
-) => {
+const HeaderComponent = ({ connectorId, isLoading, onGenerate, onConnectorIdSelected }: Props) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
   const disabled = !hasAssistantPrivilege || isLoading || connectorId == null;

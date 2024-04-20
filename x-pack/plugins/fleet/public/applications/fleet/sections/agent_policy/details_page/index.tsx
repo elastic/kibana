@@ -195,13 +195,7 @@ export const AgentPolicyDetailsPage = () => {
   );
 };
 
-const AgentPolicyDetailsContent = (
-  {
-    agentPolicy
-  }: {
-    agentPolicy: AgentPolicy;
-  }
-) => {
+const AgentPolicyDetailsContent = ({ agentPolicy }: { agentPolicy: AgentPolicy }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
     <Routes>

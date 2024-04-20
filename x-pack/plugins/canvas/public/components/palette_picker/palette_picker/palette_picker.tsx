@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { ClearablePalettePicker } from './clearable_palette_picker';
 import { palettes as defaultPalettes } from '../../../../common/lib/palettes';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
@@ -40,12 +39,7 @@ function getFormattedValue(value: number, totalCount: number): string {
 
 const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 70;
 
-export const BooleanContent = (
-  {
-    config,
-    onAddFilter
-  }: FieldDataRowProps
-) => {
+export const BooleanContent = ({ config, onAddFilter }: FieldDataRowProps) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const formattedPercentages = useMemo(() => getTFPercentage(config), [config]);
   const theme = useDataVizChartTheme();

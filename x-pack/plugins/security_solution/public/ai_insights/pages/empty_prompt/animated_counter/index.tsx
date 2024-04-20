@@ -14,11 +14,7 @@ interface Props {
   count: number;
 }
 
-const AnimatedCounterComponent = (
-  {
-    count
-  }: Props
-) => {
+const AnimatedCounterComponent = ({ count }: Props) => {
   const { euiTheme } = useEuiTheme();
   const d3Ref = useRef(null);
   const zero = 0; // counter starts at zero

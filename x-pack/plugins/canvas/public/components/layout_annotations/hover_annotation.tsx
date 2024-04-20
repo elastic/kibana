@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import { TransformMatrix3d } from '../../lib/aeroelastic';
@@ -16,22 +16,18 @@ interface Props {
   width: number;
 }
 
-export const HoverAnnotation = (
-  {
-    transformMatrix,
-    width,
-    height
-  }: Props
-) => (<div
-  className="canvasHoverAnnotation canvasLayoutAnnotation"
-  style={{
-    width,
-    height,
-    marginLeft: -width / 2,
-    marginTop: -height / 2,
-    transform: matrixToCSS(transformMatrix),
-  }}
-/>);
+export const HoverAnnotation = ({ transformMatrix, width, height }: Props) => (
+  <div
+    className="canvasHoverAnnotation canvasLayoutAnnotation"
+    style={{
+      width,
+      height,
+      marginLeft: -width / 2,
+      marginTop: -height / 2,
+      transform: matrixToCSS(transformMatrix),
+    }}
+  />
+);
 
 HoverAnnotation.propTypes = {
   height: PropTypes.number.isRequired,

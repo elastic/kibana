@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -19,11 +18,7 @@ interface Props {
   onChange(d: RARE_DETECTOR_TYPE): void;
 }
 
-export const RareDetector = (
-  {
-    onChange
-  }: Props
-) => {
+export const RareDetector = ({ onChange }: Props) => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
   const [rareDetectorType, setRareDetectorType] = useState<RARE_DETECTOR_TYPE | null>(null);

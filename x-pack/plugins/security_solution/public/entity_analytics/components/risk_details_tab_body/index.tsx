@@ -43,19 +43,17 @@ type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProp
 const getDashboardTitle = (riskEntity: RiskScoreEntity) =>
   riskEntity === RiskScoreEntity.host ? RISKY_HOSTS_DASHBOARD_TITLE : RISKY_USERS_DASHBOARD_TITLE;
 
-const RiskDetailsTabBodyComponent = (
-  {
-    entityName,
-    startDate,
-    endDate,
-    setQuery,
-    deleteQuery,
-    riskEntity
-  }: Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
-    entityName: string;
-    riskEntity: RiskScoreEntity;
-  }
-) => {
+const RiskDetailsTabBodyComponent = ({
+  entityName,
+  startDate,
+  endDate,
+  setQuery,
+  deleteQuery,
+  riskEntity,
+}: Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
+  entityName: string;
+  riskEntity: RiskScoreEntity;
+}) => {
   const queryId = useMemo(
     () =>
       riskEntity === RiskScoreEntity.host

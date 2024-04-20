@@ -7,7 +7,6 @@
 
 import './_classification_exploration.scss';
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -109,13 +108,7 @@ function getHelpText(dataSubsetTitle: string): string {
   return helpText;
 }
 
-export const EvaluatePanel = (
-  {
-    jobConfig,
-    jobStatus,
-    searchQuery
-  }: EvaluatePanelProps
-) => {
+export const EvaluatePanel = ({ jobConfig, jobStatus, searchQuery }: EvaluatePanelProps) => {
   const {
     services: { docLinks },
   } = useMlKibana();

@@ -36,72 +36,68 @@ interface Props {
   selected?: ButtonGroupOption;
 }
 
-export const ButtonGroup = (
-  {
-    onChange,
-    options,
-    selected
-  }: Props
-) => (<EuiFlexGroup className="buttonGroup" direction="column" gutterSize="m" role="radiogroup">
-  {options.map((option, index) => {
-    const isSelected = option === selected;
-    return (
-      <EuiFlexItem
-        className={classNames('buttonGroupOption', {
-          'buttonGroupOption--selected': isSelected,
-        })}
-        grow={false}
-        key={index}
-        onClick={() => {
-          onChange(option);
-        }}
-      >
-        <EuiSplitPanel.Outer
-          borderRadius="m"
-          grow
-          hasBorder
-          hasShadow={false}
-          className="buttonGroupOption-panel"
+export const ButtonGroup = ({ onChange, options, selected }: Props) => (
+  <EuiFlexGroup className="buttonGroup" direction="column" gutterSize="m" role="radiogroup">
+    {options.map((option, index) => {
+      const isSelected = option === selected;
+      return (
+        <EuiFlexItem
+          className={classNames('buttonGroupOption', {
+            'buttonGroupOption--selected': isSelected,
+          })}
+          grow={false}
+          key={index}
+          onClick={() => {
+            onChange(option);
+          }}
         >
-          <EuiSplitPanel.Inner color="plain" paddingSize="s">
-            <EuiFlexGroup alignItems="center" responsive={false}>
-              <EuiFlexItem>
-                {option.badge && (
-                  <>
-                    <div>{option.badge}</div>
-                    <EuiSpacer size="xs" />
-                  </>
-                )}
-                <EuiTitle size="xs">
-                  <h4>{option.label}</h4>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <p>{option.description}</p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  iconType={isSelected ? 'check' : 'arrowRight'}
-                  color={isSelected ? 'success' : 'primary'}
-                  aria-label={option.label}
-                  aria-checked={isSelected}
-                  role="radio"
-                  autoFocus={index === 0}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner color={isSelected ? 'success' : 'subdued'} paddingSize="s">
-            <EuiText size="s" color={isSelected ? 'success' : 'subdued'}>
-              <p>
-                <strong>{option.footer}</strong>
-              </p>
-            </EuiText>
-          </EuiSplitPanel.Inner>
-        </EuiSplitPanel.Outer>
-      </EuiFlexItem>
-    );
-  })}
-</EuiFlexGroup>);
+          <EuiSplitPanel.Outer
+            borderRadius="m"
+            grow
+            hasBorder
+            hasShadow={false}
+            className="buttonGroupOption-panel"
+          >
+            <EuiSplitPanel.Inner color="plain" paddingSize="s">
+              <EuiFlexGroup alignItems="center" responsive={false}>
+                <EuiFlexItem>
+                  {option.badge && (
+                    <>
+                      <div>{option.badge}</div>
+                      <EuiSpacer size="xs" />
+                    </>
+                  )}
+                  <EuiTitle size="xs">
+                    <h4>{option.label}</h4>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s" color="subdued">
+                    <p>{option.description}</p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    display="base"
+                    iconType={isSelected ? 'check' : 'arrowRight'}
+                    color={isSelected ? 'success' : 'primary'}
+                    aria-label={option.label}
+                    aria-checked={isSelected}
+                    role="radio"
+                    autoFocus={index === 0}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiSplitPanel.Inner>
+            <EuiSplitPanel.Inner color={isSelected ? 'success' : 'subdued'} paddingSize="s">
+              <EuiText size="s" color={isSelected ? 'success' : 'subdued'}>
+                <p>
+                  <strong>{option.footer}</strong>
+                </p>
+              </EuiText>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
+        </EuiFlexItem>
+      );
+    })}
+  </EuiFlexGroup>
+);

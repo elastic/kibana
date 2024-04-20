@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,11 +16,7 @@ interface Props {
   jobs: MlSummaryJob[];
 }
 
-export const OpenJobsWarningCallout = (
-  {
-    jobs
-  }: Props
-) => {
+export const OpenJobsWarningCallout = ({ jobs }: Props) => {
   const openJobsCount = useMemo(
     () => jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED).length,
     [jobs]

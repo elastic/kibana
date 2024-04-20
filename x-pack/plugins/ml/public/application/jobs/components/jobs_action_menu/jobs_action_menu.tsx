@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { EuiButtonEmpty } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';

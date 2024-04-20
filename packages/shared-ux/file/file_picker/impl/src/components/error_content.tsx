@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { i18nTexts } from '../i18n_texts';
@@ -17,11 +16,7 @@ interface Props {
   error: Error;
 }
 
-export const ErrorContent = (
-  {
-    error
-  }: Props
-) => {
+export const ErrorContent = ({ error }: Props) => {
   const { state } = useFilePickerContext();
   const isLoading = useBehaviorSubject(state.isLoading$);
   return (

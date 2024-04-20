@@ -6,7 +6,7 @@
  */
 
 import { XJsonLang } from '@kbn/monaco';
-import React, { FunctionComponent, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { FieldHook, XJson } from '../../../../../../shared_imports';
 
 const { useXJsonMode } = XJson;
@@ -23,12 +23,7 @@ const defaultEditorOptions = {
   lineNumbers: 'off',
 };
 
-export const XJsonEditor = (
-  {
-    field,
-    editorProps
-  }: Props
-) => {
+export const XJsonEditor = ({ field, editorProps }: Props) => {
   const { value, setValue } = field;
   const { xJson, setXJson, convertToJson } = useXJsonMode(value);
 

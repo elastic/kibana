@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -89,14 +89,12 @@ interface PartitionsResponse {
   };
 }
 
-export const PartitionsSelector = (
-  {
-    value,
-    onChange,
-    splitField,
-    enableSearch = true
-  }: PartitionsSelectorProps
-) => {
+export const PartitionsSelector = ({
+  value,
+  onChange,
+  splitField,
+  enableSearch = true,
+}: PartitionsSelectorProps) => {
   const { dataView } = useDataSource();
   const {
     notifications: { toasts },

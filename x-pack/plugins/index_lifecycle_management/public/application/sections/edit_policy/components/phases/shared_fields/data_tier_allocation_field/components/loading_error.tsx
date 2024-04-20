@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 
@@ -15,13 +15,7 @@ interface Props {
   message?: string;
 }
 
-export const LoadingError = (
-  {
-    statusCode,
-    message,
-    onResendRequest
-  }: Props
-) => {
+export const LoadingError = ({ statusCode, message, onResendRequest }: Props) => {
   return (
     <>
       <EuiSpacer size="s" />

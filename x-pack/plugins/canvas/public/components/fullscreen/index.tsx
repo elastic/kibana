@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Fullscreen as Component } from './fullscreen';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';
@@ -17,11 +17,7 @@ interface Props {
   }) => JSX.Element;
 }
 
-export const Fullscreen = (
-  {
-    children
-  }: Props
-) => {
+export const Fullscreen = ({ children }: Props) => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);
 
   return <Component isFullscreen={isFullscreen} children={children} />;

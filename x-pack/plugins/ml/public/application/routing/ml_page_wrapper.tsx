@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
-export const MlPageWrapper = (
- {
-  path,
-  children
- }: {
-  path: string;
- }
-) => {
+export const MlPageWrapper = ({ path, children }: { path: string }) => {
   return <TrackApplicationView viewId={path}>{children}</TrackApplicationView>;
 };

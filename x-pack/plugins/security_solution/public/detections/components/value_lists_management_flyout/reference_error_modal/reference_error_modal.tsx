@@ -43,19 +43,17 @@ interface ReferenceErrorModalProps {
   titleText: string;
 }
 
-export const ReferenceErrorModalComponent = (
-  {
-    cancelText,
-    confirmText,
-    contentText,
-    onClose,
-    onCancel,
-    onConfirm,
-    references = [],
-    showModal,
-    titleText
-  }: ReferenceErrorModalProps
-) => {
+export const ReferenceErrorModalComponent = ({
+  cancelText,
+  confirmText,
+  contentText,
+  onClose,
+  onCancel,
+  onConfirm,
+  references = [],
+  showModal,
+  titleText,
+}: ReferenceErrorModalProps) => {
   if (!showModal) {
     return null;
   }

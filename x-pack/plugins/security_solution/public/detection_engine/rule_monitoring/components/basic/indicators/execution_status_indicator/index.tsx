@@ -23,12 +23,10 @@ interface ExecutionStatusIndicatorProps {
   showTooltip?: boolean;
 }
 
-const ExecutionStatusIndicatorComponent = (
-  {
-    status,
-    showTooltip = false
-  }: ExecutionStatusIndicatorProps
-) => {
+const ExecutionStatusIndicatorComponent = ({
+  status,
+  showTooltip = false,
+}: ExecutionStatusIndicatorProps) => {
   const statusText = getCapitalizedStatusText(status) ?? EMPTY_STATUS_TEXT;
   const statusColor = getStatusColor(status);
 

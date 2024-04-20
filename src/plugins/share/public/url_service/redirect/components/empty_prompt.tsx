@@ -34,15 +34,13 @@ export interface ErrorProps {
   error: Error;
 }
 
-export const RedirectEmptyPrompt = (
-  {
-    title = defaultTitle,
-    body = defaultBody,
-    homeHref,
-    docTitle,
-    error
-  }: ErrorProps
-) => {
+export const RedirectEmptyPrompt = ({
+  title = defaultTitle,
+  body = defaultBody,
+  homeHref,
+  docTitle,
+  error,
+}: ErrorProps) => {
   // eslint-disable-next-line no-console
   console.error('Short URL redirect error', error);
 

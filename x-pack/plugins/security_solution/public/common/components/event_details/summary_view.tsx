@@ -66,19 +66,17 @@ const rowProps = {
   className: 'flyoutTableHoverActions',
 };
 
-const SummaryViewComponent = (
-  {
-    goToTable,
-    rows,
-    title,
-    isReadOnly
-  }: {
-    goToTable: () => void;
-    title: string;
-    rows: AlertSummaryRow[];
-    isReadOnly?: boolean;
-  }
-) => {
+const SummaryViewComponent = ({
+  goToTable,
+  rows,
+  title,
+  isReadOnly,
+}: {
+  goToTable: () => void;
+  title: string;
+  rows: AlertSummaryRow[];
+  isReadOnly?: boolean;
+}) => {
   const columns = isReadOnly ? baseColumns : allColumns;
 
   return (

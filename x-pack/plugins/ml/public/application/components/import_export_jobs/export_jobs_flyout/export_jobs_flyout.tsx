@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,12 +21,7 @@ const ExportJobsFlyoutContent = dynamic(async () => ({
   default: (await import('./export_jobs_flyout_content')).ExportJobsFlyoutContent,
 }));
 
-export const ExportJobsFlyout = (
-  {
-    isDisabled,
-    ...rest
-  }: Props
-) => {
+export const ExportJobsFlyout = ({ isDisabled, ...rest }: Props) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
 
@@ -53,15 +47,7 @@ export const ExportJobsFlyout = (
   );
 };
 
-const FlyoutButton = (
-  {
-    isDisabled,
-    onClick
-  }: {
-    isDisabled: boolean;
-    onClick(): void;
-  }
-) => {
+const FlyoutButton = ({ isDisabled, onClick }: { isDisabled: boolean; onClick(): void }) => {
   return (
     <EuiButtonEmpty
       iconType="exportAction"

@@ -38,17 +38,15 @@ interface ViewApiRequestFlyoutProps {
   urlService?: UrlService;
 }
 
-export const ApiRequestFlyout = (
-  {
-    title,
-    description,
-    request,
-    closeFlyout,
-    flyoutProps,
-    urlService,
-    application
-  }: ViewApiRequestFlyoutProps
-) => {
+export const ApiRequestFlyout = ({
+  title,
+  description,
+  request,
+  closeFlyout,
+  flyoutProps,
+  urlService,
+  application,
+}: ViewApiRequestFlyoutProps) => {
   const getUrlParams = undefined;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   const devToolsDataUri = compressToEncodedURIComponent(request);

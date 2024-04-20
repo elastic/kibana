@@ -12,30 +12,30 @@ import { TimeRange } from '../../../../../../common/time';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import { AnalyzeCategoryDatasetInMlAction } from './analyze_dataset_in_ml_action';
 
-export const DatasetActionsList = (
-  {
-    categorizationJobId,
-    categoryId,
-    datasets,
-    timeRange
-  }: {
-    categorizationJobId: string;
-    categoryId: number;
-    datasets: LogEntryCategoryDataset[];
-    timeRange: TimeRange;
-  }
-) => (<ul>
-  {datasets.map((dataset) => {
-    const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
-    return (
-      <li key={datasetLabel}>
-        <AnalyzeCategoryDatasetInMlAction
-          categorizationJobId={categorizationJobId}
-          categoryId={categoryId}
-          dataset={dataset.name}
-          timeRange={timeRange}
-        />
-      </li>
-    );
-  })}
-</ul>);
+export const DatasetActionsList = ({
+  categorizationJobId,
+  categoryId,
+  datasets,
+  timeRange,
+}: {
+  categorizationJobId: string;
+  categoryId: number;
+  datasets: LogEntryCategoryDataset[];
+  timeRange: TimeRange;
+}) => (
+  <ul>
+    {datasets.map((dataset) => {
+      const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
+      return (
+        <li key={datasetLabel}>
+          <AnalyzeCategoryDatasetInMlAction
+            categorizationJobId={categorizationJobId}
+            categoryId={categoryId}
+            dataset={dataset.name}
+            timeRange={timeRange}
+          />
+        </li>
+      );
+    })}
+  </ul>
+);

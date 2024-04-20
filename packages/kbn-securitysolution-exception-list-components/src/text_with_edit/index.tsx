@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Interpolation, Theme } from '@emotion/react';
 import { textWithEditContainerCss, editIconCss } from './text_with_edit.styles';
@@ -18,15 +18,13 @@ interface TextWithEditProps {
   onEdit?: () => void;
 }
 
-const TextWithEditComponent = (
-  {
-    isReadonly,
-    dataTestSubj,
-    text,
-    onEdit,
-    textCss
-  }: TextWithEditProps
-) => {
+const TextWithEditComponent = ({
+  isReadonly,
+  dataTestSubj,
+  text,
+  onEdit,
+  textCss,
+}: TextWithEditProps) => {
   return (
     <EuiFlexGroup css={textWithEditContainerCss}>
       <EuiFlexItem grow={10}>

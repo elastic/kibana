@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
@@ -20,15 +19,13 @@ interface JobSelectorBadgeProps {
   removeId?: Function;
 }
 
-export const JobSelectorBadge = (
-  {
-    icon,
-    id,
-    isGroup = false,
-    numJobs,
-    removeId
-  }: JobSelectorBadgeProps
-) => {
+export const JobSelectorBadge = ({
+  icon,
+  id,
+  isGroup = false,
+  numJobs,
+  removeId,
+}: JobSelectorBadgeProps) => {
   const color = isGroup ? tabColor(id) : 'hollow';
   let props = { color } as EuiBadgeProps;
   let jobCount;

@@ -53,19 +53,17 @@ export function getInstallFleetServerStep({
   };
 }
 
-const InstallFleetServerStepContent = (
-  {
-    serviceToken,
-    fleetServerHost,
-    fleetServerPolicyId,
-    deploymentMode
-  }: {
-    serviceToken?: string;
-    fleetServerHost?: string;
-    fleetServerPolicyId?: string;
-    deploymentMode: DeploymentMode;
-  }
-) => {
+const InstallFleetServerStepContent = ({
+  serviceToken,
+  fleetServerHost,
+  fleetServerPolicyId,
+  deploymentMode,
+}: {
+  serviceToken?: string;
+  fleetServerHost?: string;
+  fleetServerPolicyId?: string;
+  deploymentMode: DeploymentMode;
+}) => {
   const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const { output } = useDefaultOutput();

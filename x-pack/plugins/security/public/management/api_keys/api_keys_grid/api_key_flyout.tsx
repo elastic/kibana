@@ -31,7 +31,6 @@ import {
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik } from 'formik';
 import moment from 'moment-timezone';
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -137,15 +136,13 @@ const defaultInitialValues: ApiKeyFormValues = {
   role_descriptors: '{}',
 };
 
-export const ApiKeyFlyout = (
-  {
-    onSuccess,
-    onCancel,
-    apiKey,
-    canManageCrossClusterApiKeys = false,
-    readOnly = false
-  }: ApiKeyFlyoutProps
-) => {
+export const ApiKeyFlyout = ({
+  onSuccess,
+  onCancel,
+  apiKey,
+  canManageCrossClusterApiKeys = false,
+  readOnly = false,
+}: ApiKeyFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const isDarkMode = useDarkMode();

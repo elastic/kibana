@@ -23,22 +23,20 @@ import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
-export const CommonInfraProviders = (
-  {
-    children,
-    triggersActionsUI,
-    setHeaderActionMenu,
-    appName,
-    storage,
-    theme$
-  }: {
-    appName: string;
-    storage: Storage;
-    triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-    theme$: AppMountParameters['theme$'];
-  }
-) => {
+export const CommonInfraProviders = ({
+  children,
+  triggersActionsUI,
+  setHeaderActionMenu,
+  appName,
+  storage,
+  theme$,
+}: {
+  appName: string;
+  storage: Storage;
+  triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
+}) => {
   const darkMode = useIsDarkMode();
 
   return (
@@ -62,16 +60,14 @@ export interface CoreProvidersProps {
   kibanaEnvironment?: KibanaEnvContext;
 }
 
-export const CoreProviders = (
-  {
-    children,
-    core,
-    pluginStart,
-    plugins,
-    theme$,
-    kibanaEnvironment
-  }: CoreProvidersProps
-) => {
+export const CoreProviders = ({
+  children,
+  core,
+  pluginStart,
+  plugins,
+  theme$,
+  kibanaEnvironment,
+}: CoreProvidersProps) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -97,13 +93,6 @@ export const CoreProviders = (
   );
 };
 
-const DataUIProviders = (
-  {
-    appName,
-    children,
-    storage
-  }: {
-    appName: string;
-    storage: Storage;
-  }
-) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;
+const DataUIProviders = ({ appName, children, storage }: { appName: string; storage: Storage }) => (
+  <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>
+);

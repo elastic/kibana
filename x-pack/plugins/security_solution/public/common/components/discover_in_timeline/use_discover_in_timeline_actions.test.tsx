@@ -17,7 +17,7 @@ import { useKibana } from '../../lib/kibana';
 import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
 import * as timelineActions from '../../../timelines/store/actions';
-import type { ComponentType, FC, PropsWithChildren } from 'react';
+import type { ComponentType, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import TestRenderer from 'react-test-renderer';
@@ -63,11 +63,9 @@ jest.mock('./use_discover_in_timeline_actions', () => {
 const getTestProviderWithCustomState = (state: State = mockState) => {
   const store = createMockStore(state);
 
-  const MockTestProvider = (
-    {
-      children
-    }: PropsWithChildren<{}>
-  ) => (<TestProviders store={store}> {children}</TestProviders>);
+  const MockTestProvider = ({ children }: PropsWithChildren<{}>) => (
+    <TestProviders store={store}> {children}</TestProviders>
+  );
 
   return MockTestProvider;
 };

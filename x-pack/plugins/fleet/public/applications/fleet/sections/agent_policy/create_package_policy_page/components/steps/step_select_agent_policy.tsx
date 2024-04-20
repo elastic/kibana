@@ -159,21 +159,19 @@ function doesAgentPolicyHaveLimitedPackage(policy: AgentPolicy, pkgInfo: Package
     : false;
 }
 
-export const StepSelectAgentPolicy = (
-  {
-    packageInfo,
-    agentPolicy,
-    updateAgentPolicy: updateSelectedAgentPolicy,
-    setHasAgentPolicyError,
-    selectedAgentPolicyId
-  }: {
-    packageInfo?: PackageInfo;
-    agentPolicy: AgentPolicy | undefined;
-    updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
-    setHasAgentPolicyError: (hasError: boolean) => void;
-    selectedAgentPolicyId?: string;
-  }
-) => {
+export const StepSelectAgentPolicy = ({
+  packageInfo,
+  agentPolicy,
+  updateAgentPolicy: updateSelectedAgentPolicy,
+  setHasAgentPolicyError,
+  selectedAgentPolicyId,
+}: {
+  packageInfo?: PackageInfo;
+  agentPolicy: AgentPolicy | undefined;
+  updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
+  setHasAgentPolicyError: (hasError: boolean) => void;
+  selectedAgentPolicyId?: string;
+}) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();

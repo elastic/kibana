@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
@@ -18,12 +17,7 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const CategorizationView = (
-  {
-    isActive,
-    setCanProceed
-  }: Props
-) => {
+export const CategorizationView = ({ isActive, setCanProceed }: Props) => {
   const [categoryFieldValid, setCategoryFieldValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 

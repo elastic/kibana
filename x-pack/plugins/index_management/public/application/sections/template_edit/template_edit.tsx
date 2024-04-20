@@ -25,16 +25,14 @@ interface MatchParams {
   name: string;
 }
 
-export const TemplateEdit = (
-  {
-    match: {
-      params: { name },
-    },
+export const TemplateEdit = ({
+  match: {
+    params: { name },
+  },
 
-    location,
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+  location,
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const decodedTemplateName = attemptToURIDecode(name)!;
   const {
     config: { enableLegacyTemplates },

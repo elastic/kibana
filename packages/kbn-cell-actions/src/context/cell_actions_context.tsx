@@ -7,7 +7,7 @@
  */
 
 import { orderBy } from 'lodash/fp';
-import React, { createContext, FC, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { CellAction, CellActionsProviderProps, GetActions } from '../types';
 
 interface CellActionsContextValue {
@@ -15,12 +15,10 @@ interface CellActionsContextValue {
 }
 const CellActionsContext = createContext<CellActionsContextValue | null>(null);
 
-export const CellActionsProvider = (
-  {
-    children,
-    getTriggerCompatibleActions
-  }: CellActionsProviderProps
-) => {
+export const CellActionsProvider = ({
+  children,
+  getTriggerCompatibleActions,
+}: CellActionsProviderProps) => {
   const value = useMemo<CellActionsContextValue>(
     () => ({
       getActions: (context) =>

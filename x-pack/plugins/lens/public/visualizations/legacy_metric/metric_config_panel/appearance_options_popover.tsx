@@ -20,12 +20,7 @@ export interface VisualOptionsPopoverProps {
   datasourceLayers: FramePublicAPI['datasourceLayers'];
 }
 
-export const AppearanceOptionsPopover = (
-  {
-    state,
-    setState
-  }: VisualOptionsPopoverProps
-) => {
+export const AppearanceOptionsPopover = ({ state, setState }: VisualOptionsPopoverProps) => {
   return (
     <TooltipWrapper
       tooltipContent={i18n.translate('xpack.lens.shared.AppearanceLabel', {

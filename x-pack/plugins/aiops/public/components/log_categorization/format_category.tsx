@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
@@ -121,12 +120,7 @@ export const useCreateFormattedExample = () => {
   return createFormattedExample;
 };
 
-export const FormattedPatternExamples = (
-  {
-    category,
-    count
-  }: Props
-) => {
+export const FormattedPatternExamples = ({ category, count }: Props) => {
   const createFormattedExample = useCreateFormattedExample();
 
   const e = useMemo(() => {
@@ -146,11 +140,7 @@ export const FormattedPatternExamples = (
   return <WrapInText>{e}</WrapInText>;
 };
 
-export const FormattedRegex = (
-  {
-    category
-  }: Props
-) => {
+export const FormattedRegex = ({ category }: Props) => {
   const { tokenStyle, wildcardStyle } = useStyles();
 
   const { regex } = category;
@@ -174,11 +164,7 @@ export const FormattedRegex = (
   );
 };
 
-export const FormattedTokens = (
-  {
-    category
-  }: Props
-) => {
+export const FormattedTokens = ({ category }: Props) => {
   const { tokenStyle } = useStyles();
 
   return (

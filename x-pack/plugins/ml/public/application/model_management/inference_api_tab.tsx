@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiAccordion,
@@ -22,11 +21,7 @@ export interface InferenceAPITabProps {
   inferenceApis: InferenceAPIConfigResponse[];
 }
 
-export const InferenceApi = (
-  {
-    inferenceApis
-  }: InferenceAPITabProps
-) => {
+export const InferenceApi = ({ inferenceApis }: InferenceAPITabProps) => {
   return (
     <>
       {inferenceApis.map((inferenceApi, i) => {

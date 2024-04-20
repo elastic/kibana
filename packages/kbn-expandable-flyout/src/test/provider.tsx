@@ -8,7 +8,7 @@
 
 import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import React, { FC, PropsWithChildren } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { ExpandableFlyoutContextProvider } from '../context';
 import { reducer } from '../reducer';
 import { Context } from '../redux';
@@ -19,13 +19,11 @@ interface TestProviderProps {
   urlKey?: string;
 }
 
-export const TestProvider = (
-  {
-    children,
-    state = initialState,
-    urlKey
-  }: PropsWithChildren<TestProviderProps>
-) => {
+export const TestProvider = ({
+  children,
+  state = initialState,
+  urlKey,
+}: PropsWithChildren<TestProviderProps>) => {
   const store = configureStore({
     reducer,
     devTools: false,

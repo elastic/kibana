@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, type FunctionComponent } from 'react';
+import React, { createContext, useContext } from 'react';
 import type { BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 
 export interface FilesContextValue {
@@ -32,12 +32,7 @@ interface ContextProps {
    */
   client: FilesClient<any>;
 }
-export const FilesContext = (
-  {
-    client,
-    children
-  }: ContextProps
-) => {
+export const FilesContext = ({ client, children }: ContextProps) => {
   return (
     <FilesContextObject.Provider
       value={{

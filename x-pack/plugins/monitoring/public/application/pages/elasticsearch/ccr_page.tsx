@@ -24,11 +24,7 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const ElasticsearchCcrPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const ElasticsearchCcrPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { services } = useKibana<{ data: any }>();

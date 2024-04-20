@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
@@ -36,13 +36,7 @@ interface Props {
   job: Job;
 }
 
-export const ReportInfoFlyout = (
-  {
-    config,
-    onClose,
-    job
-  }: Props
-) => {
+export const ReportInfoFlyout = ({ config, onClose, job }: Props) => {
   const isMounted = useMountedState();
   const { apiClient } = useInternalApiClient();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
 import { EuiCallOut, EuiCheckboxGroup, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,13 +26,11 @@ interface ForceStopModelConfirmDialogProps {
  * Confirmation is required when there are multiple model deployments
  * or associated pipelines.
  */
-export const StopModelDeploymentsConfirmDialog = (
-  {
-    model,
-    onConfirm,
-    onCancel
-  }: ForceStopModelConfirmDialogProps
-) => {
+export const StopModelDeploymentsConfirmDialog = ({
+  model,
+  onConfirm,
+  onCancel,
+}: ForceStopModelConfirmDialogProps) => {
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     {}
   );

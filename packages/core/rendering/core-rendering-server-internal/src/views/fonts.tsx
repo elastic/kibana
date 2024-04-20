@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { RenderingMetadata } from '../types';
 
@@ -217,11 +217,7 @@ const getRoboto = (url: string): FontFace => {
   };
 };
 
-export const Fonts = (
-  {
-    url
-  }: Props
-) => {
+export const Fonts = ({ url }: Props) => {
   const sansFont = getInter(url);
   const codeFont = getRoboto(url);
 

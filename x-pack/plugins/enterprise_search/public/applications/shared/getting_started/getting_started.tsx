@@ -53,15 +53,13 @@ interface GettingStartedProps {
   showPipelinesPanel?: boolean;
 }
 
-export const GettingStarted = (
-  {
-    apiKeys,
-    codeArgs,
-    isPanelLeft = false,
-    openApiKeyModal,
-    showPipelinesPanel
-  }: GettingStartedProps
-) => {
+export const GettingStarted = ({
+  apiKeys,
+  codeArgs,
+  isPanelLeft = false,
+  openApiKeyModal,
+  showPipelinesPanel,
+}: GettingStartedProps) => {
   const { http } = useValues(HttpLogic);
   const { services } = useKibana<KibanaDeps>();
 

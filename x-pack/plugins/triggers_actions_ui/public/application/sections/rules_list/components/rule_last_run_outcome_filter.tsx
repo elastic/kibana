@@ -25,12 +25,10 @@ interface RuleLastRunOutcomeFilterProps {
   onChange?: (selectedRuleOutcomeIds: string[]) => void;
 }
 
-export const RuleLastRunOutcomeFilter = (
-  {
-    selectedOutcomes,
-    onChange
-  }: RuleLastRunOutcomeFilterProps
-) => {
+export const RuleLastRunOutcomeFilter = ({
+  selectedOutcomes,
+  onChange,
+}: RuleLastRunOutcomeFilterProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

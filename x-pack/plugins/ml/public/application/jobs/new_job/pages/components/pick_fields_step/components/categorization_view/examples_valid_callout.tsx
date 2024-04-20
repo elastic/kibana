@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { EuiCallOutProps, EuiListGroupItemProps } from '@elastic/eui';
 import { EuiCallOut, EuiSpacer, EuiAccordion, EuiListGroup } from '@elastic/eui';
@@ -35,13 +34,11 @@ const allChecksButtonContent = i18n.translate(
   }
 );
 
-export const ExamplesValidCallout = (
-  {
-    overallValidStatus,
-    validationChecks,
-    categorizationAnalyzer
-  }: Props
-) => {
+export const ExamplesValidCallout = ({
+  overallValidStatus,
+  validationChecks,
+  categorizationAnalyzer,
+}: Props) => {
   const analyzerUsed = <AnalyzerUsed categorizationAnalyzer={categorizationAnalyzer} />;
 
   let color: EuiCallOutProps['color'] = 'success';
@@ -89,13 +86,11 @@ export const ExamplesValidCallout = (
   );
 };
 
-const AnalyzerUsed = (
-  {
-    categorizationAnalyzer
-  }: {
-    categorizationAnalyzer: CategorizationAnalyzer;
-  }
-) => {
+const AnalyzerUsed = ({
+  categorizationAnalyzer,
+}: {
+  categorizationAnalyzer: CategorizationAnalyzer;
+}) => {
   let analyzer: string | null = null;
 
   if (
@@ -125,13 +120,7 @@ const AnalyzerUsed = (
   );
 };
 
-const AllValidationChecks = (
-  {
-    validationChecks
-  }: {
-    validationChecks: FieldExampleCheck[];
-  }
-) => {
+const AllValidationChecks = ({ validationChecks }: { validationChecks: FieldExampleCheck[] }) => {
   const list: EuiListGroupItemProps[] = Object.keys(VALIDATION_CHECK_DESCRIPTION).map((k, i) => {
     const failedCheck = validationChecks.find((vc) => vc.id === i);
     if (

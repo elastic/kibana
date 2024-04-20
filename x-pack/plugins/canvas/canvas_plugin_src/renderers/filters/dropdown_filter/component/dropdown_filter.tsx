@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, FocusEvent, FunctionComponent, useEffect, useState } from 'react';
+import React, { ChangeEvent, FocusEvent, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,13 +33,7 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const DropdownFilter = (
-  {
-    initialValue = '',
-    commit,
-    choices = []
-  }: Props
-) => {
+export const DropdownFilter = ({ initialValue = '', commit, choices = [] }: Props) => {
   const [value, setValue] = useState<string>(initialValue);
 
   useEffect(() => {

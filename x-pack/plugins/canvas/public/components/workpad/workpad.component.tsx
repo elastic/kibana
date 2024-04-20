@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 // @ts-expect-error
 import { WorkpadPage } from '../workpad_page';
@@ -41,34 +41,32 @@ export interface Props {
   zoomScale: number;
 }
 
-export const Workpad = (
-  {
-    fetchAllRenderables,
-    getAnimation,
-    grid,
-    hasHeaderBanner,
-    height,
-    isFullscreen,
-    nextPage,
-    onTransitionEnd,
-    pages,
-    previousPage,
-    redoHistory,
-    registerLayout,
-    resetZoom,
-    selectedPageNumber,
-    setFullscreen,
-    setGrid,
-    totalElementCount,
-    width,
-    workpadCss,
-    undoHistory,
-    unregisterLayout,
-    zoomIn,
-    zoomOut,
-    zoomScale
-  }: Props
-) => {
+export const Workpad = ({
+  fetchAllRenderables,
+  getAnimation,
+  grid,
+  hasHeaderBanner,
+  height,
+  isFullscreen,
+  nextPage,
+  onTransitionEnd,
+  pages,
+  previousPage,
+  redoHistory,
+  registerLayout,
+  resetZoom,
+  selectedPageNumber,
+  setFullscreen,
+  setGrid,
+  totalElementCount,
+  width,
+  workpadCss,
+  undoHistory,
+  unregisterLayout,
+  zoomIn,
+  zoomOut,
+  zoomScale,
+}: Props) => {
   const headerBannerOffset = useMemo(() => {
     if (!hasHeaderBanner) return 0;
     if (typeof document === 'undefined') return 0;

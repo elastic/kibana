@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSuperSelect } from '@elastic/eui';
 import { fonts, FontValue } from '../../../common/lib/fonts';
@@ -20,12 +20,7 @@ interface Props {
   value?: FontValue;
 }
 
-export const FontPicker = (
-  {
-    value,
-    onSelect
-  }: Props
-) => {
+export const FontPicker = ({ value, onSelect }: Props) => {
   // While fonts are strongly-typed, we also support custom fonts someone might type in.
   // So let's cast the fonts and allow for additions.
   const displayedFonts: DisplayedFont[] = fonts;

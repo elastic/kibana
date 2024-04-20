@@ -28,12 +28,7 @@ export const tlsStatItems: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiTlsHandshakesComponent = (
-  {
-    from,
-    to
-  }: NetworkKpiProps
-) => {
+const NetworkKpiTlsHandshakesComponent = ({ from, to }: NetworkKpiProps) => {
   return <KpiBaseComponent id={ID} statItems={tlsStatItems} from={from} to={to} />;
 };
 

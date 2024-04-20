@@ -10,7 +10,6 @@ import React, {
   useContext,
   useMemo,
   useState,
-  type FC,
   type Dispatch,
   type SetStateAction,
 } from 'react';
@@ -141,9 +140,9 @@ export const LogRateAnalysisStateProvider = (props: LogRateAnalysisStateProvider
 
   return (
     // Provider managing the state
-    (<LogRateAnalysisStateContext.Provider value={contextValue}>
+    <LogRateAnalysisStateContext.Provider value={contextValue}>
       {children}
-    </LogRateAnalysisStateContext.Provider>)
+    </LogRateAnalysisStateContext.Provider>
   );
 };
 

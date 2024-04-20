@@ -8,7 +8,7 @@
 
 import './filter_button_group.scss';
 
-import React, { FC, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -24,14 +24,7 @@ interface Props {
   size?: 'm' | 's';
 }
 
-export const FilterButtonGroup = (
-  {
-    items,
-    attached,
-    size = 'm',
-    ...rest
-  }: Props
-) => {
+export const FilterButtonGroup = ({ items, attached, size = 'm', ...rest }: Props) => {
   return (
     <EuiFlexGroup
       className={classNames('kbnFilterButtonGroup', {

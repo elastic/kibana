@@ -33,12 +33,10 @@ interface MethodConnectorProps {
   serviceType: string;
 }
 
-export const MethodConnector = (
-  {
-    serviceType,
-    isNative: isNativeProp = true
-  }: MethodConnectorProps
-) => {
+export const MethodConnector = ({
+  serviceType,
+  isNative: isNativeProp = true,
+}: MethodConnectorProps) => {
   const { apiReset, makeRequest } = useActions(AddConnectorLogic);
   const { error, status } = useValues(AddConnectorApiLogic);
   const { connectorTypes, isCloud } = useValues(KibanaLogic);

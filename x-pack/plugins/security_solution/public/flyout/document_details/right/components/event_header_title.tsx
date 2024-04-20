@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { startCase } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';

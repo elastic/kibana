@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { noop } from 'lodash/fp';
@@ -18,13 +17,11 @@ export interface CallOutDismissButtonProps {
   onClick?: (message: CallOutMessage) => void;
 }
 
-export const CallOutDismissButton = (
-  {
-    message,
-    text,
-    onClick = noop
-  }: CallOutDismissButtonProps
-) => {
+export const CallOutDismissButton = ({
+  message,
+  text,
+  onClick = noop,
+}: CallOutDismissButtonProps) => {
   const { type } = message;
   const buttonColor = type;
   const buttonText = text ?? i18n.DISMISS_BUTTON;

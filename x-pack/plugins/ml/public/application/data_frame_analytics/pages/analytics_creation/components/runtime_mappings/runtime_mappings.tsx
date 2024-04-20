@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiButton,
@@ -74,12 +73,7 @@ interface Props {
   state: CreateAnalyticsFormProps['state'];
 }
 
-export const RuntimeMappings = (
-  {
-    actions,
-    state
-  }: Props
-) => {
+export const RuntimeMappings = ({ actions, state }: Props) => {
   const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] =
     useState<boolean>(false);
   const [isRuntimeMappingsEditorSwitchModalVisible, setRuntimeMappingsEditorSwitchModalVisible] =

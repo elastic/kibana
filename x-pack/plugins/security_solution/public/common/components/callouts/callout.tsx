@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
@@ -21,15 +20,13 @@ export interface CallOutProps {
   showDismissButton?: boolean;
 }
 
-const CallOutComponent = (
-  {
-    message,
-    iconType,
-    dismissButtonText,
-    onDismiss,
-    showDismissButton = true
-  }: CallOutProps
-) => {
+const CallOutComponent = ({
+  message,
+  iconType,
+  dismissButtonText,
+  onDismiss,
+  showDismissButton = true,
+}: CallOutProps) => {
   const { type, id, title, description } = message;
   const finalIconType = iconType ?? getDefaultIconType(type);
 

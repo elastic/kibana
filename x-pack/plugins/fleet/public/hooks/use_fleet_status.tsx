@@ -34,14 +34,12 @@ interface FleetStatus extends FleetStatusProviderProps {
 
 const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefined);
 
-export const FleetStatusProvider = (
-  {
-    defaultFleetStatus,
-    children
-  }: {
-    defaultFleetStatus?: FleetStatusProviderProps;
-  }
-) => {
+export const FleetStatusProvider = ({
+  defaultFleetStatus,
+  children,
+}: {
+  defaultFleetStatus?: FleetStatusProviderProps;
+}) => {
   const config = useConfig();
   const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,17 +17,15 @@ import type { HeaderProps } from './header';
 const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://github.com/elastic/kibana/blob/main/packages/core/rendering/core-rendering-server-internal/src/views/template.tsx#L34
 const SEPARATOR = ' - ';
 
-export const ScreenReaderRouteAnnouncements = (
-  {
-    breadcrumbs$,
-    customBranding$,
-    appId$
-  }: {
-    breadcrumbs$: HeaderProps['breadcrumbs$'];
-    customBranding$: HeaderProps['customBranding$'];
-    appId$: InternalApplicationStart['currentAppId$'];
-  }
-) => {
+export const ScreenReaderRouteAnnouncements = ({
+  breadcrumbs$,
+  customBranding$,
+  appId$,
+}: {
+  breadcrumbs$: HeaderProps['breadcrumbs$'];
+  customBranding$: HeaderProps['customBranding$'];
+  appId$: InternalApplicationStart['currentAppId$'];
+}) => {
   const [routeTitle, setRouteTitle] = useState('');
   const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
   const breadcrumbs = useObservable(breadcrumbs$, []);

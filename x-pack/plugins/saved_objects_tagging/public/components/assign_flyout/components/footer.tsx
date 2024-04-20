@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -16,14 +16,12 @@ export interface AssignFlyoutFooterProps {
   onSave: () => void;
 }
 
-export const AssignFlyoutFooter = (
-  {
-    isSaving,
-    hasPendingChanges,
-    onCancel,
-    onSave
-  }: AssignFlyoutFooterProps
-) => {
+export const AssignFlyoutFooter = ({
+  isSaving,
+  hasPendingChanges,
+  onCancel,
+  onSave,
+}: AssignFlyoutFooterProps) => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>

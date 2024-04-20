@@ -17,13 +17,7 @@ import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../../../../../../../../com
 
 const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 
-export const SelectLogLevel = memo((
-  {
-    agent
-  }: {
-    agent: Agent;
-  }
-) => {
+export const SelectLogLevel = memo(({ agent }: { agent: Agent }) => {
   const authz = useAuthz();
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);

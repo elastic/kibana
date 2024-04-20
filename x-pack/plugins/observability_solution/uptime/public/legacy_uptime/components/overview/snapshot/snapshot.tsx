@@ -23,11 +23,7 @@ interface SnapshotComponentProps {
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const SnapshotComponent = (
-  {
-    height
-  }: SnapshotComponentProps
-) => {
+export const SnapshotComponent = ({ height }: SnapshotComponentProps) => {
   const { count, loading } = useSnapShotCount();
 
   return (

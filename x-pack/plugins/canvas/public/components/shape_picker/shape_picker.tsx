@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { Shape } from '@kbn/expression-shape-plugin/common';
@@ -16,20 +16,17 @@ interface Props {
   onChange?: (key: string) => void;
 }
 
-export const ShapePicker = (
-  {
-    shapes,
-    onChange = () => {}
-  }: Props
-) => (<EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
-  {shapes.sort().map((shapeKey: string) => (
-    <EuiFlexItem key={shapeKey}>
-      <EuiLink onClick={() => onChange(shapeKey)}>
-        <ShapePreview shape={shapeKey} />
-      </EuiLink>
-    </EuiFlexItem>
-  ))}
-</EuiFlexGrid>);
+export const ShapePicker = ({ shapes, onChange = () => {} }: Props) => (
+  <EuiFlexGrid gutterSize="s" columns={4} className="canvasShapePicker">
+    {shapes.sort().map((shapeKey: string) => (
+      <EuiFlexItem key={shapeKey}>
+        <EuiLink onClick={() => onChange(shapeKey)}>
+          <ShapePreview shape={shapeKey} />
+        </EuiLink>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGrid>
+);
 
 ShapePicker.propTypes = {
   onChange: PropTypes.func,

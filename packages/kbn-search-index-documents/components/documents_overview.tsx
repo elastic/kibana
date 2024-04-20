@@ -23,14 +23,12 @@ interface DocumentsProps {
   documentComponent: React.ReactNode;
   searchQueryCallback: (searchQuery: string) => void;
 }
-export const DocumentsOverview = (
-  {
-    accessControlSwitch,
-    dataTelemetryIdPrefix,
-    documentComponent,
-    searchQueryCallback
-  }: DocumentsProps
-) => {
+export const DocumentsOverview = ({
+  accessControlSwitch,
+  dataTelemetryIdPrefix,
+  documentComponent,
+  searchQueryCallback,
+}: DocumentsProps) => {
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
       <EuiSpacer />

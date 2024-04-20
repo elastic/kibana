@@ -17,14 +17,7 @@ interface Props {
   error: RepositorySettingsValidation['chunkSize'];
 }
 
-export const ChunkSizeField = (
-  {
-    isInvalid,
-    error,
-    defaultValue,
-    updateSettings
-  }: Props
-) => {
+export const ChunkSizeField = ({ isInvalid, error, defaultValue, updateSettings }: Props) => {
   return (
     <EuiDescribedFormGroup
       title={

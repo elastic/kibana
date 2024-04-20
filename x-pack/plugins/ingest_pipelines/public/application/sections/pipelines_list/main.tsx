@@ -40,12 +40,7 @@ const getPipelineNameFromLocation = (location: Location) => {
   return pipeline;
 };
 
-export const PipelinesList = (
-  {
-    history,
-    location
-  }: RouteComponentProps
-) => {
+export const PipelinesList = ({ history, location }: RouteComponentProps) => {
   const { services } = useKibana();
   const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 

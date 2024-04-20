@@ -23,14 +23,7 @@ export interface MappingProps {
   mappings: CaseConnectorMapping[];
 }
 
-const MappingComponent = (
-  {
-    actionTypeName,
-    connectorType,
-    isLoading,
-    mappings
-  }: MappingProps
-) => {
+const MappingComponent = ({ actionTypeName, connectorType, isLoading, mappings }: MappingProps) => {
   const fieldMappingDesc: { desc: string; color: TextColor } = useMemo(
     () =>
       mappings.length > 0 || isLoading

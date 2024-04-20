@@ -83,12 +83,7 @@ const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
   );
 };
 
-export const StepReview = React.memo((
-  {
-    template,
-    navigateToStep
-  }: Props
-) => {
+export const StepReview = React.memo(({ template, navigateToStep }: Props) => {
   const {
     name,
     indexPatterns,

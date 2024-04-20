@@ -178,14 +178,12 @@ export type UninstallCommandFlyoutProps = PropsWithPolicyId | PropsWithTokenId;
  *
  * Provide EITHER `policyId` OR `tokenId` for showing the token.
  */
-export const UninstallCommandFlyout = (
-  {
-    policyId,
-    uninstallTokenId,
-    onClose,
-    target
-  }: UninstallCommandFlyoutProps
-) => {
+export const UninstallCommandFlyout = ({
+  policyId,
+  uninstallTokenId,
+  onClose,
+  target,
+}: UninstallCommandFlyoutProps) => {
   return (
     <EuiFlyout onClose={onClose} data-test-subj="uninstall-command-flyout">
       <EuiFlyoutHeader hasBorder>

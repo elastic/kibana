@@ -90,32 +90,30 @@ export const getHeaderAlignment = ({
   }
 };
 
-const HeaderSectionComponent = (
-  {
-    alignHeader,
-    border,
-    children,
-    outerDirection = 'column',
-    growLeftSplit = true,
-    headerFilters,
-    height,
-    hideSubtitle = false,
-    id,
-    inspectMultiple = false,
-    inspectTitle,
-    isInspectDisabled,
-    showInspectButton = true,
-    split,
-    stackHeader,
-    subtitle,
-    title,
-    titleSize = 'l',
-    toggleQuery,
-    toggleStatus = true,
-    tooltip,
-    tooltipTitle
-  }: HeaderSectionProps
-) => {
+const HeaderSectionComponent = ({
+  alignHeader,
+  border,
+  children,
+  outerDirection = 'column',
+  growLeftSplit = true,
+  headerFilters,
+  height,
+  hideSubtitle = false,
+  id,
+  inspectMultiple = false,
+  inspectTitle,
+  isInspectDisabled,
+  showInspectButton = true,
+  split,
+  stackHeader,
+  subtitle,
+  title,
+  titleSize = 'l',
+  toggleQuery,
+  toggleStatus = true,
+  tooltip,
+  tooltipTitle,
+}: HeaderSectionProps) => {
   const toggle = useCallback(() => {
     if (toggleQuery) {
       toggleQuery(!toggleStatus);

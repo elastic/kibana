@@ -6,22 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiCard, EuiStat } from '@elastic/eui';
 import { DataType, formatNumber, Metric } from '../lib';
 
 /*
  * Displays metadata for a metric.
  */
-const MetricCardFooter = (
-  {
-    title,
-    description
-  }: {
-    title: string;
-    description: string;
-  }
-) => {
+const MetricCardFooter = ({ title, description }: { title: string; description: string }) => {
   return (
     <EuiStat
       data-test-subj="serverMetricMeta"
@@ -33,13 +25,7 @@ const MetricCardFooter = (
   );
 };
 
-const DelayMetricTile = (
-  {
-    metric
-  }: {
-    metric: Metric;
-  }
-) => {
+const DelayMetricTile = ({ metric }: { metric: Metric }) => {
   const { name, meta } = metric;
   return (
     <EuiCard
@@ -59,13 +45,7 @@ const DelayMetricTile = (
   );
 };
 
-const LoadMetricTile = (
-  {
-    metric
-  }: {
-    metric: Metric;
-  }
-) => {
+const LoadMetricTile = ({ metric }: { metric: Metric }) => {
   const { name, meta } = metric;
   return (
     <EuiCard
@@ -78,13 +58,7 @@ const LoadMetricTile = (
   );
 };
 
-const ResponseTimeMetric = (
-  {
-    metric
-  }: {
-    metric: Metric;
-  }
-) => {
+const ResponseTimeMetric = ({ metric }: { metric: Metric }) => {
   const { name, meta } = metric;
   return (
     <EuiCard
@@ -108,13 +82,7 @@ const ResponseTimeMetric = (
 /*
  * Displays a metric with the correct format.
  */
-export const MetricTile = (
-  {
-    metric
-  }: {
-    metric: Metric;
-  }
-) => {
+export const MetricTile = ({ metric }: { metric: Metric }) => {
   const { name } = metric;
   switch (name) {
     case 'Delay':
@@ -138,19 +106,15 @@ export const MetricTile = (
 /*
  * Wrapper component that simply maps each metric to MetricTile inside a FlexGroup
  */
-export const MetricTiles = (
-  {
-    metrics
-  }: {
-    metrics: Metric[];
-  }
-) => (<EuiFlexGrid columns={3}>
-  {metrics.map((metric) => (
-    <EuiFlexItem key={metric.name} data-test-subj="serverMetric">
-      <MetricTile metric={metric} />
-    </EuiFlexItem>
-  ))}
-</EuiFlexGrid>);
+export const MetricTiles = ({ metrics }: { metrics: Metric[] }) => (
+  <EuiFlexGrid columns={3}>
+    {metrics.map((metric) => (
+      <EuiFlexItem key={metric.name} data-test-subj="serverMetric">
+        <MetricTile metric={metric} />
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGrid>
+);
 
 // formatting helper functions
 

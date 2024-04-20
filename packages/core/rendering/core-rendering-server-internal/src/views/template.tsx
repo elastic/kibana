@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, createElement } from 'react';
+import React, { createElement } from 'react';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
@@ -17,22 +17,20 @@ interface Props {
   metadata: RenderingMetadata;
 }
 
-export const Template = (
-  {
-    metadata: {
-      uiPublicUrl,
-      locale,
-      darkMode,
-      stylesheetPaths,
-      scriptPaths,
-      injectedMetadata,
-      i18n,
-      bootstrapScriptUrl,
-      strictCsp,
-      customBranding,
-    }
-  }: Props
-) => {
+export const Template = ({
+  metadata: {
+    uiPublicUrl,
+    locale,
+    darkMode,
+    stylesheetPaths,
+    scriptPaths,
+    injectedMetadata,
+    i18n,
+    bootstrapScriptUrl,
+    strictCsp,
+    customBranding,
+  },
+}: Props) => {
   const title = customBranding.pageTitle ?? 'Elastic';
   const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
   const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;

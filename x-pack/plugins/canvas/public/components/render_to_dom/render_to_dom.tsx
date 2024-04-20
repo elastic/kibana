@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, FC, CSSProperties } from 'react';
+import React, { useCallback, CSSProperties } from 'react';
 
 interface Props {
   render: (element: HTMLElement) => void;
   style?: CSSProperties;
 }
 
-export const RenderToDom = (
-  {
-    render,
-    style
-  }: Props
-) => {
+export const RenderToDom = ({ render, style }: Props) => {
   // https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node
   const ref = useCallback(
     (node: HTMLDivElement) => {

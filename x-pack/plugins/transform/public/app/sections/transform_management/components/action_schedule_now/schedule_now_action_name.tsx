@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
 
@@ -48,13 +48,11 @@ export interface ScheduleNowActionNameProps {
   forceDisable?: boolean;
   transformNodes: number;
 }
-export const ScheduleNowActionName = (
-  {
-    items,
-    forceDisable,
-    transformNodes
-  }: ScheduleNowActionNameProps
-) => {
+export const ScheduleNowActionName = ({
+  items,
+  forceDisable,
+  transformNodes,
+}: ScheduleNowActionNameProps) => {
   const { canScheduleNowTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 

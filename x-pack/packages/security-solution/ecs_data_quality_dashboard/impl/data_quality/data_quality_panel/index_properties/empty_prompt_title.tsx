@@ -11,11 +11,9 @@ interface Props {
   title: string;
 }
 
-const EmptyPromptTitleComponent = (
-  {
-    title
-  }: Props
-) => (<h2 data-test-subj="emptyPromptTitle">{title}</h2>);
+const EmptyPromptTitleComponent = ({ title }: Props) => (
+  <h2 data-test-subj="emptyPromptTitle">{title}</h2>
+);
 
 EmptyPromptTitleComponent.displayName = 'EmptyPromptTitleComponent';
 

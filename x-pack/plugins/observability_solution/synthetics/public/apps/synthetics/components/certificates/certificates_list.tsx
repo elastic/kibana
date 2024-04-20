@@ -46,14 +46,7 @@ interface Props {
   certificates: CertResult & { isLoading?: boolean };
 }
 
-export const CertificateList = (
-  {
-    page,
-    certificates,
-    sort,
-    onChange
-  }: Props
-) => {
+export const CertificateList = ({ page, certificates, sort, onChange }: Props) => {
   const dateFormatter = useDateFormat();
   const pagination = {
     pageIndex: page.index,

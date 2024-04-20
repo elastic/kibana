@@ -30,13 +30,11 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const ReadonlySettings = (
-  {
-    repository,
-    updateRepositorySettings,
-    settingErrors
-  }: Props
-) => {
+export const ReadonlySettings = ({
+  repository,
+  updateRepositorySettings,
+  settingErrors,
+}: Props) => {
   const {
     settings: { url },
   } = repository;

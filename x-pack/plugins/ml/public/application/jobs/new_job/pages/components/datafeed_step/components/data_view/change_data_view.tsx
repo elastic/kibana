@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -53,11 +52,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const ChangeDataViewModal = (
-  {
-    onClose
-  }: Props
-) => {
+export const ChangeDataViewModal = ({ onClose }: Props) => {
   const {
     services: {
       data: { dataViews },
@@ -240,15 +235,13 @@ export const ChangeDataViewModal = (
   );
 };
 
-const ValidationMessage = (
-  {
-    validationResponse,
-    dataViewTitle
-  }: {
-    validationResponse: DatafeedValidationResponse | null;
-    dataViewTitle: string;
-  }
-) => {
+const ValidationMessage = ({
+  validationResponse,
+  dataViewTitle,
+}: {
+  validationResponse: DatafeedValidationResponse | null;
+  dataViewTitle: string;
+}) => {
   if (validationResponse === null) {
     return (
       <EuiCallOut

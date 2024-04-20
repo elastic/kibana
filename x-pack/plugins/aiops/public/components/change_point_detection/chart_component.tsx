@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCommonChartProps } from './use_common_chart_props';
@@ -32,66 +31,60 @@ export interface ChartComponentPropsAll {
   query?: Query;
 }
 
-export const ChartComponent = React.memo((
-  {
-    annotation,
-    fieldConfig,
-    interval,
-    onLoading,
-    onRenderComplete
-  }: ChartComponentProps
-) => {
-  const {
-    lens: { EmbeddableComponent },
-  } = useAiopsAppContext();
+export const ChartComponent = React.memo(
+  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete }: ChartComponentProps) => {
+    const {
+      lens: { EmbeddableComponent },
+    } = useAiopsAppContext();
 
-  const chartWrapperRef = useRef<HTMLDivElement>(null);
+    const chartWrapperRef = useRef<HTMLDivElement>(null);
 
-  const renderCompleteListener = useCallback(
-    (event: Event) => {
-      if (event.target === chartWrapperRef.current) return;
-      if (onRenderComplete) {
-        onRenderComplete();
+    const renderCompleteListener = useCallback(
+      (event: Event) => {
+        if (event.target === chartWrapperRef.current) return;
+        if (onRenderComplete) {
+          onRenderComplete();
+        }
+      },
+      [onRenderComplete]
+    );
+
+    useEffect(() => {
+      if (!chartWrapperRef.current) {
+        throw new Error('Reference to the chart wrapper is not set');
       }
-    },
-    [onRenderComplete]
-  );
+      const chartWrapper = chartWrapperRef.current;
+      chartWrapper.addEventListener('renderComplete', renderCompleteListener);
+      return () => {
+        chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
+      };
+    }, [renderCompleteListener]);
 
-  useEffect(() => {
-    if (!chartWrapperRef.current) {
-      throw new Error('Reference to the chart wrapper is not set');
-    }
-    const chartWrapper = chartWrapperRef.current;
-    chartWrapper.addEventListener('renderComplete', renderCompleteListener);
-    return () => {
-      chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
-    };
-  }, [renderCompleteListener]);
+    const { filters, timeRange, query, attributes } = useCommonChartProps({
+      fieldConfig,
+      annotation,
+      bucketInterval: interval,
+    });
 
-  const { filters, timeRange, query, attributes } = useCommonChartProps({
-    fieldConfig,
-    annotation,
-    bucketInterval: interval,
-  });
-
-  return (
-    <div ref={chartWrapperRef}>
-      <EmbeddableComponent
-        id={`changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
-        style={{ height: 350 }}
-        timeRange={timeRange}
-        query={query}
-        filters={filters}
-        // @ts-ignore
-        attributes={attributes}
-        renderMode={'view'}
-        executionContext={{
-          type: 'aiops_change_point_detection_chart',
-          name: 'Change point detection',
-        }}
-        disableTriggers
-        onLoad={onLoading}
-      />
-    </div>
-  );
-});
+    return (
+      <div ref={chartWrapperRef}>
+        <EmbeddableComponent
+          id={`changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
+          style={{ height: 350 }}
+          timeRange={timeRange}
+          query={query}
+          filters={filters}
+          // @ts-ignore
+          attributes={attributes}
+          renderMode={'view'}
+          executionContext={{
+            type: 'aiops_change_point_detection_chart',
+            name: 'Change point detection',
+          }}
+          disableTriggers
+          onLoad={onLoading}
+        />
+      </div>
+    );
+  }
+);

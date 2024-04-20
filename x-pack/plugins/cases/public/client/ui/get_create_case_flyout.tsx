@@ -19,9 +19,7 @@ export type GetCreateCaseFlyoutProps = Omit<
   | 'getFilesClient'
 >;
 
-export const CreateCaseFlyoutLazy = lazy(
-  () => import('../../components/create/flyout')
-);
+export const CreateCaseFlyoutLazy = lazy(() => import('../../components/create/flyout'));
 export const getCreateCaseFlyoutLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,

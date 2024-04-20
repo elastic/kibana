@@ -32,19 +32,17 @@ export interface StepImageCaptionProps {
   isLoading: boolean;
 }
 
-export const StepImageCaption = (
-  {
-    captionContent,
-    imgRef,
-    imgSrc,
-    maxSteps,
-    setStepNumber,
-    stepNumber,
-    isLoading,
-    label,
-    onVisible
-  }: StepImageCaptionProps
-) => {
+export const StepImageCaption = ({
+  captionContent,
+  imgRef,
+  imgSrc,
+  maxSteps,
+  setStepNumber,
+  stepNumber,
+  isLoading,
+  label,
+  onVisible,
+}: StepImageCaptionProps) => {
   const { euiTheme } = useEuiTheme();
   const isSmall = useIsWithinMaxBreakpoint('m');
 

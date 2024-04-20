@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -104,42 +103,42 @@ interface ExplorerPageProps {
   dataViews?: DataView[];
 }
 
-const ExplorerPage = (
-  {
-    children,
-    jobSelectorProps,
-    noInfluencersConfigured,
-    influencers,
-    filterActive,
-    filterPlaceHolder,
-    indexPattern,
-    dataViews,
-    queryString,
-    updateLanguage
-  }: ExplorerPageProps
-) => (<>
-  <EuiPageHeader>
-    <EuiPageHeaderSection style={{ width: '100%' }}>
-      <JobSelector {...jobSelectorProps} />
+const ExplorerPage = ({
+  children,
+  jobSelectorProps,
+  noInfluencersConfigured,
+  influencers,
+  filterActive,
+  filterPlaceHolder,
+  indexPattern,
+  dataViews,
+  queryString,
+  updateLanguage,
+}: ExplorerPageProps) => (
+  <>
+    <EuiPageHeader>
+      <EuiPageHeaderSection style={{ width: '100%' }}>
+        <JobSelector {...jobSelectorProps} />
 
-      {indexPattern && updateLanguage ? (
-        <>
-          <ExplorerQueryBar
-            filterActive={!!filterActive}
-            filterPlaceHolder={filterPlaceHolder}
-            indexPattern={indexPattern}
-            dataViews={dataViews}
-            queryString={queryString}
-            updateLanguage={updateLanguage}
-          />
-          <EuiSpacer size="m" />
-          <EuiHorizontalRule margin="none" />
-        </>
-      ) : null}
-    </EuiPageHeaderSection>
-  </EuiPageHeader>
-  {children}
-</>);
+        {indexPattern && updateLanguage ? (
+          <>
+            <ExplorerQueryBar
+              filterActive={!!filterActive}
+              filterPlaceHolder={filterPlaceHolder}
+              indexPattern={indexPattern}
+              dataViews={dataViews}
+              queryString={queryString}
+              updateLanguage={updateLanguage}
+            />
+            <EuiSpacer size="m" />
+            <EuiHorizontalRule margin="none" />
+          </>
+        ) : null}
+      </EuiPageHeaderSection>
+    </EuiPageHeader>
+    {children}
+  </>
+);
 
 interface ExplorerUIProps {
   explorerState: ExplorerState;
@@ -170,21 +169,19 @@ export function getDefaultPanelsState() {
   };
 }
 
-export const Explorer = (
-  {
-    invalidTimeRangeError,
-    showCharts,
-    severity,
-    stoppedPartitions,
-    selectedJobsRunning,
-    timefilter,
-    timeBuckets,
-    selectedCells,
-    swimLaneSeverity,
-    explorerState,
-    overallSwimlaneData
-  }: ExplorerUIProps
-) => {
+export const Explorer = ({
+  invalidTimeRangeError,
+  showCharts,
+  severity,
+  stoppedPartitions,
+  selectedJobsRunning,
+  timefilter,
+  timeBuckets,
+  selectedCells,
+  swimLaneSeverity,
+  explorerState,
+  overallSwimlaneData,
+}: ExplorerUIProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const [anomalyExplorerPanelState, setAnomalyExplorerPanelState] = useStorage(
@@ -619,7 +616,7 @@ export const Explorer = (
 
           {showCharts ? (
             // @ts-ignore inferred js types are incorrect
-            (<ExplorerChartsContainer
+            <ExplorerChartsContainer
               {...{
                 ...chartsData,
                 severity,
@@ -629,7 +626,7 @@ export const Explorer = (
                 onSelectEntity: applyFilter,
                 chartsService,
               }}
-            />)
+            />
           ) : null}
 
           <EuiSpacer size="m" />

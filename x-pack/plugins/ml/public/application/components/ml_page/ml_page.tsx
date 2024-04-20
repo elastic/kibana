@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
 import { Redirect } from 'react-router-dom';
@@ -49,13 +48,7 @@ export const MlPageControlsContext = createContext<{
  * Main page component of the ML App
  * @constructor
  */
-export const MlPage = React.memo((
-  {
-    pageDeps
-  }: {
-    pageDeps: PageDependencies;
-  }
-) => {
+export const MlPage = React.memo(({ pageDeps }: { pageDeps: PageDependencies }) => {
   const navigateToPath = useNavigateToPath();
   const {
     services: {
@@ -169,12 +162,7 @@ interface CommonPageWrapperProps {
   headerPortal: HtmlPortalNode;
 }
 
-const CommonPageWrapper = React.memo((
-  {
-    pageDeps,
-    routeList
-  }: CommonPageWrapperProps
-) => {
+const CommonPageWrapper = React.memo(({ pageDeps, routeList }: CommonPageWrapperProps) => {
   const {
     services: { application },
   } = useMlKibana();
@@ -182,7 +170,7 @@ const CommonPageWrapper = React.memo((
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
      * avoiding full page reload **/
-    (<RedirectAppLinks coreStart={{ application }}>
+    <RedirectAppLinks coreStart={{ application }}>
       <EuiPageSection restrictWidth={false}>
         <Routes>
           {routeList.map((route) => {
@@ -205,6 +193,6 @@ const CommonPageWrapper = React.memo((
           <Redirect to="/overview" />
         </Routes>
       </EuiPageSection>
-    </RedirectAppLinks>)
+    </RedirectAppLinks>
   );
 });

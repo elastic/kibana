@@ -23,13 +23,11 @@ interface Props {
   cloudSecurityIntegration: CloudSecurityIntegration;
   agentPolicy?: AgentPolicy;
 }
-export const AzureArmTemplateInstructions = (
-  {
-    enrollmentAPIKey,
-    cloudSecurityIntegration,
-    agentPolicy
-  }: Props
-) => {
+export const AzureArmTemplateInstructions = ({
+  enrollmentAPIKey,
+  cloudSecurityIntegration,
+  agentPolicy,
+}: Props) => {
   const { isLoading, azureArmTemplateUrl, error, isError } = useCreateAzureArmTemplateUrl({
     enrollmentAPIKey,
     azureArmTemplateProps: cloudSecurityIntegration?.azureArmTemplateProps,

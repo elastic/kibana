@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
   EuiCheckableCard,
@@ -176,18 +175,15 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon = (
-  {
-    title,
-    iconType
-  }: TitleWithIconProps
-) => (<EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
-  <EuiFlexItem grow={false}>
-    <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
-  </EuiFlexItem>
-  <EuiFlexItem>
-    <EuiTitle size="xs">
-      <strong>{title}</strong>
-    </EuiTitle>
-  </EuiFlexItem>
-</EuiFlexGroup>);
+const TitleWithIcon = ({ title, iconType }: TitleWithIconProps) => (
+  <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiTitle size="xs">
+        <strong>{title}</strong>
+      </EuiTitle>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

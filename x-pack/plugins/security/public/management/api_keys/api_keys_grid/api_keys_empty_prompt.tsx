@@ -7,7 +7,6 @@
 
 import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,13 +20,7 @@ export interface ApiKeysEmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const ApiKeysEmptyPrompt = (
-  {
-    error,
-    readOnly,
-    children
-  }: ApiKeysEmptyPromptProps
-) => {
+export const ApiKeysEmptyPrompt = ({ error, readOnly, children }: ApiKeysEmptyPromptProps) => {
   const { euiTheme } = useEuiTheme();
   const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
 

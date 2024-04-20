@@ -16,11 +16,7 @@ interface ActionColumnProps {
   input: InputAlert;
 }
 
-export const ActionColumn = (
-  {
-    input
-  }: ActionColumnProps
-) => {
+export const ActionColumn = ({ input }: ActionColumnProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);

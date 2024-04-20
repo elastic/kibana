@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
@@ -24,13 +24,11 @@ interface Props {
   argType: string;
 }
 
-export const FunctionUnknown = (
-  {
-    argType
-  }: Props
-) => (<div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
-  {strings.getUnknownArgumentTypeErrorMessage(argType)}
-</div>);
+export const FunctionUnknown = ({ argType }: Props) => (
+  <div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
+    {strings.getUnknownArgumentTypeErrorMessage(argType)}
+  </div>
+);
 
 FunctionUnknown.propTypes = {
   argType: PropTypes.string,

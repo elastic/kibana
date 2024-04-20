@@ -23,12 +23,7 @@ interface Props {
   children?: ReactChild;
 }
 
-const ErrorPage = (
-  {
-    title,
-    children
-  }: Props
-) => {
+const ErrorPage = ({ title, children }: Props) => {
   title =
     title ??
     i18n.translate('core.application.appRenderError.defaultTitle', {
@@ -47,15 +42,7 @@ const ErrorPage = (
   );
 };
 
-const ErrorApp = (
-  {
-    basePath,
-    history
-  }: {
-    basePath: IBasePath;
-    history: History;
-  }
-) => {
+const ErrorApp = ({ basePath, history }: { basePath: IBasePath; history: History }) => {
   const [currentLocation, setCurrentLocation] = useState(history.location);
   useLayoutEffect(() => {
     return history.listen((location) => setCurrentLocation(location));

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -17,11 +16,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const AdvancedSettings = (
-  {
-    setIsValid
-  }: Props
-) => {
+export const AdvancedSettings = ({ setIsValid }: Props) => {
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xl">

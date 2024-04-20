@@ -26,12 +26,7 @@ interface Props {
   isFlyoutMode: boolean;
 }
 
-const CommentActionsComponent = (
-  {
-    message,
-    isFlyoutMode
-  }: Props
-) => {
+const CommentActionsComponent = ({ message, isFlyoutMode }: Props) => {
   const toasts = useToasts();
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
@@ -103,7 +98,7 @@ const CommentActionsComponent = (
 
   return (
     // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed
-    (<EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       {isModelEvaluationEnabled && apmTraceLink != null && (
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE}>
@@ -151,7 +146,7 @@ const CommentActionsComponent = (
           </EuiCopy>
         </EuiToolTip>
       </EuiFlexItem>
-    </EuiFlexGroup>)
+    </EuiFlexGroup>
   );
 };
 

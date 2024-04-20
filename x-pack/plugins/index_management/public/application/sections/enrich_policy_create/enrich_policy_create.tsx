@@ -65,8 +65,10 @@ const CreateView = () => {
   );
 };
 
-export const EnrichPolicyCreate = (props: RouteComponentProps) => (<EnrichPoliciesAuthProvider>
-  <EnrichPoliciesWithPrivileges>
-    <CreateView {...props} />
-  </EnrichPoliciesWithPrivileges>
-</EnrichPoliciesAuthProvider>);
+export const EnrichPolicyCreate = (props: RouteComponentProps) => (
+  <EnrichPoliciesAuthProvider>
+    <EnrichPoliciesWithPrivileges>
+      <CreateView {...props} />
+    </EnrichPoliciesWithPrivileges>
+  </EnrichPoliciesAuthProvider>
+);

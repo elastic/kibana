@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
@@ -30,13 +30,7 @@ export const getTextExpansionOutputComponent = (inferrer: TextExpansionInference
   <TextExpansionOutput inferrer={inferrer} />
 );
 
-export const TextExpansionOutput = (
-  {
-    inferrer
-  }: {
-    inferrer: TextExpansionInference;
-  }
-) => {
+export const TextExpansionOutput = ({ inferrer }: { inferrer: TextExpansionInference }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -65,13 +59,7 @@ export const TextExpansionOutput = (
   );
 };
 
-export const DocumentResult = (
-  {
-    response
-  }: {
-    response: FormattedTextExpansionResponse;
-  }
-) => {
+export const DocumentResult = ({ response }: { response: FormattedTextExpansionResponse }) => {
   const statInfo = useResultStatFormatting(response);
 
   return (
@@ -107,13 +95,11 @@ export const DocumentResult = (
  * Currently not used. Tokens could contain sensitive words, so need to be hidden from the user.
  * This may change in the future, in which case this function will be used.
  */
-export const DocumentResultWithTokens = (
-  {
-    response
-  }: {
-    response: FormattedTextExpansionResponse;
-  }
-) => {
+export const DocumentResultWithTokens = ({
+  response,
+}: {
+  response: FormattedTextExpansionResponse;
+}) => {
   const tokens = response.adjustedTokenWeights
     .filter(({ value }) => value > 0)
     .sort((a, b) => b.value - a.value)

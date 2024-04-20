@@ -17,13 +17,7 @@ interface Props {
   onSelectedTagsChange: (selectedTags: string[]) => void;
 }
 
-export const TagsFilter = (
-  {
-    tags,
-    selectedTags,
-    onSelectedTagsChange
-  }: Props
-) => {
+export const TagsFilter = ({ tags, selectedTags, onSelectedTagsChange }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
 

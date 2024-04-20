@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { EuiRadioGroupOption } from '@elastic/eui';
 import {
@@ -33,14 +32,12 @@ interface EntityConfigProps {
   onConfigChange: (fieldType: MlEntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
 }
 
-export const EntityConfig = (
-  {
-    entity,
-    isModelPlotEnabled,
-    config,
-    onConfigChange
-  }: EntityConfigProps
-) => {
+export const EntityConfig = ({
+  entity,
+  isModelPlotEnabled,
+  config,
+  onConfigChange,
+}: EntityConfigProps) => {
   const [isEntityConfigPopoverOpen, setIsEntityConfigPopoverOpen] = useState(false);
 
   const forceSortByName = isModelPlotEnabled && !config?.anomalousOnly;

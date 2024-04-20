@@ -49,17 +49,15 @@ export interface Props {
   type: string;
 }
 
-export const NewSearchIndexTemplate = (
-  {
-    buttonLoading,
-    disabled,
-    error,
-    onNameChange,
-    onSubmit,
-    type,
-    isBeta
-  }: Props
-) => {
+export const NewSearchIndexTemplate = ({
+  buttonLoading,
+  disabled,
+  error,
+  onNameChange,
+  onSubmit,
+  type,
+  isBeta,
+}: Props) => {
   const {
     fullIndexName,
     fullIndexNameExists,

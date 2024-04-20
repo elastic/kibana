@@ -38,13 +38,11 @@ interface MlRuleWarningPopoverComponentProps {
   jobs: SecurityJob[];
 }
 
-const MlRuleWarningPopoverComponent = (
-  {
-    rule,
-    loadingJobs,
-    jobs
-  }: MlRuleWarningPopoverComponentProps
-) => {
+const MlRuleWarningPopoverComponent = ({
+  rule,
+  loadingJobs,
+  jobs,
+}: MlRuleWarningPopoverComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const jobIds = getMachineLearningJobId(rule);
 

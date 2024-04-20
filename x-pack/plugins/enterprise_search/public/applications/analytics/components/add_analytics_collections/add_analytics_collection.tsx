@@ -17,12 +17,7 @@ interface AddAnalyticsCollectionProps {
   disabled?: boolean;
   render?: (onClick: () => void) => React.ReactNode;
 }
-export const AddAnalyticsCollection = (
-  {
-    render,
-    disabled
-  }: AddAnalyticsCollectionProps
-) => {
+export const AddAnalyticsCollection = ({ render, disabled }: AddAnalyticsCollectionProps) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode, useMemo, FunctionComponent, MouseEventHandler } from 'react';
+import React, { ReactNode, useMemo, MouseEventHandler } from 'react';
 import { EuiCardProps, EuiSpacer, EuiText, EuiLink, CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -68,16 +68,14 @@ export interface NoDataPageProps extends CommonProps {
   actions: NoDataPageActionsProps;
 }
 
-export const NoDataPage = (
-  {
-    solution,
-    logo,
-    actions,
-    docsLink,
-    pageTitle,
-    ...rest
-  }: NoDataPageProps
-) => {
+export const NoDataPage = ({
+  solution,
+  logo,
+  actions,
+  docsLink,
+  pageTitle,
+  ...rest
+}: NoDataPageProps) => {
   // Convert obj data into an iterable array
   const entries = Object.entries(actions);
 

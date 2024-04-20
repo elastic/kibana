@@ -10,9 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { FieldBrowserProps } from '../application/sections/field_browser';
 
-const FieldBrowserLazy = lazy(
-  () => import('../application/sections/field_browser')
-);
+const FieldBrowserLazy = lazy(() => import('../application/sections/field_browser'));
 
 export const getFieldBrowserLazy = (props: FieldBrowserProps) => (
   <Suspense fallback={<EuiLoadingSpinner />}>

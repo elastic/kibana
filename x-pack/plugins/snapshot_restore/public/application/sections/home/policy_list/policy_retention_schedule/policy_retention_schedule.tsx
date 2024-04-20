@@ -39,14 +39,12 @@ interface Props {
   error: any;
 }
 
-export const PolicyRetentionSchedule = (
-  {
-    retentionSettings,
-    onRetentionScheduleUpdated,
-    isLoading,
-    error
-  }: Props
-) => {
+export const PolicyRetentionSchedule = ({
+  retentionSettings,
+  onRetentionScheduleUpdated,
+  isLoading,
+  error,
+}: Props) => {
   const { i18n } = useServices();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);

@@ -44,12 +44,7 @@ interface ThemeContextProps {
   darkMode: boolean;
 }
 
-export const UptimeThemeContextProvider = (
-  {
-    darkMode,
-    children
-  }: ThemeContextProps
-) => {
+export const UptimeThemeContextProvider = ({ darkMode, children }: ThemeContextProps) => {
   let colors: UptimeAppColors;
   if (darkMode) {
     colors = {

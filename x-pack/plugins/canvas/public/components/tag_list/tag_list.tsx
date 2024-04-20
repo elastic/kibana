@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { getId } from '../../lib/get_id';
 import { Tag } from '../tag';
@@ -26,21 +26,17 @@ export interface Props {
   getTag: (tagName: string) => TagSpec;
 }
 
-export const TagList = (
-  {
-    tags = [],
-    tagType = 'health',
-    getTag
-  }: Props
-) => (<Fragment>
-  {tags.length
-    ? tags.map((tag: string) => {
-        const { color, name } = getTag(tag);
-        const id = getId('tag');
-        return <Tag key={id} color={color} name={name} type={tagType} />;
-      })
-    : null}
-</Fragment>);
+export const TagList = ({ tags = [], tagType = 'health', getTag }: Props) => (
+  <Fragment>
+    {tags.length
+      ? tags.map((tag: string) => {
+          const { color, name } = getTag(tag);
+          const id = getId('tag');
+          return <Tag key={id} color={color} name={name} type={tagType} />;
+        })
+      : null}
+  </Fragment>
+);
 
 TagList.propTypes = {
   tags: PropTypes.array,

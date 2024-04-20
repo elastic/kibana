@@ -17,31 +17,33 @@ interface Props {
   intl: InjectedIntl;
 }
 
-const ConfirmAlterActiveSpaceModalUI = (props: Props) => (<EuiConfirmModal
-  onConfirm={props.onConfirm}
-  onCancel={props.onCancel}
-  title={
-    <FormattedMessage
-      id="xpack.spaces.management.confirmAlterActiveSpaceModal.title"
-      defaultMessage="Confirm update space"
-    />
-  }
-  defaultFocusedButton={'confirm'}
-  cancelButtonText={props.intl.formatMessage({
-    id: 'xpack.spaces.management.confirmAlterActiveSpaceModal.cancelButton',
-    defaultMessage: 'Cancel',
-  })}
-  confirmButtonText={props.intl.formatMessage({
-    id: 'xpack.spaces.management.confirmAlterActiveSpaceModal.updateSpaceButton',
-    defaultMessage: 'Update space',
-  })}
->
-  <p>
-    <FormattedMessage
-      id="xpack.spaces.management.confirmAlterActiveSpaceModal.reloadWarningMessage"
-      defaultMessage="You have updated the visible features in this space. Your page will reload after saving."
-    />
-  </p>
-</EuiConfirmModal>);
+const ConfirmAlterActiveSpaceModalUI = (props: Props) => (
+  <EuiConfirmModal
+    onConfirm={props.onConfirm}
+    onCancel={props.onCancel}
+    title={
+      <FormattedMessage
+        id="xpack.spaces.management.confirmAlterActiveSpaceModal.title"
+        defaultMessage="Confirm update space"
+      />
+    }
+    defaultFocusedButton={'confirm'}
+    cancelButtonText={props.intl.formatMessage({
+      id: 'xpack.spaces.management.confirmAlterActiveSpaceModal.cancelButton',
+      defaultMessage: 'Cancel',
+    })}
+    confirmButtonText={props.intl.formatMessage({
+      id: 'xpack.spaces.management.confirmAlterActiveSpaceModal.updateSpaceButton',
+      defaultMessage: 'Update space',
+    })}
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.spaces.management.confirmAlterActiveSpaceModal.reloadWarningMessage"
+        defaultMessage="You have updated the visible features in this space. Your page will reload after saving."
+      />
+    </p>
+  </EuiConfirmModal>
+);
 
 export const ConfirmAlterActiveSpaceModal = injectI18n(ConfirmAlterActiveSpaceModalUI);

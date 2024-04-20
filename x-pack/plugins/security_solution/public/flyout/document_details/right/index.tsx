@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -37,11 +36,7 @@ export interface RightPanelProps extends FlyoutPanelProps {
 /**
  * Panel to be displayed in the document details expandable flyout right section
  */
-export const RightPanel = memo((
-  {
-    path
-  }: Partial<RightPanelProps>
-) => {
+export const RightPanel = memo(({ path }: Partial<RightPanelProps>) => {
   const { storage, telemetry } = useKibana().services;
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =

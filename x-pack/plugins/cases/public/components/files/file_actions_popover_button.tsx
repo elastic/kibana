@@ -23,15 +23,13 @@ import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attach
 import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
 import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
 
-export const FileActionsPopoverButton = (
-  {
-    caseId,
-    theFile
-  }: {
-    caseId: string;
-    theFile: FileJSON;
-  }
-) => {
+export const FileActionsPopoverButton = ({
+  caseId,
+  theFile,
+}: {
+  caseId: string;
+  theFile: FileJSON;
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { owner, permissions } = useCasesContext();
   const { client: filesClient } = useFilesContext();

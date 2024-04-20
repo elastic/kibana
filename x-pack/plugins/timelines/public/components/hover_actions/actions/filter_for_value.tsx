@@ -21,8 +21,8 @@ export const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';
 
 export type FilterForValueProps = HoverActionComponentProps & FilterValueFnArgs;
 
-const FilterForValueButton = React.memo((
-  {
+const FilterForValueButton = React.memo(
+  ({
     Component,
     defaultFocusedButtonRef,
     field,
@@ -34,91 +34,91 @@ const FilterForValueButton = React.memo((
     size,
     showTooltip = false,
     value,
-    dataViewId
-  }: FilterForValueProps
-) => {
-  const filterForValueFn = useCallback(() => {
-    const makeFilter = (currentVal: string | null | undefined) =>
-      currentVal?.length === 0
-        ? createFilter(field, undefined, false, dataViewId)
-        : createFilter(field, currentVal, false, dataViewId);
-    const filters = Array.isArray(value)
-      ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
-      : makeFilter(value);
+    dataViewId,
+  }: FilterForValueProps) => {
+    const filterForValueFn = useCallback(() => {
+      const makeFilter = (currentVal: string | null | undefined) =>
+        currentVal?.length === 0
+          ? createFilter(field, undefined, false, dataViewId)
+          : createFilter(field, currentVal, false, dataViewId);
+      const filters = Array.isArray(value)
+        ? value.map((currentVal: string | null | undefined) => makeFilter(currentVal))
+        : makeFilter(value);
 
-    const activeFilterManager = filterManager;
+      const activeFilterManager = filterManager;
 
-    if (activeFilterManager != null) {
-      activeFilterManager.addFilters(filters);
-      if (onFilterAdded != null) {
-        onFilterAdded();
+      if (activeFilterManager != null) {
+        activeFilterManager.addFilters(filters);
+        if (onFilterAdded != null) {
+          onFilterAdded();
+        }
       }
-    }
 
-    if (onClick != null) {
-      onClick();
-    }
-  }, [dataViewId, field, filterManager, onClick, onFilterAdded, value]);
-
-  useEffect(() => {
-    if (!ownFocus) {
-      return;
-    }
-    if (keyboardEvent?.key === FILTER_FOR_VALUE_KEYBOARD_SHORTCUT) {
-      stopPropagationAndPreventDefault(keyboardEvent);
-      filterForValueFn();
-    }
-  }, [filterForValueFn, keyboardEvent, ownFocus]);
-
-  const button = useMemo(
-    () =>
-      Component ? (
-        <Component
-          aria-label={FILTER_FOR_VALUE}
-          buttonRef={defaultFocusedButtonRef}
-          data-test-subj="filter-for-value"
-          iconType="plusInCircle"
-          onClick={filterForValueFn}
-          size={size}
-          title={FILTER_FOR_VALUE}
-        >
-          {FILTER_FOR_VALUE}
-        </Component>
-      ) : (
-        <EuiButtonIcon
-          aria-label={FILTER_FOR_VALUE}
-          buttonRef={defaultFocusedButtonRef}
-          className="timelines__hoverActionButton"
-          data-test-subj="filter-for-value"
-          iconSize="s"
-          iconType="plusInCircle"
-          onClick={filterForValueFn}
-          size={size}
-        />
-      ),
-    [Component, defaultFocusedButtonRef, filterForValueFn, size]
-  );
-
-  return showTooltip ? (
-    <EuiToolTip
-      content={
-        <TooltipWithKeyboardShortcut
-          additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-            field,
-            value,
-          })}
-          content={FILTER_FOR_VALUE}
-          shortcut={FILTER_FOR_VALUE_KEYBOARD_SHORTCUT}
-          showShortcut={ownFocus}
-        />
+      if (onClick != null) {
+        onClick();
       }
-    >
-      {button}
-    </EuiToolTip>
-  ) : (
-    button
-  );
-});
+    }, [dataViewId, field, filterManager, onClick, onFilterAdded, value]);
+
+    useEffect(() => {
+      if (!ownFocus) {
+        return;
+      }
+      if (keyboardEvent?.key === FILTER_FOR_VALUE_KEYBOARD_SHORTCUT) {
+        stopPropagationAndPreventDefault(keyboardEvent);
+        filterForValueFn();
+      }
+    }, [filterForValueFn, keyboardEvent, ownFocus]);
+
+    const button = useMemo(
+      () =>
+        Component ? (
+          <Component
+            aria-label={FILTER_FOR_VALUE}
+            buttonRef={defaultFocusedButtonRef}
+            data-test-subj="filter-for-value"
+            iconType="plusInCircle"
+            onClick={filterForValueFn}
+            size={size}
+            title={FILTER_FOR_VALUE}
+          >
+            {FILTER_FOR_VALUE}
+          </Component>
+        ) : (
+          <EuiButtonIcon
+            aria-label={FILTER_FOR_VALUE}
+            buttonRef={defaultFocusedButtonRef}
+            className="timelines__hoverActionButton"
+            data-test-subj="filter-for-value"
+            iconSize="s"
+            iconType="plusInCircle"
+            onClick={filterForValueFn}
+            size={size}
+          />
+        ),
+      [Component, defaultFocusedButtonRef, filterForValueFn, size]
+    );
+
+    return showTooltip ? (
+      <EuiToolTip
+        content={
+          <TooltipWithKeyboardShortcut
+            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+              field,
+              value,
+            })}
+            content={FILTER_FOR_VALUE}
+            shortcut={FILTER_FOR_VALUE_KEYBOARD_SHORTCUT}
+            showShortcut={ownFocus}
+          />
+        }
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  }
+);
 
 FilterForValueButton.displayName = 'FilterForValueButton';
 

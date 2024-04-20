@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, FC } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { LangModuleType } from '@kbn/monaco';
 import { CodeEditorField } from '@kbn/code-editor';
@@ -27,14 +27,7 @@ interface EditorArgProps {
   renderError: (err?: string | Error) => void;
 }
 
-const EditorArg = (
-  {
-    argValue,
-    typeInstance,
-    onValueChange,
-    renderError
-  }: EditorArgProps
-) => {
+const EditorArg = ({ argValue, typeInstance, onValueChange, renderError }: EditorArgProps) => {
   const [value, setValue] = useState(argValue);
   const prevValue = usePrevious(value);
 

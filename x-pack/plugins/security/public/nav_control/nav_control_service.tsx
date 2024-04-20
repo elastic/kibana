@@ -6,7 +6,6 @@
  */
 
 import { sortBy } from 'lodash';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
@@ -143,19 +142,14 @@ export interface ProvidersProps {
   securityApiClients: SecurityApiClients;
 }
 
-export const Providers = (
-  {
-    authc,
-    services,
-    securityApiClients,
-    children
-  }: ProvidersProps
-) => (<KibanaRenderContextProvider {...services}>
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <SecurityApiClientsProvider {...securityApiClients}>
-        <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
-      </SecurityApiClientsProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
-</KibanaRenderContextProvider>);
+export const Providers = ({ authc, services, securityApiClients, children }: ProvidersProps) => (
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <SecurityApiClientsProvider {...securityApiClients}>
+          <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+        </SecurityApiClientsProvider>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
+);

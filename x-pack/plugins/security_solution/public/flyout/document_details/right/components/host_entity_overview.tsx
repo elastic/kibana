@@ -65,11 +65,7 @@ export interface HostEntityOverviewProps {
 /**
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const HostEntityOverview = (
-  {
-    hostName
-  }: HostEntityOverviewProps
-) => {
+export const HostEntityOverview = ({ hostName }: HostEntityOverviewProps) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {

@@ -9,15 +9,13 @@ import classnames from 'classnames';
 import React from 'react';
 import { useStepContentStyles } from '../../styles/step_content.styles';
 
-const ContentWrapperComponent = (
-  {
-    children,
-    shadow = true
-  }: {
-    children: React.ReactElement;
-    shadow?: boolean;
-  }
-) => {
+const ContentWrapperComponent = ({
+  children,
+  shadow = true,
+}: {
+  children: React.ReactElement;
+  shadow?: boolean;
+}) => {
   const { getRightContentStyles } = useStepContentStyles();
   const rightContentStyles = getRightContentStyles({ shadow });
   const rightPanelContentClassNames = classnames('right-panel-content', rightContentStyles);

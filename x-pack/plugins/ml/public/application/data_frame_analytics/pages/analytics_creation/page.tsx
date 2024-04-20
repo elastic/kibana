@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import {
@@ -45,11 +44,7 @@ interface Props {
   jobId?: DataFrameAnalyticsId;
 }
 
-export const Page = (
-  {
-    jobId
-  }: Props
-) => {
+export const Page = ({ jobId }: Props) => {
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
     true,

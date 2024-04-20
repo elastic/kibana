@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
@@ -40,13 +40,7 @@ export const WorkpadRoute = () => {
   );
 };
 
-const WorkpadRouteComponent = (
-  {
-    route
-  }: {
-    route: WorkpadRouteProps;
-  }
-) => {
+const WorkpadRouteComponent = ({ route }: { route: WorkpadRouteProps }) => {
   const getRedirectPath = useCallback(
     (workpadId: string) =>
       `/workpad/${workpadId}${
@@ -95,13 +89,7 @@ export const ExportWorkpadRoute = () => {
   );
 };
 
-const ExportWorkpadRouteComponent = (
-  {
-    route: { match }
-  }: {
-    route: WorkpadRouteProps;
-  }
-) => {
+const ExportWorkpadRouteComponent = ({ route: { match } }: { route: WorkpadRouteProps }) => {
   const getRedirectPath = useCallback(
     (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${match.params.pageNumber}`,
     [match.params.pageNumber]
@@ -144,19 +132,17 @@ export const WorkpadHistoryManager = ({ children }) => {
   return <>{children}</>;
 };
 
-const WorkpadLoaderComponent = (
-  {
-    params,
-    children,
-    loadPages,
-    getRedirectPath
-  }: {
-    params: WorkpadRouteProps['match']['params'];
-    loadPages?: boolean;
-    getRedirectPath: (workpadId: string) => string;
-    children: (workpad: CanvasWorkpad) => JSX.Element;
-  }
-) => {
+const WorkpadLoaderComponent = ({
+  params,
+  children,
+  loadPages,
+  getRedirectPath,
+}: {
+  params: WorkpadRouteProps['match']['params'];
+  loadPages?: boolean;
+  getRedirectPath: (workpadId: string) => string;
+  children: (workpad: CanvasWorkpad) => JSX.Element;
+}) => {
   const [workpad, error] = useWorkpad(params.id, loadPages, getRedirectPath);
   const notifyService = useNotifyService();
 

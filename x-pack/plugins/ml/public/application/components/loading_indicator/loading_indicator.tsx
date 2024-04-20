@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 
-export const LoadingIndicator = (
-  {
-    height,
-    label
-  }: {
-    height?: number;
-    label?: string;
-  }
-) => {
+export const LoadingIndicator = ({ height, label }: { height?: number; label?: string }) => {
   height = height ? +height : 100;
   return (
     <EuiFlexGroup justifyContent="spaceEvenly">

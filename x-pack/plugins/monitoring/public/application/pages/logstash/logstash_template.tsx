@@ -17,16 +17,14 @@ interface LogstashTemplateProps extends PageTemplateProps {
   tabsDisabled?: boolean;
 }
 
-export const LogstashTemplate = (
-  {
-    cluster,
-    instance,
-    pipelineId,
-    pipelineVersions,
-    tabsDisabled,
-    ...props
-  }: LogstashTemplateProps
-) => {
+export const LogstashTemplate = ({
+  cluster,
+  instance,
+  pipelineId,
+  pipelineVersions,
+  tabsDisabled,
+  ...props
+}: LogstashTemplateProps) => {
   const tabs: TabMenuItem[] = [];
   if (!tabsDisabled) {
     if (!instance && !pipelineId) {

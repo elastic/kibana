@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout, EuiFlyoutBody, EuiCallOut } from '@elastic/eui';
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
@@ -15,12 +15,7 @@ interface Props {
   pipelineName: string | string[] | null | undefined;
 }
 
-export const PipelineNotFoundFlyout = (
-  {
-    onClose,
-    pipelineName
-  }: Props
-) => {
+export const PipelineNotFoundFlyout = ({ onClose, pipelineName }: Props) => {
   return (
     <EuiFlyout onClose={onClose} size="m" maxWidth={550}>
       <EuiFlyoutHeader>

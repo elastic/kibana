@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useRef, useCallback } from 'react';
 
 import type { IntegrationsAppBrowseRouteState } from '../../../types';

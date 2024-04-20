@@ -40,15 +40,7 @@ interface Props {
   estimate: SyncEstimate;
 }
 
-export const FrequencyItem = (
-  {
-    type,
-    label,
-    description,
-    duration,
-    estimate
-  }: Props
-) => {
+export const FrequencyItem = ({ type, label, description, duration, estimate }: Props) => {
   const { contentSource } = useValues(SourceLogic);
   const { setSyncFrequency } = useActions(SynchronizationLogic({ contentSource }));
   const { lastRun, nextStart, duration: durationEstimate } = estimate;

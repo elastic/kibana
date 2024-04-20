@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type MouseEventHandler } from 'react';
+import React, { type MouseEventHandler } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
@@ -20,12 +20,7 @@ interface CreateTransformButtonProps {
   transformNodes: number;
 }
 
-export const CreateTransformButton = (
-  {
-    onClick,
-    transformNodes
-  }: CreateTransformButtonProps
-) => {
+export const CreateTransformButton = ({ onClick, transformNodes }: CreateTransformButtonProps) => {
   const capabilities = useTransformCapabilities();
 
   const disabled =

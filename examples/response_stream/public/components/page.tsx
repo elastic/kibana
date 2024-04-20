@@ -14,12 +14,7 @@ export interface PageProps {
   title?: React.ReactNode;
 }
 
-export const Page = (
-  {
-    title = 'Untitled',
-    children
-  }: PageProps
-) => {
+export const Page = ({ title = 'Untitled', children }: PageProps) => {
   return (
     <>
       <EuiPageTemplate.Header>

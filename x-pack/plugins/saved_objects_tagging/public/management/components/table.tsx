@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,22 +44,20 @@ const sorting = {
 export const isModifiedOrPrevented = (event: React.MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
-export const TagTable = (
-  {
-    loading,
-    capabilities,
-    tags,
-    initialQuery,
-    allowSelection,
-    onQueryChange,
-    selectedTags,
-    onSelectionChange,
-    onShowRelations,
-    getTagRelationUrl,
-    actionBar,
-    actions
-  }: TagTableProps
-) => {
+export const TagTable = ({
+  loading,
+  capabilities,
+  tags,
+  initialQuery,
+  allowSelection,
+  onQueryChange,
+  selectedTags,
+  onSelectionChange,
+  onShowRelations,
+  getTagRelationUrl,
+  actionBar,
+  actions,
+}: TagTableProps) => {
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
       field: 'name',
@@ -116,7 +114,7 @@ export const TagTable = (
 
         return capabilities.viewConnections ? (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
-          (<EuiLink
+          <EuiLink
             data-test-subj="tagsTableRowConnectionsLink"
             href={getTagRelationUrl(tag)}
             onClick={(e: React.MouseEvent) => {
@@ -127,7 +125,7 @@ export const TagTable = (
             }}
           >
             {columnText}
-          </EuiLink>)
+          </EuiLink>
         ) : (
           columnText
         );

@@ -36,12 +36,7 @@ export const usersStatItems: Readonly<StatItems[]> = [
 
 const ID = 'TotalUsersKpiQuery';
 
-const TotalUsersKpiComponent = (
-  {
-    from,
-    to
-  }: UsersKpiProps
-) => {
+const TotalUsersKpiComponent = ({ from, to }: UsersKpiProps) => {
   return <KpiBaseComponent id={ID} statItems={usersStatItems} from={from} to={to} />;
 };
 

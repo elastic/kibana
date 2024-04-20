@@ -44,12 +44,7 @@ const createStep = (formatter: InfraFormatter) => (rule: InfraWaffleMapStepRule,
   );
 };
 
-export const StepLegend = (
-  {
-    legend,
-    formatter
-  }: Props
-) => {
+export const StepLegend = ({ legend, formatter }: Props) => {
   return <StepLegendContainer>{legend.rules.map(createStep(formatter))}</StepLegendContainer>;
 };
 

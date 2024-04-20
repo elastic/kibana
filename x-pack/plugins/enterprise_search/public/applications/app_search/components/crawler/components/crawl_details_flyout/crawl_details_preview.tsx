@@ -21,11 +21,7 @@ interface CrawlDetailsPreviewProps {
   crawlerLogsEnabled?: boolean;
 }
 
-export const CrawlDetailsPreview = (
-  {
-    crawlerLogsEnabled = false
-  }: CrawlDetailsPreviewProps
-) => {
+export const CrawlDetailsPreview = ({ crawlerLogsEnabled = false }: CrawlDetailsPreviewProps) => {
   const { crawlRequest } = useValues(CrawlDetailLogic);
 
   if (crawlRequest === null) {

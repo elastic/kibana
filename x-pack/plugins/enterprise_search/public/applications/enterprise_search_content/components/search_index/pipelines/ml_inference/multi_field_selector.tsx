@@ -220,11 +220,7 @@ export interface SelectedFieldMappingsProps {
   isReadOnly?: boolean;
 }
 
-export const SelectedFieldMappings = (
-  {
-    isReadOnly
-  }: SelectedFieldMappingsProps
-) => {
+export const SelectedFieldMappings = ({ isReadOnly }: SelectedFieldMappingsProps) => {
   const { removeFieldFromMapping } = useActions(MLInferenceLogic);
   const {
     addInferencePipelineModal: { configuration },

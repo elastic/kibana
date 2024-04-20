@@ -19,11 +19,7 @@ interface ConnectorIndexNamePanelProps {
   connector: Connector;
 }
 
-export const ConnectorIndexnamePanel = (
-  {
-    connector
-  }: ConnectorIndexNamePanelProps
-) => {
+export const ConnectorIndexnamePanel = ({ connector }: ConnectorIndexNamePanelProps) => {
   const { http } = useKibanaServices();
   const { data, isLoading, isSuccess, mutate, reset } = useMutation({
     mutationFn: async (inputName: string) => {

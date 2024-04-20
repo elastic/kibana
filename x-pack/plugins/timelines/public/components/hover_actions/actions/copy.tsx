@@ -29,73 +29,65 @@ export interface CopyProps extends HoverActionComponentProps {
   isHoverAction?: boolean;
 }
 
-const CopyButton = React.memo((
-  {
-    Component,
-    field,
-    isHoverAction,
-    onClick,
-    keyboardEvent,
-    ownFocus,
-    value
-  }: CopyProps
-) => {
-  const { addSuccess } = useAppToasts();
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!ownFocus) {
-      return;
-    }
-    if (keyboardEvent?.key === COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT) {
-      stopPropagationAndPreventDefault(keyboardEvent);
-      const copyToClipboardButton = panelRef.current?.querySelector<HTMLButtonElement>(
-        `.${COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}`
-      );
-      if (copyToClipboardButton != null) {
-        copyToClipboardButton.click();
+const CopyButton = React.memo(
+  ({ Component, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }: CopyProps) => {
+    const { addSuccess } = useAppToasts();
+    const panelRef = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+      if (!ownFocus) {
+        return;
       }
+      if (keyboardEvent?.key === COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT) {
+        stopPropagationAndPreventDefault(keyboardEvent);
+        const copyToClipboardButton = panelRef.current?.querySelector<HTMLButtonElement>(
+          `.${COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}`
+        );
+        if (copyToClipboardButton != null) {
+          copyToClipboardButton.click();
+        }
+        if (onClick != null) {
+          onClick();
+        }
+      }
+    }, [onClick, keyboardEvent, ownFocus]);
+
+    const text = useMemo(() => `${field}${value != null ? `: "${value}"` : ''}`, [field, value]);
+
+    const handleOnClick = useCallback(() => {
+      const isSuccess = copy(text, { debug: true });
       if (onClick != null) {
         onClick();
       }
-    }
-  }, [onClick, keyboardEvent, ownFocus]);
 
-  const text = useMemo(() => `${field}${value != null ? `: "${value}"` : ''}`, [field, value]);
+      if (isSuccess) {
+        addSuccess(SUCCESS_TOAST_TITLE(field), { toastLifeTimeMs: 800 });
+      }
+    }, [addSuccess, field, onClick, text]);
 
-  const handleOnClick = useCallback(() => {
-    const isSuccess = copy(text, { debug: true });
-    if (onClick != null) {
-      onClick();
-    }
-
-    if (isSuccess) {
-      addSuccess(SUCCESS_TOAST_TITLE(field), { toastLifeTimeMs: 800 });
-    }
-  }, [addSuccess, field, onClick, text]);
-
-  return Component ? (
-    <Component
-      aria-label={COPY_TO_CLIPBOARD}
-      data-test-subj="copy-to-clipboard"
-      icon="copy"
-      iconType="copy"
-      onClick={handleOnClick}
-      title={COPY_TO_CLIPBOARD}
-    >
-      {COPY_TO_CLIPBOARD}
-    </Component>
-  ) : (
-    <div ref={panelRef}>
-      <WithCopyToClipboard
+    return Component ? (
+      <Component
+        aria-label={COPY_TO_CLIPBOARD}
         data-test-subj="copy-to-clipboard"
-        isHoverAction={isHoverAction}
-        keyboardShortcut={ownFocus ? COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT : ''}
-        text={text}
-        titleSummary={FIELD}
-      />
-    </div>
-  );
-});
+        icon="copy"
+        iconType="copy"
+        onClick={handleOnClick}
+        title={COPY_TO_CLIPBOARD}
+      >
+        {COPY_TO_CLIPBOARD}
+      </Component>
+    ) : (
+      <div ref={panelRef}>
+        <WithCopyToClipboard
+          data-test-subj="copy-to-clipboard"
+          isHoverAction={isHoverAction}
+          keyboardShortcut={ownFocus ? COPY_TO_CLIPBOARD_KEYBOARD_SHORTCUT : ''}
+          text={text}
+          titleSummary={FIELD}
+        />
+      </div>
+    );
+  }
+);
 
 CopyButton.displayName = 'CopyButton';
 

@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 import { getMitreComponentParts } from '../../../../detections/mitre/get_mitre_threat_component';

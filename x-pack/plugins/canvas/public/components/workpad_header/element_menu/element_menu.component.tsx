@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
@@ -119,12 +119,7 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const ElementMenu = (
-  {
-    elements,
-    addElement
-  }: Props
-) => {
+export const ElementMenu = ({ elements, addElement }: Props) => {
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 

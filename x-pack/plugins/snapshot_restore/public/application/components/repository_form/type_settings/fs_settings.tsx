@@ -28,13 +28,7 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const FSSettings = (
-  {
-    repository,
-    updateRepositorySettings,
-    settingErrors
-  }: Props
-) => {
+export const FSSettings = ({ repository, updateRepositorySettings, settingErrors }: Props) => {
   const {
     settings: {
       location,

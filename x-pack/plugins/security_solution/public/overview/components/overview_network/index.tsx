@@ -38,15 +38,13 @@ export interface OverviewNetworkProps {
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 
-const OverviewNetworkComponent = (
-  {
-    endDate,
-    filterQuery,
-    indexNames,
-    startDate,
-    setQuery
-  }: OverviewNetworkProps
-) => {
+const OverviewNetworkComponent = ({
+  endDate,
+  filterQuery,
+  indexNames,
+  startDate,
+  setQuery,
+}: OverviewNetworkProps) => {
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);

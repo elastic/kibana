@@ -32,12 +32,7 @@ interface AddQueryFlyoutProps {
   onClose: () => void;
 }
 
-const SavedQueryFlyoutComponent = (
-  {
-    defaultValue,
-    onClose
-  }: AddQueryFlyoutProps
-) => {
+const SavedQueryFlyoutComponent = ({ defaultValue, onClose }: AddQueryFlyoutProps) => {
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const hooksForm = useSavedQueryForm({

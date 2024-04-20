@@ -26,13 +26,7 @@ const heights = {
 
 export const TableContext = createContext<{ tableId: string | null }>({ tableId: null });
 
-export const TableLoading = (
-  {
-    height = 'tall'
-  }: {
-    height?: keyof typeof heights;
-  }
-) => {
+export const TableLoading = ({ height = 'tall' }: { height?: keyof typeof heights }) => {
   return (
     <EuiPanel color="subdued">
       <EuiFlexGroup

@@ -34,14 +34,7 @@ export interface TestPipelineFlyoutForm {
   documents: string | Document[];
 }
 
-export const TestPipelineFlyout = (
-  {
-    onClose,
-    activeTab,
-    setActiveTab,
-    processors
-  }: Props
-) => {
+export const TestPipelineFlyout = ({ onClose, activeTab, setActiveTab, processors }: Props) => {
   const { services } = useKibana();
   const isMounted = useIsMounted();
 

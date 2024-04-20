@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { EuiListGroupItem } from '@elastic/eui';
 
@@ -18,11 +18,7 @@ interface Props {
   item: ChromeProjectNavigationNode;
 }
 
-export const PanelNavItem = (
-  {
-    item
-  }: Props
-) => {
+export const PanelNavItem = ({ item }: Props) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab } = item;

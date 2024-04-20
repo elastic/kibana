@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
@@ -18,11 +17,7 @@ interface Props {
   detectorType: RARE_DETECTOR_TYPE;
 }
 
-export const DetectorDescription = (
-  {
-    detectorType
-  }: Props
-) => {
+export const DetectorDescription = ({ detectorType }: Props) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
   const [description, setDescription] = useState<string | null>(null);

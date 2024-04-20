@@ -19,13 +19,11 @@ const euiColorPaletteDisplayCss = {
   },
 };
 
-export const AgentStatusBar = (
-  {
-    agentStatus
-  }: {
-    agentStatus: { [k in ActionAgentStatus]: number };
-  }
-) => {
+export const AgentStatusBar = ({
+  agentStatus,
+}: {
+  agentStatus: { [k in ActionAgentStatus]: number };
+}) => {
   const palette = useMemo(() => {
     let stop = 0;
 

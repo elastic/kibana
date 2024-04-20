@@ -76,57 +76,50 @@ const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: s
   body: i18n.EMAIL_BODY(caseUrl),
 });
 
-export const UserList = React.memo((
-  {
-    theCase,
-    userProfiles,
-    headline,
-    loading,
-    users,
-    dataTestSubj
-  }: UserListProps
-) => {
-  const { getCaseViewUrl } = useCaseViewNavigation();
-  const { euiTheme } = useEuiTheme();
-  const caseUrl = getCaseViewUrl({ detailName: theCase.id });
-  const email = getEmailContent({ caseTitle: theCase.title, caseUrl });
+export const UserList = React.memo(
+  ({ theCase, userProfiles, headline, loading, users, dataTestSubj }: UserListProps) => {
+    const { getCaseViewUrl } = useCaseViewNavigation();
+    const { euiTheme } = useEuiTheme();
+    const caseUrl = getCaseViewUrl({ detailName: theCase.id });
+    const email = getEmailContent({ caseTitle: theCase.title, caseUrl });
 
-  const handleSendEmail = useCallback(
-    (emailAddress: string | undefined | null) => {
-      if (emailAddress && emailAddress != null) {
-        window.open(
-          `mailto:${emailAddress}?subject=${email.subject}&body=${email.body}`,
-          '_blank'
-        );
-      }
-    },
-    [email.body, email.subject]
-  );
+    const handleSendEmail = useCallback(
+      (emailAddress: string | undefined | null) => {
+        if (emailAddress && emailAddress != null) {
+          window.open(
+            `mailto:${emailAddress}?subject=${email.subject}&body=${email.body}`,
+            '_blank'
+          );
+        }
+      },
+      [email.body, email.subject]
+    );
 
-  const validUsers = getValidUsers(users, userProfiles ?? new Map());
-  const orderedUsers = sortBy(validUsers, getSortField);
+    const validUsers = getValidUsers(users, userProfiles ?? new Map());
+    const orderedUsers = sortBy(validUsers, getSortField);
 
-  if (orderedUsers.length === 0) {
-    return null;
+    if (orderedUsers.length === 0) {
+      return null;
+    }
+
+    return (
+      <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
+        <EuiTitle size="xs">
+          <h3>{headline}</h3>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        {loading && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {renderUsers(orderedUsers, handleSendEmail, euiTheme)}
+      </EuiFlexItem>
+    );
   }
-
-  return (
-    <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
-      <EuiTitle size="xs">
-        <h3>{headline}</h3>
-      </EuiTitle>
-      <EuiHorizontalRule margin="xs" />
-      {loading && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {renderUsers(orderedUsers, handleSendEmail, euiTheme)}
-    </EuiFlexItem>
-  );
-});
+);
 
 UserList.displayName = 'UserList';
 

@@ -20,13 +20,7 @@ const panelStyle = {
   maxWidth: 500,
 };
 
-export const EmptyState = (
-  {
-    height = 'tall'
-  }: {
-    height?: keyof typeof heights;
-  }
-) => {
+export const EmptyState = ({ height = 'tall' }: { height?: keyof typeof heights }) => {
   return (
     <EuiPanel color="subdued" data-test-subj={PANEL_TEST_ID}>
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">

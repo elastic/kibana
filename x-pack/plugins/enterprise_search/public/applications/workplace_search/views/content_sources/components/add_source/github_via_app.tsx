@@ -42,11 +42,7 @@ interface GithubViaAppProps {
   isGithubEnterpriseServer: boolean;
 }
 
-export const GitHubViaApp = (
-  {
-    isGithubEnterpriseServer
-  }: GithubViaAppProps
-) => {
+export const GitHubViaApp = ({ isGithubEnterpriseServer }: GithubViaAppProps) => {
   const { isOrganization } = useValues(AppLogic);
   const {
     githubAppId,

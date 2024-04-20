@@ -22,13 +22,7 @@ interface Props {
   name: string;
 }
 
-export const ProximityBoostForm = (
-  {
-    boost,
-    index,
-    name
-  }: Props
-) => {
+export const ProximityBoostForm = ({ boost, index, name }: Props) => {
   const { updateBoostSelectOption, updateBoostCenter } = useActions(RelevanceTuningLogic);
 
   const currentBoostCenter = boost.center !== undefined ? boost.center.toString() : '';

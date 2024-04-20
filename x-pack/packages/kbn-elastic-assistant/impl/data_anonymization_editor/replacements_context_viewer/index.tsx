@@ -14,12 +14,7 @@ export interface Props {
   replacements: Replacements;
 }
 
-const ReplacementsContextViewerComponent = (
-  {
-    markdown,
-    replacements
-  }: Props
-) => {
+const ReplacementsContextViewerComponent = ({ markdown, replacements }: Props) => {
   const markdownWithOriginalValues = Object.keys(replacements).reduce<string>(
     (acc, uuid) => acc.replaceAll(uuid, replacements[uuid]),
     markdown

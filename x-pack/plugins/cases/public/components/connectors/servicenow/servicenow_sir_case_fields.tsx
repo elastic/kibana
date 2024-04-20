@@ -31,11 +31,7 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const ServiceNowSIRFieldsComponent = (
-  {
-    connector
-  }: ConnectorFieldsProps
-) => {
+const ServiceNowSIRFieldsComponent = ({ connector }: ConnectorFieldsProps) => {
   const form = useFormContext();
   const [{ fields }] = useFormData<{ fields: ServiceNowSIRFieldsType }>();
   const { category = null } = fields ?? {};

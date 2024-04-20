@@ -112,13 +112,7 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const RuleActionsField = (
-  {
-    field,
-    messageVariables,
-    summaryMessageVariables
-  }: Props
-) => {
+export const RuleActionsField = ({ field, messageVariables, summaryMessageVariables }: Props) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
   const { isValid } = form;

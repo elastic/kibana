@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -20,11 +19,7 @@ interface Props {
   detectorIndex: number;
 }
 
-export const ByFieldSelector = (
-  {
-    detectorIndex
-  }: Props
-) => {
+export const ByFieldSelector = ({ detectorIndex }: Props) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 

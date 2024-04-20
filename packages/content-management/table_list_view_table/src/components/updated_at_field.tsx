@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
@@ -16,15 +16,13 @@ import { DateFormatter } from '../services';
 const DefaultDateFormatter: DateFormatter = ({ value, children }) =>
   children(new Date(value).toDateString());
 
-export const UpdatedAtField = (
-  {
-    dateTime,
-    DateFormatterComp = DefaultDateFormatter
-  }: {
-    dateTime?: string;
-    DateFormatterComp?: DateFormatter;
-  }
-) => {
+export const UpdatedAtField = ({
+  dateTime,
+  DateFormatterComp = DefaultDateFormatter,
+}: {
+  dateTime?: string;
+  DateFormatterComp?: DateFormatter;
+}) => {
   if (!dateTime) {
     return (
       <EuiToolTip

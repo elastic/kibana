@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext } from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import { useDashboardService } from '../../../../../../../../../services/dashboard_service';

@@ -368,23 +368,21 @@ export const ExpressionRow = (props: ExpressionRowProps) => {
   );
 };
 
-const ThresholdElement = (
-  {
-    updateComparator,
-    updateThreshold,
-    threshold,
-    isMetricPct,
-    comparator,
-    errors
-  }: {
-    updateComparator: (c?: string) => void;
-    updateThreshold: (t?: number[]) => void;
-    threshold: MetricExpression['threshold'];
-    isMetricPct: boolean;
-    comparator: MetricExpression['comparator'];
-    errors: IErrorObject;
-  }
-) => {
+const ThresholdElement = ({
+  updateComparator,
+  updateThreshold,
+  threshold,
+  isMetricPct,
+  comparator,
+  errors,
+}: {
+  updateComparator: (c?: string) => void;
+  updateThreshold: (t?: number[]) => void;
+  threshold: MetricExpression['threshold'];
+  isMetricPct: boolean;
+  comparator: MetricExpression['comparator'];
+  errors: IErrorObject;
+}) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;

@@ -23,11 +23,7 @@ interface AgentsPolicyLinkProps {
   policyId: string;
 }
 
-const AgentsPolicyLinkComponent = (
-  {
-    policyId
-  }: AgentsPolicyLinkProps
-) => {
+const AgentsPolicyLinkComponent = ({ policyId }: AgentsPolicyLinkProps) => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
@@ -56,9 +52,9 @@ const AgentsPolicyLinkComponent = (
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    (<EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
+    <EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
       {data?.name ?? policyId}
-    </EuiLink>)
+    </EuiLink>
   );
 };
 

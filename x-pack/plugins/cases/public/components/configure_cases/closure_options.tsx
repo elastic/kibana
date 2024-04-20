@@ -18,35 +18,35 @@ export interface ClosureOptionsProps {
   onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
-const ClosureOptionsComponent = (
-  {
-    closureTypeSelected,
-    disabled,
-    onChangeClosureType
-  }: ClosureOptionsProps
-) => (<EuiDescribedFormGroup
-  fullWidth
-  title={<h3>{i18n.CASE_CLOSURE_OPTIONS_TITLE}</h3>}
-  description={
-    <>
-      <p>{i18n.CASE_CLOSURE_OPTIONS_DESC}</p>
-    </>
-  }
-  data-test-subj="case-closure-options-form-group"
->
-  <EuiFormRow
+const ClosureOptionsComponent = ({
+  closureTypeSelected,
+  disabled,
+  onChangeClosureType,
+}: ClosureOptionsProps) => (
+  <EuiDescribedFormGroup
     fullWidth
-    label={i18n.CASE_CLOSURE_OPTIONS_LABEL}
-    data-test-subj="case-closure-options-form-row"
+    title={<h3>{i18n.CASE_CLOSURE_OPTIONS_TITLE}</h3>}
+    description={
+      <>
+        <p>{i18n.CASE_CLOSURE_OPTIONS_DESC}</p>
+      </>
+    }
+    data-test-subj="case-closure-options-form-group"
   >
-    <ClosureOptionsRadio
-      closureTypeSelected={closureTypeSelected}
-      disabled={disabled}
-      onChangeClosureType={onChangeClosureType}
-      data-test-subj="case-closure-options-radio"
-    />
-  </EuiFormRow>
-</EuiDescribedFormGroup>);
+    <EuiFormRow
+      fullWidth
+      label={i18n.CASE_CLOSURE_OPTIONS_LABEL}
+      data-test-subj="case-closure-options-form-row"
+    >
+      <ClosureOptionsRadio
+        closureTypeSelected={closureTypeSelected}
+        disabled={disabled}
+        onChangeClosureType={onChangeClosureType}
+        data-test-subj="case-closure-options-radio"
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+);
 ClosureOptionsComponent.displayName = 'ClosureOptions';
 
 export const ClosureOptions = React.memo(ClosureOptionsComponent);

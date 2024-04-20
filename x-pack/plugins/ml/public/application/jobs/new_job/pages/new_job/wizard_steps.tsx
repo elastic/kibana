@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useState, useMemo, useEffect, useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -32,12 +31,7 @@ interface Props {
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
 }
 
-export const WizardSteps = (
-  {
-    currentStep,
-    setCurrentStep
-  }: Props
-) => {
+export const WizardSteps = ({ currentStep, setCurrentStep }: Props) => {
   const dataSourceContext = useDataSource();
   const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
@@ -193,14 +187,7 @@ export const WizardSteps = (
   );
 };
 
-const Title = (
-  {
-    'data-test-subj': dataTestSubj,
-    children
-  }: {
-    'data-test-subj': string;
-  }
-) => {
+const Title = ({ 'data-test-subj': dataTestSubj, children }: { 'data-test-subj': string }) => {
   return (
     <Fragment>
       <EuiTitle size="s">

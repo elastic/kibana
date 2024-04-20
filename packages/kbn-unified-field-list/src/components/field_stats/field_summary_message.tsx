@@ -13,10 +13,6 @@ export interface FieldSummaryMessageProps {
   message: string;
 }
 
-export const FieldSummaryMessage = (
-  {
-    message
-  }: FieldSummaryMessageProps
-) => {
+export const FieldSummaryMessage = ({ message }: FieldSummaryMessageProps) => {
   return <EuiText size="s">{message}</EuiText>;
 };

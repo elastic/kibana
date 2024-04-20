@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useRef } from 'react';
+import React, { useRef } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 
 export interface Props {
   json: Record<string, any>;
 }
 
-export const PipelineDetailsJsonBlock = (
-  {
-    json
-  }: Props
-) => {
+export const PipelineDetailsJsonBlock = ({ json }: Props) => {
   // Hack so copied-to-clipboard value updates as content changes
   // Related issue: https://github.com/elastic/eui/issues/3321
   const uuid = useRef(0);

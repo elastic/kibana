@@ -38,11 +38,7 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   ],
 };
 
-const ConnectorFormFieldsGlobalComponent = (
-  {
-    canSave
-  }: ConnectorFormFieldsProps
-) => {
+const ConnectorFormFieldsGlobalComponent = ({ canSave }: ConnectorFormFieldsProps) => {
   return (
     <>
       <UseField path="id" component={HiddenField} />

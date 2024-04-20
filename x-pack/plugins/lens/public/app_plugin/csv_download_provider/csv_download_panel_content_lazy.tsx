@@ -7,7 +7,7 @@
 
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import * as React from 'react';
-import { FC, lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import type { DownloadPanelContentProps } from './csv_download_panel_content';
 
 const LazyComponent = lazy(() =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { ProcessorsTree } from '.';
 import { usePipelineProcessorsContext } from '../context';
 
@@ -15,11 +15,9 @@ export interface Props {
   stateSlice: typeof ON_FAILURE_STATE_SCOPE | typeof PROCESSOR_STATE_SCOPE;
 }
 
-export const PipelineProcessorsEditor = memo(function PipelineProcessorsEditor(
-  {
-    stateSlice
-  }: Props
-) {
+export const PipelineProcessorsEditor = memo(function PipelineProcessorsEditor({
+  stateSlice,
+}: Props) {
   const {
     onTreeAction,
     state: { editor, processors },

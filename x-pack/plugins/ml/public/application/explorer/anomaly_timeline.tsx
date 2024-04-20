@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { isEqual } from 'lodash';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -88,11 +86,7 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
   };
 }
 
-export const AnomalyTimeline = React.memo((
-  {
-    explorerState
-  }: AnomalyTimelineProps
-) => {
+export const AnomalyTimeline = React.memo(({ explorerState }: AnomalyTimelineProps) => {
   const {
     services: {
       application: { capabilities },
@@ -145,9 +139,7 @@ export const AnomalyTimeline = React.memo((
     true
   );
 
-  const overallSwimlaneData = useObservable(
-    anomalyTimelineStateService.getOverallSwimLaneData$()
-  );
+  const overallSwimlaneData = useObservable(anomalyTimelineStateService.getOverallSwimLaneData$());
 
   const viewBySwimlaneData = useObservable(anomalyTimelineStateService.getViewBySwimLaneData$());
   const selectedCells = useObservable(
@@ -250,9 +242,7 @@ export const AnomalyTimeline = React.memo((
         }),
         items: [
           {
-            name: (
-              <FormattedMessage id="xpack.ml.explorer.overallLabel" defaultMessage="Overall" />
-            ),
+            name: <FormattedMessage id="xpack.ml.explorer.overallLabel" defaultMessage="Overall" />,
 
             onClick: closePopoverOnAction(setSelectedSwimlane.bind(null, SWIMLANE_TYPE.OVERALL)),
             'data-test-subj': 'mlAnomalyTimelinePanelAddOverallToDashboardButton',
@@ -279,10 +269,7 @@ export const AnomalyTimeline = React.memo((
       rootItems.push({
         panel: 1,
         name: (
-          <FormattedMessage
-            id="xpack.ml.explorer.attachToCaseLabel"
-            defaultMessage="Add to case"
-          />
+          <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
         ),
         'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
       });
@@ -291,10 +278,7 @@ export const AnomalyTimeline = React.memo((
         id: 1,
         initialFocusedItemIndex: 0,
         title: (
-          <FormattedMessage
-            id="xpack.ml.explorer.attachToCaseLabel"
-            defaultMessage="Add to case"
-          />
+          <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
         ),
         items: [
           {
@@ -372,9 +356,7 @@ export const AnomalyTimeline = React.memo((
         description: newDescription,
         jobIds,
         swimlaneType: selectedSwimlane,
-        ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY
-          ? { viewBy: viewBySwimlaneFieldName }
-          : {}),
+        ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
         ...(queryString !== undefined
           ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
           : {}),

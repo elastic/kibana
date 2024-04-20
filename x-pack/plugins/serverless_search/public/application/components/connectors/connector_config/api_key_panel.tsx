@@ -26,14 +26,10 @@ import { useCreateApiKey } from '../../../hooks/api/use_create_api_key';
 interface ApiKeyPanelProps {
   connector: Connector;
 }
-export const ApiKeyPanel = (
-  {
-    connector
-  }: ApiKeyPanelProps
-) => {
+export const ApiKeyPanel = ({ connector }: ApiKeyPanelProps) => {
   const { data, isLoading, mutate } = useCreateApiKey();
   return (
-    (<EuiPanel hasBorder>
+    <EuiPanel hasBorder>
       <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -100,6 +96,6 @@ export const ApiKeyPanel = (
       </span>
       <EuiSpacer />
       {Boolean(data) && <EuiCodeBlock isCopyable>{data?.encoded}</EuiCodeBlock>}
-    </EuiPanel>)
+    </EuiPanel>
   );
 };

@@ -29,15 +29,13 @@ interface Props {
   replacements?: Replacements;
 }
 
-const StatsComponent = (
-  {
-    isDataAnonymizable,
-    anonymizationFields,
-    rawData,
-    inline,
-    replacements
-  }: Props
-) => {
+const StatsComponent = ({
+  isDataAnonymizable,
+  anonymizationFields,
+  rawData,
+  inline,
+  replacements,
+}: Props) => {
   const { allowed, anonymized, total } = useMemo(
     () =>
       getStats({

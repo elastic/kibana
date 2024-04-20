@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -19,11 +18,7 @@ interface MlJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlJobsDescriptionComponent = (
-  {
-    jobIds
-  }: MlJobsDescriptionProps
-) => {
+const MlJobsDescriptionComponent = ({ jobIds }: MlJobsDescriptionProps) => {
   const mlCapabilities = useMlCapabilities();
 
   const isMlUser = hasMlUserPermissions(mlCapabilities);

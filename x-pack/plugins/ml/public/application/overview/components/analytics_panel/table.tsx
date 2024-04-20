@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import type { Direction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
@@ -24,11 +23,7 @@ import { useTableActions } from './actions';
 interface Props {
   items: DataFrameAnalyticsListRow[];
 }
-export const AnalyticsTable = (
-  {
-    items
-  }: Props
-) => {
+export const AnalyticsTable = ({ items }: Props) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 

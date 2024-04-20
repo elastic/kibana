@@ -55,14 +55,12 @@ const DEFAULT_THRESHOLD = '99';
 
 const isThresholdInvalid = (n: number): boolean => isNaN(n) || n <= 0 || n > 100;
 
-export const AvailabilityExpressionSelect = (
-  {
-    ruleParams,
-    isOldAlert,
-    setRuleParams,
-    hasFilters
-  }: Props
-) => {
+export const AvailabilityExpressionSelect = ({
+  ruleParams,
+  isOldAlert,
+  setRuleParams,
+  hasFilters,
+}: Props) => {
   const [range, setRange] = useState<number>(ruleParams?.availability?.range ?? DEFAULT_RANGE);
   const [rangeUnit, setRangeUnit] = useState<string>(
     ruleParams?.availability?.rangeUnit ?? DEFAULT_TIMERANGE_UNIT

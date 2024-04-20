@@ -24,12 +24,7 @@ const ChartTypeIcon = styled(EuiIcon)`
 `;
 const AlertViewOptions: AlertViewSelection[] = ['charts', 'trend', 'table', 'treemap'];
 
-const ChartSelectComponent = (
-  {
-    alertViewSelection,
-    setAlertViewSelection
-  }: Props
-) => {
+const ChartSelectComponent = ({ alertViewSelection, setAlertViewSelection }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);

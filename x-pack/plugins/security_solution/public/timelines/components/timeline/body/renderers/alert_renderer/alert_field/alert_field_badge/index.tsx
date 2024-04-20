@@ -25,42 +25,42 @@ interface Props {
   value: string | number | null | undefined;
 }
 
-const AlertFieldBadgeComponent = (
-  {
-    contextId,
-    eventId,
-    field,
-    fieldType = DEFAULT_FIELD_TYPE,
-    isAggregatable = true,
-    isDraggable,
-    showSeparator,
-    scopeId,
-    value
-  }: Props
-) => (<AlertFieldFlexGroup
-  alignItems="center"
-  data-test-subj="alertFieldBadge"
-  $scopeId={scopeId}
-  gutterSize="none"
->
-  <EuiFlexItem grow={false}>
-    <DraggableBadge
-      contextId={`${contextId}-alert-field`}
-      eventId={eventId}
-      field={field}
-      fieldType={fieldType}
-      isAggregatable={isAggregatable}
-      isDraggable={isDraggable}
-      scopeId={scopeId}
-      value={value}
-    />
-  </EuiFlexItem>
-  {showSeparator && (
+const AlertFieldBadgeComponent = ({
+  contextId,
+  eventId,
+  field,
+  fieldType = DEFAULT_FIELD_TYPE,
+  isAggregatable = true,
+  isDraggable,
+  showSeparator,
+  scopeId,
+  value,
+}: Props) => (
+  <AlertFieldFlexGroup
+    alignItems="center"
+    data-test-subj="alertFieldBadge"
+    $scopeId={scopeId}
+    gutterSize="none"
+  >
     <EuiFlexItem grow={false}>
-      <span data-test-subj="separator">{', '}</span>
+      <DraggableBadge
+        contextId={`${contextId}-alert-field`}
+        eventId={eventId}
+        field={field}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
+        isDraggable={isDraggable}
+        scopeId={scopeId}
+        value={value}
+      />
     </EuiFlexItem>
-  )}
-</AlertFieldFlexGroup>);
+    {showSeparator && (
+      <EuiFlexItem grow={false}>
+        <span data-test-subj="separator">{', '}</span>
+      </EuiFlexItem>
+    )}
+  </AlertFieldFlexGroup>
+);
 
 AlertFieldBadgeComponent.displayName = 'AlertFieldBadgeComponent';
 

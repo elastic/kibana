@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -35,12 +34,7 @@ interface Props {
   setAdvancedExpanded: (a: boolean) => void;
 }
 
-export const AdvancedSection = (
-  {
-    advancedExpanded,
-    setAdvancedExpanded
-  }: Props
-) => {
+export const AdvancedSection = ({ advancedExpanded, setAdvancedExpanded }: Props) => {
   const { jobCreator } = useContext(JobCreatorContext);
 
   if (jobCreator.type === JOB_TYPE.ADVANCED) {

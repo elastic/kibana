@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiBadge, EuiHealth } from '@elastic/eui';
 
@@ -24,14 +24,7 @@ interface Props {
   type?: 'health' | 'badge';
 }
 
-export const Tag = (
-  {
-    name,
-    color = '#666666',
-    type = 'health',
-    ...rest
-  }: Props
-) => {
+export const Tag = ({ name, color = '#666666', type = 'health', ...rest }: Props) => {
   switch (type) {
     case 'health':
       return (

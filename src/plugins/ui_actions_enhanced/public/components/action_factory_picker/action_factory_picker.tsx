@@ -16,13 +16,11 @@ export interface ActionFactoryPickerProps {
   onSelect: (actionFactory: ActionFactory) => void;
 }
 
-export const ActionFactoryPicker = (
-  {
-    actionFactories,
-    context,
-    onSelect
-  }: ActionFactoryPickerProps
-) => {
+export const ActionFactoryPicker = ({
+  actionFactories,
+  context,
+  onSelect,
+}: ActionFactoryPickerProps) => {
   const items = React.useMemo(() => {
     return actionFactories.map((actionFactory) => {
       const item: Item = {

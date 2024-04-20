@@ -12,22 +12,18 @@ import stringify from 'json-stable-stringify';
 import React from 'react';
 import type { State } from 'xstate';
 
-export const InvalidStateCallout = (
-  {
-    state
-  }: {
-    state: State<any, any, any, any, any>;
-  }
-) => (<EuiCallOut title={invalidStateCalloutTitle} color="danger" iconType="warning">
-  <FormattedMessage
-    id="xpack.infra.logs.common.invalidStateMessage"
-    defaultMessage="Unable to handle state {stateValue}."
-    values={{
-      stateValue: stringify(state.value),
-    }}
-    tagName="pre"
-  />
-</EuiCallOut>);
+export const InvalidStateCallout = ({ state }: { state: State<any, any, any, any, any> }) => (
+  <EuiCallOut title={invalidStateCalloutTitle} color="danger" iconType="warning">
+    <FormattedMessage
+      id="xpack.infra.logs.common.invalidStateMessage"
+      defaultMessage="Unable to handle state {stateValue}."
+      values={{
+        stateValue: stringify(state.value),
+      }}
+      tagName="pre"
+    />
+  </EuiCallOut>
+);
 
 const invalidStateCalloutTitle = i18n.translate(
   'xpack.infra.logs.common.invalidStateCalloutTitle',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type FC } from 'react';
+import React, { useMemo } from 'react';
 
 import type { StatsBarStat } from './stat';
 import { Stat } from './stat';
@@ -29,12 +29,7 @@ interface StatsBarProps {
   dataTestSub: string;
 }
 
-export const StatsBar = (
-  {
-    stats,
-    dataTestSub
-  }: StatsBarProps
-) => {
+export const StatsBar = ({ stats, dataTestSub }: StatsBarProps) => {
   const statsList = useMemo(() => Object.values(stats), [stats]);
 
   return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -28,11 +28,7 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
-export const PointType = (
-  {
-    field
-  }: Props
-) => {
+export const PointType = ({ field }: Props) => {
   return (
     <>
       <BasicParametersSection>

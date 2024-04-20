@@ -25,40 +25,40 @@ export interface FieldCategorizeButtonProps {
   closePopover?: () => void;
 }
 
-export const FieldCategorizeButton = React.memo((
-  {
+export const FieldCategorizeButton = React.memo(
+  ({
     field,
     dataView,
     trackUiMetric,
     originatingApp,
     uiActions,
     buttonProps,
-    closePopover
-  }: FieldCategorizeButtonProps
-) => {
-  const handleVisualizeLinkClick = async (
-    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-  ) => {
-    // regular link click. let the uiActions code handle the navigation and show popup if needed
-    event.preventDefault();
-    const triggerVisualization = (updatedDataView: DataView) => {
-      trackUiMetric?.(METRIC_TYPE.CLICK, 'categorize_link_click');
-      triggerCategorizeActions(uiActions, field, originatingApp, updatedDataView);
+    closePopover,
+  }: FieldCategorizeButtonProps) => {
+    const handleVisualizeLinkClick = async (
+      event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+    ) => {
+      // regular link click. let the uiActions code handle the navigation and show popup if needed
+      event.preventDefault();
+      const triggerVisualization = (updatedDataView: DataView) => {
+        trackUiMetric?.(METRIC_TYPE.CLICK, 'categorize_link_click');
+        triggerCategorizeActions(uiActions, field, originatingApp, updatedDataView);
+      };
+      triggerVisualization(dataView);
+      if (closePopover) {
+        closePopover();
+      }
     };
-    triggerVisualization(dataView);
-    if (closePopover) {
-      closePopover();
-    }
-  };
 
-  return (
-    <FieldCategorizeButtonInner
-      fieldName={field.name}
-      handleVisualizeLinkClick={handleVisualizeLinkClick}
-      buttonProps={buttonProps}
-    />
-  );
-});
+    return (
+      <FieldCategorizeButtonInner
+        fieldName={field.name}
+        handleVisualizeLinkClick={handleVisualizeLinkClick}
+        buttonProps={buttonProps}
+      />
+    );
+  }
+);
 
 export async function getFieldCategorizeButton(props: FieldCategorizeButtonProps) {
   const showButton = await canCategorize(props.uiActions, props.field, props.dataView);

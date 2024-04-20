@@ -17,11 +17,7 @@ import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { PageTemplate } from '../page_template';
 import { ApmServerInstance } from '../../../components/apm/instance';
 
-export const ApmInstancePage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const ApmInstancePage = ({ clusters }: ComponentProps) => {
   const { instance }: { instance: string } = useParams();
 
   const globalState = useContext(GlobalStateContext);

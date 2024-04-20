@@ -15,11 +15,7 @@ export interface NoResultsSuggestionDefaultProps {
   dataView: DataView;
 }
 
-export const NoResultsSuggestionDefault = (
-  {
-    dataView
-  }: NoResultsSuggestionDefaultProps
-) => {
+export const NoResultsSuggestionDefault = ({ dataView }: NoResultsSuggestionDefaultProps) => {
   const dataViewName = dataView?.getName();
   const dataViewPattern = dataView?.getIndexPattern();
 

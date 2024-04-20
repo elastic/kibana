@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ElementType, FC, memo } from 'react';
+import React, { ElementType, memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -26,63 +26,63 @@ interface EntryContentProps {
   showValueListModal: ElementType;
 }
 
-export const EntryContent = memo((
-  {
+export const EntryContent = memo(
+  ({
     entry,
     index,
     isNestedEntry = false,
     dataTestSubj,
-    showValueListModal
-  }: EntryContentProps
-) => {
-  const { field, type } = entry;
-  const value = getValue(entry);
-  const operator = 'operator' in entry ? entry.operator : '';
+    showValueListModal,
+  }: EntryContentProps) => {
+    const { field, type } = entry;
+    const value = getValue(entry);
+    const operator = 'operator' in entry ? entry.operator : '';
 
-  const entryKey = `${field}${type}${value}${index}`;
-  return (
-    <div data-test-subj={`${dataTestSubj || ''}${entryKey}EntryContent`} key={entryKey}>
-      <div css={expressionContainerCss}>
-        {isNestedEntry ? (
-          <EuiFlexGroup
-            responsive
-            css={nestedGroupSpaceCss}
-            direction="row"
-            alignItems="center"
-            gutterSize="m"
-            data-test-subj={`${dataTestSubj || ''}NestedEntry`}
-          >
-            <EuiToken data-test-subj="nstedEntryIcon" iconType="tokenNested" size="s" />
+    const entryKey = `${field}${type}${value}${index}`;
+    return (
+      <div data-test-subj={`${dataTestSubj || ''}${entryKey}EntryContent`} key={entryKey}>
+        <div css={expressionContainerCss}>
+          {isNestedEntry ? (
+            <EuiFlexGroup
+              responsive
+              css={nestedGroupSpaceCss}
+              direction="row"
+              alignItems="center"
+              gutterSize="m"
+              data-test-subj={`${dataTestSubj || ''}NestedEntry`}
+            >
+              <EuiToken data-test-subj="nstedEntryIcon" iconType="tokenNested" size="s" />
 
-            <div css={valueContainerCss}>
-              <EuiExpression description="" value={field} color="subdued" />
+              <div css={valueContainerCss}>
+                <EuiExpression description="" value={field} color="subdued" />
+                {getValueExpression(
+                  type as ListOperatorTypeEnum,
+                  operator,
+                  value,
+                  showValueListModal
+                )}
+              </div>
+            </EuiFlexGroup>
+          ) : (
+            <>
+              <EuiExpression
+                description={index === 0 ? '' : i18n.CONDITION_AND}
+                value={field}
+                color={index === 0 ? 'primary' : 'subdued'}
+                data-test-subj={`${dataTestSubj || ''}SingleEntry`}
+              />
+
               {getValueExpression(
                 type as ListOperatorTypeEnum,
                 operator,
                 value,
                 showValueListModal
               )}
-            </div>
-          </EuiFlexGroup>
-        ) : (
-          <>
-            <EuiExpression
-              description={index === 0 ? '' : i18n.CONDITION_AND}
-              value={field}
-              color={index === 0 ? 'primary' : 'subdued'}
-              data-test-subj={`${dataTestSubj || ''}SingleEntry`}
-            />
-
-            {getValueExpression(
-              type as ListOperatorTypeEnum,
-              operator,
-              value,
-              showValueListModal
-            )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 EntryContent.displayName = 'EntryContent';

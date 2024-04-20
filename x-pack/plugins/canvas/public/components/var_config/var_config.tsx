@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -97,15 +97,7 @@ const strings = {
     }),
 };
 
-export const VarConfig = (
-  {
-    variables,
-    onCopyVar,
-    onDeleteVar,
-    onAddVar,
-    onEditVar
-  }: Props
-) => {
+export const VarConfig = ({ variables, onCopyVar, onDeleteVar, onAddVar, onEditVar }: Props) => {
   const [panelMode, setPanelMode] = useState<PanelMode>(PanelMode.List);
   const [selectedVar, setSelectedVar] = useState<CanvasVariable | null>(null);
 

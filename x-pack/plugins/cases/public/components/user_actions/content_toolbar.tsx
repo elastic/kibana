@@ -16,20 +16,20 @@ export interface UserActionContentToolbarProps {
   withCopyLinkAction?: boolean;
 }
 
-const UserActionContentToolbarComponent = (
-  {
-    id,
-    withCopyLinkAction = true,
-    children
-  }: UserActionContentToolbarProps
-) => (<EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
-  {withCopyLinkAction ? (
-    <EuiFlexItem grow={false}>
-      <UserActionCopyLink id={id} />
-    </EuiFlexItem>
-  ) : null}
-  {children}
-</EuiFlexGroup>);
+const UserActionContentToolbarComponent = ({
+  id,
+  withCopyLinkAction = true,
+  children,
+}: UserActionContentToolbarProps) => (
+  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
+    {withCopyLinkAction ? (
+      <EuiFlexItem grow={false}>
+        <UserActionCopyLink id={id} />
+      </EuiFlexItem>
+    ) : null}
+    {children}
+  </EuiFlexGroup>
+);
 
 UserActionContentToolbarComponent.displayName = 'UserActionContentToolbar';
 

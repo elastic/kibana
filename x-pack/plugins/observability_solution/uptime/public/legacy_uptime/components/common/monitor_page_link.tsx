@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { ReactRouterEuiLink } from './react_router_helpers';
 
 interface DetailPageLinkProps {
@@ -19,13 +19,7 @@ interface DetailPageLinkProps {
   linkParameters: string | undefined;
 }
 
-export const MonitorPageLink = (
-  {
-    children,
-    monitorId,
-    linkParameters
-  }: DetailPageLinkProps
-) => {
+export const MonitorPageLink = ({ children, monitorId, linkParameters }: DetailPageLinkProps) => {
   const getLocationTo = () => {
     // encode monitorId param as 64 base string to make it a valid URL, since it can be a url
     return linkParameters

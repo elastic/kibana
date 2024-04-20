@@ -23,12 +23,7 @@ interface FilteringPanelProps {
   filteringRules: FilteringRule[];
 }
 
-export const FilteringPanel = (
-  {
-    advancedSnippet,
-    filteringRules
-  }: FilteringPanelProps
-) => {
+export const FilteringPanel = ({ advancedSnippet, filteringRules }: FilteringPanelProps) => {
   return (
     <>
       <FlyoutPanel

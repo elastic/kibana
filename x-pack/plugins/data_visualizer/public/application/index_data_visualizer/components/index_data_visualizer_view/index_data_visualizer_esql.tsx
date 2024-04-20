@@ -7,7 +7,6 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { css } from '@emotion/react';
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 

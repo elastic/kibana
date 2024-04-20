@@ -17,33 +17,35 @@ interface Props {
   uploadUrl: string;
 }
 
-const ExpiredBanner = (props: Props) => (<EuiCallOut
-  iconType="help"
-  color="warning"
-  data-test-subj="licenseExpiredBanner"
-  title={
+const ExpiredBanner = (props: Props) => (
+  <EuiCallOut
+    iconType="help"
+    color="warning"
+    data-test-subj="licenseExpiredBanner"
+    title={
+      <FormattedMessage
+        id="xpack.licensing.welcomeBanner.licenseIsExpiredTitle"
+        defaultMessage="Your {licenseType} license is expired"
+        values={{ licenseType: props.type }}
+      />
+    }
+  >
     <FormattedMessage
-      id="xpack.licensing.welcomeBanner.licenseIsExpiredTitle"
-      defaultMessage="Your {licenseType} license is expired"
-      values={{ licenseType: props.type }}
+      id="xpack.licensing.welcomeBanner.licenseIsExpiredDescription"
+      defaultMessage="Contact your administrator or {updateYourLicenseLinkText} directly."
+      values={{
+        updateYourLicenseLinkText: (
+          <a href={props.uploadUrl}>
+            <FormattedMessage
+              id="xpack.licensing.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText"
+              defaultMessage="update your license"
+            />
+          </a>
+        ),
+      }}
     />
-  }
->
-  <FormattedMessage
-    id="xpack.licensing.welcomeBanner.licenseIsExpiredDescription"
-    defaultMessage="Contact your administrator or {updateYourLicenseLinkText} directly."
-    values={{
-      updateYourLicenseLinkText: (
-        <a href={props.uploadUrl}>
-          <FormattedMessage
-            id="xpack.licensing.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText"
-            defaultMessage="update your license"
-          />
-        </a>
-      ),
-    }}
-  />
-</EuiCallOut>);
+  </EuiCallOut>
+);
 
 type MountProps = Props & Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 

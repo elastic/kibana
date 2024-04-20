@@ -41,15 +41,13 @@ interface Props {
   onPolicyExecuted: () => void;
 }
 
-export const PolicyTable = (
-  {
-    policies,
-    reload,
-    openPolicyDetailsUrl,
-    onPolicyDeleted,
-    onPolicyExecuted
-  }: Props
-) => {
+export const PolicyTable = ({
+  policies,
+  reload,
+  openPolicyDetailsUrl,
+  onPolicyDeleted,
+  onPolicyExecuted,
+}: Props) => {
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SlmPolicy[]>([]);
 

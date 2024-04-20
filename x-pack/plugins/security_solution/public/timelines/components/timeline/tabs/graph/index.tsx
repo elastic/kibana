@@ -17,11 +17,7 @@ interface GraphTabContentProps {
   timelineId: TimelineId;
 }
 
-const GraphTabContentComponent = (
-  {
-    timelineId
-  }: GraphTabContentProps
-) => {
+const GraphTabContentComponent = ({ timelineId }: GraphTabContentProps) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => getTimeline(state, timelineId)?.graphEventId

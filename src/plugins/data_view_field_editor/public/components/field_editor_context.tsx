@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import type {
@@ -54,22 +54,20 @@ export interface Context {
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
 
-export const FieldEditorProvider = (
-  {
-    services,
-    dataView,
-    links,
-    uiSettings,
-    fieldTypeToProcess,
-    fieldFormats,
-    fieldFormatEditors,
-    namesNotAllowed,
-    existingConcreteFields,
-    children,
-    fieldName$,
-    subfields$
-  }: Context
-) => {
+export const FieldEditorProvider = ({
+  services,
+  dataView,
+  links,
+  uiSettings,
+  fieldTypeToProcess,
+  fieldFormats,
+  fieldFormatEditors,
+  namesNotAllowed,
+  existingConcreteFields,
+  children,
+  fieldName$,
+  subfields$,
+}: Context) => {
   const ctx = useMemo<Context>(
     () => ({
       dataView,

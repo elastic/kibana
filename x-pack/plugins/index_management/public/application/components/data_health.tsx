@@ -24,8 +24,6 @@ const healthToColor = (health: Health) => {
   }
 };
 
-export const DataHealth = (
-  {
-    health
-  }: Props
-) => (<EuiHealth color={healthToColor(health)}>{health}</EuiHealth>);
+export const DataHealth = ({ health }: Props) => (
+  <EuiHealth color={healthToColor(health)}>{health}</EuiHealth>
+);

@@ -34,15 +34,13 @@ import { linkToAddRepository } from '../../../services/navigation';
 import { InlineLoading } from '../..';
 import { StepProps } from '.';
 
-export const PolicyStepLogistics = (
-  {
-    policy,
-    updatePolicy,
-    isEditing,
-    currentUrl,
-    errors
-  }: StepProps
-) => {
+export const PolicyStepLogistics = ({
+  policy,
+  updatePolicy,
+  isEditing,
+  currentUrl,
+  errors,
+}: StepProps) => {
   // Load repositories for repository dropdown field
   const {
     error: errorLoadingRepositories,

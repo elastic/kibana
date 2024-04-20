@@ -12,11 +12,7 @@ export interface ButtonEmbeddableComponentProps {
   onClick: () => void;
 }
 
-export const ButtonEmbeddableComponent = (
-  {
-    onClick
-  }: ButtonEmbeddableComponentProps
-) => {
+export const ButtonEmbeddableComponent = ({ onClick }: ButtonEmbeddableComponentProps) => {
   return (
     <EuiFlexItem>
       <EuiCard

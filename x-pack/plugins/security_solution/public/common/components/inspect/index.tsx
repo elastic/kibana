@@ -22,14 +22,11 @@ interface InspectButtonContainerProps {
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer = (
-  {
-    children,
-    show = true
-  }: InspectButtonContainerProps
-) => (<HoverVisibilityContainer show={show} targetClassNames={[BUTTON_CLASS]}>
-  {children}
-</HoverVisibilityContainer>);
+export const InspectButtonContainer = ({ children, show = true }: InspectButtonContainerProps) => (
+  <HoverVisibilityContainer show={show} targetClassNames={[BUTTON_CLASS]}>
+    {children}
+  </HoverVisibilityContainer>
+);
 
 interface InspectButtonProps {
   compact?: boolean;
@@ -43,22 +40,20 @@ interface InspectButtonProps {
   title?: string | React.ReactElement | React.ReactNode;
 }
 
-const InspectButtonComponent = (
-  {
-    compact = false,
-    inputId = InputsModelId.global,
-    inspectIndex = 0,
-    isDisabled,
+const InspectButtonComponent = ({
+  compact = false,
+  inputId = InputsModelId.global,
+  inspectIndex = 0,
+  isDisabled,
 
-    // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
-    multiple = false,
+  // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
+  multiple = false,
 
-    onCloseInspect,
-    queryId = '',
-    showInspectButton = true,
-    title = ''
-  }: InspectButtonProps
-) => {
+  onCloseInspect,
+  queryId = '',
+  showInspectButton = true,
+  title = '',
+}: InspectButtonProps) => {
   const {
     additionalRequests,
     additionalResponses,

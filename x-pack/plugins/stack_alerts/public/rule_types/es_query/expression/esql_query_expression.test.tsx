@@ -27,13 +27,9 @@ jest.mock('@kbn/text-based-editor', () => ({
 const { fetchFieldsFromESQL } = jest.requireMock('@kbn/text-based-editor');
 const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
-const AppWrapper = React.memo((
-  {
-    children
-  }: {
-    children: React.ReactElement;
-  }
-) => (<I18nProvider>{children}</I18nProvider>));
+const AppWrapper = React.memo(({ children }: { children: React.ReactElement }) => (
+  <I18nProvider>{children}</I18nProvider>
+));
 
 const dataMock = dataPluginMock.createStartContract();
 const dataViewMock = dataViewPluginMocks.createStartContract();

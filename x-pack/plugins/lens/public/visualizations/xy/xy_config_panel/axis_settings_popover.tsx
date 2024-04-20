@@ -207,34 +207,32 @@ const axisOrientationOptions: Array<{
   },
 ];
 
-export const AxisSettingsPopover = (
-  {
-    layers,
-    axis,
-    axisTitle,
-    updateTitleState,
-    toggleTickLabelsVisibility,
-    toggleGridlinesVisibility,
-    isDisabled,
-    areTickLabelsVisible,
-    areGridlinesVisible,
-    isAxisTitleVisible,
-    orientation,
-    setOrientation,
-    setEndzoneVisibility,
-    endzonesVisible,
-    setCurrentTimeMarkerVisibility,
-    currentTimeMarkerVisible,
-    extent,
-    setExtent,
-    hasBarOrAreaOnAxis,
-    hasPercentageAxis,
-    dataBounds,
-    useMultilayerTimeAxis,
-    scale,
-    setScale
-  }: AxisSettingsPopoverProps
-) => {
+export const AxisSettingsPopover = ({
+  layers,
+  axis,
+  axisTitle,
+  updateTitleState,
+  toggleTickLabelsVisibility,
+  toggleGridlinesVisibility,
+  isDisabled,
+  areTickLabelsVisible,
+  areGridlinesVisible,
+  isAxisTitleVisible,
+  orientation,
+  setOrientation,
+  setEndzoneVisibility,
+  endzonesVisible,
+  setCurrentTimeMarkerVisibility,
+  currentTimeMarkerVisible,
+  extent,
+  setExtent,
+  hasBarOrAreaOnAxis,
+  hasPercentageAxis,
+  dataBounds,
+  useMultilayerTimeAxis,
+  scale,
+  setScale,
+}: AxisSettingsPopoverProps) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
 

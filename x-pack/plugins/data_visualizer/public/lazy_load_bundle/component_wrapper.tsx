@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Suspense } from 'react';
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { ResultLinks } from '../../common/app';
@@ -21,13 +20,7 @@ const FileDataVisualizerComponent = React.lazy(
   () => import('../application/file_data_visualizer/file_data_visualizer')
 );
 
-export const FileDataVisualizerWrapper = (
-  {
-    resultLinks
-  }: {
-    resultLinks?: ResultLinks;
-  }
-) => {
+export const FileDataVisualizerWrapper = ({ resultLinks }: { resultLinks?: ResultLinks }) => {
   return (
     <React.Suspense fallback={<div />}>
       <FileDataVisualizerComponent resultLinks={resultLinks} />
@@ -45,6 +38,8 @@ const DataDriftLazy = React.lazy(() => import('../application/data_drift'));
  * Lazy-wrapped ExplainLogRateSpikesAppState React component
  * @param {DataDriftDetectionAppStateProps}  props - properties specifying the data on which to run the analysis.
  */
-export const DataDrift = (props: DataDriftDetectionAppStateProps) => (<LazyWrapper>
-  <DataDriftLazy {...props} />
-</LazyWrapper>);
+export const DataDrift = (props: DataDriftDetectionAppStateProps) => (
+  <LazyWrapper>
+    <DataDriftLazy {...props} />
+  </LazyWrapper>
+);

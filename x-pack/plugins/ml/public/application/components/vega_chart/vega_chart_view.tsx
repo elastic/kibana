@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useEffect } from 'react';
 
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
@@ -25,11 +24,7 @@ export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;
 }
 
-export const VegaChartView = (
-  {
-    vegaSpec
-  }: VegaChartViewProps
-) => {
+export const VegaChartView = ({ vegaSpec }: VegaChartViewProps) => {
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
   useEffect(() => {

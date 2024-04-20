@@ -52,14 +52,12 @@ const panelTypeToUiMetricMap: { [key: string]: string } = {
   [TAB_FAILURES]: UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
 };
 
-export const SnapshotDetails = (
-  {
-    repositoryName,
-    snapshotId,
-    onClose,
-    onSnapshotDeleted
-  }: Props
-) => {
+export const SnapshotDetails = ({
+  repositoryName,
+  snapshotId,
+  onClose,
+  onSnapshotDeleted,
+}: Props) => {
   const { i18n, uiMetricService, history } = useServices();
   const { error, data: snapshotDetails } = useLoadSnapshot(repositoryName, snapshotId);
 

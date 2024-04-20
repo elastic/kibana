@@ -22,42 +22,42 @@ interface ConfigDocsLinksProps {
   discussUrl?: string;
 }
 
-export const ConfigDocsLinks = (
-  {
-    name,
-    documentationUrl,
-    applicationPortalUrl,
-    applicationLinkTitle,
-    discussUrl
-  }: ConfigDocsLinksProps
-) => (<EuiFlexGroup justifyContent="flexStart" responsive={false}>
-  <EuiFlexItem grow={false}>
-    <EuiButtonEmpty flush="left" iconType="popout" href={documentationUrl} target="_blank">
-      {DOCUMENTATION_LINK_TITLE}
-    </EuiButtonEmpty>
-  </EuiFlexItem>
-  {applicationPortalUrl && (
+export const ConfigDocsLinks = ({
+  name,
+  documentationUrl,
+  applicationPortalUrl,
+  applicationLinkTitle,
+  discussUrl,
+}: ConfigDocsLinksProps) => (
+  <EuiFlexGroup justifyContent="flexStart" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty flush="left" iconType="popout" href={applicationPortalUrl} target="_blank">
-        {applicationLinkTitle ||
-          i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.contentSource.configDocs.applicationPortal.button',
-            {
-              defaultMessage: '{name} Application Portal',
-              values: { name },
-            }
-          )}
+      <EuiButtonEmpty flush="left" iconType="popout" href={documentationUrl} target="_blank">
+        {DOCUMENTATION_LINK_TITLE}
       </EuiButtonEmpty>
     </EuiFlexItem>
-  )}
-  {discussUrl && (
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty flush="left" iconType="popout" target="_blank" href={discussUrl}>
-        <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.contentSource.configDocs.discuss.buttonLabel"
-          defaultMessage="Questions? Discuss here."
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  )}
-</EuiFlexGroup>);
+    {applicationPortalUrl && (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty flush="left" iconType="popout" href={applicationPortalUrl} target="_blank">
+          {applicationLinkTitle ||
+            i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.configDocs.applicationPortal.button',
+              {
+                defaultMessage: '{name} Application Portal',
+                values: { name },
+              }
+            )}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    )}
+    {discussUrl && (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty flush="left" iconType="popout" target="_blank" href={discussUrl}>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.contentSource.configDocs.discuss.buttonLabel"
+            defaultMessage="Questions? Discuss here."
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);

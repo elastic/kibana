@@ -14,19 +14,17 @@ import React from 'react';
 
 import type { PackageInfo } from '../../common';
 
-export const ConfirmForceInstallModal = (
-  {
-    onCancel,
-    onConfirm,
-    pkg,
-    docLinks
-  }: {
-    onCancel: () => void;
-    onConfirm: () => void;
-    pkg?: Pick<PackageInfo, 'name' | 'version'>;
-    docLinks: DocLinksStart;
-  }
-) => {
+export const ConfirmForceInstallModal = ({
+  onCancel,
+  onConfirm,
+  pkg,
+  docLinks,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+  pkg?: Pick<PackageInfo, 'name' | 'version'>;
+  docLinks: DocLinksStart;
+}) => {
   const title =
     pkg && pkg.name && pkg.version
       ? i18n.translate('xpack.fleet.ConfirmForceInstallModal.calloutTitleWithPkg', {

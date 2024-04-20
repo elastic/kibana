@@ -51,14 +51,7 @@ const itemToSelectableOption = (item: {
   } as ItemSelectableOption;
 };
 
-const EditTagsSelectableComponent = (
-  {
-    selectedCases,
-    tags,
-    isLoading,
-    onChangeTags
-  }: Props
-) => {
+const EditTagsSelectableComponent = ({ selectedCases, tags, isLoading, onChangeTags }: Props) => {
   const { state, options, totalSelectedItems, onChange, onSelectAll, onSelectNone } = useItemsState(
     {
       items: tags,

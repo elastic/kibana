@@ -19,9 +19,7 @@ export type GetAllCasesSelectorModalProps = Omit<
   | 'getFilesClient'
 >;
 
-const AllCasesSelectorModalLazy = lazy(
-  () => import('../../components/all_cases/selector_modal')
-);
+const AllCasesSelectorModalLazy = lazy(() => import('../../components/all_cases/selector_modal'));
 export const getAllCasesSelectorModalLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,

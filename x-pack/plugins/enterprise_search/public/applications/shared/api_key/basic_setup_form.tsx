@@ -31,16 +31,14 @@ interface BasicSetupFormProps {
 }
 export const DEFAULT_EXPIRES_VALUE = '60';
 
-export const BasicSetupForm = (
-  {
-    isLoading,
-    name,
-    user,
-    expires,
-    onChangeName,
-    onChangeExpires
-  }: BasicSetupFormProps
-) => {
+export const BasicSetupForm = ({
+  isLoading,
+  name,
+  user,
+  expires,
+  onChangeName,
+  onChangeExpires,
+}: BasicSetupFormProps) => {
   let expirationDate: Date | undefined;
   if (expires) {
     expirationDate = new Date();

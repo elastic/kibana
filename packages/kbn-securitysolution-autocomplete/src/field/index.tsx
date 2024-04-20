@@ -15,23 +15,21 @@ import { useField } from './use_field';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 
-export const FieldComponent = (
-  {
-    fieldInputWidth,
-    fieldTypeFilter = [],
-    indexPattern,
-    isClearable = false,
-    isDisabled = false,
-    isLoading = false,
-    isRequired = false,
-    onChange,
-    placeholder,
-    selectedField,
-    acceptsCustomOptions = false,
-    showMappingConflicts = false,
-    'aria-label': ariaLabel
-  }: FieldProps
-): JSX.Element => {
+export const FieldComponent = ({
+  fieldInputWidth,
+  fieldTypeFilter = [],
+  indexPattern,
+  isClearable = false,
+  isDisabled = false,
+  isLoading = false,
+  isRequired = false,
+  onChange,
+  placeholder,
+  selectedField,
+  acceptsCustomOptions = false,
+  showMappingConflicts = false,
+  'aria-label': ariaLabel,
+}: FieldProps): JSX.Element => {
   const {
     isInvalid,
     comboOptions,

@@ -54,15 +54,13 @@ export interface DrilldownTableProps {
   onCopy?: (id: string) => void;
 }
 
-export const DrilldownTable = (
-  {
-    items: drilldowns,
-    onCreate,
-    onDelete,
-    onEdit,
-    onCopy
-  }: DrilldownTableProps
-) => {
+export const DrilldownTable = ({
+  items: drilldowns,
+  onCreate,
+  onDelete,
+  onEdit,
+  onCopy,
+}: DrilldownTableProps) => {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
   const columns: Array<EuiBasicTableColumn<DrilldownTableItem>> = [

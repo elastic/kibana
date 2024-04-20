@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type FC } from 'react';
+import React from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 
 interface RulesTableEmptyColumnNameProps {
   name: string;
 }
 
-export const RulesTableEmptyColumnName = React.memo((
-  {
-    name
-  }: RulesTableEmptyColumnNameProps
-) => {
+export const RulesTableEmptyColumnName = React.memo(({ name }: RulesTableEmptyColumnNameProps) => {
   return (
     <EuiScreenReaderOnly>
       <p>{name}</p>

@@ -104,14 +104,7 @@ interface Props {
   onChange(item: PivotGroupByConfig): void;
 }
 
-export const PopoverForm = (
-  {
-    defaultData,
-    otherAggNames,
-    onChange,
-    options
-  }: Props
-) => {
+export const PopoverForm = ({ defaultData, otherAggNames, onChange, options }: Props) => {
   const { esAggsCompositeMissingBucket } = useDocumentationLinks();
 
   const isUnsupportedAgg = !isPivotGroupByConfigWithUiSupport(defaultData);

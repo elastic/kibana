@@ -68,18 +68,16 @@ interface UsernameWithAvatar {
   username: string;
 }
 
-const UsernameWithAvatarComponent = (
-  {
-    username
-  }: UsernameWithAvatar
-) => (<StyledEuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-  <EuiFlexItem grow={false}>
-    <EuiAvatar data-test-subj="avatar" name={username} size="l" />
-  </EuiFlexItem>
-  <EuiFlexItem>
-    <Username>{username}</Username>
-  </EuiFlexItem>
-</StyledEuiFlexGroup>);
+const UsernameWithAvatarComponent = ({ username }: UsernameWithAvatar) => (
+  <StyledEuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiAvatar data-test-subj="avatar" name={username} size="l" />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <Username>{username}</Username>
+    </EuiFlexItem>
+  </StyledEuiFlexGroup>
+);
 
 const UsernameWithAvatar = React.memo(UsernameWithAvatarComponent);
 
@@ -87,11 +85,7 @@ interface ParticipantsProps {
   users: TimelineResultNote[];
 }
 
-const ParticipantsComponent = (
-  {
-    users
-  }: ParticipantsProps
-) => {
+const ParticipantsComponent = ({ users }: ParticipantsProps) => {
   const List = useMemo(
     () =>
       users.map((user) => (
@@ -129,11 +123,7 @@ interface NotesTabContentProps {
   timelineId: string;
 }
 
-const NotesTabContentComponent = (
-  {
-    timelineId
-  }: NotesTabContentProps
-) => {
+const NotesTabContentComponent = ({ timelineId }: NotesTabContentProps) => {
   const dispatch = useDispatch();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 

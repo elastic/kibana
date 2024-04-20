@@ -13,12 +13,7 @@ interface Props {
   type?: 'date' | 'time';
 }
 
-export const FormattedDateTime = (
-  {
-    epochMs,
-    type
-  }: Props
-) => {
+export const FormattedDateTime = ({ epochMs, type }: Props) => {
   const date = new Date(epochMs);
   const formattedDate = <FormattedDate value={date} year="numeric" month="short" day="2-digit" />;
   const formattedTime = <FormattedTime value={date} timeZoneName="short" />;

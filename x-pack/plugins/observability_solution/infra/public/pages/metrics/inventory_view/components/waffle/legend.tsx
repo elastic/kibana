@@ -26,13 +26,7 @@ interface Props {
   formatter: InfraFormatter;
 }
 
-export const Legend = (
-  {
-    legend,
-    bounds,
-    formatter
-  }: Props
-) => {
+export const Legend = ({ legend, bounds, formatter }: Props) => {
   return (
     <LegendContainer>
       {GradientLegendRT.is(legend) && (

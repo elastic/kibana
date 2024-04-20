@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiModal, EuiModalHeader, EuiModalBody, EuiText } from '@elastic/eui';
 import { exampleFileKind, MyImageMetadata } from '../../common';
@@ -18,13 +17,7 @@ interface Props {
   onUploaded: () => void;
 }
 
-export const Modal = (
-  {
-    onDismiss,
-    onUploaded,
-    client
-  }: Props
-) => {
+export const Modal = ({ onDismiss, onUploaded, client }: Props) => {
   return (
     <EuiModal onClose={onDismiss}>
       <EuiModalHeader>

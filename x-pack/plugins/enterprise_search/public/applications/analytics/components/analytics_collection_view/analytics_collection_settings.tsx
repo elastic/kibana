@@ -27,11 +27,7 @@ interface AnalyticsCollectionSettingsProps {
   collection: AnalyticsCollection;
 }
 
-export const AnalyticsCollectionSettings = (
-  {
-    collection
-  }: AnalyticsCollectionSettingsProps
-) => {
+export const AnalyticsCollectionSettings = ({ collection }: AnalyticsCollectionSettingsProps) => {
   const { deleteAnalyticsCollection } = useActions(DeleteAnalyticsCollectionLogic);
   const { isLoading } = useValues(DeleteAnalyticsCollectionLogic);
 

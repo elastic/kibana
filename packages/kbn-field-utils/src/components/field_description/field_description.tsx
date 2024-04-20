@@ -22,13 +22,7 @@ export interface FieldDescriptionProps {
   truncate?: boolean;
 }
 
-export const FieldDescription = (
-  {
-    field,
-    color,
-    truncate = true
-  }: FieldDescriptionProps
-) => {
+export const FieldDescription = ({ field, color, truncate = true }: FieldDescriptionProps) => {
   const { euiTheme } = useEuiTheme();
   const customDescription = (field?.customDescription || '').trim();
   const isTooLong = Boolean(truncate && customDescription.length > MAX_VISIBLE_LENGTH);

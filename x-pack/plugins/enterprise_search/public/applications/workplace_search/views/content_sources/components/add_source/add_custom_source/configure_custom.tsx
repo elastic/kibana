@@ -39,11 +39,7 @@ interface ConfigureCustomProps {
   sourceData: SourceDataItem;
 }
 
-export const ConfigureCustom = (
-  {
-    sourceData
-  }: ConfigureCustomProps
-) => {
+export const ConfigureCustom = ({ sourceData }: ConfigureCustomProps) => {
   const { setCustomSourceNameValue, createContentSource } = useActions(AddCustomSourceLogic);
   const { customSourceNameValue, buttonLoading } = useValues(AddCustomSourceLogic);
 

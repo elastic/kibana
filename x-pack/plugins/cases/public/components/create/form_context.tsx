@@ -57,15 +57,13 @@ interface Props {
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
-export const FormContext = (
-  {
-    afterCaseCreated,
-    children,
-    onSuccess,
-    attachments,
-    initialValue
-  }: Props
-) => {
+export const FormContext = ({
+  afterCaseCreated,
+  children,
+  onSuccess,
+  attachments,
+  initialValue,
+}: Props) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } =
     useGetSupportedActionConnectors();
   const { data: allConfigurations } = useGetAllCaseConfigurations();

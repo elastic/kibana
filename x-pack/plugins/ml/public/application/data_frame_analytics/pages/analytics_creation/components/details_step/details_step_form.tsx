@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
@@ -35,13 +34,7 @@ const indexNameExistsMessage = i18n.translate(
   }
 );
 
-export const DetailsStepForm = (
-  {
-    actions,
-    state,
-    setCurrentStep
-  }: CreateAnalyticsStepProps
-) => {
+export const DetailsStepForm = ({ actions, state, setCurrentStep }: CreateAnalyticsStepProps) => {
   const {
     services: { docLinks, notifications },
   } = useMlKibana();

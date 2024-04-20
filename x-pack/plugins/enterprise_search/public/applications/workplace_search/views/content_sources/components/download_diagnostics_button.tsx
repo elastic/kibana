@@ -20,11 +20,7 @@ interface Props {
   label: string;
 }
 
-export const DownloadDiagnosticsButton = (
-  {
-    label
-  }: Props
-) => {
+export const DownloadDiagnosticsButton = ({ label }: Props) => {
   const { http } = useValues(HttpLogic);
   const { isOrganization } = useValues(AppLogic);
   const {

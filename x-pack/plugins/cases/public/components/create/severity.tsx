@@ -20,41 +20,39 @@ interface Props {
   isLoading: boolean;
 }
 
-const SeverityComponent = (
-  {
-    isLoading
-  }: Props
-) => (<UseField<CaseSeverity>
-  path={'severity'}
-  componentProps={{
-    isLoading,
-  }}
->
-  {(field) => {
-    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+const SeverityComponent = ({ isLoading }: Props) => (
+  <UseField<CaseSeverity>
+    path={'severity'}
+    componentProps={{
+      isLoading,
+    }}
+  >
+    {(field) => {
+      const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-    const onChange = (newSeverity: CaseSeverity) => {
-      field.setValue(newSeverity);
-    };
+      const onChange = (newSeverity: CaseSeverity) => {
+        field.setValue(newSeverity);
+      };
 
-    return (
-      <EuiFormRow
-        data-test-subj="caseSeverity"
-        fullWidth
-        label={SEVERITY_TITLE}
-        error={errorMessage}
-        isInvalid={isInvalid}
-      >
-        <SeveritySelector
-          isLoading={isLoading}
-          isDisabled={isLoading}
-          selectedSeverity={isEmpty(field.value) ? CaseSeverity.LOW : field.value}
-          onSeverityChange={onChange}
-        />
-      </EuiFormRow>
-    );
-  }}
-</UseField>);
+      return (
+        <EuiFormRow
+          data-test-subj="caseSeverity"
+          fullWidth
+          label={SEVERITY_TITLE}
+          error={errorMessage}
+          isInvalid={isInvalid}
+        >
+          <SeveritySelector
+            isLoading={isLoading}
+            isDisabled={isLoading}
+            selectedSeverity={isEmpty(field.value) ? CaseSeverity.LOW : field.value}
+            onSeverityChange={onChange}
+          />
+        </EuiFormRow>
+      );
+    }}
+  </UseField>
+);
 
 SeverityComponent.displayName = 'SeverityComponent';
 

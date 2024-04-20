@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiFlexGroup,
@@ -27,34 +26,30 @@ interface Props {
   embeddable: MapApi;
 }
 
-export const Layer = (
-  {
-    layer,
-    layerIndex,
-    embeddable
-  }: Props
-) => (<>
-  <EuiSplitPanel.Outer grow>
-    <EuiSplitPanel.Inner>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={'tokenGeo'} />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiText color={layer.dataView?.timeFieldName ? '' : 'subdued'}>
-            <h5>{layer.layerDisplayName}</h5>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiSplitPanel.Inner>
-    <EuiHorizontalRule margin="none" />
-    <EuiSplitPanel.Inner grow={false} color="plain">
-      {layer.dataView && layer.dataView.timeFieldName ? (
-        <CompatibleLayer embeddable={embeddable} layer={layer} layerIndex={layerIndex} />
-      ) : (
-        <IncompatibleLayer noDataView={layer.dataView === undefined} />
-      )}
-    </EuiSplitPanel.Inner>
-  </EuiSplitPanel.Outer>
-  <EuiSpacer />
-</>);
+export const Layer = ({ layer, layerIndex, embeddable }: Props) => (
+  <>
+    <EuiSplitPanel.Outer grow>
+      <EuiSplitPanel.Inner>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={'tokenGeo'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiText color={layer.dataView?.timeFieldName ? '' : 'subdued'}>
+              <h5>{layer.layerDisplayName}</h5>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+      <EuiHorizontalRule margin="none" />
+      <EuiSplitPanel.Inner grow={false} color="plain">
+        {layer.dataView && layer.dataView.timeFieldName ? (
+          <CompatibleLayer embeddable={embeddable} layer={layer} layerIndex={layerIndex} />
+        ) : (
+          <IncompatibleLayer noDataView={layer.dataView === undefined} />
+        )}
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
+    <EuiSpacer />
+  </>
+);

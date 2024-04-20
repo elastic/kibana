@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 
@@ -82,19 +81,15 @@ const advancedEditorsSidebarWidth = '220px';
 type PopulatedFields = Set<string>;
 const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
 
-export const ConfigSectionTitle = (
-  {
-    title
-  }: {
-    title: string;
-  }
-) => (<>
-  <EuiSpacer size="m" />
-  <EuiTitle size="xs">
-    <span>{title}</span>
-  </EuiTitle>
-  <EuiSpacer size="s" />
-</>);
+export const ConfigSectionTitle = ({ title }: { title: string }) => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiTitle size="xs">
+      <span>{title}</span>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+  </>
+);
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;

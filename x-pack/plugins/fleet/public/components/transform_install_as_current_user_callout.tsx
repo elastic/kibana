@@ -22,13 +22,7 @@ export const getNumTransformAssets = (assets?: PackageInfo['assets']) => {
 
   return uniqBy(assets.elasticsearch?.transform, 'file').length;
 };
-export const TransformInstallWithCurrentUserPermissionCallout = (
-  {
-    count
-  }: {
-    count: number;
-  }
-) => {
+export const TransformInstallWithCurrentUserPermissionCallout = ({ count }: { count: number }) => {
   return (
     <EuiCallOut color="primary" iconType="iInCircle">
       <FormattedMessage

@@ -43,11 +43,7 @@ interface DisplaySettingsProps {
   tabId: number;
 }
 
-export const DisplaySettings = (
-  {
-    tabId
-  }: DisplaySettingsProps
-) => {
+export const DisplaySettings = ({ tabId }: DisplaySettingsProps) => {
   const { initializeDisplaySettings, setServerData, handleSelectedTabChanged } =
     useActions(DisplaySettingsLogic);
 

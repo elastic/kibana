@@ -110,16 +110,14 @@ export const getFieldSpecs = (indexPattern: string) => {
   return fieldSpecs;
 };
 
-export const SearchBar = (
-  {
-    value,
-    fieldPrefix,
-    onChange,
-    placeholder,
-    indexPattern = INDEX_NAME,
-    dataTestSubj
-  }: Props
-) => {
+export const SearchBar = ({
+  value,
+  fieldPrefix,
+  onChange,
+  placeholder,
+  indexPattern = INDEX_NAME,
+  dataTestSubj,
+}: Props) => {
   const {
     data,
     dataViews,

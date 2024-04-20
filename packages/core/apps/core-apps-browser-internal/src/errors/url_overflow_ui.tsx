@@ -14,13 +14,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 
 import { IS_IE } from './url_overflow';
 
-export const UrlOverflowUi = (
-  {
-    basePath
-  }: {
-    basePath: IBasePath;
-  }
-) => {
+export const UrlOverflowUi = ({ basePath }: { basePath: IBasePath }) => {
   return (
     <EuiText textAlign="left">
       <p>

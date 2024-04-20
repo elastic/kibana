@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -82,12 +82,7 @@ const geti18nTexts = (
   }
 };
 
-export const SearchableSnapshotField = (
-  {
-    phase,
-    canBeDisabled = true
-  }: Props
-) => {
+export const SearchableSnapshotField = ({ phase, canBeDisabled = true }: Props) => {
   const {
     services: { cloud, docLinks, getUrlForApp },
   } = useKibana();

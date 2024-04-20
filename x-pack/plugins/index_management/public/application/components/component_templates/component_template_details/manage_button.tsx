@@ -29,12 +29,7 @@ interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;
 }
 
-export const ManageButton = (
-  {
-    actions,
-    componentTemplateDetails
-  }: Props
-) => {
+export const ManageButton = ({ actions, componentTemplateDetails }: Props) => {
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
   const items: EuiContextMenuPanelItemDescriptor[] = actions.map(

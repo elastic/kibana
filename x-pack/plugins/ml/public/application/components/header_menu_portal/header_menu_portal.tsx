@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,11 +17,7 @@ export interface HeaderMenuPortalProps {
   children: ReactNode;
 }
 
-export const HeaderMenuPortal = (
-  {
-    children
-  }: HeaderMenuPortalProps
-) => {
+export const HeaderMenuPortal = ({ children }: HeaderMenuPortalProps) => {
   const { services } = useMlKibana();
   const { theme, i18n } = services;
 

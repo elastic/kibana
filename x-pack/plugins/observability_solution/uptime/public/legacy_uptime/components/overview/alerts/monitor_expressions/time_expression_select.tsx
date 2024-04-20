@@ -49,14 +49,12 @@ const TimeRangeOptions: TimeRangeOption[] = [
   },
 ];
 
-export const TimeExpressionSelect = (
-  {
-    defaultTimerangeCount,
-    defaultTimerangeUnit,
-    isEnabled,
-    setRuleParams
-  }: Props
-) => {
+export const TimeExpressionSelect = ({
+  defaultTimerangeCount,
+  defaultTimerangeUnit,
+  isEnabled,
+  setRuleParams,
+}: Props) => {
   const [numUnits, setNumUnits] = useState<number>(defaultTimerangeCount ?? 15);
 
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>(

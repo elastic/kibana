@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -41,13 +40,7 @@ interface Props {
   layerIndex: number;
 }
 
-export const CompatibleLayer = (
-  {
-    embeddable,
-    layer,
-    layerIndex
-  }: Props
-) => {
+export const CompatibleLayer = ({ embeddable, layer, layerIndex }: Props) => {
   const [selectedSplitField, setSelectedSplitField] = useState<string | null>(null);
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | undefined>();
 

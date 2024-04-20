@@ -13,14 +13,12 @@ import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../..
 import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-export const EnterpriseSearchElasticsearchPageTemplate = (
-  {
-    children,
-    pageChrome,
-    pageViewTelemetry,
-    ...pageTemplateProps
-  }: PageTemplateProps
-) => {
+export const EnterpriseSearchElasticsearchPageTemplate = ({
+  children,
+  pageChrome,
+  pageViewTelemetry,
+  ...pageTemplateProps
+}: PageTemplateProps) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}

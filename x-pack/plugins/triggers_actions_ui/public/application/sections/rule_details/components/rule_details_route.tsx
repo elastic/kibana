@@ -30,17 +30,15 @@ type RuleDetailsRouteProps = RouteComponentProps<{
   Pick<ActionApis, 'loadActionTypes'> &
   Pick<RuleApis, 'loadRuleTypes' | 'resolveRule'>;
 
-export const RuleDetailsRoute = (
-  {
-    match: {
-      params: { ruleId },
-    },
+export const RuleDetailsRoute = ({
+  match: {
+    params: { ruleId },
+  },
 
-    loadRuleTypes,
-    loadActionTypes,
-    resolveRule
-  }: RuleDetailsRouteProps
-) => {
+  loadRuleTypes,
+  loadActionTypes,
+  resolveRule,
+}: RuleDetailsRouteProps) => {
   const {
     http,
     notifications: { toasts },

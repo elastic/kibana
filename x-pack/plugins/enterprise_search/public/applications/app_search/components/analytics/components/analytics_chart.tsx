@@ -33,12 +33,7 @@ interface Props {
     isDashed?: boolean;
   }>;
 }
-export const AnalyticsChart = (
-  {
-    height = 300,
-    lines
-  }: Props
-) => {
+export const AnalyticsChart = ({ height = 300, lines }: Props) => {
   const { charts } = useValues(KibanaLogic);
 
   return (

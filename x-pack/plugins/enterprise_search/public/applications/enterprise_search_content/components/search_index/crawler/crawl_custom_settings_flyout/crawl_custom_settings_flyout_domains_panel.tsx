@@ -47,13 +47,11 @@ export const CrawlCustomSettingsFlyoutDomainsPanelWithLogicProps = () => {
   );
 };
 
-export const CrawlCustomSettingsFlyoutDomainsPanel = (
-  {
-    domainUrls,
-    selectedDomainUrls,
-    onSelectDomainUrls
-  }: CrawlCustomSettingsFlyoutDomainsPanelProps
-) => {
+export const CrawlCustomSettingsFlyoutDomainsPanel = ({
+  domainUrls,
+  selectedDomainUrls,
+  onSelectDomainUrls,
+}: CrawlCustomSettingsFlyoutDomainsPanelProps) => {
   return (
     <EuiPanel hasBorder>
       <EuiAccordion

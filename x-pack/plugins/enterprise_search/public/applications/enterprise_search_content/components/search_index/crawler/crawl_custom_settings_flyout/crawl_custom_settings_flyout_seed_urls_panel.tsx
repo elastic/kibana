@@ -96,16 +96,14 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps = () => {
   );
 };
 
-export const CrawlCustomSettingsFlyoutSeedUrlsPanel = (
-  {
-    scheduleConfig,
-    onSelectCustomEntryPointUrls,
-    onSelectCustomSitemapUrls,
-    onSelectEntryPointUrls,
-    onSelectSitemapUrls,
-    toggleIncludeSitemapsInRobotsTxt
-  }: CrawlCustomSettingsFlyoutSeedUrlsPanelProps
-) => {
+export const CrawlCustomSettingsFlyoutSeedUrlsPanel = ({
+  scheduleConfig,
+  onSelectCustomEntryPointUrls,
+  onSelectCustomSitemapUrls,
+  onSelectEntryPointUrls,
+  onSelectSitemapUrls,
+  toggleIncludeSitemapsInRobotsTxt,
+}: CrawlCustomSettingsFlyoutSeedUrlsPanelProps) => {
   const totalSeedUrls =
     scheduleConfig.customEntryPointUrls.length +
     scheduleConfig.customSitemapUrls.length +

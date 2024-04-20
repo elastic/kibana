@@ -270,17 +270,15 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
   }
 }
 
-export const AgentUpgradeStatus = (
-  {
-    isAgentUpgradable,
-    agent,
-    latestAgentVersion
-  }: {
-    isAgentUpgradable: boolean;
-    agent: Agent;
-    latestAgentVersion?: string;
-  }
-) => {
+export const AgentUpgradeStatus = ({
+  isAgentUpgradable,
+  agent,
+  latestAgentVersion,
+}: {
+  isAgentUpgradable: boolean;
+  agent: Agent;
+  latestAgentVersion?: string;
+}) => {
   const isAgentUpgrading = useMemo(
     () => agent.upgrade_started_at && !agent.upgraded_at,
     [agent.upgrade_started_at, agent.upgraded_at]

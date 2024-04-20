@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -71,11 +71,7 @@ interface Props {
  *
  * We store the settings in a field called "customOptions"
  **/
-export const Custom = (
-  {
-    defaultOptions
-  }: Props
-) => {
+export const Custom = ({ defaultOptions }: Props) => {
   return (
     <UseField
       path="customOptions"

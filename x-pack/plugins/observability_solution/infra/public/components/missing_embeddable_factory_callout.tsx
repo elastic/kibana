@@ -9,13 +9,7 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const MissingEmbeddableFactoryCallout = (
-  {
-    embeddableType
-  }: {
-    embeddableType: string;
-  }
-) => {
+export const MissingEmbeddableFactoryCallout = ({ embeddableType }: { embeddableType: string }) => {
   return (
     <EuiCallOut
       size="s"

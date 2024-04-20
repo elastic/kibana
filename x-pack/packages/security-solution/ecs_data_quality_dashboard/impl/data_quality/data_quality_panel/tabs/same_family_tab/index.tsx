@@ -30,19 +30,17 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const SameFamilyTabComponent = (
-  {
-    addSuccessToast,
-    docsCount,
-    formatBytes,
-    formatNumber,
-    ilmPhase,
-    indexName,
-    partitionedFieldMetadata,
-    patternDocsCount,
-    sizeInBytes
-  }: Props
-) => {
+const SameFamilyTabComponent = ({
+  addSuccessToast,
+  docsCount,
+  formatBytes,
+  formatNumber,
+  ilmPhase,
+  indexName,
+  partitionedFieldMetadata,
+  patternDocsCount,
+  sizeInBytes,
+}: Props) => {
   const sameFamilyMappings = useMemo(
     () => getSameFamilyMappings(partitionedFieldMetadata.sameFamily),
     [partitionedFieldMetadata.sameFamily]

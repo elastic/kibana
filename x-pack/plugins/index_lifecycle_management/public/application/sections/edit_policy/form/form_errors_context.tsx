@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, FunctionComponent, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 import { Phases as _Phases } from '../../../../../common/types';
 

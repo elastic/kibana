@@ -7,7 +7,7 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { flow } from 'fp-ts/lib/function';
 import { map } from 'fp-ts/lib/Array';
 import { map as _map, groupBy as _groupBy } from 'lodash';
@@ -92,11 +92,7 @@ const typeConfig: FieldConfig<string> = {
   ],
 };
 
-export const ProcessorTypeField = (
-  {
-    initialType
-  }: Props
-) => {
+export const ProcessorTypeField = ({ initialType }: Props) => {
   const {
     services: { documentation, license },
   } = useKibana();

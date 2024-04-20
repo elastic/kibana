@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { first, lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
@@ -31,15 +31,13 @@ const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAtt
   ...providedDefaults,
 });
 
-export const CreateTagModal = (
-  {
-    defaultValues,
-    tagClient,
-    notifications,
-    onClose,
-    onSave
-  }: CreateTagModalProps
-) => {
+export const CreateTagModal = ({
+  defaultValues,
+  tagClient,
+  notifications,
+  onClose,
+  onSave,
+}: CreateTagModalProps) => {
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(
     getDefaultAttributes(defaultValues)
   );

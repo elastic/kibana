@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -26,11 +25,7 @@ function isJobAwaitingNodeAssignment(job: estypes.MlJobStats) {
   return job.node === undefined && job.state === JOB_STATE.OPENING;
 }
 
-const MLJobsAwaitingNodeWarning = (
-  {
-    jobIds
-  }: Props
-) => {
+const MLJobsAwaitingNodeWarning = ({ jobIds }: Props) => {
   const { http } = useKibana().services;
   const ml = useMemo(() => mlApiServicesProvider(new HttpService(http!)), [http]);
 

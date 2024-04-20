@@ -18,12 +18,7 @@ interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
 }
 
-const CustomCalloutComponent = (
-  {
-    children,
-    enrichedFieldMetadata
-  }: Props
-) => {
+const CustomCalloutComponent = ({ children, enrichedFieldMetadata }: Props) => {
   const title = useMemo(
     () => (
       <span data-test-subj="title">{i18n.CUSTOM_CALLOUT_TITLE(enrichedFieldMetadata.length)}</span>

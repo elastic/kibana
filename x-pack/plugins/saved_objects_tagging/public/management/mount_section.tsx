@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -24,14 +24,12 @@ interface MountSectionParams {
   title: string;
 }
 
-const RedirectToHomeIfUnauthorized = (
-  {
-    applications,
-    children
-  }: {
-    applications: ApplicationStart;
-  }
-) => {
+const RedirectToHomeIfUnauthorized = ({
+  applications,
+  children,
+}: {
+  applications: ApplicationStart;
+}) => {
   const allowed = applications.capabilities?.management?.kibana?.tags ?? false;
   if (!allowed) {
     applications.navigateToApp('home');

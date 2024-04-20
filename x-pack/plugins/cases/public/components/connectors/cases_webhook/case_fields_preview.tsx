@@ -13,29 +13,27 @@ import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';
 import * as i18n from './translations';
 
-const CasesWebhookPreviewComponent = (
-  {
-    connector
-  }: ConnectorFieldsPreviewProps<null>
-) => (<>
-  <ConnectorCard
-    connectorType={ConnectorTypes.casesWebhook}
-    isLoading={false}
-    listItems={[]}
-    title={connector.name}
-  />
-  <EuiSpacer />
-  {(!connector.config?.createCommentUrl || !connector.config?.createCommentJson) && (
-    <EuiCallOut
-      title={i18n.CREATE_COMMENT_WARNING_TITLE}
-      color="warning"
-      iconType="help"
-      data-test-subj="create-comment-warning"
-    >
-      <p>{i18n.CREATE_COMMENT_WARNING_DESC(connector.name)}</p>
-    </EuiCallOut>
-  )}
-</>);
+const CasesWebhookPreviewComponent = ({ connector }: ConnectorFieldsPreviewProps<null>) => (
+  <>
+    <ConnectorCard
+      connectorType={ConnectorTypes.casesWebhook}
+      isLoading={false}
+      listItems={[]}
+      title={connector.name}
+    />
+    <EuiSpacer />
+    {(!connector.config?.createCommentUrl || !connector.config?.createCommentJson) && (
+      <EuiCallOut
+        title={i18n.CREATE_COMMENT_WARNING_TITLE}
+        color="warning"
+        iconType="help"
+        data-test-subj="create-comment-warning"
+      >
+        <p>{i18n.CREATE_COMMENT_WARNING_DESC(connector.name)}</p>
+      </EuiCallOut>
+    )}
+  </>
+);
 
 CasesWebhookPreviewComponent.displayName = 'CasesWebhookPreview';
 

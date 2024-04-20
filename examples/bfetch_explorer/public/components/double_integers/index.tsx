@@ -27,11 +27,7 @@ export interface Props {
   double: ExplorerService['double'];
 }
 
-export const DoubleIntegers = (
-  {
-    double
-  }: Props
-) => {
+export const DoubleIntegers = ({ double }: Props) => {
   const isMounted = useMountedState();
   const [numbers, setNumbers] = useState(defaultNumbers);
   const [showingResults, setShowingResults] = useState(false);

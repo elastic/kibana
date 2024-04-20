@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,14 +19,12 @@ interface Props {
   openInDiscover: (mode: QueryMode) => void;
 }
 
-export const TableHeader = (
-  {
-    categoriesCount,
-    selectedCategoriesCount,
-    labels,
-    openInDiscover
-  }: Props
-) => {
+export const TableHeader = ({
+  categoriesCount,
+  selectedCategoriesCount,
+  labels,
+  openInDiscover,
+}: Props) => {
   const euiTheme = useEuiTheme();
   return (
     <>

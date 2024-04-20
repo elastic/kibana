@@ -27,14 +27,12 @@ interface SourceFieldsProps {
   sourceFields?: SourceField[];
 }
 
-export const SourceFields = (
-  {
-    esFields,
-    onChangeSourceFields,
-    errors,
-    sourceFields
-  }: SourceFieldsProps
-) => {
+export const SourceFields = ({
+  esFields,
+  onChangeSourceFields,
+  errors,
+  sourceFields,
+}: SourceFieldsProps) => {
   const [sourceFieldsOptions, setSourceFieldsOptions] = useState<SourceFieldsOption[]>([]);
 
   useEffect(() => {

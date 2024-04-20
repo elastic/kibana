@@ -16,7 +16,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -41,21 +41,19 @@ const NoFilterItems = () => {
   );
 };
 
-export const MultiSelectPicker = (
-  {
-    options,
-    onChange,
-    title,
-    checkedOptions,
-    dataTestSubj
-  }: {
-    options: Option[];
-    onChange?: (items: string[]) => void;
-    title?: string;
-    checkedOptions: string[];
-    dataTestSubj: string;
-  }
-) => {
+export const MultiSelectPicker = ({
+  options,
+  onChange,
+  title,
+  checkedOptions,
+  dataTestSubj,
+}: {
+  options: Option[];
+  onChange?: (items: string[]) => void;
+  title?: string;
+  checkedOptions: string[];
+  dataTestSubj: string;
+}) => {
   const [items, setItems] = useState<Option[]>(options);
   const [searchTerm, setSearchTerm] = useState<string>('');
 

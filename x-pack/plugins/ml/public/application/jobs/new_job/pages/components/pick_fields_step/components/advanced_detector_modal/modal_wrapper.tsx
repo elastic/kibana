@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -26,14 +25,7 @@ interface Props {
   saveEnabled: boolean;
 }
 
-export const ModalWrapper = (
-  {
-    onCreateClick,
-    closeModal,
-    saveEnabled,
-    children
-  }: Props
-) => {
+export const ModalWrapper = ({ onCreateClick, closeModal, saveEnabled, children }: Props) => {
   return (
     <EuiModal
       onClose={closeModal}

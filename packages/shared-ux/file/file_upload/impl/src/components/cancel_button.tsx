@@ -7,7 +7,6 @@
  */
 
 import { EuiButton, EuiButtonIcon } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useUploadState } from '../context';
@@ -18,12 +17,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const CancelButton = (
-  {
-    onClick,
-    compressed
-  }: Props
-) => {
+export const CancelButton = ({ onClick, compressed }: Props) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const disabled = !uploading;

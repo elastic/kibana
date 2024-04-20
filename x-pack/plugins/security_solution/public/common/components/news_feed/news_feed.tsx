@@ -22,20 +22,18 @@ interface Props {
 const SHOW_PLACEHOLDERS = 5;
 const LINES_PER_LOADING_PLACEHOLDER = 4;
 
-const NewsFeedComponent = (
-  {
-    news
-  }: Props
-) => (<>
-  <SidebarHeader title={NEWS_FEED_TITLE} />
-  {news == null ? (
-    <LoadingPlaceholders lines={LINES_PER_LOADING_PLACEHOLDER} placeholders={SHOW_PLACEHOLDERS} />
-  ) : news.length === 0 ? (
-    <NoNews />
-  ) : (
-    news.map((n: NewsItem) => <Post key={n.hash} newsItem={n} />)
-  )}
-</>);
+const NewsFeedComponent = ({ news }: Props) => (
+  <>
+    <SidebarHeader title={NEWS_FEED_TITLE} />
+    {news == null ? (
+      <LoadingPlaceholders lines={LINES_PER_LOADING_PLACEHOLDER} placeholders={SHOW_PLACEHOLDERS} />
+    ) : news.length === 0 ? (
+      <NoNews />
+    ) : (
+      news.map((n: NewsItem) => <Post key={n.hash} newsItem={n} />)
+    )}
+  </>
+);
 
 NewsFeedComponent.displayName = 'NewsFeedComponent';
 

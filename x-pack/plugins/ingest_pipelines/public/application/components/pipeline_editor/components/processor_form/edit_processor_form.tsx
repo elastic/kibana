@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -93,18 +93,16 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
   );
 };
 
-export const EditProcessorForm = (
-  {
-    getProcessor,
-    form,
-    isOnFailure,
-    onOpen,
-    esDocsBasePath,
-    closeFlyout,
-    handleSubmit,
-    resetProcessors
-  }: Props
-) => {
+export const EditProcessorForm = ({
+  getProcessor,
+  form,
+  isOnFailure,
+  onOpen,
+  esDocsBasePath,
+  closeFlyout,
+  handleSubmit,
+  resetProcessors,
+}: Props) => {
   const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
   const {
     testOutputPerProcessor,

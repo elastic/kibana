@@ -28,12 +28,7 @@ export const uniqueFlowsStatItems: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniqueFlowsComponent = (
-  {
-    from,
-    to
-  }: NetworkKpiProps
-) => {
+const NetworkKpiUniqueFlowsComponent = ({ from, to }: NetworkKpiProps) => {
   return <KpiBaseComponent id={ID} statItems={uniqueFlowsStatItems} from={from} to={to} />;
 };
 

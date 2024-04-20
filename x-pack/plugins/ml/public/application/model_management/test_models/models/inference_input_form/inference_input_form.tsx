@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { INPUT_TYPE } from '../inference_base';
@@ -18,12 +17,7 @@ interface Props {
   inputType: INPUT_TYPE;
 }
 
-export const InferenceInputForm = (
-  {
-    inferrer,
-    inputType
-  }: Props
-) => {
+export const InferenceInputForm = ({ inferrer, inputType }: Props) => {
   return inputType === INPUT_TYPE.TEXT ? (
     <TextInputForm inferrer={inferrer} />
   ) : (

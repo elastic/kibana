@@ -25,17 +25,15 @@ interface SelectableColumnOption {
   columnConfiguration: LogColumnConfiguration;
 }
 
-export const AddLogColumnButtonAndPopover = (
-  {
-    addLogColumn,
-    availableFields,
-    isDisabled
-  }: {
-    addLogColumn: (logColumnConfiguration: LogColumnConfiguration) => void;
-    availableFields: string[];
-    isDisabled?: boolean;
-  }
-) => {
+export const AddLogColumnButtonAndPopover = ({
+  addLogColumn,
+  availableFields,
+  isDisabled,
+}: {
+  addLogColumn: (logColumnConfiguration: LogColumnConfiguration) => void;
+  availableFields: string[];
+  isDisabled?: boolean;
+}) => {
   const { isVisible: isOpen, show: openPopover, hide: closePopover } = useVisibilityState(false);
 
   const availableColumnOptions = useMemo<SelectableColumnOption[]>(

@@ -63,12 +63,7 @@ export const EmbeddableFlyoutPortal = (props: ComponentProps) => {
   );
 };
 
-export const AddEmbeddablePanel = (
-  {
-    availableEmbeddables,
-    ...restProps
-  }: FlyoutProps
-) => {
+export const AddEmbeddablePanel = ({ availableEmbeddables, ...restProps }: FlyoutProps) => {
   const labsService = useLabsService();
   const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
 

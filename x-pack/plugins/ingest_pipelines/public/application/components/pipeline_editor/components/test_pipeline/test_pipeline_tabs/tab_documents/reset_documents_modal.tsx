@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 
 interface Props {
@@ -41,12 +41,7 @@ const i18nTexts = {
   ),
 };
 
-export const ResetDocumentsModal = (
-  {
-    confirmResetTestOutput,
-    closeModal
-  }: Props
-) => {
+export const ResetDocumentsModal = ({ confirmResetTestOutput, closeModal }: Props) => {
   return (
     <EuiConfirmModal
       buttonColor="danger"

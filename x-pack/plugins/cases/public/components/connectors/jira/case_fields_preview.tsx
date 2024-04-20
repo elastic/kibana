@@ -15,12 +15,10 @@ import type { ConnectorFieldsPreviewProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { ConnectorCard } from '../card';
 
-const JiraFieldsPreviewComponent = (
-  {
-    fields,
-    connector
-  }: ConnectorFieldsPreviewProps<JiraFieldsType>
-) => {
+const JiraFieldsPreviewComponent = ({
+  fields,
+  connector,
+}: ConnectorFieldsPreviewProps<JiraFieldsType>) => {
   const { http } = useKibana().services;
   const { issueType = null, priority = null, parent = null } = fields ?? {};
 

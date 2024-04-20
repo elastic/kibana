@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -32,14 +31,12 @@ export interface AnomalyChartsInitializerProps {
   onCancel: () => void;
 }
 
-export const AnomalyChartsInitializer = (
-  {
-    defaultTitle,
-    initialInput,
-    onCreate,
-    onCancel
-  }: AnomalyChartsInitializerProps
-) => {
+export const AnomalyChartsInitializer = ({
+  defaultTitle,
+  initialInput,
+  onCreate,
+  onCancel,
+}: AnomalyChartsInitializerProps) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(
     initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT

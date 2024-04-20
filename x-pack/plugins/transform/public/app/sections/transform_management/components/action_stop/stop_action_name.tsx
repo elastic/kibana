@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
@@ -90,12 +90,7 @@ export interface StopActionNameProps {
   items: TransformListRow[];
   forceDisable?: boolean;
 }
-export const StopActionName = (
-  {
-    items,
-    forceDisable
-  }: StopActionNameProps
-) => {
+export const StopActionName = ({ items, forceDisable }: StopActionNameProps) => {
   const capabilities = useTransformCapabilities();
   // Disable transforms if stats does not exist
   const stoppedTransformMessage = getStopActionDisabledMessage({

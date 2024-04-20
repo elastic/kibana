@@ -26,12 +26,7 @@ export interface StatusIconProps {
   type: keyof typeof STATUS_ICON_TYPES;
   label: string;
 }
-export const StatusIcon = (
-  {
-    type,
-    label
-  }: StatusIconProps
-) => {
+export const StatusIcon = ({ type, label }: StatusIconProps) => {
   const icon = typeToIconMap[type];
 
   return (

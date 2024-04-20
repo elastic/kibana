@@ -12,11 +12,7 @@ interface SidebarTitleProps {
   title: string;
 }
 
-const SidebarTitleComponent = (
-  {
-    title
-  }: SidebarTitleProps
-) => {
+const SidebarTitleComponent = ({ title }: SidebarTitleProps) => {
   return (
     <EuiTitle size="xs">
       <h3>{title}</h3>

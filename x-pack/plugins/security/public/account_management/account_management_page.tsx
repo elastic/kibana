@@ -6,7 +6,6 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';

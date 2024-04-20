@@ -18,43 +18,38 @@ interface Props {
   onChange: ({ minute }: { minute?: string }) => void;
 }
 
-export const CronMinutely = (
-  {
-    disabled,
-    minute,
-    minuteOptions,
-    onChange
-  }: Props
-) => (<Fragment>
-  <EuiFormRow
-    label={
-      <FormattedMessage
-        id="searchConnectors.cronEditor.cronMinutely.fieldTimeLabel"
-        defaultMessage="Minute"
-      />
-    }
-    fullWidth
-    data-test-subj="cronFrequencyConfiguration"
-  >
-    <EuiSelect
-      disabled={disabled}
-      options={minuteOptions}
-      value={minute}
-      onChange={(e) => onChange({ minute: e.target.value })}
+export const CronMinutely = ({ disabled, minute, minuteOptions, onChange }: Props) => (
+  <Fragment>
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="searchConnectors.cronEditor.cronMinutely.fieldTimeLabel"
+          defaultMessage="Minute"
+        />
+      }
       fullWidth
-      prepend={i18n.translate(
-        'searchConnectors.cronEditor.cronMinutely.fieldMinute.textAtLabel',
-        {
-          defaultMessage: 'Every',
-        }
-      )}
-      append={i18n.translate(
-        'searchConnectors.cronEditor.cronMinutely.fieldMinute.textAppendLabel',
-        {
-          defaultMessage: 'minutes',
-        }
-      )}
-      data-test-subj="cronFrequencyMinutelyMinuteSelect"
-    />
-  </EuiFormRow>
-</Fragment>);
+      data-test-subj="cronFrequencyConfiguration"
+    >
+      <EuiSelect
+        disabled={disabled}
+        options={minuteOptions}
+        value={minute}
+        onChange={(e) => onChange({ minute: e.target.value })}
+        fullWidth
+        prepend={i18n.translate(
+          'searchConnectors.cronEditor.cronMinutely.fieldMinute.textAtLabel',
+          {
+            defaultMessage: 'Every',
+          }
+        )}
+        append={i18n.translate(
+          'searchConnectors.cronEditor.cronMinutely.fieldMinute.textAppendLabel',
+          {
+            defaultMessage: 'minutes',
+          }
+        )}
+        data-test-subj="cronFrequencyMinutelyMinuteSelect"
+      />
+    </EuiFormRow>
+  </Fragment>
+);

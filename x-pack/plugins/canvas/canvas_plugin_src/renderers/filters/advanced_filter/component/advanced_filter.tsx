@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,36 +31,32 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter = (
-  {
-    value = '',
-    onChange,
-    commit
-  }: Props
-) => (<form
-  onSubmit={(e) => {
-    e.preventDefault();
-    commit(value);
-  }}
-  className="canvasAdvancedFilter"
->
-  <EuiFlexGroup gutterSize="xs">
-    <EuiFlexItem>
-      <input
-        type="text"
-        className="canvasAdvancedFilter__input"
-        placeholder={strings.getInputPlaceholder()}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <button className="canvasAdvancedFilter__button" type="submit">
-        {strings.getApplyButtonLabel()}
-      </button>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</form>);
+export const AdvancedFilter = ({ value = '', onChange, commit }: Props) => (
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      commit(value);
+    }}
+    className="canvasAdvancedFilter"
+  >
+    <EuiFlexGroup gutterSize="xs">
+      <EuiFlexItem>
+        <input
+          type="text"
+          className="canvasAdvancedFilter__input"
+          placeholder={strings.getInputPlaceholder()}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <button className="canvasAdvancedFilter__button" type="submit">
+          {strings.getApplyButtonLabel()}
+        </button>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </form>
+);
 
 AdvancedFilter.defaultProps = {
   value: '',

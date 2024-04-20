@@ -16,7 +16,6 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -38,16 +37,14 @@ export interface ClusterAddressFormProps {
   onSuccess?(result: PingResult, values: ClusterAddressFormValues): void;
 }
 
-export const ClusterAddressForm = (
-  {
-    defaultValues = {
-      host: 'https://localhost:9200',
-    },
+export const ClusterAddressForm = ({
+  defaultValues = {
+    host: 'https://localhost:9200',
+  },
 
-    onCancel,
-    onSuccess
-  }: ClusterAddressFormProps
-) => {
+  onCancel,
+  onSuccess,
+}: ClusterAddressFormProps) => {
   const { http } = useKibana();
 
   const [form, eventHandlers] = useForm({

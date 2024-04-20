@@ -64,17 +64,15 @@ export interface SolutionSideNavPanelProps extends SolutionSideNavPanelContentPr
 /**
  * Renders the secondary navigation panel for the nested link items
  */
-export const SolutionSideNavPanel = React.memo(function SolutionSideNavPanel(
-  {
-    onClose,
-    onOutsideClick,
-    title,
-    categories,
-    items,
-    bottomOffset,
-    topOffset
-  }: SolutionSideNavPanelProps
-) {
+export const SolutionSideNavPanel = React.memo(function SolutionSideNavPanel({
+  onClose,
+  onOutsideClick,
+  title,
+  categories,
+  items,
+  bottomOffset,
+  topOffset,
+}: SolutionSideNavPanelProps) {
   const { euiTheme } = useEuiTheme();
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
 
@@ -126,14 +124,12 @@ export const SolutionSideNavPanel = React.memo(function SolutionSideNavPanel(
   );
 });
 
-export const SolutionSideNavPanelContent = React.memo(function SolutionSideNavPanelContent(
-  {
-    title,
-    onClose,
-    categories,
-    items
-  }: SolutionSideNavPanelContentProps
-) {
+export const SolutionSideNavPanelContent = React.memo(function SolutionSideNavPanelContent({
+  title,
+  onClose,
+  categories,
+  items,
+}: SolutionSideNavPanelContentProps) {
   const { euiTheme } = useEuiTheme();
   const titleClasses = classNames(SolutionSideNavTitleStyles(euiTheme));
   return (
@@ -145,11 +141,7 @@ export const SolutionSideNavPanelContent = React.memo(function SolutionSideNavPa
       </EuiFlexItem>
       <EuiFlexItem style={{ width: '100%' }}>
         {categories ? (
-          <SolutionSideNavPanelCategories
-            categories={categories}
-            items={items}
-            onClose={onClose}
-          />
+          <SolutionSideNavPanelCategories categories={categories} items={items} onClose={onClose} />
         ) : (
           <SolutionSideNavPanelItems items={items} onClose={onClose} />
         )}
@@ -167,13 +159,11 @@ interface SolutionSideNavPanelCategoriesProps {
  * Renders all the categories for the secondary navigation panel.
  * Links that do not belong to any category are ignored
  */
-const SolutionSideNavPanelCategories = React.memo(function SolutionSideNavPanelCategories(
-  {
-    categories,
-    items,
-    onClose
-  }: SolutionSideNavPanelCategoriesProps
-) {
+const SolutionSideNavPanelCategories = React.memo(function SolutionSideNavPanelCategories({
+  categories,
+  items,
+  onClose,
+}: SolutionSideNavPanelCategoriesProps) {
   return (
     <>
       {categories.map((category, index) => {
@@ -243,13 +233,11 @@ interface SolutionSideNavPanelTitleCategoryProps {
 /**
  * Renders a title category for the secondary navigation panel.
  */
-const SolutionSideNavPanelTitleCategory = React.memo(function SolutionSideNavPanelTitleCategory(
-  {
-    category: { linkIds, label },
-    items,
-    onClose
-  }: SolutionSideNavPanelTitleCategoryProps
-) {
+const SolutionSideNavPanelTitleCategory = React.memo(function SolutionSideNavPanelTitleCategory({
+  category: { linkIds, label },
+  items,
+  onClose,
+}: SolutionSideNavPanelTitleCategoryProps) {
   const { euiTheme } = useEuiTheme();
   const titleClasses = classNames(SolutionSideNavCategoryTitleStyles(euiTheme));
   const categoryItems = useCategoryItems({ items, linkIds });
@@ -276,38 +264,38 @@ interface SolutionSideNavPanelAccordionCategoryProps {
 /**
  * Renders an accordion category for the secondary navigation panel.
  */
-const SolutionSideNavPanelAccordionCategory = React.memo(function SolutionSideNavPanelAccordionCategory(
-  {
+const SolutionSideNavPanelAccordionCategory = React.memo(
+  function SolutionSideNavPanelAccordionCategory({
     category: { label, categories },
     items,
     onClose,
-    index
-  }: SolutionSideNavPanelAccordionCategoryProps
-) {
-  const { euiTheme } = useEuiTheme();
-  const accordionClasses = classNames(SolutionSideNavCategoryAccordionStyles(euiTheme));
-  return (
-    <>
-      {index > 0 && <EuiHorizontalRule margin="xs" />}
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        id={label}
-        buttonContent={label}
-        className={accordionClasses}
-        buttonClassName={accordionButtonClassName}
-      >
-        {categories && (
-          <SolutionSideNavPanelCategories
-            categories={categories}
-            items={items}
-            onClose={onClose}
-          />
-        )}
-        {/* This component can be extended to render SolutionSideNavPanelItems when `linkIds` is defined in the category */}
-      </EuiAccordion>
-    </>
-  );
-});
+    index,
+  }: SolutionSideNavPanelAccordionCategoryProps) {
+    const { euiTheme } = useEuiTheme();
+    const accordionClasses = classNames(SolutionSideNavCategoryAccordionStyles(euiTheme));
+    return (
+      <>
+        {index > 0 && <EuiHorizontalRule margin="xs" />}
+        <EuiSpacer size="m" />
+        <EuiAccordion
+          id={label}
+          buttonContent={label}
+          className={accordionClasses}
+          buttonClassName={accordionButtonClassName}
+        >
+          {categories && (
+            <SolutionSideNavPanelCategories
+              categories={categories}
+              items={items}
+              onClose={onClose}
+            />
+          )}
+          {/* This component can be extended to render SolutionSideNavPanelItems when `linkIds` is defined in the category */}
+        </EuiAccordion>
+      </>
+    );
+  }
+);
 
 interface SolutionSideNavPanelSeparatorCategoryProps {
   category: SeparatorLinkCategory;
@@ -317,24 +305,24 @@ interface SolutionSideNavPanelSeparatorCategoryProps {
 /**
  * Renders a separator category for the secondary navigation panel.
  */
-const SolutionSideNavPanelSeparatorCategory = React.memo(function SolutionSideNavPanelSeparatorCategory(
-  {
+const SolutionSideNavPanelSeparatorCategory = React.memo(
+  function SolutionSideNavPanelSeparatorCategory({
     category: { linkIds },
     items,
-    onClose
-  }: SolutionSideNavPanelSeparatorCategoryProps
-) {
-  const categoryItems = useCategoryItems({ items, linkIds });
-  if (!categoryItems?.length) {
-    return null;
+    onClose,
+  }: SolutionSideNavPanelSeparatorCategoryProps) {
+    const categoryItems = useCategoryItems({ items, linkIds });
+    if (!categoryItems?.length) {
+      return null;
+    }
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <SolutionSideNavPanelItems items={categoryItems} onClose={onClose} />
+      </>
+    );
   }
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <SolutionSideNavPanelItems items={categoryItems} onClose={onClose} />
-    </>
-  );
-});
+);
 
 interface SolutionSideNavPanelItemsProps {
   items: SolutionSideNavItem[];
@@ -343,12 +331,10 @@ interface SolutionSideNavPanelItemsProps {
 /**
  * Renders the items for the secondary navigation panel.
  */
-const SolutionSideNavPanelItems = React.memo(function SolutionSideNavPanelItems(
-  {
-    items,
-    onClose
-  }: SolutionSideNavPanelItemsProps
-) {
+const SolutionSideNavPanelItems = React.memo(function SolutionSideNavPanelItems({
+  items,
+  onClose,
+}: SolutionSideNavPanelItemsProps) {
   const { euiTheme } = useEuiTheme();
   const panelLinksGroupClassNames = classNames(SolutionSideNavPanelLinksGroupStyles(euiTheme));
   return (
@@ -367,12 +353,10 @@ interface SolutionSideNavPanelItemProps {
 /**
  * Renders one item for the secondary navigation panel.
  * */
-const SolutionSideNavPanelItem = React.memo(function SolutionSideNavPanelItem(
-  {
-    item,
-    onClose
-  }: SolutionSideNavPanelItemProps
-) {
+const SolutionSideNavPanelItem = React.memo(function SolutionSideNavPanelItem({
+  item,
+  onClose,
+}: SolutionSideNavPanelItemProps) {
   const { tracker } = useTelemetryContext();
   const panelLinkClassNames = classNames('solutionSideNavPanelLink');
   const { id, href, onClick, iconType, openInNewTab } = item;
@@ -404,13 +388,11 @@ const SolutionSideNavPanelItem = React.memo(function SolutionSideNavPanelItem(
 /**
  * Renders the navigation item label
  **/
-const ItemLabel = React.memo(function ItemLabel(
-  {
-    item: { label, openInNewTab, isBeta, betaOptions }
-  }: {
-    item: SolutionSideNavItem;
-  }
-) {
+const ItemLabel = React.memo(function ItemLabel({
+  item: { label, openInNewTab, isBeta, betaOptions },
+}: {
+  item: SolutionSideNavItem;
+}) {
   return (
     <>
       {label} {openInNewTab && <EuiIcon type="popout" size="s" />}

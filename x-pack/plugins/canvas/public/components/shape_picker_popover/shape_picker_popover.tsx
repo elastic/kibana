@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 import { Shape } from '@kbn/expression-shape-plugin/common';
@@ -20,14 +20,7 @@ interface Props {
   ariaLabel?: string;
 }
 
-export const ShapePickerPopover = (
-  {
-    shapes,
-    onChange,
-    value,
-    ariaLabel
-  }: Props
-) => {
+export const ShapePickerPopover = ({ shapes, onChange, value, ariaLabel }: Props) => {
   const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>

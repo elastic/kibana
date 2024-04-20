@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFilterSelectItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { UseField } from '../../../form';
 
@@ -18,13 +18,7 @@ interface Props {
   }>;
 }
 
-export const UnitField = (
-  {
-    path,
-    options,
-    euiFieldProps
-  }: Props
-) => {
+export const UnitField = ({ path, options, euiFieldProps }: Props) => {
   const [open, setOpen] = useState(false);
 
   return (

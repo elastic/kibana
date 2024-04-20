@@ -15,11 +15,7 @@ interface Props {
   connector: CaseActionConnector | null;
 }
 
-const ConnectorFieldsFormComponent = (
-  {
-    connector
-  }: Props
-) => {
+const ConnectorFieldsFormComponent = ({ connector }: Props) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {

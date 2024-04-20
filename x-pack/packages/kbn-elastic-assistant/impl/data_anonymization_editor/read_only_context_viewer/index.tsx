@@ -14,11 +14,7 @@ export interface Props {
   rawData: string;
 }
 
-const ReadOnlyContextViewerComponent = (
-  {
-    rawData
-  }: Props
-) => {
+const ReadOnlyContextViewerComponent = ({ rawData }: Props) => {
   return (
     <EuiCodeBlock data-test-subj="readOnlyContextViewer" isCopyable>
       {SYSTEM_PROMPT_CONTEXT_NON_I18N(rawData)}

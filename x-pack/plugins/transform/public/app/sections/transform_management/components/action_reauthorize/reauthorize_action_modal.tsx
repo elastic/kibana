@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 import type { ReauthorizeAction } from './use_reauthorize_action';
 
-export const ReauthorizeActionModal = (
-  {
-    closeModal,
-    items,
-    reauthorizeAndCloseModal
-  }: ReauthorizeAction
-) => {
+export const ReauthorizeActionModal = ({
+  closeModal,
+  items,
+  reauthorizeAndCloseModal,
+}: ReauthorizeAction) => {
   const isBulkAction = items.length > 1;
 
   const bulkReauthorizeModalTitle = i18n.translate(

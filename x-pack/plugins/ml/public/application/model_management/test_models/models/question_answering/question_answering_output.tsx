@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
@@ -22,13 +22,7 @@ export const getQuestionAnsweringOutputComponent = (inferrer: QuestionAnsweringI
   <QuestionAnsweringOutput inferrer={inferrer} />
 );
 
-const QuestionAnsweringOutput = (
-  {
-    inferrer
-  }: {
-    inferrer: QuestionAnsweringInference;
-  }
-) => {
+const QuestionAnsweringOutput = ({ inferrer }: { inferrer: QuestionAnsweringInference }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;

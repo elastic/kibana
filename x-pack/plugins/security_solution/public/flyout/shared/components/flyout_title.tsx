@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 import {
@@ -42,75 +41,70 @@ export interface FlyoutTitleProps {
 /**
  * Title component with optional icon to indicate the type of document, can be used for text or a link
  */
-export const FlyoutTitle = memo((
-  {
-    title,
-    iconType,
-    isLink = false,
-    'data-test-subj': dataTestSubj
-  }: FlyoutTitleProps
-) => {
-  const { euiTheme } = useEuiTheme();
+export const FlyoutTitle = memo(
+  ({ title, iconType, isLink = false, 'data-test-subj': dataTestSubj }: FlyoutTitleProps) => {
+    const { euiTheme } = useEuiTheme();
 
-  const titleIcon = useMemo(() => {
-    return iconType ? (
-      <EuiIcon
-        type={iconType}
-        size="m"
-        className="eui-alignBaseline"
-        data-test-subj={`${dataTestSubj}Icon`}
-        css={css`
-          margin-right: ${euiTheme.size.xs};
-        `}
-      />
-    ) : null;
-  }, [dataTestSubj, iconType, euiTheme.size.xs]);
+    const titleIcon = useMemo(() => {
+      return iconType ? (
+        <EuiIcon
+          type={iconType}
+          size="m"
+          className="eui-alignBaseline"
+          data-test-subj={`${dataTestSubj}Icon`}
+          css={css`
+            margin-right: ${euiTheme.size.xs};
+          `}
+        />
+      ) : null;
+    }, [dataTestSubj, iconType, euiTheme.size.xs]);
 
-  const titleComponent = useMemo(() => {
+    const titleComponent = useMemo(() => {
+      return (
+        <EuiTitle size="s" data-test-subj={`${dataTestSubj}Text`}>
+          <EuiTextColor color={isLink ? euiTheme.colors.primaryText : undefined}>
+            <span>{title}</span>
+          </EuiTextColor>
+        </EuiTitle>
+      );
+    }, [dataTestSubj, title, isLink, euiTheme.colors.primaryText]);
+
+    const linkIcon = useMemo(() => {
+      return (
+        <EuiIcon
+          type={'popout'}
+          size="m"
+          css={css`
+            margin-bottom: ${euiTheme.size.xs};
+          `}
+          data-test-subj={`${dataTestSubj}LinkIcon`}
+        />
+      );
+    }, [dataTestSubj, euiTheme.size.xs]);
+
     return (
-      <EuiTitle size="s" data-test-subj={`${dataTestSubj}Text`}>
-        <EuiTextColor color={isLink ? euiTheme.colors.primaryText : undefined}>
-          <span>{title}</span>
-        </EuiTextColor>
-      </EuiTitle>
+      <EuiToolTip content={title}>
+        <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" responsive={false}>
+          <EuiFlexItem>
+            <div
+              css={css`
+                word-break: break-word;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              `}
+            >
+              {titleIcon}
+              {titleComponent}
+            </div>
+          </EuiFlexItem>
+          {isLink && <EuiFlexItem grow={false}>{linkIcon}</EuiFlexItem>}
+        </EuiFlexGroup>
+      </EuiToolTip>
     );
-  }, [dataTestSubj, title, isLink, euiTheme.colors.primaryText]);
-
-  const linkIcon = useMemo(() => {
-    return (
-      <EuiIcon
-        type={'popout'}
-        size="m"
-        css={css`
-          margin-bottom: ${euiTheme.size.xs};
-        `}
-        data-test-subj={`${dataTestSubj}LinkIcon`}
-      />
-    );
-  }, [dataTestSubj, euiTheme.size.xs]);
-
-  return (
-    <EuiToolTip content={title}>
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" responsive={false}>
-        <EuiFlexItem>
-          <div
-            css={css`
-              word-break: break-word;
-              display: -webkit-box;
-              -webkit-line-clamp: 3;
-              -webkit-box-orient: vertical;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            `}
-          >
-            {titleIcon}
-            {titleComponent}
-          </div>
-        </EuiFlexItem>
-        {isLink && <EuiFlexItem grow={false}>{linkIcon}</EuiFlexItem>}
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
-});
+  }
+);
 
 FlyoutTitle.displayName = 'FlyoutTitle';

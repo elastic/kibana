@@ -15,11 +15,9 @@ interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;
 }
 
-export const LogEntryCategoriesSetupContent = (
-  {
-    onOpenSetup
-  }: LogEntryCategoriesSetupContentProps
-) => {
+export const LogEntryCategoriesSetupContent = ({
+  onOpenSetup,
+}: LogEntryCategoriesSetupContentProps) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_categories_setup', delay: 15000 });
 

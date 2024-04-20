@@ -14,11 +14,7 @@ interface SystemMessageProps {
   content: React.ReactNode;
 }
 
-export const SystemMessage = (
-  {
-    content
-  }: SystemMessageProps
-) => {
+export const SystemMessage = ({ content }: SystemMessageProps) => {
   return (
     <EuiComment
       username={i18n.translate('xpack.searchPlayground.chat.message.system.username', {

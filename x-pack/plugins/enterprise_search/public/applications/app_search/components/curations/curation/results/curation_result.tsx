@@ -24,14 +24,7 @@ interface Props {
   index?: number;
 }
 
-export const CurationResult = (
-  {
-    actions,
-    dragHandleProps,
-    result,
-    index
-  }: Props
-) => {
+export const CurationResult = ({ actions, dragHandleProps, result, index }: Props) => {
   const {
     isMetaEngine,
     engine: { schema },

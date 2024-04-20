@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,13 +22,11 @@ interface ContentProps {
   externalPipelineConfig?: estypes.IngestPipeline;
 }
 
-export const TestTrainedModel = (
-  {
-    model,
-    handlePipelineConfigUpdate,
-    externalPipelineConfig
-  }: ContentProps
-) => {
+export const TestTrainedModel = ({
+  model,
+  handlePipelineConfigUpdate,
+  externalPipelineConfig,
+}: ContentProps) => {
   const {
     services: {
       docLinks: { links },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
@@ -53,12 +52,10 @@ const getStr = (arg: string | string[] | null, fallbackStr?: string): string => 
   return '';
 };
 
-export const DataDriftDetectionAppState = (
-  {
-    dataView,
-    savedSearch
-  }: DataDriftDetectionAppStateProps
-) => {
+export const DataDriftDetectionAppState = ({
+  dataView,
+  savedSearch,
+}: DataDriftDetectionAppStateProps) => {
   if (!(dataView || savedSearch)) {
     throw Error('No data view or saved search available.');
   }

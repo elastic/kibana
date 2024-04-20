@@ -21,11 +21,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const QuickStartTab = (
-  {
-    onClose
-  }: Props
-) => {
+export const QuickStartTab = ({ onClose }: Props) => {
   const {
     fleetServerHost,
     setFleetServerHost,

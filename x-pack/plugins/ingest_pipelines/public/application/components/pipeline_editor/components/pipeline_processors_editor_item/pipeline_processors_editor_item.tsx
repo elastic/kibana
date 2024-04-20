@@ -6,7 +6,7 @@
  */
 
 import classNames from 'classnames';
-import React, { FunctionComponent, memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -46,25 +46,22 @@ export interface Props {
   renderOnFailureHandlers?: () => React.ReactNode;
 }
 
-export const PipelineProcessorsEditorItem = memo(function PipelineProcessorsEditorItem(
-  {
-    processor,
-    description,
-    handlers: { onCancelMove, onMove },
-    selector,
-    movingProcessor,
-    renderOnFailureHandlers,
-    editor,
-    processorsDispatch
-  }: Props
-) {
+export const PipelineProcessorsEditorItem = memo(function PipelineProcessorsEditorItem({
+  processor,
+  description,
+  handlers: { onCancelMove, onMove },
+  selector,
+  movingProcessor,
+  renderOnFailureHandlers,
+  editor,
+  processorsDispatch,
+}: Props) {
   const isEditorNotInIdleMode = editor.mode.id !== 'idle';
   const isInMoveMode = Boolean(movingProcessor);
   const isMovingThisProcessor = processor.id === movingProcessor?.id;
   const isEditingThisProcessor =
     editor.mode.id === 'managingProcessor' && processor.id === editor.mode.arg.processor.id;
-  const isEditingOtherProcessor =
-    editor.mode.id === 'managingProcessor' && !isEditingThisProcessor;
+  const isEditingOtherProcessor = editor.mode.id === 'managingProcessor' && !isEditingThisProcessor;
   const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isMovingThisProcessor;
   const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 

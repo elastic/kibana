@@ -23,12 +23,7 @@ const NameFlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: 250px;
 `;
 
-export const FleetProxiesTable = (
-  {
-    proxies,
-    deleteFleetProxy
-  }: FleetProxiesTableProps
-) => {
+export const FleetProxiesTable = ({ proxies, deleteFleetProxy }: FleetProxiesTableProps) => {
   const authz = useAuthz();
   const { getHref } = useLink();
 

@@ -25,20 +25,18 @@ export type Props = Omit<PromptContext, 'id'> & {
   color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
 };
 
-const NewChatComponent = (
-  {
-    category,
-    color = 'primary',
-    children = i18n.NEW_CHAT,
-    conversationId,
-    description,
-    getPromptContext,
-    iconType,
-    promptContextId,
-    suggestedUserPrompt,
-    tooltip
-  }: Props
-) => {
+const NewChatComponent = ({
+  category,
+  color = 'primary',
+  children = i18n.NEW_CHAT,
+  conversationId,
+  description,
+  getPromptContext,
+  iconType,
+  promptContextId,
+  suggestedUserPrompt,
+  tooltip,
+}: Props) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
     conversationId ?? null,

@@ -24,11 +24,7 @@ interface Props {
   createState: AgentPolicyCreateState;
 }
 
-export const AgentPolicyCreatedCallOut = (
-  {
-    createState
-  }: Props
-) => {
+export const AgentPolicyCreatedCallOut = ({ createState }: Props) => {
   return (
     <>
       <EuiSpacer size="m" />

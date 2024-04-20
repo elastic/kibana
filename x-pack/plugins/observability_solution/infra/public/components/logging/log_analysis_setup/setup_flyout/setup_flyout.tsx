@@ -23,13 +23,11 @@ import { ModuleId, moduleIds, useLogAnalysisSetupFlyoutStateContext } from './se
 
 const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 
-export const LogAnalysisSetupFlyout = (
-  {
-    allowedModules = moduleIds
-  }: {
-    allowedModules?: ModuleId[];
-  }
-) => {
+export const LogAnalysisSetupFlyout = ({
+  allowedModules = moduleIds,
+}: {
+  allowedModules?: ModuleId[];
+}) => {
   const { closeFlyout, flyoutView, showModuleList, showModuleSetup } =
     useLogAnalysisSetupFlyoutStateContext();
 
@@ -69,17 +67,15 @@ export const LogAnalysisSetupFlyout = (
   );
 };
 
-const ModuleSetupView = (
-  {
-    moduleId,
-    onClose,
-    onViewModuleList
-  }: {
-    moduleId: ModuleId;
-    onClose: () => void;
-    onViewModuleList?: () => void;
-  }
-) => {
+const ModuleSetupView = ({
+  moduleId,
+  onClose,
+  onViewModuleList,
+}: {
+  moduleId: ModuleId;
+  onClose: () => void;
+  onViewModuleList?: () => void;
+}) => {
   switch (moduleId) {
     case 'logs_ui_analysis':
       return (
@@ -96,29 +92,29 @@ const ModuleSetupView = (
   }
 };
 
-const LogAnalysisSetupFlyoutSubPage = (
-  {
-    children,
-    onViewModuleList
-  }: {
-    onViewModuleList?: () => void;
-  }
-) => (<EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-  {onViewModuleList ? (
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButton"
-        flush="left"
-        iconSide="left"
-        iconType="arrowLeft"
-        onClick={onViewModuleList}
-      >
-        <FormattedMessage
-          id="xpack.infra.logs.analysis.setupFlyoutGotoListButtonLabel"
-          defaultMessage="All Machine Learning jobs"
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  ) : null}
-  <EuiFlexItem>{children}</EuiFlexItem>
-</EuiFlexGroup>);
+const LogAnalysisSetupFlyoutSubPage = ({
+  children,
+  onViewModuleList,
+}: {
+  onViewModuleList?: () => void;
+}) => (
+  <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+    {onViewModuleList ? (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButton"
+          flush="left"
+          iconSide="left"
+          iconType="arrowLeft"
+          onClick={onViewModuleList}
+        >
+          <FormattedMessage
+            id="xpack.infra.logs.analysis.setupFlyoutGotoListButtonLabel"
+            defaultMessage="All Machine Learning jobs"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    ) : null}
+    <EuiFlexItem>{children}</EuiFlexItem>
+  </EuiFlexGroup>
+);

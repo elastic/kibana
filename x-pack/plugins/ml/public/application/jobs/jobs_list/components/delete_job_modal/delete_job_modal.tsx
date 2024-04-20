@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -38,13 +37,7 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const DeleteJobModal = (
-  {
-    setShowFunction,
-    unsetShowFunction,
-    refreshJobs
-  }: Props
-) => {
+export const DeleteJobModal = ({ setShowFunction, unsetShowFunction, refreshJobs }: Props) => {
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [adJobs, setAdJobs] = useState<MlSummaryJob[]>([]);

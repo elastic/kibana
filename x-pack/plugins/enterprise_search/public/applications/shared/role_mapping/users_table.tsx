@@ -60,14 +60,12 @@ const deactivatedBadge = <EuiBadge color="hollow">{DEACTIVATED_LABEL}</EuiBadge>
 
 type Users = Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
 
-export const UsersTable = (
-  {
-    accessItemKey,
-    singleUserRoleMappings,
-    initializeSingleUserRoleMapping,
-    handleDeleteMapping
-  }: Props
-) => {
+export const UsersTable = ({
+  accessItemKey,
+  singleUserRoleMappings,
+  initializeSingleUserRoleMapping,
+  handleDeleteMapping,
+}: Props) => {
   // 'accessItems' is needed because App Search has `engines` and Workplace Search has `groups`.
   const users = (singleUserRoleMappings as SharedUser[]).map((user) => ({
     username: user.elasticsearchUser.username,

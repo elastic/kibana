@@ -19,12 +19,10 @@ export interface FleetServerHostsSectionProps {
   deleteFleetServerHost: (fleetServerHost: FleetServerHost) => void;
 }
 
-export const FleetServerHostsSection = (
-  {
-    fleetServerHosts,
-    deleteFleetServerHost
-  }: FleetServerHostsSectionProps
-) => {
+export const FleetServerHostsSection = ({
+  fleetServerHosts,
+  deleteFleetServerHost,
+}: FleetServerHostsSectionProps) => {
   const authz = useAuthz();
   const { docLinks } = useStartServices();
   const { getHref } = useLink();

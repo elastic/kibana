@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useRef } from 'react';
 import d3 from 'd3';
 
@@ -29,15 +28,13 @@ interface ColorRangeLegendProps {
  *
  * @param props ColorRangeLegendProps
  */
-export const ColorRangeLegend = (
-  {
-    colorRange,
-    justifyTicks = false,
-    showTicks = true,
-    title,
-    width = 250
-  }: ColorRangeLegendProps
-) => {
+export const ColorRangeLegend = ({
+  colorRange,
+  justifyTicks = false,
+  showTicks = true,
+  title,
+  width = 250,
+}: ColorRangeLegendProps) => {
   const d3Container = useRef<null | SVGSVGElement>(null);
 
   const scale = d3.range(COLOR_RANGE_RESOLUTION + 1).map((d) => ({

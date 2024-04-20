@@ -15,11 +15,7 @@ interface Props {
   repository: ReadonlyRepository;
 }
 
-export const ReadonlyDetails = (
-  {
-    repository
-  }: Props
-) => {
+export const ReadonlyDetails = ({ repository }: Props) => {
   const {
     settings: { url },
   } = repository;

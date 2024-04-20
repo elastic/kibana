@@ -46,15 +46,7 @@ import { DefaultLayout } from '../../../layouts';
 
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
-const DeleteButton = (
-  {
-    apiKey,
-    refresh
-  }: {
-    apiKey: EnrollmentAPIKey;
-    refresh: () => void;
-  }
-) => {
+const DeleteButton = ({ apiKey, refresh }: { apiKey: EnrollmentAPIKey; refresh: () => void }) => {
   const { notifications } = useStartServices();
   const [state, setState] = useState<'CONFIRM_VISIBLE' | 'CONFIRM_HIDDEN'>('CONFIRM_HIDDEN');
 

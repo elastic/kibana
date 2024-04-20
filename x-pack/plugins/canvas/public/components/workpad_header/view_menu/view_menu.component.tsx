@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
@@ -152,25 +152,23 @@ export interface Props {
   setAutoplayInterval: (interval: number) => void;
 }
 
-export const ViewMenu = (
-  {
-    enterFullscreen,
-    fitToWindow,
-    isWriteable,
-    resetZoom,
-    setZoomScale,
-    toggleWriteable,
-    zoomIn,
-    zoomOut,
-    zoomScale,
-    doRefresh,
-    refreshInterval,
-    setRefreshInterval,
-    autoplayEnabled,
-    autoplayInterval,
-    setAutoplayInterval
-  }: Props
-) => {
+export const ViewMenu = ({
+  enterFullscreen,
+  fitToWindow,
+  isWriteable,
+  resetZoom,
+  setZoomScale,
+  toggleWriteable,
+  zoomIn,
+  zoomOut,
+  zoomScale,
+  doRefresh,
+  refreshInterval,
+  setRefreshInterval,
+  autoplayEnabled,
+  autoplayInterval,
+  setAutoplayInterval,
+}: Props) => {
   const setRefresh = (val: number) => setRefreshInterval(val);
 
   const disableInterval = () => {

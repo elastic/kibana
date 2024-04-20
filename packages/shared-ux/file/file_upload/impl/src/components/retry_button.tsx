@@ -7,7 +7,6 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useUploadState } from '../context';
@@ -17,11 +16,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const RetryButton = (
-  {
-    onClick
-  }: Props
-) => {
+export const RetryButton = ({ onClick }: Props) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
 

@@ -17,11 +17,7 @@ import { NoLogging, CustomPolicy, DefaultPolicy } from './constants';
 interface Props {
   type: LogRetentionOptions;
 }
-export const LogRetentionMessage = (
-  {
-    type
-  }: Props
-) => {
+export const LogRetentionMessage = ({ type }: Props) => {
   const { logRetention } = useValues(LogRetentionLogic);
   if (!logRetention) return null;
 

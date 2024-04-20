@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { SidebarContent } from './sidebar_content';
 
 interface Props {
   commit: Function;
 }
 
-export const Sidebar = (
-  {
-    commit
-  }: Props
-) => {
+export const Sidebar = ({ commit }: Props) => {
   return (
     <div className="canvasSidebar">
       <SidebarContent commit={commit} />

@@ -30,18 +30,16 @@ const attributeValueExamples: AttributeExamples = {
   metadata: '{"_reserved": true}',
 };
 
-export const AttributeSelector = (
-  {
-    attributeName,
-    attributeValue = '',
-    attributeValueInvalid,
-    attributes,
-    elasticsearchRoles,
-    disabled,
-    handleAttributeSelectorChange,
-    handleAttributeValueChange
-  }: Props
-) => {
+export const AttributeSelector = ({
+  attributeName,
+  attributeValue = '',
+  attributeValueInvalid,
+  attributes,
+  elasticsearchRoles,
+  disabled,
+  handleAttributeSelectorChange,
+  handleAttributeValueChange,
+}: Props) => {
   return (
     <div data-test-subj="AttributeSelector">
       <EuiFormRow label={EXTERNAL_ATTRIBUTE_LABEL} fullWidth>

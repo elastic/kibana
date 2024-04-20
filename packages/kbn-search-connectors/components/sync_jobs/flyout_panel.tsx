@@ -14,12 +14,7 @@ interface FlyoutPanelProps {
   title: string;
 }
 
-export const FlyoutPanel = (
-  {
-    children,
-    title
-  }: FlyoutPanelProps
-) => {
+export const FlyoutPanel = ({ children, title }: FlyoutPanelProps) => {
   return (
     <EuiPanel paddingSize="l" color="subdued" hasShadow={false}>
       <EuiTitle size="xs">

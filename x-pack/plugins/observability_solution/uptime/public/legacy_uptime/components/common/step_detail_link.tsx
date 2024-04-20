@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { ReactRouterEuiButtonEmpty } from './react_router_helpers';
 
 interface StepDetailLinkProps {
@@ -19,13 +19,7 @@ interface StepDetailLinkProps {
   stepIndex: number;
 }
 
-export const StepDetailLink = (
-  {
-    children,
-    checkGroupId,
-    stepIndex
-  }: StepDetailLinkProps
-) => {
+export const StepDetailLink = ({ children, checkGroupId, stepIndex }: StepDetailLinkProps) => {
   const to = `/journey/${checkGroupId}/step/${stepIndex}`;
 
   return (

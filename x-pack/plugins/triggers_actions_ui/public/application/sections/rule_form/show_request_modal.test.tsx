@@ -101,9 +101,11 @@ const editRule: Rule<RuleTypeParams> = {
   ...shared,
 };
 
-const ShowRequestModalWithProviders = (props: ShowRequestModalProps) => (<IntlProvider locale="en">
-  <ShowRequestModal {...props} />
-</IntlProvider>);
+const ShowRequestModalWithProviders = (props: ShowRequestModalProps) => (
+  <IntlProvider locale="en">
+    <ShowRequestModal {...props} />
+  </IntlProvider>
+);
 
 describe('rules_settings_modal', () => {
   afterEach(() => {

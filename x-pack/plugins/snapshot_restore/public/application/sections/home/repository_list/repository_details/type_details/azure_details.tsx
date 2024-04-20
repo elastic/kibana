@@ -15,11 +15,7 @@ interface Props {
   repository: AzureRepository;
 }
 
-export const AzureDetails = (
-  {
-    repository
-  }: Props
-) => {
+export const AzureDetails = ({ repository }: Props) => {
   const {
     settings: {
       client,

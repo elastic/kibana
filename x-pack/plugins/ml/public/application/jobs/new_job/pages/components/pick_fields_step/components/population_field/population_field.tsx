@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 
 import type { Field } from '@kbn/ml-anomaly-utils';

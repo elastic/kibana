@@ -26,18 +26,16 @@ export interface SettingsPageProps {
   deleteFleetProxy: (proxy: FleetProxy) => void;
 }
 
-export const SettingsPage = (
-  {
-    outputs,
-    proxies,
-    fleetServerHosts,
-    deleteOutput,
-    deleteFleetServerHost,
-    downloadSources,
-    deleteDownloadSource,
-    deleteFleetProxy
-  }: SettingsPageProps
-) => {
+export const SettingsPage = ({
+  outputs,
+  proxies,
+  fleetServerHosts,
+  deleteOutput,
+  deleteFleetServerHost,
+  downloadSources,
+  deleteDownloadSource,
+  deleteFleetProxy,
+}: SettingsPageProps) => {
   return (
     <>
       <EuiSpacer size="m" />

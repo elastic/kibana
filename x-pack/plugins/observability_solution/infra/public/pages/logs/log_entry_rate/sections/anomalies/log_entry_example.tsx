@@ -72,17 +72,15 @@ type Props = LogEntryExample & {
   anomaly: LogEntryAnomaly;
 };
 
-export const LogEntryExampleMessage = (
-  {
-    id,
-    dataset,
-    message,
-    timestamp,
-    tiebreaker,
-    timeRange,
-    anomaly
-  }: Props
-) => {
+export const LogEntryExampleMessage = ({
+  id,
+  dataset,
+  message,
+  timestamp,
+  tiebreaker,
+  timeRange,
+  anomaly,
+}: Props) => {
   const {
     services: { ml, http, application },
   } = useKibanaContextForPlugin();
@@ -281,13 +279,7 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   },
 ];
 
-export const LogEntryExampleMessageHeaders = (
-  {
-    dateTime
-  }: {
-    dateTime: number;
-  }
-) => {
+export const LogEntryExampleMessageHeaders = ({ dateTime }: { dateTime: number }) => {
   return (
     <LogEntryExampleMessageHeadersWrapper>
       <>

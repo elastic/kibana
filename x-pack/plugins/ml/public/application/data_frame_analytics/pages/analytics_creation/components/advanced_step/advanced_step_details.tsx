@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,15 +29,13 @@ export interface ListItems {
   description: string | JSX.Element;
 }
 
-export const AdvancedStepDetails = (
-  {
-    setCurrentStep,
-    state
-  }: {
-    setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
-    state: State;
-  }
-) => {
+export const AdvancedStepDetails = ({
+  setCurrentStep,
+  state,
+}: {
+  setCurrentStep: React.Dispatch<React.SetStateAction<ANALYTICS_STEPS>>;
+  state: State;
+}) => {
   const { form, isJobCreated } = state;
   const {
     computeFeatureInfluence,

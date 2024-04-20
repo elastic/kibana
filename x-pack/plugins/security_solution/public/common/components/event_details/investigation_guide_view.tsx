@@ -43,14 +43,12 @@ interface InvestigationGuideViewProps {
 /**
  * Investigation guide that shows the markdown text of rule.note
  */
-const InvestigationGuideViewComponent = (
-  {
-    basicData,
-    ruleNote,
-    showFullView = false,
-    showTitle = true
-  }: InvestigationGuideViewProps
-) => {
+const InvestigationGuideViewComponent = ({
+  basicData,
+  ruleNote,
+  showFullView = false,
+  showTitle = true,
+}: InvestigationGuideViewProps) => {
   return (
     <BasicAlertDataContext.Provider value={basicData}>
       {showTitle && (

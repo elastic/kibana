@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiHorizontalRule, EuiSwitch } from '@elastic/eui';
 import {
   useCanvasShareableState,
@@ -45,27 +45,27 @@ export interface Props {
 /**
  * The panel used to configure Autolay in Shareable Canvas Workpads.
  */
-export const AutoplaySettingsComponent = (
-  {
-    isEnabled,
-    interval,
-    onSetAutoplay,
-    onSetInterval
-  }: Props
-) => (<div style={{ padding: 16 }}>
-  <EuiSwitch
-    name="cycle"
-    id="cycle"
-    label="Cycle Slides"
-    checked={isEnabled}
-    onChange={() => onSetAutoplay(!isEnabled)}
-  />
-  <EuiHorizontalRule margin="m" />
-  <CustomInterval
-    defaultValue={interval}
-    onSubmit={(value: number) => onSetInterval(createTimeInterval(value))}
-  />
-</div>);
+export const AutoplaySettingsComponent = ({
+  isEnabled,
+  interval,
+  onSetAutoplay,
+  onSetInterval,
+}: Props) => (
+  <div style={{ padding: 16 }}>
+    <EuiSwitch
+      name="cycle"
+      id="cycle"
+      label="Cycle Slides"
+      checked={isEnabled}
+      onChange={() => onSetAutoplay(!isEnabled)}
+    />
+    <EuiHorizontalRule margin="m" />
+    <CustomInterval
+      defaultValue={interval}
+      onSubmit={(value: number) => onSetInterval(createTimeInterval(value))}
+    />
+  </div>
+);
 
 /**
  * A store-connected container for the `AutoplaySettings` component.

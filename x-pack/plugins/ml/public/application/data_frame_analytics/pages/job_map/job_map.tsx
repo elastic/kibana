@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,14 +45,7 @@ interface Props {
   forceRefresh?: boolean;
 }
 
-export const JobMap = (
-  {
-    defaultHeight,
-    analyticsId,
-    modelId,
-    forceRefresh
-  }: Props
-) => {
+export const JobMap = ({ defaultHeight, analyticsId, modelId, forceRefresh }: Props) => {
   // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
   const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
   const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../../common/constants';
@@ -20,14 +19,12 @@ interface LinkToListDetailsProps {
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
 
-const LinkToListDetailsComponent = (
-  {
-    linkTitle,
-    listId,
-    external,
-    dataTestSubj
-  }: LinkToListDetailsProps
-) => {
+const LinkToListDetailsComponent = ({
+  linkTitle,
+  listId,
+  external,
+  dataTestSubj,
+}: LinkToListDetailsProps) => {
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}

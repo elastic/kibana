@@ -37,21 +37,19 @@ type Props = Omit<_EuiPanelDivlike, 'title'> & {
   className?: string;
 };
 
-export const DataPanel = (
-  {
-    title,
-    titleSize = 'xs',
-    subtitle,
-    iconType,
-    action,
-    filled,
-    isLoading,
-    footerDocLink,
-    className,
-    children,
-    ...props
-  }: Props
-) => {
+export const DataPanel = ({
+  title,
+  titleSize = 'xs',
+  subtitle,
+  iconType,
+  action,
+  filled,
+  isLoading,
+  footerDocLink,
+  className,
+  children,
+  ...props
+}: Props) => {
   const classes = classNames('dataPanel', className, {
     'dataPanel--filled': filled,
   });

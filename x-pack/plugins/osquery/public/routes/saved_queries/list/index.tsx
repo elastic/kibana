@@ -46,12 +46,7 @@ interface PlayButtonProps {
   savedQuery: SavedQuerySO;
 }
 
-const PlayButtonComponent = (
-  {
-    disabled = false,
-    savedQuery
-  }: PlayButtonProps
-) => {
+const PlayButtonComponent = ({ disabled = false, savedQuery }: PlayButtonProps) => {
   const { push } = useHistory();
 
   // TODO: Add href
@@ -100,13 +95,11 @@ interface EditButtonProps {
   savedQueryName: string;
 }
 
-const EditButtonComponent = (
-  {
-    disabled = false,
-    savedQueryId,
-    savedQueryName
-  }: EditButtonProps
-) => {
+const EditButtonComponent = ({
+  disabled = false,
+  savedQueryId,
+  savedQueryName,
+}: EditButtonProps) => {
   const buttonProps = useRouterNavigate(`saved_queries/${savedQueryId}`);
 
   const editText = useMemo(

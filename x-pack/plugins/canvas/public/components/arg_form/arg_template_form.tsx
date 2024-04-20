@@ -41,15 +41,13 @@ export interface ArgTemplateFormProps {
 const mergeWithFormHandlers = (handlers: ArgTemplateFormProps['handlers']) =>
   Object.assign(new ExpressionFormHandlers(), handlers);
 
-const ArgTemplateFormComponent = (
-  {
-    template,
-    argumentProps,
-    handlers,
-    error,
-    errorTemplate
-  }: ArgTemplateFormProps
-) => {
+const ArgTemplateFormComponent = ({
+  template,
+  argumentProps,
+  handlers,
+  error,
+  errorTemplate,
+}: ArgTemplateFormProps) => {
   const [updatedHandlers, setHandlers] = useState(mergeWithFormHandlers(handlers));
   const prevError = usePrevious(error);
   const [argument, setArgument] = useState<ReactPortal>();

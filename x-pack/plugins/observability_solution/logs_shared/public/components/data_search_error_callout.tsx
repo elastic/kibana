@@ -15,17 +15,15 @@ import {
   ShardFailureSearchStrategyError,
 } from '../../common/search_strategies/common/errors';
 
-export const DataSearchErrorCallout = (
-  {
-    errors,
-    onRetry,
-    title
-  }: {
-    title: React.ReactNode;
-    errors: SearchStrategyError[];
-    onRetry?: () => void;
-  }
-) => {
+export const DataSearchErrorCallout = ({
+  errors,
+  onRetry,
+  title,
+}: {
+  title: React.ReactNode;
+  errors: SearchStrategyError[];
+  onRetry?: () => void;
+}) => {
   const calloutColor = errors.some((error) => error.type !== 'aborted') ? 'danger' : 'warning';
 
   return (
@@ -50,13 +48,7 @@ export const DataSearchErrorCallout = (
   );
 };
 
-const DataSearchErrorMessage = (
-  {
-    error
-  }: {
-    error: SearchStrategyError;
-  }
-) => {
+const DataSearchErrorMessage = ({ error }: { error: SearchStrategyError }) => {
   if (error.type === 'aborted') {
     return <AbortedRequestErrorMessage error={error} />;
   } else if (error.type === 'shardFailure') {
@@ -66,36 +58,26 @@ const DataSearchErrorMessage = (
   }
 };
 
-const AbortedRequestErrorMessage = (
-  {}: {
-    error?: AbortedRequestSearchStrategyError;
-  }
-) => (<FormattedMessage
-  tagName="p"
-  id="xpack.logsShared.dataSearch.abortedRequestErrorMessage"
-  defaultMessage="The request was aborted."
-/>);
+const AbortedRequestErrorMessage = ({}: { error?: AbortedRequestSearchStrategyError }) => (
+  <FormattedMessage
+    tagName="p"
+    id="xpack.logsShared.dataSearch.abortedRequestErrorMessage"
+    defaultMessage="The request was aborted."
+  />
+);
 
-const GenericErrorMessage = (
-  {
-    error
-  }: {
-    error: GenericSearchStrategyError;
-  }
-) => (<p>{error.message ?? `${error}`}</p>);
+const GenericErrorMessage = ({ error }: { error: GenericSearchStrategyError }) => (
+  <p>{error.message ?? `${error}`}</p>
+);
 
-const ShardFailureErrorMessage = (
-  {
-    error
-  }: {
-    error: ShardFailureSearchStrategyError;
-  }
-) => (<FormattedMessage
-  tagName="p"
-  id="xpack.logsShared.dataSearch.shardFailureErrorMessage"
-  defaultMessage="Index {indexName}: {errorMessage}"
-  values={{
-    indexName: error.shardInfo.index,
-    errorMessage: error.message,
-  }}
-/>);
+const ShardFailureErrorMessage = ({ error }: { error: ShardFailureSearchStrategyError }) => (
+  <FormattedMessage
+    tagName="p"
+    id="xpack.logsShared.dataSearch.shardFailureErrorMessage"
+    defaultMessage="Index {indexName}: {errorMessage}"
+    values={{
+      indexName: error.shardInfo.index,
+      errorMessage: error.message,
+    }}
+  />
+);

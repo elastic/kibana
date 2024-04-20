@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -48,14 +47,12 @@ interface JobSettingsFormProps {
   jobs: ModuleJobUI[];
 }
 
-export const JobSettingsForm = (
-  {
-    onSubmit,
-    onJobPrefixChange,
-    saveState,
-    jobs
-  }: JobSettingsFormProps
-) => {
+export const JobSettingsForm = ({
+  onSubmit,
+  onJobPrefixChange,
+  saveState,
+  jobs,
+}: JobSettingsFormProps) => {
   const timefilter = useTimefilter();
   const { from, to } = getTimeFilterRange(timefilter);
   const { selectedDataView: dataView } = useDataSource();

@@ -20,17 +20,15 @@ interface PushButtonProps {
   pushToService: () => Promise<void>;
 }
 
-const PushButtonComponent = (
-  {
-    disabled,
-    errorsMsg,
-    isLoading,
-    hasBeenPushed,
-    connectorName,
-    showTooltip,
-    pushToService
-  }: PushButtonProps
-) => {
+const PushButtonComponent = ({
+  disabled,
+  errorsMsg,
+  isLoading,
+  hasBeenPushed,
+  connectorName,
+  showTooltip,
+  pushToService,
+}: PushButtonProps) => {
   const button = (
     <EuiButtonEmpty
       data-test-subj="push-to-external-service"

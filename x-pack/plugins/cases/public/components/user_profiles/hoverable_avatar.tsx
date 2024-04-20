@@ -10,13 +10,7 @@ import type { UserInfoWithAvatar } from './types';
 import { CaseUserAvatar } from './user_avatar';
 import { UserToolTip } from './user_tooltip';
 
-const HoverableAvatarComponent = (
-  {
-    userInfo
-  }: {
-    userInfo?: UserInfoWithAvatar;
-  }
-) => {
+const HoverableAvatarComponent = ({ userInfo }: { userInfo?: UserInfoWithAvatar }) => {
   return (
     <UserToolTip userInfo={userInfo}>
       <CaseUserAvatar size={'m'} userInfo={userInfo} />

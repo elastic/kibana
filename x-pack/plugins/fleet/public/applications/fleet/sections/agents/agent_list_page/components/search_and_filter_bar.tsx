@@ -62,36 +62,34 @@ export interface SearchAndFilterBarProps {
   latestAgentActionErrors: number;
 }
 
-export const SearchAndFilterBar = (
-  {
-    agentPolicies,
-    draftKuery,
-    onDraftKueryChange,
-    onSubmitSearch,
-    selectedAgentPolicies,
-    onSelectedAgentPoliciesChange,
-    selectedStatus,
-    onSelectedStatusChange,
-    showUpgradeable,
-    onShowUpgradeableChange,
-    tags,
-    selectedTags,
-    onSelectedTagsChange,
-    nAgentsInTable,
-    totalInactiveAgents,
-    totalManagedAgentIds,
-    selectionMode,
-    currentQuery,
-    selectedAgents,
-    refreshAgents,
-    onClickAddAgent,
-    onClickAddFleetServer,
-    agentsOnCurrentPage,
-    onClickAgentActivity,
-    showAgentActivityTour,
-    latestAgentActionErrors
-  }: SearchAndFilterBarProps
-) => {
+export const SearchAndFilterBar = ({
+  agentPolicies,
+  draftKuery,
+  onDraftKueryChange,
+  onSubmitSearch,
+  selectedAgentPolicies,
+  onSelectedAgentPoliciesChange,
+  selectedStatus,
+  onSelectedStatusChange,
+  showUpgradeable,
+  onShowUpgradeableChange,
+  tags,
+  selectedTags,
+  onSelectedTagsChange,
+  nAgentsInTable,
+  totalInactiveAgents,
+  totalManagedAgentIds,
+  selectionMode,
+  currentQuery,
+  selectedAgents,
+  refreshAgents,
+  onClickAddAgent,
+  onClickAddFleetServer,
+  agentsOnCurrentPage,
+  onClickAgentActivity,
+  showAgentActivityTour,
+  latestAgentActionErrors,
+}: SearchAndFilterBarProps) => {
   const authz = useAuthz();
 
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =

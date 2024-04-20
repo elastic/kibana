@@ -81,37 +81,35 @@ const getDescriptionText = (type: ConnectorContentSchedulingProps['type']) => {
   }
 };
 
-const EnableSwitch = (
-  {
-    disabled,
-    checked,
-    onChange
-  }: {
-    checked: boolean;
-    disabled: boolean;
-    onChange: EuiSwitchProps['onChange'];
-  }
-) => (<EuiSwitch
-  disabled={disabled}
-  checked={checked}
-  label={i18n.translate('searchConnectors.content.indices.connectorScheduling.switch.label', {
-    defaultMessage: 'Enabled',
-  })}
-  onChange={onChange}
-/>);
+const EnableSwitch = ({
+  disabled,
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  disabled: boolean;
+  onChange: EuiSwitchProps['onChange'];
+}) => (
+  <EuiSwitch
+    disabled={disabled}
+    checked={checked}
+    label={i18n.translate('searchConnectors.content.indices.connectorScheduling.switch.label', {
+      defaultMessage: 'Enabled',
+    })}
+    onChange={onChange}
+  />
+);
 
-export const ConnectorContentScheduling = (
-  {
-    connector,
-    dataTelemetryIdPrefix,
-    setHasSyncTypeChanges,
-    hasPlatinumLicense = false,
-    hasSyncTypeChanges,
-    type,
-    updateConnectorStatus,
-    updateScheduling
-  }: ConnectorContentSchedulingProps
-) => {
+export const ConnectorContentScheduling = ({
+  connector,
+  dataTelemetryIdPrefix,
+  setHasSyncTypeChanges,
+  hasPlatinumLicense = false,
+  hasSyncTypeChanges,
+  type,
+  updateConnectorStatus,
+  updateScheduling,
+}: ConnectorContentSchedulingProps) => {
   const schedulingInput = connector.scheduling;
   const [scheduling, setScheduling] = useState(schedulingInput);
   const [isAccordionOpen, setIsAccordionOpen] = useState<'open' | 'closed'>(

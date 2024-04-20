@@ -19,11 +19,7 @@ import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { useAppContext } from '../../app_context';
 
-export const TemplateCreate = (
-  {
-    history
-  }: RouteComponentProps
-) => {
+export const TemplateCreate = ({ history }: RouteComponentProps) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
   const {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiFlexGroup,
@@ -32,17 +32,15 @@ export const getTextClassificationOutputComponent = (
     | LangIdentInference
 ) => <TextClassificationOutput inferrer={inferrer} />;
 
-export const TextClassificationOutput = (
-  {
-    inferrer
-  }: {
-    inferrer:
-      | TextClassificationInference
-      | ZeroShotClassificationInference
-      | FillMaskInference
-      | LangIdentInference;
-  }
-) => {
+export const TextClassificationOutput = ({
+  inferrer,
+}: {
+  inferrer:
+    | TextClassificationInference
+    | ZeroShotClassificationInference
+    | FillMaskInference
+    | LangIdentInference;
+}) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -60,15 +58,13 @@ export const TextClassificationOutput = (
   );
 };
 
-export const PredictionProbabilityList = (
-  {
-    response,
-    inputText
-  }: {
-    response: FormattedTextClassificationResponse;
-    inputText?: string;
-  }
-) => {
+export const PredictionProbabilityList = ({
+  response,
+  inputText,
+}: {
+  response: FormattedTextClassificationResponse;
+  inputText?: string;
+}) => {
   return (
     <>
       {inputText !== undefined ? (

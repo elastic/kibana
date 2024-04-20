@@ -5,19 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC } from 'react';
+import React from 'react';
 
 export interface TooltipData {
   label?: string;
   value?: string;
 }
 
-export const TooltipRow = (
-  {
-    label,
-    value
-  }: TooltipData
-) => {
+export const TooltipRow = ({ label, value }: TooltipData) => {
   return label && value ? (
     <tr>
       <td className="detailedTooltip__label">

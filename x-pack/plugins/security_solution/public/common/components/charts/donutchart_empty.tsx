@@ -35,15 +35,11 @@ const SmallRing = styled.div<DonutChartEmptyProps>`
     vertical-align: middle;`}
 `;
 
-const EmptyDonutChartComponent = (
-  {
-    size = 90,
-    donutWidth = 20
-  }: DonutChartEmptyProps
-) => size - donutWidth > 0 ? (
-  <BigRing size={size} data-test-subj="empty-donut">
-    <SmallRing size={size - donutWidth} data-test-subj="empty-donut-small" />
-  </BigRing>
-) : null;
+const EmptyDonutChartComponent = ({ size = 90, donutWidth = 20 }: DonutChartEmptyProps) =>
+  size - donutWidth > 0 ? (
+    <BigRing size={size} data-test-subj="empty-donut">
+      <SmallRing size={size - donutWidth} data-test-subj="empty-donut-small" />
+    </BigRing>
+  ) : null;
 
 export const DonutChartEmpty = React.memo(EmptyDonutChartComponent);

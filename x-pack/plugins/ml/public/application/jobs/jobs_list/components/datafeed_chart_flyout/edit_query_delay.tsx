@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -30,17 +29,15 @@ const tooltipContent = i18n.translate(
   }
 );
 
-export const EditQueryDelay = (
-  {
-    datafeedId,
-    queryDelay,
-    isEnabled
-  }: {
-    datafeedId: Datafeed['datafeed_id'];
-    queryDelay: Datafeed['query_delay'];
-    isEnabled: boolean;
-  }
-) => {
+export const EditQueryDelay = ({
+  datafeedId,
+  queryDelay,
+  isEnabled,
+}: {
+  datafeedId: Datafeed['datafeed_id'];
+  queryDelay: Datafeed['query_delay'];
+  isEnabled: boolean;
+}) => {
   const [currentQueryDelay, setCurrentQueryDelay] = useState(queryDelay);
   const [newQueryDelay, setNewQueryDelay] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState<boolean>(false);

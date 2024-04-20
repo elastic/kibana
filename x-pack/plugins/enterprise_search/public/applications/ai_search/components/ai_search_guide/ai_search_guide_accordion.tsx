@@ -28,18 +28,16 @@ export interface AISearchGuideAccordionProps {
   currentExpandedId: string | undefined;
 }
 
-export const AISearchGuideAccordion = (
-  {
-    id,
-    icon,
-    title,
-    description,
-    initialIsOpen = false,
-    onToggle,
-    currentExpandedId,
-    children
-  }: AISearchGuideAccordionProps
-) => {
+export const AISearchGuideAccordion = ({
+  id,
+  icon,
+  title,
+  description,
+  initialIsOpen = false,
+  onToggle,
+  currentExpandedId,
+  children,
+}: AISearchGuideAccordionProps) => {
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiAccordion

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { Feature, Point } from 'geojson';
 import type { FieldDataRowProps } from '../../stats_table/types/field_data_row';
@@ -18,11 +17,7 @@ import { ExpandedRowPanel } from '../../stats_table/components/field_data_expand
 
 export const DEFAULT_GEO_REGEX = RegExp('(?<lat>.+) (?<lon>.+)');
 
-export const GeoPointContent = (
-  {
-    config
-  }: FieldDataRowProps
-) => {
+export const GeoPointContent = ({ config }: FieldDataRowProps) => {
   const formattedResults = useMemo(() => {
     const { stats } = config;
 

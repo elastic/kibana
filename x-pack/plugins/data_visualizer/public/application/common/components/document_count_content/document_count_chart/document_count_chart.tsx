@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -42,16 +41,14 @@ export function LoadingSpinner() {
   );
 }
 
-export const DocumentCountChart = (
-  {
-    width,
-    chartPoints,
-    timeRangeEarliest,
-    timeRangeLatest,
-    interval,
-    loading
-  }: Props
-) => {
+export const DocumentCountChart = ({
+  width,
+  chartPoints,
+  timeRangeEarliest,
+  timeRangeLatest,
+  interval,
+  loading,
+}: Props) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
   } = useDataVisualizerKibana();

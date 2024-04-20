@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
@@ -24,11 +24,7 @@ interface Props {
 const MOUSE_PADDING_RIGHT = 20;
 const MOUSE_PADDING_BOTTOM = 20;
 
-export const PipelineProcessorsItemTooltip = (
-  {
-    processor
-  }: Props
-) => {
+export const PipelineProcessorsItemTooltip = ({ processor }: Props) => {
   const [position, setPosition] = useState<Position | undefined>();
 
   useEffect(() => {
@@ -51,7 +47,7 @@ export const PipelineProcessorsItemTooltip = (
      * overflow: hidden we use a portal to render this tooltip in the document body so
      * that we can render it anywhere the cursor can go.
      */
-    (<EuiPortal>
+    <EuiPortal>
       <div
         className="pipelineProcessorsEditor__itemTooltip"
         style={{
@@ -61,6 +57,6 @@ export const PipelineProcessorsItemTooltip = (
       >
         <ProcessorInformation processor={processor} />
       </div>
-    </EuiPortal>)
+    </EuiPortal>
   );
 };

@@ -33,15 +33,13 @@ interface MatchParams {
   section: Section;
 }
 
-export const IndexManagementHome = (
-  {
-    match: {
-      params: { section },
-    },
+export const IndexManagementHome = ({
+  match: {
+    params: { section },
+  },
 
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const {
     plugins: { console: consolePlugin },
   } = useAppContext();

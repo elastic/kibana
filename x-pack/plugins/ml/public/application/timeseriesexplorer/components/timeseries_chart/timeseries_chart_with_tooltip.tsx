@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
@@ -40,29 +39,27 @@ interface TimeSeriesChartWithTooltipsProps {
   };
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
-export const TimeSeriesChartWithTooltips = (
-  {
-    bounds,
-    detectorIndex,
-    embeddableMode,
-    renderFocusChartOnly,
-    selectedJob,
-    selectedEntities,
-    showAnnotations,
-    showForecast,
-    showModelBounds,
-    chartProps,
-    lastRefresh,
-    contextAggregationInterval,
+export const TimeSeriesChartWithTooltips = ({
+  bounds,
+  detectorIndex,
+  embeddableMode,
+  renderFocusChartOnly,
+  selectedJob,
+  selectedEntities,
+  showAnnotations,
+  showForecast,
+  showModelBounds,
+  chartProps,
+  lastRefresh,
+  contextAggregationInterval,
 
-    tableData = {
-      anomalies: [],
-      interval: 'second',
-    },
+  tableData = {
+    anomalies: [],
+    interval: 'second',
+  },
 
-    sourceIndicesWithGeoFields
-  }: TimeSeriesChartWithTooltipsProps
-) => {
+  sourceIndicesWithGeoFields,
+}: TimeSeriesChartWithTooltipsProps) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
     services: {

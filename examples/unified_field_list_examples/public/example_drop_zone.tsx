@@ -33,11 +33,7 @@ export interface ExampleDropZoneProps {
   onDropField: (fieldName: string) => void;
 }
 
-export const ExampleDropZone = (
-  {
-    onDropField
-  }: ExampleDropZoneProps
-) => {
+export const ExampleDropZone = ({ onDropField }: ExampleDropZoneProps) => {
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
 

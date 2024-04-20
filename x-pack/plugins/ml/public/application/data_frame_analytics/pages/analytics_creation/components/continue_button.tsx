@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,23 +16,17 @@ const continueButtonText = i18n.translate(
   }
 );
 
-export const ContinueButton = (
-  {
-    isDisabled,
-    onClick
-  }: {
-    isDisabled: boolean;
-    onClick: any;
-  }
-) => (<EuiFlexGroup>
-  <EuiFlexItem grow={false}>
-    <EuiButton
-      data-test-subj="mlAnalyticsCreateJobWizardContinueButton"
-      isDisabled={isDisabled}
-      size="s"
-      onClick={onClick}
-    >
-      {continueButtonText}
-    </EuiButton>
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const ContinueButton = ({ isDisabled, onClick }: { isDisabled: boolean; onClick: any }) => (
+  <EuiFlexGroup>
+    <EuiFlexItem grow={false}>
+      <EuiButton
+        data-test-subj="mlAnalyticsCreateJobWizardContinueButton"
+        isDisabled={isDisabled}
+        size="s"
+        onClick={onClick}
+      >
+        {continueButtonText}
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

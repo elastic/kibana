@@ -16,11 +16,7 @@ interface InvalidNodeErrorProps {
   nodeName: string;
 }
 
-export const InvalidNodeError = (
-  {
-    nodeName
-  }: InvalidNodeErrorProps
-) => {
+export const InvalidNodeError = ({ nodeName }: InvalidNodeErrorProps) => {
   const tutorialLinkProps = useLinkProps({
     app: 'integrations',
     hash: '/browse',

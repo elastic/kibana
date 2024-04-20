@@ -107,13 +107,7 @@ describe('Lens App', () => {
     services?: jest.Mocked<LensAppServices>;
     preloadedState?: Partial<LensAppState>;
   }) {
-    const wrappingComponent = (
-      {
-        children
-      }: {
-        children: React.ReactNode;
-      }
-    ) => {
+    const wrappingComponent = ({ children }: { children: React.ReactNode }) => {
       return (
         <I18nProvider>
           <KibanaContextProvider services={services}>{children}</KibanaContextProvider>

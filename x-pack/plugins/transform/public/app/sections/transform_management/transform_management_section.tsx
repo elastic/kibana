@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -50,15 +50,13 @@ import {
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
 
-const ErrorMessageCallout = (
-  {
-    text,
-    errorMessage
-  }: {
-    text: JSX.Element;
-    errorMessage: IHttpFetchError<unknown> | null;
-  }
-) => {
+const ErrorMessageCallout = ({
+  text,
+  errorMessage,
+}: {
+  text: JSX.Element;
+  errorMessage: IHttpFetchError<unknown> | null;
+}) => {
   return (
     <>
       <EuiSpacer size="s" />

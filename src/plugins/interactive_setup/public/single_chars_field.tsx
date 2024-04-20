@@ -7,7 +7,7 @@
  */
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FunctionComponent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import useList from 'react-use/lib/useList';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -25,17 +25,15 @@ export interface SingleCharsFieldProps {
   autoFocus?: boolean;
 }
 
-export const SingleCharsField = (
-  {
-    defaultValue,
-    length,
-    separator,
-    pattern = /^[0-9]$/,
-    onChange,
-    isInvalid,
-    autoFocus = false
-  }: SingleCharsFieldProps
-) => {
+export const SingleCharsField = ({
+  defaultValue,
+  length,
+  separator,
+  pattern = /^[0-9]$/,
+  onChange,
+  isInvalid,
+  autoFocus = false,
+}: SingleCharsFieldProps) => {
   // Strip any invalid characters from input or clipboard and restrict length.
   const sanitize = (str: string) => {
     return str

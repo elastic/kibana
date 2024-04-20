@@ -43,12 +43,7 @@ export interface AlertsByTypeProps {
   isLoading: boolean;
 }
 
-export const AlertsByType = (
-  {
-    data,
-    isLoading
-  }: AlertsByTypeProps
-) => {
+export const AlertsByType = ({ data, isLoading }: AlertsByTypeProps) => {
   const isAlertTypeEnabled = useIsExperimentalFeatureEnabled('alertTypeEnabled');
   const columns = useMemo(
     () => getAlertsTypeTableColumns(isAlertTypeEnabled),

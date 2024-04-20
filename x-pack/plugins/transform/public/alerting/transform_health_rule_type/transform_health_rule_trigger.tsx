@@ -6,7 +6,6 @@
  */
 
 import { EuiForm, EuiSpacer } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -21,13 +20,11 @@ import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 export type TransformHealthRuleTriggerProps =
   RuleTypeParamsExpressionProps<TransformHealthRuleParams>;
 
-const TransformHealthRuleTrigger = (
-  {
-    ruleParams,
-    setRuleParams,
-    errors
-  }: TransformHealthRuleTriggerProps
-) => {
+const TransformHealthRuleTrigger = ({
+  ruleParams,
+  setRuleParams,
+  errors,
+}: TransformHealthRuleTriggerProps) => {
   const formErrors = Object.values(errors).flat();
   const isFormInvalid = formErrors.length > 0;
 

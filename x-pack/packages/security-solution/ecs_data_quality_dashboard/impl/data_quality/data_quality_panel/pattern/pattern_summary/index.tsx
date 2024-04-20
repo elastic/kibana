@@ -24,40 +24,40 @@ interface Props {
   patternSizeInBytes: number | undefined;
 }
 
-const PatternSummaryComponent = (
-  {
-    formatBytes,
-    formatNumber,
-    ilmExplainPhaseCounts,
-    incompatible,
-    indices,
-    indicesChecked,
-    pattern,
-    patternDocsCount,
-    patternSizeInBytes
-  }: Props
-) => (<EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-  <EuiFlexItem grow={false}>
-    <PatternLabel
-      incompatible={incompatible}
-      indices={indices}
-      indicesChecked={indicesChecked}
-      ilmExplainPhaseCounts={ilmExplainPhaseCounts}
-      pattern={pattern}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <StatsRollup
-      docsCount={patternDocsCount}
-      formatBytes={formatBytes}
-      formatNumber={formatNumber}
-      incompatible={incompatible}
-      indices={indices}
-      indicesChecked={indicesChecked}
-      pattern={pattern}
-      sizeInBytes={patternSizeInBytes}
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>);
+const PatternSummaryComponent = ({
+  formatBytes,
+  formatNumber,
+  ilmExplainPhaseCounts,
+  incompatible,
+  indices,
+  indicesChecked,
+  pattern,
+  patternDocsCount,
+  patternSizeInBytes,
+}: Props) => (
+  <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexItem grow={false}>
+      <PatternLabel
+        incompatible={incompatible}
+        indices={indices}
+        indicesChecked={indicesChecked}
+        ilmExplainPhaseCounts={ilmExplainPhaseCounts}
+        pattern={pattern}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <StatsRollup
+        docsCount={patternDocsCount}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
+        incompatible={incompatible}
+        indices={indices}
+        indicesChecked={indicesChecked}
+        pattern={pattern}
+        sizeInBytes={patternSizeInBytes}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const PatternSummary = React.memo(PatternSummaryComponent);

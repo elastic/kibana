@@ -81,13 +81,7 @@ export interface HeaderPageProps extends HeaderProps {
   titleNode?: React.ReactElement;
 }
 
-export const HeaderLinkBack = React.memo((
-  {
-    backOptions
-  }: {
-    backOptions: BackOptions;
-  }
-) => {
+export const HeaderLinkBack = React.memo(({ backOptions }: { backOptions: BackOptions }) => {
   const { navigateToUrl } = useKibana().services.application;
   const { formatUrl } = useFormatUrl(backOptions.pageId);
 
@@ -110,57 +104,57 @@ export const HeaderLinkBack = React.memo((
 });
 HeaderLinkBack.displayName = 'HeaderLinkBack';
 
-const HeaderPageComponent = (
-  {
-    backOptions,
-    backComponent,
-    badgeOptions,
-    border,
-    children,
-    isLoading,
-    rightSideItems,
-    subtitle,
-    subtitle2,
-    title,
-    titleNode
-  }: HeaderPageProps
-) => (<>
-  <EuiPageHeader alignItems="center" rightSideItems={rightSideItems}>
-    <HeaderSection>
-      {backOptions && <HeaderLinkBack backOptions={backOptions} />}
-      {!backOptions && backComponent && <>{backComponent}</>}
+const HeaderPageComponent = ({
+  backOptions,
+  backComponent,
+  badgeOptions,
+  border,
+  children,
+  isLoading,
+  rightSideItems,
+  subtitle,
+  subtitle2,
+  title,
+  titleNode,
+}: HeaderPageProps) => (
+  <>
+    <EuiPageHeader alignItems="center" rightSideItems={rightSideItems}>
+      <HeaderSection>
+        {backOptions && <HeaderLinkBack backOptions={backOptions} />}
+        {!backOptions && backComponent && <>{backComponent}</>}
 
-      {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
+        {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
 
-      {subtitle && (
-        <>
-          <EuiSpacer size="s" />
-          <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />
-        </>
+        {subtitle && (
+          <>
+            <EuiSpacer size="s" />
+            <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />
+          </>
+        )}
+        {border && isLoading && <EuiProgress size="xs" color="accent" />}
+      </HeaderSection>
+
+      {children && (
+        <EuiPageHeaderSection data-test-subj="header-page-supplements">
+          {children}
+        </EuiPageHeaderSection>
       )}
-      {border && isLoading && <EuiProgress size="xs" color="accent" />}
-    </HeaderSection>
-
-    {children && (
-      <EuiPageHeaderSection data-test-subj="header-page-supplements">
-        {children}
-      </EuiPageHeaderSection>
+    </EuiPageHeader>
+    {subtitle2 && (
+      <>
+        <EuiSpacer size="xs" />
+        <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />
+      </>
     )}
-  </EuiPageHeader>
-  {subtitle2 && (
-    <>
-      <EuiSpacer size="xs" />
-      <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />
-    </>
-  )}
-  {border && (
-    <>
-      <EuiSpacer size="m" />
-      <Divider />
-    </>
-  )}
-  {/* Manually add a 'padding-bottom' to header */}
-  <EuiSpacer size="l" />
-</>);
+    {border && (
+      <>
+        <EuiSpacer size="m" />
+        <Divider />
+      </>
+    )}
+    {/* Manually add a 'padding-bottom' to header */}
+    <EuiSpacer size="l" />
+  </>
+);
 
 export const HeaderPage = React.memo(HeaderPageComponent);

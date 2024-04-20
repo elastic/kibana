@@ -26,14 +26,12 @@ export interface LanguageGridProps {
   setSelectedLanguage: (language: LanguageDefinition) => void;
 }
 
-export const LanguageGrid = (
-  {
-    assetBasePath,
-    languages,
-    selectedLanguage,
-    setSelectedLanguage
-  }: LanguageGridProps
-) => {
+export const LanguageGrid = ({
+  assetBasePath,
+  languages,
+  selectedLanguage,
+  setSelectedLanguage,
+}: LanguageGridProps) => {
   const { euiTheme } = useEuiTheme();
   const isLarge = useIsWithinBreakpoints(['l']);
   const isXLarge = useIsWithinBreakpoints(['xl']);

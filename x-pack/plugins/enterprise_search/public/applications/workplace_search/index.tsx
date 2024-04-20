@@ -73,15 +73,13 @@ export const WorkplaceSearch = (props: InitialAppData) => {
   return <WorkplaceSearchConfigured {...props} />;
 };
 
-export const WorkplaceSearchConfiguredRoutes = (
-  {
-    isAdmin,
-    kibanaUIsEnabled
-  }: {
-    isAdmin: boolean;
-    kibanaUIsEnabled: boolean;
-  }
-) => {
+export const WorkplaceSearchConfiguredRoutes = ({
+  isAdmin,
+  kibanaUIsEnabled,
+}: {
+  isAdmin: boolean;
+  kibanaUIsEnabled: boolean;
+}) => {
   const isblockingRoutes = isAdmin && !kibanaUIsEnabled;
   return !isblockingRoutes ? (
     <Routes>

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -52,14 +51,10 @@ export interface ProvidersProps {
   defaultCode?: string;
 }
 
-export const Providers = (
-  {
-    defaultCode,
-    services,
-    children
-  }: ProvidersProps
-) => (<KibanaRenderContextProvider {...services}>
-  <KibanaProvider services={services}>
-    <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
-  </KibanaProvider>
-</KibanaRenderContextProvider>);
+export const Providers = ({ defaultCode, services, children }: ProvidersProps) => (
+  <KibanaRenderContextProvider {...services}>
+    <KibanaProvider services={services}>
+      <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>
+    </KibanaProvider>
+  </KibanaRenderContextProvider>
+);

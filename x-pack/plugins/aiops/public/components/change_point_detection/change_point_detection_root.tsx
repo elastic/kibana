@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
@@ -58,14 +57,12 @@ export interface ChangePointDetectionAppStateProps {
   showFrozenDataTierChoice?: boolean;
 }
 
-export const ChangePointDetectionAppState = (
-  {
-    dataView,
-    savedSearch,
-    appDependencies,
-    showFrozenDataTierChoice = true
-  }: ChangePointDetectionAppStateProps
-) => {
+export const ChangePointDetectionAppState = ({
+  dataView,
+  savedSearch,
+  appDependencies,
+  showFrozenDataTierChoice = true,
+}: ChangePointDetectionAppStateProps) => {
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,

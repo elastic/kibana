@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -13,18 +13,16 @@ import { CodeEditor } from '@kbn/code-editor';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const AdvancedSourceEditor = (
-  {
-    searchBar: {
-      actions: { setSearchString },
-    },
+export const AdvancedSourceEditor = ({
+  searchBar: {
+    actions: { setSearchString },
+  },
 
-    advancedSourceEditor: {
-      actions: { setAdvancedEditorSourceConfig, setAdvancedSourceEditorApplyButtonEnabled },
-      state: { advancedEditorSourceConfig, advancedEditorSourceConfigLastApplied },
-    }
-  }: StepDefineFormHook
-) => {
+  advancedSourceEditor: {
+    actions: { setAdvancedEditorSourceConfig, setAdvancedSourceEditorApplyButtonEnabled },
+    state: { advancedEditorSourceConfig, advancedEditorSourceConfigLastApplied },
+  },
+}: StepDefineFormHook) => {
   return (
     <div data-test-subj="transformAdvancedRuntimeMappingsEditor">
       <CodeEditor

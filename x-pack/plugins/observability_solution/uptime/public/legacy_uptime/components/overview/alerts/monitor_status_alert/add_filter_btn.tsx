@@ -16,13 +16,7 @@ interface Props {
   alertFilters: { [key: string]: string[] };
 }
 
-export const AddFilterButton = (
-  {
-    newFilters,
-    onNewFilter,
-    alertFilters
-  }: Props
-) => {
+export const AddFilterButton = ({ newFilters, onNewFilter, alertFilters }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const getSelectedItems = (fieldName: string) => alertFilters?.[fieldName] ?? [];

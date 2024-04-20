@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiHorizontalRule } from '@elastic/eui';
@@ -17,13 +16,7 @@ export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => (
   <FillMaskOutput inferrer={inferrer} />
 );
 
-const FillMaskOutput = (
-  {
-    inferrer
-  }: {
-    inferrer: FillMaskInference;
-  }
-) => {
+const FillMaskOutput = ({ inferrer }: { inferrer: FillMaskInference }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
 
   if (!result) {

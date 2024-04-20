@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import type { Direction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
@@ -36,12 +35,7 @@ interface Props {
   chartsService: ChartsPluginStart;
 }
 
-export const AnomalyDetectionTable = (
-  {
-    items,
-    chartsService
-  }: Props
-) => {
+export const AnomalyDetectionTable = ({ items, chartsService }: Props) => {
   const groupsList = Object.values(items);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -31,42 +30,37 @@ interface Props {
   searchQuery: ResultsSearchQuery;
 }
 
-export const ExplorationResultsTable = React.memo((
-  {
-    dataView,
-    jobConfig,
-    needsDestDataView,
-    searchQuery
-  }: Props
-) => {
-  const {
-    services: {
-      mlServices: { mlApiServices },
-    },
-  } = useMlKibana();
+export const ExplorationResultsTable = React.memo(
+  ({ dataView, jobConfig, needsDestDataView, searchQuery }: Props) => {
+    const {
+      services: {
+        mlServices: { mlApiServices },
+      },
+    } = useMlKibana();
 
-  const classificationData = useExplorationResults(
-    dataView,
-    jobConfig,
-    searchQuery,
-    getToastNotifications(),
-    mlApiServices
-  );
+    const classificationData = useExplorationResults(
+      dataView,
+      jobConfig,
+      searchQuery,
+      getToastNotifications(),
+      mlApiServices
+    );
 
-  if (jobConfig === undefined || classificationData === undefined) {
-    return null;
+    if (jobConfig === undefined || classificationData === undefined) {
+      return null;
+    }
+
+    return (
+      <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
+        <ExpandableSectionResults
+          indexData={classificationData}
+          dataView={dataView}
+          resultsField={jobConfig?.dest.results_field}
+          jobConfig={jobConfig}
+          needsDestDataView={needsDestDataView}
+          searchQuery={searchQuery}
+        />
+      </div>
+    );
   }
-
-  return (
-    <div data-test-subj="mlDFAnalyticsExplorationTablePanel">
-      <ExpandableSectionResults
-        indexData={classificationData}
-        dataView={dataView}
-        resultsField={jobConfig?.dest.results_field}
-        jobConfig={jobConfig}
-        needsDestDataView={needsDestDataView}
-        searchQuery={searchQuery}
-      />
-    </div>
-  );
-});
+);

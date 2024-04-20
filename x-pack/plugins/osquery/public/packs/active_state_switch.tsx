@@ -28,11 +28,7 @@ interface ActiveStateSwitchProps {
   item: PackSavedObject & { policy_ids: string[] };
 }
 
-const ActiveStateSwitchComponent = (
-  {
-    item
-  }: ActiveStateSwitchProps
-) => {
+const ActiveStateSwitchComponent = ({ item }: ActiveStateSwitchProps) => {
   const queryClient = useQueryClient();
   const {
     application: {

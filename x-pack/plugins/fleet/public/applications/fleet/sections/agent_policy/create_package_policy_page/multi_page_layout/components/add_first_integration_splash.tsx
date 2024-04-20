@@ -210,25 +210,23 @@ const CenteredLearnMoreLink = () => {
   );
 };
 
-export const AddFirstIntegrationSplashScreen = (
-  {
-    integrationInfo,
-    packageInfo,
-    isLoading,
-    error,
-    cancelUrl,
-    cancelClickHandler,
-    onNext
-  }: {
-    integrationInfo?: RegistryPolicyTemplate;
-    error?: RequestError | null;
-    packageInfo?: PackageInfo;
-    isLoading: boolean;
-    cancelClickHandler?: React.ReactEventHandler;
-    cancelUrl: string;
-    onNext: () => void;
-  }
-) => {
+export const AddFirstIntegrationSplashScreen = ({
+  integrationInfo,
+  packageInfo,
+  isLoading,
+  error,
+  cancelUrl,
+  cancelClickHandler,
+  onNext,
+}: {
+  integrationInfo?: RegistryPolicyTemplate;
+  error?: RequestError | null;
+  packageInfo?: PackageInfo;
+  isLoading: boolean;
+  cancelClickHandler?: React.ReactEventHandler;
+  cancelUrl: string;
+  onNext: () => void;
+}) => {
   if (error) {
     return (
       <Error

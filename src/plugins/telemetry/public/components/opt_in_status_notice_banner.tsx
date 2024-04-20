@@ -24,14 +24,12 @@ interface Props {
   telemetryService: TelemetryService;
 }
 
-export const OptInStatusNoticeBanner = (
-  {
-    onSeenBanner,
-    http,
-    telemetryConstants,
-    telemetryService
-  }: Props
-) => {
+export const OptInStatusNoticeBanner = ({
+  onSeenBanner,
+  http,
+  telemetryConstants,
+  telemetryService,
+}: Props) => {
   const addBasePath = http.basePath.prepend;
 
   const bannerTitle = i18n.translate('telemetry.telemetryOptedInNoticeTitle', {

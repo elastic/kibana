@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../contexts/kibana';
@@ -16,12 +15,7 @@ interface HelpMenuProps {
 }
 
 // Component for adding a documentation link to the help menu
-export const HelpMenu = React.memo((
-  {
-    docLink,
-    appName
-  }: HelpMenuProps
-) => {
+export const HelpMenu = React.memo(({ docLink, appName }: HelpMenuProps) => {
   const { chrome } = useMlKibana().services;
 
   useEffect(() => {

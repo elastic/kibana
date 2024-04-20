@@ -19,13 +19,11 @@ interface CreatedByProps {
 /**
  * Created by and created at text that are shown on rule details and rule preview in expandable flyout
  */
-export const CreatedBy = (
-  {
-    createdBy,
-    createdAt,
-    'data-test-subj': dataTestSubj
-  }: CreatedByProps
-) => {
+export const CreatedBy = ({
+  createdBy,
+  createdAt,
+  'data-test-subj': dataTestSubj,
+}: CreatedByProps) => {
   return (
     <div data-test-subj={dataTestSubj}>
       <FormattedMessage
@@ -53,13 +51,11 @@ interface UpdatedByProps {
 /**
  * Updated by and updated at text that are shown on rule details and rule preview in expandable flyout
  */
-export const UpdatedBy = (
-  {
-    updatedBy,
-    updatedAt,
-    'data-test-subj': dataTestSubj
-  }: UpdatedByProps
-) => {
+export const UpdatedBy = ({
+  updatedBy,
+  updatedAt,
+  'data-test-subj': dataTestSubj,
+}: UpdatedByProps) => {
   return (
     <div data-test-subj={dataTestSubj}>
       <FormattedMessage

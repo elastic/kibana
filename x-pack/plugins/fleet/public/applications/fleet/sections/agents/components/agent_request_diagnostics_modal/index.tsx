@@ -26,13 +26,7 @@ interface Props {
   agentCount: number;
 }
 
-export const AgentRequestDiagnosticsModal = (
-  {
-    onClose,
-    agents,
-    agentCount
-  }: Props
-) => {
+export const AgentRequestDiagnosticsModal = ({ onClose, agents, agentCount }: Props) => {
   const { notifications } = useStartServices();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;

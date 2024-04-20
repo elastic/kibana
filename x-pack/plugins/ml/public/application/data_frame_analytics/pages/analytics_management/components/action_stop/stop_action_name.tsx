@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -24,11 +23,7 @@ interface StopActionNameProps {
   isDisabled: boolean;
 }
 
-export const StopActionName = (
-  {
-    isDisabled
-  }: StopActionNameProps
-) => {
+export const StopActionName = ({ isDisabled }: StopActionNameProps) => {
   if (isDisabled) {
     return (
       <EuiToolTip

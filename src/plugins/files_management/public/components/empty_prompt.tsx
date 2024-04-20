@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18nTexts } from '../i18n_texts';

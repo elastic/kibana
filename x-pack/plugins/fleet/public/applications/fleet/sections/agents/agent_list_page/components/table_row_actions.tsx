@@ -20,27 +20,25 @@ import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
 
-export const TableRowActions = (
-  {
-    agent,
-    agentPolicy,
-    onReassignClick,
-    onUnenrollClick,
-    onGetUninstallCommandClick,
-    onUpgradeClick,
-    onAddRemoveTagsClick,
-    onRequestDiagnosticsClick
-  }: {
-    agent: Agent;
-    agentPolicy?: AgentPolicy;
-    onReassignClick: () => void;
-    onUnenrollClick: () => void;
-    onGetUninstallCommandClick: () => void;
-    onUpgradeClick: () => void;
-    onAddRemoveTagsClick: (button: HTMLElement) => void;
-    onRequestDiagnosticsClick: () => void;
-  }
-) => {
+export const TableRowActions = ({
+  agent,
+  agentPolicy,
+  onReassignClick,
+  onUnenrollClick,
+  onGetUninstallCommandClick,
+  onUpgradeClick,
+  onAddRemoveTagsClick,
+  onRequestDiagnosticsClick,
+}: {
+  agent: Agent;
+  agentPolicy?: AgentPolicy;
+  onReassignClick: () => void;
+  onUnenrollClick: () => void;
+  onGetUninstallCommandClick: () => void;
+  onUpgradeClick: () => void;
+  onAddRemoveTagsClick: (button: HTMLElement) => void;
+  onRequestDiagnosticsClick: () => void;
+}) => {
   const { getHref } = useLink();
   const authz = useAuthz();
 

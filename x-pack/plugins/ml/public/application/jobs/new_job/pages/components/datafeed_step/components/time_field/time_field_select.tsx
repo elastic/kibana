@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
@@ -20,13 +19,7 @@ interface Props {
   selectedField: string;
 }
 
-export const TimeFieldSelect = (
-  {
-    fields,
-    changeHandler,
-    selectedField
-  }: Props
-) => {
+export const TimeFieldSelect = ({ fields, changeHandler, selectedField }: Props) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = createFieldOptions(
     fields,

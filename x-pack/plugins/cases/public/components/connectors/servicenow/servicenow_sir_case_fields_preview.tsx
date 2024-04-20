@@ -27,12 +27,10 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const ServiceNowSIRFieldsPreviewComponent = (
-  {
-    connector,
-    fields
-  }: ConnectorFieldsPreviewProps<ServiceNowSIRFieldsType>
-) => {
+const ServiceNowSIRFieldsPreviewComponent = ({
+  connector,
+  fields,
+}: ConnectorFieldsPreviewProps<ServiceNowSIRFieldsType>) => {
   const {
     category = null,
     destIp = true,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';
 import { isEndzoneBucket } from './utils';
@@ -17,13 +17,7 @@ interface Props {
   xDomain?: XDomain;
 }
 
-export const TooltipHeader = (
-  {
-    value,
-    formatter,
-    xDomain
-  }: Props
-) => {
+export const TooltipHeader = ({ value, formatter, xDomain }: Props) => {
   const renderEndzoneHeader =
     xDomain && typeof value === 'number' ? isEndzoneBucket(value, xDomain) : undefined;
 

@@ -17,13 +17,7 @@ import React from 'react';
 
 import { LegendItem } from './legend_item';
 
-const LegendComponent = (
-  {
-    legendItems
-  }: {
-    legendItems: LegendItem[];
-  }
-) => {
+const LegendComponent = ({ legendItems }: { legendItems: LegendItem[] }) => {
   if (legendItems.length === 0) {
     return null;
   }

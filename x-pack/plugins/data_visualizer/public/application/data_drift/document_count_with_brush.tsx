@@ -6,7 +6,6 @@
  */
 
 import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
-import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSettings } from '@kbn/aiops-components';
@@ -52,27 +51,25 @@ export interface DocumentCountContentProps {
   barStyleAccessor?: BarStyleAccessor;
 }
 
-export const DocumentCountWithBrush = (
-  {
-    id,
-    randomSampler,
-    reload,
-    brushSelectionUpdateHandler,
-    documentCountStats,
-    documentCountStatsSplit,
-    documentCountStatsSplitLabel = '',
-    isBrushCleared,
-    totalCount,
-    sampleProbability,
-    initialAnalysisStart,
-    barColorOverride,
-    barHighlightColorOverride,
-    incomingInitialAnalysisStart,
-    stateManager,
-    label,
-    ...docCountChartProps
-  }: DocumentCountContentProps
-) => {
+export const DocumentCountWithBrush = ({
+  id,
+  randomSampler,
+  reload,
+  brushSelectionUpdateHandler,
+  documentCountStats,
+  documentCountStatsSplit,
+  documentCountStatsSplitLabel = '',
+  isBrushCleared,
+  totalCount,
+  sampleProbability,
+  initialAnalysisStart,
+  barColorOverride,
+  barHighlightColorOverride,
+  incomingInitialAnalysisStart,
+  stateManager,
+  label,
+  ...docCountChartProps
+}: DocumentCountContentProps) => {
   const {
     services: {
       data,

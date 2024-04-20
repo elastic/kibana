@@ -14,20 +14,18 @@ import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm = (
-  {
-    children,
-    defaultValues,
-    space,
-    readOnly = false,
-    canUsePublicLocations
-  }: {
-    defaultValues?: SyntheticsMonitor;
-    space?: string;
-    readOnly?: boolean;
-    canUsePublicLocations?: boolean;
-  }
-) => {
+export const MonitorForm = ({
+  children,
+  defaultValues,
+  space,
+  readOnly = false,
+  canUsePublicLocations,
+}: {
+  defaultValues?: SyntheticsMonitor;
+  space?: string;
+  readOnly?: boolean;
+  canUsePublicLocations?: boolean;
+}) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',

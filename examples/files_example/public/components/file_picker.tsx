@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 
 import { exampleFileKind } from '../../common';
 
@@ -19,13 +18,7 @@ interface Props {
   onDone: (ids: string[]) => void;
 }
 
-export const MyFilePicker = (
-  {
-    onClose,
-    onDone,
-    onUpload
-  }: Props
-) => {
+export const MyFilePicker = ({ onClose, onDone, onUpload }: Props) => {
   return (
     <FilePicker
       kind={exampleFileKind.id}

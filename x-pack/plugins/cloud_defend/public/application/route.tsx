@@ -21,15 +21,13 @@ const STATIC_PATH_PAGE_IDS = Object.fromEntries(
   Object.values(cloudDefendPages).map(({ id }) => [id, true])
 );
 
-export const CloudDefendRoute = (
-  {
-    id,
-    children,
-    component: Component,
-    disabled = false,
-    ...cloudDefendRouteProps
-  }: CloudDefendRouteProps
-) => {
+export const CloudDefendRoute = ({
+  id,
+  children,
+  component: Component,
+  disabled = false,
+  ...cloudDefendRouteProps
+}: CloudDefendRouteProps) => {
   const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
   if (disabled) {

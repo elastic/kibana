@@ -47,24 +47,22 @@ type Props = OwnProps;
  * Provide a user interface for selecting and managing conversations,
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
-export const AssistantHeader = (
-  {
-    currentConversation,
-    defaultConnector,
-    docLinks,
-    isDisabled,
-    isSettingsModalVisible,
-    onConversationSelected,
-    onConversationDeleted,
-    onToggleShowAnonymizedValues,
-    setIsSettingsModalVisible,
-    shouldDisableKeyboardShortcut,
-    showAnonymizedValues,
-    title,
-    conversations,
-    refetchConversationsState
-  }: Props
-) => {
+export const AssistantHeader = ({
+  currentConversation,
+  defaultConnector,
+  docLinks,
+  isDisabled,
+  isSettingsModalVisible,
+  onConversationSelected,
+  onConversationDeleted,
+  onToggleShowAnonymizedValues,
+  setIsSettingsModalVisible,
+  shouldDisableKeyboardShortcut,
+  showAnonymizedValues,
+  title,
+  conversations,
+  refetchConversationsState,
+}: Props) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
       currentConversation?.replacements != null &&

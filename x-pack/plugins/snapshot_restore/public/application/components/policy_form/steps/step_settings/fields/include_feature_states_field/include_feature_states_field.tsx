@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -33,12 +33,7 @@ interface Props {
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
-export const IncludeFeatureStatesField = (
-  {
-    policy,
-    onUpdate
-  }: Props
-) => {
+export const IncludeFeatureStatesField = ({ policy, onUpdate }: Props) => {
   const { config = {} } = policy;
   const {
     error: errorLoadingFeatures,

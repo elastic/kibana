@@ -17,11 +17,7 @@ interface ListProps {
   list: PivotGroupByConfigDict;
 }
 
-export const GroupByListSummary = (
-  {
-    list
-  }: ListProps
-) => {
+export const GroupByListSummary = ({ list }: ListProps) => {
   const listKeys = Object.keys(list);
   return (
     <>

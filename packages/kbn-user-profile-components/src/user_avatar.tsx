@@ -8,7 +8,6 @@
 
 import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, useEuiTheme } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { UserProfileAvatarData } from './types';
 
@@ -55,13 +54,7 @@ export interface UserAvatarProps
 /**
  * Renders an avatar given a user profile
  */
-export const UserAvatar = (
-  {
-    user,
-    avatar,
-    ...rest
-  }: UserAvatarProps
-) => {
+export const UserAvatar = ({ user, avatar, ...rest }: UserAvatarProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (!user) {

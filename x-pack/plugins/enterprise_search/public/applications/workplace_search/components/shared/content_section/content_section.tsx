@@ -24,30 +24,30 @@ interface ContentSectionProps {
   testSubj?: string;
 }
 
-export const ContentSection = (
-  {
-    children,
-    isOrganization = true,
-    className = '',
-    title,
-    description,
-    action,
-    headerChildren,
-    testSubj
-  }: ContentSectionProps
-) => (<div className={className} data-test-subj={testSubj}>
-  {title && (
-    <>
-      <ViewContentHeader
-        title={title}
-        headingLevel={isOrganization ? 3 : 2}
-        titleSize="s"
-        description={description}
-        action={action}
-      />
-      {headerChildren}
-    </>
-  )}
-  {children}
-  <EuiSpacer />
-</div>);
+export const ContentSection = ({
+  children,
+  isOrganization = true,
+  className = '',
+  title,
+  description,
+  action,
+  headerChildren,
+  testSubj,
+}: ContentSectionProps) => (
+  <div className={className} data-test-subj={testSubj}>
+    {title && (
+      <>
+        <ViewContentHeader
+          title={title}
+          headingLevel={isOrganization ? 3 : 2}
+          titleSize="s"
+          description={description}
+          action={action}
+        />
+        {headerChildren}
+      </>
+    )}
+    {children}
+    <EuiSpacer />
+  </div>
+);

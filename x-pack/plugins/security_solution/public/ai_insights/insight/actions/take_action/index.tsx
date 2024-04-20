@@ -32,14 +32,12 @@ interface Props {
   replacements?: Replacements;
 }
 
-const TakeActionComponent = (
-  {
-    conversationTitle,
-    insight,
-    promptContextId,
-    replacements
-  }: Props
-) => {
+const TakeActionComponent = ({
+  conversationTitle,
+  insight,
+  promptContextId,
+  replacements,
+}: Props) => {
   // get dependencies for creating / adding to cases:
   const { cases } = useKibana().services;
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);

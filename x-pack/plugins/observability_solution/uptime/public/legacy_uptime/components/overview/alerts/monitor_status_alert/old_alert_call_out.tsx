@@ -13,11 +13,7 @@ interface Props {
   isOldAlert: boolean;
 }
 
-export const OldAlertCallOut = (
-  {
-    isOldAlert
-  }: Props
-) => {
+export const OldAlertCallOut = ({ isOldAlert }: Props) => {
   if (!isOldAlert) return null;
   return (
     <>

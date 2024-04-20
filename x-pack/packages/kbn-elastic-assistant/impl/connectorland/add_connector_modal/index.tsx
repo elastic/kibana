@@ -22,32 +22,34 @@ interface Props {
   selectedActionType: ActionType | null;
   actionTypeSelectorInline?: boolean;
 }
-export const AddConnectorModal = React.memo((
-  {
+export const AddConnectorModal = React.memo(
+  ({
     actionTypeRegistry,
     actionTypes,
     onClose,
     onSaveConnector,
     onSelectActionType,
     selectedActionType,
-    actionTypeSelectorInline = false
-  }: Props
-) => (<>
-  <ActionTypeSelectorModal
-    actionTypes={actionTypes}
-    actionTypeRegistry={actionTypeRegistry}
-    onClose={onClose}
-    onSelect={onSelectActionType}
-    actionTypeSelectorInline={actionTypeSelectorInline}
-  />
-  {selectedActionType && (
-    <ConnectorAddModal
-      actionType={selectedActionType}
-      actionTypeRegistry={actionTypeRegistry}
-      onClose={onClose}
-      postSaveEventHandler={onSaveConnector}
-    />
-  )}
-</>));
+    actionTypeSelectorInline = false,
+  }: Props) => (
+    <>
+      <ActionTypeSelectorModal
+        actionTypes={actionTypes}
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onSelect={onSelectActionType}
+        actionTypeSelectorInline={actionTypeSelectorInline}
+      />
+      {selectedActionType && (
+        <ConnectorAddModal
+          actionType={selectedActionType}
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          postSaveEventHandler={onSaveConnector}
+        />
+      )}
+    </>
+  )
+);
 
 AddConnectorModal.displayName = 'AddConnectorModal';

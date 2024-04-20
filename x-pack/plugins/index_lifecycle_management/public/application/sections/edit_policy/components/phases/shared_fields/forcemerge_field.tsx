@@ -23,11 +23,7 @@ interface Props {
   phase: 'hot' | 'warm';
 }
 
-export const ForcemergeField = (
-  {
-    phase
-  }: Props
-) => {
+export const ForcemergeField = ({ phase }: Props) => {
   const { policy } = useEditPolicyContext();
 
   const initialToggleValue = useMemo<boolean>(() => {

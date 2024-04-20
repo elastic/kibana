@@ -48,21 +48,13 @@ import { FieldValueCell } from './field_value_cell';
 interface InputProps {
   additionalInputProps: JSX.Element;
 }
-export const ResultsView = (
-  {
-    children
-  }: ResultsViewProps
-) => {
+export const ResultsView = ({ children }: ResultsViewProps) => {
   return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
 };
 
 const RESULT_FIELDS_TRUNCATE_AT = 4;
 
-export const ResultView = (
-  {
-    result
-  }: ResultViewProps
-) => {
+export const ResultView = ({ result }: ResultViewProps) => {
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
@@ -156,73 +148,63 @@ export const ResultView = (
     </button>
   );
 };
-export const SearchBar = (
-  {
-    additionalInputProps
-  }: InputProps
-) => (<EuiFlexGroup gutterSize="s">
-  <EuiFieldSearch fullWidth {...additionalInputProps} />
-  <EuiButton type="submit" color="primary" fill>
-    {i18n.translate(
-      'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.searchLabel',
-      {
-        defaultMessage: 'Search',
-      }
-    )}
-  </EuiButton>
-</EuiFlexGroup>);
-export const PagingInfoView = (
-  {
-    start,
-    end,
-    totalResults
-  }: PagingInfoViewProps
-) => (<EuiText size="s">
-  <FormattedHTMLMessage
-    tagName="p"
-    id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pagingInfo.text"
-    defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
-    values={{ end, start, totalResults }}
-  />
-</EuiText>);
+export const SearchBar = ({ additionalInputProps }: InputProps) => (
+  <EuiFlexGroup gutterSize="s">
+    <EuiFieldSearch fullWidth {...additionalInputProps} />
+    <EuiButton type="submit" color="primary" fill>
+      {i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.searchLabel',
+        {
+          defaultMessage: 'Search',
+        }
+      )}
+    </EuiButton>
+  </EuiFlexGroup>
+);
+export const PagingInfoView = ({ start, end, totalResults }: PagingInfoViewProps) => (
+  <EuiText size="s">
+    <FormattedHTMLMessage
+      tagName="p"
+      id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.pagingInfo.text"
+      defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
+      values={{ end, start, totalResults }}
+    />
+  </EuiText>
+);
 
 export const RESULTS_PER_PAGE_OPTIONS = [10, 20, 50];
 
-export const ResultsPerPageView = (
-  {
-    onChange,
-    options,
-    value
-  }: ResultsPerPageViewProps
-) => (<EuiFlexItem grow={false}>
-  <EuiFlexGroup direction="column" gutterSize="s">
-    <EuiTitle size="xxxs">
-      <label htmlFor="results-per-page">
-        <FormattedMessage
-          id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.resultsPerPage.label"
-          defaultMessage="Show"
-        />
-      </label>
-    </EuiTitle>
-    <EuiSelect
-      id="results-per-page"
-      options={
-        options?.map((option) => ({
-          text: i18n.translate(
-            'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.resultsPerPage.option.label',
-            {
-              defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
-              values: { value: option },
-            }
-          ),
-          value: option,
-        })) ?? []
-      }
-      value={value}
-      onChange={(evt) => onChange(parseInt(evt.target.value, 10))}
-    />
-  </EuiFlexGroup>
-</EuiFlexItem>);
+export const ResultsPerPageView = ({ onChange, options, value }: ResultsPerPageViewProps) => (
+  <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiTitle size="xxxs">
+        <label htmlFor="results-per-page">
+          <FormattedMessage
+            id="xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.resultsPerPage.label"
+            defaultMessage="Show"
+          />
+        </label>
+      </EuiTitle>
+      <EuiSelect
+        id="results-per-page"
+        options={
+          options?.map((option) => ({
+            text: i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.resultsPerPage.option.label',
+              {
+                defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
+                values: { value: option },
+              }
+            ),
+            value: option,
+          })) ?? []
+        }
+        value={value}
+        onChange={(evt) => onChange(parseInt(evt.target.value, 10))}
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
+);
 
 export const Sorting = withSearch<
   { sortableFields: string[] },

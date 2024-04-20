@@ -7,7 +7,7 @@
  */
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -34,13 +34,7 @@ const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
   text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
 });
 
-export const GlobalToastList = (
-  {
-    toasts$,
-    dismissToast,
-    reportEvent
-  }: Props
-) => {
+export const GlobalToastList = ({ toasts$, dismissToast, reportEvent }: Props) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
 

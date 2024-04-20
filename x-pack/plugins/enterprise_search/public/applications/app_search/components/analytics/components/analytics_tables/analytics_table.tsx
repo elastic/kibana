@@ -27,13 +27,7 @@ interface Props {
 }
 type Columns = Array<EuiBasicTableColumn<Query>>;
 
-export const AnalyticsTable = (
-  {
-    items,
-    hasClicks,
-    isSmall
-  }: Props
-) => {
+export const AnalyticsTable = ({ items, hasClicks, isSmall }: Props) => {
   const TERM_COLUMN = {
     field: 'key',
     ...TERM_COLUMN_PROPS,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import {
@@ -49,22 +48,20 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-export const SearchPanel = (
-  {
-    dataView,
-    searchString,
-    searchQuery,
-    searchQueryLanguage,
-    overallStats,
-    indexedFieldTypes,
-    setVisibleFieldTypes,
-    visibleFieldTypes,
-    setVisibleFieldNames,
-    visibleFieldNames,
-    setSearchParams,
-    showEmptyFields
-  }: Props
-) => {
+export const SearchPanel = ({
+  dataView,
+  searchString,
+  searchQuery,
+  searchQueryLanguage,
+  overallStats,
+  indexedFieldTypes,
+  setVisibleFieldTypes,
+  visibleFieldTypes,
+  setVisibleFieldNames,
+  visibleFieldNames,
+  setSearchParams,
+  showEmptyFields,
+}: Props) => {
   const dvSearchPanelControls = css({
     marginLeft: '0px !important',
     paddingLeft: '0px !important',

@@ -40,16 +40,14 @@ interface Props {
   region?: string;
 }
 
-export const ExpressionChart = (
-  {
-    expression,
-    filterQuery,
-    nodeType,
-    sourceId,
-    accountId = '',
-    region = ''
-  }: Props
-) => {
+export const ExpressionChart = ({
+  expression,
+  filterQuery,
+  nodeType,
+  sourceId,
+  accountId = '',
+  region = '',
+}: Props) => {
   const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(
     () => ({

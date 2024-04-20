@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
@@ -40,14 +39,7 @@ interface EditJobProps {
 /**
  * Edit job flyout for overriding job configuration.
  */
-export const EditJob = (
-  {
-    job,
-    jobOverride,
-    existingGroupIds,
-    onClose
-  }: EditJobProps
-) => {
+export const EditJob = ({ job, jobOverride, existingGroupIds, onClose }: EditJobProps) => {
   const [formState, setFormState] = usePartialState({
     jobGroups: (jobOverride && jobOverride.groups) || job.config.groups,
   });

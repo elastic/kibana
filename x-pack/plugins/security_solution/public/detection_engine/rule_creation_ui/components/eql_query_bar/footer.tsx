@@ -17,7 +17,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -69,16 +68,14 @@ const Spinner = styled(EuiLoadingSpinner)`
 
 const singleSelection = { asPlainText: true };
 
-export const EqlQueryBarFooter = (
-  {
-    errors,
-    isLoading,
-    isSizeOptionDisabled,
-    optionsData,
-    optionsSelected,
-    onOptionsChange
-  }: Props
-) => {
+export const EqlQueryBarFooter = ({
+  errors,
+  isLoading,
+  isSizeOptionDisabled,
+  optionsData,
+  optionsSelected,
+  onOptionsChange,
+}: Props) => {
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 100);
   const debounceSize = useRef<Cancelable & SizeVoidFunc>();

@@ -30,19 +30,17 @@ interface Props {
   refreshAgentPolicies: () => void;
 }
 
-export const SelectCreateAgentPolicy = (
-  {
-    agentPolicies,
-    excludeFleetServer,
-    setSelectedPolicyId,
-    selectedPolicyId,
-    withKeySelection,
-    selectedApiKeyId,
-    onKeyChange,
-    isFleetServerPolicy,
-    refreshAgentPolicies
-  }: Props
-) => {
+export const SelectCreateAgentPolicy = ({
+  agentPolicies,
+  excludeFleetServer,
+  setSelectedPolicyId,
+  selectedPolicyId,
+  withKeySelection,
+  selectedApiKeyId,
+  onKeyChange,
+  isFleetServerPolicy,
+  refreshAgentPolicies,
+}: Props) => {
   const regularAgentPolicies = useMemo(() => {
     return agentPolicies.filter(
       (policy) =>

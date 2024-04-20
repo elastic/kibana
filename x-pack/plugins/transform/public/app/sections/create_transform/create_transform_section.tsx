@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,11 +19,7 @@ import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { Wizard } from './components/wizard';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const CreateTransformSection = (
-  {
-    match
-  }: Props
-) => {
+export const CreateTransformSection = ({ match }: Props) => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);

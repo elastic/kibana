@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 // @ts-expect-error untyped local
@@ -19,13 +19,7 @@ export interface Props {
   initializeWorkpad: () => void;
 }
 
-export const ExportApp = (
-  {
-    workpad,
-    selectedPageIndex,
-    initializeWorkpad
-  }: Props
-) => {
+export const ExportApp = ({ workpad, selectedPageIndex, initializeWorkpad }: Props) => {
   const { id, pages, height, width } = workpad;
   const activePage = pages[selectedPageIndex];
   const pageElementCount = activePage.elements.length;

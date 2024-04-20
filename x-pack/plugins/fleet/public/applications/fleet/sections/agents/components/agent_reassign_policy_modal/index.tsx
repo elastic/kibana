@@ -32,12 +32,7 @@ interface Props {
   agents: Agent[] | string;
 }
 
-export const AgentReassignAgentPolicyModal = (
-  {
-    onClose,
-    agents
-  }: Props
-) => {
+export const AgentReassignAgentPolicyModal = ({ onClose, agents }: Props) => {
   const { notifications } = useStartServices();
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
 

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
@@ -50,12 +50,7 @@ const mapStatusCodeToBadgeColor = (statusCode: number) => {
   return 'danger';
 };
 
-export const NetworkRequestStatusBar = (
-  {
-    requestInProgress,
-    requestResult
-  }: Props
-) => {
+export const NetworkRequestStatusBar = ({ requestInProgress, requestResult }: Props) => {
   let content: React.ReactNode = null;
 
   if (requestInProgress) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
+import React, { memo, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import List from 'react-virtualized/dist/commonjs/List';
 import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
@@ -82,7 +82,7 @@ export const ProcessorsTree = memo((props: Props) => {
   }, [movingProcessor, onAction]);
 
   return (
-    (<EuiFlexGroup
+    <EuiFlexGroup
       data-test-subj={props['data-test-subj']}
       direction="column"
       gutterSize="none"
@@ -110,7 +110,7 @@ export const ProcessorsTree = memo((props: Props) => {
         >
           {!processors.length && (
             // We want to make this dropzone the max length of its container
-            (<EuiFlexItem style={{ width: '100%' }}>
+            <EuiFlexItem style={{ width: '100%' }}>
               <DropZoneButton
                 data-test-subj="dropButtonEmptyTree"
                 isVisible={Boolean(movingProcessor)}
@@ -126,7 +126,7 @@ export const ProcessorsTree = memo((props: Props) => {
                   });
                 }}
               />
-            </EuiFlexItem>)
+            </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
             <AddProcessorButton
@@ -138,6 +138,6 @@ export const ProcessorsTree = memo((props: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-    </EuiFlexGroup>)
+    </EuiFlexGroup>
   );
 });

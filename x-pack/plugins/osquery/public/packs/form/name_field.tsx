@@ -13,11 +13,7 @@ interface NameFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const NameFieldComponent = (
-  {
-    euiFieldProps
-  }: NameFieldProps
-) => {
+const NameFieldComponent = ({ euiFieldProps }: NameFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },

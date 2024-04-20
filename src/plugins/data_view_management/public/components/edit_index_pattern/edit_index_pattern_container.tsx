@@ -15,11 +15,7 @@ import { EditIndexPattern } from '.';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-const EditIndexPatternCont = (
-  {
-    ...props
-  }: RouteComponentProps<{ id: string }>
-) => {
+const EditIndexPatternCont = ({ ...props }: RouteComponentProps<{ id: string }>) => {
   const { dataViews, setBreadcrumbs, notifications } =
     useKibana<IndexPatternManagmentContext>().services;
   const [error, setError] = useState<Error | undefined>();

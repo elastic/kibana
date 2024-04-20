@@ -21,11 +21,7 @@ interface Props {
   };
 }
 
-export const WatchActionsPanel = (
-  {
-    actionErrors
-  }: Props
-) => {
+export const WatchActionsPanel = ({ actionErrors }: Props) => {
   const { watch } = useContext(WatchContext);
 
   const { data: settings, isLoading } = useLoadSettings();

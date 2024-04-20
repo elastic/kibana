@@ -35,15 +35,13 @@ export interface TopRiskScoreContributorsAlertsProps {
   loading: boolean;
 }
 
-export const TopRiskScoreContributorsAlerts = (
-  {
-    toggleStatus,
-    toggleQuery,
-    riskScore,
-    riskEntity,
-    loading
-  }: TopRiskScoreContributorsAlertsProps
-) => {
+export const TopRiskScoreContributorsAlerts = ({
+  toggleStatus,
+  toggleQuery,
+  riskScore,
+  riskEntity,
+  loading,
+}: TopRiskScoreContributorsAlertsProps) => {
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
     useUserData();

@@ -20,12 +20,7 @@ interface SolutionFilterProps {
   onChange?: (selectedSolutions: string[]) => void;
 }
 
-export const SolutionFilter = (
-  {
-    solutions,
-    onChange
-  }: SolutionFilterProps
-) => {
+export const SolutionFilter = ({ solutions, onChange }: SolutionFilterProps) => {
   const { euiTheme } = useEuiTheme();
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);

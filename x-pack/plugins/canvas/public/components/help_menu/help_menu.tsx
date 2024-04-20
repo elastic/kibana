@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { ChromeHelpMenuActions } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 import { HelpMenu as Component } from './help_menu.component';

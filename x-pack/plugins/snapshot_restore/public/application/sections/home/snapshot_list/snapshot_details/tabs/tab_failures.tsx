@@ -16,12 +16,7 @@ interface Props {
   snapshotState: string;
 }
 
-export const TabFailures = (
-  {
-    indexFailures,
-    snapshotState
-  }: Props
-) => {
+export const TabFailures = ({ indexFailures, snapshotState }: Props) => {
   if (!indexFailures.length) {
     // If the snapshot is in progress then we still might encounter errors later.
     if (snapshotState === SNAPSHOT_STATE.IN_PROGRESS) {

@@ -27,13 +27,7 @@ interface Props {
   stepIndex: number;
 }
 
-export const WaterfallChartContainer = (
-  {
-    checkGroup,
-    stepIndex,
-    activeStep
-  }: Props
-) => {
+export const WaterfallChartContainer = ({ checkGroup, stepIndex, activeStep }: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {

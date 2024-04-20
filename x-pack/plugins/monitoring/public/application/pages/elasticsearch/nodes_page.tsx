@@ -58,11 +58,7 @@ const rolesByImportance: ElasticsearchNodeRole[] = [
   'remote_cluster_client',
 ];
 
-export const ElasticsearchNodesPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const ElasticsearchNodesPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();

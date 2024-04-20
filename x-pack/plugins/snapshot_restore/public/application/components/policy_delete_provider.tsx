@@ -20,11 +20,7 @@ export type DeletePolicy = (names: string[], onSuccess?: OnSuccessCallback) => v
 
 type OnSuccessCallback = (policiesDeleted: string[]) => void;
 
-export const PolicyDeleteProvider = (
-  {
-    children
-  }: Props
-) => {
+export const PolicyDeleteProvider = ({ children }: Props) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
 

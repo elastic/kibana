@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -37,11 +36,7 @@ export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-export const ExplorerUrlStateManager = (
-  {
-    jobsWithTimeRange
-  }: ExplorerUrlStateManagerProps
-) => {
+export const ExplorerUrlStateManager = ({ jobsWithTimeRange }: ExplorerUrlStateManagerProps) => {
   const {
     services: { cases, presentationUtil, uiSettings },
   } = useMlKibana();

@@ -24,17 +24,15 @@ import type { PackageInfo } from '../../../../../types';
 
 const toTitleCase = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
 
-export const PostInstallAddAgentModal = (
-  {
-    onConfirm,
-    onCancel,
-    packageInfo
-  }: {
-    onConfirm: () => void;
-    onCancel: () => void;
-    packageInfo: PackageInfo;
-  }
-) => {
+export const PostInstallAddAgentModal = ({
+  onConfirm,
+  onCancel,
+  packageInfo,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+  packageInfo: PackageInfo;
+}) => {
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo.name);
 
   return (

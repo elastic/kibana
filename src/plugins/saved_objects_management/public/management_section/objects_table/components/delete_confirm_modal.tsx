@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiInMemoryTable,
   EuiLoadingElastic,
@@ -41,16 +41,14 @@ export interface DeleteConfirmModalProps {
   showPlainSpinner?: boolean;
 }
 
-export const DeleteConfirmModal = (
-  {
-    isDeleting,
-    onConfirm,
-    onCancel,
-    selectedObjects,
-    allowedTypes,
-    showPlainSpinner
-  }: DeleteConfirmModalProps
-) => {
+export const DeleteConfirmModal = ({
+  isDeleting,
+  onConfirm,
+  onCancel,
+  selectedObjects,
+  allowedTypes,
+  showPlainSpinner,
+}: DeleteConfirmModalProps) => {
   const hiddenObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
   }, [selectedObjects]);

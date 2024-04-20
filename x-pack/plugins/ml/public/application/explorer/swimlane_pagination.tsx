@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -26,14 +25,12 @@ interface SwimLanePaginationProps {
   onPaginationChange: (arg: { perPage?: number; fromPage?: number }) => void;
 }
 
-export const SwimLanePagination = (
-  {
-    cardinality,
-    fromPage,
-    perPage,
-    onPaginationChange
-  }: SwimLanePaginationProps
-) => {
+export const SwimLanePagination = ({
+  cardinality,
+  fromPage,
+  perPage,
+  onPaginationChange,
+}: SwimLanePaginationProps) => {
   const componentFromPage = fromPage - 1;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

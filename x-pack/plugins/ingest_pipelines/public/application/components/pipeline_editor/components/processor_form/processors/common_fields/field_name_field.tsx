@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   FIELD_TYPES,
@@ -47,18 +47,15 @@ interface Props {
   additionalValidations?: ValidationConfig[];
 }
 
-export const FieldNameField = (
-  {
-    helpText,
-    additionalValidations
-  }: Props
-) => (<UseField
-  config={{
-    ...fieldsConfig.field,
-    helpText,
-    validations: fieldsConfig.field.validations!.concat(additionalValidations ?? []),
-  }}
-  component={Field}
-  path="fields.field"
-  data-test-subj="fieldNameField"
-/>);
+export const FieldNameField = ({ helpText, additionalValidations }: Props) => (
+  <UseField
+    config={{
+      ...fieldsConfig.field,
+      helpText,
+      validations: fieldsConfig.field.validations!.concat(additionalValidations ?? []),
+    }}
+    component={Field}
+    path="fields.field"
+    data-test-subj="fieldNameField"
+  />
+);

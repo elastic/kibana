@@ -19,13 +19,7 @@ interface Props {
   notificationsBySection?: Partial<Record<Section, number>>;
 }
 
-export const DefaultLayout = memo((
-  {
-    section,
-    children,
-    notificationsBySection
-  }: Props
-) => {
+export const DefaultLayout = memo(({ section, children, notificationsBySection }: Props) => {
   const { getHref } = useLink();
   const tabs = [
     {

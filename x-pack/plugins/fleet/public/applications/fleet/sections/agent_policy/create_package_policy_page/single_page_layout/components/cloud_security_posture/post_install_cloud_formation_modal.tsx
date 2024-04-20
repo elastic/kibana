@@ -29,19 +29,17 @@ import { CloudFormationGuide } from '../../../../../../../../components/cloud_se
 import { getCloudFormationPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
 import { useCreateCloudFormationUrl } from '../../../../../../../../components/cloud_security_posture/hooks';
 
-export const PostInstallCloudFormationModal = (
-  {
-    onConfirm,
-    onCancel,
-    agentPolicy,
-    packagePolicy
-  }: {
-    onConfirm: () => void;
-    onCancel: () => void;
-    agentPolicy: AgentPolicy;
-    packagePolicy: PackagePolicy;
-  }
-) => {
+export const PostInstallCloudFormationModal = ({
+  onConfirm,
+  onCancel,
+  agentPolicy,
+  packagePolicy,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+  agentPolicy: AgentPolicy;
+  packagePolicy: PackagePolicy;
+}) => {
   const { data: apiKeysData, isLoading } = useQuery(['cloudFormationApiKeys'], () =>
     sendGetEnrollmentAPIKeys({
       page: 1,

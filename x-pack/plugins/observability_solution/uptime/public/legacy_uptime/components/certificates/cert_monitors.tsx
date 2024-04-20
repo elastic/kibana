@@ -14,11 +14,7 @@ interface Props {
   monitors: CertMonitor[];
 }
 
-export const CertMonitors = (
-  {
-    monitors
-  }: Props
-) => {
+export const CertMonitors = ({ monitors }: Props) => {
   return (
     <span>
       {monitors.map((mon: CertMonitor, ind: number) => (

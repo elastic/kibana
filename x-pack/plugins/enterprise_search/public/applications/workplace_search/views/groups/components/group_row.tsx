@@ -34,14 +34,7 @@ const dateDisplay = (date: string) =>
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
 
-export const GroupRow = (
-  {
-    id,
-    name,
-    updatedAt,
-    contentSources
-  }: Group
-) => {
+export const GroupRow = ({ id, name, updatedAt, contentSources }: Group) => {
   const GROUP_UPDATED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.groupUpdatedText',
     {

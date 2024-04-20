@@ -24,14 +24,12 @@ type Props = OwnProps;
  * Provides a call-to-action for users to upgrade their subscription or set up a connector
  * depending on the isAssistantEnabled and isWelcomeSetup props.
  */
-export const BlockBotCallToAction = (
-  {
-    connectorPrompt,
-    http,
-    isAssistantEnabled,
-    isWelcomeSetup
-  }: Props
-) => {
+export const BlockBotCallToAction = ({
+  connectorPrompt,
+  http,
+  isAssistantEnabled,
+  isWelcomeSetup,
+}: Props) => {
   const basePath = http.basePath.get();
   return !isAssistantEnabled ? (
     <EuiFlexGroup

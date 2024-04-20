@@ -14,11 +14,9 @@ import { useStartServices } from '../../../../hooks';
 export interface FleetServerOnPremUnhealthyCalloutProps {
   onClickAddFleetServer: () => void;
 }
-export const FleetServerOnPremUnhealthyCallout = (
-  {
-    onClickAddFleetServer
-  }: FleetServerOnPremUnhealthyCalloutProps
-) => {
+export const FleetServerOnPremUnhealthyCallout = ({
+  onClickAddFleetServer,
+}: FleetServerOnPremUnhealthyCalloutProps) => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut

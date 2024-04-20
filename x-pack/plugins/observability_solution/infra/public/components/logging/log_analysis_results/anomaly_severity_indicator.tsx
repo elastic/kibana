@@ -10,13 +10,7 @@ import React, { useMemo } from 'react';
 import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
 import { getSeverityCategoryForScore, ML_SEVERITY_COLORS } from '../../../../common/log_analysis';
 
-export const AnomalySeverityIndicator = (
-  {
-    anomalyScore
-  }: {
-    anomalyScore: number;
-  }
-) => {
+export const AnomalySeverityIndicator = ({ anomalyScore }: { anomalyScore: number }) => {
   const severityColor = useMemo(() => getColorForAnomalyScore(anomalyScore), [anomalyScore]);
 
   return <EuiHealth color={severityColor}>{getFormattedSeverityScore(anomalyScore)}</EuiHealth>;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { HeaderMenu } from '../../header_menu';
 import { headerMenuCss, noLinkedRulesCss } from '../list_header.styles';
 import * as i18n from '../../translations';
@@ -24,19 +24,17 @@ interface MenuItemsProps {
   onDuplicateList: () => void;
 }
 
-const MenuItemsComponent = (
-  {
-    dataTestSubj,
-    linkedRules,
-    securityLinkAnchorComponent,
-    isReadonly,
-    canUserEditList = true,
-    onDeleteList,
-    onManageRules,
-    onExportList,
-    onDuplicateList
-  }: MenuItemsProps
-) => {
+const MenuItemsComponent = ({
+  dataTestSubj,
+  linkedRules,
+  securityLinkAnchorComponent,
+  isReadonly,
+  canUserEditList = true,
+  onDeleteList,
+  onManageRules,
+  onExportList,
+  onDuplicateList,
+}: MenuItemsProps) => {
   const referencedLinks = useMemo(
     () =>
       generateLinkedRulesMenuItems({

@@ -59,13 +59,7 @@ interface Props {
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-export const RepositoryDetails = (
-  {
-    repositoryName,
-    onClose,
-    onRepositoryDeleted
-  }: Props
-) => {
+export const RepositoryDetails = ({ repositoryName, onClose, onRepositoryDeleted }: Props) => {
   const { i18n, history } = useServices();
   const { docLinks } = useCore();
   const { error, data: repositoryDetails } = useLoadRepository(repositoryName);

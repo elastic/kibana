@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiSpacer } from '@elastic/eui';
@@ -32,12 +31,7 @@ interface Props {
   setFormState: ActionDispatchers['setFormState'];
 }
 
-export const AdditionalSection = (
-  {
-    formState,
-    setFormState
-  }: Props
-) => {
+export const AdditionalSection = ({ formState, setFormState }: Props) => {
   const [additionalExpanded, setAdditionalExpanded] = useState<boolean>(false);
   const { _meta: formMeta } = formState;
 

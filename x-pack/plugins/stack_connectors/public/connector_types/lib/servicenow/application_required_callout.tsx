@@ -29,12 +29,7 @@ interface Props {
   message?: string | null;
 }
 
-const ApplicationRequiredCalloutComponent = (
-  {
-    appId,
-    message
-  }: Props
-) => {
+const ApplicationRequiredCalloutComponent = ({ appId, message }: Props) => {
   return (
     <>
       <EuiSpacer size="s" />

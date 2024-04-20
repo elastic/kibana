@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ITagsCache } from '../../../services/tags';
@@ -16,12 +16,7 @@ export interface AssignFlyoutHeaderProps {
   tagCache: ITagsCache;
 }
 
-export const AssignFlyoutHeader = (
-  {
-    tagCache,
-    tagIds
-  }: AssignFlyoutHeaderProps
-) => {
+export const AssignFlyoutHeader = ({ tagCache, tagIds }: AssignFlyoutHeaderProps) => {
   const tags = useMemo(() => {
     return tagCache.getState().filter((tag) => tagIds.includes(tag.id));
   }, [tagCache, tagIds]);

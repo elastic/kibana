@@ -29,16 +29,14 @@ export interface AddToCaseButtonProps {
   iconProps?: Record<string, string>;
 }
 
-export const AddToCaseButton = (
-  {
-    actionId,
-    agentIds = [],
-    queryId = '',
-    isIcon = false,
-    isDisabled,
-    iconProps
-  }: AddToCaseButtonProps
-) => {
+export const AddToCaseButton = ({
+  actionId,
+  agentIds = [],
+  queryId = '',
+  isIcon = false,
+  isDisabled,
+  iconProps,
+}: AddToCaseButtonProps) => {
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
   const alertAttachments = useMemo(

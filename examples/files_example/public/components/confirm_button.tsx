@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 interface Props {
@@ -16,14 +16,7 @@ interface Props {
   disabled: boolean;
 }
 
-export const ConfirmButtonIcon = (
-  {
-    label,
-    confirmationText,
-    onConfirm,
-    disabled
-  }: Props
-) => {
+export const ConfirmButtonIcon = ({ label, confirmationText, onConfirm, disabled }: Props) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   return showConfirm ? (

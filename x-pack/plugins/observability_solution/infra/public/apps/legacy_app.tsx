@@ -25,13 +25,7 @@ export async function renderApp({ element }: AppMountParameters) {
   };
 }
 
-const LegacyApp = (
-  {
-    history
-  }: {
-    history: History<unknown>;
-  }
-) => {
+const LegacyApp = ({ history }: { history: History<unknown> }) => {
   return (
     <EuiErrorBoundary>
       <Router history={history}>

@@ -33,13 +33,7 @@ interface Props {
   error: Error;
 }
 
-export const SectionError = (
-  {
-    title,
-    error,
-    ...rest
-  }: Props
-) => {
+export const SectionError = ({ title, error, ...rest }: Props) => {
   const data = error.data || error;
 
   const { error: errorString, cause, message } = data;

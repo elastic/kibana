@@ -74,13 +74,7 @@ const parseCreateError = (error: unknown): string | undefined => {
   return JSON.stringify(error);
 };
 
-export const CreateApiKeyFlyout = (
-  {
-    onClose,
-    username,
-    setApiKey
-  }: CreateApiKeyFlyoutProps
-) => {
+export const CreateApiKeyFlyout = ({ onClose, username, setApiKey }: CreateApiKeyFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);

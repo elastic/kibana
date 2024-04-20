@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useNotifyService } from '../../../services';
 import { ErrorStrings } from '../../../../i18n';

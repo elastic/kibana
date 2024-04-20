@@ -562,15 +562,7 @@ const IntegrationsBreadcrumb = memo<{
   return null;
 });
 
-const PoliciesBreadcrumb = (
-  {
-    policyName,
-    policyId
-  }: {
-    policyName: string;
-    policyId: string;
-  }
-) => {
+const PoliciesBreadcrumb = ({ policyName, policyId }: { policyName: string; policyId: string }) => {
   useBreadcrumbs('edit_integration', { policyName, policyId });
   return null;
 };
@@ -584,15 +576,7 @@ const IntegrationsUpgradeBreadcrumb = memo<{
   return null;
 });
 
-const UpgradeBreadcrumb = (
-  {
-    policyName,
-    policyId
-  }: {
-    policyName: string;
-    policyId: string;
-  }
-) => {
+const UpgradeBreadcrumb = ({ policyName, policyId }: { policyName: string; policyId: string }) => {
   useBreadcrumbs('upgrade_package_policy', { policyName, policyId });
   return null;
 };

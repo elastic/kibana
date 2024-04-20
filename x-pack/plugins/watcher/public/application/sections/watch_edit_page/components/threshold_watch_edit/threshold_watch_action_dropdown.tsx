@@ -42,12 +42,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export const WatchActionsDropdown = (
-  {
-    settings,
-    isLoading
-  }: Props
-) => {
+export const WatchActionsDropdown = ({ settings, isLoading }: Props) => {
   const { addAction } = useContext(WatchContext);
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);

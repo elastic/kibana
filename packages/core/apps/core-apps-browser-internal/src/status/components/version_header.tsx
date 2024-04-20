@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ServerVersion } from '@kbn/core-status-common-internal';
@@ -15,11 +15,7 @@ interface VersionHeaderProps {
   version: ServerVersion;
 }
 
-export const VersionHeader = (
-  {
-    version
-  }: VersionHeaderProps
-) => {
+export const VersionHeader = ({ version }: VersionHeaderProps) => {
   const { build_hash: buildHash, build_number: buildNumber, number } = version;
   return (
     <EuiPanel grow={false}>

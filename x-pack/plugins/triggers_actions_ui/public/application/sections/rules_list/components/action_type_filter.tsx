@@ -16,13 +16,11 @@ interface ActionTypeFilterProps {
   filters: string[];
 }
 
-export const ActionTypeFilter = (
-  {
-    actionTypes,
-    onChange: onFilterChange,
-    filters
-  }: ActionTypeFilterProps
-) => {
+export const ActionTypeFilter = ({
+  actionTypes,
+  onChange: onFilterChange,
+  filters,
+}: ActionTypeFilterProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 

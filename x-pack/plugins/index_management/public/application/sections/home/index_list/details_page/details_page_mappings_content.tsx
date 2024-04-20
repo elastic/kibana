@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -64,23 +64,21 @@ const getFieldsFromState = (state: State) => {
   };
   return fields();
 };
-export const DetailsPageMappingsContent = (
-  {
-    index,
-    data,
-    jsonData,
-    refetchMapping,
-    showAboutMappings,
-    isSemanticTextEnabled = false
-  }: {
-    index: Index;
-    data: string;
-    showAboutMappings: boolean;
-    jsonData: any;
-    refetchMapping: () => void;
-    isSemanticTextEnabled?: boolean;
-  }
-) => {
+export const DetailsPageMappingsContent = ({
+  index,
+  data,
+  jsonData,
+  refetchMapping,
+  showAboutMappings,
+  isSemanticTextEnabled = false,
+}: {
+  index: Index;
+  data: string;
+  showAboutMappings: boolean;
+  jsonData: any;
+  refetchMapping: () => void;
+  isSemanticTextEnabled?: boolean;
+}) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
@@ -328,7 +326,7 @@ export const DetailsPageMappingsContent = (
   );
   return (
     // using "rowReverse" to keep docs links on the top of the mappings code block on smaller screen
-    (<>
+    <>
       <EuiFlexGroup
         wrap
         direction="rowReverse"
@@ -520,6 +518,6 @@ export const DetailsPageMappingsContent = (
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-    </>)
+    </>
   );
 };

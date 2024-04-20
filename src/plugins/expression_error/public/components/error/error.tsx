@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Markdown } from '@kbn/shared-ux-markdown';
@@ -30,12 +30,7 @@ const strings = {
     }),
 };
 
-export const Error = (
-  {
-    payload,
-    onClose
-  }: Props
-) => {
+export const Error = ({ payload, onClose }: Props) => {
   const message = payload.error?.message;
 
   const CloseIconButton = () => (

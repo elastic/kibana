@@ -33,63 +33,63 @@ export interface WelcomeBannerProps {
   showDescription?: boolean;
 }
 
-export const WelcomeBanner = (
-  {
-    user,
-    assetBasePath,
-    image,
-    showDescription = true
-  }: WelcomeBannerProps
-) => (<>
-  <EuiSpacer size="xxl" />
-  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-    <EuiFlexItem grow={2}>
-      {/* Reversing column direction here so screenreaders keep h1 as the first element */}
-      <EuiFlexGroup justifyContent="flexStart" direction="columnReverse" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
-            <h1>
-              {i18n.translate('searchApiPanels.welcomeBanner.header.title', {
-                defaultMessage: 'Get started with Elasticsearch',
-              })}
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        {Boolean(user) && (
+export const WelcomeBanner = ({
+  user,
+  assetBasePath,
+  image,
+  showDescription = true,
+}: WelcomeBannerProps) => (
+  <>
+    <EuiSpacer size="xxl" />
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={2}>
+        {/* Reversing column direction here so screenreaders keep h1 as the first element */}
+        <EuiFlexGroup justifyContent="flexStart" direction="columnReverse" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiText>
-              <h4>
-                {user
-                  ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
-                      defaultMessage: '👋 Hi {name}!',
-                      values: { name: user.full_name || user.username },
-                    })
-                  : i18n.translate('searchApiPanels.welcomeBanner.header.greeting.defaultTitle', {
-                      defaultMessage: '👋 Hi',
-                    })}
-              </h4>
-            </EuiText>
+            <EuiTitle size="l">
+              <h1>
+                {i18n.translate('searchApiPanels.welcomeBanner.header.title', {
+                  defaultMessage: 'Get started with Elasticsearch',
+                })}
+              </h1>
+            </EuiTitle>
           </EuiFlexItem>
+          {Boolean(user) && (
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h4>
+                  {user
+                    ? i18n.translate('searchApiPanels.welcomeBanner.header.greeting.customTitle', {
+                        defaultMessage: '👋 Hi {name}!',
+                        values: { name: user.full_name || user.username },
+                      })
+                    : i18n.translate('searchApiPanels.welcomeBanner.header.greeting.defaultTitle', {
+                        defaultMessage: '👋 Hi',
+                      })}
+                </h4>
+              </EuiText>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer />
+        {showDescription && (
+          <EuiText>
+            {i18n.translate('searchApiPanels.welcomeBanner.header.description', {
+              defaultMessage:
+                "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
+            })}
+          </EuiText>
         )}
-      </EuiFlexGroup>
-      <EuiSpacer />
-      {showDescription && (
-        <EuiText>
-          {i18n.translate('searchApiPanels.welcomeBanner.header.description', {
-            defaultMessage:
-              "Set up your programming language client, ingest some data, and you'll be ready to start searching within minutes.",
-          })}
-        </EuiText>
-      )}
-    </EuiFlexItem>
+      </EuiFlexItem>
 
-    <EuiFlexItem grow={1}>
-      <EuiImage
-        alt=""
-        src={image ? image : `${assetBasePath}/serverless_header.png`}
-        size="original"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer size="xxl" />
-</>);
+      <EuiFlexItem grow={1}>
+        <EuiImage
+          alt=""
+          src={image ? image : `${assetBasePath}/serverless_header.png`}
+          size="original"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="xxl" />
+  </>
+);

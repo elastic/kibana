@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,11 +25,7 @@ interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
 
-const FixIssuesStep = (
-  {
-    setIsComplete
-  }: Props
-) => {
+const FixIssuesStep = ({ setIsComplete }: Props) => {
   // We consider ES and Kibana issues to be fixed when there are 0 critical issues.
   const [isEsFixed, setIsEsFixed] = useState(false);
   const [isKibanaFixed, setIsKibanaFixed] = useState(false);

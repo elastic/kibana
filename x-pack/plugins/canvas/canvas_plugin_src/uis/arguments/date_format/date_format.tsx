@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
 import { ArgumentProps } from '../../../../types/arguments';
@@ -28,20 +28,15 @@ export interface Props extends ArgumentProps {
   argId: string;
 }
 
-export const DateFormatArgInput = (
-  {
-    dateFormats,
-    onValueChange,
-    argValue,
-    argId
-  }: Props
-) => (<FormatSelect
-  argId={argId}
-  argValue={argValue}
-  formatOptions={dateFormats}
-  onValueChange={onValueChange}
-  defaultCustomFormat="M/D/YY h:ma"
-/>);
+export const DateFormatArgInput = ({ dateFormats, onValueChange, argValue, argId }: Props) => (
+  <FormatSelect
+    argId={argId}
+    argValue={argValue}
+    formatOptions={dateFormats}
+    onValueChange={onValueChange}
+    defaultCustomFormat="M/D/YY h:ma"
+  />
+);
 
 DateFormatArgInput.propTypes = {
   dateFormats: PropTypes.arrayOf(

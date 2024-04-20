@@ -27,13 +27,7 @@ const editorOptions = {
   automaticLayout: true,
 };
 const MIN_HEIGHT = 100;
-const OsqueryEditorComponent = (
-  {
-    defaultValue,
-    onChange,
-    commands
-  }: OsqueryEditorProps
-) => {
+const OsqueryEditorComponent = ({ defaultValue, onChange, commands }: OsqueryEditorProps) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
   useDebounce(

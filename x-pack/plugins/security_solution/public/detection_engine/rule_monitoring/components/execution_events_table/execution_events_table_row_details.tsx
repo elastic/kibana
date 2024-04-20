@@ -16,11 +16,7 @@ interface ExecutionEventsTableRowDetailsProps {
   item: RuleExecutionEvent;
 }
 
-const ExecutionEventsTableRowDetailsComponent = (
-  {
-    item
-  }: ExecutionEventsTableRowDetailsProps
-) => {
+const ExecutionEventsTableRowDetailsComponent = ({ item }: ExecutionEventsTableRowDetailsProps) => {
   return (
     <EuiDescriptionList
       className="eui-fullWidth"

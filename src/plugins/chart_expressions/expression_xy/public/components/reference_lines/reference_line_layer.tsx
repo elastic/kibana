@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy } from 'lodash';
 import { Position } from '@elastic/charts';
@@ -26,18 +26,16 @@ interface ReferenceLineLayerProps {
   yAxesMap: AxesMap;
 }
 
-export const ReferenceLineLayer = (
-  {
-    layer,
-    axesConfiguration,
-    formatters,
-    xAxisFormatter,
-    paddingMap,
-    isHorizontal,
-    titles,
-    yAxesMap
-  }: ReferenceLineLayerProps
-) => {
+export const ReferenceLineLayer = ({
+  layer,
+  axesConfiguration,
+  formatters,
+  xAxisFormatter,
+  paddingMap,
+  isHorizontal,
+  titles,
+  yAxesMap,
+}: ReferenceLineLayerProps) => {
   if (!layer.decorations) {
     return null;
   }

@@ -20,12 +20,7 @@ interface Props {
   deprecation: EnrichedDeprecationInfo;
 }
 
-export const HealthIndicatorTableRow = (
-  {
-    rowFieldNames,
-    deprecation
-  }: Props
-) => {
+export const HealthIndicatorTableRow = ({ rowFieldNames, deprecation }: Props) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =

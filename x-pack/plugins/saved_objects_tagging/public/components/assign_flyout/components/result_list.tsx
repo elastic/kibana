@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiIcon, EuiSelectable, EuiSelectableOption, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AssignableObject } from '../../../../common/assignments';
@@ -24,15 +24,13 @@ interface ResultInternals {
   previously: 'on' | undefined;
 }
 
-export const AssignFlyoutResultList = (
-  {
-    results,
-    isLoading,
-    initialStatus,
-    overrides,
-    onChange
-  }: AssignFlyoutResultListProps
-) => {
+export const AssignFlyoutResultList = ({
+  results,
+  isLoading,
+  initialStatus,
+  overrides,
+  onChange,
+}: AssignFlyoutResultListProps) => {
   const options = results.map((result) => {
     const key = getKey(result);
     const overriddenStatus = getOverriddenStatus(initialStatus[key], overrides[key]);
@@ -89,13 +87,7 @@ export const AssignFlyoutResultList = (
   );
 };
 
-const ResultActionLabel = (
-  {
-    action
-  }: {
-    action: AssignmentAction;
-  }
-) => {
+const ResultActionLabel = ({ action }: { action: AssignmentAction }) => {
   if (action === 'unchanged') {
     return null;
   }

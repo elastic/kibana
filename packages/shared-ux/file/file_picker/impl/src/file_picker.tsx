@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiModal,
@@ -73,14 +72,7 @@ export interface Props<Kind extends string = string> {
 
 type InnerProps = Required<Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'multiple'>>;
 
-const Component = (
-  {
-    onClose,
-    onDone,
-    onUpload,
-    multiple
-  }: InnerProps
-) => {
+const Component = ({ onClose, onDone, onUpload, multiple }: InnerProps) => {
   const { state, kind } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
 
@@ -157,25 +149,25 @@ const Component = (
   );
 };
 
-export const FilePicker = (
-  {
-    pageSize = 20,
-    kind,
-    shouldAllowDelete,
-    multiple = false,
-    uploadMeta,
-    onUpload = () => {},
-    ...rest
-  }: Props
-) => (<FilePickerContext
-  pageSize={pageSize}
-  kind={kind}
-  uploadMeta={uploadMeta}
-  multiple={multiple}
-  shouldAllowDelete={shouldAllowDelete}
->
-  <Component {...rest} {...{ pageSize, kind, multiple, onUpload }} />
-</FilePickerContext>);
+export const FilePicker = ({
+  pageSize = 20,
+  kind,
+  shouldAllowDelete,
+  multiple = false,
+  uploadMeta,
+  onUpload = () => {},
+  ...rest
+}: Props) => (
+  <FilePickerContext
+    pageSize={pageSize}
+    kind={kind}
+    uploadMeta={uploadMeta}
+    multiple={multiple}
+    shouldAllowDelete={shouldAllowDelete}
+  >
+    <Component {...rest} {...{ pageSize, kind, multiple, onUpload }} />
+  </FilePickerContext>
+);
 
 /* eslint-disable import/no-default-export */
 export default FilePicker;

@@ -20,13 +20,7 @@ interface Props {
   onDelete: () => void;
 }
 
-const AlertPropertyActionsComponent = (
-  {
-    isLoading,
-    totalAlerts,
-    onDelete
-  }: Props
-) => {
+const AlertPropertyActionsComponent = ({ isLoading, totalAlerts, onDelete }: Props) => {
   const { permissions } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,

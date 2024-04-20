@@ -45,13 +45,9 @@ const basicData = {
 };
 
 describe('useCasesMttr', () => {
-  const wrapperContainer = (
-    {
-      children
-    }: {
-      children?: React.ReactNode;
-    }
-  ) => (<TestProviders>{children}</TestProviders>);
+  const wrapperContainer = ({ children }: { children?: React.ReactNode }) => (
+    <TestProviders>{children}</TestProviders>
+  );
   const mockGetCasesMetrics = jest.fn();
 
   afterEach(() => {

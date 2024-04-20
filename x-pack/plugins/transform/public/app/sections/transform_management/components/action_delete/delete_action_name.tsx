@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -79,15 +79,13 @@ export const getDeleteActionDisabledMessage = ({
   }
 };
 
-export const DeleteActionName = (
-  {
-    items,
-    canDeleteTransform,
-    disabled,
-    isBulkAction,
-    forceDisable
-  }: DeleteActionNameProps
-) => {
+export const DeleteActionName = ({
+  items,
+  canDeleteTransform,
+  disabled,
+  isBulkAction,
+  forceDisable,
+}: DeleteActionNameProps) => {
   const content = getDeleteActionDisabledMessage({ items, canDeleteTransform, forceDisable });
   if (content) {
     return (

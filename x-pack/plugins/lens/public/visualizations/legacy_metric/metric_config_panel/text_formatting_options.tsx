@@ -17,12 +17,7 @@ export interface TitlePositionProps {
   setState: (newState: LegacyMetricState) => void;
 }
 
-export const TextFormattingOptions = (
-  {
-    state,
-    setState
-  }: TitlePositionProps
-) => {
+export const TextFormattingOptions = ({ state, setState }: TitlePositionProps) => {
   return (
     <EuiFormRow
       fullWidth

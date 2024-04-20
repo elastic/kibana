@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
@@ -122,12 +122,7 @@ interface TransformStatsBarProps {
   transformsList: TransformListRow[];
 }
 
-export const TransformStatsBar = (
-  {
-    transformNodes,
-    transformsList
-  }: TransformStatsBarProps
-) => {
+export const TransformStatsBar = ({ transformNodes, transformsList }: TransformStatsBarProps) => {
   const { showNodeInfo } = useEnabledFeatures();
   const refreshTransformList = useRefreshTransformList();
   const { esNodeRoles } = useDocumentationLinks();

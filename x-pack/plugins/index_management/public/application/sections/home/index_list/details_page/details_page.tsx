@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
@@ -23,12 +23,10 @@ import { loadIndex } from '../../../../services';
 import { DetailsPageError } from './details_page_error';
 import { DetailsPageContent } from './details_page_content';
 
-export const DetailsPage = (
-  {
-    location: { search },
-    history
-  }: RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>
-) => {
+export const DetailsPage = ({
+  location: { search },
+  history,
+}: RouteComponentProps<{ indexName: string; indexDetailsSection: IndexDetailsSection }>) => {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const indexName = queryParams.get('indexName') ?? '';
   const tab: IndexDetailsTabId = queryParams.get('tab') ?? IndexDetailsSection.Overview;

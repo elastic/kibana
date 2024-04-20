@@ -34,12 +34,7 @@ export interface TestQueryRowTableProps {
   alerts: string[] | null;
 }
 
-export const TestQueryRowTable = (
-  {
-    rawResults,
-    alerts
-  }: TestQueryRowTableProps
-) => {
+export const TestQueryRowTable = ({ rawResults, alerts }: TestQueryRowTableProps) => {
   return (
     <EuiPanel style={{ overflow: 'hidden' }} hasShadow={false} hasBorder={true}>
       <EuiDataGrid

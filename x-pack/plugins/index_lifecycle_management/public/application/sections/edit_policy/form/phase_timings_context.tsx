@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, FunctionComponent, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
 import { FormInternal } from '../types';
 import { useGlobalFields } from '.';

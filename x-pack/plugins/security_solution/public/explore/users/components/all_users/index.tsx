@@ -141,20 +141,18 @@ const getUsersColumns = (
   return columns;
 };
 
-const UsersTableComponent = (
-  {
-    users,
-    totalCount,
-    type,
-    id,
-    fakeTotalCount,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    sort,
-    setQuerySkip
-  }: UsersTableProps
-) => {
+const UsersTableComponent = ({
+  users,
+  totalCount,
+  type,
+  id,
+  fakeTotalCount,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  sort,
+  setQuerySkip,
+}: UsersTableProps) => {
   const dispatch = useDispatch();
   const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
   const { activePage, limit } = useDeepEqualSelector((state) => getUsersSelector(state));

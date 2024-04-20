@@ -18,14 +18,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ManageLicenseModal = (
-  {
-    licenseType,
-    ruleTypeId,
-    onConfirm,
-    onCancel
-  }: Props
-) => {
+export const ManageLicenseModal = ({ licenseType, ruleTypeId, onConfirm, onCancel }: Props) => {
   const licenseRequired = capitalize(licenseType);
   return (
     <EuiConfirmModal

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 
@@ -33,13 +32,7 @@ interface Section {
 
 // fix for the annotation label being hidden inside the bounds of the chart container
 
-const SectionItem = (
-  {
-    item
-  }: {
-    item: Item;
-  }
-) => {
+const SectionItem = ({ item }: { item: Item }) => {
   const { euiTheme } = useEuiTheme();
   const fontSize = euiTheme.size.m;
 
@@ -57,13 +50,7 @@ const SectionItem = (
   );
 };
 
-const Section = (
-  {
-    section
-  }: {
-    section: Section;
-  }
-) => {
+const Section = ({ section }: { section: Section }) => {
   const { euiTheme } = useEuiTheme();
   if (section.items.length === 0) {
     return <div />;
@@ -125,15 +112,13 @@ const Section = (
   );
 };
 
-export const JobDetailsPane = (
-  {
-    sections,
-    ...props
-  }: {
-    sections: any[];
-    'data-test-subj': string;
-  }
-) => {
+export const JobDetailsPane = ({
+  sections,
+  ...props
+}: {
+  sections: any[];
+  'data-test-subj': string;
+}) => {
   return (
     <>
       <EuiSpacer size="s" />

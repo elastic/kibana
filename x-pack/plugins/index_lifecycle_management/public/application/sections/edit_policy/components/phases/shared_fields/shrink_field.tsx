@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { get } from 'lodash';
 import { NumericField, useFormData } from '../../../../../../shared_imports';
@@ -25,11 +25,7 @@ interface Props {
   phase: 'hot' | 'warm';
 }
 
-export const ShrinkField = (
-  {
-    phase
-  }: Props
-) => {
+export const ShrinkField = ({ phase }: Props) => {
   const globalFields = useGlobalFields();
   const { setValue: setIsUsingShardSize } =
     globalFields[`${phase}IsUsingShardSize` as 'hotIsUsingShardSize'];

@@ -24,12 +24,7 @@ interface AdvancedTabProps {
   selectedPolicyId?: string;
 }
 
-export const AdvancedTab = (
-  {
-    selectedPolicyId,
-    onClose
-  }: AdvancedTabProps
-) => {
+export const AdvancedTab = ({ selectedPolicyId, onClose }: AdvancedTabProps) => {
   const {
     isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,

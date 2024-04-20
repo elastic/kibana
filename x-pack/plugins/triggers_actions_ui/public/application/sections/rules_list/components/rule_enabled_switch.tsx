@@ -17,14 +17,12 @@ export interface ComponentOpts {
   disableRule: (rule: Rule) => Promise<void>;
 }
 
-export const RuleEnabledSwitch = (
-  {
-    item,
-    onRuleChanged,
-    disableRule,
-    enableRule
-  }: ComponentOpts
-) => {
+export const RuleEnabledSwitch = ({
+  item,
+  onRuleChanged,
+  disableRule,
+  enableRule,
+}: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(!item.enabled);
   useEffect(() => {
     setIsEnabled(item.enabled);

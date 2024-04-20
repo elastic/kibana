@@ -12,13 +12,11 @@ import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-const ThreatIntelligencePaywall = React.memo(function PaywallComponent(
-  {
-    requiredPLI
-  }: {
-    requiredPLI: ProductFeatureKeyType;
-  }
-) {
+const ThreatIntelligencePaywall = React.memo(function PaywallComponent({
+  requiredPLI,
+}: {
+  requiredPLI: ProductFeatureKeyType;
+}) {
   const productTypeRequired = getProductTypeByPLI(requiredPLI);
 
   return (

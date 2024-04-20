@@ -17,13 +17,7 @@ interface Props {
   setRuleParams: (key: string, value: any) => void;
 }
 
-export const StatusExpressionSelect = (
-  {
-    ruleParams,
-    hasFilters,
-    setRuleParams
-  }: Props
-) => {
+export const StatusExpressionSelect = ({ ruleParams, hasFilters, setRuleParams }: Props) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(ruleParams.shouldCheckStatus ?? true);
 
   useEffect(() => {

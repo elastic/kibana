@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,20 +14,17 @@ interface RefreshTransformListButton {
   isLoading: boolean;
   onClick(): void;
 }
-export const RefreshTransformListButton = (
-  {
-    onClick,
-    isLoading
-  }: RefreshTransformListButton
-) => (<EuiButton
-  color="success"
-  iconType="refresh"
-  data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
-  onClick={onClick}
-  isLoading={isLoading}
->
-  <FormattedMessage
-    id="xpack.transform.transformList.refreshButtonLabel"
-    defaultMessage="Reload"
-  />
-</EuiButton>);
+export const RefreshTransformListButton = ({ onClick, isLoading }: RefreshTransformListButton) => (
+  <EuiButton
+    color="success"
+    iconType="refresh"
+    data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
+    onClick={onClick}
+    isLoading={isLoading}
+  >
+    <FormattedMessage
+      id="xpack.transform.transformList.refreshButtonLabel"
+      defaultMessage="Reload"
+    />
+  </EuiButton>
+);

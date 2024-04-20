@@ -21,12 +21,7 @@ interface Props {
   fill?: boolean;
 }
 
-export const StartCrawlContextMenu = (
-  {
-    menuButtonLabel,
-    fill
-  }: Props
-) => {
+export const StartCrawlContextMenu = ({ menuButtonLabel, fill }: Props) => {
   const { startCrawl } = useActions(CrawlerLogic);
   const { showModal: showCrawlSelectDomainsModal } = useActions(CrawlSelectDomainsModalLogic);
   const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(CrawlCustomSettingsFlyoutLogic);

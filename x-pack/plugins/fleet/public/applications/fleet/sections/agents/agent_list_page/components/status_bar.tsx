@@ -22,13 +22,11 @@ const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   }
 `;
 
-export const AgentStatusBar = (
-  {
-    agentStatus
-  }: {
-    agentStatus: { [k in SimplifiedAgentStatus]: number };
-  }
-) => {
+export const AgentStatusBar = ({
+  agentStatus,
+}: {
+  agentStatus: { [k in SimplifiedAgentStatus]: number };
+}) => {
   const palette = useMemo(() => {
     return AGENT_STATUSES.reduce((acc, status) => {
       const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;

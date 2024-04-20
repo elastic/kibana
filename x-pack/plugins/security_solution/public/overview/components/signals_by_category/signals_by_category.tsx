@@ -32,16 +32,14 @@ interface Props {
   hideQueryToggle?: boolean;
 }
 
-const SignalsByCategoryComponent = (
-  {
-    filters,
-    headerChildren,
-    onlyField,
-    paddingSize,
-    setAbsoluteRangeDatePickerTarget = InputsModelId.global,
-    hideQueryToggle = false
-  }: Props
-) => {
+const SignalsByCategoryComponent = ({
+  filters,
+  headerChildren,
+  onlyField,
+  paddingSize,
+  setAbsoluteRangeDatePickerTarget = InputsModelId.global,
+  hideQueryToggle = false,
+}: Props) => {
   const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
   const filtersForSignalsByCategory = useFiltersForSignalsByCategory(filters);

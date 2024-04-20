@@ -34,14 +34,12 @@ const mapRoleToMessageComponent = {
   ),
 };
 
-export const MessageList = (
-  {
-    messages
-  }: MessageListProps
-) => (<EuiCommentList gutterSize="m">
-  {messages.map((message) => (
-    <React.Fragment key={message.id}>
-      {mapRoleToMessageComponent[message.role](message)}
-    </React.Fragment>
-  ))}
-</EuiCommentList>);
+export const MessageList = ({ messages }: MessageListProps) => (
+  <EuiCommentList gutterSize="m">
+    {messages.map((message) => (
+      <React.Fragment key={message.id}>
+        {mapRoleToMessageComponent[message.role](message)}
+      </React.Fragment>
+    ))}
+  </EuiCommentList>
+);

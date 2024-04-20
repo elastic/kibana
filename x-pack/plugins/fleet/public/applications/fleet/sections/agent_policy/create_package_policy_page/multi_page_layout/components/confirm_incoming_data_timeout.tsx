@@ -22,13 +22,7 @@ interface Props {
   packageInfo?: PackageInfo;
 }
 
-export const ConfirmIncomingDataTimeout = (
-  {
-    agentIds,
-    troubleshootLink,
-    packageInfo
-  }: Props
-) => {
+export const ConfirmIncomingDataTimeout = ({ agentIds, troubleshootLink, packageInfo }: Props) => {
   const discoverLogsLink = useGetDiscoverLogsLinkForAgents(agentIds);
 
   return (

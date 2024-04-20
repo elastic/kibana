@@ -47,11 +47,7 @@ export interface AgentDiagnosticsProps {
   agent: Agent;
 }
 
-export const AgentDiagnosticsTab = (
-  {
-    agent
-  }: AgentDiagnosticsProps
-) => {
+export const AgentDiagnosticsTab = ({ agent }: AgentDiagnosticsProps) => {
   const authz = useAuthz();
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();

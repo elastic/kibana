@@ -64,17 +64,15 @@ interface Props {
   filterSeriesByGroupName?: string;
 }
 
-export const CriterionPreview = (
-  {
-    ruleParams,
-    chartCriterion,
-    logViewReference,
-    showThreshold,
-    executionTimeRange,
-    annotations,
-    filterSeriesByGroupName
-  }: Props
-) => {
+export const CriterionPreview = ({
+  ruleParams,
+  chartCriterion,
+  logViewReference,
+  showThreshold,
+  executionTimeRange,
+  annotations,
+  filterSeriesByGroupName,
+}: Props) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
     const criteria = field && comparator && value ? [{ field, comparator, value }] : [];
@@ -137,18 +135,16 @@ interface ChartProps {
   filterSeriesByGroupName?: string;
 }
 
-const CriterionPreviewChart = (
-  {
-    buckets,
-    logViewReference,
-    threshold,
-    chartAlertParams,
-    showThreshold,
-    executionTimeRange,
-    annotations,
-    filterSeriesByGroupName
-  }: ChartProps
-) => {
+const CriterionPreviewChart = ({
+  buckets,
+  logViewReference,
+  threshold,
+  chartAlertParams,
+  showThreshold,
+  executionTimeRange,
+  annotations,
+  filterSeriesByGroupName,
+}: ChartProps) => {
   const chartTheme = useTimelineChartTheme();
   const timezone = useKibanaTimeZoneSetting();
 

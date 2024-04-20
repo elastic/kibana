@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiBetaBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export const TechnicalPreviewBadge = (
-  {
-    compressed = false
-  }: {
-    compressed?: boolean;
-  }
-) => {
+export const TechnicalPreviewBadge = ({ compressed = false }: { compressed?: boolean }) => {
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {

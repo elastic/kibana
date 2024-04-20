@@ -9,7 +9,6 @@ import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
@@ -34,31 +33,31 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
  * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
  *
  * */
-export const CustomTimelineDataGridBody = memo(
-  function CustomTimelineDataGridBody(props: CustomTimelineDataGridBodyProps) {
-    const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers } = props;
+export const CustomTimelineDataGridBody = memo(function CustomTimelineDataGridBody(
+  props: CustomTimelineDataGridBodyProps
+) {
+  const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers } = props;
 
-    const visibleRows = useMemo(
-      () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
-      [rows, visibleRowData]
-    );
+  const visibleRows = useMemo(
+    () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
+    [rows, visibleRowData]
+  );
 
-    return (
-      <>
-        {visibleRows.map((row, rowIndex) => (
-          <CustomDataGridSingleRow
-            rowData={row}
-            rowIndex={rowIndex}
-            key={rowIndex}
-            visibleColumns={visibleColumns}
-            Cell={Cell}
-            enabledRowRenderers={enabledRowRenderers}
-          />
-        ))}
-      </>
-    );
-  }
-);
+  return (
+    <>
+      {visibleRows.map((row, rowIndex) => (
+        <CustomDataGridSingleRow
+          rowData={row}
+          rowIndex={rowIndex}
+          key={rowIndex}
+          visibleColumns={visibleColumns}
+          Cell={Cell}
+          enabledRowRenderers={enabledRowRenderers}
+        />
+      ))}
+    </>
+  );
+});
 
 /**
  *

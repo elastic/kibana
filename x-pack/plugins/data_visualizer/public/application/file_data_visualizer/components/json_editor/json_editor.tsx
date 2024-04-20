@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
@@ -21,19 +20,17 @@ interface JobEditorProps {
   readOnly?: boolean;
   onChange?: CodeEditorProps['onChange'];
 }
-export const JsonEditor = (
-  {
-    value,
-    height = '500px',
+export const JsonEditor = ({
+  value,
+  height = '500px',
 
-    // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
-    width = '99%',
+  // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
+  width = '99%',
 
-    mode = EDITOR_MODE.JSON,
-    readOnly = false,
-    onChange = () => {}
-  }: JobEditorProps
-) => {
+  mode = EDITOR_MODE.JSON,
+  readOnly = false,
+  onChange = () => {},
+}: JobEditorProps) => {
   if (mode === EDITOR_MODE.XJSON) {
     value = expandLiteralStrings(value);
   }

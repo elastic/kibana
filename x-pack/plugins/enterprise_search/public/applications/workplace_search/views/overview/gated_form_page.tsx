@@ -23,11 +23,7 @@ import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 
 import { WorkplaceSearchGate } from './gated_form';
 
-export const WorkplaceSearchGatePage = (
-  {
-    isLoading
-  }: PageTemplateProps
-) => {
+export const WorkplaceSearchGatePage = ({ isLoading }: PageTemplateProps) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       restrictWidth

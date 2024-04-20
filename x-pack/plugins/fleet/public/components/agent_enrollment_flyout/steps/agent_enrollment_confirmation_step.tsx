@@ -16,13 +16,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 
 import { ConfirmAgentEnrollment } from '../confirm_agent_enrollment';
 
-const AgentEnrollmentPrePollInstructions = (
-  {
-    troubleshootLink
-  }: {
-    troubleshootLink: string;
-  }
-) => {
+const AgentEnrollmentPrePollInstructions = ({ troubleshootLink }: { troubleshootLink: string }) => {
   return (
     <EuiText>
       <FormattedMessage

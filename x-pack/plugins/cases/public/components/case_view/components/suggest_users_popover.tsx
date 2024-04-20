@@ -21,23 +21,23 @@ import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import type { CurrentUserProfile } from '../../types';
 
-const PopoverButton = (
-  {
-    togglePopover,
-    isDisabled
-  }: {
-    togglePopover: () => void;
-    isDisabled: boolean;
-  }
-) => (<EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
-  <EuiButtonIcon
-    data-test-subj="case-view-assignees-edit-button"
-    aria-label={i18n.EDIT_ASSIGNEES_ARIA_LABEL}
-    iconType={'pencil'}
-    onClick={togglePopover}
-    disabled={isDisabled}
-  />
-</EuiToolTip>);
+const PopoverButton = ({
+  togglePopover,
+  isDisabled,
+}: {
+  togglePopover: () => void;
+  isDisabled: boolean;
+}) => (
+  <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
+    <EuiButtonIcon
+      data-test-subj="case-view-assignees-edit-button"
+      aria-label={i18n.EDIT_ASSIGNEES_ARIA_LABEL}
+      iconType={'pencil'}
+      onClick={togglePopover}
+      disabled={isDisabled}
+    />
+  </EuiToolTip>
+);
 PopoverButton.displayName = 'PopoverButton';
 
 export interface SuggestUsersPopoverProps {
@@ -50,17 +50,15 @@ export interface SuggestUsersPopoverProps {
   onClosePopover: () => void;
 }
 
-const SuggestUsersPopoverComponent = (
-  {
-    assignedUsersWithProfiles,
-    currentUserProfile,
-    isLoading,
-    isPopoverOpen,
-    onUsersChange,
-    togglePopover,
-    onClosePopover
-  }: SuggestUsersPopoverProps
-) => {
+const SuggestUsersPopoverComponent = ({
+  assignedUsersWithProfiles,
+  currentUserProfile,
+  isLoading,
+  isPopoverOpen,
+  onUsersChange,
+  togglePopover,
+  onClosePopover,
+}: SuggestUsersPopoverProps) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();

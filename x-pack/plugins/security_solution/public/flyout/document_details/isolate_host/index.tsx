@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { PanelContent } from './content';

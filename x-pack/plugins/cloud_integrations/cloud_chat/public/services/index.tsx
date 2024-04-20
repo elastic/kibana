@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import type { ChatVariant } from '../../common/types';
 
 export interface ChatConfig {
@@ -27,12 +27,9 @@ export interface CloudChatServices {
 
 const ServicesContext = createContext<CloudChatServices>({});
 
-export const ServicesProvider = (
-  {
-    children,
-    ...services
-  }: CloudChatServices
-) => (<ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>);
+export const ServicesProvider = ({ children, ...services }: CloudChatServices) => (
+  <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
+);
 
 /**
  * React hook for accessing the pre-wired `CloudChatServices`.

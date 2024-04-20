@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -145,11 +144,7 @@ interface Props {
 const isBarBetween = (start: number, end: number, min: number, max: number) => {
   return start >= min && end <= max;
 };
-export const DataDriftPage = (
-  {
-    initialSettings
-  }: Props
-) => {
+export const DataDriftPage = ({ initialSettings }: Props) => {
   const {
     services: { data: dataService },
   } = useDataVisualizerKibana();

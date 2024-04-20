@@ -19,11 +19,7 @@ import { PipelinesLogic } from '../pipelines_logic';
 export interface AddMLInferencePipelineButtonProps {
   onClick: () => void;
 }
-export const AddMLInferencePipelineButton = (
-  {
-    onClick
-  }: AddMLInferencePipelineButtonProps
-) => {
+export const AddMLInferencePipelineButton = ({ onClick }: AddMLInferencePipelineButtonProps) => {
   const { capabilities } = useValues(KibanaLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { canUseMlInferencePipeline, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
@@ -73,25 +69,25 @@ export const AddMLInferencePipelineButton = (
   return <AddButton ingestionMethod={ingestionMethod} onClick={onClick} />;
 };
 
-const AddButton = (
-  {
-    disabled,
-    ingestionMethod,
-    onClick
-  }: {
-    disabled?: boolean;
-    ingestionMethod: string;
-    onClick?: () => void;
-  }
-) => (<EuiButton
-  fullWidth
-  data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
-  color={disabled ? undefined : 'success'}
-  disabled={disabled}
-  iconType={disabled ? 'lock' : 'plusInCircle'}
-  onClick={onClick}
->
-  {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {
-    defaultMessage: 'Add Inference Pipeline',
-  })}
-</EuiButton>);
+const AddButton = ({
+  disabled,
+  ingestionMethod,
+  onClick,
+}: {
+  disabled?: boolean;
+  ingestionMethod: string;
+  onClick?: () => void;
+}) => (
+  <EuiButton
+    fullWidth
+    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
+    color={disabled ? undefined : 'success'}
+    disabled={disabled}
+    iconType={disabled ? 'lock' : 'plusInCircle'}
+    onClick={onClick}
+  >
+    {i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.mlInference.addButtonLabel', {
+      defaultMessage: 'Add Inference Pipeline',
+    })}
+  </EuiButton>
+);

@@ -10,7 +10,7 @@ import {
   FieldInputKibanaProvider,
   FieldInputProvider,
 } from '@kbn/management-settings-components-field-input/services';
-import React, { FC, useContext } from 'react';
+import React, { useContext } from 'react';
 
 import type { FieldRowServices, FieldRowKibanaDependencies, Services } from './types';
 
@@ -41,14 +41,12 @@ export const FieldRowProvider = ({ children, ...services }: FieldRowProviderProp
 /**
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}.
  */
-export const FieldRowKibanaProvider = (
-  {
-    children,
-    docLinks,
-    notifications,
-    settings
-  }: FieldRowKibanaDependencies
-) => {
+export const FieldRowKibanaProvider = ({
+  children,
+  docLinks,
+  notifications,
+  settings,
+}: FieldRowKibanaDependencies) => {
   return (
     <FieldRowContext.Provider
       value={{

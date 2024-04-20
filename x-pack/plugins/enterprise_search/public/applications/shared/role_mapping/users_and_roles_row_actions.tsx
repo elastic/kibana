@@ -26,13 +26,7 @@ interface Props {
   onDeleteClick(): void;
 }
 
-export const UsersAndRolesRowActions = (
-  {
-    onManageClick,
-    onDeleteClick,
-    username
-  }: Props
-) => {
+export const UsersAndRolesRowActions = ({ onManageClick, onDeleteClick, username }: Props) => {
   const [deleteModalVisible, setVisible] = useState(false);
   const showDeleteModal = () => setVisible(true);
   const closeDeleteModal = () => setVisible(false);

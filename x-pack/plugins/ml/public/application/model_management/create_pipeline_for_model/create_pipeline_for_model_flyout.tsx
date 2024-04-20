@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 
 import {
@@ -43,12 +42,10 @@ export interface CreatePipelineForModelFlyoutProps {
   model: ModelItem;
 }
 
-export const CreatePipelineForModelFlyout = (
-  {
-    onClose,
-    model
-  }: CreatePipelineForModelFlyoutProps
-) => {
+export const CreatePipelineForModelFlyout = ({
+  onClose,
+  model,
+}: CreatePipelineForModelFlyoutProps) => {
   const {
     currentContext: { pipelineConfig },
   } = useTestTrainedModelsContext();

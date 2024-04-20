@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useState } from 'react';
 
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
@@ -25,11 +24,7 @@ interface Props {
   jobRunner: JobRunner | null;
 }
 
-export const PostSaveOptions = (
-  {
-    jobRunner
-  }: Props
-) => {
+export const PostSaveOptions = ({ jobRunner }: Props) => {
   const {
     services: { notifications },
   } = useMlKibana();

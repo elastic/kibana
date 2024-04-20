@@ -29,18 +29,16 @@ interface ResultTabsProps {
   error?: string;
 }
 
-const ResultTabsComponent = (
-  {
-    actionId,
-    agentIds,
-    ecsMapping,
-    endDate,
-    failedAgentsCount,
-    startDate,
-    liveQueryActionId,
-    error
-  }: ResultTabsProps
-) => {
+const ResultTabsComponent = ({
+  actionId,
+  agentIds,
+  ecsMapping,
+  endDate,
+  failedAgentsCount,
+  startDate,
+  liveQueryActionId,
+  error,
+}: ResultTabsProps) => {
   const tabs = useMemo(
     () => [
       {

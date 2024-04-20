@@ -11,17 +11,15 @@ import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const LoadingOverlayWrapper = (
-  {
-    children,
-    isLoading,
-    loadingChildren,
-    ...rest
-  }: React.HTMLAttributes<HTMLDivElement> & {
-    isLoading: boolean;
-    loadingChildren?: React.ReactNode;
-  }
-) => {
+export const LoadingOverlayWrapper = ({
+  children,
+  isLoading,
+  loadingChildren,
+  ...rest
+}: React.HTMLAttributes<HTMLDivElement> & {
+  isLoading: boolean;
+  loadingChildren?: React.ReactNode;
+}) => {
   return (
     <RelativeDiv {...rest}>
       {children}

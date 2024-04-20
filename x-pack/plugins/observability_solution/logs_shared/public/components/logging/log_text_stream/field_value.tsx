@@ -11,54 +11,54 @@ import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 
-export const FieldValue = React.memo((
-  {
+export const FieldValue = React.memo(
+  ({
     highlightTerms,
     isActiveHighlight,
     value,
-    render
+    render,
   }: {
     highlightTerms: string[];
     isActiveHighlight: boolean;
     value: JsonArray;
     render?: (value: JsonValue) => React.ReactNode;
-  }
-) => {
-  if (render) {
-    return <>{render(value.length === 1 ? value[0] : value)}</>;
-  }
+  }) => {
+    if (render) {
+      return <>{render(value.length === 1 ? value[0] : value)}</>;
+    }
 
-  if (value.length === 1) {
-    return (
-      <>
-        {highlightFieldValue(
-          formatValue(value[0]),
-          highlightTerms,
-          isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
-        )}
-      </>
-    );
-  } else if (value.length > 1) {
-    return (
-      <ul data-test-subj="LogEntryFieldValues">
-        {value.map((entry, i) => (
-          <CommaSeparatedLi
-            key={`LogEntryFieldValue-${i}`}
-            data-test-subj={`LogEntryFieldValue-${i}`}
-          >
-            {highlightFieldValue(
-              formatValue(entry),
-              highlightTerms,
-              isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
-            )}
-          </CommaSeparatedLi>
-        ))}
-      </ul>
-    );
-  }
+    if (value.length === 1) {
+      return (
+        <>
+          {highlightFieldValue(
+            formatValue(value[0]),
+            highlightTerms,
+            isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
+          )}
+        </>
+      );
+    } else if (value.length > 1) {
+      return (
+        <ul data-test-subj="LogEntryFieldValues">
+          {value.map((entry, i) => (
+            <CommaSeparatedLi
+              key={`LogEntryFieldValue-${i}`}
+              data-test-subj={`LogEntryFieldValue-${i}`}
+            >
+              {highlightFieldValue(
+                formatValue(entry),
+                highlightTerms,
+                isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
+              )}
+            </CommaSeparatedLi>
+          ))}
+        </ul>
+      );
+    }
 
-  return null;
-});
+    return null;
+  }
+);
 
 const formatValue = (value: JsonValue): string => {
   if (typeof value === 'string') {

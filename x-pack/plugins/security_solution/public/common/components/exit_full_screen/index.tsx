@@ -17,12 +17,7 @@ interface Props {
   setFullScreen: (fullScreen: boolean) => void;
 }
 
-const ExitFullScreenComponent = (
-  {
-    fullScreen,
-    setFullScreen
-  }: Props
-) => {
+const ExitFullScreenComponent = ({ fullScreen, setFullScreen }: Props) => {
   const exitFullScreen = useCallback(() => {
     setFullScreen(false);
   }, [setFullScreen]);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -23,15 +22,13 @@ interface Props {
   jobType: JOB_TYPE;
 }
 
-export const WizardHorizontalSteps = (
-  {
-    currentStep,
-    highestStep,
-    setCurrentStep,
-    disableSteps,
-    jobType
-  }: Props
-) => {
+export const WizardHorizontalSteps = ({
+  currentStep,
+  highestStep,
+  setCurrentStep,
+  disableSteps,
+  jobType,
+}: Props) => {
   function jumpToStep(step: WIZARD_STEPS) {
     if (step <= highestStep) {
       setCurrentStep(step);

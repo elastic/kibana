@@ -20,29 +20,29 @@ export interface WithHeaderLayoutProps extends HeaderProps {
   children?: React.ReactNode;
 }
 
-export const WithHeaderLayout = (
-  {
-    restrictWidth,
-    restrictHeaderWidth,
-    children,
-    'data-test-subj': dataTestSubj,
-    ...rest
-  }: WithHeaderLayoutProps
-) => (<Wrapper>
-  <Header
-    maxWidth={restrictHeaderWidth}
-    data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
-    {...rest}
-  />
-  <Page
-    restrictWidth={restrictWidth || 1200}
-    data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
-  >
-    <EuiPageBody>
-      <ContentWrapper>
-        <EuiSpacer size="m" />
-        {children}
-      </ContentWrapper>
-    </EuiPageBody>
-  </Page>
-</Wrapper>);
+export const WithHeaderLayout = ({
+  restrictWidth,
+  restrictHeaderWidth,
+  children,
+  'data-test-subj': dataTestSubj,
+  ...rest
+}: WithHeaderLayoutProps) => (
+  <Wrapper>
+    <Header
+      maxWidth={restrictHeaderWidth}
+      data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
+      {...rest}
+    />
+    <Page
+      restrictWidth={restrictWidth || 1200}
+      data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
+    >
+      <EuiPageBody>
+        <ContentWrapper>
+          <EuiSpacer size="m" />
+          {children}
+        </ContentWrapper>
+      </EuiPageBody>
+    </Page>
+  </Wrapper>
+);

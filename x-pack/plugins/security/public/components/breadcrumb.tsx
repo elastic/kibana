@@ -6,7 +6,6 @@
  */
 
 import type { EuiBreadcrumb } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 
 import type { ChromeStart } from '@kbn/core/public';

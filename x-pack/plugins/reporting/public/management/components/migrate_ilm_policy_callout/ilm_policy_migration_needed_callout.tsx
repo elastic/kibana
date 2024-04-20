@@ -10,7 +10,6 @@ import type { NotificationsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ILM_POLICY_NAME } from '@kbn/reporting-common';
-import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
@@ -57,12 +56,7 @@ interface Props {
   onMigrationDone: () => void;
 }
 
-export const IlmPolicyMigrationNeededCallOut = (
-  {
-    toasts,
-    onMigrationDone
-  }: Props
-) => {
+export const IlmPolicyMigrationNeededCallOut = ({ toasts, onMigrationDone }: Props) => {
   const [isMigratingIndices, setIsMigratingIndices] = useState(false);
   const isMounted = useMountedState();
 

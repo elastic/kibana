@@ -23,11 +23,7 @@ interface Props {
   text: string;
 }
 
-const TruncatedTextComponent = (
-  {
-    text
-  }: Props
-) => {
+const TruncatedTextComponent = ({ text }: Props) => {
   return (
     <span css={getTextCss} title={text}>
       {text}

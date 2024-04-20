@@ -21,17 +21,17 @@ interface SourceIconProps {
   iconAsBase64?: string;
 }
 
-export const SourceIcon = (
-  {
-    name,
-    serviceType,
-    className,
-    size,
-    iconAsBase64
-  }: SourceIconProps
-) => (<EuiIcon
-  type={iconAsBase64 ? `data:image/png;base64,${iconAsBase64}` : images[camelCase(serviceType)]}
-  title={`${name} logo`}
-  className={className}
-  size={size}
-/>);
+export const SourceIcon = ({
+  name,
+  serviceType,
+  className,
+  size,
+  iconAsBase64,
+}: SourceIconProps) => (
+  <EuiIcon
+    type={iconAsBase64 ? `data:image/png;base64,${iconAsBase64}` : images[camelCase(serviceType)]}
+    title={`${name} logo`}
+    className={className}
+    size={size}
+  />
+);

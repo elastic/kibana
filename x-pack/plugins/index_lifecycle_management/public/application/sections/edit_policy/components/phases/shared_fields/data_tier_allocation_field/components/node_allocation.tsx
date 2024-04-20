@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -28,15 +28,13 @@ const i18nTexts = {
   ),
 };
 
-export const NodeAllocation = (
-  {
-    phase,
-    nodes,
-    isLoading,
-    isCloudEnabled,
-    isUsingDeprecatedDataRoleConfig
-  }: SharedProps
-) => {
+export const NodeAllocation = ({
+  phase,
+  nodes,
+  isLoading,
+  isCloudEnabled,
+  isUsingDeprecatedDataRoleConfig,
+}: SharedProps) => {
   const allocationNodeAttributePath = `_meta.${phase}.allocationNodeAttribute`;
 
   const [formData] = useFormData({

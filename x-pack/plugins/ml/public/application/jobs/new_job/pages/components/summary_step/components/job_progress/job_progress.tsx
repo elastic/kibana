@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiProgress } from '@elastic/eui';
 
@@ -13,11 +12,7 @@ interface Props {
   progress: number;
 }
 
-export const JobProgress = (
-  {
-    progress
-  }: Props
-) => {
+export const JobProgress = ({ progress }: Props) => {
   if (progress > 0 && progress < 100) {
     return <EuiProgress value={progress} color="primary" size="xs" max={100} />;
   } else {

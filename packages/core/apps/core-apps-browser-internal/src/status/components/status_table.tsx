@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, ReactElement, useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiIcon,
@@ -32,11 +32,7 @@ const collapseLabel = i18n.translate(
   { defaultMessage: 'Collapse' }
 );
 
-export const StatusTable = (
-  {
-    statuses
-  }: StatusTableProps
-) => {
+export const StatusTable = ({ statuses }: StatusTableProps) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactElement>
   >({});

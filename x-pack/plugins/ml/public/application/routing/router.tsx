@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
@@ -60,14 +59,7 @@ export interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
-export const PageLoader = (
-  {
-    context,
-    children
-  }: {
-    context: RouteResolverContext;
-  }
-) => {
+export const PageLoader = ({ context, children }: { context: RouteResolverContext }) => {
   const isLoading = !context.initialized;
 
   if (context?.resolvedComponent) {
@@ -87,19 +79,15 @@ export const PageLoader = (
  * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
  * use in components further down via `useUrlState()`.
  */
-export const MlRouter = (
-  {
-    pageDeps
-  }: {
-    pageDeps: PageDependencies;
-  }
-) => (<Router history={pageDeps.history}>
-  <UrlStateProvider>
-    <MlNotificationsContextProvider>
-      <MlPage pageDeps={pageDeps} />
-    </MlNotificationsContextProvider>
-  </UrlStateProvider>
-</Router>);
+export const MlRouter = ({ pageDeps }: { pageDeps: PageDependencies }) => (
+  <Router history={pageDeps.history}>
+    <UrlStateProvider>
+      <MlNotificationsContextProvider>
+        <MlPage pageDeps={pageDeps} />
+      </MlNotificationsContextProvider>
+    </UrlStateProvider>
+  </Router>
+);
 
 export function createPath(page: MlPages, additionalPrefix?: string) {
   return `/${page}${additionalPrefix ? `${additionalPrefix}` : ''}`;

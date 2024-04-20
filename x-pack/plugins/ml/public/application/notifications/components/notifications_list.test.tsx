@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor } from '@testing-library/react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';

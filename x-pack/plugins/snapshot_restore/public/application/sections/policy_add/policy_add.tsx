@@ -20,12 +20,7 @@ import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy, useLoadIndices } from '../../services/http';
 
-export const PolicyAdd = (
-  {
-    history,
-    location: { pathname }
-  }: RouteComponentProps
-) => {
+export const PolicyAdd = ({ history, location: { pathname } }: RouteComponentProps) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 

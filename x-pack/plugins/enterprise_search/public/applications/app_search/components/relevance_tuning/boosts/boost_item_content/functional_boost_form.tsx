@@ -42,13 +42,7 @@ const operationOptions = Object.values(BoostOperation).map((boostOperation) => (
   text: BOOST_OPERATION_DISPLAY_MAP[boostOperation],
 }));
 
-export const FunctionalBoostForm = (
-  {
-    boost,
-    index,
-    name
-  }: Props
-) => {
+export const FunctionalBoostForm = ({ boost, index, name }: Props) => {
   const { updateBoostSelectOption } = useActions(RelevanceTuningLogic);
   return (
     <>

@@ -18,13 +18,7 @@ export interface Props {
   isMetaEngine: boolean;
 }
 
-export const ResultView = (
-  {
-    result,
-    schemaForTypeHighlights,
-    isMetaEngine
-  }: Props
-) => {
+export const ResultView = ({ result, schemaForTypeHighlights, isMetaEngine }: Props) => {
   return (
     <li>
       <Result

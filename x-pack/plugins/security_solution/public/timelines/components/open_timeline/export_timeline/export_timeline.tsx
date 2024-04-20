@@ -14,17 +14,15 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { exportSelectedTimeline } from '../../../containers/api';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 
-const ExportTimeline = (
-  {
-    onComplete,
-    isEnableDownloader,
-    exportedIds
-  }: {
-    exportedIds: string[] | undefined;
-    isEnableDownloader: boolean;
-    onComplete?: () => void;
-  }
-) => {
+const ExportTimeline = ({
+  onComplete,
+  isEnableDownloader,
+  exportedIds,
+}: {
+  exportedIds: string[] | undefined;
+  isEnableDownloader: boolean;
+  onComplete?: () => void;
+}) => {
   const { tabName: timelineType } = useParams<{ tabName: TimelineType }>();
   const { addSuccess } = useAppToasts();
 

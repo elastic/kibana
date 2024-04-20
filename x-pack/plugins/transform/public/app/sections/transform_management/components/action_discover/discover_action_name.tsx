@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -47,12 +47,7 @@ export interface DiscoverActionNameProps {
   dataViewExists: boolean;
   items: TransformListRow[];
 }
-export const DiscoverActionName = (
-  {
-    dataViewExists,
-    items
-  }: DiscoverActionNameProps
-) => {
+export const DiscoverActionName = ({ dataViewExists, items }: DiscoverActionNameProps) => {
   const isBulkAction = items.length > 1;
 
   const item = items[0];

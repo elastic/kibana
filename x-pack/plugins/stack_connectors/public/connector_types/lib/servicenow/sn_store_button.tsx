@@ -18,12 +18,7 @@ interface Props {
   color: EuiButtonProps['color'];
 }
 
-const SNStoreButtonComponent = (
-  {
-    color,
-    appId = ''
-  }: Props
-) => {
+const SNStoreButtonComponent = ({ color, appId = '' }: Props) => {
   return (
     <EuiButton
       href={getStoreURL(appId)}
@@ -39,12 +34,10 @@ const SNStoreButtonComponent = (
 
 export const SNStoreButton = memo(SNStoreButtonComponent);
 
-const SNStoreLinkComponent = (
-  {
-    appId = ''
-  }: Pick<Props, 'appId'>
-) => (<EuiLink href={getStoreURL(appId)} target="_blank">
-  {i18n.VISIT_SN_STORE}
-</EuiLink>);
+const SNStoreLinkComponent = ({ appId = '' }: Pick<Props, 'appId'>) => (
+  <EuiLink href={getStoreURL(appId)} target="_blank">
+    {i18n.VISIT_SN_STORE}
+  </EuiLink>
+);
 
 export const SNStoreLink = memo(SNStoreLinkComponent);

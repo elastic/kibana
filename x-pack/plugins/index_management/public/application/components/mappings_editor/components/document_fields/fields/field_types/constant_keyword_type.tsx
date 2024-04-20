@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { UseField, Field } from '../../../../shared_imports';
@@ -22,11 +22,7 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
-export const ConstantKeywordType = (
-  {
-    field
-  }: Props
-) => {
+export const ConstantKeywordType = ({ field }: Props) => {
   return (
     <>
       <BasicParametersSection>

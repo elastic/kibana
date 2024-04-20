@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, FC, useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import {
   EuiText,
   EuiFlexGroup,
@@ -81,13 +81,7 @@ const mapImportSuccess = (obj: SavedObjectsImportSuccess): ImportItem => {
   return { type, id, title, icon, outcome };
 };
 
-const CountIndicators = (
-  {
-    importItems
-  }: {
-    importItems: ImportItem[];
-  }
-) => {
+const CountIndicators = ({ importItems }: { importItems: ImportItem[] }) => {
   if (!importItems.length) {
     return null;
   }
@@ -148,13 +142,7 @@ const CountIndicators = (
   );
 };
 
-const StatusIndicator = (
-  {
-    item
-  }: {
-    item: ImportItem;
-  }
-) => {
+const StatusIndicator = ({ item }: { item: ImportItem }) => {
   const { outcome, errorMessage = 'Error' } = item;
   switch (outcome) {
     case 'created':
@@ -190,15 +178,13 @@ const StatusIndicator = (
   }
 };
 
-const ImportWarnings = (
-  {
-    warnings,
-    basePath
-  }: {
-    warnings: SavedObjectsImportWarning[];
-    basePath: IBasePath;
-  }
-) => {
+const ImportWarnings = ({
+  warnings,
+  basePath,
+}: {
+  warnings: SavedObjectsImportWarning[];
+  basePath: IBasePath;
+}) => {
   if (!warnings.length) {
     return null;
   }
@@ -216,15 +202,13 @@ const ImportWarnings = (
   );
 };
 
-const ImportWarning = (
-  {
-    warning,
-    basePath
-  }: {
-    warning: SavedObjectsImportWarning;
-    basePath: IBasePath;
-  }
-) => {
+const ImportWarning = ({
+  warning,
+  basePath,
+}: {
+  warning: SavedObjectsImportWarning;
+  basePath: IBasePath;
+}) => {
   const warningContent = useMemo(() => {
     if (warning.type === 'action_required') {
       return (
@@ -263,15 +247,13 @@ const ImportWarning = (
   );
 };
 
-export const ImportSummary = (
-  {
-    failedImports,
-    successfulImports,
-    importWarnings,
-    basePath,
-    allowedTypes
-  }: ImportSummaryProps
-) => {
+export const ImportSummary = ({
+  failedImports,
+  successfulImports,
+  importWarnings,
+  basePath,
+  allowedTypes,
+}: ImportSummaryProps) => {
   const importItems: ImportItem[] = useMemo(
     () =>
       _.sortBy(

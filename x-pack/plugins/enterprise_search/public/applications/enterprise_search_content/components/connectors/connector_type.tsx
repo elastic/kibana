@@ -21,11 +21,7 @@ export interface ConnectorTypeProps {
   serviceType: string;
 }
 
-export const ConnectorType = (
-  {
-    serviceType
-  }: ConnectorTypeProps
-) => {
+export const ConnectorType = ({ serviceType }: ConnectorTypeProps) => {
   const { connectorTypes } = useValues(KibanaLogic);
   const connector = connectorTypes.find((c) => c.serviceType === serviceType);
   return (

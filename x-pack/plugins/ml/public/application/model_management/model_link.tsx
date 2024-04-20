@@ -6,7 +6,6 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 import { useMlLink } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
@@ -15,11 +14,7 @@ export interface TrainedModelLinkProps {
   id: string;
 }
 
-export const TrainedModelLink = (
-  {
-    id
-  }: TrainedModelLinkProps
-) => {
+export const TrainedModelLink = ({ id }: TrainedModelLinkProps) => {
   const href = useMlLink({
     page: ML_PAGES.TRAINED_MODELS_MANAGE,
     pageState: { modelId: id },

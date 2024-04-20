@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import {
@@ -30,11 +29,7 @@ interface Props {
   setIsValid: (na: boolean) => void;
 }
 
-export const CategorizationDetectors = (
-  {
-    setIsValid
-  }: Props
-) => {
+export const CategorizationDetectors = ({ setIsValid }: Props) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
 

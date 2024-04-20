@@ -28,13 +28,7 @@ const TruncatedEuiText = styled(EuiText)`
   text-overflow: ellipsis;
 `;
 
-export const ViewErrors = (
-  {
-    action
-  }: {
-    action: ActionStatus;
-  }
-) => {
+export const ViewErrors = ({ action }: { action: ActionStatus }) => {
   const coreStart = useStartServices();
   const isLogsUIAvailable = !coreStart.cloud?.isServerlessEnabled;
 

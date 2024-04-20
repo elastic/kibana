@@ -71,19 +71,17 @@ export const reasonColumnRenderer: ColumnRenderer = {
   },
 };
 
-const ReasonCell = (
-  {
-    ecsData,
-    rowRenderers,
-    scopeId,
-    value
-  }: {
-    value: string | number | undefined | null;
-    scopeId: string;
-    ecsData: Ecs;
-    rowRenderers: RowRenderer[];
-  }
-) => {
+const ReasonCell = ({
+  ecsData,
+  rowRenderers,
+  scopeId,
+  value,
+}: {
+  value: string | number | undefined | null;
+  scopeId: string;
+  ecsData: Ecs;
+  rowRenderers: RowRenderer[];
+}) => {
   const rowRenderer = useMemo(
     () => getRowRenderer({ data: ecsData, rowRenderers }),
     [ecsData, rowRenderers]

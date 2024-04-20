@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MultiSelectPicker } from '../multi_select_picker';
@@ -20,13 +19,11 @@ interface Props {
   visibleFieldNames: string[];
 }
 
-export const DataVisualizerFieldNamesFilter = (
-  {
-    fields,
-    setVisibleFieldNames,
-    visibleFieldNames
-  }: Props
-) => {
+export const DataVisualizerFieldNamesFilter = ({
+  fields,
+  setVisibleFieldNames,
+  visibleFieldNames,
+}: Props) => {
   const fieldNameTitle = useMemo(
     () =>
       i18n.translate('xpack.dataVisualizer.fieldNameSelect', {

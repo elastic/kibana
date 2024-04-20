@@ -15,12 +15,7 @@ export interface UsernameProps {
   boldName?: boolean;
 }
 
-const UsernameComponent = (
-  {
-    userInfo,
-    boldName = false
-  }: UsernameProps
-) => {
+const UsernameComponent = ({ userInfo, boldName = false }: UsernameProps) => {
   const name = getName(userInfo?.user);
 
   return (

@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
-import React, { FC, memo } from 'react';
+import React, { memo } from 'react';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
 import { useIntegrations } from '../hooks/use_integrations';
 import { EmptyPage } from '../modules/empty_page/empty_page';

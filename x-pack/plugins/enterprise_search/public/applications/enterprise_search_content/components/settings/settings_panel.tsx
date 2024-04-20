@@ -26,38 +26,38 @@ interface SettingsPanelProps {
   value: boolean;
 }
 
-export const SettingsPanel = (
-  {
-    description,
-    label,
-    link,
-    onChange,
-    title,
-    value
-  }: SettingsPanelProps
-) => (<EuiSplitPanel.Outer hasBorder grow>
-  <EuiSplitPanel.Inner>
-    <EuiText size="m">
-      <h4>
-        <strong>{title}</strong>
-      </h4>
-    </EuiText>
-    <EuiSpacer />
-    <EuiText size="s">
-      <p>{description}</p>
-    </EuiText>
-    {link && (
-      <>
-        <EuiSpacer />
-        <EuiFlexItem grow={false}>{link}</EuiFlexItem>
-      </>
-    )}
-  </EuiSplitPanel.Inner>
-  <EuiSplitPanel.Inner grow={false} color="subdued">
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem>
-        <EuiSwitch checked={value} label={label} onChange={onChange} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiSplitPanel.Inner>
-</EuiSplitPanel.Outer>);
+export const SettingsPanel = ({
+  description,
+  label,
+  link,
+  onChange,
+  title,
+  value,
+}: SettingsPanelProps) => (
+  <EuiSplitPanel.Outer hasBorder grow>
+    <EuiSplitPanel.Inner>
+      <EuiText size="m">
+        <h4>
+          <strong>{title}</strong>
+        </h4>
+      </EuiText>
+      <EuiSpacer />
+      <EuiText size="s">
+        <p>{description}</p>
+      </EuiText>
+      {link && (
+        <>
+          <EuiSpacer />
+          <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+        </>
+      )}
+    </EuiSplitPanel.Inner>
+    <EuiSplitPanel.Inner grow={false} color="subdued">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiSwitch checked={value} label={label} onChange={onChange} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiSplitPanel.Inner>
+  </EuiSplitPanel.Outer>
+);

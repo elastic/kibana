@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
@@ -90,14 +89,12 @@ interface Props {
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
-export const DataFrameAnalyticsList = (
-  {
-    isMlEnabledInSpace = true,
-    blockRefresh = false,
-    pageState,
-    updatePageState
-  }: Props
-) => {
+export const DataFrameAnalyticsList = ({
+  isMlEnabledInSpace = true,
+  blockRefresh = false,
+  pageState,
+  updatePageState,
+}: Props) => {
   const navigateToPath = useNavigateToPath();
 
   const searchQueryText = pageState.queryText ?? '';

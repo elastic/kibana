@@ -36,15 +36,13 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesHostTableComponent = (
-  {
-    startDate,
-    endDate,
-    hostName,
-    skip,
-    type
-  }: AnomaliesHostTableProps
-) => {
+const AnomaliesHostTableComponent = ({
+  startDate,
+  endDate,
+  hostName,
+  skip,
+  type,
+}: AnomaliesHostTableProps) => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
   const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesHostTable`);

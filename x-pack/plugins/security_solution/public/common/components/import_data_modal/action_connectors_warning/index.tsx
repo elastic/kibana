@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { FC } from 'react';
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { WarningSchema } from '../../../../../common/api/detection_engine';
@@ -16,12 +15,10 @@ interface ActionConnectorWarningsComponentProps {
   actionConnectorsWarnings: WarningSchema[];
   importedActionConnectorsCount?: number;
 }
-const ActionConnectorWarningsComponent = (
-  {
-    actionConnectorsWarnings,
-    importedActionConnectorsCount
-  }: ActionConnectorWarningsComponentProps
-) => {
+const ActionConnectorWarningsComponent = ({
+  actionConnectorsWarnings,
+  importedActionConnectorsCount,
+}: ActionConnectorWarningsComponentProps) => {
   const { http } = useKibana().services;
 
   if (!importedActionConnectorsCount || !actionConnectorsWarnings.length) return null;

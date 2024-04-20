@@ -18,69 +18,69 @@ import {
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { SettingsFormProps } from '../../pages/settings';
 
-export const IndicesForm = (
-  {
-    onChange,
-    loading,
-    formFields,
-    fieldErrors,
-    isDisabled
-  }: SettingsFormProps
-) => (<>
-  <EuiTitle size="s">
-    <h3>
-      <FormattedMessage
-        id="xpack.uptime.sourceConfiguration.indicesSectionTitle"
-        defaultMessage="Indices"
-      />
-    </h3>
-  </EuiTitle>
-  <EuiSpacer size="m" />
-  <EuiDescribedFormGroup
-    title={
-      <h4>
+export const IndicesForm = ({
+  onChange,
+  loading,
+  formFields,
+  fieldErrors,
+  isDisabled,
+}: SettingsFormProps) => (
+  <>
+    <EuiTitle size="s">
+      <h3>
         <FormattedMessage
-          id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
-          defaultMessage="Uptime indices"
+          id="xpack.uptime.sourceConfiguration.indicesSectionTitle"
+          defaultMessage="Indices"
         />
-      </h4>
-    }
-    description={
-      <FormattedMessage
-        id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
-        defaultMessage="Index pattern for matching indices that contain Heartbeat data"
-      />
-    }
-  >
-    <EuiFormRow
-      describedByIds={['heartbeatIndices']}
-      error={fieldErrors?.heartbeatIndices}
-      fullWidth
-      helpText={
-        <FormattedMessage
-          id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
-          defaultMessage="The default value is {defaultValue}"
-          values={{
-            defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices}</EuiCode>,
-          }}
-        />
+      </h3>
+    </EuiTitle>
+    <EuiSpacer size="m" />
+    <EuiDescribedFormGroup
+      title={
+        <h4>
+          <FormattedMessage
+            id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
+            defaultMessage="Uptime indices"
+          />
+        </h4>
       }
-      isInvalid={!!fieldErrors?.heartbeatIndices}
-      label={
+      description={
         <FormattedMessage
-          id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
-          defaultMessage="Heartbeat indices"
+          id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
+          defaultMessage="Index pattern for matching indices that contain Heartbeat data"
         />
       }
     >
-      <EuiFieldText
-        data-test-subj={`heartbeat-indices-input-${loading ? 'loading' : 'loaded'}`}
+      <EuiFormRow
+        describedByIds={['heartbeatIndices']}
+        error={fieldErrors?.heartbeatIndices}
         fullWidth
-        disabled={isDisabled}
-        isLoading={loading}
-        value={formFields?.heartbeatIndices || ''}
-        onChange={(event: any) => onChange({ heartbeatIndices: event.currentTarget.value })}
-      />
-    </EuiFormRow>
-  </EuiDescribedFormGroup>
-</>);
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
+            defaultMessage="The default value is {defaultValue}"
+            values={{
+              defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices}</EuiCode>,
+            }}
+          />
+        }
+        isInvalid={!!fieldErrors?.heartbeatIndices}
+        label={
+          <FormattedMessage
+            id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
+            defaultMessage="Heartbeat indices"
+          />
+        }
+      >
+        <EuiFieldText
+          data-test-subj={`heartbeat-indices-input-${loading ? 'loading' : 'loaded'}`}
+          fullWidth
+          disabled={isDisabled}
+          isLoading={loading}
+          value={formFields?.heartbeatIndices || ''}
+          onChange={(event: any) => onChange({ heartbeatIndices: event.currentTarget.value })}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  </>
+);

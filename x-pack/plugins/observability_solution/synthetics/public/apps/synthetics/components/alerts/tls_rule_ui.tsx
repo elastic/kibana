@@ -14,15 +14,13 @@ import { selectDynamicSettings } from '../../state/settings';
 import { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 
-export const TLSRuleComponent = (
-  {
-    ruleParams,
-    setRuleParams
-  }: {
-    ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
-    setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
-  }
-) => {
+export const TLSRuleComponent = ({
+  ruleParams,
+  setRuleParams,
+}: {
+  ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
+  setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
+}) => {
   const dispatch = useDispatch();
 
   const { settings } = useSelector(selectDynamicSettings);

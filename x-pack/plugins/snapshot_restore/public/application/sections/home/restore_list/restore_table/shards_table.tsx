@@ -26,11 +26,7 @@ interface Props {
   shards: SnapshotRestore['shards'];
 }
 
-export const ShardsTable = (
-  {
-    shards
-  }: Props
-) => {
+export const ShardsTable = ({ shards }: Props) => {
   const { i18n } = useServices();
 
   const Progress = ({

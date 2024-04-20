@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,12 +30,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const GeoJobFlyout = (
-  {
-    onClose,
-    embeddable
-  }: Props
-) => {
+export const GeoJobFlyout = ({ onClose, embeddable }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
 

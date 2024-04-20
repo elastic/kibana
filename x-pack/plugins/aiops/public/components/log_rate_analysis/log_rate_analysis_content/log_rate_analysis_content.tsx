@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
@@ -82,19 +82,17 @@ export interface LogRateAnalysisContentProps {
   embeddingOrigin: string;
 }
 
-export const LogRateAnalysisContent = (
-  {
-    dataView,
-    timeRange,
-    esSearchQuery = DEFAULT_SEARCH_QUERY,
-    stickyHistogram,
-    barColorOverride,
-    barHighlightColorOverride,
-    onAnalysisCompleted,
-    onWindowParametersChange,
-    embeddingOrigin
-  }: LogRateAnalysisContentProps
-) => {
+export const LogRateAnalysisContent = ({
+  dataView,
+  timeRange,
+  esSearchQuery = DEFAULT_SEARCH_QUERY,
+  stickyHistogram,
+  barColorOverride,
+  barHighlightColorOverride,
+  onAnalysisCompleted,
+  onWindowParametersChange,
+  embeddingOrigin,
+}: LogRateAnalysisContentProps) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(

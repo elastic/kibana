@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface HelpCenterContentProps {
@@ -13,12 +13,7 @@ interface HelpCenterContentProps {
   appName: string;
 }
 
-export const HelpCenterContent = (
-  {
-    feedbackLink,
-    appName
-  }: HelpCenterContentProps
-) => {
+export const HelpCenterContent = ({ feedbackLink, appName }: HelpCenterContentProps) => {
   const chrome = useKibana().services.chrome;
 
   useEffect(() => {

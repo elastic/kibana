@@ -42,20 +42,18 @@ export const createInitialConfigurationStep = (
   children: <InitialConfigurationStep {...props} />,
 });
 
-export const InitialConfigurationStep = (
-  {
-    setStartTime,
-    setEndTime,
-    startTime,
-    endTime,
-    isValidating,
-    validatedIndices,
-    setupStatus,
-    setValidatedIndices,
-    validationErrors = [],
-    previousQualityWarnings = []
-  }: InitialConfigurationStepProps
-) => {
+export const InitialConfigurationStep = ({
+  setStartTime,
+  setEndTime,
+  startTime,
+  endTime,
+  isValidating,
+  validatedIndices,
+  setupStatus,
+  setValidatedIndices,
+  validationErrors = [],
+  previousQualityWarnings = [],
+}: InitialConfigurationStepProps) => {
   const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
   const [indexValidationErrors, timeRangeValidationErrors, globalValidationErrors] = useMemo(
@@ -106,13 +104,7 @@ const initialConfigurationStepTitle = i18n.translate(
   }
 );
 
-const ValidationErrors = (
-  {
-    errors
-  }: {
-    errors: ValidationUIError[];
-  }
-) => {
+const ValidationErrors = ({ errors }: { errors: ValidationUIError[] }) => {
   if (errors.length === 0) {
     return null;
   }

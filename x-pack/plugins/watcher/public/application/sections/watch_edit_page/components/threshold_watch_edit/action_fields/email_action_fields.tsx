@@ -19,14 +19,7 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const EmailActionFields = (
-  {
-    action,
-    editAction,
-    errors,
-    hasErrors
-  }: Props
-) => {
+export const EmailActionFields = ({ action, editAction, errors, hasErrors }: Props) => {
   const { to, subject, body } = action;
   const toOptions = to ? to.map((label) => ({ label })) : [];
 

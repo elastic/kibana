@@ -27,15 +27,7 @@ const useZonedDate = (timestamp: number) => {
   return new Date(new Date(timestamp).toLocaleString('en-US', options));
 };
 
-export const TimeRuler = (
-  {
-    end,
-    height,
-    start,
-    tickCount,
-    width
-  }: TimeRulerProps
-) => {
+export const TimeRuler = ({ end, height, start, tickCount, width }: TimeRulerProps) => {
   const startWithOffset = useZonedDate(start);
   const endWithOffset = useZonedDate(end);
 

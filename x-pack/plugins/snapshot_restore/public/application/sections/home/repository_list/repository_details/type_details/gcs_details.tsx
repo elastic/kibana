@@ -15,11 +15,7 @@ interface Props {
   repository: GCSRepository;
 }
 
-export const GCSDetails = (
-  {
-    repository
-  }: Props
-) => {
+export const GCSDetails = ({ repository }: Props) => {
   const {
     settings: {
       bucket,

@@ -30,13 +30,7 @@ interface Props {
   esDocsBase: string;
 }
 
-export const StepAliases = React.memo((
-  {
-    defaultValue = {},
-    onChange,
-    esDocsBase
-  }: Props
-) => {
+export const StepAliases = React.memo(({ defaultValue = {}, onChange, esDocsBase }: Props) => {
   const { jsonContent, setJsonContent, error } = useJsonStep({
     defaultValue,
     onChange,
@@ -122,12 +116,9 @@ export const StepAliases = React.memo((
             tabSize: 2,
             automaticLayout: true,
           }}
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.formWizard.stepAliases.fieldAliasesAriaLabel',
-            {
-              defaultMessage: 'Aliases code editor',
-            }
-          )}
+          aria-label={i18n.translate('xpack.idxMgmt.formWizard.stepAliases.fieldAliasesAriaLabel', {
+            defaultMessage: 'Aliases code editor',
+          })}
           onChange={setJsonContent}
         />
       </EuiFormRow>

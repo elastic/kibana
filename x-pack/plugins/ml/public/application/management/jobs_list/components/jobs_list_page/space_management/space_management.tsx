@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,12 +36,7 @@ interface Props {
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 
-export const SpaceManagement = (
-  {
-    spacesApi,
-    setCurrentTab
-  }: Props
-) => {
+export const SpaceManagement = ({ spacesApi, setCurrentTab }: Props) => {
   const { getList } = useManagementApiService();
 
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType | null>(null);
@@ -245,21 +239,21 @@ export const SpaceManagement = (
   );
 };
 
-export const RefreshButton = (
-  {
-    onRefreshClick,
-    isRefreshing
-  }: {
-    onRefreshClick: () => void;
-    isRefreshing: boolean;
-  }
-) => (<EuiButtonEmpty
-  data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
-  onClick={onRefreshClick}
-  isLoading={isRefreshing}
-  iconType={'refresh'}
-  iconSide={'left'}
-  iconSize={'m'}
->
-  <FormattedMessage id="xpack.ml.management.list.refreshButtonLabel" defaultMessage="Refresh" />
-</EuiButtonEmpty>);
+export const RefreshButton = ({
+  onRefreshClick,
+  isRefreshing,
+}: {
+  onRefreshClick: () => void;
+  isRefreshing: boolean;
+}) => (
+  <EuiButtonEmpty
+    data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
+    onClick={onRefreshClick}
+    isLoading={isRefreshing}
+    iconType={'refresh'}
+    iconSide={'left'}
+    iconSize={'m'}
+  >
+    <FormattedMessage id="xpack.ml.management.list.refreshButtonLabel" defaultMessage="Refresh" />
+  </EuiButtonEmpty>
+);

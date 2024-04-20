@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -14,12 +14,7 @@ interface Props {
   docLink: string;
 }
 
-export const DocumentationButton = (
-  {
-    processorLabel,
-    docLink
-  }: Props
-) => {
+export const DocumentationButton = ({ processorLabel, docLink }: Props) => {
   return (
     <EuiButtonEmpty size="s" flush="right" href={docLink} target="_blank" iconType="help">
       {i18n.translate(

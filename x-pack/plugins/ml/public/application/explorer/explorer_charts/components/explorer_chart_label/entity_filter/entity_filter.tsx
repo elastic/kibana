@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,13 +22,11 @@ interface EntityFilterProps {
   influencerFieldName: string;
   influencerFieldValue: string;
 }
-export const EntityFilter = (
-  {
-    onFilter,
-    influencerFieldName,
-    influencerFieldValue
-  }: EntityFilterProps
-) => {
+export const EntityFilter = ({
+  onFilter,
+  influencerFieldName,
+  influencerFieldValue,
+}: EntityFilterProps) => {
   return (
     <React.Fragment>
       <EuiToolTip

@@ -54,12 +54,7 @@ const getThresholdType = (criteria: PartialCriteria): ThresholdType => {
   return isRatioRule(criteria) ? 'ratio' : 'count';
 };
 
-export const TypeSwitcher = (
-  {
-    criteria,
-    updateType
-  }: Props
-) => {
+export const TypeSwitcher = ({ criteria, updateType }: Props) => {
   const [isThresholdTypePopoverOpen, setThresholdTypePopoverOpenState] = useState(false);
   const thresholdType = getThresholdType(criteria);
 

@@ -6,7 +6,6 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useObservable from 'react-use/lib/useObservable';
@@ -26,12 +25,10 @@ export interface SessionExpirationToastProps {
   onExtend: () => Promise<any>;
 }
 
-export const SessionExpirationToast = (
-  {
-    sessionState$,
-    onExtend
-  }: SessionExpirationToastProps
-) => {
+export const SessionExpirationToast = ({
+  sessionState$,
+  onExtend,
+}: SessionExpirationToastProps) => {
   const state = useObservable(sessionState$);
   const [{ loading }, extend] = useAsyncFn(onExtend);
 

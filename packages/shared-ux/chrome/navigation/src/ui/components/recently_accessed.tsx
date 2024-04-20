@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
@@ -29,12 +29,10 @@ export interface Props {
   defaultIsCollapsed?: boolean;
 }
 
-export const RecentlyAccessed = (
-  {
-    recentlyAccessed$: recentlyAccessedProp$,
-    defaultIsCollapsed = false
-  }: Props
-) => {
+export const RecentlyAccessed = ({
+  recentlyAccessed$: recentlyAccessedProp$,
+  defaultIsCollapsed = false,
+}: Props) => {
   const strings = getI18nStrings();
   const { recentlyAccessed$, basePath, navigateToUrl } = useServices();
   const recentlyAccessed = useObservable(recentlyAccessedProp$ ?? recentlyAccessed$, []);

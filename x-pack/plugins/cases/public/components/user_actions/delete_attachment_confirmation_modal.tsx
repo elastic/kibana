@@ -12,14 +12,12 @@ import { CANCEL_BUTTON } from './property_actions/translations';
 
 type Pros = Pick<EuiConfirmModalProps, 'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel'>;
 
-const DeleteAttachmentConfirmationModalComponent = (
-  {
-    title,
-    confirmButtonText,
-    onConfirm,
-    onCancel
-  }: Pros
-) => {
+const DeleteAttachmentConfirmationModalComponent = ({
+  title,
+  confirmButtonText,
+  onConfirm,
+  onCancel,
+}: Pros) => {
   return (
     <EuiConfirmModal
       title={title}

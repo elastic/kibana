@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -35,12 +34,7 @@ export enum COMBINED_JOB_STATE {
   UNKNOWN,
 }
 
-export const ModelSnapshotTable = (
-  {
-    job,
-    refreshJobList
-  }: Props
-) => {
+export const ModelSnapshotTable = ({ job, refreshJobList }: Props) => {
   const [canCreateJob, canStartStopDatafeed] = usePermissionCheck([
     'canCreateJob',
     'canStartStopDatafeed',

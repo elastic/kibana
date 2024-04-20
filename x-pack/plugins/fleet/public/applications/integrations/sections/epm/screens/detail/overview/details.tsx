@@ -64,12 +64,7 @@ const Replacements = euiStyled(EuiFlexItem)`
   }
 `;
 
-export const Details = memo((
-  {
-    packageInfo,
-    integrationInfo
-  }: Props
-) => {
+export const Details = memo(({ packageInfo, integrationInfo }: Props) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
 
   const mergedCategories: Array<string | undefined> = useMemo(() => {

@@ -25,13 +25,7 @@ const makeDefaultProps = (): DashboardUnsavedListingProps => ({
 
 function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedListingProps> }) {
   const props = { ...makeDefaultProps(), ...incomingProps };
-  const wrappingComponent = (
-    {
-      children
-    }: {
-      children: React.ReactNode;
-    }
-  ) => {
+  const wrappingComponent = ({ children }: { children: React.ReactNode }) => {
     return <I18nProvider>{children}</I18nProvider>;
   };
   const component = mount(<DashboardUnsavedListing {...props} />, { wrappingComponent });

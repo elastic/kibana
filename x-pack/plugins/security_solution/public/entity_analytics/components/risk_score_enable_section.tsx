@@ -139,13 +139,11 @@ const RiskScoreUpdateModal = ({
   );
 };
 
-const RiskEngineHealth = (
-  {
-    currentRiskEngineStatus
-  }: {
-    currentRiskEngineStatus?: RiskEngineStatus | null;
-  }
-) => {
+const RiskEngineHealth = ({
+  currentRiskEngineStatus,
+}: {
+  currentRiskEngineStatus?: RiskEngineStatus | null;
+}) => {
   if (!currentRiskEngineStatus) {
     return <EuiHealth color="subdued">{'-'}</EuiHealth>;
   }
@@ -155,19 +153,17 @@ const RiskEngineHealth = (
   return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
 };
 
-const RiskEngineStatusRow = (
-  {
-    currentRiskEngineStatus,
-    onSwitchClick,
-    isLoading,
-    privileges
-  }: {
-    currentRiskEngineStatus?: RiskEngineStatus | null;
-    onSwitchClick: () => void;
-    isLoading: boolean;
-    privileges: RiskEngineMissingPrivilegesResponse;
-  }
-) => {
+const RiskEngineStatusRow = ({
+  currentRiskEngineStatus,
+  onSwitchClick,
+  isLoading,
+  privileges,
+}: {
+  currentRiskEngineStatus?: RiskEngineStatus | null;
+  onSwitchClick: () => void;
+  isLoading: boolean;
+  privileges: RiskEngineMissingPrivilegesResponse;
+}) => {
   const userHasRequiredPrivileges =
     'hasAllRequiredPrivileges' in privileges && privileges.hasAllRequiredPrivileges;
   const btnIsDisabled = !currentRiskEngineStatus || isLoading || !userHasRequiredPrivileges;
@@ -200,13 +196,11 @@ const RiskEngineStatusRow = (
   );
 };
 
-export const RiskScoreEnableSection = (
-  {
-    privileges
-  }: {
-    privileges: RiskEngineMissingPrivilegesResponse;
-  }
-) => {
+export const RiskScoreEnableSection = ({
+  privileges,
+}: {
+  privileges: RiskEngineMissingPrivilegesResponse;
+}) => {
   const { addSuccess } = useAppToasts();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();

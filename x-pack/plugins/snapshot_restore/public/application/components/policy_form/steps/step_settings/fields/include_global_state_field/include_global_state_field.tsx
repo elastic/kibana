@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -29,12 +29,7 @@ interface Props {
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
-export const IncludeGlobalStateField = (
-  {
-    policy,
-    onUpdate
-  }: Props
-) => {
+export const IncludeGlobalStateField = ({ policy, onUpdate }: Props) => {
   const { config = {} } = policy;
 
   const onIncludeGlobalStateToggle = (event: EuiSwitchEvent) => {

@@ -22,13 +22,7 @@ import { EnrichmentIcon } from './enrichment_icon';
 import { EnrichmentAccordionGroup } from './enrichment_accordion_group';
 import { EnrichmentNoData } from './enrichment_no_data';
 
-const EnrichmentSectionHeader = (
-  {
-    type
-  }: {
-    type?: ENRICHMENT_TYPES;
-  }
-) => {
+const EnrichmentSectionHeader = ({ type }: { type?: ENRICHMENT_TYPES }) => {
   return type ? (
     <>
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="baseline">
@@ -50,21 +44,19 @@ const EnrichmentSectionHeader = (
   ) : null;
 };
 
-const EnrichmentSection = (
-  {
-    enrichments,
-    type,
-    loading,
-    dataTestSubj,
-    children
-  }: {
-    enrichments: CtiEnrichment[];
-    type?: ENRICHMENT_TYPES;
-    loading?: boolean;
-    dataTestSubj: string;
-    children?: React.ReactNode;
-  }
-) => {
+const EnrichmentSection = ({
+  enrichments,
+  type,
+  loading,
+  dataTestSubj,
+  children,
+}: {
+  enrichments: CtiEnrichment[];
+  type?: ENRICHMENT_TYPES;
+  loading?: boolean;
+  dataTestSubj: string;
+  children?: React.ReactNode;
+}) => {
   return (
     <div data-test-subj={dataTestSubj}>
       <EnrichmentSectionHeader type={type} />
@@ -86,26 +78,24 @@ const EnrichmentSection = (
   );
 };
 
-const ThreatDetailsViewComponent = (
-  {
-    enrichments,
-    before = null,
-    showInvestigationTimeEnrichments,
-    loading,
-    children
-  }: {
-    enrichments: CtiEnrichment[];
-    showInvestigationTimeEnrichments: boolean;
-    loading: boolean;
-    /**
-     * Slot to render something before the beforeHeader.
-     * NOTE: this was introduced to avoid alterting existing flyout and will be removed after
-     * new flyout implementation is ready (Expandable Flyout owned by the Investigations Team)
-     */
-    before?: React.ReactNode;
-    children?: React.ReactNode;
-  }
-) => {
+const ThreatDetailsViewComponent = ({
+  enrichments,
+  before = null,
+  showInvestigationTimeEnrichments,
+  loading,
+  children,
+}: {
+  enrichments: CtiEnrichment[];
+  showInvestigationTimeEnrichments: boolean;
+  loading: boolean;
+  /**
+   * Slot to render something before the beforeHeader.
+   * NOTE: this was introduced to avoid alterting existing flyout and will be removed after
+   * new flyout implementation is ready (Expandable Flyout owned by the Investigations Team)
+   */
+  before?: React.ReactNode;
+  children?: React.ReactNode;
+}) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
     [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,

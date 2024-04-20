@@ -12,39 +12,35 @@ import React from 'react';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-const OsqueryResponseActionsUpsellingSection = React.memo((
-  {
-    requiredPLI
-  }: {
-    requiredPLI: ProductFeatureKeyType;
-  }
-) => {
-  const productTypeRequired = getProductTypeByPLI(requiredPLI);
+const OsqueryResponseActionsUpsellingSection = React.memo(
+  ({ requiredPLI }: { requiredPLI: ProductFeatureKeyType }) => {
+    const productTypeRequired = getProductTypeByPLI(requiredPLI);
 
-  return (
-    <EuiEmptyPrompt
-      icon={<EuiIcon type="logoSecurity" size="xl" />}
-      color="subdued"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.securitySolutionServerless.osquery.paywall.title"
-            defaultMessage="Do more with Security!"
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolutionServerless.osquery.paywall.body"
-            defaultMessage="Upgrade your license to {productTypeRequired} to use Osquery Response Actions."
-            values={{ productTypeRequired }}
-          />
-        </p>
-      }
-    />
-  );
-});
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiIcon type="logoSecurity" size="xl" />}
+        color="subdued"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.securitySolutionServerless.osquery.paywall.title"
+              defaultMessage="Do more with Security!"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolutionServerless.osquery.paywall.body"
+              defaultMessage="Upgrade your license to {productTypeRequired} to use Osquery Response Actions."
+              values={{ productTypeRequired }}
+            />
+          </p>
+        }
+      />
+    );
+  }
+);
 
 OsqueryResponseActionsUpsellingSection.displayName = 'OsqueryResponseActionsUpsellingSection';
 

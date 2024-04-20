@@ -16,6 +16,8 @@ interface Props {
   kibanaVersion?: string;
 }
 
-export const VersionMismatchPage = (props: Props) => (<KibanaPageTemplate isEmptyState>
-  <VersionMismatchError {...props} />
-</KibanaPageTemplate>);
+export const VersionMismatchPage = (props: Props) => (
+  <KibanaPageTemplate isEmptyState>
+    <VersionMismatchError {...props} />
+  </KibanaPageTemplate>
+);

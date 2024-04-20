@@ -18,25 +18,25 @@ export interface SearchApplicationProductCardProps {
   hasShadow: boolean;
 }
 
-export const SearchApplicationsProductCard = (
-  {
-    hasBorder = true,
-    hasShadow = true
-  }: SearchApplicationProductCardProps
-) => (<ProductCard
-  hasBorder={hasBorder}
-  hasShadow={hasShadow}
-  cta={i18n.translate('xpack.enterpriseSearch.searchApplications.productCardCTA', {
-    defaultMessage: 'Explore Search Applications',
-  })}
-  description={i18n.translate('xpack.enterpriseSearch.searchApplications.description', {
-    defaultMessage:
-      'Search Applications help make your Elasticsearch data easily searchable for end users',
-  })}
-  emptyCta
-  icon={searchAppLogo}
-  iconSize="l"
-  name={APPLICATIONS_PLUGIN.NAV_TITLE}
-  productId={APPLICATIONS_PLUGIN.ID}
-  url={APPLICATIONS_PLUGIN.URL}
-/>);
+export const SearchApplicationsProductCard = ({
+  hasBorder = true,
+  hasShadow = true,
+}: SearchApplicationProductCardProps) => (
+  <ProductCard
+    hasBorder={hasBorder}
+    hasShadow={hasShadow}
+    cta={i18n.translate('xpack.enterpriseSearch.searchApplications.productCardCTA', {
+      defaultMessage: 'Explore Search Applications',
+    })}
+    description={i18n.translate('xpack.enterpriseSearch.searchApplications.description', {
+      defaultMessage:
+        'Search Applications help make your Elasticsearch data easily searchable for end users',
+    })}
+    emptyCta
+    icon={searchAppLogo}
+    iconSize="l"
+    name={APPLICATIONS_PLUGIN.NAV_TITLE}
+    productId={APPLICATIONS_PLUGIN.ID}
+    url={APPLICATIONS_PLUGIN.URL}
+  />
+);

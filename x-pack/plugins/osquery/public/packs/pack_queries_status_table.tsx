@@ -175,15 +175,13 @@ function getLensAttributes(
   };
 }
 
-const ViewResultsInLensActionComponent = (
-  {
-    actionId,
-    buttonType,
-    endDate,
-    startDate,
-    mode
-  }: ViewResultsInDiscoverActionProps
-) => {
+const ViewResultsInLensActionComponent = ({
+  actionId,
+  buttonType,
+  endDate,
+  startDate,
+  mode,
+}: ViewResultsInDiscoverActionProps) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
@@ -239,14 +237,12 @@ const ViewResultsInLensActionComponent = (
 
 export const ViewResultsInLensAction = React.memo(ViewResultsInLensActionComponent);
 
-const ViewResultsInDiscoverActionComponent = (
-  {
-    actionId,
-    buttonType,
-    endDate,
-    startDate
-  }: ViewResultsInDiscoverActionProps
-) => {
+const ViewResultsInDiscoverActionComponent = ({
+  actionId,
+  buttonType,
+  endDate,
+  startDate,
+}: ViewResultsInDiscoverActionProps) => {
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
@@ -367,12 +363,7 @@ interface ScheduledQueryErrorsProps {
   expanded: boolean;
 }
 
-const ScheduledQueryLastResults = (
-  {
-    actionId,
-    interval
-  }: ScheduledQueryLastResultsProps
-) => {
+const ScheduledQueryLastResults = ({ actionId, interval }: ScheduledQueryLastResultsProps) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
@@ -415,12 +406,7 @@ const ScheduledQueryLastResults = (
   );
 };
 
-const DocsColumnResults = (
-  {
-    actionId,
-    interval
-  }: ScheduledQueryLastResultsProps
-) => {
+const DocsColumnResults = ({ actionId, interval }: ScheduledQueryLastResultsProps) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
@@ -445,12 +431,7 @@ const DocsColumnResults = (
   );
 };
 
-const AgentsColumnResults = (
-  {
-    actionId,
-    interval
-  }: ScheduledQueryLastResultsProps
-) => {
+const AgentsColumnResults = ({ actionId, interval }: ScheduledQueryLastResultsProps) => {
   const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
@@ -474,15 +455,13 @@ const AgentsColumnResults = (
   );
 };
 
-const ErrorsColumnResults = (
-  {
-    actionId,
-    interval,
-    queryId,
-    toggleErrors,
-    expanded
-  }: ScheduledQueryErrorsProps
-) => {
+const ErrorsColumnResults = ({
+  actionId,
+  interval,
+  queryId,
+  toggleErrors,
+  expanded,
+}: ScheduledQueryErrorsProps) => {
   const handleErrorsToggle = useCallback(
     () => toggleErrors({ queryId, interval }),
     [toggleErrors, queryId, interval]
@@ -531,12 +510,7 @@ interface PackViewInActionProps {
   packName: string;
 }
 
-const PackViewInDiscoverActionComponent = (
-  {
-    item,
-    packName
-  }: PackViewInActionProps
-) => {
+const PackViewInDiscoverActionComponent = ({ item, packName }: PackViewInActionProps) => {
   const { id, interval } = item;
   const actionId = getPackActionId(id, packName);
   const { data: lastResultsData } = usePackQueryLastResults({
@@ -564,12 +538,7 @@ const PackViewInDiscoverActionComponent = (
 
 const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
 
-const PackViewInLensActionComponent = (
-  {
-    item,
-    packName
-  }: PackViewInActionProps
-) => {
+const PackViewInLensActionComponent = ({ item, packName }: PackViewInActionProps) => {
   const { id, interval } = item;
   const actionId = getPackActionId(id, packName);
   const { data: lastResultsData } = usePackQueryLastResults({
@@ -603,13 +572,11 @@ interface PackQueriesStatusTableProps {
   packName: string;
 }
 
-const PackQueriesStatusTableComponent = (
-  {
-    agentIds,
-    data,
-    packName
-  }: PackQueriesStatusTableProps
-) => {
+const PackQueriesStatusTableComponent = ({
+  agentIds,
+  data,
+  packName,
+}: PackQueriesStatusTableProps) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});

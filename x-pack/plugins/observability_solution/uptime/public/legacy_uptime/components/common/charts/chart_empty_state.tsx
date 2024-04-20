@@ -6,23 +6,20 @@
  */
 
 import { EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
-import React, { FC } from 'react';
+import React from 'react';
 
 interface ChartEmptyStateProps {
   title: string | JSX.Element;
   body: string | JSX.Element;
 }
 
-export const ChartEmptyState = (
-  {
-    title,
-    body
-  }: ChartEmptyStateProps
-) => (<EuiEmptyPrompt
-  title={
-    <EuiTitle>
-      <h5>{title}</h5>
-    </EuiTitle>
-  }
-  body={<p>{body}</p>}
-/>);
+export const ChartEmptyState = ({ title, body }: ChartEmptyStateProps) => (
+  <EuiEmptyPrompt
+    title={
+      <EuiTitle>
+        <h5>{title}</h5>
+      </EuiTitle>
+    }
+    body={<p>{body}</p>}
+  />
+);

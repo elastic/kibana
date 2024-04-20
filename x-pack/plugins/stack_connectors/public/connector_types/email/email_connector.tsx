@@ -92,11 +92,7 @@ const portConfig: FieldConfig<string> = {
   ],
 };
 
-export const EmailActionConnectorFields = (
-  {
-    readOnly
-  }: ActionConnectorFieldsProps
-) => {
+export const EmailActionConnectorFields = ({ readOnly }: ActionConnectorFieldsProps) => {
   const {
     docLinks,
     http,

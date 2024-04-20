@@ -43,16 +43,14 @@ enum FilteringTabs {
   ADVANCED = 'advanced',
 }
 
-export const EditSyncRulesFlyout = (
-  {
-    errors,
-    hasAdvancedFilteringFeature,
-    hasBasicFilteringFeature,
-    revertLocalFilteringRules,
-    revertLocalAdvancedFiltering,
-    setIsEditing
-  }: EditFilteringFlyoutProps
-) => {
+export const EditSyncRulesFlyout = ({
+  errors,
+  hasAdvancedFilteringFeature,
+  hasBasicFilteringFeature,
+  revertLocalFilteringRules,
+  revertLocalAdvancedFiltering,
+  setIsEditing,
+}: EditFilteringFlyoutProps) => {
   const tabs: EuiTabbedContentTab[] = [
     ...(hasBasicFilteringFeature
       ? [

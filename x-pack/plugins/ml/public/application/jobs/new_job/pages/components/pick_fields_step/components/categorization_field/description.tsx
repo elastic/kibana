@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,12 +13,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 interface Props {
   isOptional: boolean;
 }
-export const Description = memo((
-  {
-    children,
-    isOptional
-  }: Props
-) => {
+export const Description = memo(({ children, isOptional }: Props) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.title', {
     defaultMessage: 'Categorization field',
   });

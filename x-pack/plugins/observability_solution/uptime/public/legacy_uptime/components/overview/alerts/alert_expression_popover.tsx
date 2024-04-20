@@ -29,18 +29,16 @@ const getColor = (
   return isOpen ? 'primary' : 'success';
 };
 
-export const AlertExpressionPopover = (
-  {
-    'aria-label': ariaLabel,
-    content,
-    'data-test-subj': dataTestSubj,
-    description,
-    isEnabled,
-    isInvalid,
-    id,
-    value
-  }: AlertExpressionPopoverProps
-) => {
+export const AlertExpressionPopover = ({
+  'aria-label': ariaLabel,
+  content,
+  'data-test-subj': dataTestSubj,
+  description,
+  isEnabled,
+  isInvalid,
+  id,
+  value,
+}: AlertExpressionPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <EuiPopover

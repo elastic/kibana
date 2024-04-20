@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
@@ -52,13 +52,7 @@ export interface StartActionNameProps {
   forceDisable?: boolean;
   transformNodes: number;
 }
-export const StartActionName = (
-  {
-    items,
-    forceDisable,
-    transformNodes
-  }: StartActionNameProps
-) => {
+export const StartActionName = ({ items, forceDisable, transformNodes }: StartActionNameProps) => {
   const { canStartStopTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 

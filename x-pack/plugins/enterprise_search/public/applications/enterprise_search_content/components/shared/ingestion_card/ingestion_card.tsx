@@ -31,18 +31,16 @@ interface IngestionCardProps {
   title: string;
 }
 
-export const IngestionCard = (
-  {
-    buttonIcon,
-    buttonLabel,
-    description,
-    href,
-    isDisabled,
-    logo,
-    onClick,
-    title
-  }: IngestionCardProps
-) => {
+export const IngestionCard = ({
+  buttonIcon,
+  buttonLabel,
+  description,
+  href,
+  isDisabled,
+  logo,
+  onClick,
+  title,
+}: IngestionCardProps) => {
   return (
     <EuiCard
       hasBorder

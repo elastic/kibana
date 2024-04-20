@@ -25,11 +25,7 @@ import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../../common/types';
 import { getMLJobId } from '../../../../../common/lib';
 
-export const MonitorDuration = (
-  {
-    monitorId
-  }: MonitorIdParam
-) => {
+export const MonitorDuration = ({ monitorId }: MonitorIdParam) => {
   const { dateRangeStart, dateRangeEnd, absoluteDateRangeStart, absoluteDateRangeEnd } =
     useGetUrlParams();
 

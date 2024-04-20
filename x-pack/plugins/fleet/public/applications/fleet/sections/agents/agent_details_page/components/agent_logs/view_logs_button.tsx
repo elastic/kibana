@@ -26,14 +26,12 @@ interface ViewLogsProps {
   Button that takes to the Logs view Ui when that is available, otherwise fallback to the Discover UI
   The urls are built using same logStreamQuery (provided by a prop), startTime and endTime, ensuring that they'll both will target same log lines
 */
-export const ViewLogsButton = (
-  {
-    viewInLogs,
-    logStreamQuery,
-    startTime,
-    endTime
-  }: ViewLogsProps
-) => {
+export const ViewLogsButton = ({
+  viewInLogs,
+  logStreamQuery,
+  startTime,
+  endTime,
+}: ViewLogsProps) => {
   const { http } = useStartServices();
 
   // Generate URL to pass page state to Logs UI

@@ -23,19 +23,17 @@ interface TablePaginationBarProps {
 
 const MAX_PAGES = 100;
 
-export const TablePaginationBar = (
-  {
-    itemLabel = 'Items',
-    itemsPerPage = 10,
-    totalPages,
-    totalItems,
-    activePage = 1,
-    showPerPageOptions = false,
-    hideLabelCount = false,
-    onChangePage,
-    clearFiltersLink
-  }: TablePaginationBarProps
-) => {
+export const TablePaginationBar = ({
+  itemLabel = 'Items',
+  itemsPerPage = 10,
+  totalPages,
+  totalItems,
+  activePage = 1,
+  showPerPageOptions = false,
+  hideLabelCount = false,
+  onChangePage,
+  clearFiltersLink,
+}: TablePaginationBarProps) => {
   // EUI component starts page at 0. API starts at 1.
   const currentPage = activePage - 1;
   const showAllPages = totalPages < MAX_PAGES;

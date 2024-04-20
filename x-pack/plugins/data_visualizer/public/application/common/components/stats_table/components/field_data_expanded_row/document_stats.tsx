@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { HorizontalAlignment } from '@elastic/eui';
@@ -40,11 +40,7 @@ const metaTableTitle = i18n.translate(
   }
 );
 
-export const DocumentStatsTable = (
-  {
-    config
-  }: FieldDataRowProps
-) => {
+export const DocumentStatsTable = ({ config }: FieldDataRowProps) => {
   if (
     config?.stats === undefined ||
     config.stats.cardinality === undefined ||

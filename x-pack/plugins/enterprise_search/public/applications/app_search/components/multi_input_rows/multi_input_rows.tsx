@@ -35,19 +35,17 @@ interface Props {
   inputPlaceholder?: string;
 }
 
-export const MultiInputRows = (
-  {
-    id,
-    initialValues = [''],
-    onChange,
-    onSubmit,
-    showSubmitButton = true,
-    submitButtonText = CONTINUE_BUTTON_LABEL,
-    addRowText = ADD_VALUE_BUTTON_LABEL,
-    deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
-    inputPlaceholder = INPUT_ROW_PLACEHOLDER
-  }: Props
-) => {
+export const MultiInputRows = ({
+  id,
+  initialValues = [''],
+  onChange,
+  onSubmit,
+  showSubmitButton = true,
+  submitButtonText = CONTINUE_BUTTON_LABEL,
+  addRowText = ADD_VALUE_BUTTON_LABEL,
+  deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
+  inputPlaceholder = INPUT_ROW_PLACEHOLDER,
+}: Props) => {
   const logic = MultiInputRowsLogic({ id, values: initialValues });
   const { values, addedNewRow, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);

@@ -35,13 +35,7 @@ interface UserRiskEntity {
 
 export type RiskEntity = HostRiskEntity | UserRiskEntity;
 
-const RiskSummaryComponent = (
-  {
-    risk,
-    riskEntity,
-    originalRisk
-  }: RiskEntity
-) => {
+const RiskSummaryComponent = ({ risk, riskEntity, originalRisk }: RiskEntity) => {
   const currentRiskScore =
     riskEntity === RiskScoreEntity.host
       ? risk?.result?.[0]?.host?.risk?.calculated_level

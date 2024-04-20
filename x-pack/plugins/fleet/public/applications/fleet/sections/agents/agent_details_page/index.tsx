@@ -219,15 +219,13 @@ export const AgentDetailsPage = () => {
   );
 };
 
-const AgentDetailsPageContent = (
-  {
-    agent,
-    agentPolicy
-  }: {
-    agent: Agent;
-    agentPolicy?: AgentPolicy;
-  }
-) => {
+const AgentDetailsPageContent = ({
+  agent,
+  agentPolicy,
+}: {
+  agent: Agent;
+  agentPolicy?: AgentPolicy;
+}) => {
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&

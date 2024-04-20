@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef } from 'react';
 
 import type { EuiButtonGroupProps } from '@elastic/eui';
@@ -26,12 +25,7 @@ interface Props {
 /**
  * Component for rendering a set of buttons for switching between the Anomaly Detection results views.
  */
-export const AnomalyResultsViewSelector = (
-  {
-    viewId,
-    selectedJobs
-  }: Props
-) => {
+export const AnomalyResultsViewSelector = ({ viewId, selectedJobs }: Props) => {
   const mounted = useRef(false);
   const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();

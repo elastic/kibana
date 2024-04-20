@@ -53,19 +53,17 @@ interface Props {
   resetImage(): void;
 }
 
-export const BrandingSection = (
-  {
-    imageType,
-    description,
-    helpText,
-    image,
-    stagedImage,
-    buttonLoading,
-    stageImage,
-    saveImage,
-    resetImage
-  }: Props
-) => {
+export const BrandingSection = ({
+  imageType,
+  description,
+  helpText,
+  image,
+  stagedImage,
+  buttonLoading,
+  stageImage,
+  saveImage,
+  resetImage,
+}: Props) => {
   const [resetConfirmModalVisible, setVisible] = useState(false);
   const [imageUploadKey, setKey] = useState(1);
   const showDeleteModal = () => setVisible(true);

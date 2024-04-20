@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -37,24 +37,22 @@ interface Props {
   searchItems: SearchItems;
 }
 
-export const StepDefineSummary = (
-  {
-    formState: {
-      isDatePickerApplyEnabled,
-      timeRangeMs,
-      runtimeMappings,
-      searchString,
-      searchQuery,
-      groupByList,
-      aggList,
-      transformFunction,
-      previewRequest: partialPreviewRequest,
-      validationStatus,
-    },
+export const StepDefineSummary = ({
+  formState: {
+    isDatePickerApplyEnabled,
+    timeRangeMs,
+    runtimeMappings,
+    searchString,
+    searchQuery,
+    groupByList,
+    aggList,
+    transformFunction,
+    previewRequest: partialPreviewRequest,
+    validationStatus,
+  },
 
-    searchItems
-  }: Props
-) => {
+  searchItems,
+}: Props) => {
   const toastNotifications = useToastNotifications();
 
   const transformConfigQuery = getTransformConfigQuery(searchQuery);

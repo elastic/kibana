@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 
 import {
   NoDataConfigPageProvider,
@@ -21,24 +21,20 @@ import {
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const KibanaPageTemplateProvider = (
-  {
-    children,
-    ...services
-  }: KibanaPageTemplateServices
-) => {
+export const KibanaPageTemplateProvider = ({
+  children,
+  ...services
+}: KibanaPageTemplateServices) => {
   return <NoDataConfigPageProvider {...services}>{children}</NoDataConfigPageProvider>;
 };
 
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const KibanaPageTemplateKibanaProvider = (
-  {
-    children,
-    ...dependencies
-  }: KibanaPageTemplateKibanaDependencies
-) => {
+export const KibanaPageTemplateKibanaProvider = ({
+  children,
+  ...dependencies
+}: KibanaPageTemplateKibanaDependencies) => {
   return (
     <NoDataConfigPageKibanaProvider {...dependencies}>{children}</NoDataConfigPageKibanaProvider>
   );

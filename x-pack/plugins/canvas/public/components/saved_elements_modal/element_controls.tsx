@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,38 +40,35 @@ interface Props {
   onEdit: (event: MouseEvent) => void;
 }
 
-export const ElementControls = (
-  {
-    onDelete,
-    onEdit
-  }: Props
-) => (<EuiFlexGroup
-  className="canvasElementCard__controls"
-  gutterSize="xs"
-  justifyContent="spaceBetween"
->
-  <EuiFlexItem grow={false}>
-    <EuiToolTip content={strings.getEditTooltip()}>
-      <EuiButtonIcon
-        iconType="pencil"
-        aria-label={strings.getEditAriaLabel()}
-        onClick={onEdit}
-        data-test-subj="canvasElementCard__editButton"
-      />
-    </EuiToolTip>
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <EuiToolTip content={strings.getDeleteTooltip()}>
-      <EuiButtonIcon
-        color="danger"
-        iconType="trash"
-        aria-label={strings.getDeleteAriaLabel()}
-        onClick={onDelete}
-        data-test-subj="canvasElementCard__deleteButton"
-      />
-    </EuiToolTip>
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const ElementControls = ({ onDelete, onEdit }: Props) => (
+  <EuiFlexGroup
+    className="canvasElementCard__controls"
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={strings.getEditTooltip()}>
+        <EuiButtonIcon
+          iconType="pencil"
+          aria-label={strings.getEditAriaLabel()}
+          onClick={onEdit}
+          data-test-subj="canvasElementCard__editButton"
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content={strings.getDeleteTooltip()}>
+        <EuiButtonIcon
+          color="danger"
+          iconType="trash"
+          aria-label={strings.getDeleteAriaLabel()}
+          onClick={onDelete}
+          data-test-subj="canvasElementCard__deleteButton"
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 ElementControls.propTypes = {
   onDelete: PropTypes.func.isRequired,

@@ -25,11 +25,7 @@ interface Props {
   errorSummary: ErrorSummary[];
 }
 
-const ErrorsViewerComponent = (
-  {
-    errorSummary
-  }: Props
-) => {
+const ErrorsViewerComponent = ({ errorSummary }: Props) => {
   const columns = useMemo(() => getErrorsViewerTableColumns(), []);
 
   return (

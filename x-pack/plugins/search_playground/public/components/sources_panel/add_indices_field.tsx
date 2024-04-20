@@ -18,13 +18,11 @@ interface AddIndicesFieldProps {
   loading: boolean;
 }
 
-export const AddIndicesField = (
-  {
-    selectedIndices,
-    onIndexSelect,
-    loading
-  }: AddIndicesFieldProps
-) => {
+export const AddIndicesField = ({
+  selectedIndices,
+  onIndexSelect,
+  loading,
+}: AddIndicesFieldProps) => {
   const [query, setQuery] = useState<string>('');
   const { indices, isLoading } = useQueryIndices(query);
   const handleChange = (value: Array<EuiComboBoxOptionOption<IndexName>>) => {

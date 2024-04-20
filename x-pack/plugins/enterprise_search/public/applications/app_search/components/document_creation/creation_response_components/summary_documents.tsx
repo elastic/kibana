@@ -14,12 +14,7 @@ interface ExampleDocumentJsonProps {
   document: object;
   errors?: string[];
 }
-export const ExampleDocumentJson = (
-  {
-    document,
-    errors
-  }: ExampleDocumentJsonProps
-) => {
+export const ExampleDocumentJson = ({ document, errors }: ExampleDocumentJsonProps) => {
   return (
     <>
       {errors && (
@@ -52,11 +47,7 @@ export const ExampleDocumentJson = (
 interface MoreDocumentsTextProps {
   documents: number;
 }
-export const MoreDocumentsText = (
-  {
-    documents
-  }: MoreDocumentsTextProps
-) => {
+export const MoreDocumentsText = ({ documents }: MoreDocumentsTextProps) => {
   return (
     <EuiText>
       <p>

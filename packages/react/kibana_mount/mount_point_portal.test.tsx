@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { MountPoint, UnmountCallback } from '@kbn/core/public';
 import { MountPointPortal } from './mount_point_portal';
@@ -143,15 +143,13 @@ describe('MountPointPortal', () => {
   });
 
   it('updates the content of the portal element when the content of MountPointPortal changes', async () => {
-    const Wrapper = (
-      {
-        setMount,
-        portalContent
-      }: {
-        setMount: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
-        portalContent: string;
-      }
-    ) => {
+    const Wrapper = ({
+      setMount,
+      portalContent,
+    }: {
+      setMount: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
+      portalContent: string;
+    }) => {
       return (
         <MountPointPortal setMountPoint={setMount}>
           <div>{portalContent}</div>

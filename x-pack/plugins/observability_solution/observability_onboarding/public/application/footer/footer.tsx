@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiText, EuiLink } from '@elastic/eui';
 import integrationsIconUrl from './integrations_icon.svg';
 import demoIconUrl from './demo_icon.svg';

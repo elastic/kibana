@@ -33,12 +33,7 @@ interface TimelineWrapperProps {
  * This component renders the timeline EuiPortal as well as the bottom bar, and handles the interaction between the two.
  * Using EuiFocusTrap, we can trap the focus within the portal when it is open, which prevents closing the portal when clicking outside of it.
  */
-export const TimelineWrapper = React.memo((
-  {
-    timelineId,
-    onAppLeave
-  }: TimelineWrapperProps
-) => {
+export const TimelineWrapper = React.memo(({ timelineId, onAppLeave }: TimelineWrapperProps) => {
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
   const dispatch = useDispatch();

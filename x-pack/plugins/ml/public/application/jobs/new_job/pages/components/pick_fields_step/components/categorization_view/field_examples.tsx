@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiCodeBlock } from '@elastic/eui';
@@ -17,11 +16,7 @@ interface Props {
 
 const TOKEN_HIGHLIGHT_COLOR = '#b0ccf7';
 
-export const FieldExamples = (
-  {
-    fieldExamples
-  }: Props
-) => {
+export const FieldExamples = ({ fieldExamples }: Props) => {
   if (fieldExamples === null || fieldExamples.length === 0) {
     return null;
   }

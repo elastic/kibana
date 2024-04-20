@@ -30,7 +30,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
-import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
@@ -101,11 +100,7 @@ export interface UserProfileFormValues {
   avatarType: 'initials' | 'image';
 }
 
-const UserDetailsEditor = (
-  {
-    user
-  }: UserDetailsEditorProps
-) => {
+const UserDetailsEditor = ({ user }: UserDetailsEditorProps) => {
   const { services } = useKibana<CoreStart>();
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
@@ -164,13 +159,11 @@ const UserDetailsEditor = (
   );
 };
 
-const UserSettingsEditor = (
-  {
-    formik,
-    isThemeOverridden,
-    isOverriddenThemeDarkMode
-  }: UserSettingsEditorProps
-) => {
+const UserSettingsEditor = ({
+  formik,
+  isThemeOverridden,
+  isOverriddenThemeDarkMode,
+}: UserSettingsEditorProps) => {
   if (!formik.values.data) {
     return null;
   }
@@ -587,11 +580,7 @@ function UserPasswordEditor({
   );
 }
 
-const UserRoles = (
-  {
-    user
-  }: UserRoleProps
-) => {
+const UserRoles = ({ user }: UserRoleProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -653,12 +642,7 @@ const UserRoles = (
   );
 };
 
-export const UserProfile = (
-  {
-    user,
-    data
-  }: UserProfileProps
-) => {
+export const UserProfile = ({ user, data }: UserProfileProps) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
   const formik = useUserProfileForm({ user, data });

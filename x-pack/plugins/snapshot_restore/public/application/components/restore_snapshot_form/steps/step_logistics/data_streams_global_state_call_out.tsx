@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useCore } from '../../../../app_context';
 
@@ -42,11 +42,7 @@ interface Props {
   dataStreamsCount: number;
 }
 
-export const DataStreamsGlobalStateCallOut = (
-  {
-    dataStreamsCount
-  }: Props
-) => {
+export const DataStreamsGlobalStateCallOut = ({ dataStreamsCount }: Props) => {
   const { docLinks } = useCore();
   return (
     <EuiCallOut

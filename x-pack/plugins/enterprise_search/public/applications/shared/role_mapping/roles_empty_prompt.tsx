@@ -31,13 +31,7 @@ interface Props {
   onEnable(): void;
 }
 
-export const RolesEmptyPrompt = (
-  {
-    onEnable,
-    docsLink,
-    productName
-  }: Props
-) => {
+export const RolesEmptyPrompt = ({ onEnable, docsLink, productName }: Props) => {
   const { security } = useValues(KibanaLogic);
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const isSuperUser = currentUser?.roles.includes('superuser');

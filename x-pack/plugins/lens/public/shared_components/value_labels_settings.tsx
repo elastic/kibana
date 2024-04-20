@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { ValueLabelConfig } from '../../common/types';
@@ -40,13 +40,11 @@ export interface VisualOptionsProps {
   onValueLabelChange: (newMode: ValueLabelConfig) => void;
 }
 
-export const ValueLabelsSettings = (
-  {
-    isVisible = true,
-    valueLabels = 'hide',
-    onValueLabelChange
-  }: VisualOptionsProps
-) => {
+export const ValueLabelsSettings = ({
+  isVisible = true,
+  valueLabels = 'hide',
+  onValueLabelChange,
+}: VisualOptionsProps) => {
   if (!isVisible) {
     return null;
   }

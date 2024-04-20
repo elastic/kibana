@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, MouseEventHandler, useRef, useCallback, useEffect, useMemo } from 'react';
+import React, { MouseEventHandler, useRef, useCallback, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { CANVAS } from '../../../i18n';
 import { Sidebar } from '../sidebar';
@@ -24,13 +24,7 @@ export interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const WorkpadApp = (
-  {
-    deselectElement,
-    isWriteable,
-    workpad
-  }: Props
-) => {
+export const WorkpadApp = ({ deselectElement, isWriteable, workpad }: Props) => {
   const interactivePageLayout = useRef<CommitFn | null>(null); // future versions may enable editing on multiple pages => use array then
   const workpadTitle = useRef<HTMLHeadingElement>(null); // future versions may enable editing on multiple pages => use array then
 

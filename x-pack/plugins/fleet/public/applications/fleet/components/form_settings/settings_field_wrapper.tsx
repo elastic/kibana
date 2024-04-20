@@ -30,17 +30,15 @@ export const validateSchema = (coercedSchema: z.ZodString, newValue: any): strin
   }
 };
 
-export const SettingsFieldWrapper = (
-  {
-    settingsConfig,
-    typeName,
-    renderItem
-  }: {
-    settingsConfig: SettingsConfig;
-    typeName: keyof typeof ZodFirstPartyTypeKind;
-    renderItem: Function;
-  }
-) => {
+export const SettingsFieldWrapper = ({
+  settingsConfig,
+  typeName,
+  renderItem,
+}: {
+  settingsConfig: SettingsConfig;
+  typeName: keyof typeof ZodFirstPartyTypeKind;
+  renderItem: Function;
+}) => {
   const [error, setError] = useState('');
   const agentPolicyFormContext = useAgentPolicyFormContext();
 

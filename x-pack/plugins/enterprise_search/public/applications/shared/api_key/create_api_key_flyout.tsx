@@ -92,11 +92,7 @@ const INVALID_JSON_ERROR: string = i18n.translate('xpack.enterpriseSearch.invali
   defaultMessage: 'Invalid JSON',
 });
 
-export const CreateApiKeyFlyout = (
-  {
-    onClose
-  }: CreateApiKeyFlyoutProps
-) => {
+export const CreateApiKeyFlyout = ({ onClose }: CreateApiKeyFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);

@@ -111,25 +111,23 @@ export interface FieldStatsWithDslQuery extends FieldStatsPropsBase {
 
 export type FieldStatsProps = FieldStatsWithKbnQuery | FieldStatsWithDslQuery;
 
-const FieldStatsComponent = (
-  {
-    services,
-    query,
-    dslQuery,
-    filters,
-    fromDate,
-    toDate,
-    dataViewOrDataViewId,
-    field,
-    color = getDefaultColor(),
-    'data-test-subj': dataTestSubject = 'fieldStats',
-    overrideMissingContent,
-    overrideFooter,
-    onAddFilter,
-    overrideFieldTopValueBar,
-    onStateChange
-  }: FieldStatsProps
-) => {
+const FieldStatsComponent = ({
+  services,
+  query,
+  dslQuery,
+  filters,
+  fromDate,
+  toDate,
+  dataViewOrDataViewId,
+  field,
+  color = getDefaultColor(),
+  'data-test-subj': dataTestSubject = 'fieldStats',
+  overrideMissingContent,
+  overrideFooter,
+  onAddFilter,
+  overrideFieldTopValueBar,
+  onStateChange,
+}: FieldStatsProps) => {
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<FieldStatsState>({
     isLoading: false,

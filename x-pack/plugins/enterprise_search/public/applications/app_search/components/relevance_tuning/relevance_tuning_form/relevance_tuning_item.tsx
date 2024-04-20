@@ -21,14 +21,7 @@ interface Props {
   field?: SearchField;
 }
 
-export const RelevanceTuningItem = (
-  {
-    name,
-    type,
-    boosts = [],
-    field
-  }: Props
-) => {
+export const RelevanceTuningItem = ({ name, type, boosts = [], field }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem>

@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { Suspense, type FC } from 'react';
+import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { Props as NavigationProps } from './side_navigation';
 
 const SideNavComponentLazy = React.lazy(() => import('./side_navigation'));
 
-export const SideNavComponent = (props: NavigationProps) => (<Suspense fallback={<EuiLoadingSpinner size="s" />}>
-  <SideNavComponentLazy {...props} />
-</Suspense>);
+export const SideNavComponent = (props: NavigationProps) => (
+  <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+    <SideNavComponentLazy {...props} />
+  </Suspense>
+);

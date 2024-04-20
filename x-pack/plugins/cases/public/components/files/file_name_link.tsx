@@ -18,12 +18,7 @@ interface FileNameLinkProps {
   showPreview: () => void;
 }
 
-const FileNameLinkComponent = (
-  {
-    file,
-    showPreview
-  }: FileNameLinkProps
-) => {
+const FileNameLinkComponent = ({ file, showPreview }: FileNameLinkProps) => {
   let fileName = file.name;
 
   if (typeof file.extension !== 'undefined') {

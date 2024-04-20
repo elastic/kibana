@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -50,17 +49,15 @@ interface Props {
   sourceIndex?: string;
 }
 
-export const ReviewAndCreatePipeline = (
-  {
-    highlightTargetField = false,
-    inferencePipeline,
-    modelType,
-    pipelineName,
-    pipelineCreated,
-    pipelineError,
-    sourceIndex
-  }: Props
-) => {
+export const ReviewAndCreatePipeline = ({
+  highlightTargetField = false,
+  inferencePipeline,
+  modelType,
+  pipelineName,
+  pipelineCreated,
+  pipelineError,
+  sourceIndex,
+}: Props) => {
   const {
     services: {
       application,

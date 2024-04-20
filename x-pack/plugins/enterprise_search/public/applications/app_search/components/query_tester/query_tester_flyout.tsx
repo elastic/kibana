@@ -16,11 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const QueryTesterFlyout = (
-  {
-    onClose
-  }: Props
-) => {
+export const QueryTesterFlyout = ({ onClose }: Props) => {
   return (
     <EuiFlyout onClose={onClose} aria-labelledby="queryTesterFlyoutTitle" ownFocus>
       <EuiFlyoutHeader hasBorder>

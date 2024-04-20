@@ -152,27 +152,25 @@ export interface UseAssistantContext {
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
 
-export const AssistantProvider = (
-  {
-    actionTypeRegistry,
-    alertsIndexPattern,
-    assistantAvailability,
-    assistantTelemetry,
-    augmentMessageCodeBlocks,
-    docLinks,
-    basePath,
-    basePromptContexts = [],
-    baseQuickPrompts = [],
-    baseSystemPrompts = BASE_SYSTEM_PROMPTS,
-    children,
-    getComments,
-    http,
-    baseConversations,
-    nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-    title = DEFAULT_ASSISTANT_TITLE,
-    toasts
-  }: AssistantProviderProps
-) => {
+export const AssistantProvider = ({
+  actionTypeRegistry,
+  alertsIndexPattern,
+  assistantAvailability,
+  assistantTelemetry,
+  augmentMessageCodeBlocks,
+  docLinks,
+  basePath,
+  basePromptContexts = [],
+  baseQuickPrompts = [],
+  baseSystemPrompts = BASE_SYSTEM_PROMPTS,
+  children,
+  getComments,
+  http,
+  baseConversations,
+  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  title = DEFAULT_ASSISTANT_TITLE,
+  toasts,
+}: AssistantProviderProps) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
    */

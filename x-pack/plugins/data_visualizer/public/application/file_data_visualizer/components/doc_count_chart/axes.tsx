@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { Axis, Position } from '@elastic/charts';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
@@ -21,11 +20,7 @@ function tickFormatter(d: number): string {
   return (Math.round(d * 100) / 100).toString();
 }
 
-export const Axes = (
-  {
-    chartData
-  }: Props
-) => {
+export const Axes = ({ chartData }: Props) => {
   const yDomain = getYRange(chartData);
   const {
     services: { fieldFormats, uiSettings },

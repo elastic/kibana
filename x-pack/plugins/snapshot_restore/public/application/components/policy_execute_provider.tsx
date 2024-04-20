@@ -20,11 +20,7 @@ export type ExecutePolicy = (name: string, onSuccess?: OnSuccessCallback) => voi
 
 type OnSuccessCallback = () => void;
 
-export const PolicyExecuteProvider = (
-  {
-    children
-  }: Props
-) => {
+export const PolicyExecuteProvider = ({ children }: Props) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
 

@@ -160,12 +160,7 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
   return isSortAscending ? sorted : sorted.reverse();
 };
 
-export const EsDeprecationsTable = (
-  {
-    deprecations = [],
-    reload
-  }: Props
-) => {
+export const EsDeprecationsTable = ({ deprecations = [], reload }: Props) => {
   const {
     services: { api },
   } = useAppContext();

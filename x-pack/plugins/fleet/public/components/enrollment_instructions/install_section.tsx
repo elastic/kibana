@@ -25,18 +25,16 @@ interface Props {
   onCopy?: () => void;
 }
 
-export const InstallSection = (
-  {
-    installCommand,
-    isK8s,
-    cloudSecurityIntegration,
-    enrollToken,
-    fleetServerHost,
-    fullCopyButton = false,
-    isManaged = true,
-    onCopy
-  }: Props
-) => {
+export const InstallSection = ({
+  installCommand,
+  isK8s,
+  cloudSecurityIntegration,
+  enrollToken,
+  fleetServerHost,
+  fullCopyButton = false,
+  isManaged = true,
+  onCopy,
+}: Props) => {
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />

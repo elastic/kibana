@@ -42,11 +42,7 @@ jest.mock('../../../common/hooks/use_space_id', () => ({
 jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls');
 
 const mockStatusCapture = jest.fn();
-const GroupedAlertsTable = (
-  {
-    currentAlertStatusFilterValue
-  }: AlertsTableComponentProps
-) => {
+const GroupedAlertsTable = ({ currentAlertStatusFilterValue }: AlertsTableComponentProps) => {
   useEffect(() => {
     if (currentAlertStatusFilterValue) {
       mockStatusCapture(currentAlertStatusFilterValue);

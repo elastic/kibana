@@ -17,15 +17,13 @@ export interface ESFieldsSelectProps {
   selected: string[];
 }
 
-export const ESFieldsSelect = (
-  {
-    selected = [],
-    fields = [],
-    onChange,
-    onFocus,
-    onBlur
-  }: ESFieldsSelectProps
-) => {
+export const ESFieldsSelect = ({
+  selected = [],
+  fields = [],
+  onChange,
+  onFocus,
+  onBlur,
+}: ESFieldsSelectProps) => {
   const options = fields.map((value) => ({ label: value }));
   const selectedOptions = selected.map((value) => ({ label: value }));
 

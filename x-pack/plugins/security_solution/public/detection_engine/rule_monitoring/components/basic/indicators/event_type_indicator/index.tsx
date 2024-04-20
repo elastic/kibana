@@ -14,11 +14,7 @@ interface EventTypeIndicatorProps {
   type: RuleExecutionEventType;
 }
 
-const EventTypeIndicatorComponent = (
-  {
-    type
-  }: EventTypeIndicatorProps
-) => {
+const EventTypeIndicatorComponent = ({ type }: EventTypeIndicatorProps) => {
   const icon = getBadgeIcon(type);
   const text = getBadgeText(type);
 

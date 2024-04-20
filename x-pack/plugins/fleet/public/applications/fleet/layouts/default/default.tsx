@@ -22,13 +22,7 @@ interface Props {
   rightColumn?: JSX.Element;
 }
 
-export const DefaultLayout = (
-  {
-    section,
-    children,
-    rightColumn
-  }: Props
-) => {
+export const DefaultLayout = ({ section, children, rightColumn }: Props) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
   const authz = useAuthz();

@@ -44,11 +44,7 @@ const i18nTexts = {
   }),
 };
 
-export const TabSummary = (
-  {
-    templateDetails
-  }: Props
-) => {
+export const TabSummary = ({ templateDetails }: Props) => {
   const {
     version,
     priority,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
@@ -52,16 +52,14 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App = (
-  {
-    coreStart,
-    deps,
-    appMountParams,
-    isServerless,
-    mlFeatures,
-    experimentalFeatures
-  }: AppProps
-) => {
+const App = ({
+  coreStart,
+  deps,
+  appMountParams,
+  isServerless,
+  mlFeatures,
+  experimentalFeatures,
+}: AppProps) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,

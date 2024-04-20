@@ -36,19 +36,17 @@ const SEVERITY_FILTER_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const SeverityFilterGroup = (
-  {
-    severityCount,
-    selectedSeverities,
-    onSelect,
-    riskEntity
-  }: {
-    severityCount: SeverityCount;
-    selectedSeverities: RiskSeverity[];
-    onSelect: (newSelection: RiskSeverity[]) => void;
-    riskEntity: RiskScoreEntity;
-  }
-) => {
+export const SeverityFilterGroup = ({
+  severityCount,
+  selectedSeverities,
+  onSelect,
+  riskEntity,
+}: {
+  severityCount: SeverityCount;
+  selectedSeverities: RiskSeverity[];
+  onSelect: (newSelection: RiskSeverity[]) => void;
+  riskEntity: RiskScoreEntity;
+}) => {
   const { telemetry } = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

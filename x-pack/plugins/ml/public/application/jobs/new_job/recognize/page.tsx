@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -68,12 +67,7 @@ export enum SAVE_STATE {
   PARTIAL_FAILURE,
 }
 
-export const Page = (
-  {
-    moduleId,
-    existingGroupIds
-  }: PageProps
-) => {
+export const Page = ({ moduleId, existingGroupIds }: PageProps) => {
   const {
     services: {
       notifications,

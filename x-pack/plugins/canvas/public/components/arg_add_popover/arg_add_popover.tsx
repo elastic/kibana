@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler, FC } from 'react';
+import React, { MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -30,11 +30,7 @@ interface Props {
   options: ArgOptions[];
 }
 
-export const ArgAddPopover = (
-  {
-    options
-  }: Props
-) => {
+export const ArgAddPopover = ({ options }: Props) => {
   const button = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
     <EuiButtonIcon
       iconType="plusInCircle"

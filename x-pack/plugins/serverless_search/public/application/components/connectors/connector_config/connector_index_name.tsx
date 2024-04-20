@@ -22,11 +22,7 @@ interface ConnectorIndexNameProps {
   connector: Connector;
 }
 
-export const ConnectorIndexName = (
-  {
-    connector
-  }: ConnectorIndexNameProps
-) => {
+export const ConnectorIndexName = ({ connector }: ConnectorIndexNameProps) => {
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);

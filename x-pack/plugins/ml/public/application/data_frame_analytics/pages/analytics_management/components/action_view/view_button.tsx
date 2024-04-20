@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -25,11 +24,7 @@ interface ViewButtonProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const ViewButton = (
-  {
-    item
-  }: ViewButtonProps
-) => {
+export const ViewButton = ({ item }: ViewButtonProps) => {
   const { disabled, tooltipContent } = getViewLinkStatus(item);
 
   if (disabled) {

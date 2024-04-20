@@ -16,17 +16,15 @@ import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_
 
 const exampleCount = 5;
 
-export const CategoryDetailsRow = (
-  {
-    categoryId,
-    timeRange,
-    logViewReference
-  }: {
-    categoryId: number;
-    timeRange: TimeRange;
-    logViewReference: PersistedLogViewReference;
-  }
-) => {
+export const CategoryDetailsRow = ({
+  categoryId,
+  timeRange,
+  logViewReference,
+}: {
+  categoryId: number;
+  timeRange: TimeRange;
+  logViewReference: PersistedLogViewReference;
+}) => {
   const { idFormats } = useLogMlJobIdFormatsShimContext();
 
   const {

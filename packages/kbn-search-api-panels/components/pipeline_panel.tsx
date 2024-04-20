@@ -26,13 +26,7 @@ interface PipelinePanelProps {
   reporterImage: string;
 }
 
-export const PipelinePanel = (
-  {
-    clusterImage,
-    cutImage,
-    reporterImage
-  }: PipelinePanelProps
-) => {
+export const PipelinePanel = ({ clusterImage, cutImage, reporterImage }: PipelinePanelProps) => {
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xl">

@@ -25,13 +25,7 @@ const LazyCodeEditorBase = React.lazy(() =>
   }))
 );
 
-const Fallback = (
-  {
-    height
-  }: {
-    height: CodeEditorProps['height'];
-  }
-) => {
+const Fallback = ({ height }: { height: CodeEditorProps['height'] }) => {
   return (
     <>
       {/* when height is known, set minHeight to avoid layout shift */}

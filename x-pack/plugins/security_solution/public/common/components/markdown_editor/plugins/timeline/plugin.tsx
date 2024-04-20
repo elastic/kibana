@@ -23,12 +23,7 @@ interface TimelineEditorProps {
   onInsert: (markdown: string, config: { block: boolean }) => void;
 }
 
-const TimelineEditorComponent = (
-  {
-    onClosePopover,
-    onInsert
-  }: TimelineEditorProps
-) => {
+const TimelineEditorComponent = ({ onClosePopover, onInsert }: TimelineEditorProps) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
 
   const handleGetSelectableOptions = useCallback(

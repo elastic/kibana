@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, type FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
@@ -21,22 +21,20 @@ import { FieldStatsFlyout } from './field_stats_flyout';
 import { MLFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { PopulatedFieldsCacheManager } from './populated_fields/populated_fields_cache_manager';
 
-export const FieldStatsFlyoutProvider = (
-  {
-    dataView,
-    fieldStatsServices,
-    timeRangeMs,
-    dslQuery,
-    disablePopulatedFields = false,
-    children
-  }: {
-    dataView: DataView;
-    fieldStatsServices: FieldStatsServices;
-    timeRangeMs?: TimeRangeMs;
-    dslQuery?: FieldStatsProps['dslQuery'];
-    disablePopulatedFields?: boolean;
-  }
-) => {
+export const FieldStatsFlyoutProvider = ({
+  dataView,
+  fieldStatsServices,
+  timeRangeMs,
+  dslQuery,
+  disablePopulatedFields = false,
+  children,
+}: {
+  dataView: DataView;
+  fieldStatsServices: FieldStatsServices;
+  timeRangeMs?: TimeRangeMs;
+  dslQuery?: FieldStatsProps['dslQuery'];
+  disablePopulatedFields?: boolean;
+}) => {
   const {
     services: {
       data: { search },

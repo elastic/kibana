@@ -6,7 +6,6 @@
  */
 
 import { parse } from 'query-string';
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -52,11 +51,7 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper = (
-  {
-    location
-  }: PageProps
-) => {
+const PageWrapper = ({ location }: PageProps) => {
   const { id } = parse(location.search, { sort: false });
   const {
     services: {
@@ -80,11 +75,7 @@ const PageWrapper = (
   );
 };
 
-const CheckViewOrCreateWrapper = (
-  {
-    location
-  }: PageProps
-) => {
+const CheckViewOrCreateWrapper = ({ location }: PageProps) => {
   const {
     services: {
       notifications: { toasts },

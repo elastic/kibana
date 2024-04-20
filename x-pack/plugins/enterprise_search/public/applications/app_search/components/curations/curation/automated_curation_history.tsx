@@ -18,12 +18,7 @@ interface Props {
   engineName: string;
 }
 
-export const AutomatedCurationHistory = (
-  {
-    query,
-    engineName
-  }: Props
-) => {
+export const AutomatedCurationHistory = ({ query, engineName }: Props) => {
   const [endTimestamp, setEndTimestamp] = useState(Date.now());
   const filters = [
     `appsearch.adaptive_relevance.query: ${query}`,

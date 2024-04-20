@@ -36,16 +36,14 @@ const actionOptions = [
   },
 ];
 
-const OpsgenieParamFields = (
-  {
-    actionParams,
-    editAction,
-    errors,
-    index,
-    messageVariables,
-    executionMode
-  }: ActionParamsProps<OpsgenieActionParams>
-) => {
+const OpsgenieParamFields = ({
+  actionParams,
+  editAction,
+  errors,
+  index,
+  messageVariables,
+  executionMode,
+}: ActionParamsProps<OpsgenieActionParams>) => {
   const { subAction, subActionParams } = actionParams;
 
   const currentSubAction = useRef<string>(subAction ?? OpsgenieSubActions.CreateAlert);

@@ -16,11 +16,7 @@ import { useCharts } from '../../hooks/use_charts';
 import { EnterpriseSearchOverview } from '../../../components/enterprise_search/overview';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const EntSearchOverviewPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const EntSearchOverviewPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();

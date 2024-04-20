@@ -12,22 +12,18 @@ import { Paging, ResultsPerPage } from '@elastic/react-search-ui';
 
 import { PagingView, ResultsPerPageView } from './views';
 
-export const Pagination = (
-  {
-    'aria-label': ariaLabel
-  }: {
-    'aria-label': string;
-  }
-) => (<EuiFlexGroup
-  alignItems="center"
-  responsive={false}
-  className="documentsSearchExperience__pagingInfo"
->
-  <EuiFlexItem>
-    {/* @ts-ignore */}
-    <Paging view={PagingView} aria-label={ariaLabel} />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <ResultsPerPage view={ResultsPerPageView} />
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const Pagination = ({ 'aria-label': ariaLabel }: { 'aria-label': string }) => (
+  <EuiFlexGroup
+    alignItems="center"
+    responsive={false}
+    className="documentsSearchExperience__pagingInfo"
+  >
+    <EuiFlexItem>
+      {/* @ts-ignore */}
+      <Paging view={PagingView} aria-label={ariaLabel} />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <ResultsPerPage view={ResultsPerPageView} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

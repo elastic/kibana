@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -32,12 +31,7 @@ import {
   type TMlStorageMapped,
 } from '../../../../../../../common/types/storage';
 
-export const TimeRangeStep = (
-  {
-    setCurrentStep,
-    isCurrentStep
-  }: StepProps
-) => {
+export const TimeRangeStep = ({ setCurrentStep, isCurrentStep }: StepProps) => {
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
   const dataSourceContext = useDataSource();

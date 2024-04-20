@@ -21,13 +21,7 @@ interface RuleStatusProps {
   children: React.ReactNode | null | undefined;
 }
 
-const RuleStatusComponent = (
-  {
-    status,
-    date,
-    children
-  }: RuleStatusProps
-) => {
+const RuleStatusComponent = ({ status, date, children }: RuleStatusProps) => {
   const statusText = getStatusText(status);
   const statusColor = getStatusColor(status);
   return (

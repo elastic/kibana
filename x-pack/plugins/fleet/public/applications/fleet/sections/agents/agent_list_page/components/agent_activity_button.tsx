@@ -11,15 +11,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices } from '../../../../hooks';
 
-export const AgentActivityButton = (
-  {
-    onClickAgentActivity,
-    showAgentActivityTour
-  }: {
-    onClickAgentActivity: () => void;
-    showAgentActivityTour: { isOpen: boolean };
-  }
-) => {
+export const AgentActivityButton = ({
+  onClickAgentActivity,
+  showAgentActivityTour,
+}: {
+  onClickAgentActivity: () => void;
+  showAgentActivityTour: { isOpen: boolean };
+}) => {
   const { uiSettings } = useStartServices();
 
   const [agentActivityTourState, setAgentActivityTourState] = useState(showAgentActivityTour);

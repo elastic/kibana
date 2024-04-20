@@ -7,7 +7,6 @@
 
 import './expandable_section.scss';
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';

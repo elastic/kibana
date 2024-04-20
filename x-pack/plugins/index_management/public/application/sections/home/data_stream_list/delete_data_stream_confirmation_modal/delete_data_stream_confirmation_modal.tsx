@@ -18,12 +18,7 @@ interface Props {
   onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }
 
-export const DeleteDataStreamConfirmationModal = (
-  {
-    dataStreams,
-    onClose
-  }: Props
-) => {
+export const DeleteDataStreamConfirmationModal = ({ dataStreams, onClose }: Props) => {
   const [isLoading, setLoading] = useState(false);
 
   const dataStreamsCount = dataStreams.length;

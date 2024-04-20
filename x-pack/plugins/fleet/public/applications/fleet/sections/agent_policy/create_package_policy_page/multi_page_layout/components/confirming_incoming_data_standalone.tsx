@@ -13,11 +13,7 @@ interface Props {
   troubleshootLink: string;
 }
 
-export const ConfirmIncomingDataStandalone = (
-  {
-    troubleshootLink
-  }: Props
-) => {
+export const ConfirmIncomingDataStandalone = ({ troubleshootLink }: Props) => {
   return (
     <>
       <EuiText>

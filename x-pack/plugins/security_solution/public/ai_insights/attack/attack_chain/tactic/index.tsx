@@ -23,13 +23,7 @@ interface Props {
   tactic: string;
 }
 
-const TacticComponent = (
-  {
-    detected,
-    rightJustify = false,
-    tactic
-  }: Props
-) => {
+const TacticComponent = ({ detected, rightJustify = false, tactic }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const WIDTH = 120; // px

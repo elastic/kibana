@@ -8,7 +8,7 @@
 
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import React, { FC } from 'react';
+import React from 'react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   AxesMap,
@@ -68,15 +68,13 @@ const getRectDataValue = (
   return getHorizontalRect(name, isFillAbove, formatter, value, nextValue);
 };
 
-export const ReferenceLineAnnotations = (
-  {
-    config,
-    axesMap,
-    formatter,
-    paddingMap,
-    isHorizontal
-  }: Props
-) => {
+export const ReferenceLineAnnotations = ({
+  config,
+  axesMap,
+  formatter,
+  paddingMap,
+  isHorizontal,
+}: Props) => {
   const { id, axisGroup, iconPosition, name, value, fill, color } = config;
 
   const defaultColor = euiLightVars.euiColorDarkShade;

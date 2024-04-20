@@ -18,14 +18,12 @@ interface TruncatedContentProps {
   tooltipType?: 'inline' | 'title';
 }
 
-export const TruncatedContent = (
-  {
-    content,
-    length,
-    beginning = false,
-    tooltipType = 'inline'
-  }: TruncatedContentProps
-) => {
+export const TruncatedContent = ({
+  content,
+  length,
+  beginning = false,
+  tooltipType = 'inline',
+}: TruncatedContentProps) => {
   if (content.length <= length) return <>{content}</>;
 
   const inline = tooltipType === 'inline';

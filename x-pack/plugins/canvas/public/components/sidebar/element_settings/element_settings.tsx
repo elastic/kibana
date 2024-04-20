@@ -16,11 +16,7 @@ interface Props {
   selectedElementId: string | null;
 }
 
-export const ElementSettings = (
-  {
-    selectedElementId
-  }: Props
-) => {
+export const ElementSettings = ({ selectedElementId }: Props) => {
   const element = useSelector((state: State) => {
     return getElementById(state, selectedElementId, getSelectedPage(state));
   }, deepEqual);

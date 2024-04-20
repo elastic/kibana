@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
@@ -24,11 +23,7 @@ export const EMPTY_EXAMPLE = i18n.translate(
   'xpack.dataVisualizer.dataGrid.field.examplesList.emptyExampleMessage',
   { defaultMessage: '(empty)' }
 );
-export const ExamplesList = (
-  {
-    examples
-  }: Props
-) => {
+export const ExamplesList = ({ examples }: Props) => {
   if (examples === undefined || examples === null || !Array.isArray(examples)) {
     return null;
   }

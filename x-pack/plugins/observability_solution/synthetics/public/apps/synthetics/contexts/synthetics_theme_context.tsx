@@ -54,12 +54,7 @@ interface ThemeContextProps {
   darkMode: boolean;
 }
 
-export const SyntheticsThemeContextProvider = (
-  {
-    darkMode,
-    children
-  }: ThemeContextProps
-) => {
+export const SyntheticsThemeContextProvider = ({ darkMode, children }: ThemeContextProps) => {
   let colors: SyntheticsAppColors;
   if (darkMode) {
     colors = {

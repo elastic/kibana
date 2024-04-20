@@ -19,11 +19,7 @@ import { PipelineListing } from '../../../components/logstash/pipeline_listing/p
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const LogStashNodePipelinesPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const LogStashNodePipelinesPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const match = useRouteMatch<{ uuid: string | undefined }>();
   const { services } = useKibana<{ data: any }>();

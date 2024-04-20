@@ -129,8 +129,8 @@ const isFocusTrapDisabled = ({
   return !ownFocus;
 };
 
-export const HoverActions = React.memo((
-  {
+export const HoverActions = React.memo(
+  ({
     additionalContent = null,
     closePopOver,
     closeTopN,
@@ -153,143 +153,143 @@ export const HoverActions = React.memo((
     scopeId,
     toggleColumn,
     toggleTopN,
-    values
-  }: Props
-) => {
-  const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
-  const [isActive, setIsActive] = useState(false);
-  const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
-  const onOverflowButtonClick = useCallback(() => {
-    setIsActive((prev) => !prev);
-    setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
-  }, [isOverflowPopoverOpen, setIsOverflowPopoverOpen]);
-  const handleHoverActionClicked = useCallback(() => {
-    if (closeTopN) {
-      closeTopN();
-    }
-
-    setIsActive(false);
-    setIsOverflowPopoverOpen(false);
-    if (closePopOver) {
-      closePopOver();
-    }
-  }, [closePopOver, closeTopN]);
-
-  const isInit = useRef(true);
-  const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (isInit.current && goGetTimelineId != null && scopeId == null) {
-      isInit.current = false;
-      goGetTimelineId(true);
-    }
-  }, [goGetTimelineId, scopeId]);
-
-  useEffect(() => {
-    if (ownFocus) {
-      setTimeout(() => {
-        defaultFocusedButtonRef.current?.focus();
-      }, 0);
-    }
-  }, [ownFocus]);
-
-  const onKeyDown = useCallback(
-    (keyboardEvent: React.KeyboardEvent) => {
-      if (!ownFocus) {
-        return;
-      }
-      switch (keyboardEvent.key) {
-        case SHOW_TOP_N_KEYBOARD_SHORTCUT:
-          stopPropagationAndPreventDefault(keyboardEvent);
-          toggleTopN();
-          break;
-        case 'Enter':
-          break;
-        case 'Escape':
-          stopPropagationAndPreventDefault(keyboardEvent);
-          break;
-        default:
-          setStKeyboardEvent(keyboardEvent);
-          break;
-      }
-    },
-    [ownFocus, toggleTopN]
-  );
-
-  const isCaseView = scopeId === TimelineId.casePage;
-  const isTimelineView = scopeId === TimelineId.active;
-  // TODO Provide a list of disabled/enabled actions as props
-  const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
-
-  const hideFilters = useMemo(
-    () => isEntityAnalyticsPage && !isTimelineView,
-    [isTimelineView, isEntityAnalyticsPage]
-  );
-
-  const hiddenActionsCount = useMemo(() => {
-    const hiddenTopNActions = hideTopN ? 1 : 0; // hides the `Top N` button
-    const hiddenFilterActions = hideFilters ? 2 : 0; // hides both the `Filter In` and `Filter out` buttons
-
-    return hiddenTopNActions + hiddenFilterActions;
-  }, [hideFilters, hideTopN]);
-
-  const { overflowActionItems, allActionItems } = useHoverActionItems({
-    dataProvider,
-    dataType,
-    defaultFocusedButtonRef,
-    draggableId,
-    enableOverflowButton: enableOverflowButton && !isCaseView,
-    field,
-    fieldType,
-    hideFilters,
-    isAggregatable,
-    handleHoverActionClicked,
-    hideAddToTimeline,
-    hideTopN,
-    isCaseView,
-    isObjectArray,
-    isOverflowPopoverOpen,
-    onFilterAdded,
-    onOverflowButtonClick,
-    ownFocus,
-    showTopN,
-    stKeyboardEvent,
-    toggleColumn,
-    toggleTopN,
     values,
-    scopeId,
-  });
+  }: Props) => {
+    const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
+    const [isActive, setIsActive] = useState(false);
+    const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);
+    const onOverflowButtonClick = useCallback(() => {
+      setIsActive((prev) => !prev);
+      setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
+    }, [isOverflowPopoverOpen, setIsOverflowPopoverOpen]);
+    const handleHoverActionClicked = useCallback(() => {
+      if (closeTopN) {
+        closeTopN();
+      }
 
-  const Container = applyWidthAndPadding
-    ? StyledHoverActionsContainerWithPaddingsAndMinWidth
-    : StyledHoverActionsContainer;
+      setIsActive(false);
+      setIsOverflowPopoverOpen(false);
+      if (closePopOver) {
+        closePopOver();
+      }
+    }, [closePopOver, closeTopN]);
 
-  return (
-    <EuiFocusTrap
-      disabled={isFocusTrapDisabled({
-        ownFocus,
-        showTopN,
-      })}
-    >
-      <Container
-        data-test-subj="hover-actions-container"
-        onKeyDown={onKeyDown}
-        $showTopN={showTopN}
-        $showOwnFocus={showOwnFocus}
-        $hiddenActionsCount={hiddenActionsCount}
-        $isActive={isActive}
-        className={isActive ? 'hoverActions-active' : ''}
+    const isInit = useRef(true);
+    const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
+
+    useEffect(() => {
+      if (isInit.current && goGetTimelineId != null && scopeId == null) {
+        isInit.current = false;
+        goGetTimelineId(true);
+      }
+    }, [goGetTimelineId, scopeId]);
+
+    useEffect(() => {
+      if (ownFocus) {
+        setTimeout(() => {
+          defaultFocusedButtonRef.current?.focus();
+        }, 0);
+      }
+    }, [ownFocus]);
+
+    const onKeyDown = useCallback(
+      (keyboardEvent: React.KeyboardEvent) => {
+        if (!ownFocus) {
+          return;
+        }
+        switch (keyboardEvent.key) {
+          case SHOW_TOP_N_KEYBOARD_SHORTCUT:
+            stopPropagationAndPreventDefault(keyboardEvent);
+            toggleTopN();
+            break;
+          case 'Enter':
+            break;
+          case 'Escape':
+            stopPropagationAndPreventDefault(keyboardEvent);
+            break;
+          default:
+            setStKeyboardEvent(keyboardEvent);
+            break;
+        }
+      },
+      [ownFocus, toggleTopN]
+    );
+
+    const isCaseView = scopeId === TimelineId.casePage;
+    const isTimelineView = scopeId === TimelineId.active;
+    // TODO Provide a list of disabled/enabled actions as props
+    const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
+
+    const hideFilters = useMemo(
+      () => isEntityAnalyticsPage && !isTimelineView,
+      [isTimelineView, isEntityAnalyticsPage]
+    );
+
+    const hiddenActionsCount = useMemo(() => {
+      const hiddenTopNActions = hideTopN ? 1 : 0; // hides the `Top N` button
+      const hiddenFilterActions = hideFilters ? 2 : 0; // hides both the `Filter In` and `Filter out` buttons
+
+      return hiddenTopNActions + hiddenFilterActions;
+    }, [hideFilters, hideTopN]);
+
+    const { overflowActionItems, allActionItems } = useHoverActionItems({
+      dataProvider,
+      dataType,
+      defaultFocusedButtonRef,
+      draggableId,
+      enableOverflowButton: enableOverflowButton && !isCaseView,
+      field,
+      fieldType,
+      hideFilters,
+      isAggregatable,
+      handleHoverActionClicked,
+      hideAddToTimeline,
+      hideTopN,
+      isCaseView,
+      isObjectArray,
+      isOverflowPopoverOpen,
+      onFilterAdded,
+      onOverflowButtonClick,
+      ownFocus,
+      showTopN,
+      stKeyboardEvent,
+      toggleColumn,
+      toggleTopN,
+      values,
+      scopeId,
+    });
+
+    const Container = applyWidthAndPadding
+      ? StyledHoverActionsContainerWithPaddingsAndMinWidth
+      : StyledHoverActionsContainer;
+
+    return (
+      <EuiFocusTrap
+        disabled={isFocusTrapDisabled({
+          ownFocus,
+          showTopN,
+        })}
       >
-        <EuiScreenReaderOnly>
-          <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(field)}</p>
-        </EuiScreenReaderOnly>
+        <Container
+          data-test-subj="hover-actions-container"
+          onKeyDown={onKeyDown}
+          $showTopN={showTopN}
+          $showOwnFocus={showOwnFocus}
+          $hiddenActionsCount={hiddenActionsCount}
+          $isActive={isActive}
+          className={isActive ? 'hoverActions-active' : ''}
+        >
+          <EuiScreenReaderOnly>
+            <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(field)}</p>
+          </EuiScreenReaderOnly>
 
-        {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
+          {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
 
-        {enableOverflowButton && !isCaseView ? overflowActionItems : allActionItems}
-      </Container>
-    </EuiFocusTrap>
-  );
-});
+          {enableOverflowButton && !isCaseView ? overflowActionItems : allActionItems}
+        </Container>
+      </EuiFocusTrap>
+    );
+  }
+);
 
 HoverActions.displayName = 'HoverActions';

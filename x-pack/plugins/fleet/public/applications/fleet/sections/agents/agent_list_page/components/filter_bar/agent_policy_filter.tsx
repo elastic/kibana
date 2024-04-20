@@ -19,13 +19,11 @@ export interface Props {
   agentPolicies: AgentPolicy[];
 }
 
-export const AgentPolicyFilter = (
-  {
-    selectedAgentPolicies,
-    onSelectedAgentPoliciesChange,
-    agentPolicies
-  }: Props
-) => {
+export const AgentPolicyFilter = ({
+  selectedAgentPolicies,
+  onSelectedAgentPoliciesChange,
+  agentPolicies,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);

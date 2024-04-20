@@ -33,13 +33,7 @@ interface Props {
   onChange(selectedUrls: string[]): void;
 }
 
-export const UrlComboBox = (
-  {
-    label,
-    selectedUrls,
-    onChange
-  }: Props
-) => {
+export const UrlComboBox = ({ label, selectedUrls, onChange }: Props) => {
   const id = useGeneratedHtmlId();
   const urlComboBoxLogic = UrlComboBoxLogic({ id });
   const { isInvalid } = useValues(urlComboBoxLogic);

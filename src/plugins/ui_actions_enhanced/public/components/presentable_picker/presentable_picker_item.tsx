@@ -30,13 +30,7 @@ export interface PresentablePickerItemProps {
 
 export const TEST_SUBJ_PRESENTABLE_ITEM = 'actionFactoryItem';
 
-export const PresentablePickerItem = (
-  {
-    item,
-    context,
-    onSelect
-  }: PresentablePickerItemProps
-) => {
+export const PresentablePickerItem = ({ item, context, onSelect }: PresentablePickerItemProps) => {
   const isLicenseCompatible = item.isLicenseCompatible ?? true;
   const showTooltip = !isLicenseCompatible;
 

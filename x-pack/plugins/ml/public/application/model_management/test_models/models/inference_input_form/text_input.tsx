@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, FormEventHandler } from 'react';
+import type { FormEventHandler } from 'react';
 import React, { useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -30,11 +30,7 @@ enum TAB {
   RAW,
 }
 
-export const TextInputForm = (
-  {
-    inferrer
-  }: Props
-) => {
+export const TextInputForm = ({ inferrer }: Props) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -52,18 +52,16 @@ interface CreateOrEditModalProps {
   setField: <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => void;
 }
 
-export const CreateOrEditModal = (
-  {
-    onClose,
-    onSubmit,
-    onNameChange,
-    validation,
-    isValidating,
-    setField,
-    tag,
-    mode
-  }: CreateOrEditModalProps
-) => {
+export const CreateOrEditModal = ({
+  onClose,
+  onSubmit,
+  onNameChange,
+  validation,
+  isValidating,
+  setField,
+  tag,
+  mode,
+}: CreateOrEditModalProps) => {
   const optionalMessageId = htmlIdGenerator()();
   const ifMounted = useIfMounted();
   const [submitting, setSubmitting] = useState<boolean>(false);

@@ -20,13 +20,7 @@ interface FileDeleteButtonProps {
   isIcon?: boolean;
 }
 
-const FileDeleteButtonComponent = (
-  {
-    caseId,
-    fileId,
-    isIcon
-  }: FileDeleteButtonProps
-) => {
+const FileDeleteButtonComponent = ({ caseId, fileId, isIcon }: FileDeleteButtonProps) => {
   const { permissions } = useCasesContext();
   const { isLoading, mutate: deleteFileAttachment } = useDeleteFileAttachment();
 

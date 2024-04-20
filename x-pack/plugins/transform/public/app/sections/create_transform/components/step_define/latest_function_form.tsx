@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,13 +19,11 @@ interface LatestFunctionFormProps {
   latestFunctionService: LatestFunctionService;
 }
 
-export const LatestFunctionForm = (
-  {
-    copyToClipboard,
-    copyToClipboardDescription,
-    latestFunctionService
-  }: LatestFunctionFormProps
-) => {
+export const LatestFunctionForm = ({
+  copyToClipboard,
+  copyToClipboardDescription,
+  latestFunctionService,
+}: LatestFunctionFormProps) => {
   const {
     ml: { useFieldStatsTrigger },
   } = useAppDependencies();

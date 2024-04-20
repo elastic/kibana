@@ -16,23 +16,23 @@ import {
 } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-export const EnterpriseSearchVectorSearchPageTemplate = (
-  {
-    children,
-    pageChrome,
-    pageViewTelemetry,
-    ...pageTemplateProps
-  }: PageTemplateProps
-) => (<EnterpriseSearchPageTemplateWrapper
-  {...pageTemplateProps}
-  solutionNav={{
-    items: useEnterpriseSearchNav(),
-    name: VECTOR_SEARCH_PLUGIN.NAME,
-  }}
-  setPageChrome={pageChrome && <SetVectorSearchChrome trail={pageChrome} />}
->
-  {pageViewTelemetry && (
-    <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />
-  )}
-  {children}
-</EnterpriseSearchPageTemplateWrapper>);
+export const EnterpriseSearchVectorSearchPageTemplate = ({
+  children,
+  pageChrome,
+  pageViewTelemetry,
+  ...pageTemplateProps
+}: PageTemplateProps) => (
+  <EnterpriseSearchPageTemplateWrapper
+    {...pageTemplateProps}
+    solutionNav={{
+      items: useEnterpriseSearchNav(),
+      name: VECTOR_SEARCH_PLUGIN.NAME,
+    }}
+    setPageChrome={pageChrome && <SetVectorSearchChrome trail={pageChrome} />}
+  >
+    {pageViewTelemetry && (
+      <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />
+    )}
+    {children}
+  </EnterpriseSearchPageTemplateWrapper>
+);

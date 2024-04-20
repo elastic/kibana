@@ -26,15 +26,7 @@ export interface PageProps {
   theme: ThemeServiceSetup;
 }
 
-export const Page = (
-  {
-    manager,
-    homeHref,
-    customBranding,
-    docTitle,
-    theme
-  }: PageProps
-) => {
+export const Page = ({ manager, homeHref, customBranding, docTitle, theme }: PageProps) => {
   const error = useObservable(manager.error$);
   const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 

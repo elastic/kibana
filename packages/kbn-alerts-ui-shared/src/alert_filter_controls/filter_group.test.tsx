@@ -7,7 +7,6 @@
  */
 
 import { FilterGroup } from './filter_group';
-import { FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import {

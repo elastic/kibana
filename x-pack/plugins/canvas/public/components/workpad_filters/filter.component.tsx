@@ -25,12 +25,7 @@ const renderElement = (
   return <Component {...props} onChange={updateFilter} />;
 };
 
-export const Filter = (
-  {
-    filter,
-    ...restProps
-  }: Props
-) => {
+export const Filter = ({ filter, ...restProps }: Props) => {
   const filterView = Object.values(filter).map((filterValue) => {
     const description = filterValue.component
       ? renderElement(filterValue.component, { value: filterValue.formattedValue, ...restProps })

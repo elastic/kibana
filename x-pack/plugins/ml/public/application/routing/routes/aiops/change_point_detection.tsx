@@ -7,7 +7,6 @@
 
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml';

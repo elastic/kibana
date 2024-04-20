@@ -35,11 +35,7 @@ interface ConnectorConfigurationProps {
 
 type ConnectorConfigurationStep = 'link' | 'configure' | 'connect' | 'connected';
 
-export const ConnectorConfiguration = (
-  {
-    connector
-  }: ConnectorConfigurationProps
-) => {
+export const ConnectorConfiguration = ({ connector }: ConnectorConfigurationProps) => {
   const [currentStep, setCurrentStep] = useState<ConnectorConfigurationStep>('link');
   useEffect(() => {
     let step: ConnectorConfigurationStep = 'link';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import {
@@ -17,15 +17,13 @@ import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-typ
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
-export const _KibanaPageTemplate = (
-  {
-    className,
-    children,
-    solutionNav,
-    noDataConfig,
-    ...rest
-  }: KibanaPageTemplateProps
-) => {
+export const _KibanaPageTemplate = ({
+  className,
+  children,
+  solutionNav,
+  noDataConfig,
+  ...rest
+}: KibanaPageTemplateProps) => {
   /**
    * If passing the custom template of `noDataConfig`
    */

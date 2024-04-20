@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -47,12 +47,7 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export const LogRateAnalysis = (
-  {
-    rule,
-    alert
-  }: AlertDetailsLogRateAnalysisSectionProps
-) => {
+export const LogRateAnalysis = ({ rule, alert }: AlertDetailsLogRateAnalysisSectionProps) => {
   const { services } = useKibanaContextForPlugin();
   const { dataViews, logsShared, observabilityAIAssistant } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();

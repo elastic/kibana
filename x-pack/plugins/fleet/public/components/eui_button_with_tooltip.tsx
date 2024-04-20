@@ -12,14 +12,12 @@ import { EuiButton } from '@elastic/eui';
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 
-export const EuiButtonWithTooltip = (
-  {
-    tooltip: tooltipProps,
-    ...buttonProps
-  }: EuiButtonPropsFull & {
-    tooltip?: Partial<EuiToolTipProps>;
-  }
-) => {
+export const EuiButtonWithTooltip = ({
+  tooltip: tooltipProps,
+  ...buttonProps
+}: EuiButtonPropsFull & {
+  tooltip?: Partial<EuiToolTipProps>;
+}) => {
   return tooltipProps ? (
     <EuiToolTip {...tooltipProps}>
       <EuiButton {...buttonProps} />

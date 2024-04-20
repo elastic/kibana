@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -60,16 +60,14 @@ const managedFilterLabel = i18n.translate('xpack.ingestPipelines.list.table.mana
   defaultMessage: 'Managed',
 });
 
-export const PipelineTable = (
-  {
-    pipelines,
-    isLoading,
-    onReloadClick,
-    onEditPipelineClick,
-    onClonePipelineClick,
-    onDeletePipelineClick
-  }: Props
-) => {
+export const PipelineTable = ({
+  pipelines,
+  isLoading,
+  onReloadClick,
+  onEditPipelineClick,
+  onClonePipelineClick,
+  onDeletePipelineClick,
+}: Props) => {
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
     { key: 'managed', label: managedFilterLabel },
     { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },

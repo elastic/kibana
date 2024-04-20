@@ -23,13 +23,7 @@ interface Props {
 
 const { emptyField } = fieldValidators;
 
-const OAuthComponent = (
-  {
-    isLoading,
-    readOnly,
-    pathPrefix = ''
-  }: Props
-) => {
+const OAuthComponent = ({ isLoading, readOnly, pathPrefix = '' }: Props) => {
   return (
     <>
       <UseField

@@ -28,11 +28,7 @@ interface UnifiedFieldListExampleAppProps {
   services: FieldListSidebarProps['services'];
 }
 
-export const UnifiedFieldListExampleApp = (
-  {
-    services
-  }: UnifiedFieldListExampleAppProps
-) => {
+export const UnifiedFieldListExampleApp = ({ services }: UnifiedFieldListExampleAppProps) => {
   const { navigation, data, unifiedSearch } = services;
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [dataView, setDataView] = useState<DataView | null>();

@@ -6,7 +6,6 @@
  */
 
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -22,13 +21,11 @@ export interface ConfirmDisableUsersProps {
   onSuccess?(): void;
 }
 
-export const ConfirmDisableUsers = (
-  {
-    usernames,
-    onCancel,
-    onSuccess
-  }: ConfirmDisableUsersProps
-) => {
+export const ConfirmDisableUsers = ({
+  usernames,
+  onCancel,
+  onSuccess,
+}: ConfirmDisableUsersProps) => {
   const { services } = useKibana();
   const isSystemUser = usernames[0] === 'kibana' || usernames[0] === 'kibana_system';
 

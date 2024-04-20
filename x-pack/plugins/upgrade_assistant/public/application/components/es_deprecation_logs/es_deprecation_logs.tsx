@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiPageHeader,

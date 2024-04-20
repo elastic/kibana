@@ -22,13 +22,7 @@ interface Props {
   urlPrefix: string;
 }
 
-export const UserInvitationCallout = (
-  {
-    isNew,
-    invitationCode,
-    urlPrefix
-  }: Props
-) => {
+export const UserInvitationCallout = ({ isNew, invitationCode, urlPrefix }: Props) => {
   const link = `${urlPrefix}/invitations/${invitationCode}`;
   const label = isNew ? NEW_INVITATION_LABEL : EXISTING_INVITATION_LABEL;
 

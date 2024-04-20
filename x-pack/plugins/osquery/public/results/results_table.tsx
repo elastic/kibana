@@ -75,17 +75,15 @@ export interface ResultsTableComponentProps {
   error?: string;
 }
 
-const ResultsTableComponent = (
-  {
-    actionId,
-    agentIds,
-    ecsMapping,
-    startDate,
-    endDate,
-    liveQueryActionId,
-    error
-  }: ResultsTableComponentProps
-) => {
+const ResultsTableComponent = ({
+  actionId,
+  agentIds,
+  ecsMapping,
+  startDate,
+  endDate,
+  liveQueryActionId,
+  error,
+}: ResultsTableComponentProps) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
 

@@ -65,21 +65,19 @@ const getCss = (
   `;
 };
 
-export const ConnectorCheckable = (
-  {
-    isDisabled,
-    documentationUrl,
-    iconType,
-    isBeta,
-    isTechPreview,
-    name,
-    onConnectorSelect,
-    serviceType,
-    showNativeBadge,
-    showLicensePopover = false,
-    showNativePopover = false
-  }: ConnectorCheckableProps
-) => {
+export const ConnectorCheckable = ({
+  isDisabled,
+  documentationUrl,
+  iconType,
+  isBeta,
+  isTechPreview,
+  name,
+  onConnectorSelect,
+  serviceType,
+  showNativeBadge,
+  showLicensePopover = false,
+  showNativePopover = false,
+}: ConnectorCheckableProps) => {
   const { euiTheme } = useEuiTheme();
   const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
   const [isNativeInfoPopoverOpen, setIsNativeInfoPopoverOpen] = useState(false);

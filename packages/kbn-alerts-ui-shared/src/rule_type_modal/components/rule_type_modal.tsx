@@ -55,20 +55,18 @@ const loadingPrompt = (
   />
 );
 
-export const RuleTypeModal = (
-  {
-    onClose,
-    onSelectRuleType,
-    onFilterByProducer,
-    onChangeSearch,
-    ruleTypes,
-    ruleTypesLoading,
-    ruleTypeCountsByProducer,
-    searchString,
-    selectedProducer,
-    showCategories
-  }: RuleTypeModalProps & RuleTypeModalState
-) => {
+export const RuleTypeModal = ({
+  onClose,
+  onSelectRuleType,
+  onFilterByProducer,
+  onChangeSearch,
+  ruleTypes,
+  ruleTypesLoading,
+  ruleTypeCountsByProducer,
+  searchString,
+  selectedProducer,
+  showCategories,
+}: RuleTypeModalProps & RuleTypeModalState) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
   const isFullscreenPortrait = ['s', 'xs'].includes(currentBreakpoint);

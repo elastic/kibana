@@ -42,23 +42,21 @@ const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
   padding: 16px 24px !important;
 `;
 
-export const AgentActivityFlyout = (
-  {
-    onClose,
-    onAbortSuccess,
-    refreshAgentActivity,
-    setSearch,
-    setSelectedStatus,
-    agentPolicies
-  }: {
-    onClose: () => void;
-    onAbortSuccess: () => void;
-    refreshAgentActivity: boolean;
-    setSearch: (search: string) => void;
-    setSelectedStatus: (status: string[]) => void;
-    agentPolicies: AgentPolicy[];
-  }
-) => {
+export const AgentActivityFlyout = ({
+  onClose,
+  onAbortSuccess,
+  refreshAgentActivity,
+  setSearch,
+  setSelectedStatus,
+  agentPolicies,
+}: {
+  onClose: () => void;
+  onAbortSuccess: () => void;
+  refreshAgentActivity: boolean;
+  setSearch: (search: string) => void;
+  setSelectedStatus: (status: string[]) => void;
+  agentPolicies: AgentPolicy[];
+}) => {
   const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,

@@ -56,14 +56,12 @@ const defaultRule = {
   source_type: undefined,
 };
 
-export const EditFieldRuleFlyout = (
-  {
-    onClose,
-    fieldRule,
-    isNewRule,
-    saveRule
-  }: EditFieldRuleFlyoutProps
-) => {
+export const EditFieldRuleFlyout = ({
+  onClose,
+  fieldRule,
+  isNewRule,
+  saveRule,
+}: EditFieldRuleFlyoutProps) => {
   const { control, reset, getValues, formState } = useForm<ExtractionRuleFieldRule>({
     defaultValues: fieldRule ?? defaultRule,
     mode: 'all',

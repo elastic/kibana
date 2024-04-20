@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, type FC, type PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { useDispatch, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -53,12 +53,10 @@ const getReduxStore = () =>
 
 const EditTransformFlyoutContext = createContext<ProviderProps | null>(null);
 
-export const EditTransformFlyoutProvider = (
-  {
-    children,
-    ...props
-  }: PropsWithChildren<ProviderProps>
-) => {
+export const EditTransformFlyoutProvider = ({
+  children,
+  ...props
+}: PropsWithChildren<ProviderProps>) => {
   const store = useMemo(getReduxStore, []);
 
   // Apply original transform config to redux form state.

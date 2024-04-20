@@ -10,13 +10,11 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ActionConnectorFieldsProps } from '../../../types';
 
-const TestConnector = (
-  {
-    readOnly,
-    isEdit,
-    registerPreSubmitValidator
-  }: ActionConnectorFieldsProps
-) => {
+const TestConnector = ({
+  readOnly,
+  isEdit,
+  registerPreSubmitValidator,
+}: ActionConnectorFieldsProps) => {
   const preSubmitValidator = useCallback(async () => {}, []);
 
   useEffect(

@@ -122,14 +122,12 @@ interface ConfigurationPopOverProps {
   showConfiguration: boolean;
 }
 
-const ConfigurationPopover = (
-  {
-    searchApplicationName,
-    hasSchemaConflicts,
-    setCloseConfiguration,
-    showConfiguration
-  }: ConfigurationPopOverProps
-) => {
+const ConfigurationPopover = ({
+  searchApplicationName,
+  hasSchemaConflicts,
+  setCloseConfiguration,
+  showConfiguration,
+}: ConfigurationPopOverProps) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { openDeleteSearchApplicationModal } = useActions(SearchApplicationViewLogic);

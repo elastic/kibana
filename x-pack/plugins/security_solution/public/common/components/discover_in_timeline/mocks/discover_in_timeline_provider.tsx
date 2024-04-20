@@ -8,7 +8,7 @@
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import React, { useRef, useCallback } from 'react';
-import type { FC, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import { DiscoverInTimelineContext } from '../context';
 import { useDiscoverInTimelineActions } from '../use_discover_in_timeline_actions';
 
@@ -16,11 +16,7 @@ type Props = PropsWithChildren<{}>;
 
 jest.mock('../use_discover_in_timeline_actions');
 
-export const MockDiscoverInTimelineContext = (
-  {
-    children
-  }: Props
-) => {
+export const MockDiscoverInTimelineContext = ({ children }: Props) => {
   const discoverStateContainer = useRef(discoverPluginMock.getDiscoverStateMock({}));
 
   const setDiscoverStateContainer = useCallback((stateContainer: DiscoverStateContainer) => {

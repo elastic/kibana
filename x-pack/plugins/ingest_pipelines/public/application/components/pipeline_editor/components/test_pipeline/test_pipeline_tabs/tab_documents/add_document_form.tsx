@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -103,11 +103,7 @@ interface Props {
   onAddDocuments: (document: Document) => void;
 }
 
-export const AddDocumentForm = (
-  {
-    onAddDocuments
-  }: Props
-) => {
+export const AddDocumentForm = ({ onAddDocuments }: Props) => {
   const { services } = useKibana();
   const isMounted = useIsMounted();
 

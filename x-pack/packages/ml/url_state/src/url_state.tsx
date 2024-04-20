@@ -6,15 +6,7 @@
  */
 
 import { parse, stringify } from 'query-string';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useEffect,
-  type FC,
-} from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
 

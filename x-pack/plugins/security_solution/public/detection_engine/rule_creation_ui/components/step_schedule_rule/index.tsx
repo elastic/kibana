@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import type {
@@ -32,13 +31,11 @@ interface StepScheduleRuleReadOnlyProps {
   defaultValues: ScheduleStepRule;
 }
 
-const StepScheduleRuleComponent = (
-  {
-    isLoading,
-    isUpdateView = false,
-    form
-  }: StepScheduleRuleProps
-) => {
+const StepScheduleRuleComponent = ({
+  isLoading,
+  isUpdateView = false,
+  form,
+}: StepScheduleRuleProps) => {
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -70,13 +67,11 @@ const StepScheduleRuleComponent = (
 };
 export const StepScheduleRule = memo(StepScheduleRuleComponent);
 
-const StepScheduleRuleReadOnlyComponent = (
-  {
-    addPadding,
-    defaultValues: data,
-    descriptionColumns
-  }: StepScheduleRuleReadOnlyProps
-) => {
+const StepScheduleRuleReadOnlyComponent = ({
+  addPadding,
+  defaultValues: data,
+  descriptionColumns,
+}: StepScheduleRuleReadOnlyProps) => {
   return (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription columns={descriptionColumns} schema={schema} data={data} />

@@ -22,12 +22,7 @@ const StyledFlexItem = euiStyled(EuiFlexItem)`
   min-width: 160px;
 `;
 
-export const Legend = (
-  {
-    items,
-    render
-  }: LegendProps
-) => {
+export const Legend = ({ items, render }: LegendProps) => {
   return (
     <EuiFlexGroup gutterSize="s" wrap>
       {items.map((item, index) => (

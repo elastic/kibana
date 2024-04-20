@@ -32,12 +32,7 @@ const titlePositions = [
   },
 ];
 
-export const TitlePositionOptions = (
-  {
-    state,
-    setState
-  }: TitlePositionProps
-) => {
+export const TitlePositionOptions = ({ state, setState }: TitlePositionProps) => {
   return (
     <EuiFormRow
       display="columnCompressed"

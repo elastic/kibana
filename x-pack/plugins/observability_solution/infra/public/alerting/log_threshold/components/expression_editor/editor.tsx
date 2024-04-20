@@ -90,7 +90,9 @@ const createDefaultRatioRuleParams = (
   ],
 });
 
-export const ExpressionEditor = (props: RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>) => {
+export const ExpressionEditor = (
+  props: RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
+) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const {
     services: { logsShared },
@@ -149,7 +151,9 @@ export const SourceStatusWrapper = ({ children }) => {
   );
 };
 
-export const Editor = (props: RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>) => {
+export const Editor = (
+  props: RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
+) => {
   const { setRuleParams, ruleParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { logViewReference, resolvedLogView } = useLogViewContext();

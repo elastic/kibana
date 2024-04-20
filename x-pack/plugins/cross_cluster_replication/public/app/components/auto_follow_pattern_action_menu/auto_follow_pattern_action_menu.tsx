@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -45,16 +45,14 @@ const allValuesSame = (values: boolean[]) => {
   return true;
 };
 
-const AutoFollowPatternActionMenuUI = (
-  {
-    patterns,
-    deleteAutoFollowPattern,
-    pauseAutoFollowPattern,
-    resumeAutoFollowPattern,
-    arrowDirection,
-    edit
-  }: Props
-) => {
+const AutoFollowPatternActionMenuUI = ({
+  patterns,
+  deleteAutoFollowPattern,
+  pauseAutoFollowPattern,
+  resumeAutoFollowPattern,
+  arrowDirection,
+  edit,
+}: Props) => {
   const [showPopover, setShowPopover] = useState(false);
 
   const allActiveValuesSame = allValuesSame(patterns.filter(Boolean).map(({ active }) => active));

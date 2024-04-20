@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiForm } from '@elastic/eui';
 
@@ -19,17 +18,15 @@ export interface ConfigurationStepProps extends CreateAnalyticsStepProps {
   sourceDataViewTitle: string;
 }
 
-export const ConfigurationStep = (
-  {
-    actions,
-    state,
-    setCurrentStep,
-    step,
-    stepActivated,
-    isClone,
-    sourceDataViewTitle
-  }: ConfigurationStepProps
-) => {
+export const ConfigurationStep = ({
+  actions,
+  state,
+  setCurrentStep,
+  step,
+  stepActivated,
+  isClone,
+  sourceDataViewTitle,
+}: ConfigurationStepProps) => {
   const showForm = step === ANALYTICS_STEPS.CONFIGURATION;
   const showDetails = step !== ANALYTICS_STEPS.CONFIGURATION && stepActivated === true;
 

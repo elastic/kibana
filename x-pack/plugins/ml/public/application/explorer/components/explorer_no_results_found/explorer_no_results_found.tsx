@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,12 +18,10 @@ export interface ExplorerNoResultsFoundProps {
 /*
  * React component for rendering EuiEmptyPrompt when no results were found.
  */
-export const ExplorerNoResultsFound = (
-  {
-    hasResults,
-    selectedJobsRunning
-  }: ExplorerNoResultsFoundProps
-) => {
+export const ExplorerNoResultsFound = ({
+  hasResults,
+  selectedJobsRunning,
+}: ExplorerNoResultsFoundProps) => {
   const resultsHaveNoAnomalies = hasResults === true;
   const noResults = hasResults === false;
   return (

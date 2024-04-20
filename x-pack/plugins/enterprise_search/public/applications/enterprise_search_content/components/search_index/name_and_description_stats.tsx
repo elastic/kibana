@@ -26,20 +26,20 @@ import { ConnectorNameAndDescriptionFlyout } from './connector/connector_name_an
 import { ConnectorNameAndDescriptionLogic } from './connector/connector_name_and_description/connector_name_and_description_logic';
 import { OverviewLogic } from './overview.logic';
 
-const EditDescription = (
-  {
-    label,
-    onClick
-  }: {
-    label: string;
-    onClick: MouseEventHandler<HTMLButtonElement>;
-  }
-) => (<EuiFlexGroup justifyContent="spaceBetween">
-  <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
-  </EuiFlexItem>
-</EuiFlexGroup>);
+const EditDescription = ({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: MouseEventHandler<HTMLButtonElement>;
+}) => (
+  <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const NameAndDescriptionStats = () => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);

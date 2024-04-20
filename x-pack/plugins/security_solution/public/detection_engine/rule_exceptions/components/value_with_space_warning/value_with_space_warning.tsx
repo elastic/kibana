@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { FC } from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
@@ -19,13 +18,11 @@ const Container = styled.div`
   display: inline;
   margin-left: ${({ theme }) => `${theme.eui.euiSizeXS}`};
 `;
-export const ValueWithSpaceWarning = (
-  {
-    value,
-    tooltipIconType = 'iInCircle',
-    tooltipIconText
-  }: ValueWithSpaceWarningProps
-) => {
+export const ValueWithSpaceWarning = ({
+  value,
+  tooltipIconType = 'iInCircle',
+  tooltipIconText,
+}: ValueWithSpaceWarningProps) => {
   const { showSpaceWarningIcon, warningText } = useValueWithSpaceWarning({
     value,
     tooltipIconText,

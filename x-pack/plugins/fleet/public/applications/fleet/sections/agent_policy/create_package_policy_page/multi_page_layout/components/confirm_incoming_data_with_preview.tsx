@@ -70,13 +70,7 @@ const CompressedPre = styled('pre')`
   }
 `;
 
-const HitPreview = (
-  {
-    hit
-  }: {
-    hit: SearchHit;
-  }
-) => {
+const HitPreview = ({ hit }: { hit: SearchHit }) => {
   const hitForDisplay = omit(
     getFlattenedObject(hit._source as Record<string, unknown>),
     DATA_PREVIEW_OMIT_KEYS
@@ -96,13 +90,7 @@ const HitPreview = (
   );
 };
 
-const HitTimestamp = (
-  {
-    hit
-  }: {
-    hit: SearchHit;
-  }
-) => {
+const HitTimestamp = ({ hit }: { hit: SearchHit }) => {
   const source = (hit?._source as Record<string, any>) || {};
   const timestamp = source?.['@timestamp'] || '-';
   return (
@@ -114,13 +102,7 @@ const HitTimestamp = (
   );
 };
 
-const AgentDataPreview = (
-  {
-    dataPreview
-  }: {
-    dataPreview: SearchHit[];
-  }
-) => {
+const AgentDataPreview = ({ dataPreview }: { dataPreview: SearchHit[] }) => {
   const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
     <>
@@ -142,15 +124,13 @@ const AgentDataPreview = (
   );
 };
 
-export const ConfirmIncomingDataWithPreview = (
-  {
-    agentIds,
-    packageInfo,
-    agentDataConfirmed,
-    setAgentDataConfirmed,
-    troubleshootLink
-  }: Props
-) => {
+export const ConfirmIncomingDataWithPreview = ({
+  agentIds,
+  packageInfo,
+  agentDataConfirmed,
+  setAgentDataConfirmed,
+  troubleshootLink,
+}: Props) => {
   const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData(
     agentIds,
     true,

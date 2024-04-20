@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -25,14 +25,12 @@ interface Props {
   onChangeDefaultRoute?: (event: MouseEvent) => void;
 }
 
-export const OverviewPageFooter = (
-  {
-    addBasePath,
-    path,
-    onSetDefaultRoute,
-    onChangeDefaultRoute
-  }: Props
-) => {
+export const OverviewPageFooter = ({
+  addBasePath,
+  path,
+  onSetDefaultRoute,
+  onChangeDefaultRoute,
+}: Props) => {
   const [defaultRoute, setDefaultRoute] = useUiSetting$<string>('defaultRoute');
   const {
     services: {
@@ -97,12 +95,12 @@ export const OverviewPageFooter = (
 
   return (
     // Note: Using KibanaPageTemplate.Section instead of EuiPageTemplate causes Jest failures and bundle size issues
-    (<EuiPageTemplate.Section component="footer" className="kbnOverviewPageFooter">
+    <EuiPageTemplate.Section component="footer" className="kbnOverviewPageFooter">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <div>{defaultRouteButton}</div>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPageTemplate.Section>)
+    </EuiPageTemplate.Section>
   );
 };

@@ -28,13 +28,7 @@ interface Props {
   onChange(value: string): void;
 }
 
-export const SortingView = (
-  {
-    onChange,
-    options,
-    value
-  }: Props
-) => {
+export const SortingView = ({ onChange, options, value }: Props) => {
   // If we don't have the value in options, unset it
   const valuesFromOptions = options.map(getValueFromOption);
   const selectedValue = value && !valuesFromOptions.includes(value) ? undefined : value;

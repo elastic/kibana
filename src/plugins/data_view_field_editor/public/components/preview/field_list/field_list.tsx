@@ -69,13 +69,7 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
   );
 }, areEqual);
 
-export const PreviewFieldList = (
-  {
-    height,
-    clearSearch,
-    searchValue = ''
-  }: Props
-) => {
+export const PreviewFieldList = ({ height, clearSearch, searchValue = '' }: Props) => {
   const { dataView } = useFieldEditorContext();
   const { controller } = useFieldPreviewContext();
   const pinnedFields = useStateSelector(controller.state$, pinnedFieldsSelector, isEqual);

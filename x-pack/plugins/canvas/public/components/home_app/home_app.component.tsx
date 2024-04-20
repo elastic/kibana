@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { Home } from '../home';
 import { setDocTitle } from '../../lib/doc_title';
 
@@ -13,11 +13,7 @@ export interface Props {
   onLoad: () => void;
 }
 
-export const HomeApp = (
-  {
-    onLoad = () => {}
-  }: Props
-) => {
+export const HomeApp = ({ onLoad = () => {} }: Props) => {
   onLoad();
   setDocTitle('Canvas');
   return <Home />;

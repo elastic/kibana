@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexItem, EuiText, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
@@ -31,12 +31,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const NumberContent = (
-  {
-    config,
-    onAddFilter
-  }: FieldDataRowProps
-) => {
+export const NumberContent = ({ config, onAddFilter }: FieldDataRowProps) => {
   const { stats } = config;
 
   const distributionChartData = useMemo(

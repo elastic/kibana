@@ -35,96 +35,90 @@ interface Props {
   indexSettings?: IndexSettings;
 }
 
-export const StepMappings = React.memo((
-  {
-    defaultValue = {},
-    onChange,
-    indexSettings,
-    esDocsBase,
-    esNodesPlugins
-  }: Props
-) => {
-  const [mappings, setMappings] = useState(defaultValue);
-  const { docLinks } = useAppContext();
+export const StepMappings = React.memo(
+  ({ defaultValue = {}, onChange, indexSettings, esDocsBase, esNodesPlugins }: Props) => {
+    const [mappings, setMappings] = useState(defaultValue);
+    const { docLinks } = useAppContext();
 
-  const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
-    ({ isValid, getData, validate }) => {
-      onChange({
-        isValid,
-        async validate() {
-          return isValid === undefined ? await validate() : isValid;
-        },
-        getData,
-      });
-    },
-    [onChange]
-  );
+    const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
+      ({ isValid, getData, validate }) => {
+        onChange({
+          isValid,
+          async validate() {
+            return isValid === undefined ? await validate() : isValid;
+          },
+          getData,
+        });
+      },
+      [onChange]
+    );
 
-  const onJsonLoaded = (json: { [key: string]: any }): void => {
-    setMappings(json);
-  };
+    const onJsonLoaded = (json: { [key: string]: any }): void => {
+      setMappings(json);
+    };
 
-  return (
-    <div data-test-subj="stepMappings">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2 data-test-subj="stepTitle">
-              <FormattedMessage
-                id="xpack.idxMgmt.formWizard.stepMappings.stepTitle"
-                defaultMessage="Mappings (optional)"
-              />
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.formWizard.stepMappings.mappingsDescription"
-                defaultMessage="Define how to store and index documents."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <LoadMappingsFromJsonButton onJson={onJsonLoaded} esNodesPlugins={esNodesPlugins} />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                flush="right"
-                href={documentationService.getMappingDocumentationLink()}
-                target="_blank"
-                iconType="help"
-              >
+    return (
+      <div data-test-subj="stepMappings">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2 data-test-subj="stepTitle">
                 <FormattedMessage
-                  id="xpack.idxMgmt.formWizard.stepMappings.docsButtonLabel"
-                  defaultMessage="Mapping docs"
+                  id="xpack.idxMgmt.formWizard.stepMappings.stepTitle"
+                  defaultMessage="Mappings (optional)"
                 />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              </h2>
+            </EuiTitle>
 
-      <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-      {/* Mappings editor */}
-      <MappingsEditor
-        value={mappings}
-        onChange={onMappingsEditorUpdate}
-        indexSettings={indexSettings}
-        docLinks={docLinks}
-        esNodesPlugins={esNodesPlugins}
-      />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.formWizard.stepMappings.mappingsDescription"
+                  defaultMessage="Define how to store and index documents."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
 
-      <EuiSpacer size="m" />
-    </div>
-  );
-});
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <LoadMappingsFromJsonButton onJson={onJsonLoaded} esNodesPlugins={esNodesPlugins} />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  flush="right"
+                  href={documentationService.getMappingDocumentationLink()}
+                  target="_blank"
+                  iconType="help"
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.formWizard.stepMappings.docsButtonLabel"
+                    defaultMessage="Mapping docs"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        {/* Mappings editor */}
+        <MappingsEditor
+          value={mappings}
+          onChange={onMappingsEditorUpdate}
+          indexSettings={indexSettings}
+          docLinks={docLinks}
+          esNodesPlugins={esNodesPlugins}
+        />
+
+        <EuiSpacer size="m" />
+      </div>
+    );
+  }
+);

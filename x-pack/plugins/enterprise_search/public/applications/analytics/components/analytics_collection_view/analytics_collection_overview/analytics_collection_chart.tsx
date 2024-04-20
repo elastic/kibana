@@ -54,15 +54,13 @@ interface AnalyticsCollectionChartLensProps {
   isLoading: boolean;
 }
 
-export const AnalyticsCollectionChart = (
-  {
-    data,
-    timeRange,
-    isLoading,
-    selectedChart,
-    setSelectedChart
-  }: AnalyticsCollectionChartProps & AnalyticsCollectionChartLensProps
-) => {
+export const AnalyticsCollectionChart = ({
+  data,
+  timeRange,
+  isLoading,
+  selectedChart,
+  setSelectedChart,
+}: AnalyticsCollectionChartProps & AnalyticsCollectionChartLensProps) => {
   const [currentData, setCurrentData] = useState(data);
   const [hoverChart, setHoverChart] = useState<FilterBy | null>(null);
   const { uiSettings, charts: chartSettings } = useValues(KibanaLogic);

@@ -14,24 +14,22 @@ interface Props {
   title: string;
 }
 
-const ErrorEmptyPromptComponent = (
-  {
-    title
-  }: Props
-) => (<EuiCallOut color="danger" size="s" data-test-subj="errorEmptyPrompt" title={title}>
-  <p>{i18n.ERRORS_MAY_OCCUR}</p>
-  <span>{i18n.THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}</span>
-  <ul>
-    <li>
-      <EuiCode>{i18n.MONITOR}</EuiCode> {i18n.OR} <EuiCode>{i18n.MANAGE}</EuiCode>
-    </li>
-    <li>
-      <EuiCode>{i18n.VIEW_INDEX_METADATA}</EuiCode>
-    </li>
-    <li>
-      <EuiCode>{i18n.READ}</EuiCode>
-    </li>
-  </ul>
-</EuiCallOut>);
+const ErrorEmptyPromptComponent = ({ title }: Props) => (
+  <EuiCallOut color="danger" size="s" data-test-subj="errorEmptyPrompt" title={title}>
+    <p>{i18n.ERRORS_MAY_OCCUR}</p>
+    <span>{i18n.THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}</span>
+    <ul>
+      <li>
+        <EuiCode>{i18n.MONITOR}</EuiCode> {i18n.OR} <EuiCode>{i18n.MANAGE}</EuiCode>
+      </li>
+      <li>
+        <EuiCode>{i18n.VIEW_INDEX_METADATA}</EuiCode>
+      </li>
+      <li>
+        <EuiCode>{i18n.READ}</EuiCode>
+      </li>
+    </ul>
+  </EuiCallOut>
+);
 
 export const ErrorEmptyPrompt = React.memo(ErrorEmptyPromptComponent);

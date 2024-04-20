@@ -30,18 +30,16 @@ export interface UrlTemplateEditorProps {
   Editor?: React.ComponentType<CodeEditorProps>;
 }
 
-export const UrlTemplateEditor = (
-  {
-    height = 105,
-    fitToContent,
-    value,
-    variables,
-    onChange,
-    placeholder,
-    onEditor,
-    Editor = CodeEditor
-  }: UrlTemplateEditorProps
-) => {
+export const UrlTemplateEditor = ({
+  height = 105,
+  fitToContent,
+  value,
+  variables,
+  onChange,
+  placeholder,
+  onEditor,
+  Editor = CodeEditor,
+}: UrlTemplateEditorProps) => {
   const refEditor = React.useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const handleEditor = React.useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     refEditor.current = editor;

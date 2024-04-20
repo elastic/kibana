@@ -22,11 +22,7 @@ interface Props {
   actionConnector?: ActionConnector;
 }
 
-const SearchIssuesComponent = (
-  {
-    actionConnector
-  }: Props
-) => {
+const SearchIssuesComponent = ({ actionConnector }: Props) => {
   const [query, setQuery] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []

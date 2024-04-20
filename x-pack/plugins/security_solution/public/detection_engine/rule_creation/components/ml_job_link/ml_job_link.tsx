@@ -21,12 +21,7 @@ interface MlJobLinkProps {
   jobName: string | undefined;
 }
 
-const MlJobLinkComponent = (
-  {
-    jobId,
-    jobName
-  }: MlJobLinkProps
-) => {
+const MlJobLinkComponent = ({ jobId, jobName }: MlJobLinkProps) => {
   const {
     services: { http, ml },
   } = useKibana();

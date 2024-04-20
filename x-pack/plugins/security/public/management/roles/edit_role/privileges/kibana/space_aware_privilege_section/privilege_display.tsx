@@ -8,7 +8,7 @@
 import type { PropsOf } from '@elastic/eui';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import _ from 'lodash';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';

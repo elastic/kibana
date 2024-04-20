@@ -13,12 +13,7 @@ interface Props {
   entityValue: string;
 }
 
-export const EntityComponent = (
-  {
-    entityName,
-    entityValue
-  }: Props
-) => {
+export const EntityComponent = ({ entityName, entityValue }: Props) => {
   return (
     <SecurityCellActions
       data={{

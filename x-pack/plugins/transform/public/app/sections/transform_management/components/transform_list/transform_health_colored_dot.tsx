@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiHealth, EuiToolTip } from '@elastic/eui';
 
@@ -22,13 +22,11 @@ interface TransformHealthProps {
   showToolTip?: boolean;
 }
 
-export const TransformHealthColoredDot = (
-  {
-    healthStatus,
-    compact = true,
-    showToolTip = true
-  }: TransformHealthProps
-) => {
+export const TransformHealthColoredDot = ({
+  healthStatus,
+  compact = true,
+  showToolTip = true,
+}: TransformHealthProps) => {
   const transformHealthDescription = TRANSFORM_HEALTH_DESCRIPTION[healthStatus];
   const transformHealthColor = TRANSFORM_HEALTH_COLOR[healthStatus];
   const transformHealthLabel = TRANSFORM_HEALTH_LABEL[healthStatus];

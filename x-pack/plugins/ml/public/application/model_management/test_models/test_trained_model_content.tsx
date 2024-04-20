@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useMemo } from 'react';
 
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
@@ -24,13 +23,11 @@ interface ContentProps {
   externalPipelineConfig?: estypes.IngestPipeline;
 }
 
-export const TestTrainedModelContent = (
-  {
-    model,
-    handlePipelineConfigUpdate,
-    externalPipelineConfig
-  }: ContentProps
-) => {
+export const TestTrainedModelContent = ({
+  model,
+  handlePipelineConfigUpdate,
+  externalPipelineConfig,
+}: ContentProps) => {
   const [deploymentId, setDeploymentId] = useState<string>(model.deployment_ids[0]);
   const mediumPadding = useEuiPaddingSize('m');
 

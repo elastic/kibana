@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
@@ -48,11 +47,7 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-export const FieldsStatsGrid = (
-  {
-    results
-  }: Props
-) => {
+export const FieldsStatsGrid = ({ results }: Props) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
 
   const [dataVisualizerListState, setDataVisualizerListState] =

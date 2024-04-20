@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, FunctionComponent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Pipeline } from '../../../../../common/types';
@@ -18,12 +18,7 @@ interface Props {
   readProcessors: ReadProcessorsFunction;
 }
 
-export const PipelineRequestFlyout = (
-  {
-    closeFlyout,
-    readProcessors
-  }: Props
-) => {
+export const PipelineRequestFlyout = ({ closeFlyout, readProcessors }: Props) => {
   const { services } = useKibana();
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);

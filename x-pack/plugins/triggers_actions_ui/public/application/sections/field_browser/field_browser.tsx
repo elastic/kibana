@@ -23,16 +23,14 @@ export const INPUT_TIMEOUT = 250;
 /**
  * Manages the state of the field browser
  */
-export const FieldBrowserComponent = (
-  {
-    columnIds,
-    browserFields,
-    onResetColumns,
-    onToggleColumn,
-    options,
-    width
-  }: FieldBrowserProps
-) => {
+export const FieldBrowserComponent = ({
+  columnIds,
+  browserFields,
+  onResetColumns,
+  onToggleColumn,
+  options,
+  width,
+}: FieldBrowserProps) => {
   const initialCategories = useMemo(
     () => options?.preselectedCategoryIds ?? [],
     [options?.preselectedCategoryIds]

@@ -36,21 +36,19 @@ interface BaseProps {
 type Props = BaseProps &
   Pick<EuiBadgeProps, 'iconType' | 'iconSide' | 'onClick' | 'onClickAriaLabel'>;
 
-const RuleStatusComponent = (
-  {
-    contextId,
-    eventId,
-    fieldName,
-    fieldType,
-    isAggregatable,
-    isDraggable,
-    value,
-    onClick,
-    onClickAriaLabel,
-    iconSide,
-    iconType
-  }: Props
-) => {
+const RuleStatusComponent = ({
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isDraggable,
+  value,
+  onClick,
+  onClickAriaLabel,
+  iconSide,
+  iconType,
+}: Props) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
   const badge = (
     <StyledEuiBadge

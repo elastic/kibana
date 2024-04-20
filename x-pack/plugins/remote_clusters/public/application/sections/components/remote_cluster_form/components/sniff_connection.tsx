@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,14 +20,12 @@ import { transportPortUrl } from '../../../../services/documentation';
 import { validateSeed } from '../validators';
 import { Props } from './connection_mode';
 
-export const SniffConnection = (
-  {
-    fields,
-    fieldsErrors,
-    areErrorsVisible,
-    onFieldsChange
-  }: Props
-) => {
+export const SniffConnection = ({
+  fields,
+  fieldsErrors,
+  areErrorsVisible,
+  onFieldsChange,
+}: Props) => {
   const [localSeedErrors, setLocalSeedErrors] = useState<JSX.Element[]>([]);
   const { seeds = [], nodeConnections } = fields;
   const { seeds: seedsError } = fieldsErrors;

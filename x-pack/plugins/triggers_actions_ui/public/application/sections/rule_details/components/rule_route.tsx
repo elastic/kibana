@@ -26,16 +26,14 @@ type WithRuleSummaryProps = {
   refreshToken?: RefreshToken;
 } & Pick<RuleApis, 'loadRuleSummary'>;
 
-export const RuleRoute = (
-  {
-    rule,
-    ruleType,
-    readOnly,
-    requestRefresh,
-    loadRuleSummary: loadRuleSummary,
-    refreshToken
-  }: WithRuleSummaryProps
-) => {
+export const RuleRoute = ({
+  rule,
+  ruleType,
+  readOnly,
+  requestRefresh,
+  loadRuleSummary: loadRuleSummary,
+  refreshToken,
+}: WithRuleSummaryProps) => {
   const {
     notifications: { toasts },
   } = useKibana().services;

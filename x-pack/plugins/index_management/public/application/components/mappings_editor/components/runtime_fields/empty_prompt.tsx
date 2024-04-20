@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
@@ -15,12 +15,7 @@ interface Props {
   runtimeFieldsDocsUri: string;
 }
 
-export const EmptyPrompt = (
-  {
-    createField,
-    runtimeFieldsDocsUri
-  }: Props
-) => {
+export const EmptyPrompt = ({ createField, runtimeFieldsDocsUri }: Props) => {
   return (
     <EuiEmptyPrompt
       iconType="managementApp"

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,13 +12,7 @@ import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import type { StopAction } from './use_stop_action';
 
-export const StopActionModal = (
-  {
-    closeModal,
-    item,
-    forceStopAndCloseModal
-  }: StopAction
-) => {
+export const StopActionModal = ({ closeModal, item, forceStopAndCloseModal }: StopAction) => {
   return (
     <>
       {item !== undefined && (

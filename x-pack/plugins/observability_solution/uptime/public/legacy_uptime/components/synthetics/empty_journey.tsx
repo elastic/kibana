@@ -7,49 +7,47 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React from 'react';
 
 interface Props {
   checkGroup?: string;
 }
 
-export const EmptyJourney = (
-  {
-    checkGroup
-  }: Props
-) => (<EuiEmptyPrompt
-  iconType="cross"
-  title={
-    <h2>
-      <FormattedMessage
-        id="xpack.uptime.synthetics.emptyJourney.title"
-        defaultMessage="There are no steps for this journey"
-      />
-    </h2>
-  }
-  body={
-    <>
-      <p>
+export const EmptyJourney = ({ checkGroup }: Props) => (
+  <EuiEmptyPrompt
+    iconType="cross"
+    title={
+      <h2>
         <FormattedMessage
-          id="xpack.uptime.synthetics.emptyJourney.message.heading"
-          defaultMessage="This journey did not contain any steps."
+          id="xpack.uptime.synthetics.emptyJourney.title"
+          defaultMessage="There are no steps for this journey"
         />
-      </p>
-      {!!checkGroup && (
+      </h2>
+    }
+    body={
+      <>
         <p>
           <FormattedMessage
-            id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
-            defaultMessage="The journey's check group is {codeBlock}."
-            values={{ codeBlock: <code>{checkGroup}</code> }}
+            id="xpack.uptime.synthetics.emptyJourney.message.heading"
+            defaultMessage="This journey did not contain any steps."
           />
         </p>
-      )}
-      <p>
-        <FormattedMessage
-          id="xpack.uptime.synthetics.emptyJourney.message.footer"
-          defaultMessage="There is no further information to display."
-        />
-      </p>
-    </>
-  }
-/>);
+        {!!checkGroup && (
+          <p>
+            <FormattedMessage
+              id="xpack.uptime.synthetics.emptyJourney.message.checkGroupField"
+              defaultMessage="The journey's check group is {codeBlock}."
+              values={{ codeBlock: <code>{checkGroup}</code> }}
+            />
+          </p>
+        )}
+        <p>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.emptyJourney.message.footer"
+            defaultMessage="There is no further information to display."
+          />
+        </p>
+      </>
+    }
+  />
+);

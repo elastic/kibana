@@ -15,11 +15,9 @@ import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
 
-const SwimlaneFieldsPreviewComponent = (
-  {
-    connector
-  }: ConnectorFieldsPreviewProps<SwimlaneFieldsType>
-) => {
+const SwimlaneFieldsPreviewComponent = ({
+  connector,
+}: ConnectorFieldsPreviewProps<SwimlaneFieldsType>) => {
   const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   return (

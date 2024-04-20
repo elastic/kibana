@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 export interface StatsBarStat {
   label: string;
@@ -16,11 +16,7 @@ interface StatProps {
   stat: StatsBarStat;
 }
 
-export const Stat = (
-  {
-    stat
-  }: StatProps
-) => {
+export const Stat = ({ stat }: StatProps) => {
   return (
     <span className="transformStat">
       <span>{stat.label}</span>: <strong>{stat.value}</strong>

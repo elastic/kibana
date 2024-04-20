@@ -24,12 +24,7 @@ interface TableRowProps {
   mlUpgradeModeEnabled: boolean;
 }
 
-export const MlSnapshotsTableRowCells = (
-  {
-    rowFieldNames,
-    deprecation
-  }: TableRowProps
-) => {
+export const MlSnapshotsTableRowCells = ({ rowFieldNames, deprecation }: TableRowProps) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
 

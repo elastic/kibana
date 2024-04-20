@@ -64,16 +64,14 @@ jest.mock('../../hooks/use_license', () => {
 
 // creating a dummy component for testing data table to avoid mocking all the implementation details
 // but still test if the data table will render properly
-const SessionsViewerEventsViewer = (
-  {
-    defaultModel,
-    start,
-    end,
-    tableId,
-    pageFilters,
-    entityType
-  }: Props
-) => {
+const SessionsViewerEventsViewer = ({
+  defaultModel,
+  start,
+  end,
+  tableId,
+  pageFilters,
+  entityType,
+}: Props) => {
   useEffect(() => {
     callFilters(pageFilters);
   }, [pageFilters]);

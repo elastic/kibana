@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, Fragment, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,12 +49,7 @@ export interface PageProps {
   jobType: JOB_TYPE;
 }
 
-export const Page = (
-  {
-    existingJobsAndGroups,
-    jobType
-  }: PageProps
-) => {
+export const Page = ({ existingJobsAndGroups, jobType }: PageProps) => {
   const timefilter = useTimefilter();
   const dataSourceContext = useDataSource();
   const {

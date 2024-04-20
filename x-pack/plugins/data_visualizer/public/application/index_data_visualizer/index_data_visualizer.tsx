@@ -111,12 +111,10 @@ const DataVisualizerESQLStateContextProvider = () => {
   );
 };
 
-const DataVisualizerStateContextProvider = (
-  {
-    IndexDataVisualizerComponent,
-    getAdditionalLinks
-  }: DataVisualizerStateContextProviderProps
-) => {
+const DataVisualizerStateContextProvider = ({
+  IndexDataVisualizerComponent,
+  getAdditionalLinks,
+}: DataVisualizerStateContextProviderProps) => {
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -300,13 +298,11 @@ export interface Props {
   esql?: boolean;
 }
 
-export const IndexDataVisualizer = (
-  {
-    getAdditionalLinks,
-    showFrozenDataTierChoice = true,
-    esql
-  }: Props
-) => {
+export const IndexDataVisualizer = ({
+  getAdditionalLinks,
+  showFrozenDataTierChoice = true,
+  esql,
+}: Props) => {
   const coreStart = getCoreStart();
   const {
     data,

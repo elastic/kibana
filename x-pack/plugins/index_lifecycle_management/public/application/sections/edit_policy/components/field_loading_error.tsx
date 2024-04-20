@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonIcon } from '@elastic/eui';
 
 interface Props {

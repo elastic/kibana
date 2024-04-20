@@ -19,11 +19,7 @@ interface Props {
   cert: Cert;
 }
 
-export const FingerprintCol = (
-  {
-    cert
-  }: Props
-) => {
+export const FingerprintCol = ({ cert }: Props) => {
   const ShaComponent = ({ text, val }: { text: string; val: string }) => {
     return (
       <StyledSpan data-test-subj={val} className="eui-textNoWrap">

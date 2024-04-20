@@ -17,18 +17,16 @@ interface Props {
   viewErrorsPath: string;
 }
 
-export const SchemaErrorsCallout = (
-  {
-    viewErrorsPath
-  }: Props
-) => (<EuiCallOut
-  color="danger"
-  iconType="warning"
-  title={SCHEMA_ERRORS_TITLE}
-  data-test-subj="schemaErrorsCallout"
->
-  <p>{SCHEMA_ERRORS_DESCRIPTION}</p>
-  <EuiButtonTo to={viewErrorsPath} color="danger" fill size="s" data-test-subj="viewErrorsButton">
-    {SCHEMA_ERRORS_BUTTON}
-  </EuiButtonTo>
-</EuiCallOut>);
+export const SchemaErrorsCallout = ({ viewErrorsPath }: Props) => (
+  <EuiCallOut
+    color="danger"
+    iconType="warning"
+    title={SCHEMA_ERRORS_TITLE}
+    data-test-subj="schemaErrorsCallout"
+  >
+    <p>{SCHEMA_ERRORS_DESCRIPTION}</p>
+    <EuiButtonTo to={viewErrorsPath} color="danger" fill size="s" data-test-subj="viewErrorsButton">
+      {SCHEMA_ERRORS_BUTTON}
+    </EuiButtonTo>
+  </EuiCallOut>
+);

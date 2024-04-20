@@ -42,11 +42,7 @@ export interface AddIndicesFlyoutProps {
   onClose: () => void;
 }
 
-export const AddIndicesFlyout = (
-  {
-    onClose
-  }: AddIndicesFlyoutProps
-) => {
+export const AddIndicesFlyout = ({ onClose }: AddIndicesFlyoutProps) => {
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { selectedIndices, updateSearchApplicationStatus, updateSearchApplicationError } =
     useValues(AddIndicesLogic);

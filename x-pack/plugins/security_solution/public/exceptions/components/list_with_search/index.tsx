@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -29,13 +28,11 @@ interface ListWithSearchComponentProps {
   refreshExceptions?: boolean;
 }
 
-const ListWithSearchComponent = (
-  {
-    list,
-    isReadOnly,
-    refreshExceptions
-  }: ListWithSearchComponentProps
-) => {
+const ListWithSearchComponent = ({
+  list,
+  isReadOnly,
+  refreshExceptions,
+}: ListWithSearchComponentProps) => {
   const {
     listName,
     exceptions,

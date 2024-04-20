@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiPopover,
@@ -50,14 +50,12 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const DocumentsDropdown = (
-  {
-    documents,
-    selectedDocumentIndex,
-    updateSelectedDocument,
-    openFlyout
-  }: Props
-) => {
+export const DocumentsDropdown = ({
+  documents,
+  selectedDocumentIndex,
+  updateSelectedDocument,
+  openFlyout,
+}: Props) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const managePipelineButton = (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ChangeEvent } from 'react';
+import React, { ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ArgTypesStrings } from '../../../../i18n';
@@ -39,14 +39,12 @@ const opacities = [
   { value: 0.1, text: '10%' },
 ];
 
-export const AppearanceForm = (
-  {
-    padding = '',
-    opacity = 1,
-    overflow = 'hidden',
-    onChange
-  }: Props
-) => {
+export const AppearanceForm = ({
+  padding = '',
+  opacity = 1,
+  overflow = 'hidden',
+  onChange,
+}: Props) => {
   if (typeof padding === 'string') {
     padding = padding.replace('px', '');
   }

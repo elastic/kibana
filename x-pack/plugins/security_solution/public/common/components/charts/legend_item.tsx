@@ -35,13 +35,7 @@ const ValueWrapper = React.memo<{ value: LegendItem['value'] }>(({ value }) =>
 
 ValueWrapper.displayName = 'ValueWrapper';
 
-const LegendItemComponent = (
-  {
-    legendItem
-  }: {
-    legendItem: LegendItem;
-  }
-) => {
+const LegendItemComponent = ({ legendItem }: { legendItem: LegendItem }) => {
   const { color, value } = legendItem;
 
   return (

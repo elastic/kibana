@@ -19,34 +19,29 @@ interface Props {
   onChange: ({ minute }: { minute?: string }) => void;
 }
 
-export const CronHourly = (
-  {
-    disabled,
-    minute,
-    minuteOptions,
-    onChange
-  }: Props
-) => (<Fragment>
-  <EuiFormRow
-    label={
-      <FormattedMessage
-        id="searchConnectors.cronEditor.cronHourly.fieldTimeLabel"
-        defaultMessage="Minute"
-      />
-    }
-    fullWidth
-    data-test-subj="cronFrequencyConfiguration"
-  >
-    <EuiSelect
-      disabled={disabled}
-      options={minuteOptions}
-      value={minute}
-      onChange={(e) => onChange({ minute: e.target.value })}
+export const CronHourly = ({ disabled, minute, minuteOptions, onChange }: Props) => (
+  <Fragment>
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="searchConnectors.cronEditor.cronHourly.fieldTimeLabel"
+          defaultMessage="Minute"
+        />
+      }
       fullWidth
-      prepend={i18n.translate('searchConnectors.cronEditor.cronHourly.fieldMinute.textAtLabel', {
-        defaultMessage: 'At',
-      })}
-      data-test-subj="cronFrequencyHourlyMinuteSelect"
-    />
-  </EuiFormRow>
-</Fragment>);
+      data-test-subj="cronFrequencyConfiguration"
+    >
+      <EuiSelect
+        disabled={disabled}
+        options={minuteOptions}
+        value={minute}
+        onChange={(e) => onChange({ minute: e.target.value })}
+        fullWidth
+        prepend={i18n.translate('searchConnectors.cronEditor.cronHourly.fieldMinute.textAtLabel', {
+          defaultMessage: 'At',
+        })}
+        data-test-subj="cronFrequencyHourlyMinuteSelect"
+      />
+    </EuiFormRow>
+  </Fragment>
+);

@@ -19,12 +19,7 @@ interface LogLevelFilterProps {
   onChange: (selectedItems: LogLevel[]) => void;
 }
 
-const LogLevelFilterComponent = (
-  {
-    selectedItems,
-    onChange
-  }: LogLevelFilterProps
-) => {
+const LogLevelFilterComponent = ({ selectedItems, onChange }: LogLevelFilterProps) => {
   const renderItem = useCallback((item: LogLevel) => {
     return <LogLevelIndicator logLevel={item} />;
   }, []);

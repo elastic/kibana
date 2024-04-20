@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   Chart,

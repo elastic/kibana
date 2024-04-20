@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useRef } from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiPanel,
@@ -89,18 +89,16 @@ interface Props {
   toggleCompactView: () => void;
 }
 
-export const Expression = (
-  {
-    functionDefinitions,
-    formState,
-    updateValue,
-    setExpression,
-    done,
-    error,
-    isCompact,
-    toggleCompactView
-  }: Props
-) => {
+export const Expression = ({
+  functionDefinitions,
+  formState,
+  updateValue,
+  setExpression,
+  done,
+  error,
+  isCompact,
+  toggleCompactView,
+}: Props) => {
   const refExpressionInput: ExpressionInputEditorRef = useRef(null);
 
   const handleRun = () => {

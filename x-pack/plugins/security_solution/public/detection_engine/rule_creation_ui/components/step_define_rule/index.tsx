@@ -18,7 +18,6 @@ import {
   EuiRadioGroup,
   EuiToolTip,
 } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
 import styled from 'styled-components';
@@ -161,35 +160,33 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
 `;
 
 // eslint-disable-next-line complexity
-const StepDefineRuleComponent = (
-  {
-    isLoading,
-    isUpdateView = false,
-    kibanaDataViews,
-    indicesConfig,
-    threatIndicesConfig,
-    defaultSavedQuery,
-    form,
-    optionsSelected,
-    setOptionsSelected,
-    indexPattern,
-    isIndexPatternLoading,
-    browserFields,
-    isQueryBarValid,
-    setIsQueryBarValid,
-    setIsThreatQueryBarValid,
-    ruleType,
-    index,
-    threatIndex,
-    groupByFields,
-    dataSourceType,
-    shouldLoadQueryDynamically,
-    queryBarTitle,
-    queryBarSavedId,
-    thresholdFields,
-    enableThresholdSuppression
-  }: StepDefineRuleProps
-) => {
+const StepDefineRuleComponent = ({
+  isLoading,
+  isUpdateView = false,
+  kibanaDataViews,
+  indicesConfig,
+  threatIndicesConfig,
+  defaultSavedQuery,
+  form,
+  optionsSelected,
+  setOptionsSelected,
+  indexPattern,
+  isIndexPatternLoading,
+  browserFields,
+  isQueryBarValid,
+  setIsQueryBarValid,
+  setIsThreatQueryBarValid,
+  ruleType,
+  index,
+  threatIndex,
+  groupByFields,
+  dataSourceType,
+  shouldLoadQueryDynamically,
+  queryBarTitle,
+  queryBarSavedId,
+  thresholdFields,
+  enableThresholdSuppression,
+}: StepDefineRuleProps) => {
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -1123,14 +1120,12 @@ const StepDefineRuleComponent = (
 };
 export const StepDefineRule = memo(StepDefineRuleComponent);
 
-const StepDefineRuleReadOnlyComponent = (
-  {
-    addPadding,
-    defaultValues: data,
-    descriptionColumns,
-    indexPattern
-  }: StepDefineRuleReadOnlyProps
-) => {
+const StepDefineRuleReadOnlyComponent = ({
+  addPadding,
+  defaultValues: data,
+  descriptionColumns,
+  indexPattern,
+}: StepDefineRuleReadOnlyProps) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
   const transformFields = useExperimentalFeatureFieldsTransform();
 

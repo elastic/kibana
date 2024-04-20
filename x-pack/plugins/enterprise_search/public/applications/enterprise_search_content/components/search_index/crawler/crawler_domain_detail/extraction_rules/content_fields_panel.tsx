@@ -29,14 +29,12 @@ interface ContentFieldsPanelProps {
   removeField: (id: string) => void;
 }
 
-export const ContentFieldsPanel = (
-  {
-    contentFields,
-    editNewField,
-    editExistingField,
-    removeField
-  }: ContentFieldsPanelProps
-) => {
+export const ContentFieldsPanel = ({
+  contentFields,
+  editNewField,
+  editExistingField,
+  removeField,
+}: ContentFieldsPanelProps) => {
   return contentFields.length === 0 ? (
     <EuiEmptyPrompt
       title={

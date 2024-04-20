@@ -84,11 +84,7 @@ export interface ConnectorDescriptionBadgeProps {
   isNative: boolean;
 }
 
-export const ConnectorDescriptionBadge = (
-  {
-    isNative
-  }: ConnectorDescriptionBadgeProps
-) => {
+export const ConnectorDescriptionBadge = ({ isNative }: ConnectorDescriptionBadgeProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;
   return (

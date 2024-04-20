@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
@@ -25,18 +24,16 @@ interface MlJobEditorProps {
   'data-test-subj'?: string;
   schema?: object;
 }
-export const MLJobEditor = (
-  {
-    value,
-    height = '500px',
-    width = '100%',
-    mode = ML_EDITOR_MODE.JSON,
-    readOnly = false,
-    onChange = () => {},
-    'data-test-subj': dataTestSubj,
-    schema
-  }: MlJobEditorProps
-) => {
+export const MLJobEditor = ({
+  value,
+  height = '500px',
+  width = '100%',
+  mode = ML_EDITOR_MODE.JSON,
+  readOnly = false,
+  onChange = () => {},
+  'data-test-subj': dataTestSubj,
+  schema,
+}: MlJobEditorProps) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
     try {
       value = expandLiteralStrings(value);

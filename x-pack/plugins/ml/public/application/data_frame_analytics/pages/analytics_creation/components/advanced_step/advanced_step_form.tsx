@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -123,13 +122,7 @@ export type AdvancedParamErrors = {
   [key in ANALYSIS_ADVANCED_FIELDS]?: string;
 };
 
-export const AdvancedStepForm = (
-  {
-    actions,
-    state,
-    setCurrentStep
-  }: CreateAnalyticsStepProps
-) => {
+export const AdvancedStepForm = ({ actions, state, setCurrentStep }: CreateAnalyticsStepProps) => {
   const [advancedParamErrors, setAdvancedParamErrors] = useState<AdvancedParamErrors>({});
   const [fetchingAdvancedParamErrors, setFetchingAdvancedParamErrors] = useState<boolean>(false);
 

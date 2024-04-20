@@ -48,15 +48,13 @@ interface ExceptionsViewerUtilityProps {
 /**
  * Utilities include exception item counts and group by options
  */
-const ExceptionsViewerUtilityComponent = (
-  {
-    pagination,
-    lastUpdated,
-    exceptionsToShow,
-    onChangeExceptionsToShow,
-    isEndpoint
-  }: ExceptionsViewerUtilityProps
-): JSX.Element => {
+const ExceptionsViewerUtilityComponent = ({
+  pagination,
+  lastUpdated,
+  exceptionsToShow,
+  onChangeExceptionsToShow,
+  isEndpoint,
+}: ExceptionsViewerUtilityProps): JSX.Element => {
   return (
     <MyUtilities>
       <UtilityBar>

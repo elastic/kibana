@@ -30,15 +30,13 @@ interface InstallClientProps {
   overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
-const Link = (
-  {
-    language,
-    assetBasePath
-  }: {
-    language: LanguageDefinition;
-    assetBasePath: string;
-  }
-) => {
+const Link = ({
+  language,
+  assetBasePath,
+}: {
+  language: LanguageDefinition;
+  assetBasePath: string;
+}) => {
   if (language.github) {
     return (
       <GithubLink
@@ -51,20 +49,18 @@ const Link = (
   return null;
 };
 
-export const InstallClientPanel = (
-  {
-    codeSnippet,
-    consoleRequest,
-    language,
-    languages,
-    setSelectedLanguage,
-    assetBasePath,
-    application,
-    sharePlugin,
-    isPanelLeft = true,
-    overviewPanelProps
-  }: InstallClientProps
-) => {
+export const InstallClientPanel = ({
+  codeSnippet,
+  consoleRequest,
+  language,
+  languages,
+  setSelectedLanguage,
+  assetBasePath,
+  application,
+  sharePlugin,
+  isPanelLeft = true,
+  overviewPanelProps,
+}: InstallClientProps) => {
   const panelContent = (
     <>
       <CodeBox

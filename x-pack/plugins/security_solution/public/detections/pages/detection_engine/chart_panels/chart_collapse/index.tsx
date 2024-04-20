@@ -71,15 +71,13 @@ interface Props {
   runtimeMappings?: MappingRuntimeFields;
 }
 
-export const ChartCollapse = (
-  {
-    groupBySelection,
-    filters,
-    query,
-    signalIndexName,
-    runtimeMappings
-  }: Props
-) => {
+export const ChartCollapse = ({
+  groupBySelection,
+  filters,
+  query,
+  signalIndexName,
+  runtimeMappings,
+}: Props) => {
   const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COLLAPSED_CHART_ID}-${uuid()}`, []);
   const aggregations = useMemo(() => combinedAggregations(groupBySelection), [groupBySelection]);
 

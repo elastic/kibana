@@ -58,11 +58,7 @@ interface Props {
   };
 }
 
-export const ClusterSettingsResolutionCell = (
-  {
-    status
-  }: Props
-) => {
+export const ClusterSettingsResolutionCell = ({ status }: Props) => {
   const { statusType } = status;
   if (statusType === 'in_progress') {
     return (

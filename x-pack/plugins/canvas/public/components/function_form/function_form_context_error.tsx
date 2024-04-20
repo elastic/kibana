@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExpressionContext } from '../../../types';
 
@@ -22,10 +22,8 @@ interface FunctionFormContextErrorProps {
   context: ExpressionContext;
 }
 
-export const FunctionFormContextError = (
-  {
-    context
-  }: FunctionFormContextErrorProps
-) => (<div className="canvasFunctionForm canvasFunctionForm--error">
-  {strings.getContextErrorMessage(context.error)}
-</div>);
+export const FunctionFormContextError = ({ context }: FunctionFormContextErrorProps) => (
+  <div className="canvasFunctionForm canvasFunctionForm--error">
+    {strings.getContextErrorMessage(context.error)}
+  </div>
+);

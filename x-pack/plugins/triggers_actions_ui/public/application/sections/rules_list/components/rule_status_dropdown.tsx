@@ -49,19 +49,17 @@ export interface ComponentOpts {
   hideSnoozeOption?: boolean;
 }
 
-export const RuleStatusDropdown = (
-  {
-    rule,
-    onRuleChanged,
-    disableRule,
-    enableRule,
-    snoozeRule,
-    unsnoozeRule,
-    isEditable,
-    hideSnoozeOption = false,
-    direction = 'column'
-  }: ComponentOpts
-) => {
+export const RuleStatusDropdown = ({
+  rule,
+  onRuleChanged,
+  disableRule,
+  enableRule,
+  snoozeRule,
+  unsnoozeRule,
+  isEditable,
+  hideSnoozeOption = false,
+  direction = 'column',
+}: ComponentOpts) => {
   const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(!hideSnoozeOption && isRuleSnoozed(rule));
 
@@ -286,20 +284,18 @@ interface RuleStatusMenuProps {
   activeSnoozes?: string[];
 }
 
-const RuleStatusMenu = (
-  {
-    onChangeEnabledStatus,
-    onClosePopover,
-    isEnabled,
-    isSnoozed,
-    snoozeEndTime,
-    hideSnoozeOption = false,
-    snoozeRule,
-    unsnoozeRule,
-    scheduledSnoozes = [],
-    activeSnoozes = []
-  }: RuleStatusMenuProps
-) => {
+const RuleStatusMenu = ({
+  onChangeEnabledStatus,
+  onClosePopover,
+  isEnabled,
+  isSnoozed,
+  snoozeEndTime,
+  hideSnoozeOption = false,
+  snoozeRule,
+  unsnoozeRule,
+  scheduledSnoozes = [],
+  activeSnoozes = [],
+}: RuleStatusMenuProps) => {
   const enableRule = useCallback(() => {
     if (isSnoozed) {
       // Unsnooze if the rule is snoozed and the user clicks Enabled

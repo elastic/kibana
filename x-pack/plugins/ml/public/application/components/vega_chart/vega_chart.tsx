@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Suspense } from 'react';
 
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -15,8 +14,10 @@ import type { VegaChartViewProps } from './vega_chart_view';
 
 const VegaChartView = React.lazy(() => import('./vega_chart_view'));
 
-export const VegaChart = (props: VegaChartViewProps) => (<EuiErrorBoundary>
-  <Suspense fallback={<VegaChartLoading />}>
-    <VegaChartView {...props} />
-  </Suspense>
-</EuiErrorBoundary>);
+export const VegaChart = (props: VegaChartViewProps) => (
+  <EuiErrorBoundary>
+    <Suspense fallback={<VegaChartLoading />}>
+      <VegaChartView {...props} />
+    </Suspense>
+  </EuiErrorBoundary>
+);

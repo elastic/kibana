@@ -24,12 +24,7 @@ interface Props {
   showTitle?: boolean;
 }
 
-export const PingRedirects = (
-  {
-    monitorStatus,
-    showTitle
-  }: Props
-) => {
+export const PingRedirects = ({ monitorStatus, showTitle }: Props) => {
   const monitorUrl = monitorStatus?.url?.full;
 
   const list = monitorStatus?.http?.response?.redirects;

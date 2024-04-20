@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 import { PhaseWithAllocation } from '../../../../../../../../../common/types';
@@ -36,11 +36,7 @@ interface Props {
   phase: PhaseWithAllocation;
 }
 
-export const NoTiersAvailableNotice = (
-  {
-    phase
-  }: Props
-) => {
+export const NoTiersAvailableNotice = ({ phase }: Props) => {
   return (
     <EuiCallOut
       data-test-subj="noTiersAvailableNotice"

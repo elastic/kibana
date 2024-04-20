@@ -14,40 +14,37 @@ interface IndicesTableProps {
   onRemoveClick: (index: string) => void;
 }
 
-export const IndicesTable = (
-  {
-    indices,
-    onRemoveClick
-  }: IndicesTableProps
-) => (<EuiBasicTable
-  items={indices.map((index) => ({ index }))}
-  columns={[
-    {
-      field: 'index',
-      name: i18n.translate('xpack.searchPlayground.sources.indices.table.label', {
-        defaultMessage: 'Selected indices',
-      }),
-      truncateText: true,
-      render: (index: string) => <EuiLink href="#">{index}</EuiLink>,
-    },
-    {
-      actions: [
-        {
-          type: 'icon',
-          name: i18n.translate('xpack.searchPlayground.sources.indices.table.remove.label', {
-            defaultMessage: 'Remove',
-          }),
-          description: i18n.translate(
-            'xpack.searchPlayground.sources.indices.table.remove.description',
-            {
-              defaultMessage: 'Remove index',
-            }
-          ),
-          icon: 'minusInCircle',
-          onClick: (item: { index: string }) => onRemoveClick(item.index),
-          'data-test-subj': `removeIndexButton`,
-        },
-      ],
-    },
-  ]}
-/>);
+export const IndicesTable = ({ indices, onRemoveClick }: IndicesTableProps) => (
+  <EuiBasicTable
+    items={indices.map((index) => ({ index }))}
+    columns={[
+      {
+        field: 'index',
+        name: i18n.translate('xpack.searchPlayground.sources.indices.table.label', {
+          defaultMessage: 'Selected indices',
+        }),
+        truncateText: true,
+        render: (index: string) => <EuiLink href="#">{index}</EuiLink>,
+      },
+      {
+        actions: [
+          {
+            type: 'icon',
+            name: i18n.translate('xpack.searchPlayground.sources.indices.table.remove.label', {
+              defaultMessage: 'Remove',
+            }),
+            description: i18n.translate(
+              'xpack.searchPlayground.sources.indices.table.remove.description',
+              {
+                defaultMessage: 'Remove index',
+              }
+            ),
+            icon: 'minusInCircle',
+            onClick: (item: { index: string }) => onRemoveClick(item.index),
+            'data-test-subj': `removeIndexButton`,
+          },
+        ],
+      },
+    ]}
+  />
+);

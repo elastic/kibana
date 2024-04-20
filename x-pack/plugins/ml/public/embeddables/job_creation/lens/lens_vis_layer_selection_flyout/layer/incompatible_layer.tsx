@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
@@ -19,11 +18,7 @@ interface Props {
   layer: LayerResult;
 }
 
-export const IncompatibleLayer = (
-  {
-    layer
-  }: Props
-) => {
+export const IncompatibleLayer = ({ layer }: Props) => {
   return (
     <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlLensLayerIncompatible">
       <EuiFlexItem grow={false}>

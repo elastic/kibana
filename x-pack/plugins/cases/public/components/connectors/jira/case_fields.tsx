@@ -23,11 +23,7 @@ import { SearchIssues } from './search_issues';
 
 const { emptyField } = fieldValidators;
 
-const JiraFieldsComponent = (
-  {
-    connector
-  }: ConnectorFieldsProps
-) => {
+const JiraFieldsComponent = ({ connector }: ConnectorFieldsProps) => {
   const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
   const { http } = useKibana().services;
 

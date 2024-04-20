@@ -26,17 +26,15 @@ export interface DiscoverDrilldownConfigProps {
   onCarryTimeRangeToggle?: () => void;
 }
 
-export const DiscoverDrilldownConfig = (
-  {
-    activeIndexPatternId,
-    indexPatterns,
-    onIndexPatternSelect,
-    customIndexPattern,
-    onCustomIndexPatternToggle,
-    onCarryFiltersAndQueryToggle,
-    onCarryTimeRangeToggle
-  }: DiscoverDrilldownConfigProps
-) => {
+export const DiscoverDrilldownConfig = ({
+  activeIndexPatternId,
+  indexPatterns,
+  onIndexPatternSelect,
+  customIndexPattern,
+  onCustomIndexPatternToggle,
+  onCarryFiltersAndQueryToggle,
+  onCarryTimeRangeToggle,
+}: DiscoverDrilldownConfigProps) => {
   return (
     <>
       <EuiCallOut title="Example warning!" color="warning" iconType="help">

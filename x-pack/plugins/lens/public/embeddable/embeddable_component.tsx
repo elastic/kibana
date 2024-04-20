@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -146,18 +146,16 @@ interface EmbeddablePanelWrapperProps {
   abortController?: AbortController;
 }
 
-const EmbeddablePanelWrapper = (
-  {
-    factory,
-    uiActions,
-    actionPredicate,
-    input,
-    extraActions,
-    showInspector = true,
-    withDefaultActions,
-    abortController
-  }: EmbeddablePanelWrapperProps
-) => {
+const EmbeddablePanelWrapper = ({
+  factory,
+  uiActions,
+  actionPredicate,
+  input,
+  extraActions,
+  showInspector = true,
+  withDefaultActions,
+  abortController,
+}: EmbeddablePanelWrapperProps) => {
   const [embeddable, loading] = useEmbeddableFactory({ factory, input });
   useEffect(() => {
     if (embeddable) {

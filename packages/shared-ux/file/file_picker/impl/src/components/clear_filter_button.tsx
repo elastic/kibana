@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -20,11 +19,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const ClearFilterButton = (
-  {
-    onClick
-  }: Props
-) => {
+export const ClearFilterButton = ({ onClick }: Props) => {
   const { state } = useFilePickerContext();
   const isUploading = useBehaviorSubject(state.isUploading$);
   const query = useObservable(state.queryDebounced$);

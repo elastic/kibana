@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiToolTip, EuiText } from '@elastic/eui';
 
@@ -42,13 +42,11 @@ export interface ReauthorizeActionNameProps {
   forceDisable?: boolean;
   transformNodes: number;
 }
-export const ReauthorizeActionName = (
-  {
-    items,
-    forceDisable,
-    transformNodes
-  }: ReauthorizeActionNameProps
-) => {
+export const ReauthorizeActionName = ({
+  items,
+  forceDisable,
+  transformNodes,
+}: ReauthorizeActionNameProps) => {
   const { canStartStopTransform } = useTransformCapabilities();
 
   const someNeedsReauthorization = items.some(needsReauthorization);

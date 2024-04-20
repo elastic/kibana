@@ -27,11 +27,7 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 import { PipelineVersions } from './pipeline_versions_dropdown';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const LogStashPipelinePage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const LogStashPipelinePage = ({ clusters }: ComponentProps) => {
   const match = useRouteMatch<{ id: string | undefined; hash: string | undefined }>();
   const { hash: pipelineHash, id: pipelineId } = match.params;
   const globalState = useContext(GlobalStateContext);

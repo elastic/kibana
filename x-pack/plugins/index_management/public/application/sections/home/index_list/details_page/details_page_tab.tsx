@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { Index } from '../../../../../../common';
@@ -18,13 +18,7 @@ interface Props {
   tab: IndexDetailsTabId;
   index: Index;
 }
-export const DetailsPageTab = (
-  {
-    tabs,
-    tab,
-    index
-  }: Props
-) => {
+export const DetailsPageTab = ({ tabs, tab, index }: Props) => {
   const selectedTab = tabs.find((tabConfig) => tabConfig.id === tab);
   const {
     core: { getUrlForApp },

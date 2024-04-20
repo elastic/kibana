@@ -18,16 +18,14 @@ interface LogDatepickerProps {
   onStopStreaming?: () => void;
 }
 
-export const LogDatepicker = (
-  {
-    startDateExpression,
-    endDateExpression,
-    isStreaming,
-    onUpdateDateRange,
-    onStartStreaming,
-    onStopStreaming
-  }: LogDatepickerProps
-) => {
+export const LogDatepicker = ({
+  startDateExpression,
+  endDateExpression,
+  isStreaming,
+  onUpdateDateRange,
+  onStartStreaming,
+  onStopStreaming,
+}: LogDatepickerProps) => {
   const handleTimeChange = useCallback(
     ({ start, end, isInvalid }) => {
       if (onUpdateDateRange && !isInvalid) {

@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import React, { Fragment, type FC } from 'react';
+import React, { Fragment } from 'react';
 
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';
@@ -71,11 +71,7 @@ interface Props {
   selectedNode: PanelNavNode;
 }
 
-export const DefaultContent = (
-  {
-    selectedNode
-  }: Props
-) => {
+export const DefaultContent = ({ selectedNode }: Props) => {
   const filteredChildren = selectedNode.children?.filter(
     (child) => child.sideNavStatus !== 'hidden'
   );

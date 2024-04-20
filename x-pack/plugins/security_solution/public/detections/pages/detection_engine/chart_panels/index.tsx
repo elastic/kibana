@@ -56,17 +56,15 @@ export interface Props {
   updateDateRangeCallback: UpdateDateRange;
 }
 
-const ChartPanelsComponent = (
-  {
-    addFilter,
-    alertsDefaultFilters,
-    isLoadingIndexPattern,
-    query,
-    runtimeMappings,
-    signalIndexName,
-    updateDateRangeCallback
-  }: Props
-) => {
+const ChartPanelsComponent = ({
+  addFilter,
+  alertsDefaultFilters,
+  isLoadingIndexPattern,
+  query,
+  runtimeMappings,
+  signalIndexName,
+  updateDateRangeCallback,
+}: Props) => {
   const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
     DETECTIONS_ALERTS_CHARTS_PANEL_ID
   );

@@ -9,35 +9,35 @@ import React from 'react';
 
 import { EuiCheckableCard, EuiText, EuiTitle } from '@elastic/eui';
 
-export const SettingsCheckableCard = (
-  {
-    checked,
-    description,
-    disabled,
-    id,
-    label,
-    onChange
-  }: {
-    checked: boolean;
-    description: string;
-    disabled?: boolean;
-    id: string;
-    label: string;
-    onChange: React.ChangeEventHandler<HTMLInputElement>;
-  }
-) => (<EuiCheckableCard
-  label={
-    <EuiTitle size="xs">
-      <h4>{label}</h4>
-    </EuiTitle>
-  }
-  disabled={disabled}
-  checkableType="checkbox"
-  onChange={onChange}
-  checked={checked}
-  id={id}
->
-  <EuiText color="subdued" size="s">
-    <p>{description}</p>
-  </EuiText>
-</EuiCheckableCard>);
+export const SettingsCheckableCard = ({
+  checked,
+  description,
+  disabled,
+  id,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  description: string;
+  disabled?: boolean;
+  id: string;
+  label: string;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+}) => (
+  <EuiCheckableCard
+    label={
+      <EuiTitle size="xs">
+        <h4>{label}</h4>
+      </EuiTitle>
+    }
+    disabled={disabled}
+    checkableType="checkbox"
+    onChange={onChange}
+    checked={checked}
+    id={id}
+  >
+    <EuiText color="subdued" size="s">
+      <p>{description}</p>
+    </EuiText>
+  </EuiCheckableCard>
+);

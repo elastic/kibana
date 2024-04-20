@@ -16,12 +16,10 @@ interface Props {
   updateSysMonitoring: (newValue: boolean) => void;
 }
 
-export const AgentPolicyFormSystemMonitoringCheckbox = (
-  {
-    withSysMonitoring,
-    updateSysMonitoring
-  }: Props
-) => {
+export const AgentPolicyFormSystemMonitoringCheckbox = ({
+  withSysMonitoring,
+  updateSysMonitoring,
+}: Props) => {
   return (
     <EuiFormRow>
       <EuiCheckbox

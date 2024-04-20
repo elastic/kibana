@@ -13,29 +13,27 @@ import { getSummaryRows } from './get_alert_summary_rows';
 import { SummaryView } from './summary_view';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
-const AlertSummaryViewComponent = (
-  {
-    browserFields,
-    data,
-    eventId,
-    isDraggable,
-    scopeId,
-    title,
-    goToTable,
-    isReadOnly,
-    investigationFields
-  }: {
-    browserFields: BrowserFields;
-    data: TimelineEventsDetailsItem[];
-    eventId: string;
-    isDraggable?: boolean;
-    scopeId: string;
-    title: string;
-    goToTable: () => void;
-    isReadOnly?: boolean;
-    investigationFields?: string[];
-  }
-) => {
+const AlertSummaryViewComponent = ({
+  browserFields,
+  data,
+  eventId,
+  isDraggable,
+  scopeId,
+  title,
+  goToTable,
+  isReadOnly,
+  investigationFields,
+}: {
+  browserFields: BrowserFields;
+  data: TimelineEventsDetailsItem[];
+  eventId: string;
+  isDraggable?: boolean;
+  scopeId: string;
+  title: string;
+  goToTable: () => void;
+  isReadOnly?: boolean;
+  investigationFields?: string[];
+}) => {
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );

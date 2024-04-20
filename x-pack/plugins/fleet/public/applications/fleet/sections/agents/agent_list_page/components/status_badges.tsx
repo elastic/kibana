@@ -15,53 +15,47 @@ import {
 } from '../../services/agent_status';
 import type { SimplifiedAgentStatus } from '../../../../types';
 
-export const AgentStatusBadges = memo((
-  {
+export const AgentStatusBadges = memo(
+  ({
     agentStatus,
-    showInactive
+    showInactive,
   }: {
     showInactive?: boolean;
     agentStatus: { [k in SimplifiedAgentStatus]: number };
-  }
-) => {
-  const agentStatuses = useMemo(() => {
-    return AGENT_STATUSES.filter((status) =>
-      showInactive ? true : status !== 'inactive' && status !== 'unenrolled'
-    );
-  }, [showInactive]);
+  }) => {
+    const agentStatuses = useMemo(() => {
+      return AGENT_STATUSES.filter((status) =>
+        showInactive ? true : status !== 'inactive' && status !== 'unenrolled'
+      );
+    }, [showInactive]);
 
-  return (
-    <EuiFlexGroup gutterSize="m">
-      {agentStatuses.map((status) => (
-        <EuiFlexItem key={status} grow={false}>
-          <AgentStatusBadge status={status} count={agentStatus[status] || 0} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-});
-
-const AgentStatusBadge = memo((
-  {
-    status,
-    count
-  }: {
-    status: SimplifiedAgentStatus;
-    count: number;
-  }
-) => {
-  return (
-    <>
-      <EuiHealth color={getColorForAgentStatus(status)}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>{getLabelForAgentStatus(status)}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge size="s" color="subdued">
-              {count}
-            </EuiNotificationBadge>
+    return (
+      <EuiFlexGroup gutterSize="m">
+        {agentStatuses.map((status) => (
+          <EuiFlexItem key={status} grow={false}>
+            <AgentStatusBadge status={status} count={agentStatus[status] || 0} />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiHealth>
-    </>
-  );
-});
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+);
+
+const AgentStatusBadge = memo(
+  ({ status, count }: { status: SimplifiedAgentStatus; count: number }) => {
+    return (
+      <>
+        <EuiHealth color={getColorForAgentStatus(status)}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>{getLabelForAgentStatus(status)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge size="s" color="subdued">
+                {count}
+              </EuiNotificationBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiHealth>
+      </>
+    );
+  }
+);

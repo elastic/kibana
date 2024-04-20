@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
 import { RendererSpec } from '../../types';
@@ -28,12 +28,7 @@ interface Props {
 /**
  * The overall Canvas Shareable Workpad app; the highest-layer component.
  */
-export const App = (
-  {
-    workpad,
-    stage
-  }: Props
-) => {
+export const App = ({ workpad, stage }: Props) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
   renderFunctions.forEach((fn) => {

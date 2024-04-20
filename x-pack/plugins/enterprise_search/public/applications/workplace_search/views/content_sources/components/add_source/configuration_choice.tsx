@@ -33,39 +33,37 @@ interface CardProps {
   disabledMessage?: string;
 }
 
-const ConnectorCard = (
-  {
-    title,
-    description,
-    buttonText,
-    to,
-    badgeLabel,
-    disabledMessage
-  }: CardProps
-) => (<EuiFlexItem grow>
-  <EuiCard
-    isDisabled={!!disabledMessage}
-    hasBorder
-    title={title}
-    description={disabledMessage || description}
-    betaBadgeProps={badgeLabel ? { label: badgeLabel } : undefined}
-    footer={
-      <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
-        {buttonText}
-      </EuiButtonTo>
-    }
-  />
-</EuiFlexItem>);
+const ConnectorCard = ({
+  title,
+  description,
+  buttonText,
+  to,
+  badgeLabel,
+  disabledMessage,
+}: CardProps) => (
+  <EuiFlexItem grow>
+    <EuiCard
+      isDisabled={!!disabledMessage}
+      hasBorder
+      title={title}
+      description={disabledMessage || description}
+      betaBadgeProps={badgeLabel ? { label: badgeLabel } : undefined}
+      footer={
+        <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
+          {buttonText}
+        </EuiButtonTo>
+      }
+    />
+  </EuiFlexItem>
+);
 
 interface ConfigurationChoiceProps {
   sourceData: SourceDataItem;
 }
 
-export const ConfigurationChoice = (
-  {
-    sourceData: { name, categories = [], serviceType }
-  }: ConfigurationChoiceProps
-) => {
+export const ConfigurationChoice = ({
+  sourceData: { name, categories = [], serviceType },
+}: ConfigurationChoiceProps) => {
   const externalConnectorAvailable = hasExternalConnectorOption(serviceType);
   const customConnectorAvailable = hasCustomConnectorOption(serviceType);
 

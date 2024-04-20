@@ -21,14 +21,12 @@ export interface OptionMap {
   [key: string]: boolean;
 }
 
-export const SimplifiedSelectable = (
-  {
-    emptyMessage,
-    options,
-    selectedOptions,
-    onChange
-  }: Props
-) => {
+export const SimplifiedSelectable = ({
+  emptyMessage,
+  options,
+  selectedOptions,
+  onChange,
+}: Props) => {
   const selectedOptionsMap: OptionMap = selectedOptions.reduce(
     (acc, selectedOption) => ({
       ...acc,

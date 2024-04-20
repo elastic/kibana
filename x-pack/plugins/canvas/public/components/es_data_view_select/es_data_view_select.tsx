@@ -7,7 +7,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { sortBy } from 'lodash';
-import React, { FC, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useDataViewsService } from '../../services';
 import {

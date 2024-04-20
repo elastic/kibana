@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
@@ -19,11 +18,7 @@ export interface NumberContentPreviewProps {
   config: FieldVisConfig;
 }
 
-export const IndexBasedNumberContentPreview = (
-  {
-    config
-  }: NumberContentPreviewProps
-) => {
+export const IndexBasedNumberContentPreview = ({ config }: NumberContentPreviewProps) => {
   const { stats, fieldFormat, fieldName } = config;
   const dataTestSubj = `dataVisualizerDataGridChart-${fieldName}`;
 

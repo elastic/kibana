@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
@@ -14,11 +13,7 @@ interface Props {
   noDataView: boolean;
 }
 
-export const IncompatibleLayer = (
-  {
-    noDataView
-  }: Props
-) => {
+export const IncompatibleLayer = ({ noDataView }: Props) => {
   return (
     <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlMapLayerIncompatible">
       <EuiFlexItem grow={false}>

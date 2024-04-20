@@ -21,7 +21,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -241,11 +240,7 @@ export interface ApiKeyCreatedCalloutProps {
   createdApiKey: CreateAPIKeyResult;
 }
 
-export const ApiKeyCreatedCallout = (
-  {
-    createdApiKey
-  }: ApiKeyCreatedCalloutProps
-) => {
+export const ApiKeyCreatedCallout = ({ createdApiKey }: ApiKeyCreatedCalloutProps) => {
   const concatenated = `${createdApiKey.id}:${createdApiKey.api_key}`;
   return (
     <EuiCallOut
@@ -316,19 +311,17 @@ export interface ApiKeysTableProps {
   onDelete(apiKeys: CategorizedApiKey[]): void;
 }
 
-export const ApiKeysTable = (
-  {
-    apiKeys,
-    createdApiKey,
-    currentUser,
-    onClick,
-    onDelete,
-    canManageApiKeys = false,
-    canManageOwnApiKeys = false,
-    readOnly = false,
-    loading = false
-  }: ApiKeysTableProps
-) => {
+export const ApiKeysTable = ({
+  apiKeys,
+  createdApiKey,
+  currentUser,
+  onClick,
+  onDelete,
+  canManageApiKeys = false,
+  canManageOwnApiKeys = false,
+  readOnly = false,
+  loading = false,
+}: ApiKeysTableProps) => {
   const columns: Array<EuiBasicTableColumn<CategorizedApiKey>> = [];
   const [selectedItems, setSelectedItems] = useState<CategorizedApiKey[]>([]);
 
@@ -532,13 +525,7 @@ export interface TypesFilterButtonProps {
   types: string[];
 }
 
-export const TypesFilterButton = (
-  {
-    query,
-    onChange,
-    types
-  }: TypesFilterButtonProps
-) => {
+export const TypesFilterButton = ({ query, onChange, types }: TypesFilterButtonProps) => {
   if (!onChange) {
     return null;
   }
@@ -616,13 +603,7 @@ export interface UsersFilterButtonProps {
   usernames: string[];
 }
 
-export const UsersFilterButton = (
-  {
-    query,
-    onChange,
-    usernames
-  }: UsersFilterButtonProps
-) => {
+export const UsersFilterButton = ({ query, onChange, usernames }: UsersFilterButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -696,31 +677,24 @@ export const UsersFilterButton = (
 
 export type UsernameWithIconProps = Pick<CategorizedApiKey, 'username'>;
 
-export const UsernameWithIcon = (
-  {
-    username
-  }: UsernameWithIconProps
-) => (<EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-  <EuiFlexItem grow={false}>
-    <UserAvatar user={{ username }} size="s" />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <EuiText size="s" data-test-subj="apiKeyUsername">
-      {username}
-    </EuiText>
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const UsernameWithIcon = ({ username }: UsernameWithIconProps) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <UserAvatar user={{ username }} size="s" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" data-test-subj="apiKeyUsername">
+        {username}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export interface TimeToolTipProps {
   timestamp: number;
 }
 
-export const TimeToolTip = (
-  {
-    timestamp,
-    children
-  }: TimeToolTipProps
-) => {
+export const TimeToolTip = ({ timestamp, children }: TimeToolTipProps) => {
   return (
     <EuiToolTip content={moment(timestamp).format('LLL')}>
       <span>{children ?? moment(timestamp).fromNow()}</span>
@@ -730,11 +704,7 @@ export const TimeToolTip = (
 
 export type ApiKeyStatusProps = Pick<CategorizedApiKey, 'expiration'>;
 
-export const ApiKeyStatus = (
-  {
-    expiration
-  }: ApiKeyStatusProps
-) => {
+export const ApiKeyStatus = ({ expiration }: ApiKeyStatusProps) => {
   if (!expiration) {
     return (
       <EuiHealth color="primary" data-test-subj="apiKeyStatus">
@@ -776,11 +746,7 @@ export interface ApiKeyBadgeProps {
   type: CategorizedApiKeyType;
 }
 
-export const ApiKeyBadge = (
-  {
-    type
-  }: ApiKeyBadgeProps
-) => {
+export const ApiKeyBadge = ({ type }: ApiKeyBadgeProps) => {
   return type === 'cross_cluster' ? (
     <EuiToolTip
       content={

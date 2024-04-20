@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -110,12 +110,7 @@ interface Props {
   value: TableSeverity;
 }
 
-export const SelectSeverity = (
-  {
-    onChange,
-    value
-  }: Props
-) => {
+export const SelectSeverity = ({ onChange, value }: Props) => {
   const [severity, setSeverity] = useState(DEFAULT_SEVERITY);
 
   const onSeverityChange = (valueDisplay: string) => {

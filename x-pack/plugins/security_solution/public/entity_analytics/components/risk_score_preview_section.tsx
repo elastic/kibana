@@ -53,13 +53,11 @@ const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
     ?.slice(0, 5) || [];
 
-export const RiskScorePreviewSection = (
-  {
-    privileges
-  }: {
-    privileges: RiskEngineMissingPrivilegesResponse;
-  }
-) => {
+export const RiskScorePreviewSection = ({
+  privileges,
+}: {
+  privileges: RiskEngineMissingPrivilegesResponse;
+}) => {
   const sectionBody = useMemo(() => {
     if (privileges.isLoading) {
       return (

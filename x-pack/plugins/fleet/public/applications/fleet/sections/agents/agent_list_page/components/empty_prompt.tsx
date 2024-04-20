@@ -9,20 +9,18 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const EmptyPrompt = (
-  {
-    hasFleetAddAgentsPrivileges,
-    setEnrollmentFlyoutState
-  }: {
-    hasFleetAddAgentsPrivileges: boolean;
-    setEnrollmentFlyoutState: (
-      value: React.SetStateAction<{
-        isOpen: boolean;
-        selectedPolicyId?: string | undefined;
-      }>
-    ) => void;
-  }
-) => {
+export const EmptyPrompt = ({
+  hasFleetAddAgentsPrivileges,
+  setEnrollmentFlyoutState,
+}: {
+  hasFleetAddAgentsPrivileges: boolean;
+  setEnrollmentFlyoutState: (
+    value: React.SetStateAction<{
+      isOpen: boolean;
+      selectedPolicyId?: string | undefined;
+    }>
+  ) => void;
+}) => {
   return (
     <EuiEmptyPrompt
       title={

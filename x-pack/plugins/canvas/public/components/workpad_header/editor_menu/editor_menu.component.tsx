@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   EuiContextMenu,
@@ -50,17 +50,15 @@ interface Props {
   ) => (event: React.MouseEvent) => void;
 }
 
-export const EditorMenu = (
-  {
-    factories,
-    addPanelActions,
-    promotedVisTypes,
-    visTypeAliases,
-    createNewVisType,
-    createNewEmbeddableFromAction,
-    createNewEmbeddableFromFactory
-  }: Props
-) => {
+export const EditorMenu = ({
+  factories,
+  addPanelActions,
+  promotedVisTypes,
+  visTypeAliases,
+  createNewVisType,
+  createNewEmbeddableFromAction,
+  createNewEmbeddableFromFactory,
+}: Props) => {
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
   const canvasApi = useCanvasApi();

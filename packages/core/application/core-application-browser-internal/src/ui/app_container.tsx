@@ -9,7 +9,7 @@
 import './app_container.scss';
 
 import { Observable } from 'rxjs';
-import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
+import React, { Fragment, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -40,20 +40,18 @@ interface Props {
   showPlainSpinner?: boolean;
 }
 
-export const AppContainer = (
-  {
-    mounter,
-    appId,
-    appPath,
-    setAppLeaveHandler,
-    setAppActionMenu,
-    createScopedHistory,
-    appStatus,
-    setIsMounting,
-    theme$,
-    showPlainSpinner
-  }: Props
-) => {
+export const AppContainer = ({
+  mounter,
+  appId,
+  appPath,
+  setAppLeaveHandler,
+  setAppActionMenu,
+  createScopedHistory,
+  appStatus,
+  setIsMounting,
+  theme$,
+  showPlainSpinner,
+}: Props) => {
   const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
@@ -129,13 +127,7 @@ export const AppContainer = (
   );
 };
 
-const AppLoadingPlaceholder = (
-  {
-    showPlainSpinner
-  }: {
-    showPlainSpinner: boolean;
-  }
-) => {
+const AppLoadingPlaceholder = ({ showPlainSpinner }: { showPlainSpinner: boolean }) => {
   if (showPlainSpinner) {
     return (
       <EuiLoadingSpinner

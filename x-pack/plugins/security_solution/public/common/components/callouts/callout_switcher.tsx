@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
@@ -19,13 +18,7 @@ export interface CallOutSwitcherProps {
   message: CallOutMessage;
 }
 
-const CallOutSwitcherComponent = (
-  {
-    namespace,
-    condition,
-    message
-  }: CallOutSwitcherProps
-) => {
+const CallOutSwitcherComponent = ({ namespace, condition, message }: CallOutSwitcherProps) => {
   const { isVisible, dismiss } = useCallOutStorage([message], namespace);
 
   const shouldRender = condition && isVisible(message);

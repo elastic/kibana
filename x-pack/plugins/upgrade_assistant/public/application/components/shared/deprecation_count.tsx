@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -33,12 +33,10 @@ interface Props {
   totalWarningDeprecations: number;
 }
 
-export const DeprecationCount = (
-  {
-    totalCriticalDeprecations,
-    totalWarningDeprecations
-  }: Props
-) => {
+export const DeprecationCount = ({
+  totalCriticalDeprecations,
+  totalWarningDeprecations,
+}: Props) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>

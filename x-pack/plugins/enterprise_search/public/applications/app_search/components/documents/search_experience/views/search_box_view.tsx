@@ -19,13 +19,7 @@ interface Props {
   onChange(value: string): void;
 }
 
-export const SearchBoxView = (
-  {
-    onChange,
-    value,
-    inputProps
-  }: Props
-) => {
+export const SearchBoxView = ({ onChange, value, inputProps }: Props) => {
   return (
     <EuiFieldSearch
       value={value}

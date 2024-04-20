@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import React, { FunctionComponent, memo } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { useKibana } from '../../../../../shared_imports';
@@ -120,13 +120,7 @@ interface Props {
  * Display a timeline given ILM policy phase information. This component is re-usable and memo-ized
  * and should not rely directly on any application-specific context.
  */
-export const Timeline = memo((
-  {
-    hasDeletePhase,
-    isUsingRollover,
-    ...phasesMinAge
-  }: Props
-) => {
+export const Timeline = memo(({ hasDeletePhase, isUsingRollover, ...phasesMinAge }: Props) => {
   const absoluteTimings: AbsoluteTimings = {
     hot: { min_age: phasesMinAge.hotPhaseMinAge },
     warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,

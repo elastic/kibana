@@ -79,12 +79,7 @@ import { useHasSecurityCapability } from '../../../../helper_hooks';
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
 
-const HostDetailsComponent = (
-  {
-    detailName,
-    hostDetailsPagePath
-  }: HostDetailsProps
-) => {
+const HostDetailsComponent = ({ detailName, hostDetailsPagePath }: HostDetailsProps) => {
   const dispatch = useDispatch();
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(

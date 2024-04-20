@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -82,15 +82,13 @@ const i18nTexts = {
   }),
 };
 
-export const ProcessorOutput = (
-  {
-    processorOutput,
-    documents,
-    selectedDocumentIndex,
-    updateSelectedDocument,
-    isExecuting
-  }: Props
-) => {
+export const ProcessorOutput = ({
+  processorOutput,
+  documents,
+  selectedDocumentIndex,
+  updateSelectedDocument,
+  isExecuting,
+}: Props) => {
   if (isExecuting) {
     return <SectionLoading inline>{i18nTexts.loadingMessage}</SectionLoading>;
   }

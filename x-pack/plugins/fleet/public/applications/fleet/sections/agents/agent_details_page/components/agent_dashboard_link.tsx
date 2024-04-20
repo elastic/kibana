@@ -42,15 +42,13 @@ const EuiButtonCompressed = styled(EuiButton)`
   height: 32px;
 `;
 
-export const AgentDashboardLink = (
-  {
-    agent,
-    agentPolicy
-  }: {
-    agent: Agent;
-    agentPolicy?: AgentPolicy;
-  }
-) => {
+export const AgentDashboardLink = ({
+  agent,
+  agentPolicy,
+}: {
+  agent: Agent;
+  agentPolicy?: AgentPolicy;
+}) => {
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent);
   const { getHref } = useLink();
 

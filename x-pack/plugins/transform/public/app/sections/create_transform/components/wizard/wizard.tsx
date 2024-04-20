@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
+import React, { useRef, useState, createContext, useMemo } from 'react';
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
@@ -62,15 +62,13 @@ interface DefinePivotStepProps {
   searchItems: SearchItems;
 }
 
-const StepDefine = (
-  {
-    isCurrentStep,
-    stepDefineState,
-    setCurrentStep,
-    setStepDefineState,
-    searchItems
-  }: DefinePivotStepProps
-) => {
+const StepDefine = ({
+  isCurrentStep,
+  stepDefineState,
+  setCurrentStep,
+  setStepDefineState,
+  searchItems,
+}: DefinePivotStepProps) => {
   const definePivotRef = useRef(null);
 
   return (
@@ -109,12 +107,7 @@ export const CreateTransformWizardContext = createContext<{
   runtimeMappings: undefined,
 });
 
-export const Wizard = React.memo((
-  {
-    cloneConfig,
-    searchItems
-  }: WizardProps
-) => {
+export const Wizard = React.memo(({ cloneConfig, searchItems }: WizardProps) => {
   const { showNodeInfo } = useEnabledFeatures();
   const appDependencies = useAppDependencies();
   const {

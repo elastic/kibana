@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -209,35 +209,33 @@ export interface Props {
   hasPasteData: boolean;
 }
 
-export const EditMenu = (
-  {
-    cutNodes,
-    copyNodes,
-    pasteNodes,
-    deleteNodes,
-    cloneNodes,
-    bringToFront,
-    bringForward,
-    sendBackward,
-    sendToBack,
-    alignLeft,
-    alignCenter,
-    alignRight,
-    alignTop,
-    alignMiddle,
-    alignBottom,
-    distributeHorizontally,
-    distributeVertically,
-    createCustomElement,
-    selectedNodes,
-    groupIsSelected,
-    groupNodes,
-    ungroupNodes,
-    undoHistory,
-    redoHistory,
-    hasPasteData
-  }: Props
-) => {
+export const EditMenu = ({
+  cutNodes,
+  copyNodes,
+  pasteNodes,
+  deleteNodes,
+  cloneNodes,
+  bringToFront,
+  bringForward,
+  sendBackward,
+  sendToBack,
+  alignLeft,
+  alignCenter,
+  alignRight,
+  alignTop,
+  alignMiddle,
+  alignBottom,
+  distributeHorizontally,
+  distributeVertically,
+  createCustomElement,
+  selectedNodes,
+  groupIsSelected,
+  groupNodes,
+  ungroupNodes,
+  undoHistory,
+  redoHistory,
+  hasPasteData,
+}: Props) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const showModal = () => setModalVisible(true);
   const hideModal = () => setModalVisible(false);

@@ -6,17 +6,15 @@
  */
 import { useBreadcrumbs } from '../../../../hooks';
 
-export const IntegrationBreadcrumb = (
-  {
-    pkgTitle,
-    pkgkey,
-    integration
-  }: {
-    pkgTitle: string;
-    pkgkey: string;
-    integration?: string;
-  }
-) => {
+export const IntegrationBreadcrumb = ({
+  pkgTitle,
+  pkgkey,
+  integration,
+}: {
+  pkgTitle: string;
+  pkgkey: string;
+  integration?: string;
+}) => {
   useBreadcrumbs('add_integration_to_policy', {
     pkgTitle,
     pkgkey,

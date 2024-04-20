@@ -21,11 +21,7 @@ import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
 
-const ResilientFieldsComponent = (
-  {
-    connector
-  }: ConnectorFieldsProps
-) => {
+const ResilientFieldsComponent = ({ connector }: ConnectorFieldsProps) => {
   const { http } = useKibana().services;
 
   const {

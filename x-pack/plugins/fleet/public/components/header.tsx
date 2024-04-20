@@ -49,53 +49,51 @@ export interface HeaderProps {
   'data-test-subj'?: string;
 }
 
-const HeaderColumns = memo((
-  {
-    leftColumn,
-    rightColumn,
-    rightColumnGrow
-  }: Omit<HeaderProps, 'tabs'>
-) => (<EuiFlexGroup alignItems="center">
-  {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
-  {rightColumn ? <EuiFlexItem grow={rightColumnGrow}>{rightColumn}</EuiFlexItem> : null}
-</EuiFlexGroup>));
-
-export const Header = (
-  {
-    leftColumn,
-    rightColumn,
-    rightColumnGrow,
-    topContent,
-    tabs,
-    maxWidth,
-    tabsClassName,
-    'data-test-subj': dataTestSubj
-  }: HeaderProps
-) => (<Container data-test-subj={dataTestSubj}>
-  <Wrapper maxWidth={maxWidth}>
-    {topContent}
-    <HeaderColumns
-      leftColumn={leftColumn}
-      rightColumn={rightColumn}
-      rightColumnGrow={rightColumnGrow}
-    />
-    <EuiFlexGroup>
-      {tabs ? (
-        <EuiFlexItem>
-          <EuiSpacer size="s" />
-          <Tabs className={tabsClassName}>
-            {tabs.map((props, index) => (
-              <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>
-                {props.name}
-              </EuiTab>
-            ))}
-          </Tabs>
-        </EuiFlexItem>
-      ) : (
-        <EuiFlexItem>
-          <EuiSpacer size="l" />
-        </EuiFlexItem>
-      )}
+const HeaderColumns = memo(
+  ({ leftColumn, rightColumn, rightColumnGrow }: Omit<HeaderProps, 'tabs'>) => (
+    <EuiFlexGroup alignItems="center">
+      {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
+      {rightColumn ? <EuiFlexItem grow={rightColumnGrow}>{rightColumn}</EuiFlexItem> : null}
     </EuiFlexGroup>
-  </Wrapper>
-</Container>);
+  )
+);
+
+export const Header = ({
+  leftColumn,
+  rightColumn,
+  rightColumnGrow,
+  topContent,
+  tabs,
+  maxWidth,
+  tabsClassName,
+  'data-test-subj': dataTestSubj,
+}: HeaderProps) => (
+  <Container data-test-subj={dataTestSubj}>
+    <Wrapper maxWidth={maxWidth}>
+      {topContent}
+      <HeaderColumns
+        leftColumn={leftColumn}
+        rightColumn={rightColumn}
+        rightColumnGrow={rightColumnGrow}
+      />
+      <EuiFlexGroup>
+        {tabs ? (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <Tabs className={tabsClassName}>
+              {tabs.map((props, index) => (
+                <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>
+                  {props.name}
+                </EuiTab>
+              ))}
+            </Tabs>
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem>
+            <EuiSpacer size="l" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </Wrapper>
+  </Container>
+);

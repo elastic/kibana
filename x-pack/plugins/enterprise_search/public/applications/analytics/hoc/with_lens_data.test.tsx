@@ -44,11 +44,7 @@ jest.mock('../utils/find_or_create_data_view', () => {
 });
 
 describe('withLensData', () => {
-  const MockComponent = (
-    {
-      name
-    }: MockComponentProps
-  ) => <div>{name}</div>;
+  const MockComponent = ({ name }: MockComponentProps) => <div>{name}</div>;
 
   beforeEach(() => {
     setMockValues({});

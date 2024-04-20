@@ -6,7 +6,6 @@
  */
 
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -25,14 +24,7 @@ interface Props {
   onSuccess?(): void;
 }
 
-export const ConfirmDeleteModal = (
-  {
-    space,
-    onSuccess,
-    onCancel,
-    spacesManager
-  }: Props
-) => {
+export const ConfirmDeleteModal = ({ space, onSuccess, onCancel, spacesManager }: Props) => {
   const { services } = useKibana();
 
   const { value: isCurrentSpace } = useAsync(

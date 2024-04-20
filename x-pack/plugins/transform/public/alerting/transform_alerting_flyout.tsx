@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 import { memoize } from 'lodash';
 import type { Observable } from 'rxjs';
@@ -26,14 +25,12 @@ interface TransformAlertFlyoutProps {
   onCloseFlyout: () => void;
 }
 
-export const TransformAlertFlyout = (
-  {
-    initialAlert,
-    ruleParams,
-    onCloseFlyout,
-    onSave
-  }: TransformAlertFlyoutProps
-) => {
+export const TransformAlertFlyout = ({
+  initialAlert,
+  ruleParams,
+  onCloseFlyout,
+  onSave,
+}: TransformAlertFlyoutProps) => {
   const { triggersActionsUi } = useAppDependencies();
 
   const AlertFlyout = useMemo(() => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import classNames from 'classnames';
-import React, { FC, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 
 import {
   panelHoverTrigger,
@@ -30,16 +30,14 @@ export interface FloatingActionsProps {
   disabledActions?: EmbeddableInput['disabledActions'];
 }
 
-export const FloatingActions = (
-  {
-    children,
-    viewMode,
-    isEnabled,
-    embeddable,
-    className = '',
-    disabledActions
-  }: FloatingActionsProps
-) => {
+export const FloatingActions = ({
+  children,
+  viewMode,
+  isEnabled,
+  embeddable,
+  className = '',
+  disabledActions,
+}: FloatingActionsProps) => {
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();

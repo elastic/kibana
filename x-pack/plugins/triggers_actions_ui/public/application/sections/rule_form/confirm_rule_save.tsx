@@ -15,12 +15,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ConfirmRuleSave = (
-  {
-    onConfirm,
-    onCancel
-  }: Props
-) => {
+export const ConfirmRuleSave = ({ onConfirm, onCancel }: Props) => {
   return (
     <EuiConfirmModal
       title={i18n.translate(

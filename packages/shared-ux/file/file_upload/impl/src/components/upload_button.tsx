@@ -7,7 +7,6 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import useObservable from 'react-use/lib/useObservable';
@@ -18,11 +17,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const UploadButton = (
-  {
-    onClick
-  }: Props
-) => {
+export const UploadButton = ({ onClick }: Props) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const error = useBehaviorSubject(uploadState.error$);

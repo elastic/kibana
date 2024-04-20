@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -13,11 +13,7 @@ interface PopoverFooterProps {
   isMac: boolean;
 }
 
-export const PopoverFooter = (
-  {
-    isMac
-  }: PopoverFooterProps
-) => {
+export const PopoverFooter = ({ isMac }: PopoverFooterProps) => {
   return (
     <EuiFlexGroup
       alignItems="center"

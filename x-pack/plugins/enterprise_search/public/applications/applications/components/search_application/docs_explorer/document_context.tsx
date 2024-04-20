@@ -20,13 +20,7 @@ export const DocumentContext = createContext<DocumentContextType>({
   setSelectedDocument: () => {},
 });
 
-export const DocumentProvider = (
-  {
-    children
-  }: {
-    children: React.ReactNode;
-  }
-) => {
+export const DocumentProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedDocument, setSelectedDocument] = useState<SelectedDocument | null>(null);
   const value = useMemo(
     () => ({ selectedDocument, setSelectedDocument }),

@@ -25,15 +25,13 @@ export interface RuleTypeModalComponentProps {
 
 const EMPTY_ARRAY: string[] = [];
 
-export const RuleTypeModalComponent = (
-  {
-    http,
-    toasts,
-    filteredRuleTypes = EMPTY_ARRAY,
-    registeredRuleTypes,
-    ...rest
-  }: RuleTypeModalComponentProps
-) => {
+export const RuleTypeModalComponent = ({
+  http,
+  toasts,
+  filteredRuleTypes = EMPTY_ARRAY,
+  registeredRuleTypes,
+  ...rest
+}: RuleTypeModalComponentProps) => {
   const [selectedProducer, setSelectedProducer] = useState<string | null>(null);
   const [searchString, setSearchString] = useState<string>('');
 

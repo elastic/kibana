@@ -7,7 +7,6 @@
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 import type { ExplorerChartSeriesErrorMessages } from './explorer_charts_container_service';
 
@@ -15,11 +14,9 @@ interface ExplorerChartsErrorCalloutsProps {
   errorMessagesByType: ExplorerChartSeriesErrorMessages;
 }
 
-export const ExplorerChartsErrorCallOuts = (
-  {
-    errorMessagesByType
-  }: ExplorerChartsErrorCalloutsProps
-) => {
+export const ExplorerChartsErrorCallOuts = ({
+  errorMessagesByType,
+}: ExplorerChartsErrorCalloutsProps) => {
   if (!errorMessagesByType || Object.keys(errorMessagesByType).length === 0) return null;
   const content = Object.keys(errorMessagesByType).map((errorType) => (
     <EuiCallOut color={'warning'} size="s" key={errorType}>

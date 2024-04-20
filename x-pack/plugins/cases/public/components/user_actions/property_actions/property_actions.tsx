@@ -16,13 +16,11 @@ interface Props {
   customDataTestSubj?: string;
 }
 
-const UserActionPropertyActionsComponent = (
-  {
-    isLoading,
-    propertyActions,
-    customDataTestSubj = 'user-action'
-  }: Props
-) => {
+const UserActionPropertyActionsComponent = ({
+  isLoading,
+  propertyActions,
+  customDataTestSubj = 'user-action',
+}: Props) => {
   if (propertyActions.length === 0) {
     return null;
   }

@@ -19,13 +19,11 @@ interface FilteringStatusCalloutsProps {
   state: FilteringValidationState;
 }
 
-export const SyncRulesStateCallouts = (
-  {
-    applyDraft,
-    editDraft,
-    state
-  }: FilteringStatusCalloutsProps
-) => {
+export const SyncRulesStateCallouts = ({
+  applyDraft,
+  editDraft,
+  state,
+}: FilteringStatusCalloutsProps) => {
   switch (state) {
     case FilteringValidationState.EDITED:
       return (

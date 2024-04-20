@@ -21,13 +21,7 @@ export const getTooltipContent = (type: string | undefined) =>
     ? i18n.INVESTIGATION_TOOLTIP_CONTENT
     : i18n.INDICATOR_TOOLTIP_CONTENT;
 
-export const EnrichmentIcon = (
-  {
-    type
-  }: {
-    type: string | undefined;
-  }
-) => {
+export const EnrichmentIcon = ({ type }: { type: string | undefined }) => {
   return (
     <EuiToolTip content={getTooltipContent(type)}>
       <EuiIcon type="iInCircle" size="m" />

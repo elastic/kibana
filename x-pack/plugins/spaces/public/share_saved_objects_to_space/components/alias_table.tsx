@@ -13,7 +13,6 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,12 +31,7 @@ interface Props {
   aliasesToDisable: InternalLegacyUrlAliasTarget[];
 }
 
-export const AliasTable = (
-  {
-    spaces,
-    aliasesToDisable
-  }: Props
-) => {
+export const AliasTable = ({ spaces, aliasesToDisable }: Props) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
 

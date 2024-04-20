@@ -62,17 +62,15 @@ const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false):
   return dateObj.valueOf();
 };
 
-export const MetricsExplorerChartContextMenu = (
-  {
-    onFilter,
-    options,
-    series,
-    source,
-    timeRange,
-    uiCapabilities,
-    chartOptions
-  }: Props
-) => {
+export const MetricsExplorerChartContextMenu = ({
+  onFilter,
+  options,
+  series,
+  source,
+  timeRange,
+  uiCapabilities,
+  chartOptions,
+}: Props) => {
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);

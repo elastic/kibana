@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { useDispatch } from 'react-redux';
 import { EuiLink, useEuiTheme } from '@elastic/eui';

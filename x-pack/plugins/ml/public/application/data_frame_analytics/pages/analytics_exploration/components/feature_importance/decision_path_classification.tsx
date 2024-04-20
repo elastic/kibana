@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
@@ -33,16 +32,14 @@ interface ClassificationDecisionPathProps {
   baseline?: FeatureImportanceBaseline;
 }
 
-export const ClassificationDecisionPath = (
-  {
-    featureImportance,
-    predictedValue,
-    topClasses,
-    predictionFieldName,
-    predictedProbability,
-    baseline
-  }: ClassificationDecisionPathProps
-) => {
+export const ClassificationDecisionPath = ({
+  featureImportance,
+  predictedValue,
+  topClasses,
+  predictionFieldName,
+  predictedProbability,
+  baseline,
+}: ClassificationDecisionPathProps) => {
   const [currentClass, setCurrentClass] = useState<string>(
     Array.isArray(topClasses) && topClasses.length > 0
       ? getStringBasedClassName(topClasses[0].class_name)

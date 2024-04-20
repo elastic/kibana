@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren, ReactElement, ReactNode } from 'react';
+import type { PropsWithChildren, ReactElement, ReactNode } from 'react';
 import React, { isValidElement, memo, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiButtonProps, PropsForButton } from '@elastic/eui';
@@ -91,17 +91,15 @@ export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
 
 ItemDetailsPropertySummary.displayName = 'ItemPropertySummary';
 
-export const ItemDetailsAction = memo((
-  {
-    children,
-    className = '',
-    ...rest
-  }: PropsForButton<EuiButtonProps>
-) => (<div>
-  <EuiButton className={`eui-fullWidth ${className}`} {...rest}>
-    {children}
-  </EuiButton>
-</div>));
+export const ItemDetailsAction = memo(
+  ({ children, className = '', ...rest }: PropsForButton<EuiButtonProps>) => (
+    <div>
+      <EuiButton className={`eui-fullWidth ${className}`} {...rest}>
+        {children}
+      </EuiButton>
+    </div>
+  )
+);
 
 ItemDetailsAction.displayName = 'ItemDetailsAction';
 

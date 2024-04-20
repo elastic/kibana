@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { css } from '@emotion/css';
 import {
@@ -344,11 +344,7 @@ interface Props {
   navNode: ChromeProjectNavigationNode;
 }
 
-export const NavigationSectionUI = React.memo((
-  {
-    navNode: _navNode
-  }: Props
-) => {
+export const NavigationSectionUI = React.memo(({ navNode: _navNode }: Props) => {
   const { activeNodes } = useNavigation();
   const { navigateToUrl, isSideNavCollapsed } = useServices();
 
@@ -546,11 +542,11 @@ export const NavigationSectionUI = React.memo((
 
   return (
     // @ts-ignore - TODO
-    (<EuiCollapsibleNavItem
+    <EuiCollapsibleNavItem
       {...props}
       className={className}
       items={subItems}
       accordionProps={getAccordionProps(navNode.path)}
-    />)
+    />
   );
 });

@@ -15,15 +15,13 @@ type Props = Pick<
   'title' | 'confirmButtonText' | 'cancelButtonText' | 'onConfirm' | 'onCancel'
 >;
 
-const CancelCreationConfirmationModalComponent = (
-  {
-    title,
-    confirmButtonText = i18n.CONFIRM_MODAL_BUTTON,
-    cancelButtonText = i18n.CANCEL_MODAL_BUTTON,
-    onConfirm,
-    onCancel
-  }: Props
-) => {
+const CancelCreationConfirmationModalComponent = ({
+  title,
+  confirmButtonText = i18n.CONFIRM_MODAL_BUTTON,
+  cancelButtonText = i18n.CANCEL_MODAL_BUTTON,
+  onConfirm,
+  onCancel,
+}: Props) => {
   return (
     <EuiConfirmModal
       title={title}

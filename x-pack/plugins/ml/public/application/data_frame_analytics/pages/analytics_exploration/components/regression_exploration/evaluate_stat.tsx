@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -83,29 +82,24 @@ const tooltipContent = {
   ),
 };
 
-export const EvaluateStat = (
-  {
-    isLoading,
-    statType,
-    title,
-    dataTestSubj
-  }: Props
-) => (<EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
-  <EuiFlexItem grow={false}>
-    <EuiStat
-      reverse
-      isLoading={isLoading}
-      title={title}
-      description={statDescriptions[statType]}
-      titleSize="xxs"
-    />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    {statType !== REGRESSION_STATS.HUBER && (
-      <EuiIconTip
-        anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
-        content={tooltipContent[statType]}
+export const EvaluateStat = ({ isLoading, statType, title, dataTestSubj }: Props) => (
+  <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
+    <EuiFlexItem grow={false}>
+      <EuiStat
+        reverse
+        isLoading={isLoading}
+        title={title}
+        description={statDescriptions[statType]}
+        titleSize="xxs"
       />
-    )}
-  </EuiFlexItem>
-</EuiFlexGroup>);
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      {statType !== REGRESSION_STATS.HUBER && (
+        <EuiIconTip
+          anchorClassName="mlDataFrameAnalyticsRegression__evaluateStat"
+          content={tooltipContent[statType]}
+        />
+      )}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

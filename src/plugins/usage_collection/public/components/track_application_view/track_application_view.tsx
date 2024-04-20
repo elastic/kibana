@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC } from 'react';
+import React, { createContext } from 'react';
 import { TrackApplicationViewComponent } from './track_application_view_component';
 import { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewProps } from './types';

@@ -27,48 +27,48 @@ interface SourceInfoCardProps {
   contentSource: ContentSourceFullData;
 }
 
-export const SourceInfoCard = (
-  {
-    contentSource: { createdAt, name, serviceType, isFederatedSource, mainIcon }
-  }: SourceInfoCardProps
-) => (<EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-  <EuiFlexItem>
-    <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
-      <EuiFlexItem grow={null}>
-        <SourceIcon serviceType={serviceType} name={name} iconAsBase64={mainIcon} size="l" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h1>{name}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    {isFederatedSource && (
-      <EuiFlexGroup gutterSize="none" justifyContent="flexStart">
+export const SourceInfoCard = ({
+  contentSource: { createdAt, name, serviceType, isFederatedSource, mainIcon },
+}: SourceInfoCardProps) => (
+  <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={null}>
-          <EuiSpacer size="xs" />
-          <EuiBadge iconType="online" iconSide="left">
-            {REMOTE_SOURCE_LABEL}
-          </EuiBadge>
+          <SourceIcon serviceType={serviceType} name={name} iconAsBase64={mainIcon} size="l" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h1>{name}</h1>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-    )}
-  </EuiFlexItem>
-  <EuiFlexItem>
-    <EuiText textAlign="right" size="s">
-      <strong>{CREATED_LABEL}</strong>
-      {moment(createdAt).format('MMMM D, YYYY')}
-    </EuiText>
+      {isFederatedSource && (
+        <EuiFlexGroup gutterSize="none" justifyContent="flexStart">
+          <EuiFlexItem grow={null}>
+            <EuiSpacer size="xs" />
+            <EuiBadge iconType="online" iconSide="left">
+              {REMOTE_SOURCE_LABEL}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiText textAlign="right" size="s">
+        <strong>{CREATED_LABEL}</strong>
+        {moment(createdAt).format('MMMM D, YYYY')}
+      </EuiText>
 
-    {isFederatedSource && (
-      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={null}>
-          <strong>{STATUS_LABEL}</strong>
-        </EuiFlexItem>
-        <EuiFlexItem grow={null}>
-          <EuiHealth color="success">{READY_TEXT}</EuiHealth>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    )}
-  </EuiFlexItem>
-</EuiFlexGroup>);
+      {isFederatedSource && (
+        <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={null}>
+            <strong>{STATUS_LABEL}</strong>
+          </EuiFlexItem>
+          <EuiFlexItem grow={null}>
+            <EuiHealth color="success">{READY_TEXT}</EuiHealth>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

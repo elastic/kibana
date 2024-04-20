@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';

@@ -18,12 +18,7 @@ interface Props {
   showCta?: boolean;
 }
 
-export const LegacyIndexTemplatesDeprecation = (
-  {
-    history,
-    showCta
-  }: Props
-) => {
+export const LegacyIndexTemplatesDeprecation = ({ history, showCta }: Props) => {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.idxMgmt.legacyIndexTemplatesDeprecation.title', {

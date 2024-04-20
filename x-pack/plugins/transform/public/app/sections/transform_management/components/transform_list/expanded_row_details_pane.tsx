@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import moment from 'moment-timezone';
 
@@ -33,12 +32,7 @@ interface ExpandedRowDetailsPaneProps {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
-export const ExpandedRowDetailsPane = (
-  {
-    item,
-    onAlertEdit
-  }: ExpandedRowDetailsPaneProps
-) => {
+export const ExpandedRowDetailsPane = ({ item, onAlertEdit }: ExpandedRowDetailsPaneProps) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
 
   let displayStats = {};

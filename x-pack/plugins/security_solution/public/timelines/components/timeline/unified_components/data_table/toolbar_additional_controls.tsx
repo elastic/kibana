@@ -34,12 +34,7 @@ interface Props {
   updatedAt: number;
 }
 
-export const ToolbarAdditionalControlsComponent = (
-  {
-    timelineId,
-    updatedAt
-  }: Props
-) => {
+export const ToolbarAdditionalControlsComponent = ({ timelineId, updatedAt }: Props) => {
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import type { FC } from 'react';
 
 import {
   EmptyViewerState,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
 
 import type { EuiCallOutProps } from '@elastic/eui';
@@ -17,12 +16,7 @@ interface Props {
   size?: EuiCallOutProps['size'];
 }
 
-export const MlNodeAvailableWarningShared = (
-  {
-    nodeAvailableCallback,
-    size
-  }: Props
-) => {
+export const MlNodeAvailableWarningShared = ({ nodeAvailableCallback, size }: Props) => {
   const { mlNodesAvailable, isCloud, deploymentId, isCloudTrial } = useMlNodeAvailableCheck();
 
   useEffect(

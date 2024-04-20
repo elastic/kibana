@@ -23,12 +23,7 @@ interface CaseViewActions {
   currentExternalIncident: CaseUI['externalService'];
 }
 
-const ActionsComponent = (
-  {
-    caseData,
-    currentExternalIncident
-  }: CaseViewActions
-) => {
+const ActionsComponent = ({ caseData, currentExternalIncident }: CaseViewActions) => {
   const { mutate: deleteCases } = useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { permissions } = useCasesContext();

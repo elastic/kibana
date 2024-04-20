@@ -28,15 +28,13 @@ const renderErrorMessage = (error: string) => (
   </EuiCodeBlock>
 );
 
-const ActionResultsSummaryComponent = (
-  {
-    actionId,
-    expirationDate,
-    agentIds,
-    error,
-    startDate
-  }: ActionResultsSummaryProps
-) => {
+const ActionResultsSummaryComponent = ({
+  actionId,
+  expirationDate,
+  agentIds,
+  error,
+  startDate,
+}: ActionResultsSummaryProps) => {
   const [pageIndex] = useState(0);
   const [pageSize] = useState(50);
   const expired = useMemo(

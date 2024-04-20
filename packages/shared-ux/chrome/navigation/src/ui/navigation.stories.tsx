@@ -7,7 +7,7 @@
  */
 
 import { ComponentMeta } from '@storybook/react';
-import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
+import React, { EventHandler, MouseEvent, useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
 import {

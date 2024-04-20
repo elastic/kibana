@@ -45,17 +45,15 @@ import {
   UPDATE_USER_DESCRIPTION,
 } from './constants';
 
-export const UserFlyout = (
-  {
-    children,
-    isNew,
-    isComplete,
-    disabled,
-    formLoading,
-    closeUserFlyout,
-    handleSaveUser
-  }: Props
-) => {
+export const UserFlyout = ({
+  children,
+  isNew,
+  isComplete,
+  disabled,
+  formLoading,
+  closeUserFlyout,
+  handleSaveUser,
+}: Props) => {
   const savedIcon = (
     <EuiIcon
       color="success"

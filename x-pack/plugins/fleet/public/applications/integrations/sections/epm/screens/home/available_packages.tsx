@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,13 +26,7 @@ import { useAvailablePackages } from './hooks/use_available_packages';
 
 import type { ExtendedIntegrationCategory } from './category_facets';
 
-const NoEprCallout = (
-  {
-    statusCode
-  }: {
-    statusCode?: number;
-  }
-) => {
+const NoEprCallout = ({ statusCode }: { statusCode?: number }) => {
   let titleMessage;
   let descriptionMessage;
   if (statusCode === 502) {
@@ -99,13 +92,11 @@ function OnPremLink() {
   );
 }
 
-export const AvailablePackages = (
-  {
-    prereleaseIntegrationsEnabled
-  }: {
-    prereleaseIntegrationsEnabled: boolean;
-  }
-) => {
+export const AvailablePackages = ({
+  prereleaseIntegrationsEnabled,
+}: {
+  prereleaseIntegrationsEnabled: boolean;
+}) => {
   useBreadcrumbs('integrations_all');
 
   const {

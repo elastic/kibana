@@ -37,30 +37,26 @@ const BetaBadge = () => (
 BetaBadge.displayName = 'BetaBadge';
 export const TitleBetaBadge = React.memo(BetaBadge);
 
-const TitleComponent = (
-  {
-    title,
-    releasePhase,
-    children
-  }: Props
-) => (<EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
-  <EuiFlexItem grow={false}>
-    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="l">
-          <h1 data-test-subj="header-page-title">
-            {isString(title) ? <TruncatedText text={title} /> : title}
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    {releasePhase === 'experimental' && <ExperimentalBadge />}
-    {releasePhase === 'beta' && <BetaBadge />}
-  </EuiFlexItem>
-</EuiFlexGroup>);
+const TitleComponent = ({ title, releasePhase, children }: Props) => (
+  <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="l">
+            <h1 data-test-subj="header-page-title">
+              {isString(title) ? <TruncatedText text={title} /> : title}
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      {releasePhase === 'experimental' && <ExperimentalBadge />}
+      {releasePhase === 'beta' && <BetaBadge />}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 TitleComponent.displayName = 'Title';
 export const Title = React.memo(TitleComponent);

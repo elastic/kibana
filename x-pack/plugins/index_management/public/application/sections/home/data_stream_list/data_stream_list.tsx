@@ -47,16 +47,14 @@ interface MatchParams {
   dataStreamName?: string;
 }
 
-export const DataStreamList = (
-  {
-    match: {
-      params: { dataStreamName },
-    },
+export const DataStreamList = ({
+  match: {
+    params: { dataStreamName },
+  },
 
-    location: { search },
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+  location: { search },
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const { isDeepLink, includeHidden } = extractQueryParams(search);
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 

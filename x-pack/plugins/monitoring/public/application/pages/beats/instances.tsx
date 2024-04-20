@@ -19,11 +19,7 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 
-export const BeatsInstancesPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const BeatsInstancesPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();

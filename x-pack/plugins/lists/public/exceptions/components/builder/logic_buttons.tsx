@@ -28,56 +28,56 @@ interface BuilderLogicButtonsProps {
   onOrClicked: () => void;
 }
 
-export const BuilderLogicButtons = (
-  {
-    isAndDisabled = false,
-    isNested,
-    isNestedDisabled = true,
-    isOrDisabled = false,
-    isOrHidden = false,
-    showNestedButton = false,
-    onAddClickWhenNested,
-    onAndClicked,
-    onNestedClicked,
-    onOrClicked
-  }: BuilderLogicButtonsProps
-) => (<EuiFlexGroup gutterSize="s" alignItems="center">
-  <EuiFlexItem grow={false}>
-    <MyEuiButton
-      size="s"
-      iconType="plusInCircle"
-      onClick={isNested ? onAddClickWhenNested : onAndClicked}
-      data-test-subj="exceptionsAndButton"
-      isDisabled={isAndDisabled}
-    >
-      {i18n.AND}
-    </MyEuiButton>
-  </EuiFlexItem>
-  {!isOrHidden && (
+export const BuilderLogicButtons = ({
+  isAndDisabled = false,
+  isNested,
+  isNestedDisabled = true,
+  isOrDisabled = false,
+  isOrHidden = false,
+  showNestedButton = false,
+  onAddClickWhenNested,
+  onAndClicked,
+  onNestedClicked,
+  onOrClicked,
+}: BuilderLogicButtonsProps) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <MyEuiButton
-        fill
         size="s"
         iconType="plusInCircle"
-        onClick={onOrClicked}
-        isDisabled={isOrDisabled}
-        data-test-subj="exceptionsOrButton"
+        onClick={isNested ? onAddClickWhenNested : onAndClicked}
+        data-test-subj="exceptionsAndButton"
+        isDisabled={isAndDisabled}
       >
-        {i18n.OR}
+        {i18n.AND}
       </MyEuiButton>
     </EuiFlexItem>
-  )}
-  {showNestedButton && (
-    <EuiFlexItem grow={false}>
-      <EuiButton
-        size="s"
-        iconType="nested"
-        onClick={isNested ? onAndClicked : onNestedClicked}
-        isDisabled={isNestedDisabled}
-        data-test-subj="exceptionsNestedButton"
-      >
-        {isNested ? i18n.ADD_NON_NESTED_DESCRIPTION : i18n.ADD_NESTED_DESCRIPTION}
-      </EuiButton>
-    </EuiFlexItem>
-  )}
-</EuiFlexGroup>);
+    {!isOrHidden && (
+      <EuiFlexItem grow={false}>
+        <MyEuiButton
+          fill
+          size="s"
+          iconType="plusInCircle"
+          onClick={onOrClicked}
+          isDisabled={isOrDisabled}
+          data-test-subj="exceptionsOrButton"
+        >
+          {i18n.OR}
+        </MyEuiButton>
+      </EuiFlexItem>
+    )}
+    {showNestedButton && (
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          iconType="nested"
+          onClick={isNested ? onAndClicked : onNestedClicked}
+          isDisabled={isNestedDisabled}
+          data-test-subj="exceptionsNestedButton"
+        >
+          {isNested ? i18n.ADD_NON_NESTED_DESCRIPTION : i18n.ADD_NESTED_DESCRIPTION}
+        </EuiButton>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);

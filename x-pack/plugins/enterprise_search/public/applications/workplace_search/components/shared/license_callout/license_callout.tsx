@@ -17,11 +17,7 @@ interface LicenseCalloutProps {
   message?: string;
 }
 
-export const LicenseCallout = (
-  {
-    message
-  }: LicenseCalloutProps
-) => {
+export const LicenseCallout = ({ message }: LicenseCalloutProps) => {
   const title = (
     <>
       {message}{' '}

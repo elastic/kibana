@@ -24,13 +24,11 @@ interface RouterProps {
   policyName: string;
 }
 
-export const EditPolicy = (
-  {
-    match: {
-      params: { policyName },
-    }
-  }: RouteComponentProps<RouterProps>
-) => {
+export const EditPolicy = ({
+  match: {
+    params: { policyName },
+  },
+}: RouteComponentProps<RouterProps>) => {
   const {
     services: { breadcrumbService, license },
   } = useKibana();

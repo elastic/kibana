@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WizardNav } from '../wizard_nav';
@@ -27,16 +26,14 @@ interface Props extends StepProps {
   setAdditionalExpanded: (a: boolean) => void;
 }
 
-export const JobDetailsStep = (
-  {
-    setCurrentStep,
-    isCurrentStep,
-    advancedExpanded,
-    setAdvancedExpanded,
-    additionalExpanded,
-    setAdditionalExpanded
-  }: Props
-) => {
+export const JobDetailsStep = ({
+  setCurrentStep,
+  isCurrentStep,
+  advancedExpanded,
+  setAdvancedExpanded,
+  additionalExpanded,
+  setAdditionalExpanded,
+}: Props) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 

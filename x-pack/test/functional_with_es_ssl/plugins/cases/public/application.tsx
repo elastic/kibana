@@ -91,13 +91,7 @@ const CasesFixtureAppWithContext = (props: CasesFixtureAppDeps) => {
   );
 };
 
-const CasesFixtureApp = (
-  {
-    deps
-  }: {
-    deps: RenderAppProps;
-  }
-) => {
+const CasesFixtureApp = ({ deps }: { deps: RenderAppProps }) => {
   const { mountParams, coreStart, pluginsStart } = deps;
   const { history } = mountParams;
   const { cases } = pluginsStart;

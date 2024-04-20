@@ -18,7 +18,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import React, { FC } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
@@ -75,13 +75,7 @@ const renderReactEmbeddable = ({
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
-  const EmbeddableRenderer = (
-    {
-      embeddable
-    }: {
-      embeddable: IEmbeddable;
-    }
-  ) => {
+  const EmbeddableRenderer = ({ embeddable }: { embeddable: IEmbeddable }) => {
     const currentAppId = useObservable(core.application.currentAppId$, undefined);
 
     if (!currentAppId) {

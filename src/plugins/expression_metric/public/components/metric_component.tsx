@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, CSSProperties } from 'react';
+import React, { CSSProperties } from 'react';
 import numeral from '@elastic/numeral';
 interface Props {
   /** The text to display under the metric */
@@ -21,15 +21,7 @@ interface Props {
   metricFormat?: string;
 }
 
-export const MetricComponent = (
-  {
-    label,
-    metric,
-    labelFont,
-    metricFont,
-    metricFormat
-  }: Props
-) => {
+export const MetricComponent = ({ label, metric, labelFont, metricFont, metricFormat }: Props) => {
   return (
     <div className="canvasMetric">
       <div className="canvasMetric__metric" style={metricFont}>

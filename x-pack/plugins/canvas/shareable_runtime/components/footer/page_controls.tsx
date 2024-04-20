@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 import {
@@ -43,14 +43,12 @@ interface Props {
 /**
  * The page count and paging controls within the footer of the Shareable Canvas Workpad.
  */
-export const PageControlsComponent = (
-  {
-    onSetPageNumber,
-    page,
-    totalPages,
-    onToggleScrubber
-  }: Props
-) => {
+export const PageControlsComponent = ({
+  onSetPageNumber,
+  page,
+  totalPages,
+  onToggleScrubber,
+}: Props) => {
   const currentPage = page + 1;
 
   return (

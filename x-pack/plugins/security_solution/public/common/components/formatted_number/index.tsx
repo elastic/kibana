@@ -57,13 +57,7 @@ export function compactNotationParts(
   return [Math.floor(num / scale), prefix, (num / scale) % 1 > Number.EPSILON ? hasRemainder : ''];
 }
 
-const FormattedCountComponent = (
-  {
-    count
-  }: {
-    count: number | null;
-  }
-) => {
+const FormattedCountComponent = ({ count }: { count: number | null }) => {
   const [mantissa, scale, hasRemainder] = useMemo(() => compactNotationParts(count || 0), [count]);
 
   if (count == null) {

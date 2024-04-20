@@ -27,12 +27,7 @@ interface ReauthenticateProps {
   header: React.ReactNode;
 }
 
-export const Reauthenticate = (
-  {
-    name,
-    header
-  }: ReauthenticateProps
-) => {
+export const Reauthenticate = ({ name, header }: ReauthenticateProps) => {
   const { search } = useLocation() as Location;
 
   const { sourceId } = parseQueryParams(search) as unknown as SourceQueryParams;

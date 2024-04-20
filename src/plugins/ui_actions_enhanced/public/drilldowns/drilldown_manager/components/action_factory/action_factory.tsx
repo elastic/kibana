@@ -83,15 +83,7 @@ export interface ActionFactoryProps {
   onChange?: () => void;
 }
 
-export const ActionFactory = (
-  {
-    name,
-    icon,
-    beta,
-    showMoreLink,
-    onChange
-  }: ActionFactoryProps
-) => {
+export const ActionFactory = ({ name, icon, beta, showMoreLink, onChange }: ActionFactoryProps) => {
   return (
     <EuiFormRow
       label={txtDrilldownAction}

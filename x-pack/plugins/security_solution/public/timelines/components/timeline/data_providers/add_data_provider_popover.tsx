@@ -38,12 +38,10 @@ const AddFieldPopoverContainer = styled.div`
   min-width: 350px;
 `;
 
-const AddDataProviderPopoverComponent = (
-  {
-    browserFields,
-    timelineId
-  }: AddDataProviderPopoverProps
-) => {
+const AddDataProviderPopoverComponent = ({
+  browserFields,
+  timelineId,
+}: AddDataProviderPopoverProps) => {
   const dispatch = useDispatch();
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);

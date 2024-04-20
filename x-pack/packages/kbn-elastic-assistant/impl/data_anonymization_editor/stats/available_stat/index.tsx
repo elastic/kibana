@@ -18,12 +18,7 @@ interface Props {
   inline?: boolean;
 }
 
-const AvailableStatComponent = (
-  {
-    total,
-    inline
-  }: Props
-) => {
+const AvailableStatComponent = ({ total, inline }: Props) => {
   const tooltipContent = useMemo(() => i18n.AVAILABLE_TOOLTIP(total), [total]);
 
   return (

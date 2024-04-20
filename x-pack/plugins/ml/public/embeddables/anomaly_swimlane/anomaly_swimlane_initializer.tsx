@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -39,15 +38,13 @@ export interface AnomalySwimlaneInitializerProps {
   onCancel: () => void;
 }
 
-export const AnomalySwimlaneInitializer = (
-  {
-    defaultTitle,
-    influencers,
-    onCreate,
-    onCancel,
-    initialInput
-  }: AnomalySwimlaneInitializerProps
-) => {
+export const AnomalySwimlaneInitializer = ({
+  defaultTitle,
+  influencers,
+  onCreate,
+  onCancel,
+  initialInput,
+}: AnomalySwimlaneInitializerProps) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
   const [swimlaneType, setSwimlaneType] = useState<SwimlaneType>(
     initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL

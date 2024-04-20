@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-export const TimelinePhaseText = (
-  {
-    phaseName,
-    durationInPhase
-  }: {
-    phaseName: ReactNode | string;
-    durationInPhase?: ReactNode | string;
-  }
-) => (<EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-  <EuiFlexItem grow={false}>
-    <EuiText size="s">
-      <strong>{phaseName}</strong>
-    </EuiText>
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    {typeof durationInPhase === 'string' ? (
-      <EuiText size="s">{durationInPhase}</EuiText>
-    ) : (
-      durationInPhase
-    )}
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const TimelinePhaseText = ({
+  phaseName,
+  durationInPhase,
+}: {
+  phaseName: ReactNode | string;
+  durationInPhase?: ReactNode | string;
+}) => (
+  <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <strong>{phaseName}</strong>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      {typeof durationInPhase === 'string' ? (
+        <EuiText size="s">{durationInPhase}</EuiText>
+      ) : (
+        durationInPhase
+      )}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

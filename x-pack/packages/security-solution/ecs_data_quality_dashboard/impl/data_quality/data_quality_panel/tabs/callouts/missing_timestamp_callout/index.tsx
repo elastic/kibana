@@ -15,18 +15,16 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const MissingTimestampCalloutComponent = (
-  {
-    children
-  }: Props
-) => (<EuiCallOut color="danger" size="s" title={i18n.MISSING_TIMESTAMP_CALLOUT_TITLE}>
-  <div>{i18n.MISSING_TIMESTAMP_CALLOUT}</div>
-  <EuiSpacer size="s" />
-  <CalloutItem>{i18n.DETECTION_ENGINE_RULES_MAY_NOT_MATCH}</CalloutItem>
-  <CalloutItem>{i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}</CalloutItem>
-  <EuiSpacer size="s" />
-  {children}
-</EuiCallOut>);
+const MissingTimestampCalloutComponent = ({ children }: Props) => (
+  <EuiCallOut color="danger" size="s" title={i18n.MISSING_TIMESTAMP_CALLOUT_TITLE}>
+    <div>{i18n.MISSING_TIMESTAMP_CALLOUT}</div>
+    <EuiSpacer size="s" />
+    <CalloutItem>{i18n.DETECTION_ENGINE_RULES_MAY_NOT_MATCH}</CalloutItem>
+    <CalloutItem>{i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}</CalloutItem>
+    <EuiSpacer size="s" />
+    {children}
+  </EuiCallOut>
+);
 
 MissingTimestampCalloutComponent.displayName = 'MissingTimestampCalloutComponent';
 

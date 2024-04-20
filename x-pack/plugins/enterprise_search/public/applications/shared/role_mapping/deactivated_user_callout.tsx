@@ -15,16 +15,14 @@ interface Props {
 
 import { DEACTIVATED_USER_CALLOUT_LABEL, DEACTIVATED_USER_CALLOUT_DESCRIPTION } from './constants';
 
-export const DeactivatedUserCallout = (
-  {
-    isNew
-  }: Props
-) => (<>
-  {!isNew && <EuiSpacer />}
-  <EuiText size="s">
-    <EuiIcon type="warning" color="warning" /> <strong>{DEACTIVATED_USER_CALLOUT_LABEL}</strong>
-  </EuiText>
-  <EuiSpacer size="xs" />
-  <EuiText size="s">{DEACTIVATED_USER_CALLOUT_DESCRIPTION}</EuiText>
-  <EuiSpacer />
-</>);
+export const DeactivatedUserCallout = ({ isNew }: Props) => (
+  <>
+    {!isNew && <EuiSpacer />}
+    <EuiText size="s">
+      <EuiIcon type="warning" color="warning" /> <strong>{DEACTIVATED_USER_CALLOUT_LABEL}</strong>
+    </EuiText>
+    <EuiSpacer size="xs" />
+    <EuiText size="s">{DEACTIVATED_USER_CALLOUT_DESCRIPTION}</EuiText>
+    <EuiSpacer />
+  </>
+);

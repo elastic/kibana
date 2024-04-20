@@ -16,13 +16,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const SlackActionFields = (
-  {
-    action,
-    editAction,
-    children
-  }: Props
-) => {
+export const SlackActionFields = ({ action, editAction, children }: Props) => {
   const { text, to } = action;
   const toOptions = to ? to.map((label) => ({ label })) : [];
 

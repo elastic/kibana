@@ -66,14 +66,12 @@ interface Props {
   disabled?: boolean;
 }
 
-export const AgentPolicyAdvancedOptionsContent = (
-  {
-    agentPolicy,
-    updateAgentPolicy,
-    validation,
-    disabled = false
-  }: Props
-) => {
+export const AgentPolicyAdvancedOptionsContent = ({
+  agentPolicy,
+  updateAgentPolicy,
+  validation,
+  disabled = false,
+}: Props) => {
   const { docLinks } = useStartServices();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',

@@ -35,12 +35,7 @@ interface Props {
   errorSummary: ErrorSummary[];
 }
 
-const ErrorsPopoverComponent = (
-  {
-    addSuccessToast,
-    errorSummary
-  }: Props
-) => {
+const ErrorsPopoverComponent = ({ addSuccessToast, errorSummary }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);

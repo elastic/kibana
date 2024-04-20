@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiCallOut, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
@@ -16,11 +15,7 @@ import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../examples_list';
 import { ExpandedRowContent } from './expanded_row_content';
 
-export const TextContent = (
-  {
-    config
-  }: FieldDataRowProps
-) => {
+export const TextContent = ({ config }: FieldDataRowProps) => {
   const { stats } = config;
   if (stats === undefined) return null;
 

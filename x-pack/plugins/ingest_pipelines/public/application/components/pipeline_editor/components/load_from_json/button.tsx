@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
@@ -21,11 +21,7 @@ const i18nTexts = {
   }),
 };
 
-export const LoadFromJsonButton = (
-  {
-    onDone
-  }: Props
-) => {
+export const LoadFromJsonButton = ({ onDone }: Props) => {
   return (
     <ModalProvider onDone={onDone}>
       {(openModal) => {

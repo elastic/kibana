@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';

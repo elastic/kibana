@@ -27,11 +27,7 @@ interface MatchParams {
   repositoryName?: Repository['name'];
 }
 
-export const RepositoryList = (
-  {
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+export const RepositoryList = ({ history }: RouteComponentProps<MatchParams>) => {
   const { repositoryName } = useDecodedParams<MatchParams>();
   const {
     error,

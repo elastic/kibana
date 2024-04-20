@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -69,12 +69,7 @@ interface FilterOption {
 
 type ChangePointTypeFilterOptions = Array<EuiComboBoxOptionOption<ChangePointUIValue>>;
 
-export const ChangePointTypeFilter = (
-  {
-    value,
-    onChange
-  }: ChangePointTypeFilterProps
-) => {
+export const ChangePointTypeFilter = ({ value, onChange }: ChangePointTypeFilterProps) => {
   const options = useMemo<ChangePointTypeFilterOptions>(() => {
     return [{ value: undefined, description: '' }, ...changePointTypes].map((v) => ({
       value: v.value,

@@ -85,9 +85,13 @@ interface FindingFlyoutProps {
   onPaginate?: (pageIndex: number) => void;
 }
 
-export const CodeBlock = (props: PropsOf<typeof EuiCodeBlock>) => (<EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />);
+export const CodeBlock = (props: PropsOf<typeof EuiCodeBlock>) => (
+  <EuiCodeBlock isCopyable paddingSize="s" overflowHeight={300} {...props} />
+);
 
-export const CspFlyoutMarkdown = (props: PropsOf<typeof EuiMarkdownFormat>) => (<EuiMarkdownFormat textSize="s" {...props} />);
+export const CspFlyoutMarkdown = (props: PropsOf<typeof EuiMarkdownFormat>) => (
+  <EuiMarkdownFormat textSize="s" {...props} />
+);
 
 export const CisKubernetesIcons = ({
   benchmarkId,

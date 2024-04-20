@@ -18,12 +18,7 @@ interface Props {
   cutoff?: number;
 }
 
-export const TruncatedEnginesList = (
-  {
-    engines,
-    cutoff = 3
-  }: Props
-) => {
+export const TruncatedEnginesList = ({ engines, cutoff = 3 }: Props) => {
   if (!engines?.length) return null;
 
   const displayedEngines = engines.slice(0, cutoff);

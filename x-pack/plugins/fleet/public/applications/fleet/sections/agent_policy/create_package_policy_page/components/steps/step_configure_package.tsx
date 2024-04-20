@@ -29,27 +29,25 @@ import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputPanel } from './components';
 
-export const StepConfigurePackagePolicy = (
-  {
-    packageInfo,
-    showOnlyIntegration,
-    packagePolicy,
-    updatePackagePolicy,
-    validationResults,
-    submitAttempted,
-    noTopRule = false,
-    isEditPage = false
-  }: {
-    packageInfo: PackageInfo;
-    showOnlyIntegration?: string;
-    packagePolicy: NewPackagePolicy;
-    updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-    validationResults: PackagePolicyValidationResults | undefined;
-    submitAttempted: boolean;
-    noTopRule?: boolean;
-    isEditPage?: boolean;
-  }
-) => {
+export const StepConfigurePackagePolicy = ({
+  packageInfo,
+  showOnlyIntegration,
+  packagePolicy,
+  updatePackagePolicy,
+  validationResults,
+  submitAttempted,
+  noTopRule = false,
+  isEditPage = false,
+}: {
+  packageInfo: PackageInfo;
+  showOnlyIntegration?: string;
+  packagePolicy: NewPackagePolicy;
+  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
+  validationResults: PackagePolicyValidationResults | undefined;
+  submitAttempted: boolean;
+  noTopRule?: boolean;
+  isEditPage?: boolean;
+}) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
     () =>

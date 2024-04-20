@@ -37,21 +37,19 @@ const PreviewText = styled(EuiText)`
   white-space: pre-line;
 `;
 
-const PromptEditorComponent = (
-  {
-    conversation,
-    editingSystemPromptId,
-    isNewConversation,
-    isSettingsModalVisible,
-    promptContexts,
-    promptTextPreview,
-    onSystemPromptSelectionChange,
-    selectedPromptContexts,
-    setIsSettingsModalVisible,
-    setSelectedPromptContexts,
-    isFlyoutMode
-  }: Props
-) => {
+const PromptEditorComponent = ({
+  conversation,
+  editingSystemPromptId,
+  isNewConversation,
+  isSettingsModalVisible,
+  promptContexts,
+  promptTextPreview,
+  onSystemPromptSelectionChange,
+  selectedPromptContexts,
+  setIsSettingsModalVisible,
+  setSelectedPromptContexts,
+  isFlyoutMode,
+}: Props) => {
   const commentBody = useMemo(
     () => (
       <>

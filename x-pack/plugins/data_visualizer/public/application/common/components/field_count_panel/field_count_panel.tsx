@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiBreakpoint } from '@elastic/eui';
@@ -24,14 +23,12 @@ interface Props extends TotalFieldsCountProps, MetricFieldsCountProps {
   toggleShowEmptyFields: () => void;
 }
 
-export const FieldCountPanel = (
-  {
-    metricsStats,
-    fieldsCountStats,
-    showEmptyFields,
-    toggleShowEmptyFields
-  }: Props
-) => {
+export const FieldCountPanel = ({
+  metricsStats,
+  fieldsCountStats,
+  showEmptyFields,
+  toggleShowEmptyFields,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const dvFieldCountPanelCss = css({

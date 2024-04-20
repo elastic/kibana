@@ -19,11 +19,7 @@ interface StepFourProps {
   guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
-export const StepFour = (
-  {
-    guidedOnboarding
-  }: StepFourProps
-) => {
+export const StepFour = ({ guidedOnboarding }: StepFourProps) => {
   const { indexName } = useParams<{ indexName: string }>();
 
   const [, setIsTourStepOpen] = useState<boolean>(false);

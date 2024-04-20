@@ -65,13 +65,11 @@ function useComponentTemplates(dataStream: { dataset: string; type: string }) {
   };
 }
 
-export const PackagePolicyEditorDatastreamMappings = (
-  {
-    packageInputStream,
-    packageInfo,
-    customDataset
-  }: PackagePolicyEditorDatastreamMappingsProps
-) => {
+export const PackagePolicyEditorDatastreamMappings = ({
+  packageInputStream,
+  packageInfo,
+  customDataset,
+}: PackagePolicyEditorDatastreamMappingsProps) => {
   const dataStream = customDataset
     ? { ...packageInputStream.data_stream, dataset: customDataset }
     : packageInputStream.data_stream;

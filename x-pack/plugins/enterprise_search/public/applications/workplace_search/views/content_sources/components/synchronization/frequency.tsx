@@ -43,11 +43,7 @@ interface FrequencyProps {
   tabId: number;
 }
 
-export const Frequency = (
-  {
-    tabId
-  }: FrequencyProps
-) => {
+export const Frequency = ({ tabId }: FrequencyProps) => {
   const { contentSource } = useValues(SourceLogic);
   const { hasUnsavedFrequencyChanges, navigatingBetweenTabs } = useValues(
     SynchronizationLogic({ contentSource })

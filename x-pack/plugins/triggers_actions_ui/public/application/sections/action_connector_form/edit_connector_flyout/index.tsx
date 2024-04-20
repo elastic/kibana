@@ -46,15 +46,13 @@ const getConnectorWithoutSecrets = (
   secrets: {},
 });
 
-const EditConnectorFlyoutComponent = (
-  {
-    actionTypeRegistry,
-    connector,
-    onClose,
-    tab = EditConnectorTabs.Configuration,
-    onConnectorUpdated
-  }: EditConnectorFlyoutProps
-) => {
+const EditConnectorFlyoutComponent = ({
+  actionTypeRegistry,
+  connector,
+  onClose,
+  tab = EditConnectorTabs.Configuration,
+  onConnectorUpdated,
+}: EditConnectorFlyoutProps) => {
   const {
     docLinks,
     application: { capabilities },

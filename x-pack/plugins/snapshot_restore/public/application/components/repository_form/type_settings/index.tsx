@@ -28,14 +28,12 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const TypeSettings = (
-  {
-    repository,
-    isManagedRepository,
-    updateRepository,
-    settingErrors
-  }: Props
-) => {
+export const TypeSettings = ({
+  repository,
+  isManagedRepository,
+  updateRepository,
+  settingErrors,
+}: Props) => {
   const { i18n } = useServices();
   const { type, settings } = repository;
   const updateRepositorySettings = (

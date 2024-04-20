@@ -92,16 +92,14 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
   return agentIds;
 };
 
-export const ConfirmAgentEnrollment = (
-  {
-    policyId,
-    troubleshootLink,
-    onClickViewAgents,
-    agentCount,
-    showLoading = false,
-    isLongEnrollment = false
-  }: Props
-) => {
+export const ConfirmAgentEnrollment = ({
+  policyId,
+  troubleshootLink,
+  onClickViewAgents,
+  agentCount,
+  showLoading = false,
+  isLongEnrollment = false,
+}: Props) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
   const showViewAgents = !!onClickViewAgents;

@@ -16,13 +16,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ConfirmJobDeletion = (
-  {
-    loading,
-    onConfirm,
-    onCancel
-  }: Props
-) => {
+export const ConfirmJobDeletion = ({ loading, onConfirm, onCancel }: Props) => {
   return (
     <EuiConfirmModal
       title={labels.JOB_DELETION_CONFIRMATION}

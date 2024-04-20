@@ -27,19 +27,17 @@ import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 
-const AuthenticationsUserTableComponent = (
-  {
-    endDate,
-    filterQuery,
-    indexNames,
-    skip,
-    startDate,
-    type,
-    setQuery,
-    deleteQuery,
-    userName
-  }: AuthenticationsUserTableProps
-) => {
+const AuthenticationsUserTableComponent = ({
+  endDate,
+  filterQuery,
+  indexNames,
+  skip,
+  startDate,
+  type,
+  setQuery,
+  deleteQuery,
+  userName,
+}: AuthenticationsUserTableProps) => {
   const dispatch = useDispatch();
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);

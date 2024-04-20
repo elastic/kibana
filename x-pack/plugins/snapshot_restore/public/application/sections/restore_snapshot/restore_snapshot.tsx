@@ -24,11 +24,7 @@ interface MatchParams {
   snapshotId: string;
 }
 
-export const RestoreSnapshot = (
-  {
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+export const RestoreSnapshot = ({ history }: RouteComponentProps<MatchParams>) => {
   const { i18n } = useServices();
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
 

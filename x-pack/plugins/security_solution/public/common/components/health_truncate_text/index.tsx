@@ -26,19 +26,19 @@ interface HealthTruncateTextProps {
  * @param healthColor - color for EuiHealth component
  * @param tooltipContent - tooltip content
  */
-export const HealthTruncateText = (
-  {
-    tooltipContent,
-    children,
-    healthColor,
-    dataTestSubj
-  }: HealthTruncateTextProps
-) => (<EuiToolTip content={tooltipContent}>
-  <EuiHealth color={healthColor} data-test-subj={dataTestSubj}>
-    <StatusTextWrapper>
-      <span className="eui-textTruncate">{children}</span>
-    </StatusTextWrapper>
-  </EuiHealth>
-</EuiToolTip>);
+export const HealthTruncateText = ({
+  tooltipContent,
+  children,
+  healthColor,
+  dataTestSubj,
+}: HealthTruncateTextProps) => (
+  <EuiToolTip content={tooltipContent}>
+    <EuiHealth color={healthColor} data-test-subj={dataTestSubj}>
+      <StatusTextWrapper>
+        <span className="eui-textTruncate">{children}</span>
+      </StatusTextWrapper>
+    </EuiHealth>
+  </EuiToolTip>
+);
 
 HealthTruncateText.displayName = 'HealthTruncateText';

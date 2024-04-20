@@ -19,13 +19,11 @@ interface ExecutionStatusFilterProps {
   onChange: (selectedItems: RuleExecutionStatus[]) => void;
 }
 
-const ExecutionStatusFilterComponent = (
-  {
-    items,
-    selectedItems,
-    onChange
-  }: ExecutionStatusFilterProps
-) => {
+const ExecutionStatusFilterComponent = ({
+  items,
+  selectedItems,
+  onChange,
+}: ExecutionStatusFilterProps) => {
   const renderItem = useCallback((item: RuleExecutionStatus) => {
     return <ExecutionStatusIndicator status={item} />;
   }, []);

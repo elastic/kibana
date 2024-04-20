@@ -24,17 +24,13 @@ import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
 import { getReindexProgressLabel } from '../../../../../lib/utils';
 
-const ErrorCallout = (
-  {
-    errorMessage
-  }: {
-    errorMessage: string | null;
-  }
-) => (<EuiCallOut color="danger" title="There was an error">
-  <EuiText>
-    <p>{errorMessage}</p>
-  </EuiText>
-</EuiCallOut>);
+const ErrorCallout = ({ errorMessage }: { errorMessage: string | null }) => (
+  <EuiCallOut color="danger" title="There was an error">
+    <EuiText>
+      <p>{errorMessage}</p>
+    </EuiText>
+  </EuiCallOut>
+);
 
 const PausedCallout = () => (
   <EuiCallOut
@@ -43,15 +39,13 @@ const PausedCallout = () => (
   />
 );
 
-const ReindexingDocumentsStepTitle = (
-  {
-    reindexState: { lastCompletedStep, status, cancelLoadingState },
-    cancelReindex
-  }: {
-    reindexState: ReindexState;
-    cancelReindex: () => void;
-  }
-) => {
+const ReindexingDocumentsStepTitle = ({
+  reindexState: { lastCompletedStep, status, cancelLoadingState },
+  cancelReindex,
+}: {
+  reindexState: ReindexState;
+  cancelReindex: () => void;
+}) => {
   if (status === ReindexStatus.cancelled) {
     return (
       <>

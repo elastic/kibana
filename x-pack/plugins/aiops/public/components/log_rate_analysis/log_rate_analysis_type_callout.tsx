@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiCallOut, EuiText } from '@elastic/eui';
 
@@ -17,12 +17,10 @@ interface LogRateAnalysisTypeCallOutProps {
   zeroDocsFallback: boolean;
 }
 
-export const LogRateAnalysisTypeCallOut = (
-  {
-    analysisType,
-    zeroDocsFallback
-  }: LogRateAnalysisTypeCallOutProps
-) => {
+export const LogRateAnalysisTypeCallOut = ({
+  analysisType,
+  zeroDocsFallback,
+}: LogRateAnalysisTypeCallOutProps) => {
   let callOutTitle: string;
   let callOutText: string;
 

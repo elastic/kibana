@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -13,15 +12,13 @@ import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { RUNNING_STATE } from './inference_base';
 import type { InferrerType } from '.';
 
-export const TextInput = (
-  {
-    placeholder,
-    inferrer
-  }: {
-    placeholder?: string;
-    inferrer: InferrerType;
-  }
-) => {
+export const TextInput = ({
+  placeholder,
+  inferrer,
+}: {
+  placeholder?: string;
+  inferrer: InferrerType;
+}) => {
   const [inputText, setInputText] = useState('');
 
   useEffect(() => {

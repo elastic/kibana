@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
@@ -22,14 +21,7 @@ interface Props {
   compressed?: boolean;
 }
 
-export const ControlButton = (
-  {
-    onCancel,
-    onUpload,
-    immediate,
-    compressed
-  }: Props
-) => {
+export const ControlButton = ({ onCancel, onUpload, immediate, compressed }: Props) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const files = useObservable(uploadState.files$, []);

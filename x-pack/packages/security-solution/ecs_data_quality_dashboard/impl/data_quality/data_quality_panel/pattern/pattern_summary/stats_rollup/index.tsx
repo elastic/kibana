@@ -38,18 +38,16 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const StatsRollupComponent = (
-  {
-    docsCount,
-    formatBytes,
-    formatNumber,
-    incompatible,
-    indices,
-    indicesChecked,
-    pattern,
-    sizeInBytes
-  }: Props
-) => {
+const StatsRollupComponent = ({
+  docsCount,
+  formatBytes,
+  formatNumber,
+  incompatible,
+  indices,
+  indicesChecked,
+  pattern,
+  sizeInBytes,
+}: Props) => {
   const incompatibleDescription = useMemo(
     () => <StatLabel line1={i18n.INCOMPATIBLE} line2={i18n.FIELDS} />,
     []

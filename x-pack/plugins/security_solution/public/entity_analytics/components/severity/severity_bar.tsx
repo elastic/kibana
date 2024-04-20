@@ -28,13 +28,7 @@ interface PalletteObject {
 }
 type PalletteArray = PalletteObject[];
 
-export const SeverityBar = (
-  {
-    severityCount
-  }: {
-    severityCount: SeverityCount;
-  }
-) => {
+export const SeverityBar = ({ severityCount }: { severityCount: SeverityCount }) => {
   const palette = useMemo(
     () =>
       (Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).reduce(

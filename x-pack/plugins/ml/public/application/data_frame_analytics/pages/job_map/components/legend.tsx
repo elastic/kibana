@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -33,15 +32,13 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend = (
-  {
-    hasMissingJobNode,
-    theme
-  }: {
-    hasMissingJobNode: boolean;
-    theme: EuiThemeType;
-  }
-) => {
+export const JobMapLegend = ({
+  hasMissingJobNode,
+  theme,
+}: {
+  hasMissingJobNode: boolean;
+  theme: EuiThemeType;
+}) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
 
   return (

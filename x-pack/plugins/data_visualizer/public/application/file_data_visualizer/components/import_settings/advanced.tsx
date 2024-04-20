@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 
 import {
@@ -48,29 +47,27 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const AdvancedSettings = (
-  {
-    index,
-    dataView,
-    initialized,
-    onIndexChange,
-    createDataView,
-    onCreateDataViewChange,
-    onDataViewChange,
-    indexSettingsString,
-    mappingsString,
-    pipelineString,
-    onIndexSettingsStringChange,
-    onMappingsStringChange,
-    onPipelineStringChange,
-    indexNameError,
-    dataViewNameError,
-    combinedFields,
-    onCombinedFieldsChange,
-    results,
-    canCreateDataView
-  }: Props
-) => {
+export const AdvancedSettings = ({
+  index,
+  dataView,
+  initialized,
+  onIndexChange,
+  createDataView,
+  onCreateDataViewChange,
+  onDataViewChange,
+  indexSettingsString,
+  mappingsString,
+  pipelineString,
+  onIndexSettingsStringChange,
+  onMappingsStringChange,
+  onPipelineStringChange,
+  indexNameError,
+  dataViewNameError,
+  combinedFields,
+  onCombinedFieldsChange,
+  results,
+  canCreateDataView,
+}: Props) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -187,13 +184,7 @@ interface JsonEditorProps {
   onChange(value: string): void;
 }
 
-const IndexSettings = (
-  {
-    initialized,
-    data,
-    onChange
-  }: JsonEditorProps
-) => {
+const IndexSettings = ({ initialized, data, onChange }: JsonEditorProps) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -217,13 +208,7 @@ const IndexSettings = (
   );
 };
 
-const Mappings = (
-  {
-    initialized,
-    data,
-    onChange
-  }: JsonEditorProps
-) => {
+const Mappings = ({ initialized, data, onChange }: JsonEditorProps) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -247,13 +232,7 @@ const Mappings = (
   );
 };
 
-const IngestPipeline = (
-  {
-    initialized,
-    data,
-    onChange
-  }: JsonEditorProps
-) => {
+const IngestPipeline = ({ initialized, data, onChange }: JsonEditorProps) => {
   return (
     <React.Fragment>
       <EuiFormRow

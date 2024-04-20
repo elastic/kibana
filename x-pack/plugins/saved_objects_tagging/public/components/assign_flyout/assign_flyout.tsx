@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlexItem, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from '@kbn/core/public';
@@ -40,16 +40,14 @@ const getObjectStatus = (object: AssignableObject, assignedTags: string[]): Assi
   return assignedCount === 0 ? 'none' : assignedCount === assignedTags.length ? 'full' : 'partial';
 };
 
-export const AssignFlyout = (
-  {
-    tagIds,
-    tagCache,
-    allowedTypes,
-    notifications,
-    assignmentService,
-    onClose
-  }: AssignFlyoutProps
-) => {
+export const AssignFlyout = ({
+  tagIds,
+  tagCache,
+  allowedTypes,
+  notifications,
+  assignmentService,
+  onClose,
+}: AssignFlyoutProps) => {
   const [results, setResults] = useState<AssignableObject[]>([]);
   const [query, setQuery] = useState<Query>(Query.parse(''));
   const [initialStatus, setInitialStatus] = useState<AssignmentStatusMap>({});

@@ -82,15 +82,13 @@ interface RowItemOverflowProps {
   overflowIndexStart: number;
 }
 
-export const RowItemOverflowComponent = (
-  {
-    fieldName,
-    values,
-    idPrefix,
-    maxOverflowItems = 5,
-    overflowIndexStart = 5
-  }: RowItemOverflowProps
-) => {
+export const RowItemOverflowComponent = ({
+  fieldName,
+  values,
+  idPrefix,
+  maxOverflowItems = 5,
+  overflowIndexStart = 5,
+}: RowItemOverflowProps) => {
   return (
     <>
       {values.length > overflowIndexStart && (
@@ -130,13 +128,7 @@ interface PopoverComponentProps {
   idPrefix: string;
 }
 
-const PopoverComponent = (
-  {
-    children,
-    count,
-    idPrefix
-  }: PopoverComponentProps
-) => {
+const PopoverComponent = ({ children, count, idPrefix }: PopoverComponentProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const onButtonClick = useCallback(() => {
     setIsOpen(!isOpen);

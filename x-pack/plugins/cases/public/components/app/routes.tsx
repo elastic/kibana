@@ -27,20 +27,17 @@ import {
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
-import type { CaseViewProps } from '../case_view/types';
 
 const CaseViewLazy = lazy(() => import('../case_view'));
 
-const CasesRoutesComponent = (
-  {
-    actionsNavigation,
-    ruleDetailsNavigation,
-    showAlertDetails,
-    useFetchAlertData,
-    refreshRef,
-    timelineIntegration
-  }: CasesRoutesProps
-) => {
+const CasesRoutesComponent = ({
+  actionsNavigation,
+  ruleDetailsNavigation,
+  showAlertDetails,
+  useFetchAlertData,
+  refreshRef,
+  timelineIntegration,
+}: CasesRoutesProps) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();

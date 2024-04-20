@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import { EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
@@ -16,11 +15,7 @@ interface Props {
   messages: FormMessage[];
 }
 
-export const Messages = (
-  {
-    messages
-  }: Props
-) => {
+export const Messages = ({ messages }: Props) => {
   return (
     <>
       {messages.map((requestMessage, i) => (

@@ -23,16 +23,14 @@ export type MockIndexPatternSpec = Pick<DataView, 'id' | 'title' | 'type' | 'tim
   fields: FieldSpec[];
 };
 
-export const MockIndexPatternsKibanaContextProvider = (
-  {
-    asyncDelay,
-    children,
-    mockIndexPatterns
-  }: {
-    asyncDelay: number;
-    mockIndexPatterns: MockIndexPatternSpec[];
-  }
-) => {
+export const MockIndexPatternsKibanaContextProvider = ({
+  asyncDelay,
+  children,
+  mockIndexPatterns,
+}: {
+  asyncDelay: number;
+  mockIndexPatterns: MockIndexPatternSpec[];
+}) => {
   const indexPatterns = useMemo(
     () => createIndexPatternsMock(asyncDelay, mockIndexPatterns.map(createIndexPatternMock)),
     [asyncDelay, mockIndexPatterns]

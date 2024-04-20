@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -51,16 +50,14 @@ export interface EmbeddableSingleMetricViewerContainerProps {
   onError: (error: Error) => void;
 }
 
-export const EmbeddableSingleMetricViewerContainer = (
-  {
-    id,
-    embeddableContext,
-    embeddableInput$,
-    services,
-    refresh,
-    onRenderComplete
-  }: EmbeddableSingleMetricViewerContainerProps
-) => {
+export const EmbeddableSingleMetricViewerContainer = ({
+  id,
+  embeddableContext,
+  embeddableInput$,
+  services,
+  refresh,
+  onRenderComplete,
+}: EmbeddableSingleMetricViewerContainerProps) => {
   useEmbeddableExecutionContext<SingleMetricViewerEmbeddableInput>(
     services[0].executionContext,
     embeddableInput$,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { useContext } from 'react';
 import {
   KibanaNoDataPageKibanaProvider,
   KibanaNoDataPageProvider,
@@ -23,12 +23,10 @@ const Context = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const AnalyticsNoDataPageProvider = (
-  {
-    children,
-    ...services
-  }: AnalyticsNoDataPageServices
-) => {
+export const AnalyticsNoDataPageProvider = ({
+  children,
+  ...services
+}: AnalyticsNoDataPageServices) => {
   const { kibanaGuideDocLink, customBranding, getHttp, prependBasePath, pageFlavor } = services;
 
   return (
@@ -43,12 +41,10 @@ export const AnalyticsNoDataPageProvider = (
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const AnalyticsNoDataPageKibanaProvider = (
-  {
-    children,
-    ...dependencies
-  }: AnalyticsNoDataPageKibanaDependencies
-) => {
+export const AnalyticsNoDataPageKibanaProvider = ({
+  children,
+  ...dependencies
+}: AnalyticsNoDataPageKibanaDependencies) => {
   const value: Services = {
     kibanaGuideDocLink: dependencies.coreStart.docLinks.links.kibana.guide,
     customBranding: {

@@ -11,14 +11,12 @@ import React from 'react';
 import { KQLSyntaxError } from '@kbn/es-query';
 import { RenderErrorFunc, ResettableErrorBoundary } from '../resettable_error_boundary';
 
-export const LogStreamErrorBoundary = (
-  {
-    children,
-    resetOnChange = null
-  }: {
-    resetOnChange: any;
-  }
-) => {
+export const LogStreamErrorBoundary = ({
+  children,
+  resetOnChange = null,
+}: {
+  resetOnChange: any;
+}) => {
   return (
     <ResettableErrorBoundary
       renderError={renderLogStreamErrorContent}
@@ -29,13 +27,7 @@ export const LogStreamErrorBoundary = (
   );
 };
 
-const LogStreamErrorContent = (
-  {
-    error
-  }: {
-    error: any;
-  }
-) => {
+const LogStreamErrorContent = ({ error }: { error: any }) => {
   if (error instanceof KQLSyntaxError) {
     return (
       <EuiEmptyPrompt

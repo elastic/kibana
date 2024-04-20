@@ -27,13 +27,7 @@ interface ConnectionDetailsProps {
   status: ConnectorStatus;
 }
 
-export const ConnectionDetails = (
-  {
-    connectorId,
-    serviceType,
-    status
-  }: ConnectionDetailsProps
-) => {
+export const ConnectionDetails = ({ connectorId, serviceType, status }: ConnectionDetailsProps) => {
   const { elasticsearchUrl } = useElasticsearchUrl();
   return (
     <EuiPanel hasBorder>

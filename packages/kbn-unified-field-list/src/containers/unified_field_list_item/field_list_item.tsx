@@ -76,41 +76,43 @@ interface MultiFieldsProps {
   size: FieldItemButtonProps<DataViewField>['size'];
 }
 
-const MultiFields = memo((
-  {
+const MultiFields = memo(
+  ({
     stateService,
     multiFields,
     toggleDisplay,
     alwaysShowActionButton,
-    size
-  }: MultiFieldsProps
-) => (<React.Fragment>
-  <EuiTitle size="xxxs">
-    <h5>
-      {i18n.translate('unifiedFieldList.fieldListItem.multiFields', {
-        defaultMessage: 'Multi fields',
-      })}
-    </h5>
-  </EuiTitle>
-  <EuiSpacer size="xs" />
-  {multiFields.map((entry) => (
-    <FieldItemButton
-      key={entry.field.name}
-      flush="both"
-      isEmpty={false}
-      isActive={false}
-      shouldAlwaysShowAction={alwaysShowActionButton}
-      onClick={undefined}
-      {...getCommonFieldItemButtonProps({
-        stateService,
-        field: entry.field,
-        isSelected: entry.isSelected,
-        toggleDisplay,
-        size,
-      })}
-    />
-  ))}
-</React.Fragment>));
+    size,
+  }: MultiFieldsProps) => (
+    <React.Fragment>
+      <EuiTitle size="xxxs">
+        <h5>
+          {i18n.translate('unifiedFieldList.fieldListItem.multiFields', {
+            defaultMessage: 'Multi fields',
+          })}
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      {multiFields.map((entry) => (
+        <FieldItemButton
+          key={entry.field.name}
+          flush="both"
+          isEmpty={false}
+          isActive={false}
+          shouldAlwaysShowAction={alwaysShowActionButton}
+          onClick={undefined}
+          {...getCommonFieldItemButtonProps({
+            stateService,
+            field: entry.field,
+            isSelected: entry.isSelected,
+            toggleDisplay,
+            size,
+          })}
+        />
+      ))}
+    </React.Fragment>
+  )
+);
 
 export interface UnifiedFieldListItemProps {
   /**

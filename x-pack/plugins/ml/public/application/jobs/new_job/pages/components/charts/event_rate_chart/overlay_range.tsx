@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { timeFormatter } from '@kbn/ml-date-utils';
@@ -20,15 +19,7 @@ interface Props {
   showMarker?: boolean;
 }
 
-export const OverlayRange = (
-  {
-    overlayKey,
-    start,
-    end,
-    color,
-    showMarker = true
-  }: Props
-) => {
+export const OverlayRange = ({ overlayKey, start, end, color, showMarker = true }: Props) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (

@@ -20,13 +20,7 @@ interface Props {
   replacements?: Replacements;
 }
 
-const ViewInAiAssistantComponent = (
-  {
-    compact = false,
-    promptContextId,
-    replacements
-  }: Props
-) => {
+const ViewInAiAssistantComponent = ({ compact = false, promptContextId, replacements }: Props) => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { showAssistantOverlay } = useAssistantContext();
 

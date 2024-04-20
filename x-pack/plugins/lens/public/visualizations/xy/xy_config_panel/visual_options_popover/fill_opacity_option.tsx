@@ -25,13 +25,11 @@ export interface FillOpacityOptionProps {
   isFillOpacityEnabled?: boolean;
 }
 
-export const FillOpacityOption = (
-  {
-    onChange,
-    value,
-    isFillOpacityEnabled = true
-  }: FillOpacityOptionProps
-) => {
+export const FillOpacityOption = ({
+  onChange,
+  value,
+  isFillOpacityEnabled = true,
+}: FillOpacityOptionProps) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
   return isFillOpacityEnabled ? (
     <>

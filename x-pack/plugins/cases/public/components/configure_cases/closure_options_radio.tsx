@@ -34,13 +34,11 @@ export interface ClosureOptionsRadioComponentProps {
   onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
-const ClosureOptionsRadioComponent = (
-  {
-    closureTypeSelected,
-    disabled,
-    onChangeClosureType
-  }: ClosureOptionsRadioComponentProps
-) => {
+const ClosureOptionsRadioComponent = ({
+  closureTypeSelected,
+  disabled,
+  onChangeClosureType,
+}: ClosureOptionsRadioComponentProps) => {
   const onChangeLocal = useCallback(
     (id: string) => {
       onChangeClosureType(id as ClosureType);

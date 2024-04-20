@@ -51,12 +51,7 @@ export interface ValueListsFormProps {
   onSuccess: (response: ListSchema) => void;
 }
 
-export const ValueListsFormComponent = (
-  {
-    onError,
-    onSuccess
-  }: ValueListsFormProps
-) => {
+export const ValueListsFormComponent = ({ onError, onSuccess }: ValueListsFormProps) => {
   const ctrl = useRef(new AbortController());
   const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState<Type>(defaultListType);

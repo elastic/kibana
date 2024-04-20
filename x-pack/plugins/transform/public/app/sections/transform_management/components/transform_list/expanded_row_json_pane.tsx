@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -15,11 +15,7 @@ interface Props {
   json: object;
 }
 
-export const ExpandedRowJsonPane = (
-  {
-    json
-  }: Props
-) => {
+export const ExpandedRowJsonPane = ({ json }: Props) => {
   return (
     <div data-test-subj="transformJsonTabContent">
       <EuiFlexGroup>

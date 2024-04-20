@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiDescribedFormGroupProps,
@@ -40,15 +40,13 @@ export type Props = EuiDescribedFormGroupProps & {
   fieldNotices?: React.ReactNode;
 };
 
-export const DescribedFormRow = (
-  {
-    children,
-    switchProps,
-    description,
-    fieldNotices,
-    ...restDescribedFormProps
-  }: Props
-) => {
+export const DescribedFormRow = ({
+  children,
+  switchProps,
+  description,
+  fieldNotices,
+  ...restDescribedFormProps
+}: Props) => {
   if (
     switchProps &&
     !(typeof switchProps.checked === 'boolean' || typeof switchProps.initialValue === 'boolean')

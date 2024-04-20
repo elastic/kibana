@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
@@ -44,21 +44,19 @@ export interface DocumentCountContentProps {
   deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
-export const DocumentCountContent = (
-  {
-    brushSelectionUpdateHandler,
-    documentCountStats,
-    documentCountStatsSplit,
-    documentCountStatsSplitLabel = '',
-    isBrushCleared,
-    totalCount,
-    sampleProbability,
-    barColorOverride,
-    barHighlightColorOverride,
-    windowParameters,
-    ...docCountChartProps
-  }: DocumentCountContentProps
-) => {
+export const DocumentCountContent = ({
+  brushSelectionUpdateHandler,
+  documentCountStats,
+  documentCountStatsSplit,
+  documentCountStatsSplitLabel = '',
+  isBrushCleared,
+  totalCount,
+  sampleProbability,
+  barColorOverride,
+  barHighlightColorOverride,
+  windowParameters,
+  ...docCountChartProps
+}: DocumentCountContentProps) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);

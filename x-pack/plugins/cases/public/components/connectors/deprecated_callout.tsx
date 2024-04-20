@@ -28,18 +28,16 @@ interface Props {
   type?: EuiCallOutProps['color'];
 }
 
-const DeprecatedCalloutComponent = (
-  {
-    type = 'warning'
-  }: Props
-) => (<EuiCallOut
-  title={DEPRECATED_CONNECTOR_WARNING_TITLE}
-  color={type}
-  iconType="warning"
-  data-test-subj="deprecated-connector-warning-callout"
->
-  {DEPRECATED_CONNECTOR_WARNING_DESC}
-</EuiCallOut>);
+const DeprecatedCalloutComponent = ({ type = 'warning' }: Props) => (
+  <EuiCallOut
+    title={DEPRECATED_CONNECTOR_WARNING_TITLE}
+    color={type}
+    iconType="warning"
+    data-test-subj="deprecated-connector-warning-callout"
+  >
+    {DEPRECATED_CONNECTOR_WARNING_DESC}
+  </EuiCallOut>
+);
 DeprecatedCalloutComponent.displayName = 'DeprecatedCallout';
 
 export const DeprecatedCallout = React.memo(DeprecatedCalloutComponent);

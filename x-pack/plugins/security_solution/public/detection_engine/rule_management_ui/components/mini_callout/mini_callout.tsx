@@ -39,14 +39,12 @@ export interface MiniCalloutProps {
  *
  * @constructor
  */
-const MiniCalloutComponent = (
-  {
-    color = 'primary',
-    dismissible = true,
-    iconType,
-    title
-  }: MiniCalloutProps
-) => {
+const MiniCalloutComponent = ({
+  color = 'primary',
+  dismissible = true,
+  iconType,
+  title,
+}: MiniCalloutProps) => {
   const { euiTheme } = useEuiTheme();
   const [isDismissed, setIsDismissed] = useState(false);
 

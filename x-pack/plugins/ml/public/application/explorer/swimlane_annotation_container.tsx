@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
@@ -29,14 +28,12 @@ interface SwimlaneAnnotationContainerProps {
   tooltipService: ChartTooltipService;
 }
 
-export const SwimlaneAnnotationContainer = (
-  {
-    chartWidth,
-    domain,
-    annotationsData,
-    tooltipService
-  }: SwimlaneAnnotationContainerProps
-) => {
+export const SwimlaneAnnotationContainer = ({
+  chartWidth,
+  domain,
+  annotationsData,
+  tooltipService,
+}: SwimlaneAnnotationContainerProps) => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
   const { euiTheme } = useCurrentThemeVars();
 

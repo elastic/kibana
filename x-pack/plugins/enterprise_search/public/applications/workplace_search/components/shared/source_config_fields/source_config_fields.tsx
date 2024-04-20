@@ -39,12 +39,7 @@ interface SourceConfigFieldsProps {
   sourceConfigData: SourceConfigData;
 }
 
-export const SourceConfigFields = (
-  {
-    isOauth1,
-    sourceConfigData
-  }: SourceConfigFieldsProps
-) => {
+export const SourceConfigFields = ({ isOauth1, sourceConfigData }: SourceConfigFieldsProps) => {
   const { configuredFields, configurableFields = [], serviceType } = sourceConfigData;
 
   // TODO use configurableFields instead of static field names

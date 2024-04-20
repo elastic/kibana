@@ -22,13 +22,7 @@ export interface TriggerLineItemProps {
   incompatible?: boolean;
 }
 
-export const TriggerLineItem = (
-  {
-    tooltip,
-    incompatible,
-    children
-  }: TriggerLineItemProps
-) => {
+export const TriggerLineItem = ({ tooltip, incompatible, children }: TriggerLineItemProps) => {
   return (
     <TextWithIcon
       color={'subdued'}

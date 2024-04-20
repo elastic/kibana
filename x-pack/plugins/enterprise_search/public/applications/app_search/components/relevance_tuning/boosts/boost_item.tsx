@@ -23,14 +23,7 @@ interface Props {
   name: string;
 }
 
-export const BoostItem = (
-  {
-    id,
-    boost,
-    index,
-    name
-  }: Props
-) => {
+export const BoostItem = ({ id, boost, index, name }: Props) => {
   const summary = useMemo(() => getBoostSummary(boost), [boost]);
 
   return (

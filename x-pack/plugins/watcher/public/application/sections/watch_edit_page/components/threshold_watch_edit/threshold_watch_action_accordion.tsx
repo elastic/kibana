@@ -74,12 +74,7 @@ interface Props {
   };
 }
 
-export const WatchActionsAccordion = (
-  {
-    settings,
-    actionErrors
-  }: Props
-) => {
+export const WatchActionsAccordion = ({ settings, actionErrors }: Props) => {
   const { euiTheme } = useEuiTheme();
   const {
     links: { watchActionsConfigurationMap },

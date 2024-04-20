@@ -10,7 +10,6 @@ import React, {
   createElement,
   createContext,
   ComponentType,
-  FC,
   ReactElement,
 } from 'react';
 import { CanvasServices, CanvasServiceProviders, services } from '.';
@@ -31,15 +30,13 @@ export const withServices = <Props extends WithServicesProps>(type: ComponentTyp
   return EnhancedType;
 };
 
-export const LegacyServicesProvider = (
-  {
-    providers = {},
-    children
-  }: {
-    providers?: Partial<CanvasServiceProviders>;
-    children: ReactElement<any>;
-  }
-) => {
+export const LegacyServicesProvider = ({
+  providers = {},
+  children,
+}: {
+  providers?: Partial<CanvasServiceProviders>;
+  children: ReactElement<any>;
+}) => {
   const specifiedProviders: CanvasServiceProviders = { ...services, ...providers };
   const value = {
     search: specifiedProviders.search.getService(),

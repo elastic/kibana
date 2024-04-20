@@ -18,12 +18,7 @@ const PlaceHolder = styled.div`
   padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
-const ChartLabelComponent = (
-  {
-    count,
-    onClick
-  }: ChartLabelProps
-) => {
+const ChartLabelComponent = ({ count, onClick }: ChartLabelProps) => {
   const onLabelClick = useCallback(() => onClick && onClick(), [onClick]);
 
   if (count) {

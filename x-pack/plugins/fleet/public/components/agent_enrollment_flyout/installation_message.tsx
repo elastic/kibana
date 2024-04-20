@@ -21,12 +21,7 @@ interface Props {
   isManaged?: boolean;
 }
 
-export const InstallationMessage = (
-  {
-    isK8s,
-    isManaged = true
-  }: Props
-) => {
+export const InstallationMessage = ({ isK8s, isManaged = true }: Props) => {
   const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const kibanaVersionURLString = useMemo(

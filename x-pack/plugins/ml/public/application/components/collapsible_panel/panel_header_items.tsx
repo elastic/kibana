@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { type FC } from 'react';
+import React from 'react';
 import { useCurrentThemeVars } from '../../contexts/kibana';
 
 export interface PanelHeaderItems {
@@ -15,12 +15,7 @@ export interface PanelHeaderItems {
   compressed?: boolean;
 }
 
-export const PanelHeaderItems = (
-  {
-    headerItems,
-    compressed = false
-  }: PanelHeaderItems
-) => {
+export const PanelHeaderItems = ({ headerItems, compressed = false }: PanelHeaderItems) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (

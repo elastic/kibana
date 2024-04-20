@@ -12,13 +12,7 @@ import { CodeEditor } from '@kbn/code-editor';
 /**
  * A read-only code block with various default settings suitable for displaying API responses, etc
  */
-export const CodeBlock = (
-  {
-    value
-  }: {
-    value: string;
-  }
-) => {
+export const CodeBlock = ({ value }: { value: string }) => {
   return (
     <CodeEditor
       isCopyable

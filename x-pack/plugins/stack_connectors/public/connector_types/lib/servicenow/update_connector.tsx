@@ -93,17 +93,15 @@ export interface Props {
 
 const PATH_PREFIX = 'updatedConnector.';
 
-const UpdateConnectorComponent = (
-  {
-    actionTypeId,
-    isOAuth,
-    isLoading,
-    readOnly,
-    onCancel,
-    onConfirm,
-    updateErrorMessage
-  }: Props
-) => {
+const UpdateConnectorComponent = ({
+  actionTypeId,
+  isOAuth,
+  isLoading,
+  readOnly,
+  onCancel,
+  onConfirm,
+  updateErrorMessage,
+}: Props) => {
   const { form } = useForm<UpdateConnectorFormSchema>();
   const { submit, isValid } = form;
 

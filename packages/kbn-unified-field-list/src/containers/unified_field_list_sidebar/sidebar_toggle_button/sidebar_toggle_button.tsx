@@ -29,15 +29,13 @@ export interface SidebarToggleButtonProps {
  * @param onChange
  * @constructor
  */
-export const SidebarToggleButton = (
-  {
-    'data-test-subj': dataTestSubj = 'unifiedFieldListSidebar__toggle',
-    isSidebarCollapsed,
-    panelId,
-    buttonSize,
-    onChange
-  }: SidebarToggleButtonProps
-) => {
+export const SidebarToggleButton = ({
+  'data-test-subj': dataTestSubj = 'unifiedFieldListSidebar__toggle',
+  isSidebarCollapsed,
+  panelId,
+  buttonSize,
+  onChange,
+}: SidebarToggleButtonProps) => {
   return (
     <div data-test-subj={dataTestSubj}>
       <IconButtonGroup

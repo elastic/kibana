@@ -7,7 +7,6 @@
 
 import type { EuiAvatarProps } from '@elastic/eui';
 import { EuiAvatar, isValidHex } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 
 import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';

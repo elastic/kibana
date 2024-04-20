@@ -31,14 +31,12 @@ const useStyles = () => {
   };
 };
 
-export const LandingLinksIconsCategories = React.memo(function LandingLinksIconsCategories(
-  {
-    links,
-    categories,
-    urlState,
-    onLinkClick
-  }: LandingLinksIconsCategoriesProps
-) {
+export const LandingLinksIconsCategories = React.memo(function LandingLinksIconsCategories({
+  links,
+  categories,
+  urlState,
+  onLinkClick,
+}: LandingLinksIconsCategoriesProps) {
   const categoriesLinks = useMemo(() => {
     const linksById = Object.fromEntries(links.map((link) => [link.id, link]));
 
@@ -75,17 +73,15 @@ export const LandingLinksIconsCategories = React.memo(function LandingLinksIcons
   );
 });
 
-const CategoryHeading = React.memo(function CategoryHeading(
-  {
-    type,
-    label,
-    index
-  }: {
-    type?: LinkCategoryType;
-    label?: string;
-    index: number;
-  }
-) {
+const CategoryHeading = React.memo(function CategoryHeading({
+  type,
+  label,
+  index,
+}: {
+  type?: LinkCategoryType;
+  label?: string;
+  index: number;
+}) {
   const styles = useStyles();
   return (
     <>

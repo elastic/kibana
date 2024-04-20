@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { HeaderPage } from '../header_page';
@@ -19,11 +18,7 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const CasesTableHeader = (
-  {
-    actionsErrors
-  }: Props
-) => {
+export const CasesTableHeader = ({ actionsErrors }: Props) => {
   return (
     <HeaderPage title={i18n.PAGE_TITLE} border data-test-subj="cases-all-title">
       <EuiFlexGroup

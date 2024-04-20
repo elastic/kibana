@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 
@@ -13,14 +13,12 @@ import { i18n } from '@kbn/i18n';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const DatePickerApplySwitch = (
-  {
-    datePicker: {
-      actions: { setDatePickerApplyEnabled },
-      state: { isDatePickerApplyEnabled },
-    }
-  }: StepDefineFormHook
-) => {
+export const DatePickerApplySwitch = ({
+  datePicker: {
+    actions: { setDatePickerApplyEnabled },
+    state: { isDatePickerApplyEnabled },
+  },
+}: StepDefineFormHook) => {
   return (
     <EuiSwitch
       label={i18n.translate('xpack.transform.stepDefineForm.datePickerApplySwitchLabel', {

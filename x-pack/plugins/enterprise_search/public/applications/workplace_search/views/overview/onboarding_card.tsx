@@ -31,17 +31,15 @@ interface OnboardingCardProps {
   complete?: boolean;
 }
 
-export const OnboardingCard = (
-  {
-    title,
-    icon,
-    description,
-    actionTitle,
-    testSubj,
-    actionPath,
-    complete
-  }: OnboardingCardProps
-) => {
+export const OnboardingCard = ({
+  title,
+  icon,
+  description,
+  actionTitle,
+  testSubj,
+  actionPath,
+  complete,
+}: OnboardingCardProps) => {
   const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>

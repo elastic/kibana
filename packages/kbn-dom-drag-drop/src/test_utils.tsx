@@ -39,13 +39,7 @@ export const renderWithDragDropContext = (
 ): any => {
   const { wrapper, ...options } = renderOptions || {};
 
-  const Wrapper = (
-    {
-      children
-    }: {
-      children: React.ReactNode;
-    }
-  ) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <RootDragDropProvider initialState={contextStateOverrides}>{children}</RootDragDropProvider>
     );

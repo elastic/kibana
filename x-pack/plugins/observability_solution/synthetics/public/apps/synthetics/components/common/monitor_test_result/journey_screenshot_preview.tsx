@@ -26,21 +26,19 @@ export interface StepImagePopoverProps {
   borderRadius?: string | number;
 }
 
-export const JourneyScreenshotPreview = (
-  {
-    timestamp,
-    checkGroup,
-    stepName,
-    stepNumber,
-    imgSrc,
-    maxSteps,
-    isStepFailed,
-    isLoading,
-    size,
-    unavailableMessage,
-    borderRadius
-  }: StepImagePopoverProps
-) => {
+export const JourneyScreenshotPreview = ({
+  timestamp,
+  checkGroup,
+  stepName,
+  stepNumber,
+  imgSrc,
+  maxSteps,
+  isStepFailed,
+  isLoading,
+  size,
+  unavailableMessage,
+  borderRadius,
+}: StepImagePopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);

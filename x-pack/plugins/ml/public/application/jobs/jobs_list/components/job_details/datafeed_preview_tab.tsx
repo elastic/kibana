@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,11 +18,7 @@ interface Props {
   job: CombinedJob;
 }
 
-export const DatafeedPreviewPane = (
-  {
-    job
-  }: Props
-) => {
+export const DatafeedPreviewPane = ({ job }: Props) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApiContext();

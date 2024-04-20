@@ -26,14 +26,12 @@ interface Props {
   showAnonymized?: boolean;
 }
 
-const AiInsightsComponent = (
-  {
-    insight,
-    promptContextId,
-    replacements,
-    showAnonymized = false
-  }: Props
-) => {
+const AiInsightsComponent = ({
+  insight,
+  promptContextId,
+  replacements,
+  showAnonymized = false,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => insight, [insight]);
 

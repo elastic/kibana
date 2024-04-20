@@ -68,21 +68,15 @@ const getCellActionsStub = {
 const fieldBrowserStub = () => ({});
 const stableMappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
 
-const BasicRenderCellValue = memo((
-  {
-    data,
-    columnId
-  }: {
-    data: Array<{ field: string; value: string[] }>;
-    columnId: string;
+const BasicRenderCellValue = memo(
+  ({ data, columnId }: { data: Array<{ field: string; value: string[] }>; columnId: string }) => {
+    const value = (Array.isArray(data) && data.find((d) => d.field === columnId)?.value) ?? [];
+    if (Array.isArray(value)) {
+      return <>{value.length ? value.join() : '--'}</>;
+    }
+    return <>{value}</>;
   }
-) => {
-  const value = (Array.isArray(data) && data.find((d) => d.field === columnId)?.value) ?? [];
-  if (Array.isArray(value)) {
-    return <>{value.length ? value.join() : '--'}</>;
-  }
-  return <>{value}</>;
-});
+);
 
 const FullFeaturedRenderCellValue: RenderCellValue = memo((props) => {
   const {

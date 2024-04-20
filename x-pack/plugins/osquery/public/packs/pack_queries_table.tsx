@@ -21,16 +21,14 @@ export interface PackQueriesTableProps {
   setSelectedItems?: (selection: PackQueryFormData[]) => void;
 }
 
-const PackQueriesTableComponent = (
-  {
-    data,
-    isReadOnly,
-    onDeleteClick,
-    onEditClick,
-    selectedItems,
-    setSelectedItems
-  }: PackQueriesTableProps
-) => {
+const PackQueriesTableComponent = ({
+  data,
+  isReadOnly,
+  onDeleteClick,
+  onEditClick,
+  selectedItems,
+  setSelectedItems,
+}: PackQueriesTableProps) => {
   const renderDeleteAction = useCallback(
     (item: PackQueryFormData) => (
       <EuiButtonIcon

@@ -6,7 +6,6 @@
  */
 
 import { EuiSpacer, EuiTab } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';
@@ -33,13 +32,7 @@ export interface PanelHeaderProps {
   tabs: RightPanelTabType[];
 }
 
-export const PanelHeader = memo((
-  {
-    selectedTabId,
-    setSelectedTabId,
-    tabs
-  }: PanelHeaderProps
-) => {
+export const PanelHeader = memo(({ selectedTabId, setSelectedTabId, tabs }: PanelHeaderProps) => {
   const { dataFormattedForFieldBrowser } = useRightPanelContext();
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);

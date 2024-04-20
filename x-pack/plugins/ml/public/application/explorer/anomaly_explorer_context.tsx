@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';

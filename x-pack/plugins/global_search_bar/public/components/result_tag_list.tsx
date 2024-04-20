@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 import type { Tag } from '@kbn/saved-objects-tagging-plugin/public';
@@ -36,12 +36,7 @@ interface ResultTagListProps {
   searchTagIds: string[];
 }
 
-export const ResultTagList = (
-  {
-    tags,
-    searchTagIds
-  }: ResultTagListProps
-) => {
+export const ResultTagList = ({ tags, searchTagIds }: ResultTagListProps) => {
   const showOverflow = tags.length > MAX_TAGS_TO_SHOW;
 
   if (!showOverflow) {

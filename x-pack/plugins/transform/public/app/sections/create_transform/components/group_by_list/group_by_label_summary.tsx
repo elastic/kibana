@@ -17,12 +17,7 @@ interface Props {
   optionsDataId: string;
 }
 
-export const GroupByLabelSummary = (
-  {
-    item,
-    optionsDataId
-  }: Props
-) => {
+export const GroupByLabelSummary = ({ item, optionsDataId }: Props) => {
   let interval: string | undefined;
 
   if (isGroupByDateHistogram(item)) {

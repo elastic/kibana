@@ -33,14 +33,12 @@ export interface OsqueryFlyoutProps {
 // Make sure we keep this and ACTIONS_QUERY_KEY in use_all_live_queries.ts in sync.
 const ACTIONS_QUERY_KEY = 'actions';
 
-const OsqueryFlyoutComponent = (
-  {
-    agentId,
-    defaultValues,
-    onClose,
-    ecsData
-  }: OsqueryFlyoutProps
-) => {
+const OsqueryFlyoutComponent = ({
+  agentId,
+  defaultValues,
+  onClose,
+  ecsData,
+}: OsqueryFlyoutProps) => {
   const {
     services: { osquery },
   } = useKibana();

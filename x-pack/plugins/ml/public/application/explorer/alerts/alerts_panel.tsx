@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_STATUS_ACTIVE, AlertConsumers, type AlertStatus } from '@kbn/rule-data-utils';
-import React, { type FC, useState } from 'react';
+import React, { useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ML_ALERTS_CONFIG_ID } from '../../../alerting/anomaly_detection_alerts_table/register_alerts_table_configuration';
 import { CollapsiblePanel } from '../../components/collapsible_panel';

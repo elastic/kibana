@@ -17,11 +17,7 @@ export interface FieldValueCellProps {
   value: FieldValue | string | number | boolean | null;
 }
 
-export const FieldValueCell = (
-  {
-    value
-  }: FieldValueCellProps
-) => {
+export const FieldValueCell = ({ value }: FieldValueCellProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
 
   if (isFieldValue(value)) {

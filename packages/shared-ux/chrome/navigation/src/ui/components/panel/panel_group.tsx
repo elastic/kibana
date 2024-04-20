@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiListGroup,
   EuiTitle,
@@ -60,13 +60,7 @@ interface Props {
   hasHorizontalRuleBefore?: boolean;
 }
 
-export const PanelGroup = (
-  {
-    navNode,
-    isFirstInList,
-    hasHorizontalRuleBefore
-  }: Props
-) => {
+export const PanelGroup = ({ navNode, isFirstInList, hasHorizontalRuleBefore }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');

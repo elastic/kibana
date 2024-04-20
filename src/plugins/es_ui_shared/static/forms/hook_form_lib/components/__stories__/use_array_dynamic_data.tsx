@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState, FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import { get } from 'lodash';
 import {
   EuiFlexGroup,
@@ -204,13 +204,7 @@ const processorNameConfig = {
   validations: [{ validator: emptyField('A name is required.') }],
 };
 
-const ProcessorsConfigurator = (
-  {
-    ruleType
-  }: {
-    ruleType: string;
-  }
-) => {
+const ProcessorsConfigurator = ({ ruleType }: { ruleType: string }) => {
   return (
     <UseArray path="processors" initialNumberOfItems={ruleType === 'type_one' ? 1 : 3}>
       {({ items, addItem, removeItem }) => {

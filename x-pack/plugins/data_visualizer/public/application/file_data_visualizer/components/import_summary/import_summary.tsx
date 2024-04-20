@@ -6,7 +6,6 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiSpacer, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
@@ -23,17 +22,15 @@ interface Props {
   createPipeline: boolean;
 }
 
-export const ImportSummary = (
-  {
-    index,
-    dataView,
-    ingestPipelineId,
-    docCount,
-    importFailures,
-    createDataView,
-    createPipeline
-  }: Props
-) => {
+export const ImportSummary = ({
+  index,
+  dataView,
+  ingestPipelineId,
+  docCount,
+  importFailures,
+  createDataView,
+  createPipeline,
+}: Props) => {
   const items = createDisplayItems(
     index,
     dataView,

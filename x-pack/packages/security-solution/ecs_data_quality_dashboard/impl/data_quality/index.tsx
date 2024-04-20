@@ -66,29 +66,27 @@ interface Props {
 }
 
 /** Renders the `Data Quality` dashboard content */
-const DataQualityPanelComponent = (
-  {
-    toasts,
-    baseTheme,
-    canUserCreateAndReadCases,
-    defaultBytesFormat,
-    defaultNumberFormat,
-    endDate,
-    getGroupByFieldsOnClick,
-    httpFetch,
-    ilmPhases,
-    isAssistantEnabled,
-    isILMAvailable,
-    lastChecked,
-    openCreateCaseFlyout,
-    patterns,
-    reportDataQualityIndexChecked,
-    reportDataQualityCheckAllCompleted,
-    setLastChecked,
-    startDate,
-    theme
-  }: Props
-) => {
+const DataQualityPanelComponent = ({
+  toasts,
+  baseTheme,
+  canUserCreateAndReadCases,
+  defaultBytesFormat,
+  defaultNumberFormat,
+  endDate,
+  getGroupByFieldsOnClick,
+  httpFetch,
+  ilmPhases,
+  isAssistantEnabled,
+  isILMAvailable,
+  lastChecked,
+  openCreateCaseFlyout,
+  patterns,
+  reportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted,
+  setLastChecked,
+  startDate,
+  theme,
+}: Props) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
       value != null ? numeral(value).format(defaultBytesFormat) : EMPTY_STAT,

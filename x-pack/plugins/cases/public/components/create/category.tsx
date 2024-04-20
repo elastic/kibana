@@ -14,11 +14,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const CategoryComponent = (
-  {
-    isLoading
-  }: Props
-) => {
+const CategoryComponent = ({ isLoading }: Props) => {
   const { isLoading: isLoadingCategories, data: categories = [] } = useGetCategories();
 
   return (

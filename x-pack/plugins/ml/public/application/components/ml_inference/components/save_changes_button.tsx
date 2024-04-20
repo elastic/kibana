@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,19 +14,16 @@ interface SaveChangesButtonProps {
   disabled: boolean;
 }
 
-export const SaveChangesButton = (
-  {
-    onClick,
-    disabled
-  }: SaveChangesButtonProps
-) => (<EuiButtonEmpty
-  size="xs"
-  onClick={onClick}
-  disabled={disabled}
-  data-test-subj="mlTrainedModelsInferencePipelineFlyoutSaveChangesButton"
->
-  {i18n.translate(
-    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.saveChangesButton',
-    { defaultMessage: 'Save changes' }
-  )}
-</EuiButtonEmpty>);
+export const SaveChangesButton = ({ onClick, disabled }: SaveChangesButtonProps) => (
+  <EuiButtonEmpty
+    size="xs"
+    onClick={onClick}
+    disabled={disabled}
+    data-test-subj="mlTrainedModelsInferencePipelineFlyoutSaveChangesButton"
+  >
+    {i18n.translate(
+      'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.saveChangesButton',
+      { defaultMessage: 'Save changes' }
+    )}
+  </EuiButtonEmpty>
+);

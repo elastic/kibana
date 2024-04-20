@@ -82,13 +82,7 @@ interface GraphOverlayProps {
   Navigation: JSX.Element | null;
 }
 
-const GraphOverlayComponent = (
-  {
-    SessionView,
-    Navigation,
-    scopeId
-  }: GraphOverlayProps
-) => {
+const GraphOverlayComponent = ({ SessionView, Navigation, scopeId }: GraphOverlayProps) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();

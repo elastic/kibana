@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -16,13 +15,7 @@ import { TextInput } from '../text_input';
 import type { ZeroShotClassificationInference } from './zero_shot_classification_inference';
 import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
-const ClassNameInput = (
-  {
-    inferrer
-  }: {
-    inferrer: ZeroShotClassificationInference;
-  }
-) => {
+const ClassNameInput = ({ inferrer }: { inferrer: ZeroShotClassificationInference }) => {
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
   const labelsText = useObservable(inferrer.getLabelsText$(), inferrer.getLabelsText());
   const multiLabel = useObservable(inferrer.getMultiLabel$(), inferrer.getMultiLabel());

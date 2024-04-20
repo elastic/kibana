@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,11 +45,7 @@ interface Props {
   element: PositionedElement;
 }
 
-export const ElementSettings = (
-  {
-    element
-  }: Props
-) => {
+export const ElementSettings = ({ element }: Props) => {
   const tabs = useMemo(() => {
     const filtersTab = isExpressionWithFilters(element.expression) && {
       id: 'filters',
@@ -116,7 +112,7 @@ export const ElementSettings = (
           // contains args, which should react on input changes and change the expression,
           // according to the logic they encapsulate.
           // Good example: columns have changed, the args of expression `math` should be changed, containing the new columns.
-          (<div style={{ display: 'none' }}>{content}</div>)
+          <div style={{ display: 'none' }}>{content}</div>
         )
       ),
     [selectedTab, tabs]

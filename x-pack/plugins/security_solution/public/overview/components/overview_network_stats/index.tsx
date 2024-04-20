@@ -178,12 +178,7 @@ const AccordionContent = styled.div`
   padding-top: 8px;
 `;
 
-const OverviewNetworkStatsComponent = (
-  {
-    data,
-    loading
-  }: OverviewNetworkProps
-) => {
+const OverviewNetworkStatsComponent = ({ data, loading }: OverviewNetworkProps) => {
   const allNetworkStats = getOverviewNetworkStats(data);
   const allNetworkStatsCount = allNetworkStats.reduce((total, stat) => total + stat.count, 0);
 

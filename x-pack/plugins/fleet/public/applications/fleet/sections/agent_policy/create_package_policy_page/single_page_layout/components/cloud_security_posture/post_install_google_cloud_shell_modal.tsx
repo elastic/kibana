@@ -33,19 +33,17 @@ import { GoogleCloudShellGuide } from '../../../../../../../../components/cloud_
 import { useCreateCloudShellUrl } from '../../../../../../../../components/cloud_security_posture/hooks';
 import { getGcpIntegrationDetailsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
 
-export const PostInstallGoogleCloudShellModal = (
-  {
-    onConfirm,
-    onCancel,
-    agentPolicy,
-    packagePolicy
-  }: {
-    onConfirm: () => void;
-    onCancel: () => void;
-    agentPolicy: AgentPolicy;
-    packagePolicy: PackagePolicy;
-  }
-) => {
+export const PostInstallGoogleCloudShellModal = ({
+  onConfirm,
+  onCancel,
+  agentPolicy,
+  packagePolicy,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+  agentPolicy: AgentPolicy;
+  packagePolicy: PackagePolicy;
+}) => {
   const { data: apyKeysData } = useQuery(['googleCloudShellApiKeys'], () =>
     sendGetEnrollmentAPIKeys({
       page: 1,

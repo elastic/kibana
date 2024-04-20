@@ -31,14 +31,12 @@ type AssistantMessageProps = Pick<
   'content' | 'createdAt' | 'citations' | 'retrievalDocs'
 >;
 
-export const AssistantMessage = (
-  {
-    content,
-    createdAt,
-    citations,
-    retrievalDocs
-  }: AssistantMessageProps
-) => {
+export const AssistantMessage = ({
+  content,
+  createdAt,
+  citations,
+  retrievalDocs,
+}: AssistantMessageProps) => {
   const [isDocsFlyoutOpen, setIsDocsFlyoutOpen] = useState(false);
   const username = i18n.translate('xpack.searchPlayground.chat.message.assistant.username', {
     defaultMessage: 'AI',

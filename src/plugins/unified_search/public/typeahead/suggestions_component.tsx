@@ -160,54 +160,54 @@ export default class SuggestionsComponent extends PureComponent<SuggestionsCompo
   });
 }
 
-const ResizableSuggestionsListDiv = React.memo((
-  props: {
+const ResizableSuggestionsListDiv = React.memo(
+  (props: {
     inputContainer: HTMLElement;
     suggestionsSize?: SuggestionsListSize;
     children: (rect: DOMRect) => ReactNode;
-  }
-) => {
-  const inputContainer = props.inputContainer;
+  }) => {
+    const inputContainer = props.inputContainer;
 
-  const [{ documentHeight }, { pageYOffset }, containerRect] = useDimensions(inputContainer);
+    const [{ documentHeight }, { pageYOffset }, containerRect] = useDimensions(inputContainer);
 
-  if (!containerRect) return null;
+    if (!containerRect) return null;
 
-  // reflects if the suggestions list has enough space below to be opened down
-  const isSuggestionsListFittable =
-    documentHeight - (containerRect.top + containerRect.height) >
-    SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
-  const verticalListPosition = isSuggestionsListFittable
-    ? `top: ${pageYOffset + containerRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
-    : `bottom: ${documentHeight - (pageYOffset + containerRect.top)}px;`;
+    // reflects if the suggestions list has enough space below to be opened down
+    const isSuggestionsListFittable =
+      documentHeight - (containerRect.top + containerRect.height) >
+      SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE;
+    const verticalListPosition = isSuggestionsListFittable
+      ? `top: ${pageYOffset + containerRect.bottom - SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET}px;`
+      : `bottom: ${documentHeight - (pageYOffset + containerRect.top)}px;`;
 
-  const divPosition = css`
-    position: absolute;
-    z-index: 4001;
-    left: ${containerRect.left}px;
-    width: ${containerRect.width}px;
-    ${verticalListPosition}
-  `;
+    const divPosition = css`
+      position: absolute;
+      z-index: 4001;
+      left: ${containerRect.left}px;
+      width: ${containerRect.width}px;
+      ${verticalListPosition}
+    `;
 
-  return (
-    <div css={divPosition}>
-      <div
-        className={classNames('kbnTypeahead', {
-          'kbnTypeahead--small': props.suggestionsSize === 's',
-        })}
-      >
+    return (
+      <div css={divPosition}>
         <div
-          className={classNames('kbnTypeahead__popover', {
-            ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
-            ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
+          className={classNames('kbnTypeahead', {
+            'kbnTypeahead--small': props.suggestionsSize === 's',
           })}
         >
-          {props.children(containerRect)}
+          <div
+            className={classNames('kbnTypeahead__popover', {
+              ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
+              ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
+            })}
+          >
+            {props.children(containerRect)}
+          </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 function useDimensions(
   container: HTMLElement | null

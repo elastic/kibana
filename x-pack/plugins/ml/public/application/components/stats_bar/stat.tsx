@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -19,11 +18,7 @@ interface StatProps {
   stat: StatsBarStat;
 }
 
-export const Stat = (
-  {
-    stat
-  }: StatProps
-) => {
+export const Stat = ({ stat }: StatProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <span css={{ marginRight: euiTheme.size.s }}>

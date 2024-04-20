@@ -7,7 +7,7 @@
 
 import type { EuiFieldTextProps } from '@elastic/eui';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
 import { composeValidators } from '../../common';
@@ -19,14 +19,12 @@ type TimeIntervalControlProps = Omit<EuiFieldTextProps, 'value' | 'onChange'> & 
   onChange: (update: string) => void;
 };
 
-export const TimeIntervalControl = (
-  {
-    value,
-    onChange,
-    label,
-    ...fieldTextProps
-  }: TimeIntervalControlProps
-) => {
+export const TimeIntervalControl = ({
+  value,
+  onChange,
+  label,
+  ...fieldTextProps
+}: TimeIntervalControlProps) => {
   const validators = useMemo(() => composeValidators(timeIntervalInputValidator()), []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

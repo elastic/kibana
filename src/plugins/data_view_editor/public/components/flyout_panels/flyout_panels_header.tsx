@@ -13,7 +13,9 @@ export const PanelHeader = (
   props: {
     children: React.ReactNode;
   } & Omit<EuiFlyoutHeaderProps, 'children'>
-) => (<>
-  <EuiFlyoutHeader className="fieldEditor__flyoutPanel__header" {...props} />
-  <EuiSpacer />
-</>);
+) => (
+  <>
+    <EuiFlyoutHeader className="fieldEditor__flyoutPanel__header" {...props} />
+    <EuiSpacer />
+  </>
+);

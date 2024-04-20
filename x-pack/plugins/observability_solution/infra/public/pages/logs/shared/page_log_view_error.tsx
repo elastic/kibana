@@ -19,15 +19,7 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 import { LogsPageTemplate } from './page_template';
 
-export const LogViewErrorPage = (
-  {
-    errors,
-    onRetry
-  }: {
-    errors: Error[];
-    onRetry: () => void;
-  }
-) => {
+export const LogViewErrorPage = ({ errors, onRetry }: { errors: Error[]; onRetry: () => void }) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
   return (
@@ -109,16 +101,10 @@ export const ConnectedLogViewErrorPage = () => {
   return <LogSourceErrorPage errors={errors} onRetry={retry} />;
 };
 
-const LogSourceErrorMessage = (
-  {
-    error
-  }: {
-    error: Error;
-  }
-) => {
+const LogSourceErrorMessage = ({ error }: { error: Error }) => {
   if (error instanceof ResolveLogViewError) {
     return (
-      (<LogSourceErrorCallout
+      <LogSourceErrorCallout
         title={
           <FormattedMessage
             id="xpack.infra.logSourceErrorPage.resolveLogSourceConfigurationErrorTitle"
@@ -128,18 +114,18 @@ const LogSourceErrorMessage = (
       >
         {error.cause instanceof SavedObjectNotFound ? (
           // the SavedObjectNotFound error message contains broken markup
-          (<FormattedMessage
+          <FormattedMessage
             id="xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage"
             defaultMessage="Failed to locate that {savedObjectType}: {savedObjectId}"
             values={{
               savedObjectType: error.cause.savedObjectType,
               savedObjectId: error.cause.savedObjectId,
             }}
-          />)
+          />
         ) : (
           `${error.cause?.message ?? error.message}`
         )}
-      </LogSourceErrorCallout>)
+      </LogSourceErrorCallout>
     );
   } else if (error instanceof FetchLogViewError) {
     return (
@@ -172,13 +158,8 @@ const LogSourceErrorMessage = (
   }
 };
 
-const LogSourceErrorCallout = (
-  {
-    title,
-    children
-  }: {
-    title: React.ReactNode;
-  }
-) => (<EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
-  <p>{children}</p>
-</EuiCallOut>);
+const LogSourceErrorCallout = ({ title, children }: { title: React.ReactNode }) => (
+  <EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
+    <p>{children}</p>
+  </EuiCallOut>
+);

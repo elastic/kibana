@@ -33,11 +33,7 @@ interface ActionTableResultsButtonProps {
   actionId: string;
 }
 
-const ActionTableResultsButton = (
-  {
-    actionId
-  }: ActionTableResultsButtonProps
-) => {
+const ActionTableResultsButton = ({ actionId }: ActionTableResultsButtonProps) => {
   const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   const detailsText = i18n.translate(

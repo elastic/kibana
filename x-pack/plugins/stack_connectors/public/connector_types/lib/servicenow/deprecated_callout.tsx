@@ -14,11 +14,7 @@ interface Props {
   onMigrate?: () => void;
 }
 
-const DeprecatedCalloutComponent = (
-  {
-    onMigrate
-  }: Props
-) => {
+const DeprecatedCalloutComponent = ({ onMigrate }: Props) => {
   const update =
     onMigrate != null ? (
       <EuiLink onClick={onMigrate} data-test-subj="update-connector-btn">

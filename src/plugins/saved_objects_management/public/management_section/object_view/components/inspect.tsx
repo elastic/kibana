@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { omit } from 'lodash';
@@ -27,11 +27,7 @@ const copyToClipboardLabel = i18n.translate('savedObjectsManagement.view.copyToC
   defaultMessage: 'Copy to clipboard',
 });
 
-export const Inspect = (
-  {
-    object
-  }: InspectProps
-) => {
+export const Inspect = ({ object }: InspectProps) => {
   const title = object.meta.title || 'saved object';
 
   const objectAsJsonString = useMemo(() => JSON.stringify(omit(object, 'meta'), null, 2), [object]);

@@ -47,13 +47,7 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 import { SearchApplicationViewLogic } from './search_application_view_logic';
 
-const SchemaFieldDetails = (
-  {
-    schemaField
-  }: {
-    schemaField: SchemaField;
-  }
-) => {
+const SchemaFieldDetails = ({ schemaField }: { schemaField: SchemaField }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const notInAllIndices = schemaField.indices.some((i) => i.type === 'unmapped');
 

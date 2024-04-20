@@ -29,13 +29,7 @@ interface NativePopoverProps {
   isPopoverOpen: boolean;
 }
 
-export const NativePopover = (
-  {
-    button,
-    isPopoverOpen,
-    closePopover
-  }: NativePopoverProps
-) => {
+export const NativePopover = ({ button, isPopoverOpen, closePopover }: NativePopoverProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPopover

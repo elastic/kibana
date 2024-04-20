@@ -16,12 +16,7 @@ interface Props {
   selectedTab: TestPipelineFlyoutTab;
 }
 
-export const Tabs = (
-  {
-    onTabChange,
-    selectedTab
-  }: Props
-) => {
+export const Tabs = ({ onTabChange, selectedTab }: Props) => {
   const tabs: Array<{
     id: TestPipelineFlyoutTab;
     name: React.ReactNode;

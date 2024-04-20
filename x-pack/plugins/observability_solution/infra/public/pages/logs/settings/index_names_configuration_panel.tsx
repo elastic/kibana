@@ -14,17 +14,15 @@ import { FormElement } from './form_elements';
 import { getFormRowProps, getInputFieldProps } from './form_field_props';
 import { FormValidationError } from './validation_errors';
 
-export const IndexNamesConfigurationPanel = (
-  {
-    isLoading,
-    isReadOnly,
-    indexNamesFormElement
-  }: {
-    isLoading: boolean;
-    isReadOnly: boolean;
-    indexNamesFormElement: FormElement<LogIndexNameReference, FormValidationError>;
-  }
-) => {
+export const IndexNamesConfigurationPanel = ({
+  isLoading,
+  isReadOnly,
+  indexNamesFormElement,
+}: {
+  isLoading: boolean;
+  isReadOnly: boolean;
+  indexNamesFormElement: FormElement<LogIndexNameReference, FormValidationError>;
+}) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_index_name' });
   useTrackPageview({
     app: 'infra_logs',

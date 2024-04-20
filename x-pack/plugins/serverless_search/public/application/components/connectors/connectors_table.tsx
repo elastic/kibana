@@ -288,13 +288,7 @@ export const ConnectorsTable = () => {
   );
 };
 
-const DeleteConnectorModalAction = (
-  {
-    connector
-  }: {
-    connector: Connector;
-  }
-) => {
+const DeleteConnectorModalAction = ({ connector }: { connector: Connector }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   return (

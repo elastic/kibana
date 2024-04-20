@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,12 +22,7 @@ interface Props {
   features: FeatureCatalogueEntry[];
 }
 
-export const AddData = (
-  {
-    addBasePath,
-    features
-  }: Props
-) => {
+export const AddData = ({ addBasePath, features }: Props) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();

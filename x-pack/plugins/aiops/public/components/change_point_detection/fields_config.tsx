@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -162,17 +162,15 @@ export interface FieldPanelProps {
  * @param removeDisabled
  * @constructor
  */
-const FieldPanel = (
-  {
-    panelIndex,
-    fieldConfig,
-    onChange,
-    onRemove,
-    removeDisabled,
-    onSelectionChange,
-    'data-test-subj': dataTestSubj
-  }: FieldPanelProps
-) => {
+const FieldPanel = ({
+  panelIndex,
+  fieldConfig,
+  onChange,
+  onRemove,
+  removeDisabled,
+  onSelectionChange,
+  'data-test-subj': dataTestSubj,
+}: FieldPanelProps) => {
   const {
     embeddable,
     application: { capabilities },
@@ -633,13 +631,7 @@ interface FieldsControlsProps {
 /**
  * Renders controls for fields selection and emits updates on change.
  */
-export const FieldsControls = (
-  {
-    fieldConfig,
-    onChange,
-    children
-  }: FieldsControlsProps
-) => {
+export const FieldsControls = ({ fieldConfig, onChange, children }: FieldsControlsProps) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
   const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
@@ -718,15 +710,13 @@ interface ChangePointResultsProps {
 /**
  * Handles request and rendering results of the change point  with provided config.
  */
-export const ChangePointResults = (
-  {
-    fieldConfig,
-    splitFieldCardinality,
-    isLoading,
-    annotations,
-    onSelectionChange
-  }: ChangePointResultsProps
-) => {
+export const ChangePointResults = ({
+  fieldConfig,
+  splitFieldCardinality,
+  isLoading,
+  annotations,
+  onSelectionChange,
+}: ChangePointResultsProps) => {
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 

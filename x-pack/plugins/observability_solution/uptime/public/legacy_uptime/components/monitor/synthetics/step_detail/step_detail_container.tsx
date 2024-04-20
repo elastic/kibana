@@ -21,12 +21,7 @@ interface Props {
   stepIndex: number;
 }
 
-export const StepDetailContainer = (
-  {
-    checkGroup,
-    stepIndex
-  }: Props
-) => {
+export const StepDetailContainer = ({ checkGroup, stepIndex }: Props) => {
   const { activeStep, journey } = useStepDetailPage();
 
   useMonitorBreadcrumb({ details: journey?.details, activeStep, performanceBreakDownView: true });

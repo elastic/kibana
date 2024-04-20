@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectProps } from '@elastic/eui';
@@ -85,19 +84,17 @@ interface SeriesControlsProps {
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls = (
-  {
-    appStateHandler,
-    bounds,
-    children,
-    functionDescription,
-    job,
-    selectedDetectorIndex,
-    selectedEntities,
-    selectedJobId,
-    setFunctionDescription
-  }: SeriesControlsProps
-) => {
+export const SeriesControls = ({
+  appStateHandler,
+  bounds,
+  children,
+  functionDescription,
+  job,
+  selectedDetectorIndex,
+  selectedEntities,
+  selectedJobId,
+  setFunctionDescription,
+}: SeriesControlsProps) => {
   const {
     services: {
       mlServices: {

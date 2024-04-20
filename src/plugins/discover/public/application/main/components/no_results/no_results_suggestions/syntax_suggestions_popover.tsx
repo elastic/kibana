@@ -35,11 +35,7 @@ export interface SyntaxSuggestionsPopoverProps {
   meta: SyntaxExamples;
 }
 
-export const SyntaxSuggestionsPopover = (
-  {
-    meta
-  }: SyntaxSuggestionsPopoverProps
-) => {
+export const SyntaxSuggestionsPopover = ({ meta }: SyntaxSuggestionsPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { title, items, footer } = meta;
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,11 +75,7 @@ interface ExpandableSectionAnalyticsProps {
   jobId: string;
 }
 
-export const ExpandableSectionAnalytics = (
-  {
-    jobId
-  }: ExpandableSectionAnalyticsProps
-) => {
+export const ExpandableSectionAnalytics = ({ jobId }: ExpandableSectionAnalyticsProps) => {
   const [expandedRowItem, setExpandedRowItem] = useState<DataFrameAnalyticsListRow | undefined>();
 
   const fetchStats = async () => {

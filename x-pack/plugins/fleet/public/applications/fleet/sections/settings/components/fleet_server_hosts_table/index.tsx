@@ -36,12 +36,10 @@ const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
   min-width: 0px;
 `;
 
-export const FleetServerHostsTable = (
-  {
-    fleetServerHosts,
-    deleteFleetServerHost
-  }: FleetServerHostsTableProps
-) => {
+export const FleetServerHostsTable = ({
+  fleetServerHosts,
+  deleteFleetServerHost,
+}: FleetServerHostsTableProps) => {
   const authz = useAuthz();
   const { getHref } = useLink();
 

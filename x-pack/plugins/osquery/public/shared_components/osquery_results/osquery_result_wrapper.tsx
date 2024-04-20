@@ -68,20 +68,20 @@ type OsqueryActionResultsWrapperProps = {
   services: CoreStart & StartPlugins;
 } & OsqueryActionResultProps;
 
-const OsqueryActionResultWrapperComponent = (
-  {
-    services,
-    ...restProps
-  }: OsqueryActionResultsWrapperProps
-) => (<KibanaThemeProvider theme$={services.theme.theme$}>
-  <KibanaContextProvider services={services}>
-    <EuiErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <OsqueryActionResult {...restProps} />
-      </QueryClientProvider>
-    </EuiErrorBoundary>
-  </KibanaContextProvider>
-</KibanaThemeProvider>);
+const OsqueryActionResultWrapperComponent = ({
+  services,
+  ...restProps
+}: OsqueryActionResultsWrapperProps) => (
+  <KibanaThemeProvider theme$={services.theme.theme$}>
+    <KibanaContextProvider services={services}>
+      <EuiErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <OsqueryActionResult {...restProps} />
+        </QueryClientProvider>
+      </EuiErrorBoundary>
+    </KibanaContextProvider>
+  </KibanaThemeProvider>
+);
 
 const OsqueryActionResultWrapper = React.memo(OsqueryActionResultWrapperComponent);
 

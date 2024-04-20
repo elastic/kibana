@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiToolTip, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
@@ -24,20 +23,18 @@ interface Props {
   selectedPatterns: string[];
   signalIndexName: string | null;
 }
-export const TriggerComponent = (
-  {
-    activePatterns,
-    disabled,
-    isModified,
-    isOnlyDetectionAlerts,
-    isPopoverOpen,
-    isTimelineSourcerer,
-    loading,
-    onClick,
-    selectedPatterns,
-    signalIndexName
-  }: Props
-) => {
+export const TriggerComponent = ({
+  activePatterns,
+  disabled,
+  isModified,
+  isOnlyDetectionAlerts,
+  isPopoverOpen,
+  isTimelineSourcerer,
+  loading,
+  onClick,
+  selectedPatterns,
+  signalIndexName,
+}: Props) => {
   const badge = useMemo(() => {
     switch (isModified) {
       case 'modified':

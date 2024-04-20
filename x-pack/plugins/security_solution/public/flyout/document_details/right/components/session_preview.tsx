@@ -7,7 +7,7 @@
 
 import { EuiCode, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { ReactElement } from 'react';
-import React, { useMemo, type FC } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
@@ -20,23 +20,18 @@ import { RenderRuleName } from '../../../../timelines/components/timeline/body/r
 /**
  * One-off helper to make sure that inline values are rendered consistently
  */
-const ValueContainer = (
-  {
-    text,
-    children
-  }: {
-    text?: ReactElement;
-  }
-) => (<>
-  {text && (
-    <>
-      &nbsp;
-      <span>{text}</span>
-      &nbsp;
-    </>
-  )}
-  {children}
-</>);
+const ValueContainer = ({ text, children }: { text?: ReactElement }) => (
+  <>
+    {text && (
+      <>
+        &nbsp;
+        <span>{text}</span>
+        &nbsp;
+      </>
+    )}
+    {children}
+  </>
+);
 
 /**
  * Renders session preview under Visualizations section in the flyout right EuiPanel

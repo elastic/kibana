@@ -23,13 +23,7 @@ const Pagination = styled(EuiPagination)`
   max-width: 130px;
 `;
 
-export const Screenshots = memo((
-  {
-    images,
-    packageName,
-    version
-  }: ScreenshotProps
-) => {
+export const Screenshots = memo(({ images, packageName, version }: ScreenshotProps) => {
   const { toPackageImage } = useLinks();
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const maxImageIndex = useMemo(() => images.length - 1, [images.length]);

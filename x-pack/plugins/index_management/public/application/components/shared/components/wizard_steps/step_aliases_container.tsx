@@ -15,11 +15,7 @@ interface Props {
   esDocsBase: string;
 }
 
-export const StepAliasesContainer = (
-  {
-    esDocsBase
-  }: Props
-) => {
+export const StepAliasesContainer = ({ esDocsBase }: Props) => {
   const { defaultValue, updateContent } = Forms.useContent<CommonWizardSteps, 'aliases'>('aliases');
 
   return (

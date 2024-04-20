@@ -19,14 +19,12 @@ interface Props {
   setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ChartSettingsPopoverComponent = (
-  {
-    initialPanelId,
-    isPopoverOpen,
-    panels,
-    setIsPopoverOpen
-  }: Props
-) => {
+const ChartSettingsPopoverComponent = ({
+  initialPanelId,
+  isPopoverOpen,
+  panels,
+  setIsPopoverOpen,
+}: Props) => {
   const onButtonClick = useCallback(
     () => setIsPopoverOpen((isOpen) => !isOpen),
     [setIsPopoverOpen]

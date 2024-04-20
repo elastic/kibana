@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -21,68 +20,63 @@ export interface JobGroupsInputProps {
   validation: Validation;
 }
 
-export const JobGroupsInput = memo((
-  {
-    existingGroups,
-    selectedGroups,
-    onChange,
-    validation
-  }: JobGroupsInputProps
-) => {
-  const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
-    label: g,
-    color: tabColor(g),
-  }));
+export const JobGroupsInput = memo(
+  ({ existingGroups, selectedGroups, onChange, validation }: JobGroupsInputProps) => {
+    const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
+      label: g,
+      color: tabColor(g),
+    }));
 
-  const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>((g) => ({
-    label: g,
-    color: tabColor(g),
-  }));
+    const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>((g) => ({
+      label: g,
+      color: tabColor(g),
+    }));
 
-  function onChangeCallback(optionsIn: EuiComboBoxOptionOption[]) {
-    onChange(optionsIn.map((g) => g.label));
-  }
-
-  function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
-    const normalizedSearchValue = input.trim().toLowerCase();
-
-    if (!normalizedSearchValue) {
-      return;
+    function onChangeCallback(optionsIn: EuiComboBoxOptionOption[]) {
+      onChange(optionsIn.map((g) => g.label));
     }
 
-    const newGroup: EuiComboBoxOptionOption = {
-      label: input,
-      color: tabColor(input),
-    };
+    function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
+      const normalizedSearchValue = input.trim().toLowerCase();
 
-    if (
-      flattenedOptions.findIndex(
-        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
-      ) === -1
-    ) {
-      options.push(newGroup);
+      if (!normalizedSearchValue) {
+        return;
+      }
+
+      const newGroup: EuiComboBoxOptionOption = {
+        label: input,
+        color: tabColor(input),
+      };
+
+      if (
+        flattenedOptions.findIndex(
+          (option) => option.label.trim().toLowerCase() === normalizedSearchValue
+        ) === -1
+      ) {
+        options.push(newGroup);
+      }
+
+      onChangeCallback([...selectedOptions, newGroup]);
     }
 
-    onChangeCallback([...selectedOptions, newGroup]);
+    return (
+      <Description validation={validation}>
+        <EuiComboBox
+          placeholder={i18n.translate(
+            'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
+            {
+              defaultMessage: 'Select or create groups',
+            }
+          )}
+          options={options}
+          selectedOptions={selectedOptions}
+          onChange={onChangeCallback}
+          onCreateOption={onCreateGroup}
+          isClearable={true}
+          isInvalid={!validation.valid}
+          data-test-subj="mlJobWizardComboBoxJobGroups"
+        />
+      </Description>
+    );
   }
-
-  return (
-    <Description validation={validation}>
-      <EuiComboBox
-        placeholder={i18n.translate(
-          'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
-          {
-            defaultMessage: 'Select or create groups',
-          }
-        )}
-        options={options}
-        selectedOptions={selectedOptions}
-        onChange={onChangeCallback}
-        onCreateOption={onCreateGroup}
-        isClearable={true}
-        isInvalid={!validation.valid}
-        data-test-subj="mlJobWizardComboBoxJobGroups"
-      />
-    </Description>
-  );
-});
+);

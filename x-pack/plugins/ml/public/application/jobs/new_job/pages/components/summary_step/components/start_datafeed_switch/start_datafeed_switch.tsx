@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiFormRow, EuiSpacer } from '@elastic/eui';
@@ -15,13 +14,11 @@ interface Props {
   disabled?: boolean;
 }
 
-export const StartDatafeedSwitch = (
-  {
-    startDatafeed,
-    setStartDatafeed,
-    disabled = false
-  }: Props
-) => {
+export const StartDatafeedSwitch = ({
+  startDatafeed,
+  setStartDatafeed,
+  disabled = false,
+}: Props) => {
   return (
     <>
       <EuiSpacer />

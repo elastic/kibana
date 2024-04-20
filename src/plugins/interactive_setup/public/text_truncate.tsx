@@ -7,7 +7,6 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 
 export const TextTruncate = ({ children }) => {

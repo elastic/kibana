@@ -27,13 +27,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const LicenseModal = (
-  {
-    licenseName = 'LICENSE.txt',
-    licensePath,
-    onClose
-  }: Props
-) => {
+export const LicenseModal = ({ licenseName = 'LICENSE.txt', licensePath, onClose }: Props) => {
   const { notifications } = useStartServices();
 
   const {

@@ -21,14 +21,7 @@ interface Props {
   input?: EmbeddableInput;
 }
 
-export const EmbeddableRoot = (
-  {
-    embeddable,
-    loading,
-    error,
-    input
-  }: Props
-) => {
+export const EmbeddableRoot = ({ embeddable, loading, error, input }: Props) => {
   const [node, setNode] = useState<ReactNode | undefined>();
   const [embeddableHasMounted, setEmbeddableHasMounted] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);

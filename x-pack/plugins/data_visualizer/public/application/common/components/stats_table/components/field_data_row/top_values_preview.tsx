@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { ChartData, OrdinalDataItem } from '@kbn/ml-data-grid';
@@ -16,12 +15,7 @@ export interface TopValuesPreviewProps extends FieldDataRowProps {
   isNumeric?: boolean;
 }
 
-export const TopValuesPreview = (
-  {
-    config,
-    isNumeric
-  }: TopValuesPreviewProps
-) => {
+export const TopValuesPreview = ({ config, isNumeric }: TopValuesPreviewProps) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { topValues, cardinality } = stats;

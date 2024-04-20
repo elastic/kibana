@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,14 +33,12 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-export const SearchPanel = (
-  {
-    dataView,
-    searchString,
-    searchQueryLanguage,
-    setSearchParams
-  }: Props
-) => {
+export const SearchPanel = ({
+  dataView,
+  searchString,
+  searchQueryLanguage,
+  setSearchParams,
+}: Props) => {
   const {
     uiSettings,
     unifiedSearch: {

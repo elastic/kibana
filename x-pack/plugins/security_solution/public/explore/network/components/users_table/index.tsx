@@ -53,21 +53,19 @@ const rowItems: ItemsPerRow[] = [
 
 export const usersTableId = 'users-table';
 
-const UsersTableComponent = (
-  {
-    data,
-    fakeTotalCount,
-    flowTarget,
-    id,
-    isInspect,
-    loading,
-    loadPage,
-    setQuerySkip,
-    showMorePagesIndicator,
-    totalCount,
-    type
-  }: UsersTableProps
-) => {
+const UsersTableComponent = ({
+  data,
+  fakeTotalCount,
+  flowTarget,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  setQuerySkip,
+  showMorePagesIndicator,
+  totalCount,
+  type,
+}: UsersTableProps) => {
   const dispatch = useDispatch();
   const getUsersSelector = useMemo(() => networkSelectors.usersSelector(), []);
   const { activePage, sort, limit } = useDeepEqualSelector(getUsersSelector);

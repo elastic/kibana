@@ -7,7 +7,6 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
@@ -18,11 +17,7 @@ export interface Props {
   onClick: (selectedFiles: FileJSON[]) => void;
 }
 
-export const SelectButton = (
-  {
-    onClick
-  }: Props
-) => {
+export const SelectButton = ({ onClick }: Props) => {
   const { state } = useFilePickerContext();
   const isUploading = useBehaviorSubject(state.isUploading$);
   const selectedFiles = useBehaviorSubject(state.selectedFiles$);

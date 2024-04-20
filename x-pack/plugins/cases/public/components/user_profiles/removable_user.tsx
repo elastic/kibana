@@ -16,12 +16,7 @@ export interface UserRepresentationProps {
   onRemoveAssignee: (removedAssigneeUID: string) => void;
 }
 
-const RemovableUserComponent = (
-  {
-    assignee,
-    onRemoveAssignee
-  }: UserRepresentationProps
-) => {
+const RemovableUserComponent = ({ assignee, onRemoveAssignee }: UserRepresentationProps) => {
   const removeAssigneeCallback = useCallback(
     () => onRemoveAssignee(assignee.uid),
     [onRemoveAssignee, assignee.uid]

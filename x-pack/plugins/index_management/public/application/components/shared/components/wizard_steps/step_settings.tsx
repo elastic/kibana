@@ -30,13 +30,7 @@ interface Props {
   defaultValue?: { [key: string]: any };
 }
 
-export const StepSettings = React.memo((
-  {
-    defaultValue = {},
-    onChange,
-    esDocsBase
-  }: Props
-) => {
+export const StepSettings = React.memo(({ defaultValue = {}, onChange, esDocsBase }: Props) => {
   const { jsonContent, setJsonContent, error } = useJsonStep({
     defaultValue,
     onChange,

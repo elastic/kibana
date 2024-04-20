@@ -46,14 +46,12 @@ export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
-const FieldTopValuesBucket = (
-  {
-    'data-test-subj': dataTestSubject,
-    onAddFilter,
-    overrideFieldTopValueBar,
-    ...fieldTopValuesBucketOverridableProps
-  }: FieldTopValuesBucketProps
-) => {
+const FieldTopValuesBucket = ({
+  'data-test-subj': dataTestSubject,
+  onAddFilter,
+  overrideFieldTopValueBar,
+  ...fieldTopValuesBucketOverridableProps
+}: FieldTopValuesBucketProps) => {
   const overrides = overrideFieldTopValueBar
     ? overrideFieldTopValueBar(fieldTopValuesBucketOverridableProps)
     : ({} as FieldTopValuesBucketParams);

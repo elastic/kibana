@@ -136,17 +136,15 @@ export const LogColumnsConfigurationPanel = React.memo<{
   );
 });
 
-const LogColumnConfigurationPanel = (
-  {
-    logColumnConfiguration,
-    dragHandleProps,
-    onRemove
-  }: {
-    logColumnConfiguration: LogColumnConfiguration;
-    dragHandleProps: DragHandleProps;
-    onRemove: (logColumnConfiguration: LogColumnConfiguration) => void;
-  }
-) => {
+const LogColumnConfigurationPanel = ({
+  logColumnConfiguration,
+  dragHandleProps,
+  onRemove,
+}: {
+  logColumnConfiguration: LogColumnConfiguration;
+  dragHandleProps: DragHandleProps;
+  onRemove: (logColumnConfiguration: LogColumnConfiguration) => void;
+}) => {
   const removeColumn = useCallback(
     () => onRemove(logColumnConfiguration),
     [logColumnConfiguration, onRemove]
@@ -184,56 +182,54 @@ interface LogColumnConfigurationPanelProps<LogColumnConfigurationType> {
   onRemove: () => void;
 }
 
-const TimestampLogColumnConfigurationPanel = (
-  {
-    dragHandleProps,
-    onRemove
-  }: LogColumnConfigurationPanelProps<TimestampLogColumnConfiguration>
-) => (<ExplainedLogColumnConfigurationPanel
-  fieldName="Timestamp"
-  helpText={
-    <FormattedMessage
-      tagName="span"
-      id="xpack.infra.sourceConfiguration.timestampLogColumnDescription"
-      defaultMessage="This system field shows the log entry's time as determined by the {timestampSetting} field setting."
-      values={{
-        timestampSetting: <code>timestamp</code>,
-      }}
-    />
-  }
-  onRemove={onRemove}
-  dragHandleProps={dragHandleProps}
-/>);
+const TimestampLogColumnConfigurationPanel = ({
+  dragHandleProps,
+  onRemove,
+}: LogColumnConfigurationPanelProps<TimestampLogColumnConfiguration>) => (
+  <ExplainedLogColumnConfigurationPanel
+    fieldName="Timestamp"
+    helpText={
+      <FormattedMessage
+        tagName="span"
+        id="xpack.infra.sourceConfiguration.timestampLogColumnDescription"
+        defaultMessage="This system field shows the log entry's time as determined by the {timestampSetting} field setting."
+        values={{
+          timestampSetting: <code>timestamp</code>,
+        }}
+      />
+    }
+    onRemove={onRemove}
+    dragHandleProps={dragHandleProps}
+  />
+);
 
-const MessageLogColumnConfigurationPanel = (
-  {
-    dragHandleProps,
-    onRemove
-  }: LogColumnConfigurationPanelProps<MessageLogColumnConfiguration>
-) => (<ExplainedLogColumnConfigurationPanel
-  fieldName="Message"
-  helpText={
-    <FormattedMessage
-      tagName="span"
-      id="xpack.infra.sourceConfiguration.messageLogColumnDescription"
-      defaultMessage="This system field shows the log entry message as derived from the document fields."
-    />
-  }
-  onRemove={onRemove}
-  dragHandleProps={dragHandleProps}
-/>);
+const MessageLogColumnConfigurationPanel = ({
+  dragHandleProps,
+  onRemove,
+}: LogColumnConfigurationPanelProps<MessageLogColumnConfiguration>) => (
+  <ExplainedLogColumnConfigurationPanel
+    fieldName="Message"
+    helpText={
+      <FormattedMessage
+        tagName="span"
+        id="xpack.infra.sourceConfiguration.messageLogColumnDescription"
+        defaultMessage="This system field shows the log entry message as derived from the document fields."
+      />
+    }
+    onRemove={onRemove}
+    dragHandleProps={dragHandleProps}
+  />
+);
 
-const FieldLogColumnConfigurationPanel = (
-  {
-    dragHandleProps,
+const FieldLogColumnConfigurationPanel = ({
+  dragHandleProps,
 
-    logColumnConfiguration: {
-      fieldColumn: { field },
-    },
+  logColumnConfiguration: {
+    fieldColumn: { field },
+  },
 
-    onRemove
-  }: LogColumnConfigurationPanelProps<FieldLogColumnConfiguration>
-) => {
+  onRemove,
+}: LogColumnConfigurationPanelProps<FieldLogColumnConfiguration>) => {
   return (
     <EuiPanel
       color="subdued"
@@ -261,50 +257,48 @@ const FieldLogColumnConfigurationPanel = (
   );
 };
 
-const ExplainedLogColumnConfigurationPanel = (
-  {
-    fieldName,
-    helpText,
-    onRemove,
-    dragHandleProps
-  }: {
-    fieldName: React.ReactNode;
-    helpText: React.ReactNode;
-    onRemove: () => void;
-    dragHandleProps: DragHandleProps;
-  }
-) => (<EuiPanel
-  color="subdued"
-  data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
-  hasShadow={false}
->
-  <EuiFlexGroup alignItems="center">
-    <EuiFlexItem grow={false}>
-      <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
-        <EuiIcon type="grab" />
-      </div>
-    </EuiFlexItem>
-    <EuiFlexItem grow={1}>{fieldName}</EuiFlexItem>
-    <EuiFlexItem grow={3}>
-      <EuiText size="s" color="subdued">
-        {helpText}
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <RemoveLogColumnButton onClick={onRemove} columnDescription={String(fieldName)} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</EuiPanel>);
+const ExplainedLogColumnConfigurationPanel = ({
+  fieldName,
+  helpText,
+  onRemove,
+  dragHandleProps,
+}: {
+  fieldName: React.ReactNode;
+  helpText: React.ReactNode;
+  onRemove: () => void;
+  dragHandleProps: DragHandleProps;
+}) => (
+  <EuiPanel
+    color="subdued"
+    data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
+    hasShadow={false}
+  >
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow={false}>
+        <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
+          <EuiIcon type="grab" />
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem grow={1}>{fieldName}</EuiFlexItem>
+      <EuiFlexItem grow={3}>
+        <EuiText size="s" color="subdued">
+          {helpText}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <RemoveLogColumnButton onClick={onRemove} columnDescription={String(fieldName)} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+);
 
-const RemoveLogColumnButton = (
-  {
-    onClick,
-    columnDescription
-  }: {
-    onClick?: () => void;
-    columnDescription: string;
-  }
-) => {
+const RemoveLogColumnButton = ({
+  onClick,
+  columnDescription,
+}: {
+  onClick?: () => void;
+  columnDescription: string;
+}) => {
   const removeColumnLabel = i18n.translate(
     'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
     {

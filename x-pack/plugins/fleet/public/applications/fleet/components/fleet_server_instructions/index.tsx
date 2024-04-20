@@ -61,19 +61,17 @@ const useFleetServerTabs = (onClose: () => void) => {
   return { tabs: [quickStartTab, advancedTab], currentTab, setCurrentTab, currentTabContent };
 };
 
-const Header = (
-  {
-    isFlyout = false,
-    currentTab: currentTabId,
-    tabs,
-    onTabClick
-  }: {
-    isFlyout?: boolean;
-    currentTab: string;
-    tabs: Array<{ id: string; label: string; content: React.ReactNode }>;
-    onTabClick: (id: string) => void;
-  }
-) => {
+const Header = ({
+  isFlyout = false,
+  currentTab: currentTabId,
+  tabs,
+  onTabClick,
+}: {
+  isFlyout?: boolean;
+  currentTab: string;
+  tabs: Array<{ id: string; label: string; content: React.ReactNode }>;
+  onTabClick: (id: string) => void;
+}) => {
   const { docLinks } = useStartServices();
 
   return (
@@ -125,11 +123,7 @@ const Header = (
 };
 
 // Renders instructions inside of a flyout
-export const FleetServerFlyout = (
-  {
-    onClose
-  }: Props
-) => {
+export const FleetServerFlyout = ({ onClose }: Props) => {
   const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(onClose);
 
   return (

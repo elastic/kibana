@@ -25,17 +25,15 @@ interface ScriptingHelpFlyoutProps {
   onClose: () => void;
 }
 
-export const ScriptingHelpFlyout = (
-  {
-    isVisible = false,
-    onClose = () => {},
-    indexPattern,
-    lang,
-    name,
-    script,
-    executeScript
-  }: ScriptingHelpFlyoutProps
-) => {
+export const ScriptingHelpFlyout = ({
+  isVisible = false,
+  onClose = () => {},
+  indexPattern,
+  lang,
+  name,
+  script,
+  executeScript,
+}: ScriptingHelpFlyoutProps) => {
   const tabs = [
     {
       id: 'syntax',

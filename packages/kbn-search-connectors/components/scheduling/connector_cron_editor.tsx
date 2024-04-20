@@ -23,19 +23,17 @@ interface ConnectorCronEditorProps {
   setHasSyncTypeChanges: (state: boolean) => void;
   status: boolean;
 }
-export const ConnectorCronEditor = (
-  {
-    dataTelemetryIdPrefix,
-    disabled = false,
-    frequencyBlockList = ['MINUTE'],
-    hasSyncTypeChanges,
-    onReset,
-    onSave,
-    scheduling,
-    setHasSyncTypeChanges,
-    status
-  }: ConnectorCronEditorProps
-) => {
+export const ConnectorCronEditor = ({
+  dataTelemetryIdPrefix,
+  disabled = false,
+  frequencyBlockList = ['MINUTE'],
+  hasSyncTypeChanges,
+  onReset,
+  onSave,
+  scheduling,
+  setHasSyncTypeChanges,
+  status,
+}: ConnectorCronEditorProps) => {
   const [newInterval, setNewInterval] = useState(scheduling.interval);
   const [fieldToPreferredValueMap, setFieldToPreferredValueMap] = useState({});
   const [simpleCron, setSimpleCron] = useState<{

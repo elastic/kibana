@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -54,18 +53,16 @@ interface Props {
   onSelectChange: (updatedOptions: TagOptionItem[]) => void;
 }
 
-export const TagFilterPanel = (
-  {
-    isPopoverOpen,
-    isInUse,
-    options,
-    totalActiveFilters,
-    onFilterButtonClick,
-    onSelectChange,
-    closePopover,
-    clearTagSelection
-  }: Props
-) => {
+export const TagFilterPanel = ({
+  isPopoverOpen,
+  isInUse,
+  options,
+  totalActiveFilters,
+  onFilterButtonClick,
+  onSelectChange,
+  closePopover,
+  clearTagSelection,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
   const isSearchVisible = options.length > 10;

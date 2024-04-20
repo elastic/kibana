@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { OrdinalChartData } from '@kbn/ml-data-grid';
@@ -13,11 +12,7 @@ import { getTFPercentage } from '../../utils';
 import { ColumnChart } from './column_chart';
 import type { FieldDataRowProps } from '../../types';
 
-export const BooleanContentPreview = (
-  {
-    config
-  }: FieldDataRowProps
-) => {
+export const BooleanContentPreview = ({ config }: FieldDataRowProps) => {
   const chartData = useMemo(() => {
     const results = getTFPercentage(config);
     if (results) {

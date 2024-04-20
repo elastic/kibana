@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-export const HelpIcon = (
-  {
-    content
-  }: {
-    content: ReactNode | string;
-  }
-) => {
+export const HelpIcon = ({ content }: { content: ReactNode | string }) => {
   return (
     <EuiToolTip position="top" content={content}>
       <EuiIcon

@@ -19,52 +19,46 @@ interface Props {
   onChange: ({ minute, hour }: { minute?: string; hour?: string }) => void;
 }
 
-export const CronDaily = (
-  {
-    minute,
-    minuteOptions,
-    hour,
-    hourOptions,
-    onChange
-  }: Props
-) => (<Fragment>
-  <EuiFormRow
-    label={
-      <FormattedMessage id="esUi.cronEditor.cronDaily.fieldTimeLabel" defaultMessage="Time" />
-    }
-    fullWidth
-    data-test-subj="cronFrequencyConfiguration"
-  >
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiSelect
-          options={hourOptions}
-          value={hour}
-          aria-label={i18n.translate('esUi.cronEditor.cronDaily.hourSelectLabel', {
-            defaultMessage: 'Hour',
-          })}
-          onChange={(e) => onChange({ hour: e.target.value })}
-          fullWidth
-          prepend={i18n.translate('esUi.cronEditor.cronDaily.fieldHour.textAtLabel', {
-            defaultMessage: 'At',
-          })}
-          data-test-subj="cronFrequencyDailyHourSelect"
-        />
-      </EuiFlexItem>
+export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }: Props) => (
+  <Fragment>
+    <EuiFormRow
+      label={
+        <FormattedMessage id="esUi.cronEditor.cronDaily.fieldTimeLabel" defaultMessage="Time" />
+      }
+      fullWidth
+      data-test-subj="cronFrequencyConfiguration"
+    >
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            options={hourOptions}
+            value={hour}
+            aria-label={i18n.translate('esUi.cronEditor.cronDaily.hourSelectLabel', {
+              defaultMessage: 'Hour',
+            })}
+            onChange={(e) => onChange({ hour: e.target.value })}
+            fullWidth
+            prepend={i18n.translate('esUi.cronEditor.cronDaily.fieldHour.textAtLabel', {
+              defaultMessage: 'At',
+            })}
+            data-test-subj="cronFrequencyDailyHourSelect"
+          />
+        </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiSelect
-          options={minuteOptions}
-          value={minute}
-          aria-label={i18n.translate('esUi.cronEditor.cronDaily.minuteSelectLabel', {
-            defaultMessage: 'Minute',
-          })}
-          onChange={(e) => onChange({ minute: e.target.value })}
-          fullWidth
-          prepend=":"
-          data-test-subj="cronFrequencyDailyMinuteSelect"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFormRow>
-</Fragment>);
+        <EuiFlexItem>
+          <EuiSelect
+            options={minuteOptions}
+            value={minute}
+            aria-label={i18n.translate('esUi.cronEditor.cronDaily.minuteSelectLabel', {
+              defaultMessage: 'Minute',
+            })}
+            onChange={(e) => onChange({ minute: e.target.value })}
+            fullWidth
+            prepend=":"
+            data-test-subj="cronFrequencyDailyMinuteSelect"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  </Fragment>
+);

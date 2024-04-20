@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -27,13 +26,11 @@ interface StartActionNameProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const StartActionName = (
-  {
-    canStartStopDataFrameAnalytics,
-    isDisabled,
-    item
-  }: StartActionNameProps
-) => {
+export const StartActionName = ({
+  canStartStopDataFrameAnalytics,
+  isDisabled,
+  item,
+}: StartActionNameProps) => {
   if (isDisabled) {
     return (
       <EuiToolTip

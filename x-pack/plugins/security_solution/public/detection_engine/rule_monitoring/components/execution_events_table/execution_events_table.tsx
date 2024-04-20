@@ -38,11 +38,7 @@ interface ExecutionEventsTableProps {
   ruleId: string;
 }
 
-const ExecutionEventsTableComponent = (
-  {
-    ruleId
-  }: ExecutionEventsTableProps
-) => {
+const ExecutionEventsTableComponent = ({ ruleId }: ExecutionEventsTableProps) => {
   const getItemId = useCallback((item: RuleExecutionEvent): string => {
     return `${item.timestamp} ${item.sequence}`;
   }, []);

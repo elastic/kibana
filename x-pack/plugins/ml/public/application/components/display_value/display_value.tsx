@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
 const MAX_CHARS = 12;
 
-export const DisplayValue = (
-  {
-    value
-  }: {
-    value: any;
-  }
-) => {
+export const DisplayValue = ({ value }: { value: any }) => {
   const length = String(value).length;
 
   if (length <= MAX_CHARS) {

@@ -51,58 +51,58 @@ interface Props {
   trailingControlColumns: ControlColumnProps[];
 }
 
-const EventsComponent = (
-  {
-    actionsColumnWidth,
-    columnHeaders,
-    containerRef,
-    data,
-    eventIdToNoteIds,
-    id,
-    isEventViewer = false,
-    lastFocusedAriaColindex,
-    loadingEventIds,
-    onRowSelected,
-    pinnedEventIds,
-    refetch,
-    onRuleChange,
-    renderCellValue,
-    rowRenderers,
-    selectedEventIds,
-    showCheckboxes,
-    tabType,
-    leadingControlColumns,
-    trailingControlColumns
-  }: Props
-) => (<EventsTbody data-test-subj="events">
-  {data.map((event, i) => (
-    <StatefulEvent
-      actionsColumnWidth={actionsColumnWidth}
-      ariaRowindex={i + ARIA_ROW_INDEX_OFFSET}
-      columnHeaders={columnHeaders}
-      containerRef={containerRef}
-      event={event}
-      eventIdToNoteIds={eventIdToNoteIds}
-      isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
-      isEventViewer={isEventViewer}
-      key={`${id}_${tabType}_${event._id}_${event._index}_${
-        !isEmpty(event.ecs.eql?.sequenceNumber) ? event.ecs.eql?.sequenceNumber : ''
-      }`}
-      lastFocusedAriaColindex={lastFocusedAriaColindex}
-      loadingEventIds={loadingEventIds}
-      onRowSelected={onRowSelected}
-      renderCellValue={renderCellValue}
-      refetch={refetch}
-      rowRenderers={rowRenderers}
-      onRuleChange={onRuleChange}
-      selectedEventIds={selectedEventIds}
-      showCheckboxes={showCheckboxes}
-      tabType={tabType}
-      timelineId={id}
-      leadingControlColumns={leadingControlColumns}
-      trailingControlColumns={trailingControlColumns}
-    />
-  ))}
-</EventsTbody>);
+const EventsComponent = ({
+  actionsColumnWidth,
+  columnHeaders,
+  containerRef,
+  data,
+  eventIdToNoteIds,
+  id,
+  isEventViewer = false,
+  lastFocusedAriaColindex,
+  loadingEventIds,
+  onRowSelected,
+  pinnedEventIds,
+  refetch,
+  onRuleChange,
+  renderCellValue,
+  rowRenderers,
+  selectedEventIds,
+  showCheckboxes,
+  tabType,
+  leadingControlColumns,
+  trailingControlColumns,
+}: Props) => (
+  <EventsTbody data-test-subj="events">
+    {data.map((event, i) => (
+      <StatefulEvent
+        actionsColumnWidth={actionsColumnWidth}
+        ariaRowindex={i + ARIA_ROW_INDEX_OFFSET}
+        columnHeaders={columnHeaders}
+        containerRef={containerRef}
+        event={event}
+        eventIdToNoteIds={eventIdToNoteIds}
+        isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
+        isEventViewer={isEventViewer}
+        key={`${id}_${tabType}_${event._id}_${event._index}_${
+          !isEmpty(event.ecs.eql?.sequenceNumber) ? event.ecs.eql?.sequenceNumber : ''
+        }`}
+        lastFocusedAriaColindex={lastFocusedAriaColindex}
+        loadingEventIds={loadingEventIds}
+        onRowSelected={onRowSelected}
+        renderCellValue={renderCellValue}
+        refetch={refetch}
+        rowRenderers={rowRenderers}
+        onRuleChange={onRuleChange}
+        selectedEventIds={selectedEventIds}
+        showCheckboxes={showCheckboxes}
+        tabType={tabType}
+        timelineId={id}
+        leadingControlColumns={leadingControlColumns}
+        trailingControlColumns={trailingControlColumns}
+      />
+    ))}
+  </EventsTbody>
+);
 
 export const Events = React.memo(EventsComponent);

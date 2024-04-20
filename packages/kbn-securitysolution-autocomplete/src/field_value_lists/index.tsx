@@ -44,22 +44,20 @@ export interface AutocompleteListsData {
   largeLists: ListSchema[];
 }
 
-export const AutocompleteFieldListsComponent = (
-  {
-    httpService,
-    isClearable = false,
-    isDisabled = false,
-    isLoading = false,
-    onChange,
-    placeholder,
-    rowLabel,
-    selectedField,
-    selectedValue,
-    allowLargeValueLists = false,
-    'aria-label': ariaLabel,
-    showValueListModal
-  }: AutocompleteFieldListsProps
-): JSX.Element => {
+export const AutocompleteFieldListsComponent = ({
+  httpService,
+  isClearable = false,
+  isDisabled = false,
+  isLoading = false,
+  onChange,
+  placeholder,
+  rowLabel,
+  selectedField,
+  selectedValue,
+  allowLargeValueLists = false,
+  'aria-label': ariaLabel,
+  showValueListModal,
+}: AutocompleteFieldListsProps): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
     smallLists: [],

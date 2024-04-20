@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -60,15 +59,13 @@ const THREADS_MAX_EXPONENT = 5;
 /**
  * Form for setting threading params.
  */
-export const DeploymentSetup = (
-  {
-    config,
-    onConfigChange,
-    errors,
-    isUpdate,
-    deploymentsParams
-  }: DeploymentSetupProps
-) => {
+export const DeploymentSetup = ({
+  config,
+  onConfigChange,
+  errors,
+  isUpdate,
+  deploymentsParams,
+}: DeploymentSetupProps) => {
   const {
     total_ml_processors: totalMlProcessors,
     max_single_ml_node_processors: maxSingleMlNodeProcessors,
@@ -367,16 +364,14 @@ interface StartDeploymentModalProps {
 /**
  * Modal window wrapper for {@link DeploymentSetup}
  */
-export const StartUpdateDeploymentModal = (
-  {
-    model,
-    onConfigChange,
-    onClose,
-    startModelDeploymentDocUrl,
-    initialParams,
-    modelAndDeploymentIds
-  }: StartDeploymentModalProps
-) => {
+export const StartUpdateDeploymentModal = ({
+  model,
+  onConfigChange,
+  onClose,
+  startModelDeploymentDocUrl,
+  initialParams,
+  modelAndDeploymentIds,
+}: StartDeploymentModalProps) => {
   const isUpdate = !!initialParams;
 
   const { total_ml_processors: totalMlProcessors } = getNewJobLimits();

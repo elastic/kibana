@@ -33,13 +33,7 @@ import { DeleteDomainModalLogic } from '../domain_management/delete_domain_modal
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
 import { CrawlerDomainDetailTabs } from './crawler_domain_detail_tabs';
 
-export const CrawlerDomainDetail = (
-  {
-    domainId
-  }: {
-    domainId: string;
-  }
-) => {
+export const CrawlerDomainDetail = ({ domainId }: { domainId: string }) => {
   const { indexName } = useValues(IndexNameLogic);
   const crawlerDomainDetailLogic = CrawlerDomainDetailLogic({ domainId });
   const { domain, getLoading } = useValues(crawlerDomainDetailLogic);

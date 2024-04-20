@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
 import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
@@ -28,13 +27,11 @@ interface Props {
   title: string;
 }
 
-export const JobConfigErrorCallout = (
-  {
-    jobCapsServiceErrorMessage,
-    jobConfigErrorMessage,
-    title
-  }: Props
-) => {
+export const JobConfigErrorCallout = ({
+  jobCapsServiceErrorMessage,
+  jobConfigErrorMessage,
+  title,
+}: Props) => {
   const {
     services: {
       application: { getUrlForApp },

@@ -588,17 +588,15 @@ function getConnectorName(name: string, connector: ActionConnector): string {
   return connector.isDeprecated ? `${name} ${deprecatedMessage}` : name;
 }
 
-const DeleteOperation = (
-  {
-    item,
-    canDelete,
-    onDelete
-  }: {
-    item: ActionConnectorTableItem;
-    canDelete: boolean;
-    onDelete: () => void;
-  }
-) => {
+const DeleteOperation = ({
+  item,
+  canDelete,
+  onDelete,
+}: {
+  item: ActionConnectorTableItem;
+  canDelete: boolean;
+  onDelete: () => void;
+}) => {
   if (item.isPreconfigured) {
     return (
       <EuiFlexItem grow={false}>
@@ -645,17 +643,15 @@ const DeleteOperation = (
   );
 };
 
-const RunOperation = (
-  {
-    item,
-    canExecute,
-    onRun
-  }: {
-    item: ActionConnectorTableItem;
-    canExecute: boolean;
-    onRun: () => void;
-  }
-) => {
+const RunOperation = ({
+  item,
+  canExecute,
+  onRun,
+}: {
+  item: ActionConnectorTableItem;
+  canExecute: boolean;
+  onRun: () => void;
+}) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip

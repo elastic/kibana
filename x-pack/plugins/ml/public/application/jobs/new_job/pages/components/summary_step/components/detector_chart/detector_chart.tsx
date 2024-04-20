@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';

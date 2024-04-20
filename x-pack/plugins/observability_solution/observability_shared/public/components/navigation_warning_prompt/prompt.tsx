@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigationWarningPrompt } from './context';
 
 interface Props {
   prompt?: string;
 }
 
-export const Prompt = (
-  {
-    prompt
-  }: Props
-) => {
+export const Prompt = ({ prompt }: Props) => {
   const { setPrompt } = useNavigationWarningPrompt();
 
   useEffect(() => {

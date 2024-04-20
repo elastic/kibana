@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -123,11 +123,7 @@ const i18nTexts = {
   },
 };
 
-const MigrateSystemIndicesStep = (
-  {
-    setIsComplete
-  }: Props
-) => {
+const MigrateSystemIndicesStep = ({ setIsComplete }: Props) => {
   const { beginSystemIndicesMigration, startMigrationStatus, migrationStatus, setShowFlyout } =
     useMigrateSystemIndices();
 

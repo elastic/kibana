@@ -17,15 +17,13 @@ interface Props {
   dataTestSubjPrefix?: string;
 }
 
-const RemovableItemComponent = (
-  {
-    children,
-    tooltipContent,
-    buttonAriaLabel,
-    onRemoveItem,
-    dataTestSubjPrefix = ''
-  }: Props
-) => {
+const RemovableItemComponent = ({
+  children,
+  tooltipContent,
+  buttonAriaLabel,
+  onRemoveItem,
+  dataTestSubjPrefix = '',
+}: Props) => {
   const { permissions } = useCasesContext();
   const [isHovering, setIsHovering] = useState(false);
 

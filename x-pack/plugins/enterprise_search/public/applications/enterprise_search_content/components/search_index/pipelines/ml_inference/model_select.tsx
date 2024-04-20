@@ -39,17 +39,15 @@ type EuiSelectableOptionWithMlModelData = EuiSelectableOption & {
   data: MlModel;
 };
 
-export const DeployModelButton = (
-  {
-    onClick,
-    modelId,
-    disabled
-  }: {
-    onClick: () => void;
-    modelId: string;
-    disabled: boolean;
-  }
-) => {
+export const DeployModelButton = ({
+  onClick,
+  modelId,
+  disabled,
+}: {
+  onClick: () => void;
+  modelId: string;
+  disabled: boolean;
+}) => {
   return (
     <EuiButton
       onClick={onClick}
@@ -97,17 +95,15 @@ export const ModelDeployingButton = () => {
   );
 };
 
-export const StartModelButton = (
-  {
-    onClick,
-    modelId,
-    disabled
-  }: {
-    onClick: () => void;
-    modelId: string;
-    disabled: boolean;
-  }
-) => {
+export const StartModelButton = ({
+  onClick,
+  modelId,
+  disabled,
+}: {
+  onClick: () => void;
+  modelId: string;
+  disabled: boolean;
+}) => {
   return (
     <EuiButton
       onClick={onClick}

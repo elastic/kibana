@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import React, { useContext, FC } from 'react';
+import React, { useContext } from 'react';
 import { UptimeThemeContext } from '../../contexts';
 import { JourneyStep } from '../../../../common/runtime_types/ping';
 
@@ -14,11 +14,7 @@ interface Props {
   event: JourneyStep;
 }
 
-export const ConsoleEvent = (
-  {
-    event
-  }: Props
-) => {
+export const ConsoleEvent = ({ event }: Props) => {
   const {
     colors: { danger },
   } = useContext(UptimeThemeContext);

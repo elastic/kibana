@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Chart,
@@ -60,13 +59,7 @@ const TYPE_LABELS_INVERTED = Object.entries(TYPE_LABELS).reduce<Record<MlSavedOb
   {} as Record<MlSavedObjectType, string>
 );
 
-export const JobMemoryTreeMap = (
-  {
-    node,
-    type,
-    height
-  }: Props
-) => {
+export const JobMemoryTreeMap = ({ node, type, height }: Props) => {
   const {
     services: { theme: themeService },
   } = useMlKibana();

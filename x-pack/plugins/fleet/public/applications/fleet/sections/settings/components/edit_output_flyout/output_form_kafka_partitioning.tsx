@@ -38,11 +38,7 @@ const kafkaPartitioningOptions = [
   },
 ];
 
-export const OutputFormKafkaPartitioning = (
-  props: {
-    inputs: OutputFormInputsType;
-  }
-) => {
+export const OutputFormKafkaPartitioning = (props: { inputs: OutputFormInputsType }) => {
   const { inputs } = props;
 
   const renderPartitioning = () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useCallback } from 'react';
+import React, { useContext, useCallback } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 // @ts-expect-error untyped local

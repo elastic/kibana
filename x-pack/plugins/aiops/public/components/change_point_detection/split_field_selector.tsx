@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
@@ -18,66 +17,62 @@ interface SplitFieldSelectorProps {
   inline?: boolean;
 }
 
-export const SplitFieldSelector = React.memo((
-  {
-    value,
-    onChange,
-    inline = true
-  }: SplitFieldSelectorProps
-) => {
-  const { fieldStats } = useAiopsAppContext();
-  const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
+export const SplitFieldSelector = React.memo(
+  ({ value, onChange, inline = true }: SplitFieldSelectorProps) => {
+    const { fieldStats } = useAiopsAppContext();
+    const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
 
-  const { splitFieldsOptions } = useChangePointDetectionControlsContext();
+    const { splitFieldsOptions } = useChangePointDetectionControlsContext();
 
-  const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    return [
-      {
-        value: undefined,
-        label: i18n.translate('xpack.aiops.changePointDetection.notSelectedSplitFieldLabel', {
-          defaultMessage: '--- Not selected ---',
-        }),
+    const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+      return [
+        {
+          value: undefined,
+          label: i18n.translate('xpack.aiops.changePointDetection.notSelectedSplitFieldLabel', {
+            defaultMessage: '--- Not selected ---',
+          }),
+        },
+        ...splitFieldsOptions.map((v) => ({
+          value: v.name,
+          label: v.displayName,
+          ...(v.name ? { field: { id: v.name, type: v?.type } } : {}),
+        })),
+      ];
+    }, [splitFieldsOptions]);
+
+    const selection = options.filter((v) => v.value === value);
+
+    const onChangeCallback = useCallback(
+      (selectedOptions: EuiComboBoxOptionOption[]) => {
+        const option = selectedOptions[0];
+        const newValue = option?.value as string;
+        onChange(newValue);
+        if (closeFlyout) {
+          closeFlyout();
+        }
       },
-      ...splitFieldsOptions.map((v) => ({
-        value: v.name,
-        label: v.displayName,
-        ...(v.name ? { field: { id: v.name, type: v?.type } } : {}),
-      })),
-    ];
-  }, [splitFieldsOptions]);
+      [onChange, closeFlyout]
+    );
 
-  const selection = options.filter((v) => v.value === value);
+    const label = i18n.translate('xpack.aiops.changePointDetection.selectSpitFieldLabel', {
+      defaultMessage: 'Split field',
+    });
 
-  const onChangeCallback = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      const option = selectedOptions[0];
-      const newValue = option?.value as string;
-      onChange(newValue);
-      if (closeFlyout) {
-        closeFlyout();
-      }
-    },
-    [onChange, closeFlyout]
-  );
-
-  const label = i18n.translate('xpack.aiops.changePointDetection.selectSpitFieldLabel', {
-    defaultMessage: 'Split field',
-  });
-
-  return (
-    <EuiFormRow fullWidth label={inline ? undefined : label}>
-      <EuiComboBox
-        fullWidth
-        compressed
-        prepend={inline ? label : undefined}
-        singleSelection={{ asPlainText: true }}
-        options={options}
-        selectedOptions={selection}
-        onChange={onChangeCallback}
-        isClearable
-        data-test-subj="aiopsChangePointSplitField"
-        renderOption={renderOption}
-      />
-    </EuiFormRow>
-  );
-});
+    return (
+      <EuiFormRow fullWidth label={inline ? undefined : label}>
+        <EuiComboBox
+          fullWidth
+          compressed
+          prepend={inline ? label : undefined}
+          singleSelection={{ asPlainText: true }}
+          options={options}
+          selectedOptions={selection}
+          onChange={onChangeCallback}
+          isClearable
+          data-test-subj="aiopsChangePointSplitField"
+          renderOption={renderOption}
+        />
+      </EuiFormRow>
+    );
+  }
+);

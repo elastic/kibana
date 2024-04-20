@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
@@ -58,11 +58,7 @@ interface SetChromeProps {
   trail?: BreadcrumbTrail;
 }
 
-export const SetSearchChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetSearchChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -79,11 +75,7 @@ export const SetSearchChrome = (
   return null;
 };
 
-export const SetAnalyticsChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetAnalyticsChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -100,11 +92,7 @@ export const SetAnalyticsChrome = (
   return null;
 };
 
-export const SetElasticsearchChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetElasticsearchChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -121,11 +109,7 @@ export const SetElasticsearchChrome = (
   return null;
 };
 
-export const SetAppSearchChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetAppSearchChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -142,11 +126,7 @@ export const SetAppSearchChrome = (
   return null;
 };
 
-export const SetAiSearchChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetAiSearchChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -163,11 +143,7 @@ export const SetAiSearchChrome = (
   return null;
 };
 
-export const SetWorkplaceSearchChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetWorkplaceSearchChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -184,11 +160,7 @@ export const SetWorkplaceSearchChrome = (
   return null;
 };
 
-export const SetEnterpriseSearchContentChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetEnterpriseSearchContentChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -205,11 +177,7 @@ export const SetEnterpriseSearchContentChrome = (
   return null;
 };
 
-export const SetSearchExperiencesChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetSearchExperiencesChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -226,11 +194,7 @@ export const SetSearchExperiencesChrome = (
   return null;
 };
 
-export const SetEnterpriseSearchApplicationsChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetEnterpriseSearchApplicationsChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -248,11 +212,7 @@ export const SetEnterpriseSearchApplicationsChrome = (
   return null;
 };
 
-export const SetVectorSearchChrome = (
-  {
-    trail = []
-  }: SetChromeProps
-) => {
+export const SetVectorSearchChrome = ({ trail = [] }: SetChromeProps) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);

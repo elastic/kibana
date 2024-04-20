@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -37,14 +36,7 @@ interface Props {
   ingestPipelineId: string;
   closeFlyout(): void;
 }
-export const FilebeatConfigFlyout = (
-  {
-    index,
-    results,
-    ingestPipelineId,
-    closeFlyout
-  }: Props
-) => {
+export const FilebeatConfigFlyout = ({ index, results, ingestPipelineId, closeFlyout }: Props) => {
   const [fileBeatConfig, setFileBeatConfig] = useState('');
   const [username, setUsername] = useState<string | null>(null);
   const {
@@ -104,17 +96,15 @@ export const FilebeatConfigFlyout = (
   );
 };
 
-const Contents = (
-  {
-    value,
-    index,
-    username
-  }: {
-    value: string;
-    index: string;
-    username: string | null;
-  }
-) => {
+const Contents = ({
+  value,
+  index,
+  username,
+}: {
+  value: string;
+  index: string;
+  username: string | null;
+}) => {
   return (
     <EuiFlexItem data-test-subj="fileDataVisFilebeatConfigPanel">
       <EuiTitle size="s">

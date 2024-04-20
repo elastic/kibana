@@ -15,19 +15,17 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const TlsTableManage = manageQuery(TlsTable);
 
-const TlsQueryTabBodyComponent = (
-  {
-    endDate,
-    filterQuery,
-    flowTarget,
-    indexNames,
-    ip = '',
-    setQuery,
-    skip,
-    startDate,
-    type
-  }: FTQueryTabBodyProps
-) => {
+const TlsQueryTabBodyComponent = ({
+  endDate,
+  filterQuery,
+  flowTarget,
+  indexNames,
+  ip = '',
+  setQuery,
+  skip,
+  startDate,
+  type,
+}: FTQueryTabBodyProps) => {
   const queryId = `${ID}-${type}`;
   const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);

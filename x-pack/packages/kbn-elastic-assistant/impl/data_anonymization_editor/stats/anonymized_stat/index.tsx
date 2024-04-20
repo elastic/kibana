@@ -20,13 +20,7 @@ interface Props {
   inline?: boolean;
 }
 
-const AnonymizedStatComponent = (
-  {
-    anonymized,
-    isDataAnonymizable,
-    inline
-  }: Props
-) => {
+const AnonymizedStatComponent = ({ anonymized, isDataAnonymizable, inline }: Props) => {
   const color = useMemo(() => getColor(isDataAnonymizable), [isDataAnonymizable]);
 
   const tooltipContent = useMemo(

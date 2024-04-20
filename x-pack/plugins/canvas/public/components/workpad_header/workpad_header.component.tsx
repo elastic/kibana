@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
@@ -66,17 +66,15 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const WorkpadHeader = (
-  {
-    isWriteable,
-    canUserWrite,
-    commit,
-    onSetWriteable = () => {},
-    renderEmbedPanel,
-    elements,
-    addElement
-  }: Props
-) => {
+export const WorkpadHeader = ({
+  isWriteable,
+  canUserWrite,
+  commit,
+  onSetWriteable = () => {},
+  renderEmbedPanel,
+  elements,
+  addElement,
+}: Props) => {
   const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const hideEmbedPanel = () => setEmbedPanelVisible(false);
   const showEmbedPanel = () => setEmbedPanelVisible(true);

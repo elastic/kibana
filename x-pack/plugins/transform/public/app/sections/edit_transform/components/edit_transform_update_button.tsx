@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
 
@@ -27,11 +27,7 @@ interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
 }
 
-export const EditTransformUpdateButton = (
-  {
-    closeFlyout
-  }: EditTransformUpdateButtonProps
-) => {
+export const EditTransformUpdateButton = ({ closeFlyout }: EditTransformUpdateButtonProps) => {
   const { config } = useEditTransformFlyoutContext();
   const isFormValid = useIsFormValid();
   const isFormTouched = useIsFormTouched();

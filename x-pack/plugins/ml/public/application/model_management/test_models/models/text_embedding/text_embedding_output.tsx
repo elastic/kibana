@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,13 +23,7 @@ export const getTextEmbeddingOutputComponent = (inferrer: TextEmbeddingInference
   <TextEmbeddingOutput inferrer={inferrer} />
 );
 
-const TextEmbeddingOutput = (
-  {
-    inferrer
-  }: {
-    inferrer: TextEmbeddingInference;
-  }
-) => {
+const TextEmbeddingOutput = ({ inferrer }: { inferrer: TextEmbeddingInference }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -48,15 +41,7 @@ const TextEmbeddingOutput = (
   );
 };
 
-const TextEmbedding = (
-  {
-    value,
-    inputText
-  }: {
-    value: string;
-    inputText: string;
-  }
-) => {
+const TextEmbedding = ({ value, inputText }: { value: string; inputText: string }) => {
   return (
     <>
       <EuiText size="s">{inputText}</EuiText>

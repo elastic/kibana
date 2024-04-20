@@ -14,23 +14,22 @@ interface LayoutProps {
   actionSection?: React.ReactNode;
 }
 
-export const NoDataLayout = withRouter<
-  any,
-  React.FunctionComponent<LayoutProps>
->(({ actionSection, title, children }: React.PropsWithChildren<LayoutProps>) => {
-  return (
-    <EuiFlexGroup justifyContent="spaceAround">
-      <EuiFlexItem grow={false}>
-        <EuiPageSection color="transparent">
-          <EuiEmptyPrompt
-            color="plain"
-            iconType="logoBeats"
-            title={<h2>{title}</h2>}
-            body={children}
-            actions={actionSection}
-          />
-        </EuiPageSection>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}) as any;
+export const NoDataLayout = withRouter<any, React.FunctionComponent<LayoutProps>>(
+  ({ actionSection, title, children }: React.PropsWithChildren<LayoutProps>) => {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiPageSection color="transparent">
+            <EuiEmptyPrompt
+              color="plain"
+              iconType="logoBeats"
+              title={<h2>{title}</h2>}
+              body={children}
+              actions={actionSection}
+            />
+          </EuiPageSection>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+) as any;

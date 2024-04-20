@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { SearchableSnapshotField } from '../shared_fields';
 import { Phase } from '../phase';

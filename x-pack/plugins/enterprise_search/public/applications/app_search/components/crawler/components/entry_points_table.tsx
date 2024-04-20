@@ -28,13 +28,7 @@ interface EntryPointsTableProps {
   items: EntryPoint[];
 }
 
-export const EntryPointsTable = (
-  {
-    domain,
-    engineName,
-    items
-  }: EntryPointsTableProps
-) => {
+export const EntryPointsTable = ({ domain, engineName, items }: EntryPointsTableProps) => {
   const { onAdd, onDelete, onUpdate } = useActions(EntryPointsTableLogic);
   const field = 'value';
 

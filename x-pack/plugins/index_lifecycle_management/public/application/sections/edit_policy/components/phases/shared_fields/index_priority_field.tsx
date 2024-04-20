@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 
@@ -23,19 +23,16 @@ interface Props {
   phase: PhaseExceptDelete;
 }
 
-export const IndexPriorityField = (
-  {
-    phase
-  }: Props
-) => {
+export const IndexPriorityField = ({ phase }: Props) => {
   const { policy, isNewPolicy } = useEditPolicyContext();
 
   const initialToggleValue = useMemo<boolean>(() => {
     return (
       // enable index priority if it's set
-      (// enable index priority for new phases
+      // enable index priority for new phases
       isNewPolicy || // enable index priority for new policies
-      !policy.phases[phase]?.actions || policy.phases[phase]?.actions?.set_priority != null)
+      !policy.phases[phase]?.actions ||
+      policy.phases[phase]?.actions?.set_priority != null
     );
   }, [isNewPolicy, policy.phases, phase]);
 

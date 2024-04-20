@@ -50,20 +50,16 @@ const MlJobEuiButton = styled(EuiButton)`
   margin-top: 20px;
 `;
 
-const JobDisplay = (
-  {
-    description,
-    name,
-    id
-  }: MlJobValue
-) => (<JobDisplayContainer>
-  <strong>{name ?? id}</strong>
-  <EuiToolTip content={description}>
-    <EuiText size="xs" color="subdued">
-      <p>{description}</p>
-    </EuiText>
-  </EuiToolTip>
-</JobDisplayContainer>);
+const JobDisplay = ({ description, name, id }: MlJobValue) => (
+  <JobDisplayContainer>
+    <strong>{name ?? id}</strong>
+    <EuiToolTip content={description}>
+      <EuiText size="xs" color="subdued">
+        <p>{description}</p>
+      </EuiText>
+    </EuiToolTip>
+  </JobDisplayContainer>
+);
 
 interface MlJobSelectProps {
   describedByIds: string[];
@@ -80,12 +76,7 @@ const renderJobOption = (option: MlJobOption) => (
   />
 );
 
-export const MlJobSelect = (
-  {
-    describedByIds = [],
-    field
-  }: MlJobSelectProps
-) => {
+export const MlJobSelect = ({ describedByIds = [], field }: MlJobSelectProps) => {
   const jobIds = field.value as string[];
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { loading, jobs } = useSecurityJobs();

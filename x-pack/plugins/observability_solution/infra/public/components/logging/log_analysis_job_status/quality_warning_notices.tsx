@@ -25,17 +25,15 @@ import {
 } from '../../../../common/log_analysis';
 import { RecreateJobCallout } from './recreate_job_callout';
 
-export const CategoryQualityWarnings = (
-  {
-    hasSetupCapabilities,
-    onRecreateMlJob,
-    qualityWarnings
-  }: {
-    hasSetupCapabilities: boolean;
-    onRecreateMlJob: () => void;
-    qualityWarnings: CategoryQualityWarning[];
-  }
-) => {
+export const CategoryQualityWarnings = ({
+  hasSetupCapabilities,
+  onRecreateMlJob,
+  qualityWarnings,
+}: {
+  hasSetupCapabilities: boolean;
+  onRecreateMlJob: () => void;
+  qualityWarnings: CategoryQualityWarning[];
+}) => {
   const [detailAccordionId] = useState(htmlIdGenerator()());
 
   const categoryQualityWarningsByJob = groupBy(qualityWarnings, 'jobId');
@@ -102,13 +100,11 @@ const categoryQualityWarningCalloutTitle = i18n.translate(
   }
 );
 
-export const CategoryQualityWarningReasonDescription = (
-  {
-    reason
-  }: {
-    reason: CategoryQualityWarningReason;
-  }
-) => {
+export const CategoryQualityWarningReasonDescription = ({
+  reason,
+}: {
+  reason: CategoryQualityWarningReason;
+}) => {
   switch (reason.type) {
     case 'singleCategory':
       return (

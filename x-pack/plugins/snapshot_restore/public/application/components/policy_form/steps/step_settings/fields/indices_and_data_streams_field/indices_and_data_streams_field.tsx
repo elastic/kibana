@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -53,16 +53,14 @@ interface Props {
  * they share an array "indices" in the snapshot lifecycle policy config. See
  * this github issue for progress: https://github.com/elastic/elasticsearch/issues/58474
  */
-export const IndicesAndDataStreamsField = (
-  {
-    isManagedPolicy,
-    dataStreams,
-    indices,
-    policy,
-    onUpdate: _onUpdate,
-    errors
-  }: Props
-) => {
+export const IndicesAndDataStreamsField = ({
+  isManagedPolicy,
+  dataStreams,
+  indices,
+  policy,
+  onUpdate: _onUpdate,
+  errors,
+}: Props) => {
   const { i18n } = useServices();
   const { config = {} } = policy;
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,15 +21,13 @@ import type { CombinedJob } from '../../../../../../../../common/types/anomaly_d
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { useMlApiContext } from '../../../../../../contexts/kibana';
 
-export const DatafeedPreview = (
-  {
-    combinedJob,
-    heightOffset = 0
-  }: {
-    combinedJob: CombinedJob | null;
-    heightOffset?: number;
-  }
-) => {
+export const DatafeedPreview = ({
+  combinedJob,
+  heightOffset = 0,
+}: {
+  combinedJob: CombinedJob | null;
+  heightOffset?: number;
+}) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApiContext();

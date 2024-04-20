@@ -62,15 +62,12 @@ test('<Provider> passes state to connect()()', () => {
   const stateContainer = createStateContainer({ hello: 'Bob' });
   const { Provider, connect } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  const Demo = (
-    {
-      message,
-      stop
-    }: Props1
-  ) => (<>
-    {message}
-    {stop}
-  </>);
+  const Demo = ({ message, stop }: Props1) => (
+    <>
+      {message}
+      {stop}
+    </>
+  );
   const mergeProps = ({ hello }: State1) => ({ message: hello });
   const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 

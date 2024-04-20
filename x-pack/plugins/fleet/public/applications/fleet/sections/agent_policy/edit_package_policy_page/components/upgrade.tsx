@@ -149,15 +149,13 @@ const ReadyToUpgradeCallOut = ({
   );
 };
 
-export const UpgradeStatusCallout = (
-  {
-    dryRunData,
-    newSecrets
-  }: {
-    dryRunData: UpgradePackagePolicyDryRunResponse;
-    newSecrets: RegistryVarsEntry[];
-  }
-) => {
+export const UpgradeStatusCallout = ({
+  dryRunData,
+  newSecrets,
+}: {
+  dryRunData: UpgradePackagePolicyDryRunResponse;
+  newSecrets: RegistryVarsEntry[];
+}) => {
   const [isPreviousVersionFlyoutOpen, setIsPreviousVersionFlyoutOpen] = useState<boolean>(false);
 
   if (!dryRunData) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { RouteComponentProps, Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
@@ -24,43 +24,39 @@ const mergeQueryStrings = (query: string, queryFromHash: string) => {
   return stringify({ ...queryObject, ...hashObject });
 };
 
-export const CanvasRouter = (
-  {
-    history
-  }: {
-    history: History;
-  }
-) => (<Router history={history}>
-  <Route
-    path="/"
-    children={(route: RouteComponentProps) => {
-      // If it looks like the hash is a route then we will do a redirect
-      if (isHashPath(route.location.hash) && !route.location.pathname) {
-        const [hashPath, hashQuery] = route.location.hash.split('?');
-        let search = route.location.search || '?';
+export const CanvasRouter = ({ history }: { history: History }) => (
+  <Router history={history}>
+    <Route
+      path="/"
+      children={(route: RouteComponentProps) => {
+        // If it looks like the hash is a route then we will do a redirect
+        if (isHashPath(route.location.hash) && !route.location.pathname) {
+          const [hashPath, hashQuery] = route.location.hash.split('?');
+          let search = route.location.search || '?';
 
-        if (hashQuery !== undefined) {
-          search = mergeQueryStrings(search, `?${hashQuery}`);
+          if (hashQuery !== undefined) {
+            search = mergeQueryStrings(search, `?${hashQuery}`);
+          }
+
+          return (
+            <Redirect
+              push
+              to={{
+                pathname: `${hashPath.substring(1)}`,
+                search,
+              }}
+            />
+          );
         }
 
         return (
-          <Redirect
-            push
-            to={{
-              pathname: `${hashPath.substring(1)}`,
-              search,
-            }}
-          />
+          <Routes>
+            {ExportWorkpadRoute()}
+            {WorkpadRoute()}
+            {HomeRoute()}
+          </Routes>
         );
-      }
-
-      return (
-        <Routes>
-          {ExportWorkpadRoute()}
-          {WorkpadRoute()}
-          {HomeRoute()}
-        </Routes>
-      );
-    }}
-  />
-</Router>);
+      }}
+    />
+  </Router>
+);

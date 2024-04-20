@@ -29,21 +29,19 @@ interface Props {
   userName: string | null | undefined;
 }
 
-const RegistryEventDetailsLineComponent = (
-  {
-    contextId,
-    hostName,
-    id,
-    isDraggable,
-    processName,
-    processPid,
-    registryKey,
-    registryPath,
-    text,
-    userDomain,
-    userName
-  }: Props
-) => {
+const RegistryEventDetailsLineComponent = ({
+  contextId,
+  hostName,
+  id,
+  isDraggable,
+  processName,
+  processPid,
+  registryKey,
+  registryPath,
+  text,
+  userDomain,
+  userName,
+}: Props) => {
   const registryKeyTooltipContent = useMemo(
     () => (
       <>

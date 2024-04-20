@@ -71,12 +71,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
-export const NewEnrollmentTokenModal = (
-  {
-    onClose,
-    agentPolicies = []
-  }: Props
-) => {
+export const NewEnrollmentTokenModal = ({ onClose, agentPolicies = [] }: Props) => {
   const { notifications } = useStartServices();
 
   const selectPolicyOptions = useMemo(() => {

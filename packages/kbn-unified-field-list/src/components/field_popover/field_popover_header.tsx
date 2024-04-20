@@ -35,20 +35,18 @@ export interface FieldPopoverHeaderProps {
   onDeleteField?: (fieldName: string) => unknown;
 }
 
-export const FieldPopoverHeader = (
-  {
-    field,
-    closePopover,
-    buttonAddFieldToWorkspaceProps,
-    buttonAddFilterProps,
-    buttonEditFieldProps,
-    buttonDeleteFieldProps,
-    onAddFieldToWorkspace,
-    onAddFilter,
-    onEditField,
-    onDeleteField
-  }: FieldPopoverHeaderProps
-) => {
+export const FieldPopoverHeader = ({
+  field,
+  closePopover,
+  buttonAddFieldToWorkspaceProps,
+  buttonAddFilterProps,
+  buttonEditFieldProps,
+  buttonDeleteFieldProps,
+  onAddFieldToWorkspace,
+  onAddFilter,
+  onEditField,
+  onDeleteField,
+}: FieldPopoverHeaderProps) => {
   if (!field) {
     return null;
   }

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import type { FC } from 'react';
 import React, { memo, useEffect, useRef } from 'react';
 
 import type {
@@ -83,15 +81,11 @@ const cssOverride = ({ euiTheme }: UseEuiTheme) =>
     },
   } as const);
 
-export const DataGridTitle = (
-  {
-    title
-  }: {
-    title: string;
-  }
-) => (<EuiTitle size="xs">
-  <span>{title}</span>
-</EuiTitle>);
+export const DataGridTitle = ({ title }: { title: string }) => (
+  <EuiTitle size="xs">
+    <span>{title}</span>
+  </EuiTitle>
+);
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
   dataTestSubj: string;

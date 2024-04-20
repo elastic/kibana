@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useState, useEffect } from 'react';
 
 import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
@@ -33,11 +32,7 @@ const emptyRichDetector: RichDetector = {
   useNull: null,
 };
 
-export const AdvancedDetectors = (
-  {
-    setIsValid
-  }: Props
-) => {
+export const AdvancedDetectors = ({ setIsValid }: Props) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
 

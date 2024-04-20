@@ -36,13 +36,7 @@ const RELEASE_BADGE_DESCRIPTION: { [key in Exclude<IntegrationCardReleaseLabel, 
   }),
 };
 
-export const HeaderReleaseBadge = (
-  {
-    release
-  }: {
-    release: IntegrationCardReleaseLabel;
-  }
-) => {
+export const HeaderReleaseBadge = ({ release }: { release: IntegrationCardReleaseLabel }) => {
   if (release === 'ga') return null;
 
   const releaseLabel = RELEASE_BADGE_LABEL[release];
@@ -53,13 +47,7 @@ export const HeaderReleaseBadge = (
   );
 };
 
-export const InlineReleaseBadge = (
-  {
-    release
-  }: {
-    release: IntegrationCardReleaseLabel;
-  }
-) => {
+export const InlineReleaseBadge = ({ release }: { release: IntegrationCardReleaseLabel }) => {
   if (release === 'ga') return null;
 
   const releaseLabel = RELEASE_BADGE_LABEL[release];

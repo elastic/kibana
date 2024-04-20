@@ -14,11 +14,7 @@ interface Props {
   mappings: Mappings | undefined;
 }
 
-export const TabMappings = (
-  {
-    mappings
-  }: Props
-) => {
+export const TabMappings = ({ mappings }: Props) => {
   if (mappings && Object.keys(mappings).length) {
     return (
       <div data-test-subj="mappingsTabContent">

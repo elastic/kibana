@@ -39,14 +39,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const ChangelogModal = (
-  {
-    latestVersion,
-    currentVersion,
-    packageName,
-    onClose
-  }: Props
-) => {
+export const ChangelogModal = ({ latestVersion, currentVersion, packageName, onClose }: Props) => {
   const { notifications } = useStartServices();
 
   const {

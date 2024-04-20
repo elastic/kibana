@@ -17,14 +17,12 @@ export interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProp
   isDataLoading?: boolean;
 }
 
-export const LogsPageTemplate = (
-  {
-    hasData = true,
-    isDataLoading = false,
-    'data-test-subj': _dataTestSubj,
-    ...pageTemplateProps
-  }: LogsPageTemplateProps
-) => {
+export const LogsPageTemplate = ({
+  hasData = true,
+  isDataLoading = false,
+  'data-test-subj': _dataTestSubj,
+  ...pageTemplateProps
+}: LogsPageTemplateProps) => {
   const {
     services: {
       observabilityAIAssistant,

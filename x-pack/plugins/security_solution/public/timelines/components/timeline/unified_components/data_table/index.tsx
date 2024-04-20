@@ -71,33 +71,31 @@ interface DataTableProps extends CommonDataTableProps {
   dataView: DataView;
 }
 
-export const TimelineDataTableComponent = memo(function TimelineDataTableMemo(
-  {
-    columns,
-    columnIds,
-    dataView,
-    activeTab,
-    timelineId,
-    itemsPerPage,
-    itemsPerPageOptions,
-    rowRenderers,
-    sort,
-    events,
-    onFieldEdited,
-    refetch,
-    dataLoadingState,
-    totalCount,
-    onEventClosed,
-    showExpandedDetails,
-    expandedDetail,
-    onChangePage,
-    updatedAt,
-    isTextBasedQuery = false,
-    onSetColumns,
-    onSort,
-    onFilter
-  }: DataTableProps
-) {
+export const TimelineDataTableComponent = memo(function TimelineDataTableMemo({
+  columns,
+  columnIds,
+  dataView,
+  activeTab,
+  timelineId,
+  itemsPerPage,
+  itemsPerPageOptions,
+  rowRenderers,
+  sort,
+  events,
+  onFieldEdited,
+  refetch,
+  dataLoadingState,
+  totalCount,
+  onEventClosed,
+  showExpandedDetails,
+  expandedDetail,
+  onChangePage,
+  updatedAt,
+  isTextBasedQuery = false,
+  onSetColumns,
+  onSort,
+  onFilter,
+}: DataTableProps) {
   const dispatch = useDispatch();
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created

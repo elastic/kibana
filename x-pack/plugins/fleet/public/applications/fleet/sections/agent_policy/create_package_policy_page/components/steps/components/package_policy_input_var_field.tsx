@@ -74,8 +74,8 @@ type InputComponentProps = InputFieldProps & {
   fieldTestSelector: string;
 };
 
-export const PackagePolicyInputVarField = memo((
-  {
+export const PackagePolicyInputVarField = memo(
+  ({
     varDef,
     value,
     onChange,
@@ -85,86 +85,86 @@ export const PackagePolicyInputVarField = memo((
     packageType,
     packageName,
     datastreams = [],
-    isEditPage = false
-  }: InputFieldProps
-) => {
-  const fleetStatus = useFleetStatus();
+    isEditPage = false,
+  }: InputFieldProps) => {
+    const fleetStatus = useFleetStatus();
 
-  const [isDirty, setIsDirty] = useState<boolean>(false);
-  const { required, type, title, name, description } = varDef;
-  const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
-  const errors = isInvalid ? varErrors : null;
-  const fieldLabel = title || name;
-  const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
-  // Boolean cannot be optional by default set to false
-  const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
+    const [isDirty, setIsDirty] = useState<boolean>(false);
+    const { required, type, title, name, description } = varDef;
+    const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
+    const errors = isInvalid ? varErrors : null;
+    const fieldLabel = title || name;
+    const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
+    // Boolean cannot be optional by default set to false
+    const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
-  const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
-  const useSecretsUi = secretsStorageEnabled && varDef.secret;
+    const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
+    const useSecretsUi = secretsStorageEnabled && varDef.secret;
 
-  let field: JSX.Element;
+    let field: JSX.Element;
 
-  if (useSecretsUi) {
-    field = (
-      <SecretInputField
-        varDef={varDef}
-        value={value}
-        onChange={onChange}
-        frozen={frozen}
-        packageName={packageName}
-        packageType={packageType}
-        datastreams={datastreams}
-        isEditPage={isEditPage}
+    if (useSecretsUi) {
+      field = (
+        <SecretInputField
+          varDef={varDef}
+          value={value}
+          onChange={onChange}
+          frozen={frozen}
+          packageName={packageName}
+          packageType={packageType}
+          datastreams={datastreams}
+          isEditPage={isEditPage}
+          isInvalid={isInvalid}
+          fieldLabel={fieldLabel}
+          fieldTestSelector={fieldTestSelector}
+          isDirty={isDirty}
+          setIsDirty={setIsDirty}
+        />
+      );
+    } else {
+      field = getInputComponent({
+        varDef,
+        value,
+        onChange,
+        frozen,
+        packageName,
+        packageType,
+        datastreams,
+        isEditPage,
+        isInvalid,
+        fieldLabel,
+        fieldTestSelector,
+        isDirty,
+        setIsDirty,
+      });
+    }
+
+    const formRow = (
+      <FormRow
         isInvalid={isInvalid}
-        fieldLabel={fieldLabel}
-        fieldTestSelector={fieldTestSelector}
-        isDirty={isDirty}
-        setIsDirty={setIsDirty}
-      />
+        error={errors}
+        hasChildLabel={!varDef.multi}
+        label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
+        labelAppend={
+          isOptional ? (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+                defaultMessage="Optional"
+              />
+            </EuiText>
+          ) : undefined
+        }
+        helpText={description && <ReactMarkdown children={description} />}
+        fullWidth
+      >
+        {field}
+      </FormRow>
     );
-  } else {
-    field = getInputComponent({
-      varDef,
-      value,
-      onChange,
-      frozen,
-      packageName,
-      packageType,
-      datastreams,
-      isEditPage,
-      isInvalid,
-      fieldLabel,
-      fieldTestSelector,
-      isDirty,
-      setIsDirty,
-    });
+
+    return useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
   }
-
-  const formRow = (
-    <FormRow
-      isInvalid={isInvalid}
-      error={errors}
-      hasChildLabel={!varDef.multi}
-      label={useSecretsUi ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
-      labelAppend={
-        isOptional ? (
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
-              defaultMessage="Optional"
-            />
-          </EuiText>
-        ) : undefined
-      }
-      helpText={description && <ReactMarkdown children={description} />}
-      fullWidth
-    >
-      {field}
-    </FormRow>
-  );
-
-  return useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
-});
+);
 
 function getInputComponent({
   varDef,

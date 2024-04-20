@@ -61,29 +61,27 @@ const LensComponentWrapper = styled.div<{
   }
 `;
 
-const LensEmbeddableComponent = (
-  {
-    applyGlobalQueriesAndFilters = true,
-    applyPageAndTabsFilters = true,
-    extraActions,
-    extraOptions,
-    getLensAttributes,
-    height: wrapperHeight,
-    id,
-    inputsModelId = InputsModelId.global,
-    inspectTitle,
-    lensAttributes,
-    onLoad,
-    scopeId = SourcererScopeName.default,
-    enableLegendActions = true,
-    stackByField,
-    timerange,
-    width: wrapperWidth,
-    withActions = DEFAULT_ACTIONS,
-    disableOnClickFilter = false,
-    casesAttachmentMetadata
-  }: LensEmbeddableComponentProps
-) => {
+const LensEmbeddableComponent = ({
+  applyGlobalQueriesAndFilters = true,
+  applyPageAndTabsFilters = true,
+  extraActions,
+  extraOptions,
+  getLensAttributes,
+  height: wrapperHeight,
+  id,
+  inputsModelId = InputsModelId.global,
+  inspectTitle,
+  lensAttributes,
+  onLoad,
+  scopeId = SourcererScopeName.default,
+  enableLegendActions = true,
+  stackByField,
+  timerange,
+  width: wrapperWidth,
+  withActions = DEFAULT_ACTIONS,
+  disableOnClickFilter = false,
+  casesAttachmentMetadata,
+}: LensEmbeddableComponentProps) => {
   const style = useMemo(
     () => ({
       height: wrapperHeight ?? '100%',

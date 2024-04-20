@@ -182,285 +182,280 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
   };
 }
 
-export const StepLogistics = React.memo((
-  {
-    defaultValue,
-    isEditing = false,
-    onChange,
-    isLegacy = false
-  }: Props
-) => {
-  const { form } = useForm({
-    schema: schemas.logistics,
-    defaultValue,
-    options: { stripEmptyFields: false },
-    serializer: getformSerializer(defaultValue),
-    deserializer: formDeserializer,
-  });
-  const {
-    submit,
-    isSubmitted,
-    isValid: isFormValid,
-    getErrors: getFormErrors,
-    getFormData,
-  } = form;
-
-  const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{
-    addMeta: boolean;
-    lifecycle: DataRetention;
-    doCreateDataStream: boolean;
-  }>({
-    form,
-    watch: [
-      'addMeta',
-      'lifecycle.enabled',
-      'lifecycle.infiniteDataRetention',
-      'doCreateDataStream',
-    ],
-  });
-
-  /**
-   * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
-   * and we can display the form errors on top of the forms if there are any.
-   */
-  const validate = useCallback(async () => {
-    return (await submit()).isValid;
-  }, [submit]);
-
-  useEffect(() => {
-    onChange({
-      isValid: isFormValid,
-      getData: getFormData,
-      validate,
+export const StepLogistics = React.memo(
+  ({ defaultValue, isEditing = false, onChange, isLegacy = false }: Props) => {
+    const { form } = useForm({
+      schema: schemas.logistics,
+      defaultValue,
+      options: { stripEmptyFields: false },
+      serializer: getformSerializer(defaultValue),
+      deserializer: formDeserializer,
     });
-  }, [onChange, isFormValid, validate, getFormData]);
+    const {
+      submit,
+      isSubmitted,
+      isValid: isFormValid,
+      getErrors: getFormErrors,
+      getFormData,
+    } = form;
 
-  const {
-    name,
-    indexPatterns,
-    createDataStream,
-    order,
-    priority,
-    version,
-    dataRetention,
-    allowAutoCreate,
-  } = getFieldsMeta(documentationService.getEsDocsBase());
+    const [{ addMeta, doCreateDataStream, lifecycle }] = useFormData<{
+      addMeta: boolean;
+      lifecycle: DataRetention;
+      doCreateDataStream: boolean;
+    }>({
+      form,
+      watch: [
+        'addMeta',
+        'lifecycle.enabled',
+        'lifecycle.infiniteDataRetention',
+        'doCreateDataStream',
+      ],
+    });
 
-  return (
-    <>
-      {/* Header */}
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2 data-test-subj="stepTitle">
+    /**
+     * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
+     * and we can display the form errors on top of the forms if there are any.
+     */
+    const validate = useCallback(async () => {
+      return (await submit()).isValid;
+    }, [submit]);
+
+    useEffect(() => {
+      onChange({
+        isValid: isFormValid,
+        getData: getFormData,
+        validate,
+      });
+    }, [onChange, isFormValid, validate, getFormData]);
+
+    const {
+      name,
+      indexPatterns,
+      createDataStream,
+      order,
+      priority,
+      version,
+      dataRetention,
+      allowAutoCreate,
+    } = getFieldsMeta(documentationService.getEsDocsBase());
+
+    return (
+      <>
+        {/* Header */}
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2 data-test-subj="stepTitle">
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
+                  defaultMessage="Logistics"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={documentationService.getTemplatesDocumentationLink(isLegacy)}
+              target="_blank"
+              iconType="help"
+            >
               <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepLogistics.stepTitle"
-                defaultMessage="Logistics"
+                id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"
+                defaultMessage="Index Templates docs"
               />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={documentationService.getTemplatesDocumentationLink(isLegacy)}
-            target="_blank"
-            iconType="help"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"
-              defaultMessage="Index Templates docs"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiSpacer size="l" />
 
-      <EuiSpacer size="l" />
-
-      <Form
-        form={form}
-        isInvalid={isSubmitted && !isFormValid}
-        error={getFormErrors()}
-        data-test-subj="stepLogistics"
-      >
-        {/* Name */}
-        <FormRow title={name.title} description={name.description}>
-          <UseField
-            path="name"
-            componentProps={{
-              ['data-test-subj']: name.testSubject,
-              euiFieldProps: { disabled: isEditing },
-            }}
-            config={isEditing ? nameConfigWithoutValidations : nameConfig}
-          />
-        </FormRow>
-
-        {/* Index patterns */}
-        <FormRow title={indexPatterns.title} description={indexPatterns.description}>
-          <UseField
-            path="indexPatterns"
-            componentProps={{
-              ['data-test-subj']: indexPatterns.testSubject,
-            }}
-          />
-        </FormRow>
-
-        {/* Create data stream */}
-        {isLegacy !== true && (
-          <FormRow title={createDataStream.title} description={createDataStream.description}>
+        <Form
+          form={form}
+          isInvalid={isSubmitted && !isFormValid}
+          error={getFormErrors()}
+          data-test-subj="stepLogistics"
+        >
+          {/* Name */}
+          <FormRow title={name.title} description={name.description}>
             <UseField
-              path="doCreateDataStream"
-              componentProps={{ 'data-test-subj': createDataStream.testSubject }}
+              path="name"
+              componentProps={{
+                ['data-test-subj']: name.testSubject,
+                euiFieldProps: { disabled: isEditing },
+              }}
+              config={isEditing ? nameConfigWithoutValidations : nameConfig}
             />
           </FormRow>
-        )}
 
-        {/*
+          {/* Index patterns */}
+          <FormRow title={indexPatterns.title} description={indexPatterns.description}>
+            <UseField
+              path="indexPatterns"
+              componentProps={{
+                ['data-test-subj']: indexPatterns.testSubject,
+              }}
+            />
+          </FormRow>
+
+          {/* Create data stream */}
+          {isLegacy !== true && (
+            <FormRow title={createDataStream.title} description={createDataStream.description}>
+              <UseField
+                path="doCreateDataStream"
+                componentProps={{ 'data-test-subj': createDataStream.testSubject }}
+              />
+            </FormRow>
+          )}
+
+          {/*
           Since data stream and data retention are settings that are only allowed for non legacy,
           we only need to check if data stream is set to true to show the data retention.
         */}
-        {doCreateDataStream && (
-          <FormRow
-            title={dataRetention.title}
-            description={
-              <>
-                {dataRetention.description}
-                <EuiSpacer size="m" />
-                <UseField
-                  path="lifecycle.enabled"
-                  componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
-                />
-              </>
-            }
-          >
-            {lifecycle?.enabled && (
-              <UseField
-                path="lifecycle.value"
-                component={NumericField}
-                labelAppend={
+          {doCreateDataStream && (
+            <FormRow
+              title={dataRetention.title}
+              description={
+                <>
+                  {dataRetention.description}
+                  <EuiSpacer size="m" />
                   <UseField
-                    path="lifecycle.infiniteDataRetention"
-                    data-test-subj="infiniteDataRetentionToggle"
-                    componentProps={{
-                      euiFieldProps: {
-                        compressed: true,
-                      },
-                    }}
+                    path="lifecycle.enabled"
+                    componentProps={{ 'data-test-subj': 'dataRetentionToggle' }}
                   />
-                }
-                componentProps={{
-                  euiFieldProps: {
-                    disabled: lifecycle?.infiniteDataRetention,
-                    'data-test-subj': 'valueDataRetentionField',
-                    min: 1,
-                    append: (
-                      <UnitField
-                        path="lifecycle.unit"
-                        options={timeUnits}
-                        disabled={lifecycle?.infiniteDataRetention}
-                        euiFieldProps={{
-                          'data-test-subj': 'unitDataRetentionField',
-                        }}
-                      />
-                    ),
-                  },
-                }}
-              />
-            )}
-          </FormRow>
-        )}
-
-        {/* Order */}
-        {isLegacy && (
-          <FormRow title={order.title} description={order.description}>
-            <UseField
-              path="order"
-              componentProps={{
-                ['data-test-subj']: order.testSubject,
-              }}
-            />
-          </FormRow>
-        )}
-
-        {/* Priority */}
-        {isLegacy === false && (
-          <FormRow title={priority.title} description={priority.description}>
-            <UseField
-              path="priority"
-              componentProps={{
-                ['data-test-subj']: priority.testSubject,
-              }}
-            />
-          </FormRow>
-        )}
-
-        {/* Version */}
-        <FormRow title={version.title} description={version.description}>
-          <UseField
-            path="version"
-            componentProps={{
-              ['data-test-subj']: version.testSubject,
-            }}
-          />
-        </FormRow>
-
-        {/* Allow auto create */}
-        {isLegacy === false && (
-          <FormRow title={allowAutoCreate.title} description={allowAutoCreate.description}>
-            <UseField
-              path="allowAutoCreate"
-              component={RadioGroupField}
-              componentProps={{
-                'data-test-subj': allowAutoCreate.testSubject,
-                euiFieldProps: {
-                  options: allowAutoCreateRadios,
-                  name: 'allowAutoCreate radio group',
-                },
-              }}
-            />
-          </FormRow>
-        )}
-
-        {/* _meta */}
-        {isLegacy === false && (
-          <FormRow
-            title={i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldTitle', {
-              defaultMessage: '_meta field',
-            })}
-            description={
-              <>
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepLogistics.metaFieldDescription"
-                  defaultMessage="Use the _meta field to store any metadata you want."
+                </>
+              }
+            >
+              {lifecycle?.enabled && (
+                <UseField
+                  path="lifecycle.value"
+                  component={NumericField}
+                  labelAppend={
+                    <UseField
+                      path="lifecycle.infiniteDataRetention"
+                      data-test-subj="infiniteDataRetentionToggle"
+                      componentProps={{
+                        euiFieldProps: {
+                          compressed: true,
+                        },
+                      }}
+                    />
+                  }
+                  componentProps={{
+                    euiFieldProps: {
+                      disabled: lifecycle?.infiniteDataRetention,
+                      'data-test-subj': 'valueDataRetentionField',
+                      min: 1,
+                      append: (
+                        <UnitField
+                          path="lifecycle.unit"
+                          options={timeUnits}
+                          disabled={lifecycle?.infiniteDataRetention}
+                          euiFieldProps={{
+                            'data-test-subj': 'unitDataRetentionField',
+                          }}
+                        />
+                      ),
+                    },
+                  }}
                 />
-                <EuiSpacer size="m" />
-                <UseField path="addMeta" data-test-subj="metaToggle" />
-              </>
-            }
-          >
-            {addMeta && (
+              )}
+            </FormRow>
+          )}
+
+          {/* Order */}
+          {isLegacy && (
+            <FormRow title={order.title} description={order.description}>
               <UseField
-                path="_meta"
-                component={JsonEditorField}
+                path="order"
                 componentProps={{
-                  codeEditorProps: {
-                    height: '280px',
-                    'aria-label': i18n.translate(
-                      'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
-                      {
-                        defaultMessage: '_meta field data editor',
-                      }
-                    ),
-                    'data-test-subj': 'metaField',
+                  ['data-test-subj']: order.testSubject,
+                }}
+              />
+            </FormRow>
+          )}
+
+          {/* Priority */}
+          {isLegacy === false && (
+            <FormRow title={priority.title} description={priority.description}>
+              <UseField
+                path="priority"
+                componentProps={{
+                  ['data-test-subj']: priority.testSubject,
+                }}
+              />
+            </FormRow>
+          )}
+
+          {/* Version */}
+          <FormRow title={version.title} description={version.description}>
+            <UseField
+              path="version"
+              componentProps={{
+                ['data-test-subj']: version.testSubject,
+              }}
+            />
+          </FormRow>
+
+          {/* Allow auto create */}
+          {isLegacy === false && (
+            <FormRow title={allowAutoCreate.title} description={allowAutoCreate.description}>
+              <UseField
+                path="allowAutoCreate"
+                component={RadioGroupField}
+                componentProps={{
+                  'data-test-subj': allowAutoCreate.testSubject,
+                  euiFieldProps: {
+                    options: allowAutoCreateRadios,
+                    name: 'allowAutoCreate radio group',
                   },
                 }}
               />
-            )}
-          </FormRow>
-        )}
-      </Form>
-    </>
-  );
-});
+            </FormRow>
+          )}
+
+          {/* _meta */}
+          {isLegacy === false && (
+            <FormRow
+              title={i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.metaFieldTitle', {
+                defaultMessage: '_meta field',
+              })}
+              description={
+                <>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateForm.stepLogistics.metaFieldDescription"
+                    defaultMessage="Use the _meta field to store any metadata you want."
+                  />
+                  <EuiSpacer size="m" />
+                  <UseField path="addMeta" data-test-subj="metaToggle" />
+                </>
+              }
+            >
+              {addMeta && (
+                <UseField
+                  path="_meta"
+                  component={JsonEditorField}
+                  componentProps={{
+                    codeEditorProps: {
+                      height: '280px',
+                      'aria-label': i18n.translate(
+                        'xpack.idxMgmt.templateForm.stepLogistics.metaFieldEditorAriaLabel',
+                        {
+                          defaultMessage: '_meta field data editor',
+                        }
+                      ),
+                      'data-test-subj': 'metaField',
+                    },
+                  }}
+                />
+              )}
+            </FormRow>
+          )}
+        </Form>
+      </>
+    );
+  }
+);

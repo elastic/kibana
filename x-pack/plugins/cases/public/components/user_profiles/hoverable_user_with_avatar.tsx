@@ -14,12 +14,7 @@ import { Username } from './username';
 
 export type HoverableUserWithAvatarProps = UsernameProps;
 
-const HoverableUserWithAvatarComponent = (
-  {
-    userInfo,
-    boldName
-  }: HoverableUserWithAvatarProps
-) => {
+const HoverableUserWithAvatarComponent = ({ userInfo, boldName }: HoverableUserWithAvatarProps) => {
   return (
     <UserToolTip userInfo={userInfo}>
       <EuiFlexGroup alignItems="center" gutterSize="s">

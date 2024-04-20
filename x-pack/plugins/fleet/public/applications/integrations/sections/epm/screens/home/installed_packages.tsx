@@ -75,30 +75,26 @@ const InstalledIntegrationsInfoCallout = () => (
   </EuiCallOut>
 );
 
-const UpdatesAvailableCallout = (
-  {
-    count
-  }: {
-    count: number;
-  }
-) => (<EuiCallOut
-  title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
-    defaultMessage:
-      '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
-    values: {
-      count,
-    },
-  })}
-  iconType="warning"
-  color="warning"
->
-  <p>
-    <FormattedMessage
-      id="xpack.fleet.epmList.updatesAvailableCalloutText"
-      defaultMessage="Update your integrations to get the latest features."
-    />
-  </p>
-</EuiCallOut>);
+const UpdatesAvailableCallout = ({ count }: { count: number }) => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
+      defaultMessage:
+        '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
+      values: {
+        count,
+      },
+    })}
+    iconType="warning"
+    color="warning"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.fleet.epmList.updatesAvailableCalloutText"
+        defaultMessage="Update your integrations to get the latest features."
+      />
+    </p>
+  </EuiCallOut>
+);
 
 const VerificationWarningCallout = () => {
   const { docLinks } = useStartServices();
@@ -131,15 +127,13 @@ const VerificationWarningCallout = () => {
   );
 };
 
-export const InstalledPackages = (
-  {
-    installedPackages,
-    isLoading
-  }: {
-    installedPackages: PackageListItem[];
-    isLoading: boolean;
-  }
-) => {
+export const InstalledPackages = ({
+  installedPackages,
+  isLoading,
+}: {
+  installedPackages: PackageListItem[];
+  isLoading: boolean;
+}) => {
   useBreadcrumbs('integrations_installed');
 
   const { packageVerificationKeyId } = useGetPackageVerificationKeyId();

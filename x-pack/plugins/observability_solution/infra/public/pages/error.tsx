@@ -21,11 +21,7 @@ interface Props {
   message: string;
 }
 
-export const Error = (
-  {
-    message
-  }: Props
-) => {
+export const Error = ({ message }: Props) => {
   return (
     <ColumnarPage>
       <DetailPageContent>
@@ -35,13 +31,7 @@ export const Error = (
   );
 };
 
-export const ErrorPageBody = (
-  {
-    message
-  }: {
-    message: string;
-  }
-) => {
+export const ErrorPageBody = ({ message }: { message: string }) => {
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} bottomBorder={false} grow={false}>
       <EuiPageTemplate.Header>

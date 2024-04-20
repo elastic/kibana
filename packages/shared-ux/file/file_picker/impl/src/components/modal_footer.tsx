@@ -8,7 +8,6 @@
 
 import { EuiModalFooter } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 
@@ -25,14 +24,7 @@ interface Props {
   multiple: boolean;
 }
 
-export const ModalFooter = (
-  {
-    kind,
-    onDone,
-    onUpload,
-    multiple
-  }: Props
-) => {
+export const ModalFooter = ({ kind, onDone, onUpload, multiple }: Props) => {
   const { state, uploadMeta } = useFilePickerContext();
   const onUploadStart = useCallback(() => state.setIsUploading(true), [state]);
   const onUploadEnd = useCallback(() => state.setIsUploading(false), [state]);

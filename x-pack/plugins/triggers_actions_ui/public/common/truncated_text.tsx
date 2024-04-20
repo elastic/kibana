@@ -22,15 +22,11 @@ const styles = {
   `,
 };
 
-const TruncatedTextComponent = (
-  {
-    text
-  }: {
-    text: string;
-  }
-) => (<EuiText size="xs" color="subdued" css={styles.truncatedText}>
-  {text}
-</EuiText>);
+const TruncatedTextComponent = ({ text }: { text: string }) => (
+  <EuiText size="xs" color="subdued" css={styles.truncatedText}>
+    {text}
+  </EuiText>
+);
 
 TruncatedTextComponent.displayName = 'TruncatedText';
 

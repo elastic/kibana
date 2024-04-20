@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { type FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -25,11 +25,7 @@ interface Props {
   closeModal: () => void;
 }
 
-export const DeploymentDetailsModal = (
-  {
-    closeModal
-  }: Props
-) => {
+export const DeploymentDetailsModal = ({ closeModal }: Props) => {
   const { apiKeysLearnMoreUrl } = useDeploymentDetails();
 
   return (

@@ -15,22 +15,19 @@ interface SourceErrorPageProps {
   retry: () => void;
 }
 
-export const SourceErrorPage = (
-  {
-    errorMessage,
-    retry
-  }: SourceErrorPageProps
-) => (<ErrorPage
-  shortMessage={
-    <FormattedMessage
-      id="xpack.infra.sourceErrorPage.failedToLoadDataSourcesMessage"
-      defaultMessage="Failed to load data sources."
-    />
-  }
-  detailedMessage={
-    <pre>
-      <code>{errorMessage}</code>
-    </pre>
-  }
-  retry={retry}
-/>);
+export const SourceErrorPage = ({ errorMessage, retry }: SourceErrorPageProps) => (
+  <ErrorPage
+    shortMessage={
+      <FormattedMessage
+        id="xpack.infra.sourceErrorPage.failedToLoadDataSourcesMessage"
+        defaultMessage="Failed to load data sources."
+      />
+    }
+    detailedMessage={
+      <pre>
+        <code>{errorMessage}</code>
+      </pre>
+    }
+    retry={retry}
+  />
+);

@@ -18,11 +18,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const TagsComponent = (
-  {
-    isLoading
-  }: Props
-) => {
+const TagsComponent = ({ isLoading }: Props) => {
   const { data: tagOptions = [], isLoading: isLoadingTags } = useGetTags();
   const options = useMemo(
     () =>

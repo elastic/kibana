@@ -14,12 +14,7 @@ interface Props {
   text?: ReactNode;
 }
 
-export const LearnMoreLink = (
-  {
-    docPath,
-    text
-  }: Props
-) => {
+export const LearnMoreLink = ({ docPath, text }: Props) => {
   const content = text ? (
     text
   ) : (

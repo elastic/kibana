@@ -18,36 +18,33 @@ interface EmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const EmptyPrompt = (
-  {
-    history,
-    readOnly = false
-  }: EmptyPromptProps
-) => (<KibanaPageTemplate.EmptyPrompt
-  iconType="managementApp"
-  title={
-    <h1>
-      {readOnly ? (
+export const EmptyPrompt = ({ history, readOnly = false }: EmptyPromptProps) => (
+  <KibanaPageTemplate.EmptyPrompt
+    iconType="managementApp"
+    title={
+      <h1>
+        {readOnly ? (
+          <FormattedMessage
+            id="xpack.security.management.roleMappings.readOnlyEmptyPromptTitle"
+            defaultMessage="There are no role mappings to view"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.security.management.roleMappings.emptyPromptTitle"
+            defaultMessage="Create your first role mapping"
+          />
+        )}
+      </h1>
+    }
+    body={
+      <p>
         <FormattedMessage
-          id="xpack.security.management.roleMappings.readOnlyEmptyPromptTitle"
-          defaultMessage="There are no role mappings to view"
+          id="xpack.security.management.roleMappings.emptyPromptDescription"
+          defaultMessage="Role mappings control which roles are assigned to your users."
         />
-      ) : (
-        <FormattedMessage
-          id="xpack.security.management.roleMappings.emptyPromptTitle"
-          defaultMessage="Create your first role mapping"
-        />
-      )}
-    </h1>
-  }
-  body={
-    <p>
-      <FormattedMessage
-        id="xpack.security.management.roleMappings.emptyPromptDescription"
-        defaultMessage="Role mappings control which roles are assigned to your users."
-      />
-    </p>
-  }
-  actions={readOnly ? null : <CreateRoleMappingButton history={history} />}
-  data-test-subj="roleMappingsEmptyPrompt"
-/>);
+      </p>
+    }
+    actions={readOnly ? null : <CreateRoleMappingButton history={history} />}
+    data-test-subj="roleMappingsEmptyPrompt"
+  />
+);

@@ -31,13 +31,7 @@ interface Props {
   onClose: (theCase?: CaseUI) => void;
 }
 
-const AddExistingCaseModalWrapper = (
-  {
-    embeddable,
-    onClose,
-    onSuccess
-  }: Props
-) => {
+const AddExistingCaseModalWrapper = ({ embeddable, onClose, onSuccess }: Props) => {
   const modal = useCasesAddToExistingCaseModal({
     onClose,
     onSuccess,

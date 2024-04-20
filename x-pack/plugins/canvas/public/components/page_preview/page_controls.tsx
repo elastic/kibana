@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactEventHandler } from 'react';
+import React, { ReactEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -35,13 +35,7 @@ interface Props {
   onDuplicate: (pageId: string) => void;
 }
 
-export const PageControls = (
-  {
-    pageId,
-    onRemove,
-    onDuplicate
-  }: Props
-) => {
+export const PageControls = ({ pageId, onRemove, onDuplicate }: Props) => {
   const handleDuplicate: ReactEventHandler = (ev) => {
     ev.preventDefault();
     onDuplicate(pageId);

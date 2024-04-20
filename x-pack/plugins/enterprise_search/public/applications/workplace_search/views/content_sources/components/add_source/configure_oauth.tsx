@@ -30,13 +30,7 @@ interface ConfigureOauthProps {
   onFormCreated(name: string): void;
 }
 
-export const ConfigureOauth = (
-  {
-    name,
-    onFormCreated,
-    header
-  }: ConfigureOauthProps
-) => {
+export const ConfigureOauth = ({ name, onFormCreated, header }: ConfigureOauthProps) => {
   const [formLoading, setFormLoading] = useState(false);
 
   const { getPreContentSourceConfigData, setSelectedGithubOrganizations, createContentSource } =

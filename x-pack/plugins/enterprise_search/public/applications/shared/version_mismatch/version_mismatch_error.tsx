@@ -15,12 +15,7 @@ interface Props {
   kibanaVersion?: string;
 }
 
-export const VersionMismatchError = (
-  {
-    enterpriseSearchVersion,
-    kibanaVersion
-  }: Props
-) => {
+export const VersionMismatchError = ({ enterpriseSearchVersion, kibanaVersion }: Props) => {
   return (
     <EuiEmptyPrompt
       iconType="warning"

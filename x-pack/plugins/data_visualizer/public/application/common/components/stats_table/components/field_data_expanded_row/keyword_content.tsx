@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import type { FieldDataRowProps } from '../../types/field_data_row';
@@ -16,12 +15,7 @@ import { ExpandedRowContent } from './expanded_row_content';
 import { ChoroplethMap } from './choropleth_map';
 import { ErrorMessageContent } from './error_message';
 
-export const KeywordContent = (
-  {
-    config,
-    onAddFilter
-  }: FieldDataRowProps
-) => {
+export const KeywordContent = ({ config, onAddFilter }: FieldDataRowProps) => {
   const [EMSSuggestion, setEMSSuggestion] = useState<EMSTermJoinConfig | null | undefined>();
   const { stats, fieldName } = config;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;

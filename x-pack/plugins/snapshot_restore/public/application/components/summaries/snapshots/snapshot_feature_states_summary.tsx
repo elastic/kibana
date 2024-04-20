@@ -16,11 +16,7 @@ import {
 import { SnapshotConfig } from '../../../../../common/types';
 import { CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
-export const SnapshotFeatureStatesSummary = (
-  {
-    featureStates
-  }: SnapshotConfig
-) => {
+export const SnapshotFeatureStatesSummary = ({ featureStates }: SnapshotConfig) => {
   // When a policy that includes featureStates: ['none'] is executed, the resulting
   // snapshot wont include the `none` in the featureStates array but instead will
   // return an empty array.

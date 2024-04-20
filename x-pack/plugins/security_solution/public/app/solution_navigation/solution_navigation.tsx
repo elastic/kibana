@@ -25,24 +25,22 @@ export const withNavigationProvider = <T extends object>(
   Component: React.ComponentType<T>,
   core: CoreStart
 ) =>
-  (function WithNavigationProvider(props: T) {
+  function WithNavigationProvider(props: T) {
     return (
       <NavigationProvider core={core}>
         <Component {...props} />
       </NavigationProvider>
     );
-  });
+  };
 
 const getPanelContent = (
   core: CoreStart,
   solutionNavLinks$: SolutionNavLinks$
 ): React.FC<PanelComponentProps> => {
-  const PanelContentProvider = React.memo(function PanelContentProvider(
-    {
-      selectedNode: { id: linkId },
-      closePanel
-    }: PanelComponentProps
-  ) {
+  const PanelContentProvider = React.memo(function PanelContentProvider({
+    selectedNode: { id: linkId },
+    closePanel,
+  }: PanelComponentProps) {
     const solutionNavLinks = useObservable(solutionNavLinks$, []);
     const currentPanelItem = solutionNavLinks.find((item) => item.id === linkId);
 

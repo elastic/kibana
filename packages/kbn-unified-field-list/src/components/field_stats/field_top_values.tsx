@@ -25,19 +25,17 @@ export interface FieldTopValuesProps {
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
-export const FieldTopValues = (
-  {
-    areExamples,
-    buckets,
-    dataView,
-    field,
-    sampledValuesCount,
-    color = getDefaultColor(),
-    'data-test-subj': dataTestSubject,
-    onAddFilter,
-    overrideFieldTopValueBar
-  }: FieldTopValuesProps
-) => {
+export const FieldTopValues = ({
+  areExamples,
+  buckets,
+  dataView,
+  field,
+  sampledValuesCount,
+  color = getDefaultColor(),
+  'data-test-subj': dataTestSubject,
+  onAddFilter,
+  overrideFieldTopValueBar,
+}: FieldTopValuesProps) => {
   if (!buckets?.length) {
     return null;
   }

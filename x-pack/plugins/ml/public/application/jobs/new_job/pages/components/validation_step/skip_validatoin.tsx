@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { WIZARD_STEPS } from '../step_types';
 
-export const SkipValidationButton = (
-  {
-    nextActive,
-    setCurrentStep
-  }: {
-    nextActive: boolean;
-    setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
-  }
-) => nextActive ? null : (
-  <EuiButtonEmpty
-    onClick={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
-    iconType="arrowRight"
-    iconSide="right"
-    data-test-subj="mlJobWizardNavButtonPrevious"
-  >
-    <FormattedMessage
-      id="xpack.ml.newJob.wizard.shopValidationButton"
-      defaultMessage="Skip validation"
-    />
-  </EuiButtonEmpty>
-);
+export const SkipValidationButton = ({
+  nextActive,
+  setCurrentStep,
+}: {
+  nextActive: boolean;
+  setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
+}) =>
+  nextActive ? null : (
+    <EuiButtonEmpty
+      onClick={() => setCurrentStep(WIZARD_STEPS.SUMMARY)}
+      iconType="arrowRight"
+      iconSide="right"
+      data-test-subj="mlJobWizardNavButtonPrevious"
+    >
+      <FormattedMessage
+        id="xpack.ml.newJob.wizard.shopValidationButton"
+        defaultMessage="Skip validation"
+      />
+    </EuiButtonEmpty>
+  );

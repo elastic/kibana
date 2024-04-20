@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
@@ -31,14 +30,12 @@ export interface ValidationSummary {
   success: number;
 }
 
-export const ValidationStepWrapper = (
-  {
-    state,
-    setCurrentStep,
-    step,
-    stepActivated
-  }: CreateAnalyticsStepProps
-) => {
+export const ValidationStepWrapper = ({
+  state,
+  setCurrentStep,
+  step,
+  stepActivated,
+}: CreateAnalyticsStepProps) => {
   const [checksInProgress, setChecksInProgress] = useState<boolean>(false);
   const [validationMessages, setValidationMessages] = useState<CalloutMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<CalloutMessage | undefined>();

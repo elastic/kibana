@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
@@ -42,12 +41,10 @@ export interface TimeSeriesExplorerUrlStateManager {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-export const TimeSeriesExplorerUrlStateManager = (
-  {
-    config,
-    jobsWithTimeRange
-  }: TimeSeriesExplorerUrlStateManager
-) => {
+export const TimeSeriesExplorerUrlStateManager = ({
+  config,
+  jobsWithTimeRange,
+}: TimeSeriesExplorerUrlStateManager) => {
   const {
     services: {
       data: { dataViews: dataViewsService },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { RenderedElement } from './rendered_element';
 import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
 import { useCanvasShareableState } from '../context';
@@ -30,13 +30,7 @@ interface ComponentProps {
 /**
  * A Page in the Shareable Workpad is conceptually identical to a Page in a Workpad.
  */
-export const PageComponent = (
-  {
-    page,
-    height,
-    width
-  }: ComponentProps
-) => {
+export const PageComponent = ({ page, height, width }: ComponentProps) => {
   const { elements, style, id } = page;
 
   const output = elements.map((element: CanvasRenderedElement, i) => (
@@ -60,11 +54,7 @@ interface Props {
 /**
  * A store-connected container for the `Page` component.
  */
-export const Page = (
-  {
-    index
-  }: Props
-) => {
+export const Page = ({ index }: Props) => {
   const [{ workpad }] = useCanvasShareableState();
 
   if (!workpad) {

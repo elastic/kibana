@@ -7,7 +7,6 @@
  */
 
 import * as React from 'react';
-import type { FunctionComponent } from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { EuiConfirmModal } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';

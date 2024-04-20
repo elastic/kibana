@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
 export interface TopNavMenuItem {
@@ -22,12 +22,7 @@ interface Props {
   items: TopNavMenuItem[];
 }
 
-export const TopNavMenu = (
-  {
-    items,
-    disabled
-  }: Props
-) => {
+export const TopNavMenu = ({ items, disabled }: Props) => {
   return (
     <EuiTabs size="s">
       {items.map((item, idx) => {

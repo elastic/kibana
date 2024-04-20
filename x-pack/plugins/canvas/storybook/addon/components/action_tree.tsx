@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { isObject, isDate } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiTreeView } from '@elastic/eui';
@@ -68,13 +68,7 @@ const jsonToTree: (obj: Record<string, any>) => Node[] = (obj) => {
   return values.filter((value) => value !== null) as Node[];
 };
 
-export const ActionTree = (
-  {
-    action
-  }: {
-    action: RecordedAction | null;
-  }
-) => {
+export const ActionTree = ({ action }: { action: RecordedAction | null }) => {
   const items = action ? actionToTree(action) : null;
   let tree = <></>;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiIcon, IconType } from '@elastic/eui';
 import { ProcessorStatus } from '../types';
@@ -76,11 +76,7 @@ interface Props {
   processorStatus: ProcessorStatus;
 }
 
-export const PipelineProcessorsItemStatus = (
-  {
-    processorStatus
-  }: Props
-) => {
+export const PipelineProcessorsItemStatus = ({ processorStatus }: Props) => {
   const { icon, iconColor, label } = processorStatusToIconMap[processorStatus] || unknownStatus;
 
   return (

@@ -8,15 +8,7 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-export const Error = (
-  {
-    title,
-    error
-  }: {
-    title: JSX.Element;
-    error: Error | string;
-  }
-) => {
+export const Error = ({ title, error }: { title: JSX.Element; error: Error | string }) => {
   return (
     <EuiCallOut title={title} color="danger" iconType="warning">
       <p>{typeof error === 'string' ? error : error.message}</p>

@@ -181,15 +181,13 @@ export interface BarChartComponentProps {
 
 const NO_LEGEND_DATA: LegendItem[] = [];
 
-export const BarChartComponent = (
-  {
-    barChart,
-    configs,
-    stackByField,
-    scopeId,
-    visualizationActionsOptions
-  }: BarChartComponentProps
-) => {
+export const BarChartComponent = ({
+  barChart,
+  configs,
+  stackByField,
+  scopeId,
+  visualizationActionsOptions,
+}: BarChartComponentProps) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const legendItems: LegendItem[] = useMemo(
     () =>

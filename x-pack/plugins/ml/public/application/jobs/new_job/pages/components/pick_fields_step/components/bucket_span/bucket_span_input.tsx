@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText } from '@elastic/eui';
@@ -17,14 +16,7 @@ interface Props {
   disabled: boolean;
 }
 
-export const BucketSpanInput = (
-  {
-    bucketSpan,
-    setBucketSpan,
-    isInvalid,
-    disabled
-  }: Props
-) => {
+export const BucketSpanInput = ({ bucketSpan, setBucketSpan, isInvalid, disabled }: Props) => {
   return (
     <EuiFieldText
       disabled={disabled}

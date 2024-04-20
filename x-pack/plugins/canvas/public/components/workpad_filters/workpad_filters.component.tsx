@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
@@ -53,13 +53,7 @@ const groupByOptions: Array<{ value: FilterField; text: string }> = [
   { value: 'column', text: strings.getGroupByColumnLabel() },
 ];
 
-export const WorkpadFilters = (
-  {
-    filtersGroups,
-    onGroupByChange,
-    groupFiltersByField
-  }: Props
-) => {
+export const WorkpadFilters = ({ filtersGroups, onGroupByChange, groupFiltersByField }: Props) => {
   const groupedByFilterGroupField = groupFiltersByField === 'filterGroup';
   const formatter = groupFiltersByField ? formatByKey(groupFiltersByField) ?? identity : identity;
 

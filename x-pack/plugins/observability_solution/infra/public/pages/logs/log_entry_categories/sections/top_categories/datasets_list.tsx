@@ -11,22 +11,18 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 
-export const DatasetsList = (
-  {
-    datasets
-  }: {
-    datasets: LogEntryCategoryDataset[];
-  }
-) => (<ul>
-  {datasets.map((dataset) => {
-    const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
-    return (
-      <li key={datasetLabel}>
-        <DatasetLabel>{datasetLabel}</DatasetLabel>
-      </li>
-    );
-  })}
-</ul>);
+export const DatasetsList = ({ datasets }: { datasets: LogEntryCategoryDataset[] }) => (
+  <ul>
+    {datasets.map((dataset) => {
+      const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
+      return (
+        <li key={datasetLabel}>
+          <DatasetLabel>{datasetLabel}</DatasetLabel>
+        </li>
+      );
+    })}
+  </ul>
+);
 
 /*
  * These aim at aligning the list with the EuiHealth list in the neighboring

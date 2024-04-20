@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, type FC } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { css } from '@emotion/css';
@@ -50,13 +50,7 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const NavigationItemOpenPanel = (
-  {
-    item,
-    navigateToUrl,
-    activeNodes
-  }: Props
-) => {
+export const NavigationItemOpenPanel = ({ item, navigateToUrl, activeNodes }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { isSideNavCollapsed } = useServices();

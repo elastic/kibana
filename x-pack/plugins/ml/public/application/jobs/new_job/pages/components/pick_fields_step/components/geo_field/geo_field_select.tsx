@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
@@ -23,13 +22,7 @@ interface Props {
   selectedField: Field | null;
 }
 
-export const GeoFieldSelect = (
-  {
-    fields,
-    changeHandler,
-    selectedField
-  }: Props
-) => {
+export const GeoFieldSelect = ({ fields, changeHandler, selectedField }: Props) => {
   const { renderOption, optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = useMemo(

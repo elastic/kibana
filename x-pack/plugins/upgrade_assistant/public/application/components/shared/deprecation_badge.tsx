@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 
@@ -26,12 +26,7 @@ interface Props {
   isResolved?: boolean;
 }
 
-export const DeprecationBadge = (
-  {
-    isCritical,
-    isResolved
-  }: Props
-) => {
+export const DeprecationBadge = ({ isCritical, isResolved }: Props) => {
   if (isResolved) {
     return (
       <EuiBadge color="success" data-test-subj="resolvedDeprecationBadge">

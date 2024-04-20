@@ -19,11 +19,7 @@ interface Props {
 
 const numberOfErrorsToDisplay = 5;
 
-export const PipelineFormError = (
-  {
-    error
-  }: Props
-) => {
+export const PipelineFormError = ({ error }: Props) => {
   const { services } = useKibana();
   const [isShowingAllErrors, setIsShowingAllErrors] = useState<boolean>(false);
   const safeErrorResult = toKnownError(error);

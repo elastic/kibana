@@ -15,11 +15,7 @@ interface Props {
   appId: string;
 }
 
-const InstallationCalloutComponent = (
-  {
-    appId
-  }: Props
-) => {
+const InstallationCalloutComponent = ({ appId }: Props) => {
   return (
     <>
       <EuiSpacer size="s" />

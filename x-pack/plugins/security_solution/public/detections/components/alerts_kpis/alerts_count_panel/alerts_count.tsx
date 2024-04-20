@@ -40,14 +40,12 @@ const Wrapper = styled.div`
   margin-top: -${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const AlertsCountComponent = (
-  {
-    data,
-    loading,
-    stackByField0,
-    stackByField1
-  }: AlertsCountProps
-) => {
+export const AlertsCountComponent = ({
+  data,
+  loading,
+  stackByField0,
+  stackByField1,
+}: AlertsCountProps) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const tableColumns = useMemo(

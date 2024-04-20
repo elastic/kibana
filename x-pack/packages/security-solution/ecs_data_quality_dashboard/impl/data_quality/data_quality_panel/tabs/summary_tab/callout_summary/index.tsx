@@ -42,23 +42,21 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const CalloutSummaryComponent = (
-  {
-    addSuccessToast,
-    addToNewCaseDisabled,
-    docsCount,
-    formatBytes,
-    formatNumber,
-    ilmPhase,
-    indexName,
-    isAssistantEnabled,
-    onAddToNewCase,
-    partitionedFieldMetadata,
-    pattern,
-    patternDocsCount,
-    sizeInBytes
-  }: Props
-) => {
+const CalloutSummaryComponent = ({
+  addSuccessToast,
+  addToNewCaseDisabled,
+  docsCount,
+  formatBytes,
+  formatNumber,
+  ilmPhase,
+  indexName,
+  isAssistantEnabled,
+  onAddToNewCase,
+  partitionedFieldMetadata,
+  pattern,
+  patternDocsCount,
+  sizeInBytes,
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const markdownComments: string[] = useMemo(
     () =>

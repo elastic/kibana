@@ -17,11 +17,7 @@ export interface AggListSummaryProps {
   list: PivotAggsConfigDict;
 }
 
-export const AggListSummary = (
-  {
-    list
-  }: AggListSummaryProps
-) => {
+export const AggListSummary = ({ list }: AggListSummaryProps) => {
   const aggNames = Object.keys(list);
   return (
     <EuiForm>

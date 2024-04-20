@@ -15,11 +15,7 @@ interface Props {
   verificationResults: RepositoryVerification | null;
 }
 
-export const RepositoryVerificationBadge = (
-  {
-    verificationResults
-  }: Props
-) => {
+export const RepositoryVerificationBadge = ({ verificationResults }: Props) => {
   if (!verificationResults) {
     return (
       <EuiHealth color="subdued">

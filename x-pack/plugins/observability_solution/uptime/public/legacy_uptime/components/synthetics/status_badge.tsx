@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, FC } from 'react';
+import React, { useContext } from 'react';
 import { UptimeAppColors } from '../../app/uptime_app';
 import { UptimeThemeContext } from '../../contexts';
 
@@ -47,13 +47,7 @@ export function textFromStatus(status?: string) {
   }
 }
 
-export const StatusBadge = (
-  {
-    status,
-    stepNo,
-    isMobile
-  }: StatusBadgeProps
-) => {
+export const StatusBadge = ({ status, stepNo, isMobile }: StatusBadgeProps) => {
   const theme = useContext(UptimeThemeContext);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">

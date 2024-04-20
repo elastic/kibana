@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,11 +19,7 @@ export interface AccessDeniedCalloutProps {
   missingCapabilities?: MlCapabilitiesKey[];
 }
 
-export const AccessDeniedCallout = (
-  {
-    missingCapabilities
-  }: AccessDeniedCalloutProps
-) => {
+export const AccessDeniedCallout = ({ missingCapabilities }: AccessDeniedCalloutProps) => {
   const {
     services: { docLinks },
   } = useMlKibana();

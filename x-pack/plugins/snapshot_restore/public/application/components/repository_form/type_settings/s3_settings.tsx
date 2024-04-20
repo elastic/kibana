@@ -31,14 +31,12 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const S3Settings = (
-  {
-    repository,
-    isManagedRepository,
-    updateRepositorySettings,
-    settingErrors
-  }: Props
-) => {
+export const S3Settings = ({
+  repository,
+  isManagedRepository,
+  updateRepositorySettings,
+  settingErrors,
+}: Props) => {
   const {
     settings: {
       bucket,

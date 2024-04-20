@@ -15,11 +15,7 @@ import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const ElasticsearchOverviewPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const ElasticsearchOverviewPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();

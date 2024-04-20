@@ -30,13 +30,7 @@ export interface Props {
   variablesHelpLink?: string;
 }
 
-export const VariablePopover = (
-  {
-    variables,
-    onSelect,
-    variablesHelpLink
-  }: Props
-) => {
+export const VariablePopover = ({ variables, onSelect, variablesHelpLink }: Props) => {
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   const closePopover = () => setIsVariablesPopoverOpen(false);
 

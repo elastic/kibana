@@ -59,13 +59,7 @@ const getCategoryConfig = (): FieldConfig<CategoryField> => ({
   ],
 });
 
-const CategoryFormFieldComponent = (
-  {
-    isLoading,
-    availableCategories,
-    formRowProps
-  }: Props
-) => {
+const CategoryFormFieldComponent = ({ isLoading, availableCategories, formRowProps }: Props) => {
   return (
     <UseField<CategoryField> path={'category'} config={getCategoryConfig()}>
       {(field) => {

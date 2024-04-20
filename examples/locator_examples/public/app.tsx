@@ -52,11 +52,7 @@ export const Routes = () => {
   );
 };
 
-export const LinksExample = (
-  props: {
-    appBasePath: string;
-  }
-) => {
+export const LinksExample = (props: { appBasePath: string }) => {
   const history = React.useMemo(
     () =>
       createBrowserHistory({

@@ -20,13 +20,11 @@ interface FleetServerHostSelectProps {
   setFleetServerHost: (host: FleetServerHost | null | undefined) => void;
 }
 
-export const FleetServerHostSelect = (
-  {
-    selectedFleetServerHost,
-    setFleetServerHost,
-    fleetServerHosts
-  }: FleetServerHostSelectProps
-) => {
+export const FleetServerHostSelect = ({
+  selectedFleetServerHost,
+  setFleetServerHost,
+  fleetServerHosts,
+}: FleetServerHostSelectProps) => {
   const theme = useTheme() as EuiTheme;
 
   const fleetServerHostsOptions = useMemo(

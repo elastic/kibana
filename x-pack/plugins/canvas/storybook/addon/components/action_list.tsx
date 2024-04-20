@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 import addons from '@storybook/addons';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,13 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EVENTS } from '../constants';
 import { RecordedAction, RecordedPayload } from '../types';
 
-export const ActionList = (
-  {
-    onSelect
-  }: {
-    onSelect: (action: RecordedAction | null) => void;
-  }
-) => {
+export const ActionList = ({ onSelect }: { onSelect: (action: RecordedAction | null) => void }) => {
   const [recordedActions, setRecordedActions] = useState<Record<string, RecordedAction>>({});
   const [selectedAction, setSelectedAction] = useState<RecordedAction | null>(null);
 

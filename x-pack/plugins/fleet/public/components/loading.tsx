@@ -9,14 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
 
-export const Loading = (
-  {
-    size
-  }: {
-    size?: EuiLoadingSpinnerSize;
-  }
-) => (<EuiFlexGroup justifyContent="spaceAround">
-  <EuiFlexItem grow={false}>
-    <EuiLoadingSpinner size={size || 'xl'} data-test-subj="loadingSpinner" />
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const Loading = ({ size }: { size?: EuiLoadingSpinnerSize }) => (
+  <EuiFlexGroup justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size={size || 'xl'} data-test-subj="loadingSpinner" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

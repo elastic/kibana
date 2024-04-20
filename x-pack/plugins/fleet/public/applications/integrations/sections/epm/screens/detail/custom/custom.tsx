@@ -17,11 +17,7 @@ interface Props {
   packageInfo: PackageInfo;
 }
 
-export const CustomViewPage = memo((
-  {
-    packageInfo
-  }: Props
-) => {
+export const CustomViewPage = memo(({ packageInfo }: Props) => {
   const customViewExtension = useUIExtension(packageInfo.name, 'package-detail-custom');
   const { getPath } = useLink();
   const pkgkey = useMemo(() => pkgKeyFromPackageInfo(packageInfo), [packageInfo]);

@@ -73,27 +73,25 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIpComponent = (
-  {
-    contextId,
-    eventId,
-    fieldName,
-    fieldType,
-    isAggregatable,
-    isDraggable,
-    truncate,
-    value
-  }: {
-    contextId: string;
-    eventId: string;
-    fieldName: string;
-    fieldType: string;
-    isAggregatable: boolean;
-    isDraggable: boolean;
-    truncate?: boolean;
-    value: string | object | null | undefined;
-  }
-) => {
+const NonDecoratedIpComponent = ({
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isDraggable,
+  truncate,
+  value,
+}: {
+  contextId: string;
+  eventId: string;
+  fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
+  isDraggable: boolean;
+  truncate?: boolean;
+  value: string | object | null | undefined;
+}) => {
   const key = useMemo(
     () =>
       `non-decorated-ip-draggable-wrapper-${getUniqueId({
@@ -153,22 +151,20 @@ interface AddressLinksItemProps extends Omit<AddressLinksProps, 'addresses'> {
   address: string;
 }
 
-const AddressLinksItemComponent = (
-  {
-    address,
-    Component,
-    contextId,
-    eventId,
-    fieldName,
-    fieldType,
-    isAggregatable,
-    isButton,
-    isDraggable,
-    onClick,
-    truncate,
-    title
-  }: AddressLinksItemProps
-) => {
+const AddressLinksItemComponent = ({
+  address,
+  Component,
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isButton,
+  isDraggable,
+  onClick,
+  truncate,
+  title,
+}: AddressLinksItemProps) => {
   const key = `address-links-draggable-wrapper-${getUniqueId({
     contextId,
     eventId,
@@ -299,22 +295,20 @@ interface AddressLinksProps {
   title?: string;
 }
 
-const AddressLinksComponent = (
-  {
-    addresses,
-    Component,
-    contextId,
-    eventId,
-    fieldName,
-    fieldType,
-    isAggregatable,
-    isButton,
-    isDraggable,
-    onClick,
-    truncate,
-    title
-  }: AddressLinksProps
-) => {
+const AddressLinksComponent = ({
+  addresses,
+  Component,
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isButton,
+  isDraggable,
+  onClick,
+  truncate,
+  title,
+}: AddressLinksProps) => {
   const uniqAddresses = useMemo(() => uniq(addresses), [addresses]);
 
   const content = useMemo(
@@ -368,35 +362,33 @@ const AddressLinks = React.memo(
     deepEqual(prevProps.addresses, nextProps.addresses)
 );
 
-const FormattedIpComponent = (
-  {
-    Component,
-    contextId,
-    eventId,
-    fieldName,
-    fieldType,
-    isAggregatable,
-    isDraggable,
-    isButton,
-    onClick,
-    title,
-    truncate,
-    value
-  }: {
-    Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-    contextId: string;
-    eventId: string;
-    fieldName: string;
-    fieldType: string;
-    isAggregatable: boolean;
-    isButton?: boolean;
-    isDraggable: boolean;
-    onClick?: () => void;
-    title?: string;
-    truncate?: boolean;
-    value: string | object | null | undefined;
-  }
-) => {
+const FormattedIpComponent = ({
+  Component,
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isDraggable,
+  isButton,
+  onClick,
+  title,
+  truncate,
+  value,
+}: {
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  contextId: string;
+  eventId: string;
+  fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
+  isButton?: boolean;
+  isDraggable: boolean;
+  onClick?: () => void;
+  title?: string;
+  truncate?: boolean;
+  value: string | object | null | undefined;
+}) => {
   if (isString(value) && !isEmpty(value)) {
     try {
       const addresses = JSON.parse(value);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -30,13 +30,7 @@ import { OverviewCard } from './overview_card';
 
 const MAX_VISIBLE_ALIASES = 3;
 
-export const AliasesDetails = (
-  {
-    aliases
-  }: {
-    aliases: Index['aliases'];
-  }
-) => {
+export const AliasesDetails = ({ aliases }: { aliases: Index['aliases'] }) => {
   const [isShowingAliases, setIsShowingAliases] = useState<boolean>(false);
   if (!Array.isArray(aliases)) {
     return null;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -27,25 +27,21 @@ import {
   type TransformEnabledFeatures,
 } from './serverless_context';
 
-export const App = (
-  {
-    history
-  }: {
-    history: ScopedHistory;
-  }
-) => (<Router history={history}>
-  <Routes>
-    <Route
-      path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-      component={CloneTransformSection}
-    />
-    <Route
-      path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-      component={CreateTransformSection}
-    />
-    <Route path={`/`} component={TransformManagementSection} />
-  </Routes>
-</Router>);
+export const App = ({ history }: { history: ScopedHistory }) => (
+  <Router history={history}>
+    <Routes>
+      <Route
+        path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+        component={CloneTransformSection}
+      />
+      <Route
+        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+        component={CreateTransformSection}
+      />
+      <Route path={`/`} component={TransformManagementSection} />
+    </Routes>
+  </Router>
+);
 
 export const renderApp = (
   element: HTMLElement,

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import {
@@ -69,16 +68,14 @@ export interface LogCategorizationPageProps {
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationFlyout = (
-  {
-    dataView,
-    savedSearch,
-    selectedField,
-    onClose,
-    embeddingOrigin,
-    additionalFilter
-  }: LogCategorizationPageProps
-) => {
+export const LogCategorizationFlyout = ({
+  dataView,
+  savedSearch,
+  selectedField,
+  onClose,
+  embeddingOrigin,
+  additionalFilter,
+}: LogCategorizationPageProps) => {
   const {
     notifications: { toasts },
     data: {

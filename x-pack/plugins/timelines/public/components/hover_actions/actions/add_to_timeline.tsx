@@ -65,8 +65,8 @@ export interface AddToTimelineButtonProps extends HoverActionComponentProps {
   timelineType?: string;
 }
 
-const AddToTimelineButton = React.memo((
-  {
+const AddToTimelineButton = React.memo(
+  ({
     Component,
     dataProvider,
     defaultFocusedButtonRef,
@@ -77,111 +77,111 @@ const AddToTimelineButton = React.memo((
     onClick,
     showTooltip = false,
     value,
-    timelineType = 'default'
-  }: AddToTimelineButtonProps
-) => {
-  const dispatch = useDispatch();
-  const { addSuccess } = useAppToasts();
-  const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
+    timelineType = 'default',
+  }: AddToTimelineButtonProps) => {
+    const dispatch = useDispatch();
+    const { addSuccess } = useAppToasts();
+    const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
 
-  const handleStartDragToTimeline = useCallback(() => {
-    if (draggableId != null) {
-      startDragToTimeline();
-    } else if (!isEmpty(dataProvider)) {
-      const addDataProvider = Array.isArray(dataProvider) ? dataProvider : [dataProvider];
-      addDataProvider.forEach((provider) => {
-        if (provider) {
-          dispatch(
-            addProviderToTimeline({
-              id: TimelineId.active,
-              dataProvider: provider,
-            })
-          );
-          addSuccess({
-            title: toMountPoint(
-              <AddSuccessMessage>
-                {i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
-                  provider.name,
-                  timelineType === 'default'
-                )}
-              </AddSuccessMessage>
-            ),
-          });
-        }
-      });
-    }
-
-    if (onClick != null) {
-      onClick();
-    }
-  }, [
-    addSuccess,
-    dataProvider,
-    dispatch,
-    draggableId,
-    onClick,
-    startDragToTimeline,
-    timelineType,
-  ]);
-
-  useEffect(() => {
-    if (!ownFocus) {
-      return;
-    }
-    if (keyboardEvent?.key === ADD_TO_TIMELINE_KEYBOARD_SHORTCUT) {
-      stopPropagationAndPreventDefault(keyboardEvent);
-      handleStartDragToTimeline();
-    }
-  }, [handleStartDragToTimeline, keyboardEvent, ownFocus]);
-
-  const button = useMemo(
-    () =>
-      Component ? (
-        <Component
-          aria-label={i18n.ADD_TO_TIMELINE}
-          buttonRef={defaultFocusedButtonRef}
-          data-test-subj="add-to-timeline"
-          icon="timeline"
-          iconType="timeline"
-          onClick={handleStartDragToTimeline}
-          title={i18n.ADD_TO_TIMELINE}
-        >
-          {i18n.ADD_TO_TIMELINE}
-        </Component>
-      ) : (
-        <EuiButtonIcon
-          aria-label={i18n.ADD_TO_TIMELINE}
-          buttonRef={defaultFocusedButtonRef}
-          className="timelines__hoverActionButton"
-          data-test-subj="add-to-timeline"
-          iconSize="s"
-          iconType="timeline"
-          onClick={handleStartDragToTimeline}
-        />
-      ),
-    [Component, defaultFocusedButtonRef, handleStartDragToTimeline]
-  );
-
-  return showTooltip ? (
-    <EuiToolTip
-      content={
-        <TooltipWithKeyboardShortcut
-          additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-            field,
-            value,
-          })}
-          content={i18n.ADD_TO_TIMELINE}
-          shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
-          showShortcut={ownFocus}
-        />
+    const handleStartDragToTimeline = useCallback(() => {
+      if (draggableId != null) {
+        startDragToTimeline();
+      } else if (!isEmpty(dataProvider)) {
+        const addDataProvider = Array.isArray(dataProvider) ? dataProvider : [dataProvider];
+        addDataProvider.forEach((provider) => {
+          if (provider) {
+            dispatch(
+              addProviderToTimeline({
+                id: TimelineId.active,
+                dataProvider: provider,
+              })
+            );
+            addSuccess({
+              title: toMountPoint(
+                <AddSuccessMessage>
+                  {i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(
+                    provider.name,
+                    timelineType === 'default'
+                  )}
+                </AddSuccessMessage>
+              ),
+            });
+          }
+        });
       }
-    >
-      {button}
-    </EuiToolTip>
-  ) : (
-    button
-  );
-});
+
+      if (onClick != null) {
+        onClick();
+      }
+    }, [
+      addSuccess,
+      dataProvider,
+      dispatch,
+      draggableId,
+      onClick,
+      startDragToTimeline,
+      timelineType,
+    ]);
+
+    useEffect(() => {
+      if (!ownFocus) {
+        return;
+      }
+      if (keyboardEvent?.key === ADD_TO_TIMELINE_KEYBOARD_SHORTCUT) {
+        stopPropagationAndPreventDefault(keyboardEvent);
+        handleStartDragToTimeline();
+      }
+    }, [handleStartDragToTimeline, keyboardEvent, ownFocus]);
+
+    const button = useMemo(
+      () =>
+        Component ? (
+          <Component
+            aria-label={i18n.ADD_TO_TIMELINE}
+            buttonRef={defaultFocusedButtonRef}
+            data-test-subj="add-to-timeline"
+            icon="timeline"
+            iconType="timeline"
+            onClick={handleStartDragToTimeline}
+            title={i18n.ADD_TO_TIMELINE}
+          >
+            {i18n.ADD_TO_TIMELINE}
+          </Component>
+        ) : (
+          <EuiButtonIcon
+            aria-label={i18n.ADD_TO_TIMELINE}
+            buttonRef={defaultFocusedButtonRef}
+            className="timelines__hoverActionButton"
+            data-test-subj="add-to-timeline"
+            iconSize="s"
+            iconType="timeline"
+            onClick={handleStartDragToTimeline}
+          />
+        ),
+      [Component, defaultFocusedButtonRef, handleStartDragToTimeline]
+    );
+
+    return showTooltip ? (
+      <EuiToolTip
+        content={
+          <TooltipWithKeyboardShortcut
+            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+              field,
+              value,
+            })}
+            content={i18n.ADD_TO_TIMELINE}
+            shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
+            showShortcut={ownFocus}
+          />
+        }
+      >
+        {button}
+      </EuiToolTip>
+    ) : (
+      button
+    );
+  }
+);
 
 AddToTimelineButton.displayName = 'AddToTimelineButton';
 

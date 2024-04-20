@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -34,20 +33,18 @@ interface ChartGridProps {
   loading?: boolean;
 }
 
-export const ChartGrid = (
-  {
-    aggFieldPairList,
-    chartSettings,
-    splitField,
-    lineChartsData,
-    modelData,
-    anomalyData,
-    deleteDetector,
-    jobType,
-    fieldValuesPerDetector,
-    loading = false
-  }: ChartGridProps
-) => {
+export const ChartGrid = ({
+  aggFieldPairList,
+  chartSettings,
+  splitField,
+  lineChartsData,
+  modelData,
+  anomalyData,
+  deleteDetector,
+  jobType,
+  fieldValuesPerDetector,
+  loading = false,
+}: ChartGridProps) => {
   const animateSplit = useAnimateSplit();
 
   return (

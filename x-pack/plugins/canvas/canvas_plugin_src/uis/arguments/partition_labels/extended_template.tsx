@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  ChangeEvent,
-  MouseEvent,
-  KeyboardEvent,
-  FunctionComponent,
-  useCallback,
-  useEffect,
-} from 'react';
+import React, { ChangeEvent, MouseEvent, KeyboardEvent, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFormRow,
@@ -44,12 +37,7 @@ const VALUES_FIELD = 'values';
 const VALUES_FORMAT_FIELD = 'valuesFormat';
 const PERCENT_DECIMALS_FIELD = 'percentDecimals';
 
-export const ExtendedTemplate = (
-  {
-    onValueChange,
-    argValue
-  }: Props
-) => {
+export const ExtendedTemplate = ({ onValueChange, argValue }: Props) => {
   const showLabels = getFieldValue(argValue, SHOW_FIELD);
   const showValues = getFieldValue(argValue, VALUES_FIELD);
   const valueFormat = getFieldValue(argValue, VALUES_FORMAT_FIELD);

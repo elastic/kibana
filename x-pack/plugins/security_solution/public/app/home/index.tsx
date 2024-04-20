@@ -34,11 +34,7 @@ interface HomePageProps {
   children: React.ReactNode;
 }
 
-const HomePageComponent = (
-  {
-    children
-  }: HomePageProps
-) => {
+const HomePageComponent = ({ children }: HomePageProps) => {
   const { pathname } = useLocation();
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();

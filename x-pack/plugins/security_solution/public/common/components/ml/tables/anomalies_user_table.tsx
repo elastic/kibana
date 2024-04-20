@@ -39,15 +39,13 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesUserTableComponent = (
-  {
-    startDate,
-    endDate,
-    userName,
-    skip,
-    type
-  }: AnomaliesUserTableProps
-) => {
+const AnomaliesUserTableComponent = ({
+  startDate,
+  endDate,
+  userName,
+  skip,
+  type,
+}: AnomaliesUserTableProps) => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
 

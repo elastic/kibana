@@ -14,11 +14,7 @@ interface LogLevelIndicatorProps {
   logLevel: LogLevel;
 }
 
-const LogLevelIndicatorComponent = (
-  {
-    logLevel
-  }: LogLevelIndicatorProps
-) => {
+const LogLevelIndicatorComponent = ({ logLevel }: LogLevelIndicatorProps) => {
   const color = getBadgeColor(logLevel);
   const text = getBadgeText(logLevel);
 

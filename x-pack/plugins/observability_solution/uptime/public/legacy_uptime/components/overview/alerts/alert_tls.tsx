@@ -17,44 +17,44 @@ interface Props {
   setExpirationThreshold: (value: number) => void;
 }
 
-export const AlertTlsComponent = (
-  {
-    ageThreshold,
-    expirationThreshold,
-    setAgeThreshold,
-    setExpirationThreshold
-  }: Props
-) => (<>
-  <EuiSpacer size="m" />
-  <EuiFlexGroup direction="column" gutterSize="none">
-    <EuiFlexItem>
-      <EuiExpression
-        aria-label={TlsTranslations.criteriaAriaLabel}
-        color="success"
-        description={TlsTranslations.criteriaDescription}
-        value={TlsTranslations.criteriaValue}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem data-test-subj="tlsExpirationThreshold">
-      <ValueExpression
-        value={expirationThreshold}
-        onChangeSelectedValue={(val) => {
-          setExpirationThreshold(val);
-        }}
-        description={TlsTranslations.expirationDescription}
-        errors={[]}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem data-test-subj="tlsAgeExpirationThreshold">
-      <ValueExpression
-        value={ageThreshold}
-        onChangeSelectedValue={(val) => {
-          setAgeThreshold(val);
-        }}
-        description={TlsTranslations.ageDescription}
-        errors={[]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiSpacer size="l" />
-</>);
+export const AlertTlsComponent = ({
+  ageThreshold,
+  expirationThreshold,
+  setAgeThreshold,
+  setExpirationThreshold,
+}: Props) => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <EuiExpression
+          aria-label={TlsTranslations.criteriaAriaLabel}
+          color="success"
+          description={TlsTranslations.criteriaDescription}
+          value={TlsTranslations.criteriaValue}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem data-test-subj="tlsExpirationThreshold">
+        <ValueExpression
+          value={expirationThreshold}
+          onChangeSelectedValue={(val) => {
+            setExpirationThreshold(val);
+          }}
+          description={TlsTranslations.expirationDescription}
+          errors={[]}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem data-test-subj="tlsAgeExpirationThreshold">
+        <ValueExpression
+          value={ageThreshold}
+          onChangeSelectedValue={(val) => {
+            setAgeThreshold(val);
+          }}
+          description={TlsTranslations.ageDescription}
+          errors={[]}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="l" />
+  </>
+);

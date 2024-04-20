@@ -20,12 +20,10 @@ export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-export const MissingPrivilegesCallOutBody = (
-  {
-    indexPrivileges,
-    clusterPrivileges
-  }: MissingPrivileges
-) => {
+export const MissingPrivilegesCallOutBody = ({
+  indexPrivileges,
+  clusterPrivileges,
+}: MissingPrivileges) => {
   const { docLinks } = useKibana().services;
 
   return (

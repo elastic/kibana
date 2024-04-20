@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,12 +16,7 @@ interface Props {
   analysisType: DataFrameAnalysisConfigType;
 }
 
-export const ViewResultsPanel = (
-  {
-    jobId,
-    analysisType
-  }: Props
-) => {
+export const ViewResultsPanel = ({ jobId, analysisType }: Props) => {
   const analyticsExplorationPageLink = useMlLink({
     page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
     pageState: {

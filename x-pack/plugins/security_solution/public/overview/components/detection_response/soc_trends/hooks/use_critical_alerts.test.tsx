@@ -50,13 +50,9 @@ const basicReturn = {
 };
 
 describe('useCriticalAlerts', () => {
-  const wrapperContainer = (
-    {
-      children
-    }: {
-      children?: React.ReactNode;
-    }
-  ) => (<TestProviders>{children}</TestProviders>);
+  const wrapperContainer = ({ children }: { children?: React.ReactNode }) => (
+    <TestProviders>{children}</TestProviders>
+  );
   const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
 
   beforeEach(() => {

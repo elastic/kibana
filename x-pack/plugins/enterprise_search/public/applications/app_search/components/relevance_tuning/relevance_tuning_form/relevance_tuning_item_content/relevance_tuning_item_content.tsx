@@ -24,14 +24,7 @@ interface Props {
   field?: SearchField;
 }
 
-export const RelevanceTuningItemContent = (
-  {
-    name,
-    type,
-    boosts,
-    field
-  }: Props
-) => {
+export const RelevanceTuningItemContent = ({ name, type, boosts, field }: Props) => {
   return (
     <>
       <EuiPanel hasShadow={false} className="relevanceTuningAccordionItem">

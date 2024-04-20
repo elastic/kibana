@@ -20,14 +20,7 @@ interface Props {
   text: string;
 }
 
-const RegistryEventDetailsComponent = (
-  {
-    contextId,
-    data,
-    isDraggable,
-    text
-  }: Props
-) => {
+const RegistryEventDetailsComponent = ({ contextId, data, isDraggable, text }: Props) => {
   const hostName: string | null | undefined = get('host.name[0]', data);
   const id = data._id;
   const processName: string | null | undefined = get('process.name[0]', data);

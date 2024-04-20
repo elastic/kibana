@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,14 +26,12 @@ interface RegressionDecisionPathProps {
   topClasses?: TopClasses;
 }
 
-export const RegressionDecisionPath = (
-  {
-    baseline,
-    featureImportance,
-    predictedValue,
-    predictionFieldName
-  }: RegressionDecisionPathProps
-) => {
+export const RegressionDecisionPath = ({
+  baseline,
+  featureImportance,
+  predictedValue,
+  predictionFieldName,
+}: RegressionDecisionPathProps) => {
   const { decisionPathData } = useDecisionPathData({
     baseline,
     featureImportance,

@@ -16,7 +16,7 @@ import {
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useContext, useEffect, useMemo, useRef, useState, FC } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
@@ -94,16 +94,14 @@ const ComposedStepImage = ({
   return <BaseStepImage stepIndex={stepIndex} stepName={stepName} url={url} />;
 };
 
-export const StepScreenshotDisplay = (
-  {
-    checkGroup,
-    isFullScreenshot: isScreenshotBlob,
-    isScreenshotRef,
-    stepIndex,
-    stepName,
-    lazyLoad = true
-  }: StepScreenshotDisplayProps
-) => {
+export const StepScreenshotDisplay = ({
+  checkGroup,
+  isFullScreenshot: isScreenshotBlob,
+  isScreenshotRef,
+  stepIndex,
+  stepName,
+  lazyLoad = true,
+}: StepScreenshotDisplayProps) => {
   const containerRef = useRef(null);
   const {
     colors: { lightestShade: pageBackground },

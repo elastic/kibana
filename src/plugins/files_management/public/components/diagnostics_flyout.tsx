@@ -31,7 +31,6 @@ import {
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18nTexts } from '../i18n_texts';
 import { useFilesManagementContext } from '../context';
@@ -40,11 +39,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const DiagnosticsFlyout = (
-  {
-    onClose
-  }: Props
-) => {
+export const DiagnosticsFlyout = ({ onClose }: Props) => {
   const { filesClient } = useFilesManagementContext();
   const { status, refetch, data, isLoading, error } = useQuery(['filesDiagnostics'], async () => {
     return filesClient.getMetrics();

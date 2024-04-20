@@ -32,13 +32,11 @@ export interface IndexManagementAppContextProps {
   dependencies: AppDependencies;
 }
 
-export const IndexManagementAppContext = (
-  {
-    children,
-    core,
-    dependencies
-  }: IndexManagementAppContextProps
-) => {
+export const IndexManagementAppContext = ({
+  children,
+  core,
+  dependencies,
+}: IndexManagementAppContextProps) => {
   const { docLinks, notifications, application, executionContext, overlays, theme } = core;
   const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 

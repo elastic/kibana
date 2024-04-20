@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 const i18nTexts = {
@@ -30,11 +30,7 @@ interface Props {
  * A call-to-action for users to migrate to data tiers if their cluster is still running
  * the deprecated node.data:true config.
  */
-export const CloudDataTierCallout = (
-  {
-    linkToCloudDeployment
-  }: Props
-) => {
+export const CloudDataTierCallout = ({ linkToCloudDeployment }: Props) => {
   return (
     <EuiCallOut title={i18nTexts.title} data-test-subj="cloudDataTierCallout">
       {i18nTexts.body}{' '}

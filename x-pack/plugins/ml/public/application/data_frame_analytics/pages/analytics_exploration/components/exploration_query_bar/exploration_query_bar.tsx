@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -39,14 +38,12 @@ export interface ExplorationQueryBarProps {
   };
 }
 
-export const ExplorationQueryBar = (
-  {
-    dataView,
-    setSearchQuery,
-    filters,
-    query
-  }: ExplorationQueryBarProps
-) => {
+export const ExplorationQueryBar = ({
+  dataView,
+  setSearchQuery,
+  filters,
+  query,
+}: ExplorationQueryBarProps) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(query);
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});

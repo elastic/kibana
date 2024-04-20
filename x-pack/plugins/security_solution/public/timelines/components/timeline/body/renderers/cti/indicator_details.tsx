@@ -27,78 +27,78 @@ interface IndicatorDetailsProps {
   isDraggable?: boolean;
 }
 
-export const IndicatorDetails = (
-  {
-    contextId,
-    eventId,
-    feedName,
-    indicatorReference,
-    indicatorType,
-    isDraggable
-  }: IndicatorDetailsProps
-) => (<EuiFlexGroup
-  alignItems="flexStart"
-  data-test-subj="threat-match-indicator-details"
-  direction="row"
-  justifyContent="center"
-  gutterSize="none"
-  wrap
->
-  {indicatorType && (
-    <EuiFlexItem grow={false}>
-      <DraggableBadge
-        contextId={contextId}
-        data-test-subj="threat-match-indicator-details-indicator-type"
-        eventId={eventId}
-        field={INDICATOR_MATCHED_TYPE}
-        isDraggable={isDraggable}
-        value={indicatorType}
-        isAggregatable={true}
-        fieldType={'keyword'}
-      />
-    </EuiFlexItem>
-  )}
-  {feedName && (
-    <>
-      <EuiFlexItem grow={false} component="span">
-        <HorizontalSpacer>
-          <FormattedMessage
-            defaultMessage="provided by"
-            id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.providerPreposition"
-          />
-        </HorizontalSpacer>
-      </EuiFlexItem>
+export const IndicatorDetails = ({
+  contextId,
+  eventId,
+  feedName,
+  indicatorReference,
+  indicatorType,
+  isDraggable,
+}: IndicatorDetailsProps) => (
+  <EuiFlexGroup
+    alignItems="flexStart"
+    data-test-subj="threat-match-indicator-details"
+    direction="row"
+    justifyContent="center"
+    gutterSize="none"
+    wrap
+  >
+    {indicatorType && (
       <EuiFlexItem grow={false}>
         <DraggableBadge
           contextId={contextId}
-          data-test-subj="threat-match-indicator-details-indicator-feedName"
+          data-test-subj="threat-match-indicator-details-indicator-type"
           eventId={eventId}
-          field={FEED_NAME}
+          field={INDICATOR_MATCHED_TYPE}
           isDraggable={isDraggable}
-          value={feedName}
+          value={indicatorType}
           isAggregatable={true}
           fieldType={'keyword'}
         />
       </EuiFlexItem>
-    </>
-  )}
-  {indicatorReference && (
-    <>
-      <EuiFlexItem grow={false}>
-        <HorizontalSpacer>{':'}</HorizontalSpacer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FormattedFieldValue
-          contextId={contextId}
-          data-test-subj="threat-match-indicator-details-indicator-reference"
-          eventId={eventId}
-          fieldName={INDICATOR_REFERENCE}
-          isDraggable={isDraggable}
-          value={indicatorReference}
-          isAggregatable={true}
-          fieldType={'keyword'}
-        />
-      </EuiFlexItem>
-    </>
-  )}
-</EuiFlexGroup>);
+    )}
+    {feedName && (
+      <>
+        <EuiFlexItem grow={false} component="span">
+          <HorizontalSpacer>
+            <FormattedMessage
+              defaultMessage="provided by"
+              id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.providerPreposition"
+            />
+          </HorizontalSpacer>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DraggableBadge
+            contextId={contextId}
+            data-test-subj="threat-match-indicator-details-indicator-feedName"
+            eventId={eventId}
+            field={FEED_NAME}
+            isDraggable={isDraggable}
+            value={feedName}
+            isAggregatable={true}
+            fieldType={'keyword'}
+          />
+        </EuiFlexItem>
+      </>
+    )}
+    {indicatorReference && (
+      <>
+        <EuiFlexItem grow={false}>
+          <HorizontalSpacer>{':'}</HorizontalSpacer>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedFieldValue
+            contextId={contextId}
+            data-test-subj="threat-match-indicator-details-indicator-reference"
+            eventId={eventId}
+            fieldName={INDICATOR_REFERENCE}
+            isDraggable={isDraggable}
+            value={indicatorReference}
+            isAggregatable={true}
+            fieldType={'keyword'}
+          />
+        </EuiFlexItem>
+      </>
+    )}
+  </EuiFlexGroup>
+);

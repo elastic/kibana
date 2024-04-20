@@ -8,22 +8,15 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 
-export const Link = (
-  {
-    path,
-    copy
-  }: {
-    path?: string;
-    copy: string;
-  }
-) => path ? (
-  <EuiLink href={path} target="_blank" data-test-subj="panel-link">
-    {copy}
-  </EuiLink>
-) : (
-  <EuiText color="subdued" size="s" data-test-subj="panel-no-link">
-    {copy}
-  </EuiText>
-);
+export const Link = ({ path, copy }: { path?: string; copy: string }) =>
+  path ? (
+    <EuiLink href={path} target="_blank" data-test-subj="panel-link">
+      {copy}
+    </EuiLink>
+  ) : (
+    <EuiText color="subdued" size="s" data-test-subj="panel-no-link">
+      {copy}
+    </EuiText>
+  );
 
 Link.displayName = 'Link';

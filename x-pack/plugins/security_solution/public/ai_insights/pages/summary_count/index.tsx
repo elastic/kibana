@@ -20,13 +20,7 @@ interface Props {
   lastUpdated: Date | null;
 }
 
-const SummaryCountComponent = (
-  {
-    alertsCount,
-    insightsCount,
-    lastUpdated
-  }: Props
-) => {
+const SummaryCountComponent = ({ alertsCount, insightsCount, lastUpdated }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [formattedDate, setFormattedDate] = useState<string>(EMPTY_LAST_UPDATED_DATE);
 

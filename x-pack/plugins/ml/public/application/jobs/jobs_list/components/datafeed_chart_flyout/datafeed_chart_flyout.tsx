@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -104,14 +103,12 @@ const customTooltip: CustomAnnotationTooltip = ({ details, datum }) => (
   </div>
 );
 
-export const DatafeedChartFlyout = (
-  {
-    jobId,
-    end,
-    onClose,
-    onModelSnapshotAnnotationClick
-  }: DatafeedChartFlyoutProps
-) => {
+export const DatafeedChartFlyout = ({
+  jobId,
+  end,
+  onClose,
+  onModelSnapshotAnnotationClick,
+}: DatafeedChartFlyoutProps) => {
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
@@ -656,13 +653,11 @@ interface JobListDatafeedChartFlyoutProps {
  * @param refreshJobs function to refresh the jobs list
  * @constructor
  */
-export const JobListDatafeedChartFlyout = (
-  {
-    setShowFunction,
-    unsetShowFunction,
-    refreshJobs
-  }: JobListDatafeedChartFlyoutProps
-) => {
+export const JobListDatafeedChartFlyout = ({
+  setShowFunction,
+  unsetShowFunction,
+  refreshJobs,
+}: JobListDatafeedChartFlyoutProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [job, setJob] = useState<MlSummaryJob | undefined>();
   const [jobWithStats, setJobWithStats] = useState<CombinedJobWithStats | undefined>();

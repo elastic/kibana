@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import moment, { type Moment } from 'moment';
 import { EuiDatePicker, EuiDatePickerRange, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
@@ -22,13 +21,11 @@ interface CustomUrlTimeRangePickerProps {
 /*
  * React component for the form for adding a custom time range.
  */
-export const CustomTimeRangePicker = (
-  {
-    onCustomTimeRangeChange,
-    customTimeRange,
-    disabled
-  }: CustomUrlTimeRangePickerProps
-) => {
+export const CustomTimeRangePicker = ({
+  onCustomTimeRangeChange,
+  customTimeRange,
+  disabled,
+}: CustomUrlTimeRangePickerProps) => {
   const [showCustomTimeRangeSelector, setShowCustomTimeRangeSelector] = useState<boolean>(false);
   const {
     services: {

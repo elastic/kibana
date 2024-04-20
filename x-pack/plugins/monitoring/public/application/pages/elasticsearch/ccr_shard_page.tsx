@@ -27,11 +27,7 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const ElasticsearchCcrShardPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const ElasticsearchCcrShardPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const [data, setData] = useState({} as any);

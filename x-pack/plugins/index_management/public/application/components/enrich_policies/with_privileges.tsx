@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import {
   PageLoading,
@@ -17,11 +17,7 @@ import {
 } from '../../../shared_imports';
 import { ENRICH_POLICIES_REQUIRED_PRIVILEGES } from '../../constants';
 
-export const EnrichPoliciesWithPrivileges = ({
-  children,
-}: {
-  children?: React.ReactNode;
-}) => {
+export const EnrichPoliciesWithPrivileges = ({ children }: { children?: React.ReactNode }) => {
   const { apiError } = useAuthorizationContext();
 
   if (apiError) {

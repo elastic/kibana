@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, ReactElement, useMemo, useState } from 'react';
+import React, { ReactElement, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -48,20 +48,18 @@ const popoverHeightStyle = css`
   overflow-x: hidden;
   overflow-y: auto;
 `;
-const HeaderMenuComponent = (
-  {
-    text,
-    dataTestSubj,
-    actions,
-    disableActions,
-    emptyButton,
-    useCustomActions,
-    iconType,
-    iconSide = 'left',
-    anchorPosition = 'downCenter',
-    panelPaddingSize = 's'
-  }: HeaderMenuComponentProps
-) => {
+const HeaderMenuComponent = ({
+  text,
+  dataTestSubj,
+  actions,
+  disableActions,
+  emptyButton,
+  useCustomActions,
+  iconType,
+  iconSide = 'left',
+  anchorPosition = 'downCenter',
+  panelPaddingSize = 's',
+}: HeaderMenuComponentProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);

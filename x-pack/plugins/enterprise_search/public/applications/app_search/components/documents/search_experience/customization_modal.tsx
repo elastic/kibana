@@ -37,14 +37,7 @@ interface Props {
 const fieldNameToComboBoxOption = (fieldName: string) => ({ label: fieldName });
 const comboBoxOptionToFieldName = ({ label }: { label: string }) => label;
 
-export const CustomizationModal = (
-  {
-    filterFields,
-    onClose,
-    onSave,
-    sortFields
-  }: Props
-) => {
+export const CustomizationModal = ({ filterFields, onClose, onSave, sortFields }: Props) => {
   const { engine } = useValues(EngineLogic);
 
   const [selectedFilterFields, setSelectedFilterFields] = useState(

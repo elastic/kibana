@@ -21,13 +21,7 @@ export interface EditableTitleProps {
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent = (
-  {
-    onSubmit,
-    isLoading,
-    title
-  }: EditableTitleProps
-) => {
+const EditableTitleComponent = ({ onSubmit, isLoading, title }: EditableTitleProps) => {
   const { releasePhase, permissions } = useCasesContext();
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);

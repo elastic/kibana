@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
@@ -31,15 +30,13 @@ interface BrushBadgeProps {
  * @param width - width of badge
  * @constructor
  */
-export const BrushBadge = (
-  {
-    label,
-    marginLeft,
-    timestampFrom,
-    timestampTo,
-    width
-  }: BrushBadgeProps
-) => {
+export const BrushBadge = ({
+  label,
+  marginLeft,
+  timestampFrom,
+  timestampTo,
+  width,
+}: BrushBadgeProps) => {
   // If "from" and "to" are on the same day, we skip displaying the date twice.
   const dateFrom = formatDate(timestampFrom, DATE_FORMAT);
   const dateTo = formatDate(timestampTo, DATE_FORMAT);

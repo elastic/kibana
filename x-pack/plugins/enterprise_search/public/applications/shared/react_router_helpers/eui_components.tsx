@@ -33,87 +33,85 @@ import { generateReactRouterProps, ReactRouterProps } from '.';
  */
 
 type ReactRouterEuiLinkProps = ReactRouterProps & EuiLinkAnchorProps;
-export const EuiLinkTo = (
-  {
-    to,
-    onClick,
-    shouldNotCreateHref,
-    ...rest
-  }: ReactRouterEuiLinkProps
-) => <EuiLink {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+export const EuiLinkTo = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}: ReactRouterEuiLinkProps) => (
+  <EuiLink {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
 
 type ReactRouterEuiButtonProps = ReactRouterProps & EuiButtonProps;
-export const EuiButtonTo = (
-  {
-    to,
-    onClick,
-    shouldNotCreateHref,
-    ...rest
-  }: ReactRouterEuiButtonProps
-) => <EuiButton {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+export const EuiButtonTo = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}: ReactRouterEuiButtonProps) => (
+  <EuiButton {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
 
 type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
-export const EuiButtonEmptyTo = (
-  {
-    to,
-    onClick,
-    shouldNotCreateHref,
-    ...rest
-  }: ReactRouterEuiButtonEmptyProps
-) => (<EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />);
+export const EuiButtonEmptyTo = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}: ReactRouterEuiButtonEmptyProps) => (
+  <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
 
 type ReactRouterEuiButtonIconProps = ReactRouterProps & EuiButtonIconProps;
-export const EuiButtonIconTo = (
-  {
-    to,
-    onClick,
-    shouldNotCreateHref,
-    ...rest
-  }: ReactRouterEuiButtonIconProps
-) => (<EuiButtonIcon {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />);
+export const EuiButtonIconTo = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}: ReactRouterEuiButtonIconProps) => (
+  <EuiButtonIcon {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
 
 type ReactRouterEuiPanelProps = ReactRouterProps & EuiPanelProps;
-export const EuiPanelTo = (
-  {
-    to,
-    onClick,
-    shouldNotCreateHref,
-    ...rest
-  }: ReactRouterEuiPanelProps
-) => <EuiPanel {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+export const EuiPanelTo = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}: ReactRouterEuiPanelProps) => (
+  <EuiPanel {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
 
 type ReactRouterEuiCardProps = ReactRouterProps & EuiCardProps;
-export const EuiCardTo = (
-  {
-    to,
-    onClick,
-    shouldNotCreateHref,
-    ...rest
-  }: ReactRouterEuiCardProps
-) => <EuiCard {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+export const EuiCardTo = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}: ReactRouterEuiCardProps) => (
+  <EuiCard {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
 
 type ReactRouterEuiListGroupItemProps = ReactRouterProps & EuiListGroupItemProps;
-export const EuiListGroupItemTo = (
-  {
-    to,
-    onClick,
-    shouldNotCreateHref,
-    ...rest
-  }: ReactRouterEuiListGroupItemProps
-) => (<EuiListGroupItem {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />);
+export const EuiListGroupItemTo = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}: ReactRouterEuiListGroupItemProps) => (
+  <EuiListGroupItem {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+);
 
 // TODO Right now this only supports the `color` prop of EuiBadgeProps
 // Trying to use EuiBadgeProps in its entirety causes a succession of Typescript errors
 type ReactRouterEuiBadgeProps = ReactRouterProps & Pick<EuiBadgeProps, 'color'> & { label: string };
-export const EuiBadgeTo = (
-  {
-    label,
-    onClick,
-    shouldNotCreateHref,
-    to,
-    ...rest
-  }: ReactRouterEuiBadgeProps
-) => {
+export const EuiBadgeTo = ({
+  label,
+  onClick,
+  shouldNotCreateHref,
+  to,
+  ...rest
+}: ReactRouterEuiBadgeProps) => {
   const routerProps = generateReactRouterProps({ onClick, shouldNotCreateHref, to });
 
   const badgeProps: EuiBadgeProps = {

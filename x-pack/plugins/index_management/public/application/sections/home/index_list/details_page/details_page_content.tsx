@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButton,
   EuiPageHeader,
@@ -83,16 +83,14 @@ interface Props {
   fetchIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
 }
-export const DetailsPageContent = (
-  {
-    index,
-    tab,
-    history,
-    search,
-    fetchIndexDetails,
-    navigateToIndicesList
-  }: Props
-) => {
+export const DetailsPageContent = ({
+  index,
+  tab,
+  history,
+  search,
+  fetchIndexDetails,
+  navigateToIndicesList,
+}: Props) => {
   const {
     config: { enableIndexStats },
     plugins: { console: consolePlugin },

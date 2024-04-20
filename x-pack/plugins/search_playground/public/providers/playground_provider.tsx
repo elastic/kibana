@@ -16,12 +16,7 @@ export interface PlaygroundProviderProps {
   defaultValues?: Partial<Pick<ChatForm, ChatFormFields.indices>>;
 }
 
-export const PlaygroundProvider = (
-  {
-    children,
-    defaultValues
-  }: PlaygroundProviderProps
-) => {
+export const PlaygroundProvider = ({ children, defaultValues }: PlaygroundProviderProps) => {
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -14,11 +13,7 @@ interface Props {
   error: string | JSX.Element;
 }
 
-export const ErrorCallout = (
-  {
-    error
-  }: Props
-) => {
+export const ErrorCallout = ({ error }: Props) => {
   let errorCallout = (
     <EuiCallOut
       title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.generalErrorTitle', {

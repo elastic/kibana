@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,19 +41,16 @@ const modalMessage = i18n.translate(
   }
 );
 
-export const SwitchModal = (
-  {
-    onCancel,
-    onConfirm
-  }: Props
-) => (<EuiConfirmModal
-  title={modalTitle}
-  onCancel={onCancel}
-  onConfirm={onConfirm}
-  cancelButtonText={cancelButtonText}
-  confirmButtonText={applyChangesText}
-  buttonColor="danger"
-  defaultFocusedButton="confirm"
->
-  <p>{modalMessage}</p>
-</EuiConfirmModal>);
+export const SwitchModal = ({ onCancel, onConfirm }: Props) => (
+  <EuiConfirmModal
+    title={modalTitle}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    cancelButtonText={cancelButtonText}
+    confirmButtonText={applyChangesText}
+    buttonColor="danger"
+    defaultFocusedButton="confirm"
+  >
+    <p>{modalMessage}</p>
+  </EuiConfirmModal>
+);

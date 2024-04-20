@@ -8,7 +8,6 @@
 import { EuiFormRow, EuiText } from '@elastic/eui';
 import type { EuiFormRowProps } from '@elastic/eui';
 import { useFormikContext } from 'formik';
-import type { FunctionComponent } from 'react';
 import React, { Children } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';

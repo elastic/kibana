@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
@@ -17,11 +16,7 @@ interface Props {
   jobCount: number;
 }
 
-export const JobsAwaitingNodeWarning = (
-  {
-    jobCount
-  }: Props
-) => {
+export const JobsAwaitingNodeWarning = ({ jobCount }: Props) => {
   const { showNodeInfo } = useEnabledFeatures();
   if (showNodeInfo === false || lazyMlNodesAvailable() === false || jobCount === 0) {
     return null;

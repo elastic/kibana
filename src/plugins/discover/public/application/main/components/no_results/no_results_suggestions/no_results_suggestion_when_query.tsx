@@ -160,11 +160,9 @@ export interface NoResultsSuggestionWhenQueryProps {
   querySyntax: string | undefined;
 }
 
-export const NoResultsSuggestionWhenQuery = (
-  {
-    querySyntax
-  }: NoResultsSuggestionWhenQueryProps
-) => {
+export const NoResultsSuggestionWhenQuery = ({
+  querySyntax,
+}: NoResultsSuggestionWhenQueryProps) => {
   const services = useDiscoverServices();
   const { docLinks } = services;
   const examplesMeta = getExamples(querySyntax, docLinks);

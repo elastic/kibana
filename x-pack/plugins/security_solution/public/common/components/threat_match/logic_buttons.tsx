@@ -22,36 +22,36 @@ interface LogicButtonsProps {
   onOrClicked: () => void;
 }
 
-export const LogicButtons = (
-  {
-    isOrDisabled = false,
-    isAndDisabled = false,
-    onAndClicked,
-    onOrClicked
-  }: LogicButtonsProps
-) => (<EuiFlexGroup gutterSize="s" alignItems="center">
-  <EuiFlexItem grow={false}>
-    <MyEuiButton
-      fill
-      size="s"
-      iconType="plusInCircle"
-      onClick={onAndClicked}
-      data-test-subj="andButton"
-      isDisabled={isAndDisabled}
-    >
-      {i18n.AND}
-    </MyEuiButton>
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <MyEuiButton
-      fill
-      size="s"
-      iconType="plusInCircle"
-      onClick={onOrClicked}
-      isDisabled={isOrDisabled}
-      data-test-subj="orButton"
-    >
-      {i18n.OR}
-    </MyEuiButton>
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const LogicButtons = ({
+  isOrDisabled = false,
+  isAndDisabled = false,
+  onAndClicked,
+  onOrClicked,
+}: LogicButtonsProps) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <MyEuiButton
+        fill
+        size="s"
+        iconType="plusInCircle"
+        onClick={onAndClicked}
+        data-test-subj="andButton"
+        isDisabled={isAndDisabled}
+      >
+        {i18n.AND}
+      </MyEuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <MyEuiButton
+        fill
+        size="s"
+        iconType="plusInCircle"
+        onClick={onOrClicked}
+        isDisabled={isOrDisabled}
+        data-test-subj="orButton"
+      >
+        {i18n.OR}
+      </MyEuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

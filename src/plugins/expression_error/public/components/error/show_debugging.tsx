@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import Debug from '../debug';
 import { Props } from './error';
 
-export const ShowDebugging = (
-  {
-    payload
-  }: Props
-) => {
+export const ShowDebugging = ({ payload }: Props) => {
   const [expanded, setExpanded] = useState(false);
 
   return process.env.NODE_ENV === 'production' ? null : (

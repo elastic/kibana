@@ -45,14 +45,7 @@ interface Props {
   certificates: CertResult & { loading?: boolean };
 }
 
-export const CertificateList = (
-  {
-    page,
-    certificates,
-    sort,
-    onChange
-  }: Props
-) => {
+export const CertificateList = ({ page, certificates, sort, onChange }: Props) => {
   const onTableChange = (newVal: Partial<Props>) => {
     onChange(newVal.page as Page, newVal.sort as CertSort);
   };

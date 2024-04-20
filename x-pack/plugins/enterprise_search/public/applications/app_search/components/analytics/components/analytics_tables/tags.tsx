@@ -18,11 +18,7 @@ interface Props {
   tags?: Query['tags'];
 }
 
-export const TagsCount = (
-  {
-    tags
-  }: Props
-) => {
+export const TagsCount = ({ tags }: Props) => {
   if (!tags?.length) return null;
 
   return (
@@ -37,11 +33,7 @@ export const TagsCount = (
   );
 };
 
-export const TagsList = (
-  {
-    tags
-  }: Props
-) => {
+export const TagsList = ({ tags }: Props) => {
   if (!tags?.length) return null;
 
   const displayedTags = tags.slice(0, 2);

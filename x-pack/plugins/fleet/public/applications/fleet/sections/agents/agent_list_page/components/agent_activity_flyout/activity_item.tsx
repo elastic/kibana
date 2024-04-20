@@ -31,17 +31,15 @@ import {
 } from './helpers';
 import { ViewAgentsButton } from './view_agents_button';
 
-export const ActivityItem = (
-  {
-    action,
-    onClickViewAgents,
-    agentPolicies
-  }: {
-    action: ActionStatus;
-    onClickViewAgents: (action: ActionStatus) => void;
-    agentPolicies: AgentPolicy[];
-  }
-) => {
+export const ActivityItem = ({
+  action,
+  onClickViewAgents,
+  agentPolicies,
+}: {
+  action: ActionStatus;
+  onClickViewAgents: (action: ActionStatus) => void;
+  agentPolicies: AgentPolicy[];
+}) => {
   const completeTitle =
     action.type === 'POLICY_CHANGE' && action.nbAgentsActioned === 0 ? (
       <EuiText>

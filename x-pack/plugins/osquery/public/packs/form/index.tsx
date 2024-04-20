@@ -53,13 +53,11 @@ interface PackFormProps {
   isReadOnly?: boolean;
 }
 
-const PackFormComponent = (
-  {
-    defaultValue,
-    editMode = false,
-    isReadOnly = false
-  }: PackFormProps
-) => {
+const PackFormComponent = ({
+  defaultValue,
+  editMode = false,
+  isReadOnly = false,
+}: PackFormProps) => {
   const [shardsToggleState, setShardsToggleState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const handleToggle = useCallback((isOpen) => {

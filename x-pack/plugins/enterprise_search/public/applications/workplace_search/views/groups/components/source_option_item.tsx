@@ -19,15 +19,13 @@ interface SourceOptionItemProps {
   source: ContentSource;
 }
 
-export const SourceOptionItem = (
-  {
-    source
-  }: SourceOptionItemProps
-) => (<EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center" responsive={false}>
-  <EuiFlexItem grow={false}>
-    <SourceIcon {...source} size="s" />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <TruncatedContent tooltipType="title" content={source.name} length={MAX_LENGTH} />
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const SourceOptionItem = ({ source }: SourceOptionItemProps) => (
+  <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <SourceIcon {...source} size="s" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <TruncatedContent tooltipType="title" content={source.name} length={MAX_LENGTH} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

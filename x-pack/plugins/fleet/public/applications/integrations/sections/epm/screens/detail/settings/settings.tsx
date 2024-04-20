@@ -120,12 +120,7 @@ interface Props {
   theme$: Observable<CoreTheme>;
 }
 
-export const SettingsPage = memo((
-  {
-    packageInfo,
-    theme$
-  }: Props
-) => {
+export const SettingsPage = memo(({ packageInfo, theme$ }: Props) => {
   const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -23,15 +22,13 @@ interface Props {
 
 const MAX_WIDTH = 560;
 
-export const MetricSelector = (
-  {
-    fields,
-    detectorChangeHandler,
-    selectedOptions,
-    maxWidth,
-    removeOptions
-  }: Props
-) => {
+export const MetricSelector = ({
+  fields,
+  detectorChangeHandler,
+  selectedOptions,
+  maxWidth,
+  removeOptions,
+}: Props) => {
   return (
     <EuiFlexGroup style={{ maxWidth: maxWidth !== undefined ? maxWidth : MAX_WIDTH }}>
       <EuiFlexItem>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 
@@ -20,13 +19,7 @@ interface Props {
   validationMessages: CalloutMessage[];
 }
 
-export const ValidationStep = (
-  {
-    checksInProgress,
-    validationMessages,
-    setCurrentStep
-  }: Props
-) => {
+export const ValidationStep = ({ checksInProgress, validationMessages, setCurrentStep }: Props) => {
   const callouts = validationMessages.map((m, i) => <Callout key={`${m.id}_${i}`} {...m} />);
 
   return (

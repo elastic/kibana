@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiSwitch,
@@ -90,17 +90,15 @@ type Props = Pick<
   | 'toggleLogging'
 >;
 
-export const DeprecationLoggingToggle = (
-  {
-    isDeprecationLogIndexingEnabled,
-    isLoading,
-    isUpdating,
-    fetchError,
-    updateError,
-    resendRequest,
-    toggleLogging
-  }: Props
-) => {
+export const DeprecationLoggingToggle = ({
+  isDeprecationLogIndexingEnabled,
+  isLoading,
+  isUpdating,
+  fetchError,
+  updateError,
+  resendRequest,
+  toggleLogging,
+}: Props) => {
   if (isLoading) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" className="upgToggleLoading">

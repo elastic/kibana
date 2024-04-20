@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { formatDate, EuiPanel, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 
@@ -25,11 +25,7 @@ interface ExpandedRowHealthPaneProps {
   health: TransformStats['health'];
 }
 
-export const ExpandedRowHealthPane = (
-  {
-    health
-  }: ExpandedRowHealthPaneProps
-) => {
+export const ExpandedRowHealthPane = ({ health }: ExpandedRowHealthPaneProps) => {
   const healthStatus = mapEsHealthStatus2TransformHealthStatus(health?.status);
   const issues = health?.issues;
 

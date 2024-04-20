@@ -17,24 +17,22 @@ import { histogramConfigs } from './histogram_configs';
 
 const ID = 'anomaliesHistogramQuery';
 
-const AnomaliesQueryTabBodyComponent = (
-  {
-    deleteQuery,
-    endDate,
-    setQuery,
-    skip,
-    startDate,
-    type,
-    filterQuery,
-    anomaliesFilterQuery,
-    AnomaliesTableComponent,
-    flowTarget,
-    ip,
-    hostName,
-    userName,
-    indexNames
-  }: AnomaliesQueryTabBodyProps
-) => {
+const AnomaliesQueryTabBodyComponent = ({
+  deleteQuery,
+  endDate,
+  setQuery,
+  skip,
+  startDate,
+  type,
+  filterQuery,
+  anomaliesFilterQuery,
+  AnomaliesTableComponent,
+  flowTarget,
+  ip,
+  hostName,
+  userName,
+  indexNames,
+}: AnomaliesQueryTabBodyProps) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 

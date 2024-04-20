@@ -24,11 +24,7 @@ jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
 
-const TestProviders = (
-  {
-    children
-  }: {}
-) => {
+const TestProviders = ({ children }: {}) => {
   const queryClient = new QueryClient();
   return (
     <I18nProvider>

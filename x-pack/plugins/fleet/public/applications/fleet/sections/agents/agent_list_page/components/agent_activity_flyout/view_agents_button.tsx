@@ -13,17 +13,15 @@ import type { ActionStatus, AgentPolicy } from '../../../../../types';
 
 const MAX_VIEW_AGENTS_COUNT = 1000;
 
-export const ViewAgentsButton = (
-  {
-    action,
-    onClickViewAgents,
-    agentPolicies
-  }: {
-    action: ActionStatus;
-    onClickViewAgents: (action: ActionStatus) => void;
-    agentPolicies?: AgentPolicy[];
-  }
-) => {
+export const ViewAgentsButton = ({
+  action,
+  onClickViewAgents,
+  agentPolicies,
+}: {
+  action: ActionStatus;
+  onClickViewAgents: (action: ActionStatus) => void;
+  agentPolicies?: AgentPolicy[];
+}) => {
   const isDisabled = useMemo(() => {
     if (action.type !== 'POLICY_CHANGE') {
       return action.nbAgentsActionCreated > MAX_VIEW_AGENTS_COUNT;

@@ -8,14 +8,14 @@
 import { EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
 
-export const LogEntryExampleMessagesLoadingIndicator = (
-  {
-    exampleCount
-  }: {
-    exampleCount: number;
-  }
-) => (<>
-  {Array.from(new Array(exampleCount), (_value, index) => (
-    <EuiSkeletonText key={index} lines={1} />
-  ))}
-</>);
+export const LogEntryExampleMessagesLoadingIndicator = ({
+  exampleCount,
+}: {
+  exampleCount: number;
+}) => (
+  <>
+    {Array.from(new Array(exampleCount), (_value, index) => (
+      <EuiSkeletonText key={index} lines={1} />
+    ))}
+  </>
+);

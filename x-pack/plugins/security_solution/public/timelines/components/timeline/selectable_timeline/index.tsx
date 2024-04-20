@@ -82,16 +82,14 @@ export interface SelectableTimelineProps {
   placeholder?: string;
 }
 
-const SelectableTimelineComponent = (
-  {
-    hideUntitled = false,
-    getSelectableOptions,
-    onClosePopover,
-    onTimelineChange,
-    timelineType,
-    placeholder
-  }: SelectableTimelineProps
-) => {
+const SelectableTimelineComponent = ({
+  hideUntitled = false,
+  getSelectableOptions,
+  onClosePopover,
+  onTimelineChange,
+  timelineType,
+  placeholder,
+}: SelectableTimelineProps) => {
   const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
   const [heightTrigger, setHeightTrigger] = useState(0);
   const [searchTimelineValue, setSearchTimelineValue] = useState<string>('');

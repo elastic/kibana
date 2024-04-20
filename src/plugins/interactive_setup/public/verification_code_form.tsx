@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -39,15 +38,13 @@ export interface VerificationCodeFormProps {
   onSuccess?(values: VerificationCodeFormValues): void;
 }
 
-export const VerificationCodeForm = (
-  {
-    defaultValues = {
-      code: '',
-    },
+export const VerificationCodeForm = ({
+  defaultValues = {
+    code: '',
+  },
 
-    onSuccess
-  }: VerificationCodeFormProps
-) => {
+  onSuccess,
+}: VerificationCodeFormProps) => {
   const { http } = useKibana();
   const [form, eventHandlers] = useForm({
     defaultValues,

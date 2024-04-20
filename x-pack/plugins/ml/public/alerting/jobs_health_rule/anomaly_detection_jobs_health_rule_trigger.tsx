@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
@@ -26,13 +25,11 @@ import { ALL_JOBS_SELECTION } from '../../../common/constants/alerts';
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
-const AnomalyDetectionJobsHealthRuleTrigger = (
-  {
-    ruleParams,
-    setRuleParams,
-    errors
-  }: MlAnomalyAlertTriggerProps
-) => {
+const AnomalyDetectionJobsHealthRuleTrigger = ({
+  ruleParams,
+  setRuleParams,
+  errors,
+}: MlAnomalyAlertTriggerProps) => {
   const {
     services: { http },
   } = useMlKibana();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFlexItem, EuiFlexGroup, EuiPageTemplate, EuiEmptyPrompt } from '@elastic/eui';
 
@@ -48,14 +48,12 @@ const MissingCapabilities = () => (
   </EuiFlexGroup>
 );
 
-export const CapabilitiesWrapper = (
-  {
-    children,
-    requiredCapabilities
-  }: {
-    requiredCapabilities: TransformCapability | TransformCapability[];
-  }
-) => {
+export const CapabilitiesWrapper = ({
+  children,
+  requiredCapabilities,
+}: {
+  requiredCapabilities: TransformCapability | TransformCapability[];
+}) => {
   const capabilities = useTransformCapabilities();
 
   const hasCapabilities = toArray(requiredCapabilities).every((c) => capabilities[c]);

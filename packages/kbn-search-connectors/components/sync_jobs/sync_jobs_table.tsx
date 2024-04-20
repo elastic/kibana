@@ -42,22 +42,20 @@ interface SyncJobHistoryTableProps {
   };
 }
 
-export const SyncJobsTable = (
-  {
-    isLoading,
-    onPaginate,
-    pagination,
-    syncJobs,
-    type,
+export const SyncJobsTable = ({
+  isLoading,
+  onPaginate,
+  pagination,
+  syncJobs,
+  type,
 
-    cancelConfirmModalProps = {
-      onConfirmCb: () => {},
-      isLoading: false,
-      setSyncJobIdToCancel: () => {},
-      syncJobIdToCancel: undefined,
-    }
-  }: SyncJobHistoryTableProps
-) => {
+  cancelConfirmModalProps = {
+    onConfirmCb: () => {},
+    isLoading: false,
+    setSyncJobIdToCancel: () => {},
+    syncJobIdToCancel: undefined,
+  },
+}: SyncJobHistoryTableProps) => {
   const [selectedSyncJob, setSelectedSyncJob] = useState<ConnectorSyncJob | undefined>(undefined);
   const columns: Array<EuiBasicTableColumn<ConnectorSyncJob>> = [
     {

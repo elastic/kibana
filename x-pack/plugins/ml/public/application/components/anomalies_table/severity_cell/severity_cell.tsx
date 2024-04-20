@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getSeverityColor, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
@@ -25,12 +24,7 @@ interface SeverityCellProps {
 /**
  * Renders anomaly severity score with single or multi-bucket impact marker.
  */
-export const SeverityCell = memo((
-  {
-    score,
-    isMultiBucketAnomaly
-  }: SeverityCellProps
-) => {
+export const SeverityCell = memo(({ score, isMultiBucketAnomaly }: SeverityCellProps) => {
   const severity = getFormattedSeverityScore(score);
   const color = getSeverityColor(score);
   return isMultiBucketAnomaly ? (

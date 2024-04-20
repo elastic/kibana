@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { cloneDeep } from 'lodash/fp';
-import type { EuiLinkAnchorProps, EuiTextProps } from '@elastic/eui';
+import type { EuiTextProps } from '@elastic/eui';
 import { EuiMarkdownFormat, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import unified from 'unified';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,13 +24,7 @@ interface Props {
   textSize?: EuiTextProps['size'];
 }
 
-const MarkdownRendererComponent = (
-  {
-    children,
-    disableLinks,
-    textSize = 'm'
-  }: Props
-) => {
+const MarkdownRendererComponent = ({ children, disableLinks, textSize = 'm' }: Props) => {
   const MarkdownLinkProcessingComponent = useMemo(
     // eslint-disable-next-line react/display-name
     () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,

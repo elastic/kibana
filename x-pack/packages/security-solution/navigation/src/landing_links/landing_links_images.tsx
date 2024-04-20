@@ -57,13 +57,11 @@ const useStyles = () => {
   };
 };
 
-export const LandingLinksImages = React.memo(function LandingLinksImages(
-  {
-    items,
-    urlState,
-    onLinkClick
-  }: LandingLinksImagesProps
-) {
+export const LandingLinksImages = React.memo(function LandingLinksImages({
+  items,
+  urlState,
+  onLinkClick,
+}: LandingLinksImagesProps) {
   const styles = useStyles();
   return (
     <EuiFlexGroup direction="column">

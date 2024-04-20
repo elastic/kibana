@@ -37,17 +37,15 @@ export interface ToolbarSelectorProps {
   onChange?: (chosenOption: SelectableEntry | undefined) => void;
 }
 
-export const ToolbarSelector = (
-  {
-    'data-test-subj': dataTestSubj,
-    'data-selected-value': dataSelectedValue,
-    buttonLabel,
-    popoverTitle,
-    options,
-    searchable,
-    onChange
-  }: ToolbarSelectorProps
-) => {
+export const ToolbarSelector = ({
+  'data-test-subj': dataTestSubj,
+  'data-selected-value': dataSelectedValue,
+  buttonLabel,
+  popoverTitle,
+  options,
+  searchable,
+  onChange,
+}: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>();

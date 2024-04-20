@@ -26,14 +26,7 @@ export interface AggListProps {
   onChange(previousAggName: AggName, item: PivotAggsConfig): void;
 }
 
-export const AggListForm = (
-  {
-    deleteHandler,
-    list,
-    onChange,
-    options
-  }: AggListProps
-) => {
+export const AggListForm = ({ deleteHandler, list, onChange, options }: AggListProps) => {
   const listKeys = Object.keys(list);
   return (
     <>

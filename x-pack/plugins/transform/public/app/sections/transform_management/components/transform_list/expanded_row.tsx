@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 import { EuiTabbedContent } from '@elastic/eui';
@@ -29,12 +29,7 @@ interface Props {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
-export const ExpandedRow = (
-  {
-    item,
-    onAlertEdit
-  }: Props
-) => {
+export const ExpandedRow = ({ item, onAlertEdit }: Props) => {
   const tabId = stringHash(item.id);
 
   const tabs = [

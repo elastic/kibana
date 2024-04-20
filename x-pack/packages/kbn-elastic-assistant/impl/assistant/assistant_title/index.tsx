@@ -31,25 +31,23 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
  * Renders a header title, a tooltip button, and a popover with
  * information about the assistant feature and access to documentation.
  */
-export const AssistantTitle = (
-  {
-    isDisabled = false,
-    title,
-    docLinks,
-    selectedConversation,
-    isFlyoutMode,
-    onChange,
-    refetchConversationsState
-  }: {
-    isDisabled?: boolean;
-    title?: string;
-    docLinks: Omit<DocLinksStart, 'links'>;
-    selectedConversation: Conversation | undefined;
-    isFlyoutMode: boolean;
-    onChange: (updatedConversation: Conversation) => void;
-    refetchConversationsState: () => Promise<void>;
-  }
-) => {
+export const AssistantTitle = ({
+  isDisabled = false,
+  title,
+  docLinks,
+  selectedConversation,
+  isFlyoutMode,
+  onChange,
+  refetchConversationsState,
+}: {
+  isDisabled?: boolean;
+  title?: string;
+  docLinks: Omit<DocLinksStart, 'links'>;
+  selectedConversation: Conversation | undefined;
+  isFlyoutMode: boolean;
+  onChange: (updatedConversation: Conversation) => void;
+  refetchConversationsState: () => Promise<void>;
+}) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();

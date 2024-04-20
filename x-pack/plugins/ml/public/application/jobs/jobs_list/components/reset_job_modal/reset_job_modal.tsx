@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -37,13 +36,7 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const ResetJobModal = (
-  {
-    setShowFunction,
-    unsetShowFunction,
-    refreshJobs
-  }: Props
-) => {
+export const ResetJobModal = ({ setShowFunction, unsetShowFunction, refreshJobs }: Props) => {
   const [resetting, setResetting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);

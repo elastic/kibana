@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 
@@ -28,15 +28,7 @@ export interface Props {
 
 const INDENTATION_PX = 34;
 
-export const TreeNode = (
-  {
-    processor,
-    processorInfo,
-    onAction,
-    movingProcessor,
-    level
-  }: Props
-) => {
+export const TreeNode = ({ processor, processorInfo, onAction, movingProcessor, level }: Props) => {
   const stringSelector = processorInfo.selector.join('.');
   const handlers = useMemo((): Handlers => {
     return {

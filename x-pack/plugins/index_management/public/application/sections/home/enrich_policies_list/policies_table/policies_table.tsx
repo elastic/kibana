@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
@@ -31,14 +31,12 @@ const pagination = {
   pageSizeOptions: [25, 50, 100],
 };
 
-export const PoliciesTable = (
-  {
-    policies,
-    onReloadClick,
-    onDeletePolicyClick,
-    onExecutePolicyClick
-  }: Props
-) => {
+export const PoliciesTable = ({
+  policies,
+  onReloadClick,
+  onDeletePolicyClick,
+  onExecutePolicyClick,
+}: Props) => {
   const { history } = useAppContext();
 
   const renderToolsRight = () => {

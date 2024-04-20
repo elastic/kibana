@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_check';

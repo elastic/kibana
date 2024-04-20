@@ -52,12 +52,7 @@ const prettifyFormJson = (policy: SerializedPolicy): PolicyJson => {
   };
 };
 
-export const PolicyJsonFlyout = (
-  {
-    policyName,
-    close
-  }: Props
-) => {
+export const PolicyJsonFlyout = ({ policyName, close }: Props) => {
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid

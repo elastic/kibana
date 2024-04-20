@@ -35,35 +35,32 @@ interface Props {
   title: TitleProp;
 }
 
-const TitleComponent = (
-  {
-    title,
-    badgeOptions
-  }: Props
-) => (<EuiTitle size="l">
-  <Header data-test-subj="header-page-title">
-    <TitleWrapper>
-      <TruncatableText tooltipContent={typeof title === 'string' ? title : null}>
-        {title}
-      </TruncatableText>
-    </TitleWrapper>
-    {badgeOptions && (
-      <>
-        {badgeOptions.beta ? (
-          <EuiBetaBadge
-            label={badgeOptions.text}
-            tooltipContent={badgeOptions.tooltip}
-            tooltipPosition="bottom"
-            size={badgeOptions.size}
-          />
-        ) : (
-          <EuiBadge color={badgeOptions.color || 'hollow'} title="">
-            {badgeOptions.text}
-          </EuiBadge>
-        )}
-      </>
-    )}
-  </Header>
-</EuiTitle>);
+const TitleComponent = ({ title, badgeOptions }: Props) => (
+  <EuiTitle size="l">
+    <Header data-test-subj="header-page-title">
+      <TitleWrapper>
+        <TruncatableText tooltipContent={typeof title === 'string' ? title : null}>
+          {title}
+        </TruncatableText>
+      </TitleWrapper>
+      {badgeOptions && (
+        <>
+          {badgeOptions.beta ? (
+            <EuiBetaBadge
+              label={badgeOptions.text}
+              tooltipContent={badgeOptions.tooltip}
+              tooltipPosition="bottom"
+              size={badgeOptions.size}
+            />
+          ) : (
+            <EuiBadge color={badgeOptions.color || 'hollow'} title="">
+              {badgeOptions.text}
+            </EuiBadge>
+          )}
+        </>
+      )}
+    </Header>
+  </EuiTitle>
+);
 
 export const Title = React.memo(TitleComponent);

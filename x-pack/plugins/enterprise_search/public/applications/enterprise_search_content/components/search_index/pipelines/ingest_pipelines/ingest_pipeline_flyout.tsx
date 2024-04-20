@@ -48,19 +48,17 @@ interface IngestPipelineFlyoutProps {
   setPipeline: (pipeline: IngestPipelineParams) => void;
 }
 
-export const IngestPipelineFlyout = (
-  {
-    closeFlyout,
-    displayOnly,
-    extractionDisabled,
-    indexName,
-    ingestionMethod,
-    isLoading,
-    pipeline,
-    savePipeline,
-    setPipeline
-  }: IngestPipelineFlyoutProps
-) => {
+export const IngestPipelineFlyout = ({
+  closeFlyout,
+  displayOnly,
+  extractionDisabled,
+  indexName,
+  ingestionMethod,
+  isLoading,
+  pipeline,
+  savePipeline,
+  setPipeline,
+}: IngestPipelineFlyoutProps) => {
   const { name } = pipeline;
 
   return (

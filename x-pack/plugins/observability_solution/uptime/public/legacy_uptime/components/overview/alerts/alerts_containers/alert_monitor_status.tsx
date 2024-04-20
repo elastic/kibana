@@ -34,17 +34,15 @@ interface Props {
   };
 }
 
-export const AlertMonitorStatus = (
-  {
-    id,
-    enabled,
-    numTimes,
-    setRuleParams,
-    timerange,
-    ruleParams,
-    stackVersion
-  }: Props
-) => {
+export const AlertMonitorStatus = ({
+  id,
+  enabled,
+  numTimes,
+  setRuleParams,
+  timerange,
+  ruleParams,
+  stackVersion,
+}: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {

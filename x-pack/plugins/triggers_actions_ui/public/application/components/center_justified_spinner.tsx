@@ -14,12 +14,10 @@ interface Props {
   size?: EuiLoadingSpinnerSize;
 }
 
-export const CenterJustifiedSpinner = (
-  {
-    size
-  }: Props
-) => (<EuiFlexGroup data-test-subj="centerJustifiedSpinner" justifyContent="center">
-  <EuiFlexItem grow={false}>
-    <EuiLoadingSpinner size={size || 'xl'} />
-  </EuiFlexItem>
-</EuiFlexGroup>);
+export const CenterJustifiedSpinner = ({ size }: Props) => (
+  <EuiFlexGroup data-test-subj="centerJustifiedSpinner" justifyContent="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size={size || 'xl'} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

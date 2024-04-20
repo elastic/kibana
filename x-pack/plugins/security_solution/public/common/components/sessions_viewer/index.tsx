@@ -74,18 +74,16 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   },
 };
 
-const SessionsViewComponent = (
-  {
-    tableId,
-    endDate,
-    entityType = 'sessions',
-    pageFilters,
-    startDate,
-    filterQuery,
-    columns = sessionsHeaders,
-    defaultColumns = sessionsHeaders
-  }: SessionsComponentsProps
-) => {
+const SessionsViewComponent = ({
+  tableId,
+  endDate,
+  entityType = 'sessions',
+  pageFilters,
+  startDate,
+  filterQuery,
+  columns = sessionsHeaders,
+  defaultColumns = sessionsHeaders,
+}: SessionsComponentsProps) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {

@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { pick } from 'lodash';
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import {
@@ -49,13 +48,11 @@ export interface AnomalyChartsInitializerProps {
   onCancel: () => void;
 }
 
-export const ChangePointChartInitializer = (
-  {
-    initialInput,
-    onCreate,
-    onCancel
-  }: AnomalyChartsInitializerProps
-) => {
+export const ChangePointChartInitializer = ({
+  initialInput,
+  onCreate,
+  onCancel,
+}: AnomalyChartsInitializerProps) => {
   const {
     unifiedSearch: {
       ui: { IndexPatternSelect },
@@ -181,17 +178,15 @@ export type FormControlsProps = Pick<
   'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
 >;
 
-export const FormControls = (
-  {
-    formInput,
-    onChange,
-    onValidationChange
-  }: {
-    formInput?: FormControlsProps;
-    onChange: (update: FormControlsProps) => void;
-    onValidationChange: (isValid: boolean) => void;
-  }
-) => {
+export const FormControls = ({
+  formInput,
+  onChange,
+  onValidationChange,
+}: {
+  formInput?: FormControlsProps;
+  onChange: (update: FormControlsProps) => void;
+  onValidationChange: (isValid: boolean) => void;
+}) => {
   const { metricFieldOptions, splitFieldsOptions } = useChangePointDetectionControlsContext();
   const prevMetricFieldOptions = usePrevious(metricFieldOptions);
 

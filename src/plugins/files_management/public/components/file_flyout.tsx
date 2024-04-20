@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
-import type { FunctionComponent } from 'react';
 import { FileImage as Image } from '@kbn/shared-ux-file-image';
 import React from 'react';
 import { i18nTexts } from '../i18n_texts';
@@ -33,12 +32,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const FileFlyout = (
-  {
-    onClose,
-    file
-  }: Props
-) => {
+export const FileFlyout = ({ onClose, file }: Props) => {
   const { filesClient } = useFilesManagementContext();
   return (
     <EuiFlyout ownFocus onClose={onClose} size="m">

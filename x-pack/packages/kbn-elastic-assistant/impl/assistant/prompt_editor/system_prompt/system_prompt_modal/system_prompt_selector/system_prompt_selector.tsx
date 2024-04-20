@@ -41,196 +41,196 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
 /**
  * Selector for choosing and deleting System Prompts
  */
-export const SystemPromptSelector = React.memo((
-  {
+export const SystemPromptSelector = React.memo(
+  ({
     autoFocus = false,
     systemPrompts,
     onSystemPromptDeleted,
     onSystemPromptSelectionChange,
-    selectedSystemPrompt
-  }: Props
-) => {
-  // Form options
-  const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
-    systemPrompts.map((sp) => ({
-      value: {
-        isDefault: sp.isDefault ?? false,
-        isNewConversationDefault: sp.isNewConversationDefault ?? false,
-      },
-      label: sp.name,
-      'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
-    }))
-  );
-  const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
-    return selectedSystemPrompt
-      ? [
-          {
-            value: {
-              isDefault: selectedSystemPrompt.isDefault ?? false,
-              isNewConversationDefault: selectedSystemPrompt.isNewConversationDefault ?? false,
+    selectedSystemPrompt,
+  }: Props) => {
+    // Form options
+    const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
+      systemPrompts.map((sp) => ({
+        value: {
+          isDefault: sp.isDefault ?? false,
+          isNewConversationDefault: sp.isNewConversationDefault ?? false,
+        },
+        label: sp.name,
+        'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
+      }))
+    );
+    const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
+      return selectedSystemPrompt
+        ? [
+            {
+              value: {
+                isDefault: selectedSystemPrompt.isDefault ?? false,
+                isNewConversationDefault: selectedSystemPrompt.isNewConversationDefault ?? false,
+              },
+              label: selectedSystemPrompt.name,
             },
-            label: selectedSystemPrompt.name,
-          },
-        ]
-      : [];
-  }, [selectedSystemPrompt]);
+          ]
+        : [];
+    }, [selectedSystemPrompt]);
 
-  const handleSelectionChange = useCallback(
-    (systemPromptSelectorOption: SystemPromptSelectorOption[]) => {
-      const newSystemPrompt =
-        systemPromptSelectorOption.length === 0
-          ? undefined
-          : systemPrompts.find((sp) => sp.name === systemPromptSelectorOption[0]?.label) ??
-            systemPromptSelectorOption[0]?.label;
-      onSystemPromptSelectionChange(newSystemPrompt);
-    },
-    [onSystemPromptSelectionChange, systemPrompts]
-  );
+    const handleSelectionChange = useCallback(
+      (systemPromptSelectorOption: SystemPromptSelectorOption[]) => {
+        const newSystemPrompt =
+          systemPromptSelectorOption.length === 0
+            ? undefined
+            : systemPrompts.find((sp) => sp.name === systemPromptSelectorOption[0]?.label) ??
+              systemPromptSelectorOption[0]?.label;
+        onSystemPromptSelectionChange(newSystemPrompt);
+      },
+      [onSystemPromptSelectionChange, systemPrompts]
+    );
 
-  // Callback for when user types to create a new system prompt
-  const onCreateOption = useCallback(
-    (searchValue, flattenedOptions = []) => {
-      if (!searchValue || !searchValue.trim().toLowerCase()) {
-        return;
-      }
+    // Callback for when user types to create a new system prompt
+    const onCreateOption = useCallback(
+      (searchValue, flattenedOptions = []) => {
+        if (!searchValue || !searchValue.trim().toLowerCase()) {
+          return;
+        }
 
-      const normalizedSearchValue = searchValue.trim().toLowerCase();
-      const optionExists =
-        flattenedOptions.findIndex(
-          (option: SystemPromptSelectorOption) =>
-            option.label.trim().toLowerCase() === normalizedSearchValue
-        ) !== -1;
+        const normalizedSearchValue = searchValue.trim().toLowerCase();
+        const optionExists =
+          flattenedOptions.findIndex(
+            (option: SystemPromptSelectorOption) =>
+              option.label.trim().toLowerCase() === normalizedSearchValue
+          ) !== -1;
 
-      const newOption = {
-        value: searchValue,
-        label: searchValue,
-      };
+        const newOption = {
+          value: searchValue,
+          label: searchValue,
+        };
 
-      if (!optionExists) {
-        setOptions([...options, newOption]);
-      }
-      handleSelectionChange([newOption]);
-    },
-    [handleSelectionChange, options]
-  );
+        if (!optionExists) {
+          setOptions([...options, newOption]);
+        }
+        handleSelectionChange([newOption]);
+      },
+      [handleSelectionChange, options]
+    );
 
-  // Callback for when user selects a quick prompt
-  const onChange = useCallback(
-    (newOptions: SystemPromptSelectorOption[]) => {
-      if (newOptions.length === 0) {
-        handleSelectionChange([]);
-      } else if (options.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
-        handleSelectionChange(newOptions);
-      }
-    },
-    [handleSelectionChange, options]
-  );
+    // Callback for when user selects a quick prompt
+    const onChange = useCallback(
+      (newOptions: SystemPromptSelectorOption[]) => {
+        if (newOptions.length === 0) {
+          handleSelectionChange([]);
+        } else if (options.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
+          handleSelectionChange(newOptions);
+        }
+      },
+      [handleSelectionChange, options]
+    );
 
-  // Callback for when user deletes a quick prompt
-  const onDelete = useCallback(
-    (label: string) => {
-      setOptions(options.filter((o) => o.label !== label));
-      if (selectedOptions?.[0]?.label === label) {
-        handleSelectionChange([]);
-      }
-      onSystemPromptDeleted(label);
-    },
-    [handleSelectionChange, onSystemPromptDeleted, options, selectedOptions]
-  );
+    // Callback for when user deletes a quick prompt
+    const onDelete = useCallback(
+      (label: string) => {
+        setOptions(options.filter((o) => o.label !== label));
+        if (selectedOptions?.[0]?.label === label) {
+          handleSelectionChange([]);
+        }
+        onSystemPromptDeleted(label);
+      },
+      [handleSelectionChange, onSystemPromptDeleted, options, selectedOptions]
+    );
 
-  const renderOption: (
-    option: SystemPromptSelectorOption,
-    searchValue: string,
-    OPTION_CONTENT_CLASSNAME: string
-  ) => React.ReactNode = (option, searchValue, contentClassName) => {
-    const { label, value } = option;
-    return (
-      <EuiFlexGroup
-        alignItems="center"
-        className={'parentFlexGroup'}
-        component={'span'}
-        justifyContent="spaceBetween"
-        data-test-subj="systemPromptOptionSelector"
-      >
-        <EuiFlexItem
-          grow={false}
+    const renderOption: (
+      option: SystemPromptSelectorOption,
+      searchValue: string,
+      OPTION_CONTENT_CLASSNAME: string
+    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      const { label, value } = option;
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          className={'parentFlexGroup'}
           component={'span'}
-          css={css`
-            width: calc(100% - 60px);
-          `}
+          justifyContent="spaceBetween"
+          data-test-subj="systemPromptOptionSelector"
         >
-          <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
-            <EuiFlexItem
-              component={'span'}
-              grow={false}
-              css={css`
-                max-width: 100%;
-              `}
-            >
-              <EuiHighlight
-                search={searchValue}
+          <EuiFlexItem
+            grow={false}
+            component={'span'}
+            css={css`
+              width: calc(100% - 60px);
+            `}
+          >
+            <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
+              <EuiFlexItem
+                component={'span'}
+                grow={false}
                 css={css`
-                  overflow: hidden;
-                  text-overflow: ellipsis;
+                  max-width: 100%;
                 `}
               >
-                {label}
-              </EuiHighlight>
-            </EuiFlexItem>
-            {value?.isNewConversationDefault && (
-              <EuiFlexItem grow={false} component={'span'}>
-                <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
-                  <EuiIcon type={'starFilled'} />
-                </EuiToolTip>
+                <EuiHighlight
+                  search={searchValue}
+                  css={css`
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  `}
+                >
+                  {label}
+                </EuiHighlight>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        {!value?.isDefault && (
-          <EuiFlexItem grow={false} component={'span'}>
-            <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
-              <EuiButtonIcon
-                iconType="cross"
-                aria-label={i18n.DELETE_SYSTEM_PROMPT}
-                color="danger"
-                data-test-subj="delete-prompt"
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  onDelete(label);
-                }}
-                css={css`
-                  visibility: hidden;
-                  .parentFlexGroup:hover & {
-                    visibility: visible;
-                  }
-                `}
-              />
-            </EuiToolTip>
+              {value?.isNewConversationDefault && (
+                <EuiFlexItem grow={false} component={'span'}>
+                  <EuiToolTip position="right" content={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}>
+                    <EuiIcon type={'starFilled'} />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  };
 
-  return (
-    <EuiComboBox
-      aria-label={i18n.SYSTEM_PROMPT_SELECTOR}
-      className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
-      compressed
-      data-test-subj={TEST_IDS.SYSTEM_PROMPT_SELECTOR}
-      fullWidth
-      placeholder={i18n.SYSTEM_PROMPT_SELECTOR}
-      customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
-      singleSelection={{ asPlainText: true }}
-      options={options}
-      selectedOptions={selectedOptions}
-      onChange={onChange}
-      onCreateOption={onCreateOption}
-      renderOption={renderOption}
-      autoFocus={autoFocus}
-    />
-  );
-});
+          {!value?.isDefault && (
+            <EuiFlexItem grow={false} component={'span'}>
+              <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.DELETE_SYSTEM_PROMPT}
+                  color="danger"
+                  data-test-subj="delete-prompt"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    onDelete(label);
+                  }}
+                  css={css`
+                    visibility: hidden;
+                    .parentFlexGroup:hover & {
+                      visibility: visible;
+                    }
+                  `}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    };
+
+    return (
+      <EuiComboBox
+        aria-label={i18n.SYSTEM_PROMPT_SELECTOR}
+        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
+        compressed
+        data-test-subj={TEST_IDS.SYSTEM_PROMPT_SELECTOR}
+        fullWidth
+        placeholder={i18n.SYSTEM_PROMPT_SELECTOR}
+        customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={onChange}
+        onCreateOption={onCreateOption}
+        renderOption={renderOption}
+        autoFocus={autoFocus}
+      />
+    );
+  }
+);
 
 SystemPromptSelector.displayName = 'SystemPromptSelector';

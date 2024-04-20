@@ -28,15 +28,13 @@ interface GroupRowSourcesDropdownProps {
   closePopover(): void;
 }
 
-export const GroupRowSourcesDropdown = (
-  {
-    isPopoverOpen,
-    numOptions,
-    groupSources,
-    onButtonClick,
-    closePopover
-  }: GroupRowSourcesDropdownProps
-) => {
+export const GroupRowSourcesDropdown = ({
+  isPopoverOpen,
+  numOptions,
+  groupSources,
+  onButtonClick,
+  closePopover,
+}: GroupRowSourcesDropdownProps) => {
   const { euiTheme } = useEuiTheme();
 
   const toggleLink = (

@@ -7,7 +7,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
@@ -54,13 +54,7 @@ interface Props {
   features: FeatureCatalogueEntry[];
 }
 
-export const Overview = (
-  {
-    newsFetchResult,
-    solutions,
-    features
-  }: Props
-) => {
+export const Overview = ({ newsFetchResult, solutions, features }: Props) => {
   const [isNewKibanaInstance, setNewKibanaInstance] = useState(false);
   const [hasESData, setHasESData] = useState(false);
   const [hasDataView, setHasDataView] = useState(false);

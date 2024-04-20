@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -44,13 +44,7 @@ const i18nTexts = {
   },
 };
 
-export const DefaultToDataTiersNotice = (
-  {
-    phase
-  }: {
-    phase: PhaseWithAllocation;
-  }
-) => {
+export const DefaultToDataTiersNotice = ({ phase }: { phase: PhaseWithAllocation }) => {
   return (
     <EuiCallOut
       data-test-subj="defaultToDataTiersNotice"

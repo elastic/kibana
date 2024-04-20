@@ -65,15 +65,13 @@ const DEFAULT_DESCRIPTION = (
   </p>
 );
 
-export const CrawlRulesTable = (
-  {
-    description = DEFAULT_DESCRIPTION,
-    domainId,
-    engineName,
-    crawlRules,
-    defaultCrawlRule
-  }: CrawlRulesTableProps
-) => {
+export const CrawlRulesTable = ({
+  description = DEFAULT_DESCRIPTION,
+  domainId,
+  engineName,
+  crawlRules,
+  defaultCrawlRule,
+}: CrawlRulesTableProps) => {
   const { updateCrawlRules } = useActions(CrawlerSingleDomainLogic);
 
   const columns: Array<InlineEditableTableColumn<ItemWithAnID>> = [

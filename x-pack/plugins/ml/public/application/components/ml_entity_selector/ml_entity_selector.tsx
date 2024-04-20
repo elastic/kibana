@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiComboBox,
@@ -55,15 +54,13 @@ const defaultEntities = {
  * @param handleDuplicates
  * @constructor
  */
-export const MlEntitySelector = (
-  {
-    entityTypes = defaultEntities,
-    multiSelect = true,
-    selectedOptions,
-    onSelectionChange,
-    handleDuplicates = false
-  }: MlEntitySelectorProps
-) => {
+export const MlEntitySelector = ({
+  entityTypes = defaultEntities,
+  multiSelect = true,
+  selectedOptions,
+  onSelectionChange,
+  handleDuplicates = false,
+}: MlEntitySelectorProps) => {
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
   const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();

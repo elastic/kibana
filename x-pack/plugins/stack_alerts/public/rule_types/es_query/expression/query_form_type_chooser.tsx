@@ -45,12 +45,7 @@ export interface QueryFormTypeProps {
   onFormTypeSelect: (formType: SearchType | null) => void;
 }
 
-export const QueryFormTypeChooser = (
-  {
-    searchType,
-    onFormTypeSelect
-  }: QueryFormTypeProps
-) => {
+export const QueryFormTypeChooser = ({ searchType, onFormTypeSelect }: QueryFormTypeProps) => {
   const { uiSettings } = useTriggerUiActionServices();
   const isEsqlEnabled = uiSettings?.get('discover:enableESQL');
 

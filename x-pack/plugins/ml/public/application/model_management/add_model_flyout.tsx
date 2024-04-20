@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
@@ -47,13 +47,7 @@ export type AddModelFlyoutTabId = 'clickToDownload' | 'manualDownload';
 /**
  * Flyout for downloading elastic curated models and showing instructions for importing third-party models.
  */
-export const AddModelFlyout = (
-  {
-    onClose,
-    onSubmit,
-    modelDownloads
-  }: AddModelFlyoutProps
-) => {
+export const AddModelFlyout = ({ onClose, onSubmit, modelDownloads }: AddModelFlyoutProps) => {
   const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
   const isClickToDownloadTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
 
@@ -153,12 +147,10 @@ interface ClickToDownloadTabContentProps {
 /**
  * Tab content for selecting a model to download.
  */
-const ClickToDownloadTabContent = (
-  {
-    modelDownloads,
-    onModelDownload
-  }: ClickToDownloadTabContentProps
-) => {
+const ClickToDownloadTabContent = ({
+  modelDownloads,
+  onModelDownload,
+}: ClickToDownloadTabContentProps) => {
   const {
     services: { docLinks },
   } = useMlKibana();

@@ -18,23 +18,21 @@ import { ContextMenuActions } from './context_menu_actions';
 import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
-export const PackagePolicyActionsMenu = (
-  {
-    agentPolicy,
-    packagePolicy,
-    showAddAgent,
-    upgradePackagePolicyHref,
-    defaultIsOpen = false,
-    from
-  }: {
-    agentPolicy?: AgentPolicy;
-    packagePolicy: InMemoryPackagePolicy;
-    showAddAgent?: boolean;
-    defaultIsOpen?: boolean;
-    upgradePackagePolicyHref?: string;
-    from?: 'fleet-policy-list' | undefined;
-  }
-) => {
+export const PackagePolicyActionsMenu = ({
+  agentPolicy,
+  packagePolicy,
+  showAddAgent,
+  upgradePackagePolicyHref,
+  defaultIsOpen = false,
+  from,
+}: {
+  agentPolicy?: AgentPolicy;
+  packagePolicy: InMemoryPackagePolicy;
+  showAddAgent?: boolean;
+  defaultIsOpen?: boolean;
+  upgradePackagePolicyHref?: string;
+  from?: 'fleet-policy-list' | undefined;
+}) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;

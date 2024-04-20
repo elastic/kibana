@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, type MouseEventHandler, useState } from 'react';
+import React, { type MouseEventHandler, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
@@ -91,16 +91,14 @@ interface TransformListProps {
   transformsStatsLoading: boolean;
 }
 
-export const TransformList = (
-  {
-    isLoading,
-    onCreateTransform,
-    transformNodes,
-    transforms,
-    transformsLoading,
-    transformsStatsLoading
-  }: TransformListProps
-) => {
+export const TransformList = ({
+  isLoading,
+  onCreateTransform,
+  transformNodes,
+  transforms,
+  transformsLoading,
+  transformsStatsLoading,
+}: TransformListProps) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
 

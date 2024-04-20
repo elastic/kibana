@@ -42,11 +42,7 @@ export interface Deps {
   openDateViewNumberFieldEditor: () => void;
 }
 
-const UsingAnExistingFieldFormatExample = (
-  props: {
-    deps: Deps;
-  }
-) => {
+const UsingAnExistingFieldFormatExample = (props: { deps: Deps }) => {
   const sample = example1.getSample(props.deps.fieldFormats);
 
   return (
@@ -83,11 +79,7 @@ const UsingAnExistingFieldFormatExample = (
   );
 };
 
-const CreatingCustomFieldFormat = (
-  props: {
-    deps: Deps;
-  }
-) => {
+const CreatingCustomFieldFormat = (props: { deps: Deps }) => {
   const sample = example2.getSample(props.deps.fieldFormats);
 
   return (
@@ -141,11 +133,7 @@ const CreatingCustomFieldFormat = (
   );
 };
 
-const CreatingCustomFieldFormatEditor = (
-  props: {
-    deps: Deps;
-  }
-) => {
+const CreatingCustomFieldFormatEditor = (props: { deps: Deps }) => {
   return (
     <>
       <EuiText>
@@ -177,11 +165,7 @@ const CreatingCustomFieldFormatEditor = (
   );
 };
 
-export const App = (
-  props: {
-    deps: Deps;
-  }
-) => {
+export const App = (props: { deps: Deps }) => {
   return (
     <EuiProvider>
       <EuiPageTemplate offset={0}>

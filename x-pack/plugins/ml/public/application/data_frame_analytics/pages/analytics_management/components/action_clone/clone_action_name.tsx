@@ -6,7 +6,6 @@
  */
 
 import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -493,11 +492,7 @@ interface CloneActionNameProps {
   isDisabled: boolean;
 }
 
-export const CloneActionName = (
-  {
-    isDisabled
-  }: CloneActionNameProps
-) => {
+export const CloneActionName = ({ isDisabled }: CloneActionNameProps) => {
   if (isDisabled) {
     return (
       <EuiToolTip

@@ -12,11 +12,7 @@ import { AIMessage as AIMessageType, Doc } from '../../types';
 
 type CitationsTableProps = Pick<AIMessageType, 'citations'>;
 
-export const CitationsTable = (
-  {
-    citations
-  }: CitationsTableProps
-) => {
+export const CitationsTable = ({ citations }: CitationsTableProps) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});

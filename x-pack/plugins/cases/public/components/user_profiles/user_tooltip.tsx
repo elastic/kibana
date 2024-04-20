@@ -14,13 +14,7 @@ import { getName } from './display_name';
 import * as i18n from './translations';
 import type { UserInfoWithAvatar } from './types';
 
-const UserFullInformation = React.memo((
-  {
-    userInfo
-  }: {
-    userInfo?: UserInfoWithAvatar;
-  }
-) => {
+const UserFullInformation = React.memo(({ userInfo }: { userInfo?: UserInfoWithAvatar }) => {
   if (userInfo?.user?.full_name) {
     return (
       <EuiText size="s" className="eui-textBreakWord">
@@ -50,22 +44,18 @@ const getNameOrMissingText = (user?: UserProfileUserInfo) => {
 
 UserFullInformation.displayName = 'UserFullInformation';
 
-const UserToolTipAvatar = (
-  {
-    userInfo
-  }: Pick<React.ComponentProps<typeof CaseUserAvatar>, 'userInfo'>
-) => <CaseUserAvatar size={'m'} userInfo={userInfo} />;
+const UserToolTipAvatar = ({
+  userInfo,
+}: Pick<React.ComponentProps<typeof CaseUserAvatar>, 'userInfo'>) => (
+  <CaseUserAvatar size={'m'} userInfo={userInfo} />
+);
 UserToolTipAvatar.displayName = 'UserToolTipAvatar';
 
 interface UserFullRepresentationProps {
   userInfo?: UserInfoWithAvatar;
 }
 
-const UserFullRepresentationComponent = (
-  {
-    userInfo
-  }: UserFullRepresentationProps
-) => {
+const UserFullRepresentationComponent = ({ userInfo }: UserFullRepresentationProps) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false} data-test-subj="user-profile-tooltip-avatar">
@@ -104,12 +94,7 @@ export interface UserToolTipProps {
   userInfo?: UserInfoWithAvatar;
 }
 
-const UserToolTipComponent = (
-  {
-    children,
-    userInfo
-  }: UserToolTipProps
-) => {
+const UserToolTipComponent = ({ children, userInfo }: UserToolTipProps) => {
   return (
     <EuiToolTip
       display="inlineBlock"

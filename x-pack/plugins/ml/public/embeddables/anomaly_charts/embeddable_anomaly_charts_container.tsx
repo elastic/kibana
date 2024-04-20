@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -50,20 +49,18 @@ export interface EmbeddableAnomalyChartsContainerProps {
   onError: (error: Error) => void;
 }
 
-export const EmbeddableAnomalyChartsContainer = (
-  {
-    id,
-    embeddableContext,
-    embeddableInput,
-    services,
-    refresh,
-    onInputChange,
-    onOutputChange,
-    onRenderComplete,
-    onError,
-    onLoading
-  }: EmbeddableAnomalyChartsContainerProps
-) => {
+export const EmbeddableAnomalyChartsContainer = ({
+  id,
+  embeddableContext,
+  embeddableInput,
+  services,
+  refresh,
+  onInputChange,
+  onOutputChange,
+  onRenderComplete,
+  onError,
+  onLoading,
+}: EmbeddableAnomalyChartsContainerProps) => {
   useEmbeddableExecutionContext<AnomalyChartsEmbeddableInput>(
     services[0].executionContext,
     embeddableInput,

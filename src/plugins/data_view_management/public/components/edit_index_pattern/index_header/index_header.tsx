@@ -46,17 +46,15 @@ const removeTooltip = i18n.translate('indexPatternManagement.editDataView.remove
   defaultMessage: 'Delete',
 });
 
-export const IndexHeader = (
-  {
-    defaultIndex,
-    indexPattern,
-    setDefault,
-    editIndexPatternClick,
-    deleteIndexPatternClick,
-    children,
-    canSave
-  }: IndexHeaderProps
-) => {
+export const IndexHeader = ({
+  defaultIndex,
+  indexPattern,
+  setDefault,
+  editIndexPatternClick,
+  deleteIndexPatternClick,
+  children,
+  canSave,
+}: IndexHeaderProps) => {
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}

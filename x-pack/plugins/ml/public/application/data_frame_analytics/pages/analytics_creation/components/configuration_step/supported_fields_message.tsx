@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useState, useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -69,11 +68,7 @@ interface Props {
   jobType: AnalyticsJobType;
 }
 
-export const SupportedFieldsMessage = (
-  {
-    jobType
-  }: Props
-) => {
+export const SupportedFieldsMessage = ({ jobType }: Props) => {
   const [sourceIndexContainsSupportedFields, setSourceIndexContainsSupportedFields] =
     useState<boolean>(true);
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);

@@ -31,12 +31,7 @@ interface NewSavedQueryFormProps {
   handleSubmit: (payload: unknown) => Promise<void>;
 }
 
-const NewSavedQueryFormComponent = (
-  {
-    defaultValue,
-    handleSubmit
-  }: NewSavedQueryFormProps
-) => {
+const NewSavedQueryFormComponent = ({ defaultValue, handleSubmit }: NewSavedQueryFormProps) => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const hooksForm = useSavedQueryForm({

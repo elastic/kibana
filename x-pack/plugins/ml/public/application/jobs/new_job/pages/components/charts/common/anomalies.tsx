@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
@@ -51,11 +50,7 @@ function splitAnomalySeverities(anomalies: Anomaly[]) {
   return severities;
 }
 
-export const Anomalies = (
-  {
-    anomalyData
-  }: Props
-) => {
+export const Anomalies = ({ anomalyData }: Props) => {
   const anomalies = anomalyData === undefined ? [] : anomalyData;
   const severities: Severities = splitAnomalySeverities(anomalies);
 

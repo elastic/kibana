@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -24,11 +24,7 @@ interface Props {
   addBasePath: (path: string) => string;
 }
 
-export const MoveData = (
-  {
-    addBasePath
-  }: Props
-) => {
+export const MoveData = ({ addBasePath }: Props) => {
   const migrateDataUrl = 'https://ela.st/cloud-migration';
   const buttonLabel = (
     <FormattedMessage

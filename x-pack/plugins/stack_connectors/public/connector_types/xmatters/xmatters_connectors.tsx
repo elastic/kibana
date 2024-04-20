@@ -46,15 +46,7 @@ const authenticationButtons = [
   },
 ];
 
-const XmattersUrlField = (
-  {
-    path,
-    readOnly
-  }: {
-    path: string;
-    readOnly: boolean;
-  }
-) => {
+const XmattersUrlField = ({ path, readOnly }: { path: string; readOnly: boolean }) => {
   return (
     <UseField
       path={path}
@@ -80,11 +72,7 @@ const XmattersUrlField = (
   );
 };
 
-const XmattersActionConnectorFields = (
-  {
-    readOnly
-  }: ActionConnectorFieldsProps
-) => {
+const XmattersActionConnectorFields = ({ readOnly }: ActionConnectorFieldsProps) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: ['config.usesBasic', '__internal__.auth'],

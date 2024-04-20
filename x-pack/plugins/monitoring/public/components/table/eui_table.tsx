@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import { EuiInMemoryTable, EuiButton, EuiSpacer, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
 import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 
-export const EuiMonitoringTable = (
-  {
-    rows: items,
-    search = {},
-    columns: _columns,
-    setupMode,
-    productName,
-    ...props
-  }: Record<any, any>
-) => {
+export const EuiMonitoringTable = ({
+  rows: items,
+  search = {},
+  columns: _columns,
+  setupMode,
+  productName,
+  ...props
+}: Record<any, any>) => {
   const [hasItems, setHasItem] = React.useState(items.length > 0);
 
   if (search.box && !search.box['data-test-subj']) {

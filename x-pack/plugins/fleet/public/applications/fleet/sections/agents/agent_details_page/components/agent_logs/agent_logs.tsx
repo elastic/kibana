@@ -66,13 +66,7 @@ export interface AgentLogsState {
 
 export const AgentLogsUrlStateHelper = createStateContainerReactHelpers();
 
-const AgentPolicyLogsNotEnabledCallout = (
-  {
-    agentPolicy
-  }: {
-    agentPolicy: AgentPolicy;
-  }
-) => {
+const AgentPolicyLogsNotEnabledCallout = ({ agentPolicy }: { agentPolicy: AgentPolicy }) => {
   const { getHref } = useLink();
 
   return (
@@ -114,13 +108,7 @@ const AgentPolicyLogsNotEnabledCallout = (
   );
 };
 
-export const AgentLogsUI = memo((
-  {
-    agent,
-    agentPolicy,
-    state
-  }: AgentLogsProps
-) => {
+export const AgentLogsUI = memo(({ agent, agentPolicy, state }: AgentLogsProps) => {
   const { data, application, cloud } = useStartServices();
   const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
   const isLogsUIAvailable = !cloud?.isServerlessEnabled;

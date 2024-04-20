@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -69,21 +68,18 @@ interface OptionLabelWithIconTipProps {
   tooltip: string;
 }
 
-const OptionLabelWithIconTip = (
-  {
-    label,
-    tooltip
-  }: OptionLabelWithIconTipProps
-) => (<>
-  {label}
-  <EuiIconTip
-    content={tooltip}
-    iconProps={{
-      className: 'eui-alignTop',
-    }}
-    size="s"
-  />
-</>);
+const OptionLabelWithIconTip = ({ label, tooltip }: OptionLabelWithIconTipProps) => (
+  <>
+    {label}
+    <EuiIconTip
+      content={tooltip}
+      iconProps={{
+        className: 'eui-alignTop',
+      }}
+      size="s"
+    />
+  </>
+);
 
 function filterChartableItems(items: estypes.SearchHit[], resultsField?: string) {
   return (
@@ -109,19 +105,17 @@ export interface ScatterplotMatrixProps {
   query?: Query;
 }
 
-export const ScatterplotMatrix = (
-  {
-    fields: allFields,
-    index,
-    resultsField,
-    color,
-    legendType,
-    searchQuery,
-    runtimeMappings,
-    dataView,
-    query
-  }: ScatterplotMatrixProps
-) => {
+export const ScatterplotMatrix = ({
+  fields: allFields,
+  index,
+  resultsField,
+  color,
+  legendType,
+  searchQuery,
+  runtimeMappings,
+  dataView,
+  query,
+}: ScatterplotMatrixProps) => {
   const { esSearch } = useMlApiContext();
   const kibana = useMlKibana();
   const {

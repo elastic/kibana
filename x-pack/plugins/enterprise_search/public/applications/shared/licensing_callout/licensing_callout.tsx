@@ -23,13 +23,7 @@ export enum LICENSING_FEATURE {
 
 type ContentBlock = Record<LICENSING_FEATURE, string>;
 
-export const LicensingCallout = (
-  {
-    feature
-  }: {
-    feature: LICENSING_FEATURE;
-  }
-) => {
+export const LicensingCallout = ({ feature }: { feature: LICENSING_FEATURE }) => {
   const firstContentBlock: ContentBlock = {
     [LICENSING_FEATURE.NATIVE_CONNECTOR]: i18n.translate(
       'xpack.enterpriseSearch.content.licensingCallout.nativeConnector.contentOne',

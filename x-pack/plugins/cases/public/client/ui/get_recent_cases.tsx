@@ -19,9 +19,7 @@ export type GetRecentCasesProps = Omit<
   | 'getFilesClient'
 >;
 
-const RecentCasesLazy = lazy(
-  () => import('../../components/recent_cases')
-);
+const RecentCasesLazy = lazy(() => import('../../components/recent_cases'));
 export const getRecentCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,

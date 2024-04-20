@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CodeBlockAccordion } from './code_block_accordion';
@@ -40,14 +40,7 @@ const ExpandedRow = euiStyled.div`
   width: 100%;
 `;
 
-export const ExecutedStep = (
-  {
-    loading,
-    step,
-    index,
-    browserConsoles
-  }: ExecutedStepProps
-) => {
+export const ExecutedStep = ({ loading, step, index, browserConsoles }: ExecutedStepProps) => {
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
   return (

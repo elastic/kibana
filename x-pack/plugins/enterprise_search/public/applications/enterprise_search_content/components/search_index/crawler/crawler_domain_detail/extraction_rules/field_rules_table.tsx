@@ -33,13 +33,7 @@ export interface FieldRulesTableProps {
   removeRule: (id: string) => void;
 }
 
-export const FieldRulesTable = (
-  {
-    editRule,
-    fieldRules,
-    removeRule
-  }: FieldRulesTableProps
-) => {
+export const FieldRulesTable = ({ editRule, fieldRules, removeRule }: FieldRulesTableProps) => {
   const columns: Array<EuiBasicTableColumn<FieldRuleWithId>> = [
     {
       field: 'field_name',

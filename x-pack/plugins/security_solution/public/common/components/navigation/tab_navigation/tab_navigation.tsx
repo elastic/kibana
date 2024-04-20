@@ -59,11 +59,7 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent = (
-  {
-    navTabs
-  }: TabNavigationProps
-) => {
+export const TabNavigationComponent = ({ navTabs }: TabNavigationProps) => {
   const [{ tabName }] = useRouteSpy();
   const mapLocationToTab = useCallback(
     (): string =>

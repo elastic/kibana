@@ -107,13 +107,7 @@ type ProgressMessageProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'timestamp' | 'position' | 'isStreaming'
 >;
-const ProgressMessage = (
-  {
-    timestamp,
-    position,
-    isStreaming
-  }: ProgressMessageProps
-) => {
+const ProgressMessage = ({ timestamp, position, isStreaming }: ProgressMessageProps) => {
   const formattedTimestamp =
     isStreaming && position === 'end' ? (
       <FormattedRelative units="second" value={timestamp} updateInterval={1} />
@@ -149,46 +143,40 @@ const ProgressMessage = (
   );
 };
 
-const ProgressSpinner = (
-  {
-    kind
-  }: {
-    kind: 'streaming' | 'loading';
-  }
-) => (<>
-  <EuiFlexItem grow={false}>
-    <EuiLoadingSpinner size="l" />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <EuiText size="s">
-      {kind === 'streaming' ? (
-        <FormattedMessage
-          id="xpack.logsShared.logs.streamingNewEntriesText"
-          defaultMessage="Streaming new entries"
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.logsShared.logs.loadingNewEntriesText"
-          defaultMessage="Loading new entries"
-        />
-      )}
-    </EuiText>
-  </EuiFlexItem>
-</>);
+const ProgressSpinner = ({ kind }: { kind: 'streaming' | 'loading' }) => (
+  <>
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="l" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        {kind === 'streaming' ? (
+          <FormattedMessage
+            id="xpack.logsShared.logs.streamingNewEntriesText"
+            defaultMessage="Streaming new entries"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.logsShared.logs.loadingNewEntriesText"
+            defaultMessage="Loading new entries"
+          />
+        )}
+      </EuiText>
+    </EuiFlexItem>
+  </>
+);
 
 type ProgressCtaProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'position' | 'startDateExpression' | 'endDateExpression' | 'onExtendRange' | 'onStreamStart'
 >;
-const ProgressCta = (
-  {
-    position,
-    startDateExpression,
-    endDateExpression,
-    onExtendRange,
-    onStreamStart
-  }: ProgressCtaProps
-) => {
+const ProgressCta = ({
+  position,
+  startDateExpression,
+  endDateExpression,
+  onExtendRange,
+  onStreamStart,
+}: ProgressCtaProps) => {
   const rangeEdge = position === 'start' ? startDateExpression : endDateExpression;
 
   if (rangeEdge === 'now' && position === 'end') {
@@ -224,15 +212,7 @@ const ProgressCta = (
   );
 };
 
-const ProgressExtendMessage = (
-  {
-    amount,
-    unit
-  }: {
-    amount: number;
-    unit: Unit;
-  }
-) => {
+const ProgressExtendMessage = ({ amount, unit }: { amount: number; unit: Unit }) => {
   switch (unit) {
     case 'ms':
       return (

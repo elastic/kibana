@@ -55,23 +55,21 @@ const { useXJsonMode } = XJson;
 // Multiple editors can use the same ID without any issues.
 const EDITOR_SOURCE = 'json-editor-with-message-variables';
 
-export const JsonEditorWithMessageVariables = (
-  {
-    buttonTitle,
-    messageVariables,
-    paramsProperty,
-    inputTargetValue,
-    label,
-    errors,
-    ariaLabel,
-    onDocumentsChange,
-    helpText,
-    onBlur,
-    showButtonTitle,
-    dataTestSubj,
-    euiCodeEditorProps = {}
-  }: Props
-) => {
+export const JsonEditorWithMessageVariables = ({
+  buttonTitle,
+  messageVariables,
+  paramsProperty,
+  inputTargetValue,
+  label,
+  errors,
+  ariaLabel,
+  onDocumentsChange,
+  helpText,
+  onBlur,
+  showButtonTitle,
+  dataTestSubj,
+  euiCodeEditorProps = {},
+}: Props) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
   const [showErrorMessage, setShowErrorMessage] = useState(false);

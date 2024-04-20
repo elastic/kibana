@@ -22,46 +22,46 @@ interface MetaEnginesTableNameContentProps {
   showRow: (name: string) => void;
 }
 
-export const MetaEnginesTableNameColumnContent = (
-  {
-    item: { name, schemaConflicts, engine_count: engineCount },
-    isExpanded,
-    hideRow,
-    showRow
-  }: MetaEnginesTableNameContentProps
-) => (<EuiFlexGroup direction="column" gutterSize="none">
-  {renderEngineLink(name)}
-  <button
-    type="button"
-    onClick={() => (isExpanded ? hideRow(name) : showRow(name))}
-    aria-expanded={isExpanded}
-    data-test-subj="ExpandRowButton"
-  >
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj="SourceEnginesCount">
-        {i18n.translate(
-          'xpack.enterpriseSearch.appSearch.engines.metaEnginesTable.sourceEnginesCount',
-          {
-            defaultMessage: '{sourceEnginesCount, plural, one {# engine} other {# engines}}',
-            values: { sourceEnginesCount: engineCount || 0 },
-          }
-        )}
-      </EuiFlexItem>
-      {schemaConflicts && Object.keys(schemaConflicts).length > 0 && (
+export const MetaEnginesTableNameColumnContent = ({
+  item: { name, schemaConflicts, engine_count: engineCount },
+  isExpanded,
+  hideRow,
+  showRow,
+}: MetaEnginesTableNameContentProps) => (
+  <EuiFlexGroup direction="column" gutterSize="none">
+    {renderEngineLink(name)}
+    <button
+      type="button"
+      onClick={() => (isExpanded ? hideRow(name) : showRow(name))}
+      aria-expanded={isExpanded}
+      data-test-subj="ExpandRowButton"
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiHealth color="warning">
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engines.metaEnginesTable.fieldTypeConflictWarning',
-              {
-                defaultMessage: 'Field-type conflict',
-              }
-            )}
-          </EuiHealth>
+          <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} />
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  </button>
-</EuiFlexGroup>);
+        <EuiFlexItem grow={false} data-test-subj="SourceEnginesCount">
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.engines.metaEnginesTable.sourceEnginesCount',
+            {
+              defaultMessage: '{sourceEnginesCount, plural, one {# engine} other {# engines}}',
+              values: { sourceEnginesCount: engineCount || 0 },
+            }
+          )}
+        </EuiFlexItem>
+        {schemaConflicts && Object.keys(schemaConflicts).length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiHealth color="warning">
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engines.metaEnginesTable.fieldTypeConflictWarning',
+                {
+                  defaultMessage: 'Field-type conflict',
+                }
+              )}
+            </EuiHealth>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </button>
+  </EuiFlexGroup>
+);

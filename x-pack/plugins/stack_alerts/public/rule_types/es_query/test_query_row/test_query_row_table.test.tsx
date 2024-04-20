@@ -10,13 +10,9 @@ import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TestQueryRowTable } from './test_query_row_table';
 
-const AppWrapper = React.memo((
-  {
-    children
-  }: {
-    children: React.ReactElement;
-  }
-) => (<I18nProvider>{children}</I18nProvider>));
+const AppWrapper = React.memo(({ children }: { children: React.ReactElement }) => (
+  <I18nProvider>{children}</I18nProvider>
+));
 
 describe('TestQueryRow', () => {
   it('should render the datagrid', () => {

@@ -19,14 +19,12 @@ interface DeleteConnectorModalProps {
   onSuccess?: () => void;
 }
 
-export const DeleteConnectorModal = (
-  {
-    connectorId,
-    connectorName,
-    closeDeleteModal,
-    onSuccess
-  }: DeleteConnectorModalProps
-) => {
+export const DeleteConnectorModal = ({
+  connectorId,
+  connectorName,
+  closeDeleteModal,
+  onSuccess,
+}: DeleteConnectorModalProps) => {
   const { http } = useKibanaServices();
   const { isLoading, isSuccess, mutate } = useMutation({
     mutationFn: async () => {

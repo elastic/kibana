@@ -29,8 +29,8 @@ interface Props {
 /**
  * Gear button that opens the assistant settings modal
  */
-export const AssistantSettingsButton = React.memo((
-  {
+export const AssistantSettingsButton = React.memo(
+  ({
     defaultConnector,
     isDisabled = false,
     isSettingsModalVisible,
@@ -39,66 +39,66 @@ export const AssistantSettingsButton = React.memo((
     isFlyoutMode,
     onConversationSelected,
     conversations,
-    refetchConversationsState
-  }: Props
-) => {
-  const { toasts, setSelectedSettingsTab } = useAssistantContext();
+    refetchConversationsState,
+  }: Props) => {
+    const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
-  // Modal control functions
-  const cleanupAndCloseModal = useCallback(() => {
-    setIsSettingsModalVisible(false);
-  }, [setIsSettingsModalVisible]);
+    // Modal control functions
+    const cleanupAndCloseModal = useCallback(() => {
+      setIsSettingsModalVisible(false);
+    }, [setIsSettingsModalVisible]);
 
-  const handleCloseModal = useCallback(() => {
-    cleanupAndCloseModal();
-  }, [cleanupAndCloseModal]);
-
-  const handleSave = useCallback(
-    async (success: boolean) => {
+    const handleCloseModal = useCallback(() => {
       cleanupAndCloseModal();
-      await refetchConversationsState();
-      if (success) {
-        toasts?.addSuccess({
-          iconType: 'check',
-          title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
-        });
-      }
-    },
-    [cleanupAndCloseModal, refetchConversationsState, toasts]
-  );
+    }, [cleanupAndCloseModal]);
 
-  const handleShowConversationSettings = useCallback(() => {
-    setSelectedSettingsTab(CONVERSATIONS_TAB);
-    setIsSettingsModalVisible(true);
-  }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
+    const handleSave = useCallback(
+      async (success: boolean) => {
+        cleanupAndCloseModal();
+        await refetchConversationsState();
+        if (success) {
+          toasts?.addSuccess({
+            iconType: 'check',
+            title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+          });
+        }
+      },
+      [cleanupAndCloseModal, refetchConversationsState, toasts]
+    );
 
-  return (
-    <>
-      <EuiToolTip position="right" content={i18n.SETTINGS_TOOLTIP}>
-        <EuiButtonIcon
-          aria-label={i18n.SETTINGS}
-          data-test-subj="settings"
-          onClick={handleShowConversationSettings}
-          isDisabled={isDisabled}
-          iconType="gear"
-          size="xs"
-          {...(isFlyoutMode ? { color: 'text' } : {})}
-        />
-      </EuiToolTip>
+    const handleShowConversationSettings = useCallback(() => {
+      setSelectedSettingsTab(CONVERSATIONS_TAB);
+      setIsSettingsModalVisible(true);
+    }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
 
-      {isSettingsModalVisible && (
-        <AssistantSettings
-          defaultConnector={defaultConnector}
-          selectedConversationId={selectedConversationId}
-          onConversationSelected={onConversationSelected}
-          onClose={handleCloseModal}
-          onSave={handleSave}
-          isFlyoutMode={isFlyoutMode}
-          conversations={conversations}
-        />
-      )}
-    </>
-  );
-});
+    return (
+      <>
+        <EuiToolTip position="right" content={i18n.SETTINGS_TOOLTIP}>
+          <EuiButtonIcon
+            aria-label={i18n.SETTINGS}
+            data-test-subj="settings"
+            onClick={handleShowConversationSettings}
+            isDisabled={isDisabled}
+            iconType="gear"
+            size="xs"
+            {...(isFlyoutMode ? { color: 'text' } : {})}
+          />
+        </EuiToolTip>
+
+        {isSettingsModalVisible && (
+          <AssistantSettings
+            defaultConnector={defaultConnector}
+            selectedConversationId={selectedConversationId}
+            onConversationSelected={onConversationSelected}
+            onClose={handleCloseModal}
+            onSave={handleSave}
+            isFlyoutMode={isFlyoutMode}
+            conversations={conversations}
+          />
+        )}
+      </>
+    );
+  }
+);
 
 AssistantSettingsButton.displayName = 'AssistantSettingsButton';

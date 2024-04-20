@@ -26,12 +26,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const NoticeModal = (
-  {
-    noticePath,
-    onClose
-  }: Props
-) => {
+export const NoticeModal = ({ noticePath, onClose }: Props) => {
   const { notifications } = useStartServices();
   const [notice, setNotice] = useState<string | undefined>(undefined);
 
@@ -51,7 +46,7 @@ export const NoticeModal = (
     fetchData();
   }, [noticePath, notifications]);
   return (
-    (<EuiModal maxWidth={true} onClose={onClose}>
+    <EuiModal maxWidth={true} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>NOTICE.txt</EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -61,14 +56,14 @@ export const NoticeModal = (
             notice
           ) : (
             // Simulate a long notice while loading
-            (<>
+            <>
               <p>
                 <EuiSkeletonText lines={5} />
               </p>
               <p>
                 <EuiSkeletonText lines={6} />
               </p>
-            </>)
+            </>
           )}
         </EuiCodeBlock>
       </EuiModalBody>
@@ -77,6 +72,6 @@ export const NoticeModal = (
           <FormattedMessage id="xpack.fleet.epm.noticeModalCloseBtn" defaultMessage="Close" />
         </EuiButton>
       </EuiModalFooter>
-    </EuiModal>)
+    </EuiModal>
   );
 };

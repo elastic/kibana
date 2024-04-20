@@ -7,7 +7,7 @@
 
 import { EuiFilePicker } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 interface Props {
   /** Optional ID of the component */
@@ -18,7 +18,9 @@ interface Props {
   onUpload: () => void;
 }
 
-export const FileUpload = (props: Props) => (<EuiFilePicker compressed id={props.id} className={props.className} onChange={props.onUpload} />);
+export const FileUpload = (props: Props) => (
+  <EuiFilePicker compressed id={props.id} className={props.className} onChange={props.onUpload} />
+);
 
 FileUpload.defaultProps = {
   id: '',

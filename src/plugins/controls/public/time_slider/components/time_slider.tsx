@@ -7,7 +7,7 @@
  */
 
 import { EuiInputPopover } from '@elastic/eui';
-import React, { FC } from 'react';
+import React from 'react';
 
 import { TimeSlice } from '../../../common/types';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';

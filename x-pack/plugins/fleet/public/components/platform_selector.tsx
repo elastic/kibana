@@ -46,25 +46,23 @@ interface Props {
   onCopy?: () => void;
 }
 
-export const PlatformSelector = (
-  {
-    linuxCommand,
-    macCommand,
-    windowsCommand,
-    linuxDebCommand,
-    linuxRpmCommand,
-    k8sCommand,
-    hasK8sIntegration,
-    cloudSecurityIntegration,
-    hasK8sIntegrationMultiPage,
-    isManaged,
-    enrollToken,
-    hasFleetServer,
-    fleetServerHost,
-    fullCopyButton,
-    onCopy
-  }: Props
-) => {
+export const PlatformSelector = ({
+  linuxCommand,
+  macCommand,
+  windowsCommand,
+  linuxDebCommand,
+  linuxRpmCommand,
+  k8sCommand,
+  hasK8sIntegration,
+  cloudSecurityIntegration,
+  hasK8sIntegrationMultiPage,
+  isManaged,
+  enrollToken,
+  hasFleetServer,
+  fleetServerHost,
+  fullCopyButton,
+  onCopy,
+}: Props) => {
   const getInitialPlatform = useCallback(() => {
     if (
       hasK8sIntegration ||

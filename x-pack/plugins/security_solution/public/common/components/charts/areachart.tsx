@@ -143,13 +143,11 @@ interface AreaChartComponentProps {
   visualizationActionsOptions?: VisualizationActionsProps;
 }
 
-export const AreaChartComponent = (
-  {
-    areaChart,
-    configs,
-    visualizationActionsOptions
-  }: AreaChartComponentProps
-) => {
+export const AreaChartComponent = ({
+  areaChart,
+  configs,
+  visualizationActionsOptions,
+}: AreaChartComponentProps) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);

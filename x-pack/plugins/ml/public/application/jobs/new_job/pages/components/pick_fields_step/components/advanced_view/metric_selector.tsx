@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
@@ -25,16 +24,14 @@ interface Props {
 
 const MAX_WIDTH = 560;
 
-export const MetricSelector = (
-  {
-    payload,
-    fields,
-    aggs,
-    detectorChangeHandler,
-    closeModal,
-    showModal
-  }: Props
-) => {
+export const MetricSelector = ({
+  payload,
+  fields,
+  aggs,
+  detectorChangeHandler,
+  closeModal,
+  showModal,
+}: Props) => {
   return (
     <Fragment>
       <EuiFlexGroup style={{ maxWidth: MAX_WIDTH }}>

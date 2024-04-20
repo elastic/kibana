@@ -38,19 +38,17 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const CustomTabComponent = (
-  {
-    addSuccessToast,
-    docsCount,
-    formatBytes,
-    formatNumber,
-    ilmPhase,
-    indexName,
-    partitionedFieldMetadata,
-    patternDocsCount,
-    sizeInBytes
-  }: Props
-) => {
+const CustomTabComponent = ({
+  addSuccessToast,
+  docsCount,
+  formatBytes,
+  formatNumber,
+  ilmPhase,
+  indexName,
+  partitionedFieldMetadata,
+  patternDocsCount,
+  sizeInBytes,
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const markdownComments: string[] = useMemo(
     () =>

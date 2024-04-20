@@ -51,13 +51,7 @@ const getInitialFilterString = (securityTags: TagReference[] | null | undefined)
   return `tag:(${query})`;
 };
 
-const Header = (
-  {
-    canCreateDashboard
-  }: {
-    canCreateDashboard: boolean;
-  }
-) => {
+const Header = ({ canCreateDashboard }: { canCreateDashboard: boolean }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
   const { navigateTo } = useNavigateTo();
   return (

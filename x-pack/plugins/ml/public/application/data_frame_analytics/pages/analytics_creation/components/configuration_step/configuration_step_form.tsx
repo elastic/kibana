@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiBadge, EuiFormRow, EuiPanel, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
@@ -108,15 +107,13 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   return runtimeOptions;
 }
 
-export const ConfigurationStepForm = (
-  {
-    actions,
-    isClone,
-    state,
-    setCurrentStep,
-    sourceDataViewTitle
-  }: ConfigurationStepProps
-) => {
+export const ConfigurationStepForm = ({
+  actions,
+  isClone,
+  state,
+  setCurrentStep,
+  sourceDataViewTitle,
+}: ConfigurationStepProps) => {
   const { selectedDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 

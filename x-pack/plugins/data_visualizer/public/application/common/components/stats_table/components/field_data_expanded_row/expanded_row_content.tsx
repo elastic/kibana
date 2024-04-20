@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 
@@ -13,12 +13,7 @@ interface Props {
   children: ReactNode;
   dataTestSubj: string;
 }
-export const ExpandedRowContent = (
-  {
-    children,
-    dataTestSubj
-  }: Props
-) => {
+export const ExpandedRowContent = ({ children, dataTestSubj }: Props) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSubj} gutterSize={'s'} wrap={true}>
       {children}

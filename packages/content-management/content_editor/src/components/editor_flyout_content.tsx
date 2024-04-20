@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useState, useMemo } from 'react';
-import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -59,18 +58,16 @@ export interface Props {
 
 const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
 
-export const ContentEditorFlyoutContent = (
-  {
-    item,
-    entityName,
-    isReadonly = true,
-    readonlyReason,
-    services: { TagSelector, TagList, notifyError },
-    onSave,
-    onCancel,
-    customValidators
-  }: Props
-) => {
+export const ContentEditorFlyoutContent = ({
+  item,
+  entityName,
+  isReadonly = true,
+  readonlyReason,
+  services: { TagSelector, TagList, notifyError },
+  onSave,
+  onCancel,
+  customValidators,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

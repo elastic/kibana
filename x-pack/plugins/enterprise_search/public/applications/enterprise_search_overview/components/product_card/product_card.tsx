@@ -41,21 +41,19 @@ export interface ProductCardProps {
   url?: string;
 }
 
-export const ProductCard = (
-  {
-    cta,
-    description,
-    emptyCta = false,
-    hasBorder,
-    hasShadow,
-    icon,
-    iconSize,
-    productId,
-    rightPanelItems,
-    name,
-    url
-  }: ProductCardProps
-) => {
+export const ProductCard = ({
+  cta,
+  description,
+  emptyCta = false,
+  hasBorder,
+  hasShadow,
+  icon,
+  iconSize,
+  productId,
+  rightPanelItems,
+  name,
+  url,
+}: ProductCardProps) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
 
   return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { RenderArgData } from '../../expression_types/types';
 
 type FunctionFormComponentProps = RenderArgData;

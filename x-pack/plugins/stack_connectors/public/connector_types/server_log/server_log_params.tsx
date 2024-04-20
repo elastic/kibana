@@ -12,17 +12,15 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { ServerLogActionParams } from '../types';
 
-export const ServerLogParamsFields = (
-  {
-    actionParams,
-    editAction,
-    index,
-    errors,
-    messageVariables,
-    defaultMessage,
-    useDefaultMessage
-  }: ActionParamsProps<ServerLogActionParams>
-) => {
+export const ServerLogParamsFields = ({
+  actionParams,
+  editAction,
+  index,
+  errors,
+  messageVariables,
+  defaultMessage,
+  useDefaultMessage,
+}: ActionParamsProps<ServerLogActionParams>) => {
   const { message, level } = actionParams;
   const levelOptions = [
     { value: 'trace', text: 'Trace' },

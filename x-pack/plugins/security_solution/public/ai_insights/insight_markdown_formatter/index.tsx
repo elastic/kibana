@@ -20,12 +20,7 @@ interface Props {
   markdown: string;
 }
 
-const InsightMarkdownFormatterComponent = (
-  {
-    disableActions = false,
-    markdown
-  }: Props
-) => {
+const InsightMarkdownFormatterComponent = ({ disableActions = false, markdown }: Props) => {
   const insightParsingPluginList = useMemo(
     () => [...getDefaultEuiMarkdownParsingPlugins(), InsightMarkdownParser],
     []

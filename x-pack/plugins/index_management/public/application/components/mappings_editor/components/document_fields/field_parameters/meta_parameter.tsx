@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,38 +18,36 @@ interface Props {
   defaultToggleValue: boolean;
 }
 
-export const MetaParameter = (
-  {
-    defaultToggleValue
-  }: Props
-) => (<EditFieldFormRow
-  title={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterTitle', {
-    defaultMessage: 'Set metadata',
-  })}
-  description={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterDescription', {
-    defaultMessage: 'Arbitrary information about the field. Specify as JSON key-value pairs.',
-  })}
-  defaultToggleValue={defaultToggleValue}
-  docLink={{
-    text: i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterDocLinkText', {
-      defaultMessage: 'Metadata documentation',
-    }),
-    href: documentationService.getMetaLink(),
-  }}
-  data-test-subj="metaParameter"
->
-  <UseField
-    path="meta"
-    config={getFieldConfig('meta')}
-    component={JsonEditorField}
-    componentProps={{
-      codeEditorProps: {
-        ['data-test-subj']: 'metaParameterEditor',
-        height: '300px',
-        'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterAriaLabel', {
-          defaultMessage: 'metadata field data editor',
-        }),
-      },
+export const MetaParameter = ({ defaultToggleValue }: Props) => (
+  <EditFieldFormRow
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterTitle', {
+      defaultMessage: 'Set metadata',
+    })}
+    description={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterDescription', {
+      defaultMessage: 'Arbitrary information about the field. Specify as JSON key-value pairs.',
+    })}
+    defaultToggleValue={defaultToggleValue}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterDocLinkText', {
+        defaultMessage: 'Metadata documentation',
+      }),
+      href: documentationService.getMetaLink(),
     }}
-  />
-</EditFieldFormRow>);
+    data-test-subj="metaParameter"
+  >
+    <UseField
+      path="meta"
+      config={getFieldConfig('meta')}
+      component={JsonEditorField}
+      componentProps={{
+        codeEditorProps: {
+          ['data-test-subj']: 'metaParameterEditor',
+          height: '300px',
+          'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterAriaLabel', {
+            defaultMessage: 'metadata field data editor',
+          }),
+        },
+      }}
+    />
+  </EditFieldFormRow>
+);

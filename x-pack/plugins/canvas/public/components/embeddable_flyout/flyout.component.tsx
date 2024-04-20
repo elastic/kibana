@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -29,14 +29,12 @@ export interface Props {
   isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout = (
-  {
-    onSelect,
-    availableEmbeddables,
-    onClose,
-    isByValueEnabled
-  }: Props
-) => {
+export const AddEmbeddableFlyout = ({
+  onSelect,
+  availableEmbeddables,
+  onClose,
+  isByValueEnabled,
+}: Props) => {
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;

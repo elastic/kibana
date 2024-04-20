@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
@@ -75,12 +74,7 @@ export const editFilterListRouteFactory = (
   ],
 });
 
-const PageWrapper = (
-  {
-    location,
-    mode
-  }: NewFilterPageProps
-) => {
+const PageWrapper = ({ location, mode }: NewFilterPageProps) => {
   let filterId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);

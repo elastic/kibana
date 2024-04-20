@@ -29,11 +29,7 @@ export interface PreviewPanelProps extends FlyoutPanelProps {
 /**
  * Preview panel to be displayed on top of the document details expandable flyout right section
  */
-export const PreviewPanel = memo((
-  {
-    path
-  }: Partial<PreviewPanelProps>
-) => {
+export const PreviewPanel = memo(({ path }: Partial<PreviewPanelProps>) => {
   const previewPanel = useMemo(() => {
     return path ? panels.find((panel) => panel.id === path.tab) : null;
   }, [path]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSwitch } from '@elastic/eui';
 
@@ -14,12 +14,7 @@ export interface Props {
   argValue: boolean;
 }
 
-export const SimpleTemplate = (
-  {
-    onValueChange,
-    argValue
-  }: Props
-) => {
+export const SimpleTemplate = ({ onValueChange, argValue }: Props) => {
   return (
     <EuiSwitch
       compressed

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -25,12 +24,7 @@ interface DeleteActionNameProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const DeleteActionName = (
-  {
-    isDisabled,
-    item
-  }: DeleteActionNameProps
-) => {
+export const DeleteActionName = ({ isDisabled, item }: DeleteActionNameProps) => {
   if (isDisabled) {
     return (
       <EuiToolTip

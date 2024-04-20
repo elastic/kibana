@@ -19,15 +19,7 @@ export interface EncryptedFieldsCalloutProps {
   isMissingSecrets?: boolean | undefined;
 }
 
-const Callout = (
-  {
-    title,
-    dataTestSubj
-  }: {
-    title: string;
-    dataTestSubj: string;
-  }
-) => {
+const Callout = ({ title, dataTestSubj }: { title: string; dataTestSubj: string }) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -68,12 +60,10 @@ const getCommaSeparatedLabel = (labels: string[]) => {
   return `${commaSeparatedLabelsWithoutLastItem}, and ${lastLabel}`;
 };
 
-const EncryptedFieldsCalloutComponent = (
-  {
-    isEdit,
-    isMissingSecrets
-  }: EncryptedFieldsCalloutProps
-) => {
+const EncryptedFieldsCalloutComponent = ({
+  isEdit,
+  isMissingSecrets,
+}: EncryptedFieldsCalloutProps) => {
   /**
    * This is needed to rerender on any form change
    * and listen to any form field changes.

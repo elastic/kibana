@@ -89,17 +89,15 @@ interface Props {
   baseTheme: Theme;
 }
 
-const EcsSummaryDonutChartComponent = (
-  {
-    defaultTabId,
-    getGroupByFieldsOnClick,
-    height = DEFAULT_HEIGHT,
-    partitionedFieldMetadata,
-    setSelectedTabId,
-    theme = {},
-    baseTheme
-  }: Props
-) => {
+const EcsSummaryDonutChartComponent = ({
+  defaultTabId,
+  getGroupByFieldsOnClick,
+  height = DEFAULT_HEIGHT,
+  partitionedFieldMetadata,
+  setSelectedTabId,
+  theme = {},
+  baseTheme,
+}: Props) => {
   const summaryData = useMemo(
     () => getSummaryData(partitionedFieldMetadata),
     [partitionedFieldMetadata]

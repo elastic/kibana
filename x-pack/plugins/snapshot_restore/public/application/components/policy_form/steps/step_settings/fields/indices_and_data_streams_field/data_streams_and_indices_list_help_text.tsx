@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
@@ -16,14 +16,12 @@ interface Props {
   dataStreams: string[];
 }
 
-export const DataStreamsAndIndicesListHelpText = (
-  {
-    onSelectionChange,
-    selectedIndicesAndDataStreams,
-    indices,
-    dataStreams
-  }: Props
-) => {
+export const DataStreamsAndIndicesListHelpText = ({
+  onSelectionChange,
+  selectedIndicesAndDataStreams,
+  indices,
+  dataStreams,
+}: Props) => {
   if (selectedIndicesAndDataStreams.length === 0) {
     return (
       <FormattedMessage

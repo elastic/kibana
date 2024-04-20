@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -17,11 +16,7 @@ interface Props {
   jobs: JobDependencies;
 }
 
-export const ExportJobDependenciesWarningCallout = (
-  {
-    jobs: allJobs
-  }: Props
-) => {
+export const ExportJobDependenciesWarningCallout = ({ jobs: allJobs }: Props) => {
   const [jobs, jobsWithCalendars, jobsWithFilters] = filterJobs(allJobs);
   const usingCalendars = jobsWithCalendars.length > 0;
   const usingFilters = jobsWithFilters.length > 0;
@@ -90,61 +85,53 @@ export const ExportJobDependenciesWarningCallout = (
   );
 };
 
-const CalendarJobList = (
-  {
-    jobs
-  }: {
-    jobs: JobDependencies;
-  }
-) => (<>
-  {jobs.length > 0 && (
-    <>
-      {jobs.map(({ jobId, calendarIds }) => (
-        <>
-          <EuiText size="s">
-            <h5>{jobId}</h5>
-            {calendarIds.length > 0 && (
-              <FormattedMessage
-                id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarList"
-                defaultMessage="{num, plural, one {calendar} other {calendars}}: {calendars}"
-                values={{ num: calendarIds.length, calendars: calendarIds.join(', ') }}
-              />
-            )}
-          </EuiText>
-          <EuiSpacer size="s" />
-        </>
-      ))}
-    </>
-  )}
-</>);
+const CalendarJobList = ({ jobs }: { jobs: JobDependencies }) => (
+  <>
+    {jobs.length > 0 && (
+      <>
+        {jobs.map(({ jobId, calendarIds }) => (
+          <>
+            <EuiText size="s">
+              <h5>{jobId}</h5>
+              {calendarIds.length > 0 && (
+                <FormattedMessage
+                  id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.calendarList"
+                  defaultMessage="{num, plural, one {calendar} other {calendars}}: {calendars}"
+                  values={{ num: calendarIds.length, calendars: calendarIds.join(', ') }}
+                />
+              )}
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        ))}
+      </>
+    )}
+  </>
+);
 
-const FilterJobList = (
-  {
-    jobs
-  }: {
-    jobs: JobDependencies;
-  }
-) => (<>
-  {jobs.length > 0 && (
-    <>
-      {jobs.map(({ jobId, filterIds }) => (
-        <>
-          <EuiText size="s">
-            <h5>{jobId}</h5>
-            {filterIds.length > 0 && (
-              <FormattedMessage
-                id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterList"
-                defaultMessage="Filter {num, plural, one {list} other {lists}}: {filters}"
-                values={{ num: filterIds.length, filters: filterIds.join(', ') }}
-              />
-            )}
-          </EuiText>
-          <EuiSpacer size="s" />
-        </>
-      ))}
-    </>
-  )}
-</>);
+const FilterJobList = ({ jobs }: { jobs: JobDependencies }) => (
+  <>
+    {jobs.length > 0 && (
+      <>
+        {jobs.map(({ jobId, filterIds }) => (
+          <>
+            <EuiText size="s">
+              <h5>{jobId}</h5>
+              {filterIds.length > 0 && (
+                <FormattedMessage
+                  id="xpack.ml.importExport.exportFlyout.exportJobDependenciesWarningCallout.filterList"
+                  defaultMessage="Filter {num, plural, one {list} other {lists}}: {filters}"
+                  values={{ num: filterIds.length, filters: filterIds.join(', ') }}
+                />
+              )}
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        ))}
+      </>
+    )}
+  </>
+);
 
 function getTitle(jobs: JobDependencies, calendarCount: number, filterCount: number) {
   if (calendarCount > 0 && filterCount === 0) {

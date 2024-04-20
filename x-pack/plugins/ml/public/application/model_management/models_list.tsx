@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import {
@@ -127,12 +126,10 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
-export const ModelsList = (
-  {
-    pageState: pageStateExternal,
-    updatePageState: updatePageStateExternal
-  }: Props
-) => {
+export const ModelsList = ({
+  pageState: pageStateExternal,
+  updatePageState: updatePageStateExternal,
+}: Props) => {
   const {
     services: {
       application: { capabilities },

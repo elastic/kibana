@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -31,12 +30,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const LensLayerSelectionFlyout = (
-  {
-    onClose,
-    embeddable
-  }: Props
-) => {
+export const LensLayerSelectionFlyout = ({ onClose, embeddable }: Props) => {
   const {
     services: { data, lens },
   } = useMlFromLensKibanaContext();

@@ -13,17 +13,15 @@ import { snoozeRule as snoozeRuleApi } from '../../../../lib/rule_api/snooze';
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListNotifyBadgePropsWithApi } from './types';
 
-export const RulesListNotifyBadgeWithApi = (
-  {
-    ruleId,
-    snoozeSettings,
-    loading,
-    disabled,
-    showTooltipInline,
-    showOnHover,
-    onRuleChanged
-  }: RulesListNotifyBadgePropsWithApi
-) => {
+export const RulesListNotifyBadgeWithApi = ({
+  ruleId,
+  snoozeSettings,
+  loading,
+  disabled,
+  showTooltipInline,
+  showOnHover,
+  onRuleChanged,
+}: RulesListNotifyBadgePropsWithApi) => {
   const { http } = useKibana().services;
 
   const onSnoozeRule = useCallback(

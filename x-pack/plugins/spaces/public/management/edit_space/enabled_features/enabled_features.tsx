@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';

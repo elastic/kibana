@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
@@ -47,11 +46,7 @@ export const analyticsJobsCreationRouteFactory = (
   ],
 });
 
-const PageWrapper = (
-  {
-    location
-  }: PageProps
-) => {
+const PageWrapper = ({ location }: PageProps) => {
   const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {
     sort: false,
   });

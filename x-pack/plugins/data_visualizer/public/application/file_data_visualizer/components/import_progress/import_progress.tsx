@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 
 import type { EuiStepStatus } from '@elastic/eui';
@@ -33,13 +32,7 @@ export interface Statuses {
   permissionCheckStatus: IMPORT_STATUS;
 }
 
-export const ImportProgress = (
-  {
-    statuses
-  }: {
-    statuses: Statuses;
-  }
-) => {
+export const ImportProgress = ({ statuses }: { statuses: Statuses }) => {
   const {
     reading,
     readStatus,
@@ -302,13 +295,7 @@ export const ImportProgress = (
   );
 };
 
-const UploadFunctionProgress = (
-  {
-    progress
-  }: {
-    progress: number;
-  }
-) => {
+const UploadFunctionProgress = ({ progress }: { progress: number }) => {
   return (
     <React.Fragment>
       <p>

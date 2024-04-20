@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -20,13 +19,7 @@ export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
   <LangIdentOutput inferrer={inferrer} />
 );
 
-const LangIdentOutput = (
-  {
-    inferrer
-  }: {
-    inferrer: LangIdentInference;
-  }
-) => {
+const LangIdentOutput = ({ inferrer }: { inferrer: LangIdentInference }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -44,15 +37,13 @@ const LangIdentOutput = (
   );
 };
 
-const LanguageIdent = (
-  {
-    response,
-    inputText
-  }: {
-    response: FormattedTextClassificationResponse;
-    inputText: string;
-  }
-) => {
+const LanguageIdent = ({
+  response,
+  inputText,
+}: {
+  response: FormattedTextClassificationResponse;
+  inputText: string;
+}) => {
   const langCode = response[0].value;
   const lang = getLanguage(langCode);
 

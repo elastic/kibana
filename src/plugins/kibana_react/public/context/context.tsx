@@ -45,14 +45,7 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
     notifications: createNotifications(services),
   };
 
-  const Provider = (
-    {
-      services: newServices = {},
-      children
-    }: {
-      services?: Services;
-    }
-  ) => {
+  const Provider = ({ services: newServices = {}, children }: { services?: Services }) => {
     const oldValue = useKibana();
     const { value: newValue } = useMemo(
       () => createKibanaReactContext({ ...services, ...oldValue.services, ...newServices }),

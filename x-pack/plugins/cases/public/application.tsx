@@ -36,31 +36,25 @@ interface CasesAppWithContextProps {
   getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
-const CasesAppWithContext = React.memo((
-  {
+const CasesAppWithContext = React.memo(
+  ({
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
-    getFilesClient
-  }: CasesAppWithContextProps
-) => {
-  return (
-    <CasesApp
-      externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
-      persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
-      getFilesClient={getFilesClient}
-    />
-  );
-});
+    getFilesClient,
+  }: CasesAppWithContextProps) => {
+    return (
+      <CasesApp
+        externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
+        persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
+        getFilesClient={getFilesClient}
+      />
+    );
+  }
+);
 
 CasesAppWithContext.displayName = 'CasesAppWithContext';
 
-export const App = (
-  {
-    deps
-  }: {
-    deps: RenderAppProps;
-  }
-) => {
+export const App = ({ deps }: { deps: RenderAppProps }) => {
   const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
   const { history } = mountParams;
 

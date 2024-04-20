@@ -6,7 +6,6 @@
  */
 
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 

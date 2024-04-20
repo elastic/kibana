@@ -11,7 +11,6 @@ import React, {
   useCallback,
   Fragment,
   type ComponentProps,
-  type FC,
   type ReactElement,
 } from 'react';
 import {
@@ -60,13 +59,7 @@ export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>,
   modalTitle?: string;
 }
 
-const TabbedModalInner = (
-  {
-    onClose,
-    modalTitle,
-    modalWidth
-  }: ITabbedModalInner
-) => {
+const TabbedModalInner = ({ onClose, modalTitle, modalWidth }: ITabbedModalInner) => {
   const { tabs, state, dispatch } =
     useModalContext<Array<IModalTabDeclaration<Record<string, any>>>>();
 

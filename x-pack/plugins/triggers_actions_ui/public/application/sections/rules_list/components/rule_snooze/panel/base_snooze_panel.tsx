@@ -53,22 +53,20 @@ export interface BaseSnoozePanelProps {
   inPopover?: boolean;
 }
 
-export const BaseSnoozePanel = (
-  {
-    isLoading,
-    interval = '3d',
-    snoozeRule,
-    unsnoozeRule,
-    showCancel,
-    showAddSchedule = true,
-    scheduledSnoozes,
-    activeSnoozes,
-    navigateToScheduler,
-    onRemoveAllSchedules,
-    hasTitle,
-    inPopover = false
-  }: BaseSnoozePanelProps
-) => {
+export const BaseSnoozePanel = ({
+  isLoading,
+  interval = '3d',
+  snoozeRule,
+  unsnoozeRule,
+  showCancel,
+  showAddSchedule = true,
+  scheduledSnoozes,
+  activeSnoozes,
+  navigateToScheduler,
+  onRemoveAllSchedules,
+  hasTitle,
+  inPopover = false,
+}: BaseSnoozePanelProps) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -36,11 +36,7 @@ interface Props {
   onAddDocuments: (document: any) => void;
 }
 
-export const AddDocumentsAccordion = (
-  {
-    onAddDocuments
-  }: Props
-) => {
+export const AddDocumentsAccordion = ({ onAddDocuments }: Props) => {
   const { services } = useKibana();
   const isMounted = useIsMounted();
   const [discoverLink, setDiscoverLink] = useState<string | undefined>(undefined);

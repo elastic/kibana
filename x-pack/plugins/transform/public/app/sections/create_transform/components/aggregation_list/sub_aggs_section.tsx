@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiSpacer, EuiToolTip } from '@elastic/eui';
@@ -21,13 +20,7 @@ import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
  * Component for managing sub-aggregation of the provided
  * aggregation item.
  */
-export const SubAggsSection = (
-  {
-    item
-  }: {
-    item: PivotAggsConfig;
-  }
-) => {
+export const SubAggsSection = ({ item }: { item: PivotAggsConfig }) => {
   const { state, actions } = useContext(PivotConfigurationContext)!;
 
   const addSubAggHandler = useCallback(

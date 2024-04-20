@@ -71,20 +71,18 @@ const getSorting = (sortField: HostsFields, direction: Direction): SortingBasicT
   direction,
 });
 
-const HostsTableComponent = (
-  {
-    data,
-    fakeTotalCount,
-    id,
-    isInspect,
-    loading,
-    loadPage,
-    setQuerySkip,
-    showMorePagesIndicator,
-    totalCount,
-    type
-  }: HostsTableProps
-) => {
+const HostsTableComponent = ({
+  data,
+  fakeTotalCount,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  setQuerySkip,
+  showMorePagesIndicator,
+  totalCount,
+  type,
+}: HostsTableProps) => {
   const dispatch = useDispatch();
   const { navigateTo } = useNavigateTo();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);

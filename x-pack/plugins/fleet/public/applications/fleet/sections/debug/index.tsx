@@ -94,15 +94,13 @@ const panels = [
   },
 ];
 
-export const DebugPage = (
-  {
-    isInitialized,
-    setupError
-  }: {
-    isInitialized: boolean;
-    setupError: RequestError | null;
-  }
-) => {
+export const DebugPage = ({
+  isInitialized,
+  setupError,
+}: {
+  isInitialized: boolean;
+  setupError: RequestError | null;
+}) => {
   const { chrome } = useStartServices();
   const { getHref } = useLink();
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { WizardNav } from '../wizard_nav';
@@ -21,12 +20,7 @@ import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 
-export const DatafeedStep = (
-  {
-    setCurrentStep,
-    isCurrentStep
-  }: StepProps
-) => {
+export const DatafeedStep = ({ setCurrentStep, isCurrentStep }: StepProps) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [isValidQuery, setIsValidQuery] = useState(false);

@@ -24,25 +24,23 @@ import { useCardItemStyles } from './styles/card_item.styles';
 
 export const SHADOW_ANIMATION_DURATION = 350;
 
-const CardItemComponent = (
-  {
-    activeStepIds,
-    cardId,
-    expandedCardSteps,
-    finishedSteps,
-    toggleTaskCompleteStatus,
-    onStepClicked,
-    sectionId
-  }: {
-    activeStepIds: StepId[] | undefined;
-    cardId: CardId;
-    expandedCardSteps: ExpandedCardSteps;
-    finishedSteps: Set<StepId>;
-    toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
-    onStepClicked: OnStepClicked;
-    sectionId: SectionId;
-  }
-) => {
+const CardItemComponent = ({
+  activeStepIds,
+  cardId,
+  expandedCardSteps,
+  finishedSteps,
+  toggleTaskCompleteStatus,
+  onStepClicked,
+  sectionId,
+}: {
+  activeStepIds: StepId[] | undefined;
+  cardId: CardId;
+  expandedCardSteps: ExpandedCardSteps;
+  finishedSteps: Set<StepId>;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
+  onStepClicked: OnStepClicked;
+  sectionId: SectionId;
+}) => {
   const isExpandedCard = expandedCardSteps[cardId].isExpanded;
 
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiSearchBar, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -15,13 +15,11 @@ export interface AssignFlyoutSearchBarProps {
   types: string[];
 }
 
-export const AssignFlyoutSearchBar = (
-  {
-    onChange,
-    types,
-    isLoading
-  }: AssignFlyoutSearchBarProps
-) => {
+export const AssignFlyoutSearchBar = ({
+  onChange,
+  types,
+  isLoading,
+}: AssignFlyoutSearchBarProps) => {
   const filters = useMemo(() => {
     return [
       {

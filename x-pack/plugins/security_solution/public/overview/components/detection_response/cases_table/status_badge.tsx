@@ -31,11 +31,7 @@ const statuses = {
   },
 } as const;
 
-export const StatusBadge = (
-  {
-    status
-  }: Props
-) => {
+export const StatusBadge = ({ status }: Props) => {
   return (
     <EuiBadge color={statuses[status].color} data-test-subj="case-status-badge">
       {statuses[status].label}

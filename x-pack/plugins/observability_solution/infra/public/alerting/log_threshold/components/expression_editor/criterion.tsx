@@ -101,17 +101,15 @@ interface Props {
   errors: IErrorObject;
 }
 
-export const Criterion = (
-  {
-    idx,
-    fields,
-    criterion,
-    updateCriterion,
-    removeCriterion,
-    canDelete,
-    errors
-  }: Props
-) => {
+export const Criterion = ({
+  idx,
+  fields,
+  criterion,
+  updateCriterion,
+  removeCriterion,
+  canDelete,
+  errors,
+}: Props) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
 

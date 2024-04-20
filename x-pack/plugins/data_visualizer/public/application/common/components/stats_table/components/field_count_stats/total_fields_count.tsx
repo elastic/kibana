@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 import { dvFieldCountItemCss } from './styles';
 
@@ -20,11 +19,7 @@ export interface TotalFieldsCountProps {
   fieldsCountStats?: TotalFieldsStats;
 }
 
-export const TotalFieldsCount = (
-  {
-    fieldsCountStats
-  }: TotalFieldsCountProps
-) => {
+export const TotalFieldsCount = ({ fieldsCountStats }: TotalFieldsCountProps) => {
   if (
     !fieldsCountStats ||
     fieldsCountStats.visibleFieldsCount === undefined ||

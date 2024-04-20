@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { flowRight, identity } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import useEffectOnce from 'react-use/lib/useEffectOnce';

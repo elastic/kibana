@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,21 +17,19 @@ import {
 
 import type { DeleteAction } from './use_delete_action';
 
-export const DeleteActionModal = (
-  {
-    closeModal,
-    deleteAndCloseModal,
-    deleteTargetIndex,
-    deleteDataView,
-    dataViewExists,
-    isLoading,
-    item,
-    toggleDeleteIndex,
-    toggleDeleteDataView,
-    userCanDeleteIndex,
-    userCanDeleteDataView
-  }: DeleteAction
-) => {
+export const DeleteActionModal = ({
+  closeModal,
+  deleteAndCloseModal,
+  deleteTargetIndex,
+  deleteDataView,
+  dataViewExists,
+  isLoading,
+  item,
+  toggleDeleteIndex,
+  toggleDeleteDataView,
+  userCanDeleteIndex,
+  userCanDeleteDataView,
+}: DeleteAction) => {
   if (item === undefined) {
     return null;
   }

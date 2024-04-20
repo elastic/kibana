@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { DomainRange } from '@elastic/charts';
 import { CurrentTime } from '@kbn/charts-plugin/public';
 
@@ -16,13 +16,7 @@ interface XYCurrentTime {
   domain?: DomainRange;
 }
 
-export const XYCurrentTime = (
-  {
-    enabled,
-    isDarkMode,
-    domain
-  }: XYCurrentTime
-) => {
+export const XYCurrentTime = ({ enabled, isDarkMode, domain }: XYCurrentTime) => {
   if (!enabled) {
     return null;
   }

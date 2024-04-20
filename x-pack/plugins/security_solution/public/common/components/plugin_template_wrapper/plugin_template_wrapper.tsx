@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../lib/kibana';
 

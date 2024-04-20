@@ -94,11 +94,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
   );
 };
 
-export const KibanaOverviewPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const KibanaOverviewPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();

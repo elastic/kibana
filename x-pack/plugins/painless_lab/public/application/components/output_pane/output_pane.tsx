@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -25,12 +25,7 @@ interface Props {
   response?: Response;
 }
 
-export const OutputPane = (
-  {
-    isLoading,
-    response
-  }: Props
-) => {
+export const OutputPane = ({ isLoading, response }: Props) => {
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>

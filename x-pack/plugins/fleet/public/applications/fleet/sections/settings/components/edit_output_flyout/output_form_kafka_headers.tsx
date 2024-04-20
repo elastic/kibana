@@ -24,11 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { OutputFormInputsType } from './use_output_form';
 
-export const OutputFormKafkaHeaders = (
-  props: {
-    inputs: OutputFormInputsType;
-  }
-) => {
+export const OutputFormKafkaHeaders = (props: { inputs: OutputFormInputsType }) => {
   const { inputs } = props;
   const {
     props: { onChange },

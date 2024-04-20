@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -142,14 +142,12 @@ const documentFieldConfig: FieldConfig<object[], {}, string> = {
   ],
 };
 
-export const DocumentsTab = (
-  {
-    validateAndTestPipeline,
-    isRunningTest,
-    form,
-    resetTestOutput
-  }: Props
-) => {
+export const DocumentsTab = ({
+  validateAndTestPipeline,
+  isRunningTest,
+  form,
+  resetTestOutput,
+}: Props) => {
   const { services } = useKibana();
   const { getFormData, reset } = form;
 

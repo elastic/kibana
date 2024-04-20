@@ -19,14 +19,7 @@ interface QuestionInputProps {
   isDisabled?: boolean;
 }
 
-export const QuestionInput = (
-  {
-    value,
-    onChange,
-    button,
-    isDisabled
-  }: QuestionInputProps
-) => {
+export const QuestionInput = ({ value, onChange, button, isDisabled }: QuestionInputProps) => {
   const { euiTheme } = useEuiTheme();
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 
-export const JobGroup = (
-  {
-    name
-  }: {
-    name: string;
-  }
-) => (<EuiBadge key={`${name}-id`} data-test-subj="mlJobGroup" color={tabColor(name)}>
-  {name}
-</EuiBadge>);
+export const JobGroup = ({ name }: { name: string }) => (
+  <EuiBadge key={`${name}-id`} data-test-subj="mlJobGroup" color={tabColor(name)}>
+    {name}
+  </EuiBadge>
+);

@@ -19,7 +19,7 @@ import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';
-import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import type { FieldConfig, SelectedChangePoint } from './change_point_detection_context';
@@ -71,15 +71,13 @@ function getFilterConfig(
 
 const pageSizeOptions = [5, 10, 15];
 
-export const ChangePointsTable = (
-  {
-    isLoading,
-    annotations,
-    fieldConfig,
-    onSelectionChange,
-    onRenderComplete
-  }: ChangePointsTableProps
-) => {
+export const ChangePointsTable = ({
+  isLoading,
+  annotations,
+  fieldConfig,
+  onSelectionChange,
+  onRenderComplete,
+}: ChangePointsTableProps) => {
   const {
     fieldFormats,
     data: {
@@ -348,14 +346,12 @@ export const ChangePointsTable = (
   );
 };
 
-export const MiniChartPreview = (
-  {
-    fieldConfig,
-    annotation,
-    onRenderComplete,
-    onLoading
-  }: ChartComponentProps
-) => {
+export const MiniChartPreview = ({
+  fieldConfig,
+  annotation,
+  onRenderComplete,
+  onLoading,
+}: ChartComponentProps) => {
   const {
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();

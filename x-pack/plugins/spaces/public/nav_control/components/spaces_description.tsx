@@ -8,7 +8,6 @@
 import './spaces_description.scss';
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';

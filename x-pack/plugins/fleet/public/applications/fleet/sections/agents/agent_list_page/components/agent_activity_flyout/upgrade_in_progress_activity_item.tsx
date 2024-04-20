@@ -30,17 +30,15 @@ import {
 } from './helpers';
 import { ViewAgentsButton } from './view_agents_button';
 
-export const UpgradeInProgressActivityItem = (
-  {
-    action,
-    abortUpgrade,
-    onClickViewAgents
-  }: {
-    action: ActionStatus;
-    abortUpgrade: (action: ActionStatus) => Promise<void>;
-    onClickViewAgents: (action: ActionStatus) => void;
-  }
-) => {
+export const UpgradeInProgressActivityItem = ({
+  action,
+  abortUpgrade,
+  onClickViewAgents,
+}: {
+  action: ActionStatus;
+  abortUpgrade: (action: ActionStatus) => Promise<void>;
+  onClickViewAgents: (action: ActionStatus) => void;
+}) => {
   const { docLinks } = useStartServices();
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {

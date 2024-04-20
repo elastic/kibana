@@ -31,13 +31,7 @@ interface SitemapsTableProps {
   items: Sitemap[];
 }
 
-export const SitemapsTable = (
-  {
-    domain,
-    engineName,
-    items
-  }: SitemapsTableProps
-) => {
+export const SitemapsTable = ({ domain, engineName, items }: SitemapsTableProps) => {
   const { updateSitemaps } = useActions(CrawlerSingleDomainLogic);
   const field = 'url';
 

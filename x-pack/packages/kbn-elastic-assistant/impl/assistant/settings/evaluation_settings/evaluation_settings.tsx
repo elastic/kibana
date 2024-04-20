@@ -51,11 +51,7 @@ interface Props {
 /**
  * Evaluation Settings -- development-only feature for evaluating models
  */
-export const EvaluationSettings = React.memo((
-  {
-    onEvaluationSettingsChange
-  }: Props
-) => {
+export const EvaluationSettings = React.memo(({ onEvaluationSettingsChange }: Props) => {
   const { actionTypeRegistry, basePath, http, setTraceOptions, traceOptions } =
     useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });

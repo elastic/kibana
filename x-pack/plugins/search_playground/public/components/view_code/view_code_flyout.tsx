@@ -48,11 +48,7 @@ es_client = Elasticsearch(
   `;
 };
 
-export const ViewCodeFlyout = (
-  {
-    onClose
-  }: ViewCodeFlyoutProps
-) => {
+export const ViewCodeFlyout = ({ onClose }: ViewCodeFlyoutProps) => {
   const [selectedLanguage, setSelectedLanguage] = useState('py-es-client');
   const { getValues } = useFormContext<ChatForm>();
   const formValues = getValues();

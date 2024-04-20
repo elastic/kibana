@@ -26,12 +26,10 @@ interface Props {
   sourceComponentTemplate?: any;
 }
 
-export const ComponentTemplateCreate = (
-  {
-    history,
-    sourceComponentTemplate
-  }: RouteComponentProps & Props
-) => {
+export const ComponentTemplateCreate = ({
+  history,
+  sourceComponentTemplate,
+}: RouteComponentProps & Props) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
   const redirectTo = useRedirectPath(history);

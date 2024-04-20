@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { type FC } from 'react';
+import React from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -16,13 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const DeploymentDetailsEsInput = (
-  {
-    elasticsearchUrl
-  }: {
-    elasticsearchUrl: string;
-  }
-) => {
+export const DeploymentDetailsEsInput = ({ elasticsearchUrl }: { elasticsearchUrl: string }) => {
   return (
     <EuiFormRow
       label={i18n.translate('cloud.deploymentDetails.elasticEndpointLabel', {

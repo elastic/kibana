@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -81,12 +80,7 @@ interface SelectIntervalUIProps {
   interval: TableInterval;
   onChange: (interval: TableInterval) => void;
 }
-export const SelectIntervalUI = (
-  {
-    interval,
-    onChange
-  }: SelectIntervalUIProps
-) => {
+export const SelectIntervalUI = ({ interval, onChange }: SelectIntervalUIProps) => {
   const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(optionValueToInterval(e.target.value));
   };

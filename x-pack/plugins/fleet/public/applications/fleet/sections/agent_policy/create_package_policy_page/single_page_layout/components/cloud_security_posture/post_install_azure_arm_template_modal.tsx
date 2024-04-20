@@ -27,19 +27,17 @@ import { useCreateAzureArmTemplateUrl } from '../../../../../../../../components
 import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 import { sendGetEnrollmentAPIKeys } from '../../../../../../hooks';
 
-export const PostInstallAzureArmTemplateModal = (
-  {
-    onConfirm,
-    onCancel,
-    agentPolicy,
-    packagePolicy
-  }: {
-    onConfirm: () => void;
-    onCancel: () => void;
-    agentPolicy: AgentPolicy;
-    packagePolicy: PackagePolicy;
-  }
-) => {
+export const PostInstallAzureArmTemplateModal = ({
+  onConfirm,
+  onCancel,
+  agentPolicy,
+  packagePolicy,
+}: {
+  onConfirm: () => void;
+  onCancel: () => void;
+  agentPolicy: AgentPolicy;
+  packagePolicy: PackagePolicy;
+}) => {
   const { data: apyKeysData } = useQuery(
     ['azureArmTemplateApiKeys', { agentPolicyId: agentPolicy.id }],
     () =>

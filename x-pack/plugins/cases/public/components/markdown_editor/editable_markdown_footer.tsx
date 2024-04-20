@@ -16,13 +16,11 @@ interface EditableMarkdownFooterProps {
   isSaveDisabled: boolean;
 }
 
-const EditableMarkdownFooterComponent = (
-  {
-    handleSaveAction,
-    handleCancelAction,
-    isSaveDisabled
-  }: EditableMarkdownFooterProps
-) => {
+const EditableMarkdownFooterComponent = ({
+  handleSaveAction,
+  handleCancelAction,
+  isSaveDisabled,
+}: EditableMarkdownFooterProps) => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>

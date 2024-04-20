@@ -52,18 +52,16 @@ interface NavigationProps {
   activeTab?: TimelineTabs;
 }
 
-const NavigationComponent = (
-  {
-    fullScreen,
-    globalFullScreen,
-    onCloseOverlay,
-    isActiveTimelines,
-    timelineFullScreen,
-    toggleFullScreen,
-    graphEventId,
-    activeTab
-  }: NavigationProps
-) => {
+const NavigationComponent = ({
+  fullScreen,
+  globalFullScreen,
+  onCloseOverlay,
+  isActiveTimelines,
+  timelineFullScreen,
+  toggleFullScreen,
+  graphEventId,
+  activeTab,
+}: NavigationProps) => {
   const title = () => {
     if (isActiveTimelines) {
       return activeTab === TimelineTabs.graph ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;

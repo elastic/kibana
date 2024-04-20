@@ -23,11 +23,7 @@ interface ManageCrawlsPopoverProps {
   domain?: CrawlerDomain;
 }
 
-export const ManageCrawlsPopover = (
-  {
-    domain
-  }: ManageCrawlsPopoverProps
-) => {
+export const ManageCrawlsPopover = ({ domain }: ManageCrawlsPopoverProps) => {
   const { closePopover, reApplyCrawlRules, togglePopover } = useActions(ManageCrawlsPopoverLogic);
 
   const { isOpen } = useValues(ManageCrawlsPopoverLogic);

@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { FunctionComponent, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';

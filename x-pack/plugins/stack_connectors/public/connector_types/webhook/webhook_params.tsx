@@ -11,15 +11,13 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { WebhookActionParams } from '../types';
 
-const WebhookParamsFields = (
-  {
-    actionParams,
-    editAction,
-    index,
-    messageVariables,
-    errors
-  }: ActionParamsProps<WebhookActionParams>
-) => {
+const WebhookParamsFields = ({
+  actionParams,
+  editAction,
+  index,
+  messageVariables,
+  errors,
+}: ActionParamsProps<WebhookActionParams>) => {
   const { body } = actionParams;
   return (
     <JsonEditorWithMessageVariables

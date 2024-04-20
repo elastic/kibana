@@ -24,13 +24,11 @@ interface CodeEditorFieldProps {
   helpText?: string;
 }
 
-const CodeEditorFieldComponent = (
-  {
-    euiFieldProps,
-    labelAppend,
-    helpText
-  }: CodeEditorFieldProps
-) => {
+const CodeEditorFieldComponent = ({
+  euiFieldProps,
+  labelAppend,
+  helpText,
+}: CodeEditorFieldProps) => {
   const {
     field: { onChange, value },
     fieldState: { error },

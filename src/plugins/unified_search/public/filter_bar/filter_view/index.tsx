@@ -8,7 +8,7 @@
 
 import { EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import React from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { stringHash } from '@kbn/ml-string-hash';
@@ -27,21 +27,19 @@ interface Props {
   dataViews: DataView[];
 }
 
-export const FilterView = (
-  {
-    filter,
-    readOnly,
-    iconOnClick,
-    onClick,
-    valueLabel,
-    fieldLabel,
-    errorMessage,
-    filterLabelStatus,
-    hideAlias,
-    dataViews,
-    ...rest
-  }: Props
-) => {
+export const FilterView = ({
+  filter,
+  readOnly,
+  iconOnClick,
+  onClick,
+  valueLabel,
+  fieldLabel,
+  errorMessage,
+  filterLabelStatus,
+  hideAlias,
+  dataViews,
+  ...rest
+}: Props) => {
   const [ref, innerText] = useInnerText();
 
   const filterString = readOnly

@@ -29,15 +29,13 @@ interface Props {
   isExperimental?: boolean;
 }
 
-const FlyoutHeaderComponent = (
-  {
-    icon,
-    actionTypeName,
-    actionTypeMessage,
-    compatibility,
-    isExperimental
-  }: Props
-) => {
+const FlyoutHeaderComponent = ({
+  icon,
+  actionTypeName,
+  actionTypeMessage,
+  compatibility,
+  isExperimental,
+}: Props) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">

@@ -27,14 +27,12 @@ interface TestConnectionPanelContentProps {
   setSelectedLanguage: (selectedLanguage: LanguageDefinition) => void;
 }
 
-export const TestConnectionPanelContent = (
-  {
-    assetBasePath,
-    codeArgs,
-    selectedLanguage,
-    setSelectedLanguage
-  }: TestConnectionPanelContentProps
-) => {
+export const TestConnectionPanelContent = ({
+  assetBasePath,
+  codeArgs,
+  selectedLanguage,
+  setSelectedLanguage,
+}: TestConnectionPanelContentProps) => {
   const { services } = useKibana<KibanaDeps>();
   return (
     <CodeBox

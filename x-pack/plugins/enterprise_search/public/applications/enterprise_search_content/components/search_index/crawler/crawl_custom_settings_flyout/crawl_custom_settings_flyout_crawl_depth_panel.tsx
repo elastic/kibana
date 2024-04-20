@@ -39,12 +39,10 @@ export const CrawlCustomSettingsFlyoutCrawlDepthPanelWithLogicProps = () => {
   );
 };
 
-export const CrawlCustomSettingsFlyoutCrawlDepthPanel = (
-  {
-    maxCrawlDepth,
-    onSelectMaxCrawlDepth
-  }: CrawlCustomSettingsFlyoutCrawlDepthPanelProps
-) => {
+export const CrawlCustomSettingsFlyoutCrawlDepthPanel = ({
+  maxCrawlDepth,
+  onSelectMaxCrawlDepth,
+}: CrawlCustomSettingsFlyoutCrawlDepthPanelProps) => {
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup>

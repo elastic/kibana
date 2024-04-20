@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import {

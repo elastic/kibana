@@ -35,13 +35,7 @@ interface FullErrorProps {
 /**
  * @deprecated Use x-pack/plugins/security_solution/public/common/hooks/use_app_toasts.ts instead
  */
-const ModalAllErrorsComponent = (
-  {
-    isShowing,
-    toast,
-    toggle
-  }: FullErrorProps
-) => {
+const ModalAllErrorsComponent = ({ isShowing, toast, toggle }: FullErrorProps) => {
   const handleClose = useCallback(() => toggle(toast), [toggle, toast]);
 
   if (!isShowing || toast == null) return null;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -71,19 +70,17 @@ interface LogRateAnalysisResultsTableProps {
   zeroDocsFallback?: boolean;
 }
 
-export const LogRateAnalysisResultsTable = (
-  {
-    significantItems,
-    dataView,
-    loading,
-    isExpandedRow,
-    searchQuery,
-    timeRangeMs,
-    barColorOverride,
-    barHighlightColorOverride,
-    zeroDocsFallback = false
-  }: LogRateAnalysisResultsTableProps
-) => {
+export const LogRateAnalysisResultsTable = ({
+  significantItems,
+  dataView,
+  loading,
+  isExpandedRow,
+  searchQuery,
+  timeRangeMs,
+  barColorOverride,
+  barHighlightColorOverride,
+  zeroDocsFallback = false,
+}: LogRateAnalysisResultsTableProps) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const dataViewId = dataView.id;

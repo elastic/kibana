@@ -49,19 +49,17 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 
-const NetworkTopNFlowTableComponent = (
-  {
-    data,
-    flowTargeted,
-    id,
-    isInspect,
-    loading,
-    loadPage,
-    setQuerySkip,
-    totalCount,
-    type
-  }: NetworkTopNFlowTableProps
-) => {
+const NetworkTopNFlowTableComponent = ({
+  data,
+  flowTargeted,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  setQuerySkip,
+  totalCount,
+  type,
+}: NetworkTopNFlowTableProps) => {
   const dispatch = useDispatch();
   const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>

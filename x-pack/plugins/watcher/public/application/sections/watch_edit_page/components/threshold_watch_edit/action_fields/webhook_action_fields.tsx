@@ -34,14 +34,7 @@ const HTTP_VERBS = ['head', 'get', 'post', 'put', 'delete'];
 
 const SCHEME = ['http', 'https'];
 
-export const WebhookActionFields = (
-  {
-    action,
-    editAction,
-    errors,
-    hasErrors
-  }: Props
-) => {
+export const WebhookActionFields = ({ action, editAction, errors, hasErrors }: Props) => {
   const { method, host, port, scheme, path, body, username, password } = action;
 
   useEffect(() => {

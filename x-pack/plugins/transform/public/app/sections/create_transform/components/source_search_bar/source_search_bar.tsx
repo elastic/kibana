@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -19,12 +19,7 @@ interface SourceSearchBarProps {
   dataView: SearchItems['dataView'];
   searchBar: StepDefineFormHook['searchBar'];
 }
-export const SourceSearchBar = (
-  {
-    dataView,
-    searchBar
-  }: SourceSearchBarProps
-) => {
+export const SourceSearchBar = ({ dataView, searchBar }: SourceSearchBarProps) => {
   const {
     actions: { searchChangeHandler, searchSubmitHandler, setQueryErrorMessage },
     state: { queryErrorMessage, searchInput },

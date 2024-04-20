@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 
@@ -17,19 +17,19 @@ interface CreateDataViewSwitchProps {
   setCreateDataView: (d: boolean) => void;
 }
 
-export const CreateDataViewSwitch = (
-  {
-    canCreateDataView,
-    createDataView,
-    setCreateDataView
-  }: CreateDataViewSwitchProps
-) => (<EuiSwitch
-  name="mlCreateDataView"
-  disabled={canCreateDataView === false}
-  label={i18n.translate('xpack.ml.dataViewUtils.createDataViewSwitchLabel', {
-    defaultMessage: 'Create data view',
-  })}
-  checked={createDataView === true}
-  onChange={() => setCreateDataView(!createDataView)}
-  data-test-subj="mlCreateDataViewSwitch"
-/>);
+export const CreateDataViewSwitch = ({
+  canCreateDataView,
+  createDataView,
+  setCreateDataView,
+}: CreateDataViewSwitchProps) => (
+  <EuiSwitch
+    name="mlCreateDataView"
+    disabled={canCreateDataView === false}
+    label={i18n.translate('xpack.ml.dataViewUtils.createDataViewSwitchLabel', {
+      defaultMessage: 'Create data view',
+    })}
+    checked={createDataView === true}
+    onChange={() => setCreateDataView(!createDataView)}
+    data-test-subj="mlCreateDataViewSwitch"
+  />
+);

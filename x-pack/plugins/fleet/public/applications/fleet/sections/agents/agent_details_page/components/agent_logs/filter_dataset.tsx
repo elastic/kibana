@@ -15,115 +15,115 @@ import { useStartServices } from '../../../../../hooks';
 
 import { AGENT_LOG_INDEX_PATTERN, DATASET_FIELD, AGENT_DATASET } from './constants';
 
-export const DatasetFilter = memo((
-  {
+export const DatasetFilter = memo(
+  ({
     selectedDatasets,
-    onToggleDataset
+    onToggleDataset,
   }: {
     selectedDatasets: string[];
     onToggleDataset: (dataset: string) => void;
-  }
-) => {
-  const { unifiedSearch, data } = useStartServices();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
+  }) => {
+    const { unifiedSearch, data } = useStartServices();
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
 
-  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), [setIsOpen]);
-  const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
+    const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), [setIsOpen]);
+    const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
 
-  const datasetValuesToOptions = useCallback(
-    (values: string[]): EuiSelectableOption[] => {
-      return values.map((value) => ({
-        label: value,
-        checked: selectedDatasets.includes(value) ? 'on' : undefined,
-        key: value,
-      }));
-    },
-    [selectedDatasets]
-  );
-  const [options, setOptions] = useState<EuiSelectableOption[]>(
-    datasetValuesToOptions(datasetValues)
-  );
+    const datasetValuesToOptions = useCallback(
+      (values: string[]): EuiSelectableOption[] => {
+        return values.map((value) => ({
+          label: value,
+          checked: selectedDatasets.includes(value) ? 'on' : undefined,
+          key: value,
+        }));
+      },
+      [selectedDatasets]
+    );
+    const [options, setOptions] = useState<EuiSelectableOption[]>(
+      datasetValuesToOptions(datasetValues)
+    );
 
-  useEffect(() => {
-    const fetchValues = async () => {
-      setIsLoading(true);
-      try {
-        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
-          pattern: AGENT_LOG_INDEX_PATTERN,
-        });
-        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
-          acc[curr.name] = curr;
-          return acc;
-        }, {});
-        const newDataView = await data.dataViews.create({
-          title: AGENT_LOG_INDEX_PATTERN,
-          fields: fieldsMap,
-        });
-
-        const values = await unifiedSearch.autocomplete.getValueSuggestions({
-          indexPattern: newDataView,
-          field: DATASET_FIELD as DataViewField,
-          query: '',
-        });
-        if (values.length > 0) {
-          setDatasetValues(values.sort());
-          setOptions(datasetValuesToOptions(values.sort()));
-        }
-      } catch (e) {
-        setDatasetValues([AGENT_DATASET]);
-        setOptions(datasetValuesToOptions([AGENT_DATASET]));
-      }
-      setIsLoading(false);
-    };
-    fetchValues();
-  }, [data.dataViews, unifiedSearch.autocomplete, datasetValuesToOptions]);
-
-  return (
-    <EuiPopover
-      button={
-        <EuiFilterButton
-          data-test-subj="agentList.datasetFilterBtn"
-          iconType="arrowDown"
-          onClick={togglePopover}
-          isSelected={isOpen}
-          isLoading={isLoading}
-          numFilters={datasetValues.length}
-          hasActiveFilters={selectedDatasets.length > 0}
-          numActiveFilters={selectedDatasets.length}
-        >
-          {i18n.translate('xpack.fleet.agentLogs.datasetSelectText', {
-            defaultMessage: 'Dataset',
-          })}
-        </EuiFilterButton>
-      }
-      isOpen={isOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-    >
-      <EuiSelectable
-        options={options}
-        onChange={(newOptions) => {
-          setOptions(newOptions);
-          newOptions.forEach((option, index) => {
-            if (option.checked !== options[index].checked) {
-              onToggleDataset(option.label);
-              return;
-            }
+    useEffect(() => {
+      const fetchValues = async () => {
+        setIsLoading(true);
+        try {
+          const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
+            pattern: AGENT_LOG_INDEX_PATTERN,
           });
-        }}
-        data-test-subj="agentList.datasetFilterOptions"
-        isLoading={isLoading}
-        listProps={{
-          paddingSize: 's',
-          style: {
-            minWidth: 220,
-          },
-        }}
+          const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+            acc[curr.name] = curr;
+            return acc;
+          }, {});
+          const newDataView = await data.dataViews.create({
+            title: AGENT_LOG_INDEX_PATTERN,
+            fields: fieldsMap,
+          });
+
+          const values = await unifiedSearch.autocomplete.getValueSuggestions({
+            indexPattern: newDataView,
+            field: DATASET_FIELD as DataViewField,
+            query: '',
+          });
+          if (values.length > 0) {
+            setDatasetValues(values.sort());
+            setOptions(datasetValuesToOptions(values.sort()));
+          }
+        } catch (e) {
+          setDatasetValues([AGENT_DATASET]);
+          setOptions(datasetValuesToOptions([AGENT_DATASET]));
+        }
+        setIsLoading(false);
+      };
+      fetchValues();
+    }, [data.dataViews, unifiedSearch.autocomplete, datasetValuesToOptions]);
+
+    return (
+      <EuiPopover
+        button={
+          <EuiFilterButton
+            data-test-subj="agentList.datasetFilterBtn"
+            iconType="arrowDown"
+            onClick={togglePopover}
+            isSelected={isOpen}
+            isLoading={isLoading}
+            numFilters={datasetValues.length}
+            hasActiveFilters={selectedDatasets.length > 0}
+            numActiveFilters={selectedDatasets.length}
+          >
+            {i18n.translate('xpack.fleet.agentLogs.datasetSelectText', {
+              defaultMessage: 'Dataset',
+            })}
+          </EuiFilterButton>
+        }
+        isOpen={isOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
       >
-        {(list) => list}
-      </EuiSelectable>
-    </EuiPopover>
-  );
-});
+        <EuiSelectable
+          options={options}
+          onChange={(newOptions) => {
+            setOptions(newOptions);
+            newOptions.forEach((option, index) => {
+              if (option.checked !== options[index].checked) {
+                onToggleDataset(option.label);
+                return;
+              }
+            });
+          }}
+          data-test-subj="agentList.datasetFilterOptions"
+          isLoading={isLoading}
+          listProps={{
+            paddingSize: 's',
+            style: {
+              minWidth: 220,
+            },
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
+      </EuiPopover>
+    );
+  }
+);

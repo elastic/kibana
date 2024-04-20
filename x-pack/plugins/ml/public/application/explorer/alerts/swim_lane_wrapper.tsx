@@ -26,7 +26,7 @@ import {
   type AlertStatus,
 } from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
-import React, { type FC, useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -58,14 +58,12 @@ export interface SwimLaneWrapperProps {
  * Wrapper component for the swim lane
  * that handles the popover for the selected cells.
  */
-export const SwimLaneWrapper = (
-  {
-    children,
-    selection,
-    swimlaneContainerWidth,
-    swimLaneData
-  }: SwimLaneWrapperProps
-) => {
+export const SwimLaneWrapper = ({
+  children,
+  selection,
+  swimlaneContainerWidth,
+  swimLaneData,
+}: SwimLaneWrapperProps) => {
   const {
     services: { fieldFormats },
   } = useMlKibana();
@@ -225,11 +223,7 @@ export interface MiniAlertTableProps {
 
 const ALERT_PER_PAGE = 3;
 
-export const MiniAlertTable = (
-  {
-    data
-  }: MiniAlertTableProps
-) => {
+export const MiniAlertTable = ({ data }: MiniAlertTableProps) => {
   const {
     services: { fieldFormats },
   } = useMlKibana();

@@ -47,8 +47,8 @@ const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
   }
 `;
 
-export const StepDefinePackagePolicy = memo((
-  {
+export const StepDefinePackagePolicy = memo(
+  ({
     agentPolicy,
     packageInfo,
     packagePolicy,
@@ -56,7 +56,7 @@ export const StepDefinePackagePolicy = memo((
     validationResults,
     submitAttempted,
     noAdvancedToggle = false,
-    isEditPage = false
+    isEditPage = false,
   }: {
     agentPolicy?: AgentPolicy;
     packageInfo: PackageInfo;
@@ -66,307 +66,307 @@ export const StepDefinePackagePolicy = memo((
     submitAttempted: boolean;
     isEditPage?: boolean;
     noAdvancedToggle?: boolean;
-  }
-) => {
-  const { docLinks } = useStartServices();
+  }) => {
+    const { docLinks } = useStartServices();
 
-  // Form show/hide states
-  const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
+    // Form show/hide states
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-  // Package-level vars
-  const requiredVars: RegistryVarsEntry[] = [];
-  const advancedVars: RegistryVarsEntry[] = [];
+    // Package-level vars
+    const requiredVars: RegistryVarsEntry[] = [];
+    const advancedVars: RegistryVarsEntry[] = [];
 
-  if (packageInfo.vars) {
-    packageInfo.vars.forEach((varDef) => {
-      if (isAdvancedVar(varDef)) {
-        advancedVars.push(varDef);
-      } else {
-        requiredVars.push(varDef);
-      }
-    });
-  }
+    if (packageInfo.vars) {
+      packageInfo.vars.forEach((varDef) => {
+        if (isAdvancedVar(varDef)) {
+          advancedVars.push(varDef);
+        } else {
+          requiredVars.push(varDef);
+        }
+      });
+    }
 
-  const isManaged = packagePolicy.is_managed;
+    const isManaged = packagePolicy.is_managed;
 
-  return validationResults ? (
-    <>
-      {isManaged && (
-        <>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
-                defaultMessage="This is a managed package policy. You cannot modify it here."
-              />
-            }
-            iconType="lock"
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <FormGroupResponsiveFields
-        title={
-          <h4>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
-              defaultMessage="Integration settings"
+    return validationResults ? (
+      <>
+        {isManaged && (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
+                  defaultMessage="This is a managed package policy. You cannot modify it here."
+                />
+              }
+              iconType="lock"
             />
-          </h4>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionDescription"
-            defaultMessage="Choose a name and description to help identify how this integration will be used."
-          />
-        }
-      >
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {/* Name */}
-          <EuiFlexItem>
-            <EuiFormRow
-              isInvalid={!!validationResults.name}
-              error={validationResults.name}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNameInputLabel"
-                  defaultMessage="Integration name"
-                />
-              }
-            >
-              <EuiFieldText
-                readOnly={isManaged}
-                value={packagePolicy.name}
-                onChange={(e) =>
-                  updatePackagePolicy({
-                    name: e.target.value,
-                  })
-                }
-                data-test-subj="packagePolicyNameInput"
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <FormGroupResponsiveFields
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
+                defaultMessage="Integration settings"
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-
-          {/* Description */}
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
-                  defaultMessage="Description"
-                />
-              }
-              labelAppend={
-                <EuiText size="xs" color="subdued">
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.stepConfigure.integrationSettingsSectionDescription"
+              defaultMessage="Choose a name and description to help identify how this integration will be used."
+            />
+          }
+        >
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {/* Name */}
+            <EuiFlexItem>
+              <EuiFormRow
+                isInvalid={!!validationResults.name}
+                error={validationResults.name}
+                label={
                   <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
-                    defaultMessage="Optional"
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNameInputLabel"
+                    defaultMessage="Integration name"
                   />
-                </EuiText>
-              }
-              isInvalid={!!validationResults.description}
-              error={validationResults.description}
-            >
-              <EuiFieldText
-                readOnly={isManaged}
-                value={packagePolicy.description}
-                onChange={(e) =>
-                  updatePackagePolicy({
-                    description: e.target.value,
-                  })
                 }
-                data-test-subj="packagePolicyDescriptionInput"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-
-          {/* Required vars */}
-          {requiredVars.map((varDef) => {
-            const { name: varName, type: varType } = varDef;
-            if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
-            const value = packagePolicy.vars[varName].value;
-
-            return (
-              <EuiFlexItem key={varName}>
-                <PackagePolicyInputVarField
-                  varDef={varDef}
-                  value={value}
-                  onChange={(newValue: any) => {
+              >
+                <EuiFieldText
+                  readOnly={isManaged}
+                  value={packagePolicy.name}
+                  onChange={(e) =>
                     updatePackagePolicy({
-                      vars: {
-                        ...packagePolicy.vars,
-                        [varName]: {
-                          type: varType,
-                          value: newValue,
-                        },
-                      },
-                    });
-                  }}
-                  errors={validationResults?.vars?.[varName] ?? []}
-                  forceShowErrors={submitAttempted}
-                  isEditPage={isEditPage}
+                      name: e.target.value,
+                    })
+                  }
+                  data-test-subj="packagePolicyNameInput"
                 />
-              </EuiFlexItem>
-            );
-          })}
-
-          {/* Advanced options toggle */}
-          {!noAdvancedToggle && !isManaged && (
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-                    onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-                    flush="left"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
-                      defaultMessage="Advanced options"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                {!isShowingAdvanced && !!validationResults.namespace ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiText color="danger" size="s">
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-                        defaultMessage="{count, plural, one {# error} other {# errors}}"
-                        values={{ count: 1 }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
+              </EuiFormRow>
             </EuiFlexItem>
-          )}
 
-          {/* Advanced options content */}
-          {isShowingAdvanced ? (
+            {/* Description */}
             <EuiFlexItem>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem>
-                  <EuiFormRow
-                    isInvalid={!!validationResults.namespace}
-                    error={validationResults.namespace}
-                    label={
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
+                    defaultMessage="Description"
+                  />
+                }
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+                      defaultMessage="Optional"
+                    />
+                  </EuiText>
+                }
+                isInvalid={!!validationResults.description}
+                error={validationResults.description}
+              >
+                <EuiFieldText
+                  readOnly={isManaged}
+                  value={packagePolicy.description}
+                  onChange={(e) =>
+                    updatePackagePolicy({
+                      description: e.target.value,
+                    })
+                  }
+                  data-test-subj="packagePolicyDescriptionInput"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+
+            {/* Required vars */}
+            {requiredVars.map((varDef) => {
+              const { name: varName, type: varType } = varDef;
+              if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
+              const value = packagePolicy.vars[varName].value;
+
+              return (
+                <EuiFlexItem key={varName}>
+                  <PackagePolicyInputVarField
+                    varDef={varDef}
+                    value={value}
+                    onChange={(newValue: any) => {
+                      updatePackagePolicy({
+                        vars: {
+                          ...packagePolicy.vars,
+                          [varName]: {
+                            type: varType,
+                            value: newValue,
+                          },
+                        },
+                      });
+                    }}
+                    errors={validationResults?.vars?.[varName] ?? []}
+                    forceShowErrors={submitAttempted}
+                    isEditPage={isEditPage}
+                  />
+                </EuiFlexItem>
+              );
+            })}
+
+            {/* Advanced options toggle */}
+            {!noAdvancedToggle && !isManaged && (
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                      onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                      flush="left"
+                    >
                       <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
-                        defaultMessage="Namespace"
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
+                        defaultMessage="Advanced options"
                       />
-                    }
-                    helpText={
-                      isEditPage && packageInfo.type === 'input' ? (
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  {!isShowingAdvanced && !!validationResults.namespace ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="danger" size="s">
                         <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditNamespaceHelpLabel"
-                          defaultMessage="The namespace cannot be changed for this integration. Create a new integration policy to use a different namespace."
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                          defaultMessage="{count, plural, one {# error} other {# errors}}"
+                          values={{ count: 1 }}
                         />
-                      ) : (
+                      </EuiText>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+
+            {/* Advanced options content */}
+            {isShowingAdvanced ? (
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      isInvalid={!!validationResults.namespace}
+                      error={validationResults.namespace}
+                      label={
                         <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                          defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
+                          defaultMessage="Namespace"
+                        />
+                      }
+                      helpText={
+                        isEditPage && packageInfo.type === 'input' ? (
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditNamespaceHelpLabel"
+                            defaultMessage="The namespace cannot be changed for this integration. Create a new integration policy to use a different namespace."
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
+                            defaultMessage="Change the default namespace inherited from the selected Agent policy. This setting changes the name of the integration's data stream. {learnMore}."
+                            values={{
+                              learnMore: (
+                                <EuiLink
+                                  href={docLinks.links.fleet.datastreamsNamingScheme}
+                                  target="_blank"
+                                >
+                                  {i18n.translate(
+                                    'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                    { defaultMessage: 'Learn more' }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        )
+                      }
+                    >
+                      <EuiComboBox
+                        noSuggestions
+                        placeholder={agentPolicy?.namespace}
+                        isDisabled={isEditPage && packageInfo.type === 'input'}
+                        singleSelection={true}
+                        selectedOptions={
+                          packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
+                        }
+                        onCreateOption={(newNamespace: string) => {
+                          updatePackagePolicy({
+                            namespace: newNamespace,
+                          });
+                        }}
+                        onChange={(newNamespaces: Array<{ label: string }>) => {
+                          updatePackagePolicy({
+                            namespace: newNamespaces.length ? newNamespaces[0].label : '',
+                          });
+                        }}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
+                          defaultMessage="Data retention settings"
+                        />
+                      }
+                      helpText={
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
+                          defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
                           values={{
                             learnMore: (
-                              <EuiLink
-                                href={docLinks.links.fleet.datastreamsNamingScheme}
-                                target="_blank"
-                              >
+                              <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
                                 {i18n.translate(
-                                  'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
+                                  'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
                                   { defaultMessage: 'Learn more' }
                                 )}
                               </EuiLink>
                             ),
                           }}
                         />
-                      )
-                    }
-                  >
-                    <EuiComboBox
-                      noSuggestions
-                      placeholder={agentPolicy?.namespace}
-                      isDisabled={isEditPage && packageInfo.type === 'input'}
-                      singleSelection={true}
-                      selectedOptions={
-                        packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
                       }
-                      onCreateOption={(newNamespace: string) => {
-                        updatePackagePolicy({
-                          namespace: newNamespace,
-                        });
-                      }}
-                      onChange={(newNamespaces: Array<{ label: string }>) => {
-                        updatePackagePolicy({
-                          namespace: newNamespaces.length ? newNamespaces[0].label : '',
-                        });
-                      }}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
-                        defaultMessage="Data retention settings"
-                      />
-                    }
-                    helpText={
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
-                        defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
-                        values={{
-                          learnMore: (
-                            <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
-                              {i18n.translate(
-                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
-                                { defaultMessage: 'Learn more' }
-                              )}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    }
-                  >
-                    <div />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                {/* Advanced vars */}
-                {advancedVars.map((varDef) => {
-                  const { name: varName, type: varType } = varDef;
-                  if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
-                  const value = packagePolicy.vars![varName].value;
-                  return (
-                    <EuiFlexItem key={varName}>
-                      <PackagePolicyInputVarField
-                        varDef={varDef}
-                        value={value}
-                        onChange={(newValue: any) => {
-                          updatePackagePolicy({
-                            vars: {
-                              ...packagePolicy.vars,
-                              [varName]: {
-                                type: varType,
-                                value: newValue,
+                    >
+                      <div />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  {/* Advanced vars */}
+                  {advancedVars.map((varDef) => {
+                    const { name: varName, type: varType } = varDef;
+                    if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
+                    const value = packagePolicy.vars![varName].value;
+                    return (
+                      <EuiFlexItem key={varName}>
+                        <PackagePolicyInputVarField
+                          varDef={varDef}
+                          value={value}
+                          onChange={(newValue: any) => {
+                            updatePackagePolicy({
+                              vars: {
+                                ...packagePolicy.vars,
+                                [varName]: {
+                                  type: varType,
+                                  value: newValue,
+                                },
                               },
-                            },
-                          });
-                        }}
-                        errors={validationResults?.vars?.[varName] ?? []}
-                        forceShowErrors={submitAttempted}
-                        isEditPage={isEditPage}
-                      />
-                    </EuiFlexItem>
-                  );
-                })}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </FormGroupResponsiveFields>
-    </>
-  ) : (
-    <Loading />
-  );
-});
+                            });
+                          }}
+                          errors={validationResults?.vars?.[varName] ?? []}
+                          forceShowErrors={submitAttempted}
+                          isEditPage={isEditPage}
+                        />
+                      </EuiFlexItem>
+                    );
+                  })}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </FormGroupResponsiveFields>
+      </>
+    ) : (
+      <Loading />
+    );
+  }
+);

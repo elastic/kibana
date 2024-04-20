@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -40,16 +39,14 @@ export interface SingleMetricViewerInitializerProps {
   onCancel: () => void;
 }
 
-export const SingleMetricViewerInitializer = (
-  {
-    defaultTitle,
-    bounds,
-    initialInput,
-    job,
-    onCreate,
-    onCancel
-  }: SingleMetricViewerInitializerProps
-) => {
+export const SingleMetricViewerInitializer = ({
+  defaultTitle,
+  bounds,
+  initialInput,
+  job,
+  onCreate,
+  onCancel,
+}: SingleMetricViewerInitializerProps) => {
   const isNewJob = initialInput?.jobIds !== undefined && initialInput?.jobIds[0] !== job.job_id;
 
   const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);

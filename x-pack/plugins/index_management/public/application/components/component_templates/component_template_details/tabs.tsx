@@ -48,12 +48,7 @@ const TABS: Tab[] = [
   },
 ];
 
-export const ComponentTemplateTabs = (
-  {
-    setActiveTab,
-    activeTab
-  }: Props
-) => {
+export const ComponentTemplateTabs = ({ setActiveTab, activeTab }: Props) => {
   return (
     <EuiTabs>
       {TABS.map((tab) => (

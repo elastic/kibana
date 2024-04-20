@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
 import { IAggConfig } from '@kbn/data-plugin/public';
@@ -22,13 +22,7 @@ type Callback = () => void;
 
 let testComp: ReactWrapper;
 
-const TestHook = (
-  {
-    callback
-  }: {
-    callback: Callback;
-  }
-) => {
+const TestHook = ({ callback }: { callback: Callback }) => {
   callback();
   return null;
 };

@@ -18,12 +18,7 @@ interface Props {
   replacements?: Replacements;
 }
 
-const AlertsComponent = (
-  {
-    insight,
-    replacements
-  }: Props
-) => {
+const AlertsComponent = ({ insight, replacements }: Props) => {
   const { triggersActionsUi } = useKibana().services;
 
   const originalAlertIds = useMemo(

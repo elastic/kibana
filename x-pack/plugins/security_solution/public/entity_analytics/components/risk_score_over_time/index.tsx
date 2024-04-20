@@ -37,19 +37,17 @@ const CHART_HEIGHT = 180;
 
 export const scoreFormatter = (d: number) => Math.round(d).toString();
 
-const RiskScoreOverTimeComponent = (
-  {
-    from,
-    to,
-    riskScore,
-    loading,
-    queryId,
-    riskEntity,
-    title,
-    toggleStatus,
-    toggleQuery
-  }: RiskScoreOverTimeProps
-) => {
+const RiskScoreOverTimeComponent = ({
+  from,
+  to,
+  riskScore,
+  loading,
+  queryId,
+  riskEntity,
+  title,
+  toggleStatus,
+  toggleQuery,
+}: RiskScoreOverTimeProps) => {
   const spaceId = useSpaceId();
   const timerange = useMemo(
     () => ({

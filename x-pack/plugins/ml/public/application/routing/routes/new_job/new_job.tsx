@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { ML_PAGES } from '../../../../locator';

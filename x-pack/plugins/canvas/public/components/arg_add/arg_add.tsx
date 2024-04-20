@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactEventHandler } from 'react';
+import React, { ReactEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiDescriptionList,
@@ -19,13 +19,7 @@ interface Props {
   onValueAdd?: ReactEventHandler;
 }
 
-export const ArgAdd = (
-  {
-    onValueAdd = () => {},
-    displayName,
-    help
-  }: Props
-) => {
+export const ArgAdd = ({ onValueAdd = () => {}, displayName, help }: Props) => {
   return (
     <button className="canvasArg__add" onClick={onValueAdd}>
       <EuiDescriptionList compressed>

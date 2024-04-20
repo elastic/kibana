@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';

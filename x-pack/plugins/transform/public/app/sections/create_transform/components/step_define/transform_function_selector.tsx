@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
@@ -17,12 +17,10 @@ interface TransformFunctionSelectorProps {
   onChange: (update: TransformFunction) => void;
 }
 
-export const TransformFunctionSelector = (
-  {
-    selectedFunction,
-    onChange
-  }: TransformFunctionSelectorProps
-) => {
+export const TransformFunctionSelector = ({
+  selectedFunction,
+  onChange,
+}: TransformFunctionSelectorProps) => {
   const transformFunctions = [
     {
       name: TRANSFORM_FUNCTION.PIVOT,

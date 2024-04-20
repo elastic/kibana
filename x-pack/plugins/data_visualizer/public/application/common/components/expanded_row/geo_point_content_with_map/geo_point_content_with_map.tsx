@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
@@ -18,21 +17,19 @@ import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { EmbeddedMapComponent } from '../../embedded_map';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
-export const GeoPointContentWithMap = (
-  {
-    config,
-    dataView,
-    combinedQuery,
-    esql,
-    timeFieldName
-  }: {
-    config: FieldVisConfig;
-    dataView: DataView | undefined;
-    combinedQuery?: CombinedQuery;
-    esql?: string;
-    timeFieldName?: string;
-  }
-) => {
+export const GeoPointContentWithMap = ({
+  config,
+  dataView,
+  combinedQuery,
+  esql,
+  timeFieldName,
+}: {
+  config: FieldVisConfig;
+  dataView: DataView | undefined;
+  combinedQuery?: CombinedQuery;
+  esql?: string;
+  timeFieldName?: string;
+}) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {

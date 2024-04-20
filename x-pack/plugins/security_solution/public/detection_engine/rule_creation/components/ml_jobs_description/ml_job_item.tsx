@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -23,16 +23,14 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const MlJobItemComponent = (
-  {
-    job,
-    switchComponent,
-    ...props
-  }: {
-    job: MlSummaryJob;
-    switchComponent: ReactNode;
-  }
-) => {
+const MlJobItemComponent = ({
+  job,
+  switchComponent,
+  ...props
+}: {
+  job: MlSummaryJob;
+  switchComponent: ReactNode;
+}) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
 
   return (

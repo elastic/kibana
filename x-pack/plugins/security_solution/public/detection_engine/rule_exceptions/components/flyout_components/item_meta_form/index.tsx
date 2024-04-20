@@ -15,12 +15,10 @@ interface ExceptionsFlyoutMetaComponentProps {
   onChange: (value: [string, string]) => void;
 }
 
-const ExceptionsFlyoutMetaComponent = (
-  {
-    exceptionItemName,
-    onChange
-  }: ExceptionsFlyoutMetaComponentProps
-): JSX.Element => {
+const ExceptionsFlyoutMetaComponent = ({
+  exceptionItemName,
+  onChange,
+}: ExceptionsFlyoutMetaComponentProps): JSX.Element => {
   const onNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       onChange(['name', e.target.value]);

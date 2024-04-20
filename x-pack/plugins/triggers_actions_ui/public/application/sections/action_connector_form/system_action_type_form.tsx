@@ -283,21 +283,19 @@ function getAvailableActionVariables(
   }, []);
 }
 
-const ButtonContent = (
-  {
-    showActionGroupErrorIcon,
-    iconClass,
-    showWarning,
-    isExperimental,
-    connectorName
-  }: {
-    showActionGroupErrorIcon: boolean;
-    iconClass: string | IconType;
-    connectorName: string;
-    showWarning: boolean;
-    isExperimental: boolean;
-  }
-) => {
+const ButtonContent = ({
+  showActionGroupErrorIcon,
+  iconClass,
+  showWarning,
+  isExperimental,
+  connectorName,
+}: {
+  showActionGroupErrorIcon: boolean;
+  iconClass: string | IconType;
+  connectorName: string;
+  showWarning: boolean;
+  isExperimental: boolean;
+}) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       {showActionGroupErrorIcon ? (

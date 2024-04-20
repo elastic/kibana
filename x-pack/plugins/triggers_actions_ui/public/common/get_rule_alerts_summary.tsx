@@ -10,7 +10,9 @@ import { AlertSummaryWidgetLoader } from '../application/sections/alert_summary_
 import { AlertSummaryWidgetProps } from '../application/sections/alert_summary_widget';
 import { AlertSummaryWidgetDependencies } from '../application/sections/alert_summary_widget/types';
 
-const AlertSummaryWidgetLazy = lazy(() => import('../application/sections/alert_summary_widget/alert_summary_widget'));
+const AlertSummaryWidgetLazy = lazy(
+  () => import('../application/sections/alert_summary_widget/alert_summary_widget')
+);
 
 export const getAlertSummaryWidgetLazy = (
   props: AlertSummaryWidgetProps & AlertSummaryWidgetDependencies

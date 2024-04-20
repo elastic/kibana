@@ -37,53 +37,47 @@ const StyledEnrichmentFieldTitle = styled(EuiTitle)`
   width: 220px;
 `;
 
-const EnrichmentFieldTitle = (
-  {
-    title
-  }: {
-    title: string | React.ReactNode | undefined;
-  }
-) => (<StyledEnrichmentFieldTitle size="xxxs">
-  <h6>{title}</h6>
-</StyledEnrichmentFieldTitle>);
+const EnrichmentFieldTitle = ({ title }: { title: string | React.ReactNode | undefined }) => (
+  <StyledEnrichmentFieldTitle size="xxxs">
+    <h6>{title}</h6>
+  </StyledEnrichmentFieldTitle>
+);
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EnrichedDataRow = (
-  {
-    field,
-    value
-  }: {
-    field: string | React.ReactNode | undefined;
-    value: React.ReactNode;
-  }
-) => (<StyledEuiFlexGroup
-  direction="row"
-  gutterSize="none"
-  responsive
-  alignItems="center"
-  data-test-subj="EnrichedDataRow"
->
-  <EuiFlexItem style={{ flexShrink: 0 }} grow={false}>
-    <EnrichmentFieldTitle title={field} />
-  </EuiFlexItem>
-  <EuiFlexItem className="eui-textBreakWord">{value}</EuiFlexItem>
-</StyledEuiFlexGroup>);
+export const EnrichedDataRow = ({
+  field,
+  value,
+}: {
+  field: string | React.ReactNode | undefined;
+  value: React.ReactNode;
+}) => (
+  <StyledEuiFlexGroup
+    direction="row"
+    gutterSize="none"
+    responsive
+    alignItems="center"
+    data-test-subj="EnrichedDataRow"
+  >
+    <EuiFlexItem style={{ flexShrink: 0 }} grow={false}>
+      <EnrichmentFieldTitle title={field} />
+    </EuiFlexItem>
+    <EuiFlexItem className="eui-textBreakWord">{value}</EuiFlexItem>
+  </StyledEuiFlexGroup>
+);
 
-export const ThreatSummaryPanelHeader = (
-  {
-    title,
-    toolTipContent,
-    toolTipTitle
-  }: {
-    title: string | React.ReactNode;
-    toolTipContent: React.ReactNode;
-    toolTipTitle?: React.ReactNode;
-  }
-) => {
+export const ThreatSummaryPanelHeader = ({
+  title,
+  toolTipContent,
+  toolTipTitle,
+}: {
+  title: string | React.ReactNode;
+  toolTipContent: React.ReactNode;
+  toolTipTitle?: React.ReactNode;
+}) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
       <EuiFlexItem>
@@ -99,29 +93,27 @@ export const ThreatSummaryPanelHeader = (
   );
 };
 
-const ThreatSummaryViewComponent = (
-  {
-    browserFields,
-    data,
-    enrichments,
-    eventId,
-    scopeId,
-    hostRisk,
-    userRisk,
-    isDraggable,
-    isReadOnly
-  }: {
-    browserFields: BrowserFields;
-    data: TimelineEventsDetailsItem[];
-    enrichments: CtiEnrichment[];
-    eventId: string;
-    scopeId: string;
-    hostRisk: HostRisk;
-    userRisk: UserRisk;
-    isDraggable?: boolean;
-    isReadOnly?: boolean;
-  }
-) => {
+const ThreatSummaryViewComponent = ({
+  browserFields,
+  data,
+  enrichments,
+  eventId,
+  scopeId,
+  hostRisk,
+  userRisk,
+  isDraggable,
+  isReadOnly,
+}: {
+  browserFields: BrowserFields;
+  data: TimelineEventsDetailsItem[];
+  enrichments: CtiEnrichment[];
+  eventId: string;
+  scopeId: string;
+  hostRisk: HostRisk;
+  userRisk: UserRisk;
+  isDraggable?: boolean;
+  isReadOnly?: boolean;
+}) => {
   const originalHostRisk = data?.find(
     (eventDetail) => eventDetail?.field === 'host.risk.calculated_level'
   )?.values?.[0] as RiskSeverity | undefined;

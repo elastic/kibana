@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import { Fragment } from 'react';
 import React from 'react';
 
@@ -35,12 +34,7 @@ interface Props {
   savedObjects: SimpleSOAssetType[];
 }
 
-export const AssetsAccordion = (
-  {
-    savedObjects,
-    type
-  }: Props
-) => {
+export const AssetsAccordion = ({ savedObjects, type }: Props) => {
   const { http } = useStartServices();
 
   const isDashboard = type === KibanaAssetType.dashboard;

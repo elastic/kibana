@@ -29,15 +29,13 @@ interface ViewResultsInLensActionProps {
   mode?: string;
 }
 
-const ViewResultsInLensActionComponent = (
-  {
-    actionId,
-    buttonType,
-    endDate,
-    startDate,
-    mode
-  }: ViewResultsInLensActionProps
-) => {
+const ViewResultsInLensActionComponent = ({
+  actionId,
+  buttonType,
+  endDate,
+  startDate,
+  mode,
+}: ViewResultsInLensActionProps) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });

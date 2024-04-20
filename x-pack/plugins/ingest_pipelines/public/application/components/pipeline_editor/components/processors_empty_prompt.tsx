@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiLink } from '@elastic/eui';
@@ -24,11 +24,7 @@ export interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const ProcessorsEmptyPrompt = (
-  {
-    onLoadJson
-  }: Props
-) => {
+export const ProcessorsEmptyPrompt = ({ onLoadJson }: Props) => {
   const { onTreeAction } = usePipelineProcessorsContext();
   const { services } = useKibana();
 

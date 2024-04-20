@@ -16,11 +16,7 @@ import { useCharts } from '../../hooks/use_charts';
 import { BeatsOverview } from '../../../components/beats/overview';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const BeatsOverviewPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const BeatsOverviewPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Field, FIELD_TYPES, UseField, FieldConfig } from '../../../../../../../shared_imports';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { useRightPanelContext } from '../context';
 import { getSourcererScopeId } from '../../../../helpers';
@@ -39,14 +38,7 @@ interface CellActionsProps {
 /**
  * Security cell action wrapper for document details flyout
  */
-export const CellActions = (
-  {
-    field,
-    value,
-    isObjectArray,
-    children
-  }: CellActionsProps
-) => {
+export const CellActions = ({ field, value, isObjectArray, children }: CellActionsProps) => {
   const { dataFormattedForFieldBrowser, scopeId, isPreview } = useRightPanelContext();
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 

@@ -87,17 +87,15 @@ const ruleDetailStyle = {
   minWidth: 0,
 };
 
-export const RuleDetails = (
-  {
-    rule,
-    ruleType,
-    bulkDisableRules,
-    bulkEnableRules,
-    bulkDeleteRules,
-    requestRefresh,
-    refreshToken
-  }: RuleDetailsProps
-) => {
+export const RuleDetails = ({
+  rule,
+  ruleType,
+  bulkDisableRules,
+  bulkEnableRules,
+  bulkDeleteRules,
+  requestRefresh,
+  refreshToken,
+}: RuleDetailsProps) => {
   const history = useHistory();
   const {
     application: { capabilities },

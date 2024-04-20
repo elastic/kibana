@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPanel } from '@elastic/eui';
 import { StatusTable } from './status_table';
 import { FormattedStatus, getHighestStatus } from '../lib';
@@ -18,13 +18,7 @@ interface StatusSectionProps {
   statuses: FormattedStatus[];
 }
 
-export const StatusSection = (
-  {
-    id,
-    title,
-    statuses
-  }: StatusSectionProps
-) => {
+export const StatusSection = ({ id, title, statuses }: StatusSectionProps) => {
   const highestStatus = useMemo(() => getHighestStatus(statuses), [statuses]);
 
   return (

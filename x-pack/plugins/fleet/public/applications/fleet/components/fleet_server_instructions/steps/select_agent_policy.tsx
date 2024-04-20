@@ -45,19 +45,17 @@ export const getSelectAgentPolicyStep = ({
   };
 };
 
-const SelectAgentPolicyStepContent = (
-  {
-    policyId,
-    setPolicyId,
-    eligibleFleetServerPolicies,
-    refreshEligibleFleetServerPolicies
-  }: {
-    policyId?: string;
-    setPolicyId: (v?: string) => void;
-    eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
-    refreshEligibleFleetServerPolicies: () => void;
-  }
-) => {
+const SelectAgentPolicyStepContent = ({
+  policyId,
+  setPolicyId,
+  eligibleFleetServerPolicies,
+  refreshEligibleFleetServerPolicies,
+}: {
+  policyId?: string;
+  setPolicyId: (v?: string) => void;
+  eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
+  refreshEligibleFleetServerPolicies: () => void;
+}) => {
   useEffect(() => {
     // Select default value
     if (eligibleFleetServerPolicies.length === 1 && !policyId) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -27,15 +26,13 @@ interface Props {
   documentCountStats?: DocumentCountStats;
 }
 
-export const DocumentCountChart = (
-  {
-    eventRate,
-    totalCount,
-    pinnedCategory,
-    selectedCategory,
-    documentCountStats
-  }: Props
-) => {
+export const DocumentCountChart = ({
+  eventRate,
+  totalCount,
+  pinnedCategory,
+  selectedCategory,
+  documentCountStats,
+}: Props) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
   const chartPointsSplitLabel = i18n.translate(

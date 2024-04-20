@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FormattedStatus } from '../lib';
 
@@ -14,11 +14,7 @@ interface StatusExpandedRowProps {
   status: FormattedStatus;
 }
 
-export const StatusExpandedRow = (
-  {
-    status
-  }: StatusExpandedRowProps
-) => {
+export const StatusExpandedRow = ({ status }: StatusExpandedRowProps) => {
   const { original } = status;
   const statusAsString = useMemo(() => JSON.stringify(original, null, 2), [original]);
 

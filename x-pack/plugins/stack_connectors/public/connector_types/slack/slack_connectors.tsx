@@ -35,12 +35,7 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ],
 });
 
-const SlackActionFields = (
-  {
-    isEdit,
-    readOnly
-  }: ActionConnectorFieldsProps
-) => {
+const SlackActionFields = ({ isEdit, readOnly }: ActionConnectorFieldsProps) => {
   const { docLinks } = useKibana().services;
 
   return (

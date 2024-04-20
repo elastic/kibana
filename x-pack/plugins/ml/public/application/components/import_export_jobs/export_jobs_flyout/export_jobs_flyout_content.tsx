@@ -22,7 +22,6 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import type { FC } from 'react';
 import { useEffect, useMemo, useCallback } from 'react';
 import React, { useState } from 'react';
 
@@ -47,41 +46,41 @@ const LoadingSpinner = () => (
   </>
 );
 
-const SwitchTabsConfirm = (
-  {
-    onCancel,
-    onConfirm
-  }: {
-    onCancel: () => void;
-    onConfirm: () => void;
-  }
-) => (<EuiConfirmModal
-  title={i18n.translate('xpack.ml.importExport.exportFlyout.switchTabsConfirm.title', {
-    defaultMessage: 'Change tabs?',
-  })}
-  onCancel={onCancel}
-  onConfirm={onConfirm}
-  cancelButtonText={i18n.translate(
-    'xpack.ml.importExport.exportFlyout.switchTabsConfirm.cancelButton',
-    {
-      defaultMessage: 'Cancel',
-    }
-  )}
-  confirmButtonText={i18n.translate(
-    'xpack.ml.importExport.exportFlyout.switchTabsConfirm.confirmButton',
-    {
-      defaultMessage: 'Confirm',
-    }
-  )}
-  defaultFocusedButton="confirm"
->
-  <p>
-    <FormattedMessage
-      id="xpack.ml.importExport.exportFlyout.switchTabsConfirm.text"
-      defaultMessage="Changing tabs will clear currently selected jobs"
-    />
-  </p>
-</EuiConfirmModal>);
+const SwitchTabsConfirm = ({
+  onCancel,
+  onConfirm,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+}) => (
+  <EuiConfirmModal
+    title={i18n.translate('xpack.ml.importExport.exportFlyout.switchTabsConfirm.title', {
+      defaultMessage: 'Change tabs?',
+    })}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    cancelButtonText={i18n.translate(
+      'xpack.ml.importExport.exportFlyout.switchTabsConfirm.cancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    )}
+    confirmButtonText={i18n.translate(
+      'xpack.ml.importExport.exportFlyout.switchTabsConfirm.confirmButton',
+      {
+        defaultMessage: 'Confirm',
+      }
+    )}
+    defaultFocusedButton="confirm"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.ml.importExport.exportFlyout.switchTabsConfirm.text"
+        defaultMessage="Changing tabs will clear currently selected jobs"
+      />
+    </p>
+  </EuiConfirmModal>
+);
 
 export interface ExportJobsFlyoutContentProps {
   currentTab: JobType;

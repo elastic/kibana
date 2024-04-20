@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { NumericField } from '../../../../../../shared_imports';
@@ -19,11 +19,7 @@ interface Props {
   phase: 'warm' | 'cold' | 'frozen';
 }
 
-export const ReplicasField = (
-  {
-    phase
-  }: Props
-) => {
+export const ReplicasField = ({ phase }: Props) => {
   const { policy } = useEditPolicyContext();
   const initialValue = policy.phases[phase]?.actions?.allocate?.number_of_replicas != null;
   return (

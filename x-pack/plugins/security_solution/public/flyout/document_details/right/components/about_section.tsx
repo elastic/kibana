@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandSection } from '../hooks/use_expand_section';
@@ -49,10 +48,10 @@ export const AboutSection = memo(() => {
         {eventKindInECS &&
           (eventKind === 'event' ? (
             // if event kind is event, show a detailed description based on event category
-            (<EventCategoryDescription />)
+            <EventCategoryDescription />
           ) : (
             // if event kind is not event, show a higher level description on event kind
-            (<EventKindDescription eventKind={eventKind} />)
+            <EventKindDescription eventKind={eventKind} />
           ))}
         <EventRenderer />
       </>

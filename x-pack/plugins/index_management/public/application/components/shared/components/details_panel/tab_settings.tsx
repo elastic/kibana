@@ -14,11 +14,7 @@ interface Props {
   settings: IndexSettings | undefined;
 }
 
-export const TabSettings = (
-  {
-    settings
-  }: Props
-) => {
+export const TabSettings = ({ settings }: Props) => {
   if (settings && Object.keys(settings).length) {
     return (
       <div data-test-subj="settingsTabContent">

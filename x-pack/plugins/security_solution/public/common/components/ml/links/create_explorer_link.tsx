@@ -18,14 +18,7 @@ interface ExplorerLinkProps {
   linkName: React.ReactNode;
 }
 
-export const ExplorerLink = (
-  {
-    score,
-    startDate,
-    endDate,
-    linkName
-  }: ExplorerLinkProps
-) => {
+export const ExplorerLink = ({ score, startDate, endDate, linkName }: ExplorerLinkProps) => {
   const {
     services: { ml, http },
   } = useKibana();

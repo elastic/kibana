@@ -26,18 +26,16 @@ export interface Props {
   baseTheme: Theme;
 }
 
-const StorageDetailsComponent = (
-  {
-    formatBytes,
-    formatNumber,
-    ilmPhases,
-    onIndexSelected,
-    patternRollups,
-    patterns,
-    theme,
-    baseTheme
-  }: Props
-) => {
+const StorageDetailsComponent = ({
+  formatBytes,
+  formatNumber,
+  ilmPhases,
+  onIndexSelected,
+  patternRollups,
+  patterns,
+  theme,
+  baseTheme,
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
 
   const flattenedBuckets = useMemo(

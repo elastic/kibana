@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
 import tinycolor from 'tinycolor2';

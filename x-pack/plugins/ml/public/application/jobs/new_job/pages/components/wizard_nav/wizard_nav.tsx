@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,59 +24,53 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav = (
-  {
-    previous,
-    previousActive = true,
-    next,
-    nextActive = true,
-    children
-  }: StepsNavProps
-) => (<Fragment>
-  <EuiHorizontalRule />
-  <EuiFlexGroup>
-    {previous && (
-      <EuiFlexItem grow={false}>
-        <PreviousButton previous={previous} previousActive={previousActive} />
-      </EuiFlexItem>
-    )}
-    {next && (
-      <EuiFlexItem grow={false}>
-        <NextButton next={next} nextActive={nextActive} />
-      </EuiFlexItem>
-    )}
-    <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-    <EuiFlexItem />
-  </EuiFlexGroup>
-</Fragment>);
+export const WizardNav = ({
+  previous,
+  previousActive = true,
+  next,
+  nextActive = true,
+  children,
+}: StepsNavProps) => (
+  <Fragment>
+    <EuiHorizontalRule />
+    <EuiFlexGroup>
+      {previous && (
+        <EuiFlexItem grow={false}>
+          <PreviousButton previous={previous} previousActive={previousActive} />
+        </EuiFlexItem>
+      )}
+      {next && (
+        <EuiFlexItem grow={false}>
+          <NextButton next={next} nextActive={nextActive} />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+      <EuiFlexItem />
+    </EuiFlexGroup>
+  </Fragment>
+);
 
-export const PreviousButton = (
-  {
-    previous,
-    previousActive = true
-  }: StepsNavProps
-) => (<EuiButtonEmpty
-  disabled={!previousActive}
-  onClick={previous}
-  iconType="arrowLeft"
-  iconSide="left"
-  data-test-subj="mlJobWizardNavButtonPrevious"
->
-  <FormattedMessage id="xpack.ml.newJob.wizard.previousStepButton" defaultMessage="Previous" />
-</EuiButtonEmpty>);
+export const PreviousButton = ({ previous, previousActive = true }: StepsNavProps) => (
+  <EuiButtonEmpty
+    disabled={!previousActive}
+    onClick={previous}
+    iconType="arrowLeft"
+    iconSide="left"
+    data-test-subj="mlJobWizardNavButtonPrevious"
+  >
+    <FormattedMessage id="xpack.ml.newJob.wizard.previousStepButton" defaultMessage="Previous" />
+  </EuiButtonEmpty>
+);
 
-export const NextButton = (
-  {
-    next,
-    nextActive = true
-  }: StepsNavProps
-) => (<EuiButton
-  fill
-  disabled={!nextActive}
-  onClick={next}
-  iconSide="right"
-  iconType="arrowRight"
-  data-test-subj="mlJobWizardNavButtonNext"
->
-  <FormattedMessage id="xpack.ml.newJob.wizard.nextStepButton" defaultMessage="Next" />
-</EuiButton>);
+export const NextButton = ({ next, nextActive = true }: StepsNavProps) => (
+  <EuiButton
+    fill
+    disabled={!nextActive}
+    onClick={next}
+    iconSide="right"
+    iconType="arrowRight"
+    data-test-subj="mlJobWizardNavButtonNext"
+  >
+    <FormattedMessage id="xpack.ml.newJob.wizard.nextStepButton" defaultMessage="Next" />
+  </EuiButton>
+);

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
@@ -56,12 +56,7 @@ const i18nTexts = {
 const defaultValue = {};
 const defaultValueRaw = JSON.stringify(defaultValue, null, 2);
 
-export const ModalProvider = (
-  {
-    onDone,
-    children
-  }: Props
-) => {
+export const ModalProvider = ({ onDone, children }: Props) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isValidJson, setIsValidJson] = useState(true);
   const [error, setError] = useState<Error | undefined>();

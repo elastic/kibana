@@ -11,13 +11,7 @@ import React, { useCallback } from 'react';
 import { shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export const AnalyzeInMlButton = (
-  {
-    href
-  }: {
-    href?: string;
-  }
-) => {
+export const AnalyzeInMlButton = ({ href }: { href?: string }) => {
   const {
     services: { application },
   } = useKibanaContextForPlugin();

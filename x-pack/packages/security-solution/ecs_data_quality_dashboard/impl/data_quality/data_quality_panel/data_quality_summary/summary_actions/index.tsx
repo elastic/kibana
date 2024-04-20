@@ -167,28 +167,26 @@ export interface Props {
   sizeInBytes: number | undefined;
 }
 
-const SummaryActionsComponent = (
-  {
-    addSuccessToast,
-    canUserCreateAndReadCases,
-    formatBytes,
-    formatNumber,
-    errorSummary,
-    ilmPhases,
-    lastChecked,
-    onCheckCompleted,
-    openCreateCaseFlyout,
-    patternIndexNames,
-    patternRollups,
-    patterns,
-    setLastChecked,
-    totalDocsCount,
-    totalIncompatible,
-    totalIndices,
-    totalIndicesChecked,
-    sizeInBytes
-  }: Props
-) => {
+const SummaryActionsComponent = ({
+  addSuccessToast,
+  canUserCreateAndReadCases,
+  formatBytes,
+  formatNumber,
+  errorSummary,
+  ilmPhases,
+  lastChecked,
+  onCheckCompleted,
+  openCreateCaseFlyout,
+  patternIndexNames,
+  patternRollups,
+  patterns,
+  setLastChecked,
+  totalDocsCount,
+  totalIncompatible,
+  totalIndices,
+  totalIndicesChecked,
+  sizeInBytes,
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const [indexToCheck, setIndexToCheck] = useState<IndexToCheck | null>(null);
   const [checkAllIndiciesChecked, setCheckAllIndiciesChecked] = useState<number>(0);

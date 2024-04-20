@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { DomPreview } from '../dom_preview';
 import { PageControls } from './page_controls';
@@ -18,21 +18,15 @@ export interface Props {
   onDuplicate: (pageId: string) => void;
   onRemove: (pageId: string) => void;
 }
-export const PagePreview = (
-  {
-    isWriteable,
-    page,
-    height,
-    onDuplicate,
-    onRemove
-  }: Props
-) => (<div
-  className="canvasPageManager__pagePreview"
-  style={{ backgroundColor: page.style.background }}
->
-  <DomPreview elementId={page.id} height={height} />
-  {isWriteable && <PageControls pageId={page.id} onDuplicate={onDuplicate} onRemove={onRemove} />}
-</div>);
+export const PagePreview = ({ isWriteable, page, height, onDuplicate, onRemove }: Props) => (
+  <div
+    className="canvasPageManager__pagePreview"
+    style={{ backgroundColor: page.style.background }}
+  >
+    <DomPreview elementId={page.id} height={height} />
+    {isWriteable && <PageControls pageId={page.id} onDuplicate={onDuplicate} onRemove={onRemove} />}
+  </div>
+);
 
 PagePreview.propTypes = {
   isWriteable: PropTypes.bool.isRequired,

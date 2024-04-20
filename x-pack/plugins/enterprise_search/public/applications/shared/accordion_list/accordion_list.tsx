@@ -31,16 +31,14 @@ interface Props {
   title: string;
 }
 
-export const AccordionList = (
-  {
-    hasBorder,
-    iconType,
-    initialIsOpen,
-    items,
-    rowCount = 10,
-    title
-  }: Props
-) => {
+export const AccordionList = ({
+  hasBorder,
+  iconType,
+  initialIsOpen,
+  items,
+  rowCount = 10,
+  title,
+}: Props) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionList',
   });

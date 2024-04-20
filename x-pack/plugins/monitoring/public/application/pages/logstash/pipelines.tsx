@@ -17,11 +17,7 @@ import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
-export const LogStashPipelinesPage = (
-  {
-    clusters
-  }: ComponentProps
-) => {
+export const LogStashPipelinesPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();

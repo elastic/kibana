@@ -6,7 +6,6 @@
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -71,19 +70,17 @@ const TagContainer = styled.div`
 
 TagContainer.displayName = 'TagContainer';
 
-const StepAboutRuleComponent = (
-  {
-    ruleType,
-    machineLearningJobId,
-    index,
-    dataViewId,
-    timestampOverride,
-    isUpdateView = false,
-    isLoading,
-    form,
-    esqlQuery
-  }: StepAboutRuleProps
-) => {
+const StepAboutRuleComponent = ({
+  ruleType,
+  machineLearningJobId,
+  index,
+  dataViewId,
+  timestampOverride,
+  isUpdateView = false,
+  isLoading,
+  form,
+  esqlQuery,
+}: StepAboutRuleProps) => {
   const { data } = useKibana().services;
 
   const isThreatMatchRuleValue = useMemo(() => isThreatMatchRule(ruleType), [ruleType]);
@@ -409,13 +406,11 @@ const StepAboutRuleComponent = (
 
 export const StepAboutRule = memo(StepAboutRuleComponent);
 
-const StepAboutRuleReadOnlyComponent = (
-  {
-    addPadding,
-    defaultValues: data,
-    descriptionColumns
-  }: StepAboutRuleReadOnlyProps
-) => {
+const StepAboutRuleReadOnlyComponent = ({
+  addPadding,
+  defaultValues: data,
+  descriptionColumns,
+}: StepAboutRuleReadOnlyProps) => {
   return (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
       <StepRuleDescription columns={descriptionColumns} schema={defaultSchema} data={data} />

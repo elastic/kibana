@@ -21,12 +21,7 @@ window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
-export const MockAssistantProviderComponent = (
-  {
-    assistantAvailability,
-    children
-  }: Props
-) => {
+export const MockAssistantProviderComponent = ({ assistantAvailability, children }: Props) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const defaultAssistantAvailability: AssistantAvailability = {

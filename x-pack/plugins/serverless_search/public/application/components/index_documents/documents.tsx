@@ -27,11 +27,7 @@ interface IndexDocumentsProps {
   indexName: string;
 }
 
-export const IndexDocuments = (
-  {
-    indexName
-  }: IndexDocumentsProps
-) => {
+export const IndexDocuments = ({ indexName }: IndexDocumentsProps) => {
   const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
   const [searchQuery, setSearchQuery] = useState('');
   const searchQueryCallback = (query: string) => {

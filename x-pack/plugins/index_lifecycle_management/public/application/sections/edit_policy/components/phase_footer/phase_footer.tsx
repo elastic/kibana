@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -35,11 +35,7 @@ interface Props {
   phase: PhaseExceptDelete;
 }
 
-export const PhaseFooter = (
-  {
-    phase
-  }: Props
-) => {
+export const PhaseFooter = ({ phase }: Props) => {
   const {
     isDeletePhaseEnabled,
     setDeletePhaseEnabled: setValue,

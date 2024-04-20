@@ -8,7 +8,7 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';
 import { useControlGroupContainer } from '../../control_group/embeddable/control_group_container';

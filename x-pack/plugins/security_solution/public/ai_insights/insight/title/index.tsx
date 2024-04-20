@@ -18,12 +18,7 @@ interface Props {
   title: string;
 }
 
-const TitleComponent = (
-  {
-    isLoading,
-    title
-  }: Props
-) => {
+const TitleComponent = ({ isLoading, title }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (

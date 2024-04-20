@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { useCanvasShareableState, setToolbarAutohideAction } from '../../../context';
 
@@ -47,11 +47,7 @@ export const ToolbarSettingsComponent = ({ isAutohide, onSetAutohide }: Props) =
 /**
  * A store-connected container for the `ToolbarSettings` component.
  */
-export const ToolbarSettings = (
-  {
-    onSetAutohide
-  }: Pick<Props, 'onSetAutohide'>
-) => {
+export const ToolbarSettings = ({ onSetAutohide }: Pick<Props, 'onSetAutohide'>) => {
   const [{ settings }, dispatch] = useCanvasShareableState();
 
   const { toolbar } = settings;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -29,16 +28,14 @@ export async function showPatternAnalysisToADJobFlyout(
   dashboardService: DashboardStart,
   lens?: LensPublicStart
 ): Promise<void> {
-  const Comp = (
-    {
-      onClose
-    }: FlyoutComponentProps
-  ) => (<CreateCategorizationJobFlyout
-    dataView={dataView}
-    field={field}
-    query={query}
-    timeRange={timeRange}
-    onClose={onClose}
-  />);
+  const Comp = ({ onClose }: FlyoutComponentProps) => (
+    <CreateCategorizationJobFlyout
+      dataView={dataView}
+      field={field}
+      query={query}
+      timeRange={timeRange}
+      onClose={onClose}
+    />
+  );
   return createFlyout(Comp, coreStart, share, data, dashboardService, lens);
 }

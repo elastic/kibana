@@ -20,11 +20,7 @@ interface ExchangeFormFieldsProps {
   readOnly: boolean;
 }
 
-const ExchangeFormFields = (
-  {
-    readOnly
-  }: ExchangeFormFieldsProps
-) => {
+const ExchangeFormFields = ({ readOnly }: ExchangeFormFieldsProps) => {
   const { docLinks } = useKibana().services;
 
   return (

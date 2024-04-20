@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { Phases } from '../../../../../../common/types';
 import './phase_icon.scss';
@@ -13,12 +13,7 @@ interface Props {
   enabled: boolean;
   phase: string & keyof Phases;
 }
-export const PhaseIcon = (
-  {
-    enabled,
-    phase
-  }: Props
-) => {
+export const PhaseIcon = ({ enabled, phase }: Props) => {
   return (
     <div
       className={`ilmPhaseIcon ilmPhaseIcon--${phase} ${enabled ? '' : 'ilmPhaseIcon--disabled'}`}

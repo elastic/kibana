@@ -35,17 +35,14 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-const TinesActionConnectorFields = (
-  {
-    readOnly,
-    isEdit
-  }: ActionConnectorFieldsProps
-) => (<SimpleConnectorForm
-  isEdit={isEdit}
-  readOnly={readOnly}
-  configFormSchema={configFormSchema}
-  secretsFormSchema={secretsFormSchema}
-/>);
+const TinesActionConnectorFields = ({ readOnly, isEdit }: ActionConnectorFieldsProps) => (
+  <SimpleConnectorForm
+    isEdit={isEdit}
+    readOnly={readOnly}
+    configFormSchema={configFormSchema}
+    secretsFormSchema={secretsFormSchema}
+  />
+);
 
 // eslint-disable-next-line import/no-default-export
 export { TinesActionConnectorFields as default };

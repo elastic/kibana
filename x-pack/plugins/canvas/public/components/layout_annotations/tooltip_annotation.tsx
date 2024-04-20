@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import { TransformMatrix3d } from '../../lib/aeroelastic';
@@ -15,12 +15,7 @@ interface Props {
   text: string;
 }
 
-export const TooltipAnnotation = (
-  {
-    transformMatrix,
-    text
-  }: Props
-) => {
+export const TooltipAnnotation = ({ transformMatrix, text }: Props) => {
   const newStyle = {
     transform: `${matrixToCSS(transformMatrix)} translate(1em, -1em)`,
   };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ErrorInfo, FC, ReactElement } from 'react';
+import React, { ErrorInfo, ReactElement } from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'react-recompose';
 import PropTypes from 'prop-types';
 import { omit } from 'lodash';

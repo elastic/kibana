@@ -22,12 +22,7 @@ interface SidebarProps {
   render: Required<WaterfallChartProps>['renderSidebarItem'];
 }
 
-export const Sidebar = (
-  {
-    items,
-    render
-  }: SidebarProps
-) => {
+export const Sidebar = ({ items, render }: SidebarProps) => {
   const { onSidebarClick } = useWaterfallContext();
   const handleSidebarClick = useMemo(() => onSidebarClick, [onSidebarClick]);
 

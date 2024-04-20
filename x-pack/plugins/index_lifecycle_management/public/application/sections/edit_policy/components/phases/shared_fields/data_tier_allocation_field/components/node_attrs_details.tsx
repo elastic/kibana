@@ -28,12 +28,7 @@ interface Props {
   selectedNodeAttrs: string;
 }
 
-export const NodeAttrsDetails = (
-  {
-    close,
-    selectedNodeAttrs
-  }: Props
-) => {
+export const NodeAttrsDetails = ({ close, selectedNodeAttrs }: Props) => {
   const { data, isLoading, error, resendRequest } = useLoadNodeDetails(selectedNodeAttrs);
   let content;
   if (isLoading) {

@@ -6,7 +6,7 @@
  */
 
 import type { MouseEvent } from 'react';
-import React, { useState, type FC } from 'react';
+import React, { useState } from 'react';
 
 import type { EuiBasicTableProps } from '@elastic/eui';
 import { formatDate, EuiPanel, EuiBasicTable, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
@@ -30,11 +30,7 @@ interface Sorting {
   direction: 'asc' | 'desc';
 }
 
-export const ExpandedRowMessagesPane = (
-  {
-    transformId
-  }: ExpandedRowMessagesPaneProps
-) => {
+export const ExpandedRowMessagesPane = ({ transformId }: ExpandedRowMessagesPaneProps) => {
   const { showNodeInfo } = useEnabledFeatures();
 
   const [pageIndex, setPageIndex] = useState(0);

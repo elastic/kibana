@@ -37,19 +37,17 @@ interface Props {
   onBack: () => void;
 }
 
-export const RepositoryFormStepTwo = (
-  {
-    repository,
-    isManagedRepository,
-    isEditing,
-    isSaving,
-    onSave,
-    updateRepository,
-    validation,
-    saveError,
-    onBack
-  }: Props
-) => {
+export const RepositoryFormStepTwo = ({
+  repository,
+  isManagedRepository,
+  isEditing,
+  isSaving,
+  onSave,
+  updateRepository,
+  validation,
+  saveError,
+  onBack,
+}: Props) => {
   const { docLinks } = useCore();
   const hasValidationErrors: boolean = !validation.isValid;
   const {

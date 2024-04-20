@@ -35,28 +35,26 @@ const Wrapper = styled.div`
   }
 `;
 
-const VisualizationActionsComponent = (
-  {
-    applyGlobalQueriesAndFilters = true,
-    className,
-    extraActions,
-    extraOptions,
-    getLensAttributes,
-    inputId = InputsModelId.global,
-    inspectIndex = 0,
-    isInspectButtonDisabled,
-    isMultipleQuery,
-    lensAttributes,
-    onCloseInspect,
-    queryId,
-    timerange,
-    title: inspectTitle,
-    scopeId = SourcererScopeName.default,
-    stackByField,
-    withActions = DEFAULT_ACTIONS,
-    casesAttachmentMetadata
-  }: VisualizationActionsProps
-) => {
+const VisualizationActionsComponent = ({
+  applyGlobalQueriesAndFilters = true,
+  className,
+  extraActions,
+  extraOptions,
+  getLensAttributes,
+  inputId = InputsModelId.global,
+  inspectIndex = 0,
+  isInspectButtonDisabled,
+  isMultipleQuery,
+  lensAttributes,
+  onCloseInspect,
+  queryId,
+  timerange,
+  title: inspectTitle,
+  scopeId = SourcererScopeName.default,
+  stackByField,
+  withActions = DEFAULT_ACTIONS,
+  casesAttachmentMetadata,
+}: VisualizationActionsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
 

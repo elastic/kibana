@@ -36,11 +36,7 @@ interface AddFileProps {
   caseId: string;
 }
 
-const AddFileComponent = (
-  {
-    caseId
-  }: AddFileProps
-) => {
+const AddFileComponent = ({ caseId }: AddFileProps) => {
   const { owner, permissions } = useCasesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
   const { isLoading, mutateAsync: createAttachments } = useCreateAttachments();

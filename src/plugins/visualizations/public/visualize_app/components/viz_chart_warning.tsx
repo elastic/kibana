@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
@@ -33,13 +33,11 @@ interface WarningMessageProps {
   mode?: 'old' | 'new';
 }
 
-const SwitchToOldLibraryMessage = (
-  {
-    canEditAdvancedSettings,
-    advancedSettingsLink,
-    mode = 'old'
-  }: WarningMessageProps
-) => {
+const SwitchToOldLibraryMessage = ({
+  canEditAdvancedSettings,
+  advancedSettingsLink,
+  mode = 'old',
+}: WarningMessageProps) => {
   return (
     <>
       {canEditAdvancedSettings && (
@@ -70,11 +68,7 @@ const SwitchToOldLibraryMessage = (
   );
 };
 
-const ContactAdminMessage = (
-  {
-    canEditAdvancedSettings
-  }: WarningMessageProps
-) => {
+const ContactAdminMessage = ({ canEditAdvancedSettings }: WarningMessageProps) => {
   return (
     <>
       {!canEditAdvancedSettings && (
@@ -136,13 +130,7 @@ const warningMessages = {
   [CHARTS_TO_BE_DEPRECATED.controls]: ControlsWarningFormatMessage,
 };
 
-export const VizChartWarning = (
-  {
-    chartType,
-    chartConfigToken,
-    mode
-  }: Props
-) => {
+export const VizChartWarning = ({ chartType, chartConfigToken, mode }: Props) => {
   const { services } = useKibana<VisualizeServices>();
   const canEditAdvancedSettings = services.application.capabilities.advancedSettings.save;
   const advancedSettingsLink = services.application.getUrlForApp('management', {

@@ -30,11 +30,7 @@ interface Props {
   alerts: {};
 }
 
-export const EnableAlertsModal = (
-  {
-    alerts
-  }: Props
-) => {
+export const EnableAlertsModal = ({ alerts }: Props) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [promptForMigration, setPromptForMigration] = useState(false);
   const alertsEnableModalProvider = useAlertsModal();

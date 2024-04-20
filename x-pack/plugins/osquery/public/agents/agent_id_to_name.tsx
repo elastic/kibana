@@ -17,11 +17,7 @@ interface AgentIdToNameProps {
   agentId: string;
 }
 
-const AgentIdToNameComponent = (
-  {
-    agentId
-  }: AgentIdToNameProps
-) => {
+const AgentIdToNameComponent = ({ agentId }: AgentIdToNameProps) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
   const { data } = useAgentDetails({ agentId, skip: !agentId });
 

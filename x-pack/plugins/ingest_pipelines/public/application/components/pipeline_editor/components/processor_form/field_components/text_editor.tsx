@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import {
   CodeEditor,
@@ -21,12 +21,7 @@ interface Props {
   editorProps: { [key: string]: any };
 }
 
-export const TextEditor = (
-  {
-    field,
-    editorProps
-  }: Props
-) => {
+export const TextEditor = ({ field, editorProps }: Props) => {
   const { value, helpText, setValue, label } = field;
   const { errorMessage } = getFieldValidityAndErrorMessage(field);
 

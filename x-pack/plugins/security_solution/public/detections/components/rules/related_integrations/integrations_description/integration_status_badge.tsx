@@ -20,11 +20,7 @@ interface IntegrationStatusBadgeProps {
   integration: IntegrationDetails;
 }
 
-const IntegrationStatusBadgeComponent = (
-  {
-    integration
-  }: IntegrationStatusBadgeProps
-) => {
+const IntegrationStatusBadgeComponent = ({ integration }: IntegrationStatusBadgeProps) => {
   const { installationStatus } = integration;
 
   if (!installationStatus.isKnown) {

@@ -14,11 +14,13 @@ interface Props {
   message: ReactNode;
 }
 
-export const DisabledLoginForm = (props: Props) => (<EuiPanel>
-  <EuiText color="danger" style={{ textAlign: 'center' }}>
-    <p>{props.title}</p>
-  </EuiText>
-  <EuiText style={{ textAlign: 'center' }}>
-    <p>{props.message}</p>
-  </EuiText>
-</EuiPanel>);
+export const DisabledLoginForm = (props: Props) => (
+  <EuiPanel>
+    <EuiText color="danger" style={{ textAlign: 'center' }}>
+      <p>{props.title}</p>
+    </EuiText>
+    <EuiText style={{ textAlign: 'center' }}>
+      <p>{props.message}</p>
+    </EuiText>
+  </EuiPanel>
+);

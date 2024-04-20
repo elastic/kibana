@@ -211,13 +211,7 @@ const participateInUXLabsChoice = {
   yes: { choice: 'yes', value: true },
 };
 
-const EducationPanel = (
-  {
-    featureContent
-  }: {
-    featureContent: string;
-  }
-) => {
+const EducationPanel = ({ featureContent }: { featureContent: string }) => {
   const feature = getFeature(featureContent);
   const { setFeaturesOther } = useActions(WorkplaceSearchGateLogic);
   if (feature) {

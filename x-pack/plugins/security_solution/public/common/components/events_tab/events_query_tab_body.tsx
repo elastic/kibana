@@ -62,18 +62,16 @@ export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
 
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
 
-const EventsQueryTabBodyComponent = (
-  {
-    additionalFilters,
-    deleteQuery,
-    endDate,
-    filterQuery,
-    indexNames,
-    setQuery,
-    startDate,
-    tableId
-  }: EventsQueryTabBodyComponentProps
-) => {
+const EventsQueryTabBodyComponent = ({
+  additionalFilters,
+  deleteQuery,
+  endDate,
+  filterQuery,
+  indexNames,
+  setQuery,
+  startDate,
+  tableId,
+}: EventsQueryTabBodyComponentProps) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');

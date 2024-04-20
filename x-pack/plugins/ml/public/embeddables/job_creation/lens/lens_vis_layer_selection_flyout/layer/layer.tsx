@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiFlexGroup,
@@ -27,13 +26,7 @@ interface Props {
   embeddable: LensApi;
 }
 
-export const Layer = (
-  {
-    layer,
-    layerIndex,
-    embeddable
-  }: Props
-) => {
+export const Layer = ({ layer, layerIndex, embeddable }: Props) => {
   return (
     <>
       <EuiSplitPanel.Outer grow>

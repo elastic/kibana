@@ -38,11 +38,7 @@ interface DashboardViewProps {
 
 const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
-const DashboardViewComponent = (
-  {
-    initialViewMode
-  }: DashboardViewProps
-) => {
+const DashboardViewComponent = ({ initialViewMode }: DashboardViewProps) => {
   const { fromStr, toStr, from, to } = useDeepEqualSelector((state) =>
     pick(['fromStr', 'toStr', 'from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
   );

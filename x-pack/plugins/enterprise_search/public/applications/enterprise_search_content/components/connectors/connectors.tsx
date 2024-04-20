@@ -62,11 +62,7 @@ export const crawlersBreadcrumbs = [
 export interface ConnectorsProps {
   isCrawler: boolean;
 }
-export const Connectors = (
-  {
-    isCrawler
-  }: ConnectorsProps
-) => {
+export const Connectors = ({ isCrawler }: ConnectorsProps) => {
   const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } =
     useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);

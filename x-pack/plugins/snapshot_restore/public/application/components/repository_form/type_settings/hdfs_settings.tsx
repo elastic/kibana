@@ -32,13 +32,7 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const HDFSSettings = (
-  {
-    repository,
-    updateRepositorySettings,
-    settingErrors
-  }: Props
-) => {
+export const HDFSSettings = ({ repository, updateRepositorySettings, settingErrors }: Props) => {
   const {
     name,
     settings: {

@@ -39,11 +39,7 @@ interface Props {
   indexDetails: Index;
 }
 
-export const DetailsPageOverview = (
-  {
-    indexDetails
-  }: Props
-) => {
+export const DetailsPageOverview = ({ indexDetails }: Props) => {
   const {
     name,
     status,

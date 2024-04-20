@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';

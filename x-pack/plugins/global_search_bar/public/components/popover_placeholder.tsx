@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,11 +14,7 @@ interface PopoverPlaceholderProps {
   basePath: string;
 }
 
-export const PopoverPlaceholder = (
-  {
-    basePath
-  }: PopoverPlaceholderProps
-) => {
+export const PopoverPlaceholder = ({ basePath }: PopoverPlaceholderProps) => {
   const { colorMode } = useEuiTheme();
 
   return (

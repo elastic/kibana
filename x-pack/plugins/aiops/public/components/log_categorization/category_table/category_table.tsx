@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 
@@ -61,26 +60,24 @@ interface Props {
   displayExamples?: boolean;
 }
 
-export const CategoryTable = (
-  {
-    categories,
-    eventRate,
-    dataViewId,
-    selectedField,
-    timefilter,
-    aiopsListState,
-    pinnedCategory,
-    setPinnedCategory,
-    selectedCategory,
-    setSelectedCategory,
-    onAddFilter,
-    onClose = () => {},
-    enableRowActions = true,
-    additionalFilter,
-    navigateToDiscover = true,
-    displayExamples = true
-  }: Props
-) => {
+export const CategoryTable = ({
+  categories,
+  eventRate,
+  dataViewId,
+  selectedField,
+  timefilter,
+  aiopsListState,
+  pinnedCategory,
+  setPinnedCategory,
+  selectedCategory,
+  setSelectedCategory,
+  onAddFilter,
+  onClose = () => {},
+  enableRowActions = true,
+  additionalFilter,
+  navigateToDiscover = true,
+  displayExamples = true,
+}: Props) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();

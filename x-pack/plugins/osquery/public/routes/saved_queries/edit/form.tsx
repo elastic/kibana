@@ -31,13 +31,11 @@ interface EditSavedQueryFormProps {
   viewMode?: boolean;
 }
 
-const EditSavedQueryFormComponent = (
-  {
-    defaultValue,
-    handleSubmit,
-    viewMode
-  }: EditSavedQueryFormProps
-) => {
+const EditSavedQueryFormComponent = ({
+  defaultValue,
+  handleSubmit,
+  viewMode,
+}: EditSavedQueryFormProps) => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const hooksForm = useSavedQueryForm({

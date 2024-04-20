@@ -14,12 +14,7 @@ interface CopyActionButtonProps {
   ariaLabel: string;
 }
 
-export const CopyActionButton = (
-  {
-    copyText,
-    ariaLabel
-  }: CopyActionButtonProps
-) => {
+export const CopyActionButton = ({ copyText, ariaLabel }: CopyActionButtonProps) => {
   const handleCopy = () => {
     navigator.clipboard.writeText(copyText);
   };

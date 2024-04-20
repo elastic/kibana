@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
@@ -24,11 +24,7 @@ import {
 
 const expandDetails = jest.fn();
 
-const ExpandableFlyoutTestProviders = (
-  {
-    children
-  }: PropsWithChildren<{}>
-) => {
+const ExpandableFlyoutTestProviders = ({ children }: PropsWithChildren<{}>) => {
   return <TestProviders>{children}</TestProviders>;
 };
 

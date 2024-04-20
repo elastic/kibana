@@ -23,13 +23,7 @@ interface Props {
   backToContent?: React.ReactNode;
 }
 
-export const NotFoundPrompt = (
-  {
-    productSupportUrl,
-    backToLink = '/',
-    backToContent
-  }: Props
-) => {
+export const NotFoundPrompt = ({ productSupportUrl, backToLink = '/', backToContent }: Props) => {
   const { hasGoldLicense } = useValues(LicensingLogic);
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : productSupportUrl;
 

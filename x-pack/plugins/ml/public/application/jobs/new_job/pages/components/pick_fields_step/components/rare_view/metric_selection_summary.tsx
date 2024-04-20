@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiCallOut,
@@ -23,12 +22,7 @@ interface Props {
   failedJobMessage: string | undefined;
 }
 
-export const ProgressStats = (
-  {
-    currentProgress,
-    failedJobMessage
-  }: Props
-) => {
+export const ProgressStats = ({ currentProgress, failedJobMessage }: Props) => {
   if (currentProgress === undefined) return null;
 
   return (

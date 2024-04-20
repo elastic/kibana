@@ -8,7 +8,6 @@
 
 import { EuiModal, EuiModalHeader } from '@elastic/eui';
 import constate from 'constate';
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -72,12 +71,7 @@ const InnerVerificationProvider = ({ children }) => {
   );
 };
 
-export const VerificationProvider = (
-  {
-    defaultCode,
-    children
-  }: VerificationProps
-) => {
+export const VerificationProvider = ({ defaultCode, children }: VerificationProps) => {
   return (
     <OuterVerificationProvider defaultCode={defaultCode}>
       <InnerVerificationProvider>{children}</InnerVerificationProvider>

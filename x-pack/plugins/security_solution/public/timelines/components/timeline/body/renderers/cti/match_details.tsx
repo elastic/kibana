@@ -21,52 +21,52 @@ interface MatchDetailsProps {
   sourceValue: string;
 }
 
-export const MatchDetails = (
-  {
-    contextId,
-    eventId,
-    isDraggable,
-    sourceField,
-    sourceValue
-  }: MatchDetailsProps
-) => (<EuiFlexGroup
-  alignItems="center"
-  data-test-subj="threat-match-details"
-  direction="row"
-  justifyContent="center"
-  gutterSize="none"
-  wrap
->
-  <EuiFlexItem grow={false}>
-    <DraggableBadge
-      contextId={contextId}
-      data-test-subj="threat-match-details-source-field"
-      eventId={eventId}
-      field={INDICATOR_MATCHED_FIELD}
-      isDraggable={isDraggable}
-      value={sourceField}
-      isAggregatable={true}
-      fieldType={'keyword'}
-    />
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <HorizontalSpacer>
-      <FormattedMessage
-        defaultMessage="matched"
-        id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.matchedVerb"
+export const MatchDetails = ({
+  contextId,
+  eventId,
+  isDraggable,
+  sourceField,
+  sourceValue,
+}: MatchDetailsProps) => (
+  <EuiFlexGroup
+    alignItems="center"
+    data-test-subj="threat-match-details"
+    direction="row"
+    justifyContent="center"
+    gutterSize="none"
+    wrap
+  >
+    <EuiFlexItem grow={false}>
+      <DraggableBadge
+        contextId={contextId}
+        data-test-subj="threat-match-details-source-field"
+        eventId={eventId}
+        field={INDICATOR_MATCHED_FIELD}
+        isDraggable={isDraggable}
+        value={sourceField}
+        isAggregatable={true}
+        fieldType={'keyword'}
       />
-    </HorizontalSpacer>
-  </EuiFlexItem>
-  <EuiFlexItem grow={false}>
-    <DraggableBadge
-      contextId={contextId}
-      data-test-subj="threat-match-details-source-value"
-      eventId={eventId}
-      field={sourceField}
-      isDraggable={isDraggable}
-      value={sourceValue}
-      isAggregatable={true}
-      fieldType={'keyword'}
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>);
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <HorizontalSpacer>
+        <FormattedMessage
+          defaultMessage="matched"
+          id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.matchedVerb"
+        />
+      </HorizontalSpacer>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <DraggableBadge
+        contextId={contextId}
+        data-test-subj="threat-match-details-source-value"
+        eventId={eventId}
+        field={sourceField}
+        isDraggable={isDraggable}
+        value={sourceValue}
+        isAggregatable={true}
+        fieldType={'keyword'}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

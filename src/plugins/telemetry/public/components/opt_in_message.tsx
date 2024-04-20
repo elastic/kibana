@@ -21,16 +21,14 @@ export interface OptInMessageProps {
   onClick?: () => unknown;
 }
 
-export const OptInMessage = (
-  {
-    addBasePath,
-    telemetryService,
-    telemetryConstants,
-    onClick
-  }: OptInMessageProps
-) => {
+export const OptInMessage = ({
+  addBasePath,
+  telemetryService,
+  telemetryConstants,
+  onClick,
+}: OptInMessageProps) => {
   return (
-    (<React.Fragment>
+    <React.Fragment>
       <FormattedMessage
         id="telemetry.dataManagementDisclaimerPrivacy"
         defaultMessage="{optInStatus}
@@ -54,7 +52,7 @@ export const OptInMessage = (
           ),
           privacyStatementLink: (
             /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-            (<EuiLink
+            <EuiLink
               onClick={onClick}
               href={telemetryConstants.getPrivacyStatementUrl()}
               target="_blank"
@@ -64,12 +62,12 @@ export const OptInMessage = (
                 id="telemetry.dataManagementDisclaimerPrivacyLink"
                 defaultMessage="Privacy Statement"
               />
-            </EuiLink>)
+            </EuiLink>
           ),
         }}
       />{' '}
       {renderTelemetryEnabledOrDisabledText(telemetryService, addBasePath, onClick)}
-    </React.Fragment>)
+    </React.Fragment>
   );
 };
 
@@ -97,8 +95,8 @@ function renderTelemetryEnabledOrDisabledText(
 
   return (
     /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-    (<EuiLink href={addBasePath(PATH_TO_ADVANCED_SETTINGS)} onClick={onClick}>
+    <EuiLink href={addBasePath(PATH_TO_ADVANCED_SETTINGS)} onClick={onClick}>
       {actionMessage}
-    </EuiLink>)
+    </EuiLink>
   );
 }

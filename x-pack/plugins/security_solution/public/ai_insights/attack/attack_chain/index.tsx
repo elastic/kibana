@@ -17,11 +17,7 @@ interface Props {
   insight: AlertsInsight;
 }
 
-const AttackChainComponent = (
-  {
-    insight
-  }: Props
-) => {
+const AttackChainComponent = ({ insight }: Props) => {
   const tacticMetadata = useMemo(() => getTacticMetadata(insight), [insight]);
 
   return (

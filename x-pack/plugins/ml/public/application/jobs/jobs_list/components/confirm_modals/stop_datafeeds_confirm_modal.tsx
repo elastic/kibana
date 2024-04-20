@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -33,13 +32,11 @@ interface Props {
   showStopDatafeedsFlyout(job: MlSummaryJob[]): void;
 }
 
-export const StopDatafeedsConfirmModal = (
-  {
-    setShowFunction,
-    unsetShowFunction,
-    refreshJobs
-  }: Props
-) => {
+export const StopDatafeedsConfirmModal = ({
+  setShowFunction,
+  unsetShowFunction,
+  refreshJobs,
+}: Props) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToStop, setJobsToStop] = useState<MlSummaryJob[]>([]);

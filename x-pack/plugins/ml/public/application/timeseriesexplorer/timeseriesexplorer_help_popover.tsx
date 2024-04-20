@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HelpPopover } from '../components/help_popover/help_popover';
 
-export const TimeSeriesExplorerHelpPopover = (
-  {
-    embeddableMode
-  }: {
-    embeddableMode: boolean;
-  }
-) => {
+export const TimeSeriesExplorerHelpPopover = ({ embeddableMode }: { embeddableMode: boolean }) => {
   return (
     <HelpPopover
       anchorPosition="upCenter"

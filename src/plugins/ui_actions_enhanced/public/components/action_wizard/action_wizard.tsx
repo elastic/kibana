@@ -87,20 +87,18 @@ export interface ActionWizardProps<
   triggerPickerDocsLink?: string;
 }
 
-export const ActionWizard = (
-  {
-    currentActionFactory,
-    actionFactories,
-    onActionFactoryChange,
-    onConfigChange,
-    config,
-    context,
-    onSelectedTriggersChange,
-    getTriggerInfo,
-    triggers,
-    triggerPickerDocsLink
-  }: ActionWizardProps
-) => {
+export const ActionWizard = ({
+  currentActionFactory,
+  actionFactories,
+  onActionFactoryChange,
+  onConfigChange,
+  config,
+  context,
+  onSelectedTriggersChange,
+  getTriggerInfo,
+  triggers,
+  triggerPickerDocsLink,
+}: ActionWizardProps) => {
   // auto pick action factory if there is only 1 available
   React.useEffect(() => {
     if (
@@ -163,15 +161,13 @@ interface TriggerPickerProps {
   triggerPickerDocsLink?: string;
 }
 
-const TriggerPicker = (
-  {
-    triggers,
-    selectedTriggers,
-    getTriggerInfo,
-    onSelectedTriggersChange,
-    triggerPickerDocsLink
-  }: TriggerPickerProps
-) => {
+const TriggerPicker = ({
+  triggers,
+  selectedTriggers,
+  getTriggerInfo,
+  onSelectedTriggersChange,
+  triggerPickerDocsLink,
+}: TriggerPickerProps) => {
   const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
     <EuiFormFieldset
@@ -242,20 +238,18 @@ interface SelectedActionFactoryProps<
 
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selectedActionFactory';
 
-const SelectedActionFactory = (
-  {
-    actionFactory,
-    onDeselect,
-    showDeselect,
-    onConfigChange,
-    config,
-    context,
-    allTriggers,
-    getTriggerInfo,
-    onSelectedTriggersChange,
-    triggerPickerDocsLink
-  }: SelectedActionFactoryProps
-) => {
+const SelectedActionFactory = ({
+  actionFactory,
+  onDeselect,
+  showDeselect,
+  onConfigChange,
+  config,
+  context,
+  allTriggers,
+  getTriggerInfo,
+  onSelectedTriggersChange,
+  triggerPickerDocsLink,
+}: SelectedActionFactoryProps) => {
   return (
     <div
       className="auaActionWizard__selectedActionFactoryContainer"
@@ -320,13 +314,11 @@ interface ActionFactorySelectorProps<
 
 export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'actionFactoryItem';
 
-const ActionFactorySelector = (
-  {
-    actionFactories,
-    onActionFactorySelected,
-    context
-  }: ActionFactorySelectorProps
-) => {
+const ActionFactorySelector = ({
+  actionFactories,
+  onActionFactorySelected,
+  context,
+}: ActionFactorySelectorProps) => {
   if (actionFactories.length === 0) {
     // this is not user facing, as it would be impossible to get into this state
     // just leaving for dev purposes for troubleshooting

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -34,14 +34,7 @@ interface Props {
   isCloudEnabled: boolean;
 }
 
-export const AddData = (
-  {
-    addBasePath,
-    application,
-    isDarkMode,
-    isCloudEnabled
-  }: Props
-) => {
+export const AddData = ({ addBasePath, application, isDarkMode, isCloudEnabled }: Props) => {
   const { trackUiMetric, guidedOnboardingService } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {

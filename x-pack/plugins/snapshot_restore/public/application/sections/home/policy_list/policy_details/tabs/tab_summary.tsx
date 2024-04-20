@@ -33,11 +33,7 @@ interface Props {
   policy: SlmPolicy;
 }
 
-export const TabSummary = (
-  {
-    policy
-  }: Props
-) => {
+export const TabSummary = ({ policy }: Props) => {
   const { i18n, history } = useServices();
 
   const {

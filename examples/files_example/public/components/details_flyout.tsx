@@ -7,7 +7,6 @@
  */
 
 import moment from 'moment';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import {
   EuiFlyout,
@@ -34,13 +33,7 @@ interface Props {
   onDismiss: () => void;
 }
 
-export const DetailsFlyout = (
-  {
-    files,
-    file,
-    onDismiss
-  }: Props
-) => {
+export const DetailsFlyout = ({ files, file, onDismiss }: Props) => {
   return (
     <EuiFlyout onClose={onDismiss}>
       <EuiFlyoutHeader>

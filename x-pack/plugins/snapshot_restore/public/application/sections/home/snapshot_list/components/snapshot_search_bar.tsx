@@ -51,16 +51,14 @@ interface Props {
   repositories: string[];
 }
 
-export const SnapshotSearchBar = (
-  {
-    listParams,
-    setListParams,
-    reload,
-    selectedItems,
-    onSnapshotDeleted,
-    repositories
-  }: Props
-) => {
+export const SnapshotSearchBar = ({
+  listParams,
+  setListParams,
+  reload,
+  selectedItems,
+  onSnapshotDeleted,
+  repositories,
+}: Props) => {
   const [cachedListParams, setCachedListParams] = useState<SnapshotListParams>(listParams);
   // send the request after the user has stopped typing
   useDebounce(

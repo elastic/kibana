@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { useContext } from 'react';
 
 import {
   FieldCategoryKibanaProvider,
@@ -41,12 +41,7 @@ export const FormProvider = ({ children, ...services }: FormProviderProps) => {
 /**
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}.
  */
-export const FormKibanaProvider = (
-  {
-    children,
-    ...deps
-  }: FormKibanaDependencies
-) => {
+export const FormKibanaProvider = ({ children, ...deps }: FormKibanaDependencies) => {
   const { settings, notifications, docLinks, theme, i18n } = deps;
 
   const services: Services = {

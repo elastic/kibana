@@ -25,15 +25,13 @@ import {
 } from '../../../utils/log_column_render_configuration';
 import LogColumnHeadersWrapper from './column_headers_wrapper';
 
-export const LogColumnHeaders = (
-  {
-    columnConfigurations,
-    columnWidths
-  }: {
-    columnConfigurations: LogColumnRenderConfiguration[];
-    columnWidths: LogEntryColumnWidths;
-  }
-) => {
+export const LogColumnHeaders = ({
+  columnConfigurations,
+  columnWidths,
+}: {
+  columnConfigurations: LogColumnRenderConfiguration[];
+  columnWidths: LogEntryColumnWidths;
+}) => {
   const { firstVisiblePosition } = useLogPositionStateContext();
   return (
     <LogColumnHeadersWrapper>
@@ -107,18 +105,18 @@ export const LogColumnHeaders = (
   );
 };
 
-export const LogColumnHeader = (
-  {
-    children,
-    columnWidth,
-    'data-test-subj': dataTestSubj
-  }: {
-    columnWidth: LogEntryColumnWidth;
-    'data-test-subj'?: string;
-  }
-) => (<LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
-  <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
-</LogColumnHeaderWrapper>);
+export const LogColumnHeader = ({
+  children,
+  columnWidth,
+  'data-test-subj': dataTestSubj,
+}: {
+  columnWidth: LogEntryColumnWidth;
+  'data-test-subj'?: string;
+}) => (
+  <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
+    <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
+  </LogColumnHeaderWrapper>
+);
 
 const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs((props) => ({
   role: props.role ?? 'columnheader',

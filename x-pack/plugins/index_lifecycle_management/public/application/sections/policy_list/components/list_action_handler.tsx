@@ -14,11 +14,7 @@ import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confir
 interface Props {
   updatePolicies: () => void;
 }
-export const ListActionHandler = (
-  {
-    updatePolicies
-  }: Props
-) => {
+export const ListActionHandler = ({ updatePolicies }: Props) => {
   const { listAction, setListAction } = usePolicyListContext();
   if (listAction?.actionType === 'viewIndexTemplates') {
     return (

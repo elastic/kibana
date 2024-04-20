@@ -46,15 +46,7 @@ afterEach(() => {
 });
 
 describe('useUiSetting', () => {
-  const TestConsumer = (
-    {
-      setting,
-      newValue = ''
-    }: {
-      setting: string;
-      newValue?: string;
-    }
-  ) => {
+  const TestConsumer = ({ setting, newValue = '' }: { setting: string; newValue?: string }) => {
     const [value, set] = useUiSetting$(setting, 'DEFAULT');
 
     return (
@@ -113,15 +105,7 @@ describe('useGlobalUiSetting', () => {
     return [core, subject];
   };
 
-  const TestConsumer = (
-    {
-      setting,
-      newValue = ''
-    }: {
-      setting: string;
-      newValue?: string;
-    }
-  ) => {
+  const TestConsumer = ({ setting, newValue = '' }: { setting: string; newValue?: string }) => {
     const [value, set] = useGlobalUiSetting$(setting, 'default');
 
     return (
@@ -167,15 +151,7 @@ describe('useGlobalUiSetting', () => {
 });
 
 describe('useUiSetting$', () => {
-  const TestConsumerX = (
-    {
-      setting,
-      newValue = ''
-    }: {
-      setting: string;
-      newValue?: string;
-    }
-  ) => {
+  const TestConsumerX = ({ setting, newValue = '' }: { setting: string; newValue?: string }) => {
     const [value, set] = useUiSetting$(setting, 'DEFAULT');
 
     return (

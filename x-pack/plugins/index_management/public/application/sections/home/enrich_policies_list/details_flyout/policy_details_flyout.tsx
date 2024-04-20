@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -28,12 +28,7 @@ export interface Props {
   onClose: () => void;
 }
 
-export const PolicyDetailsFlyout = (
-  {
-    policy,
-    onClose
-  }: Props
-) => {
+export const PolicyDetailsFlyout = ({ policy, onClose }: Props) => {
   return (
     <EuiFlyout onClose={onClose} data-test-subj="policyDetailsFlyout" size="m" maxWidth={550}>
       <EuiFlyoutHeader>

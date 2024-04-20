@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -100,16 +99,14 @@ interface ExplorerQueryBarProps {
   dataViews?: DataView[];
 }
 
-export const ExplorerQueryBar = (
-  {
-    filterActive,
-    filterPlaceHolder,
-    indexPattern,
-    queryString,
-    updateLanguage,
-    dataViews = []
-  }: ExplorerQueryBarProps
-) => {
+export const ExplorerQueryBar = ({
+  filterActive,
+  filterPlaceHolder,
+  indexPattern,
+  queryString,
+  updateLanguage,
+  dataViews = [],
+}: ExplorerQueryBarProps) => {
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
   const {

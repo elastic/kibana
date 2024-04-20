@@ -29,12 +29,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ModifiedFieldModal = (
-  {
-    onCancel,
-    onConfirm
-  }: Props
-) => {
+export const ModifiedFieldModal = ({ onCancel, onConfirm }: Props) => {
   return (
     <EuiConfirmModal
       title={i18nTexts.title}

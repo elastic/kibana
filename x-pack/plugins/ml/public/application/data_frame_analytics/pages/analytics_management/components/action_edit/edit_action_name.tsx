@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -23,11 +22,7 @@ interface EditActionNameProps {
   isDisabled: boolean;
 }
 
-export const EditActionName = (
-  {
-    isDisabled
-  }: EditActionNameProps
-) => {
+export const EditActionName = ({ isDisabled }: EditActionNameProps) => {
   if (isDisabled) {
     return (
       <EuiToolTip

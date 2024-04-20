@@ -44,12 +44,7 @@ interface GenerateApiKeyModalProps {
   onClose(): void;
 }
 
-export const GenerateApiKeyModal = (
-  {
-    indexName,
-    onClose
-  }: GenerateApiKeyModalProps
-) => {
+export const GenerateApiKeyModal = ({ indexName, onClose }: GenerateApiKeyModalProps) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);

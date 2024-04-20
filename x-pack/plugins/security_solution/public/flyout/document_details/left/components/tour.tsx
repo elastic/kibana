@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';

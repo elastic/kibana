@@ -51,12 +51,7 @@ const referenceModalInitialState: ReferenceFlyoutState = {
   valueListId: '',
 };
 
-export const ValueListsFlyoutComponent = (
-  {
-    onClose,
-    showFlyout
-  }: ValueListsFlyoutProps
-) => {
+export const ValueListsFlyoutComponent = ({ onClose, showFlyout }: ValueListsFlyoutProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });

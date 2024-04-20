@@ -52,12 +52,7 @@ export const authenticationsStatItems: Readonly<StatItems[]> = [
   },
 ];
 
-const UsersKpiAuthenticationsComponent = (
-  {
-    from,
-    to
-  }: UsersKpiProps
-) => {
+const UsersKpiAuthenticationsComponent = ({ from, to }: UsersKpiProps) => {
   return <KpiBaseComponent id={ID} statItems={authenticationsStatItems} from={from} to={to} />;
 };
 

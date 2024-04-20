@@ -33,13 +33,7 @@ export const AnomaliesSwimlaneVisualisation = (props: Props) => {
   return <VisualisationContent {...props} />;
 };
 
-export const VisualisationContent = (
-  {
-    timeRange,
-    jobIds,
-    selectedDatasets
-  }: Props
-) => {
+export const VisualisationContent = ({ timeRange, jobIds, selectedDatasets }: Props) => {
   const { ml } = useKibanaContextForPlugin().services;
 
   const formattedTimeRange = useMemo(() => {

@@ -26,14 +26,12 @@ interface Props extends Omit<LogStreamProps, 'startTimestamp' | 'endTimestamp'> 
   hoursAgo?: number;
 }
 
-export const EntSearchLogStream = (
-  {
-    startTimestamp,
-    endTimestamp,
-    hoursAgo = 24,
-    ...props
-  }: Props
-) => {
+export const EntSearchLogStream = ({
+  startTimestamp,
+  endTimestamp,
+  hoursAgo = 24,
+  ...props
+}: Props) => {
   if (!endTimestamp) endTimestamp = Date.now();
   if (!startTimestamp) startTimestamp = endTimestamp - hoursAgo * 60 * 60 * 1000;
 

@@ -7,7 +7,6 @@
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
@@ -25,16 +24,14 @@ function convertToEuiOptions(values: string[]) {
   return values.map((v) => ({ value: v, label: v }));
 }
 
-export const TransformSelectorControl = (
-  {
-    label,
-    errors,
-    onChange,
-    selectedOptions,
-    options,
-    allowSelectAll = false
-  }: TransformSelectorControlProps
-) => {
+export const TransformSelectorControl = ({
+  label,
+  errors,
+  onChange,
+  selectedOptions,
+  options,
+  allowSelectAll = false,
+}: TransformSelectorControlProps) => {
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = ((selectionUpdate) => {
     if (!selectionUpdate?.length) {
       onChange([]);

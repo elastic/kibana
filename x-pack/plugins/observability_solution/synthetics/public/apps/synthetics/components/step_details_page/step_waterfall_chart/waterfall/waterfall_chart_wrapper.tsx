@@ -34,14 +34,7 @@ interface Props {
   markerItems?: MarkerItems;
 }
 
-export const WaterfallChartWrapper = (
-  {
-    data,
-    total,
-    markerItems,
-    activeStep
-  }: Props
-) => {
+export const WaterfallChartWrapper = ({ data, total, markerItems, activeStep }: Props) => {
   const [query, setQuery] = useState<string>('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [onlyHighlighted, setOnlyHighlighted] = useLocalStorage<boolean>(

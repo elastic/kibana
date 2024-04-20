@@ -6,7 +6,7 @@
  */
 
 import { EuiPortal } from '@elastic/eui';
-import React, { FC } from 'react';
+import React from 'react';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 
 interface Props {
@@ -14,15 +14,12 @@ interface Props {
   hidePanel: () => void;
 }
 
-export const KeyboardShortcutsDocPanel = (
-  {
-    isVisible,
-    hidePanel
-  }: Props
-) => (<>
-  {isVisible && (
-    <EuiPortal>
-      <KeyboardShortcutsDoc onClose={hidePanel} />
-    </EuiPortal>
-  )}
-</>);
+export const KeyboardShortcutsDocPanel = ({ isVisible, hidePanel }: Props) => (
+  <>
+    {isVisible && (
+      <EuiPortal>
+        <KeyboardShortcutsDoc onClose={hidePanel} />
+      </EuiPortal>
+    )}
+  </>
+);

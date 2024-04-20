@@ -65,12 +65,7 @@ const getUnknownUsers = (
   return unknownUsers;
 };
 
-const EditAssigneesSelectableComponent = (
-  {
-    selectedCases,
-    onChangeAssignees
-  }: Props
-) => {
+const EditAssigneesSelectableComponent = ({ selectedCases, onChangeAssignees }: Props) => {
   const { owner: owners } = useCasesContext();
   const { euiTheme } = useEuiTheme();
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();

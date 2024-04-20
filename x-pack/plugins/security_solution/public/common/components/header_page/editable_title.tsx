@@ -42,14 +42,7 @@ interface Props {
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent = (
-  {
-    disabled = false,
-    onSubmit,
-    isLoading,
-    title
-  }: Props
-) => {
+const EditableTitleComponent = ({ disabled = false, onSubmit, isLoading, title }: Props) => {
   const [editMode, setEditMode] = useState(false);
   const [changedTitle, onTitleChange] = useState<string>(typeof title === 'string' ? title : '');
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { getTransformConfigMock } from './__mocks__/transform_config';

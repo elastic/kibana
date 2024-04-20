@@ -110,14 +110,12 @@ interface UnifiedDataTableFooterContainerProps extends UnifiedDataTableFooterPro
   hasButton: boolean;
 }
 
-const UnifiedDataTableFooterContainer = (
-  {
-    hasButton,
-    rowCount,
-    children,
-    fieldFormats
-  }: UnifiedDataTableFooterContainerProps
-) => {
+const UnifiedDataTableFooterContainer = ({
+  hasButton,
+  rowCount,
+  children,
+  fieldFormats,
+}: UnifiedDataTableFooterContainerProps) => {
   const { euiTheme } = useEuiTheme();
 
   const formattedRowCount = fieldFormats

@@ -33,11 +33,7 @@ import './api_logs_table.scss';
 interface Props {
   hasPagination?: boolean;
 }
-export const ApiLogsTable = (
-  {
-    hasPagination
-  }: Props
-) => {
+export const ApiLogsTable = ({ hasPagination }: Props) => {
   const { dataLoading, apiLogs, meta } = useValues(ApiLogsLogic);
   const { onPaginate } = useActions(ApiLogsLogic);
   const { openFlyout } = useActions(ApiLogLogic);

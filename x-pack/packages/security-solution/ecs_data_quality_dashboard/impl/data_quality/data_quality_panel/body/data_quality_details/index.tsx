@@ -68,27 +68,25 @@ export interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const DataQualityDetailsComponent = (
-  {
-    addSuccessToast,
-    canUserCreateAndReadCases,
-    endDate,
-    formatBytes,
-    formatNumber,
-    getGroupByFieldsOnClick,
-    ilmPhases,
-    isAssistantEnabled,
-    openCreateCaseFlyout,
-    patternIndexNames,
-    patternRollups,
-    patterns,
-    startDate,
-    theme,
-    baseTheme,
-    updatePatternIndexNames,
-    updatePatternRollup
-  }: Props
-) => {
+const DataQualityDetailsComponent = ({
+  addSuccessToast,
+  canUserCreateAndReadCases,
+  endDate,
+  formatBytes,
+  formatNumber,
+  getGroupByFieldsOnClick,
+  ilmPhases,
+  isAssistantEnabled,
+  openCreateCaseFlyout,
+  patternIndexNames,
+  patternRollups,
+  patterns,
+  startDate,
+  theme,
+  baseTheme,
+  updatePatternIndexNames,
+  updatePatternRollup,
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const [selectedIndex, setSelectedIndex] = useState<SelectedIndex | null>(null);
 

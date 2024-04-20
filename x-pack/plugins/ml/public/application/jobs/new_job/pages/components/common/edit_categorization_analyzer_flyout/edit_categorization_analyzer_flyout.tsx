@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -122,13 +121,7 @@ export const EditCategorizationAnalyzerFlyout = () => {
   );
 };
 
-const FlyoutButton = (
-  {
-    onClick
-  }: {
-    onClick(): void;
-  }
-) => {
+const FlyoutButton = ({ onClick }: { onClick(): void }) => {
   return (
     <EuiButtonEmpty onClick={onClick} flush="left" data-test-subj="mlJobWizardButtonPreviewJobJson">
       <FormattedMessage
@@ -139,17 +132,15 @@ const FlyoutButton = (
   );
 };
 
-const Contents = (
-  {
-    title,
-    value,
-    onChange
-  }: {
-    title: string;
-    value: string;
-    onChange(s: string): void;
-  }
-) => {
+const Contents = ({
+  title,
+  value,
+  onChange,
+}: {
+  title: string;
+  value: string;
+  onChange(s: string): void;
+}) => {
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

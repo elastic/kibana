@@ -35,18 +35,15 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const WithoutHeaderLayout = (
-  {
-    restrictWidth,
-    children
-  }: Props
-) => (<Wrapper>
-  <Page restrictWidth={restrictWidth || 1200}>
-    <EuiPageBody>
-      <ContentWrapper>
-        <EuiSpacer size="m" />
-        {children}
-      </ContentWrapper>
-    </EuiPageBody>
-  </Page>
-</Wrapper>);
+export const WithoutHeaderLayout = ({ restrictWidth, children }: Props) => (
+  <Wrapper>
+    <Page restrictWidth={restrictWidth || 1200}>
+      <EuiPageBody>
+        <ContentWrapper>
+          <EuiSpacer size="m" />
+          {children}
+        </ContentWrapper>
+      </EuiPageBody>
+    </Page>
+  </Wrapper>
+);

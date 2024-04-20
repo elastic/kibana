@@ -85,26 +85,24 @@ export interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const IndexPropertiesComponent = (
-  {
-    addSuccessToast,
-    baseTheme,
-    canUserCreateAndReadCases,
-    docsCount,
-    formatBytes,
-    formatNumber,
-    getGroupByFieldsOnClick,
-    ilmPhase,
-    indexId,
-    indexName,
-    isAssistantEnabled,
-    openCreateCaseFlyout,
-    pattern,
-    patternRollup,
-    theme,
-    updatePatternRollup
-  }: Props
-) => {
+const IndexPropertiesComponent = ({
+  addSuccessToast,
+  baseTheme,
+  canUserCreateAndReadCases,
+  docsCount,
+  formatBytes,
+  formatNumber,
+  getGroupByFieldsOnClick,
+  ilmPhase,
+  indexId,
+  indexName,
+  isAssistantEnabled,
+  openCreateCaseFlyout,
+  pattern,
+  patternRollup,
+  theme,
+  updatePatternRollup,
+}: Props) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
   const { telemetryEvents, isILMAvailable, httpFetch, toasts } = useDataQualityContext();
 

@@ -66,68 +66,68 @@ interface HostDetailsProps {
 }
 
 // eslint-disable-next-line react/display-name
-export const HostDetailsPanel = React.memo((
-  {
+export const HostDetailsPanel = React.memo(
+  ({
     contextID,
     scopeId,
     expandedHost,
     handleOnHostClosed,
     isDraggable,
-    isFlyoutView
-  }: HostDetailsProps
-) => {
-  const { hostName } = expandedHost;
-  const entity = useMemo(() => ({ name: hostName, type: 'host' as const }), [hostName]);
-  if (!hostName) {
-    return null;
-  }
+    isFlyoutView,
+  }: HostDetailsProps) => {
+    const { hostName } = expandedHost;
+    const entity = useMemo(() => ({ name: hostName, type: 'host' as const }), [hostName]);
+    if (!hostName) {
+      return null;
+    }
 
-  return isFlyoutView ? (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <ExpandableHostDetailsTitle hostName={hostName} />
-      </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody>
-        <EuiSpacer size="m" />
-        <ExpandableHostDetailsPageLink hostName={hostName} />
-        <EuiHorizontalRule />
-        <AssetCriticalityAccordion entity={entity} />
-        <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
-      </StyledEuiFlyoutBody>
-    </>
-  ) : (
-    <>
-      <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={false}>
-        <EuiFlexItem grow={false}>
+    return isFlyoutView ? (
+      <>
+        <EuiFlyoutHeader hasBorder>
           <ExpandableHostDetailsTitle hostName={hostName} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={i18n.translate(
-              'xpack.securitySolution.timeline.sidePanel.hostDetails.close',
-              {
-                defaultMessage: 'close',
-              }
-            )}
-            onClick={handleOnHostClosed}
+        </EuiFlyoutHeader>
+        <StyledEuiFlyoutBody>
+          <EuiSpacer size="m" />
+          <ExpandableHostDetailsPageLink hostName={hostName} />
+          <EuiHorizontalRule />
+          <AssetCriticalityAccordion entity={entity} />
+          <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
+        </StyledEuiFlyoutBody>
+      </>
+    ) : (
+      <>
+        <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={false}>
+          <EuiFlexItem grow={false}>
+            <ExpandableHostDetailsTitle hostName={hostName} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={i18n.translate(
+                'xpack.securitySolution.timeline.sidePanel.hostDetails.close',
+                {
+                  defaultMessage: 'close',
+                }
+              )}
+              onClick={handleOnHostClosed}
+            />
+          </EuiFlexItem>
+        </StyledEuiFlexGroup>
+        <EuiSpacer size="m" />
+        <StyledEuiFlexButtonWrapper grow={false}>
+          <ExpandableHostDetailsPageLink hostName={hostName} />
+        </StyledEuiFlexButtonWrapper>
+        <EuiSpacer size="m" />
+        <AssetCriticalityAccordion entity={entity} />
+        <StyledPanelContent>
+          <ExpandableHostDetails
+            contextID={contextID}
+            scopeId={scopeId}
+            hostName={hostName}
+            isDraggable={isDraggable}
           />
-        </EuiFlexItem>
-      </StyledEuiFlexGroup>
-      <EuiSpacer size="m" />
-      <StyledEuiFlexButtonWrapper grow={false}>
-        <ExpandableHostDetailsPageLink hostName={hostName} />
-      </StyledEuiFlexButtonWrapper>
-      <EuiSpacer size="m" />
-      <AssetCriticalityAccordion entity={entity} />
-      <StyledPanelContent>
-        <ExpandableHostDetails
-          contextID={contextID}
-          scopeId={scopeId}
-          hostName={hostName}
-          isDraggable={isDraggable}
-        />
-      </StyledPanelContent>
-    </>
-  );
-});
+        </StyledPanelContent>
+      </>
+    );
+  }
+);

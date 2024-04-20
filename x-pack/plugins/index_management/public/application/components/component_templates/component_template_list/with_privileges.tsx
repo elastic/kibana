@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import {
   PageLoading,
@@ -17,11 +17,7 @@ import {
 } from '../shared_imports';
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../constants';
 
-export const ComponentTemplatesWithPrivileges = ({
-  children,
-}: {
-  children?: React.ReactNode;
-}) => {
+export const ComponentTemplatesWithPrivileges = ({ children }: { children?: React.ReactNode }) => {
   const { apiError } = useAuthorizationContext();
 
   if (apiError) {

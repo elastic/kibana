@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
   SaveModalDashboardProps,
@@ -33,14 +33,12 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
-export const TagEnhancedSavedObjectSaveModalDashboard = (
-  {
-    initialTags,
-    onSave,
-    savedObjectsTagging,
-    ...otherProps
-  }: TagEnhancedSavedObjectSaveModalDashboardProps
-) => {
+export const TagEnhancedSavedObjectSaveModalDashboard = ({
+  initialTags,
+  onSave,
+  savedObjectsTagging,
+  ...otherProps
+}: TagEnhancedSavedObjectSaveModalDashboardProps) => {
   const [selectedTags, setSelectedTags] = useState(initialTags);
 
   const tagSelectorOption = useMemo(

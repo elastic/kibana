@@ -45,21 +45,19 @@ interface Props {
   selectedAgentPolicyId?: string;
 }
 
-export const StepSelectHosts = (
-  {
-    agentPolicy,
-    updateAgentPolicy,
-    newAgentPolicy,
-    updateNewAgentPolicy,
-    withSysMonitoring,
-    updateSysMonitoring,
-    validation,
-    packageInfo,
-    setHasAgentPolicyError,
-    updateSelectedTab,
-    selectedAgentPolicyId
-  }: Props
-) => {
+export const StepSelectHosts = ({
+  agentPolicy,
+  updateAgentPolicy,
+  newAgentPolicy,
+  updateNewAgentPolicy,
+  withSysMonitoring,
+  updateSysMonitoring,
+  validation,
+  packageInfo,
+  setHasAgentPolicyError,
+  updateSelectedTab,
+  selectedAgentPolicyId,
+}: Props) => {
   let agentPolicies: AgentPolicy[] = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
     page: 1,

@@ -12,7 +12,6 @@ import { EuiPanel, EuiCallOut, EuiButton } from '@elastic/eui';
 import useInterval from 'react-use/lib/useInterval';
 import { Redirect } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ComponentProps } from '../../route_init';
 import { MonitoringStartServices } from '../../../types';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
 

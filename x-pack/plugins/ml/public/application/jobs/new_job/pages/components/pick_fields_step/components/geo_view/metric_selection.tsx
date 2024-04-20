@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
@@ -21,11 +20,7 @@ interface Props {
   setIsValid: (na: boolean) => void;
 }
 
-export const GeoDetector = (
-  {
-    setIsValid
-  }: Props
-) => {
+export const GeoDetector = ({ setIsValid }: Props) => {
   const { jobCreator: jc, jobCreatorUpdated, chartLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as GeoJobCreator;
 

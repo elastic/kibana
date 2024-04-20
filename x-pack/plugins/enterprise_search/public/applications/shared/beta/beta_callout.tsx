@@ -15,12 +15,7 @@ interface BetaCallOutProps {
   title?: string;
 }
 
-export const BetaCallOut = (
-  {
-    title,
-    description
-  }: BetaCallOutProps
-) => {
+export const BetaCallOut = ({ title, description }: BetaCallOutProps) => {
   return (
     <EuiCallOut
       color="warning"

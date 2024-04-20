@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type FC } from 'react';
+import React from 'react';
 import {
   Navigation,
   NavigationKibanaProvider,
@@ -17,12 +17,7 @@ export interface Props {
   deps: NavigationKibanaDependencies;
 }
 
-export const SideNavigation = (
-  {
-    navProps,
-    deps
-  }: Props
-) => {
+export const SideNavigation = ({ navProps, deps }: Props) => {
   return (
     <NavigationKibanaProvider {...deps}>
       <Navigation {...navProps} />

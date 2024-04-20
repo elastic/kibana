@@ -26,16 +26,14 @@ interface DataTableColumnHeaderProps {
   showColumnTokens?: boolean;
 }
 
-export const DataTableColumnHeader = (
-  {
-    columnDisplayName,
-    showColumnTokens,
-    columnName,
-    columnsMeta,
-    dataView,
-    headerRowHeight
-  }: DataTableColumnHeaderProps
-) => {
+export const DataTableColumnHeader = ({
+  columnDisplayName,
+  showColumnTokens,
+  columnName,
+  columnsMeta,
+  dataView,
+  headerRowHeight,
+}: DataTableColumnHeaderProps) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && (
@@ -64,11 +62,9 @@ const DataTableColumnToken = (
   ) : null;
 };
 
-const DataTableColumnTitle = (
-  {
-    columnDisplayName
-  }: Pick<DataTableColumnHeaderProps, 'columnDisplayName'>
-) => {
+const DataTableColumnTitle = ({
+  columnDisplayName,
+}: Pick<DataTableColumnHeaderProps, 'columnDisplayName'>) => {
   return <span data-test-subj="unifiedDataTableColumnTitle">{columnDisplayName}</span>;
 };
 
@@ -88,7 +84,7 @@ function getRenderedToken({
     const columnMeta = columnsMeta[columnName];
     const columnIconType = getTextBasedColumnIconType(columnMeta);
     return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
-      (<FieldIcon type={columnIconType} css={fieldIconCss} />)
+      <FieldIcon type={columnIconType} css={fieldIconCss} />
     ) : null;
   }
 

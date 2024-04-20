@@ -27,18 +27,16 @@ export interface LogEntryFieldColumnProps {
   render?: (value: JsonValue) => React.ReactNode;
 }
 
-export const LogEntryFieldColumn = (
-  {
-    columnValue,
+export const LogEntryFieldColumn = ({
+  columnValue,
 
-    // we only support one highlight for now
-    highlights: [firstHighlight],
+  // we only support one highlight for now
+  highlights: [firstHighlight],
 
-    isActiveHighlight,
-    wrapMode,
-    render
-  }: LogEntryFieldColumnProps
-) => {
+  isActiveHighlight,
+  wrapMode,
+  render,
+}: LogEntryFieldColumnProps) => {
   if (isFieldColumn(columnValue)) {
     return (
       <FieldColumnContent wrapMode={wrapMode}>

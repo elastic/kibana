@@ -48,13 +48,11 @@ const useStyles = () => {
 
 const EuiCardWithLink = withLink(EuiCard);
 
-export const LandingLinksImageCards = React.memo(function LandingLinksImageCards(
-  {
-    items,
-    urlState,
-    onLinkClick
-  }: LandingLinksImagesProps
-) {
+export const LandingLinksImageCards = React.memo(function LandingLinksImageCards({
+  items,
+  urlState,
+  onLinkClick,
+}: LandingLinksImagesProps) {
   const styles = useStyles();
   return (
     <EuiFlexGroup direction="row" wrap data-test-subj="LandingImageCards">

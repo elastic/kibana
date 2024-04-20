@@ -41,12 +41,7 @@ const defaultContext: UptimeSettingsContextValues = {
 };
 export const UptimeSettingsContext = createContext(defaultContext);
 
-export const UptimeSettingsContextProvider = (
-  {
-    children,
-    ...props
-  }: UptimeAppProps
-) => {
+export const UptimeSettingsContextProvider = ({ children, ...props }: UptimeAppProps) => {
   const { basePath, isApmAvailable, isInfraAvailable, isLogsAvailable, commonlyUsedRanges, isDev } =
     props;
 

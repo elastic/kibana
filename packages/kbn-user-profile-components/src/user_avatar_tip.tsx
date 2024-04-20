@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { UserAvatarProps } from './user_avatar';
@@ -16,13 +15,7 @@ import { UserToolTip } from './user_tooltip';
 /**
  * Renders a user avatar with tooltip
  */
-export const UserAvatarTip = (
-  {
-    user,
-    avatar,
-    ...rest
-  }: UserAvatarProps
-) => {
+export const UserAvatarTip = ({ user, avatar, ...rest }: UserAvatarProps) => {
   if (!user) {
     return <UserAvatar {...rest} />;
   }

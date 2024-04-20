@@ -15,11 +15,7 @@ interface Props {
   dataStream: DataStream;
 }
 
-export const DataStreamsBadges = (
-  {
-    dataStream
-  }: Props
-) => {
+export const DataStreamsBadges = ({ dataStream }: Props) => {
   const badges = [];
   if (isManaged(dataStream)) {
     badges.push(

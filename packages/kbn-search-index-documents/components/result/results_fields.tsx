@@ -18,12 +18,7 @@ interface Props {
   isExpanded: boolean;
 }
 
-export const ResultFields = (
-  {
-    fields,
-    isExpanded
-  }: Props
-) => {
+export const ResultFields = ({ fields, isExpanded }: Props) => {
   return (
     <EuiTable>
       <EuiTableBody>

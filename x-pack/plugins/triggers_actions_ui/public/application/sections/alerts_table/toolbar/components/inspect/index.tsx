@@ -22,14 +22,11 @@ interface InspectButtonContainerProps {
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer = memo((
-  {
-    children,
-    hide
-  }: InspectButtonContainerProps
-) => (<HoverVisibilityContainer hide={hide} targetClassNames={VISIBILITY_CLASSES}>
-  {children}
-</HoverVisibilityContainer>));
+export const InspectButtonContainer = memo(({ children, hide }: InspectButtonContainerProps) => (
+  <HoverVisibilityContainer hide={hide} targetClassNames={VISIBILITY_CLASSES}>
+    {children}
+  </HoverVisibilityContainer>
+));
 
 interface InspectButtonProps {
   onCloseInspect?: () => void;
@@ -38,12 +35,7 @@ interface InspectButtonProps {
   inspectTitle: string;
 }
 
-const InspectButtonComponent = (
-  {
-    getInspectQuery,
-    inspectTitle
-  }: InspectButtonProps
-) => {
+const InspectButtonComponent = ({ getInspectQuery, inspectTitle }: InspectButtonProps) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
   const onOpenModal = useCallback(() => {

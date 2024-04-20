@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment } from 'react';
-import type { FunctionComponent } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -34,13 +33,11 @@ export interface CustomAssetsAccordionProps {
   title?: string;
 }
 
-export const CustomAssetsAccordion = (
-  {
-    views,
-    initialIsOpen = false,
-    title
-  }: CustomAssetsAccordionProps
-) => {
+export const CustomAssetsAccordion = ({
+  views,
+  initialIsOpen = false,
+  title,
+}: CustomAssetsAccordionProps) => {
   const { application } = useStartServices();
 
   return (

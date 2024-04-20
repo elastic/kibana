@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
@@ -22,11 +21,7 @@ export const fromPatternAnalysisRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper = (
-  {
-    location
-  }: PageProps
-) => {
+const PageWrapper = ({ location }: PageProps) => {
   const {
     categorizationType,
     dataViewId,

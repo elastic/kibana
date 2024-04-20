@@ -7,7 +7,7 @@
  */
 
 import { debounce } from 'lodash';
-import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
 import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
 

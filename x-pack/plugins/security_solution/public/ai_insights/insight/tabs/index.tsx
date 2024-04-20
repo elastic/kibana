@@ -19,14 +19,12 @@ interface Props {
   showAnonymized?: boolean;
 }
 
-const TabsComponent = (
-  {
-    insight,
-    promptContextId,
-    replacements,
-    showAnonymized = false
-  }: Props
-) => {
+const TabsComponent = ({
+  insight,
+  promptContextId,
+  replacements,
+  showAnonymized = false,
+}: Props) => {
   const tabs = useMemo(
     () => getTabs({ insight, promptContextId, replacements, showAnonymized }),
     [insight, promptContextId, replacements, showAnonymized]

@@ -7,7 +7,7 @@
  */
 
 import { snakeCase } from 'lodash';
-import React, { FC, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiCard, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/kibana-react-plugin/public';
@@ -20,12 +20,7 @@ interface Props {
   solution: FeatureCatalogueSolution;
 }
 
-export const SolutionPanel = (
-  {
-    addBasePath,
-    solution
-  }: Props
-) => {
+export const SolutionPanel = ({ addBasePath, solution }: Props) => {
   const { trackUiMetric } = getServices();
 
   const getSolutionGraphicURL = (solutionId: string) =>

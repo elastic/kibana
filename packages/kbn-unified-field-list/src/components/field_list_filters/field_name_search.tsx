@@ -32,16 +32,14 @@ export interface FieldNameSearchProps {
  * @param onChange
  * @constructor
  */
-export const FieldNameSearch = (
-  {
-    'data-test-subj': dataTestSubject,
-    append,
-    compressed,
-    nameFilter,
-    screenReaderDescriptionId,
-    onChange
-  }: FieldNameSearchProps
-) => {
+export const FieldNameSearch = ({
+  'data-test-subj': dataTestSubject,
+  append,
+  compressed,
+  nameFilter,
+  screenReaderDescriptionId,
+  onChange,
+}: FieldNameSearchProps) => {
   const searchPlaceholder = i18n.translate('unifiedFieldList.fieldNameSearch.filterByNameLabel', {
     defaultMessage: 'Search field names',
     description: 'Search the list of fields in the data view for the provided text',

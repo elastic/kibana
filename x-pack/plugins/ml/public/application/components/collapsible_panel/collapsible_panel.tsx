@@ -14,7 +14,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { type FC } from 'react';
+import React from 'react';
 import { PanelHeaderItems } from './panel_header_items';
 import { useCurrentThemeVars } from '../../contexts/kibana';
 
@@ -26,15 +26,13 @@ export interface CollapsiblePanelProps {
   headerItems?: React.ReactElement[];
 }
 
-export const CollapsiblePanel = (
-  {
-    isOpen,
-    onToggle,
-    children,
-    header,
-    headerItems
-  }: CollapsiblePanelProps
-) => {
+export const CollapsiblePanel = ({
+  isOpen,
+  onToggle,
+  children,
+  header,
+  headerItems,
+}: CollapsiblePanelProps) => {
   const { euiTheme } = useCurrentThemeVars();
 
   return (
@@ -97,12 +95,7 @@ export interface OverviewStatsBarProps {
   dataTestSub?: string;
 }
 
-export const OverviewStatsBar = (
-  {
-    inputStats,
-    dataTestSub
-  }: OverviewStatsBarProps
-) => {
+export const OverviewStatsBar = ({ inputStats, dataTestSub }: OverviewStatsBarProps) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSub} alignItems={'center'} gutterSize={'m'}>
       {inputStats.map(({ value, label, 'data-test-subj': dataTestSubjValue }) => {

@@ -19,16 +19,14 @@ export interface RuleActionsPopoverProps {
   onRunRule: (ruleId: string) => void;
 }
 
-export const RuleActionsPopover = (
-  {
-    rule,
-    canSaveRule,
-    onDelete,
-    onApiKeyUpdate,
-    onEnableDisable,
-    onRunRule
-  }: RuleActionsPopoverProps
-) => {
+export const RuleActionsPopover = ({
+  rule,
+  canSaveRule,
+  onDelete,
+  onApiKeyUpdate,
+  onEnableDisable,
+  onRunRule,
+}: RuleActionsPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   return (

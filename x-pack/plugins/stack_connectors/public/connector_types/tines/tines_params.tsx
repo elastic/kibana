@@ -64,16 +64,14 @@ const renderStory = (
   </EuiFlexGroup>
 );
 
-const TinesParamsFields = (
-  {
-    actionConnector,
-    actionParams,
-    editAction,
-    index,
-    executionMode,
-    errors
-  }: ActionParamsProps<TinesExecuteActionParams>
-) => {
+const TinesParamsFields = ({
+  actionConnector,
+  actionParams,
+  editAction,
+  index,
+  executionMode,
+  errors,
+}: ActionParamsProps<TinesExecuteActionParams>) => {
   const { toasts } = useKibana().notifications;
   const { subAction, subActionParams } = actionParams;
   const { body, webhook, webhookUrl } = subActionParams ?? {};

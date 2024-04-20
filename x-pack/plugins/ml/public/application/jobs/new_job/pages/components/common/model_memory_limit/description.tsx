@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,12 +15,7 @@ interface Props {
   validation: Validation;
 }
 
-export const Description = memo((
-  {
-    children,
-    validation
-  }: Props
-) => {
+export const Description = memo(({ children, validation }: Props) => {
   const title = i18n.translate(
     'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.title',
     {

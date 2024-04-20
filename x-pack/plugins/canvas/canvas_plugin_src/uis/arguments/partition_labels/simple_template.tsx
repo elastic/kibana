@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
@@ -20,12 +20,7 @@ export interface Props {
 
 const SHOW_FIELD = 'show';
 
-export const SimpleTemplate = (
-  {
-    onValueChange,
-    argValue
-  }: Props
-) => {
+export const SimpleTemplate = ({ onValueChange, argValue }: Props) => {
   const showValuePath = getFieldPath(SHOW_FIELD);
 
   useEffect(() => {

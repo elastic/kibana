@@ -15,13 +15,11 @@ interface ComponentLoaderProps {
 
 import './component_loader.scss';
 
-export const ComponentLoader = (
-  {
-    text = 'Loading...'
-  }: ComponentLoaderProps
-) => (<div className="componentLoader">
-  <EuiLoadingSpinner size="l" />
-  <EuiTextColor className="componentLoaderText" color="subdued">
-    {text}
-  </EuiTextColor>
-</div>);
+export const ComponentLoader = ({ text = 'Loading...' }: ComponentLoaderProps) => (
+  <div className="componentLoader">
+    <EuiLoadingSpinner size="l" />
+    <EuiTextColor className="componentLoaderText" color="subdued">
+      {text}
+    </EuiTextColor>
+  </div>
+);

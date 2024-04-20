@@ -49,40 +49,38 @@ export interface RuleCommonExpressionsProps extends CommonRuleParams {
   onChangeSourceFields: (selectedSourceFields: SourceField[]) => void;
 }
 
-export const RuleCommonExpressions = (
-  {
-    esFields,
-    thresholdComparator,
-    threshold,
-    timeWindowSize,
-    timeWindowUnit,
-    aggType,
-    aggField,
-    groupBy,
-    termField,
-    termSize,
-    size,
-    sourceFields,
-    errors,
-    hasValidationErrors,
-    onChangeSelectedAggField,
-    onChangeSelectedAggType,
-    onChangeSelectedGroupBy,
-    onChangeSelectedTermField,
-    onChangeSelectedTermSize,
-    onChangeThreshold,
-    onChangeThresholdComparator,
-    onChangeWindowSize,
-    onChangeWindowUnit,
-    onChangeSizeValue,
-    onTestFetch,
-    onCopyQuery,
-    excludeHitsFromPreviousRun,
-    onChangeExcludeHitsFromPreviousRun,
-    canSelectMultiTerms,
-    onChangeSourceFields
-  }: RuleCommonExpressionsProps
-) => {
+export const RuleCommonExpressions = ({
+  esFields,
+  thresholdComparator,
+  threshold,
+  timeWindowSize,
+  timeWindowUnit,
+  aggType,
+  aggField,
+  groupBy,
+  termField,
+  termSize,
+  size,
+  sourceFields,
+  errors,
+  hasValidationErrors,
+  onChangeSelectedAggField,
+  onChangeSelectedAggType,
+  onChangeSelectedGroupBy,
+  onChangeSelectedTermField,
+  onChangeSelectedTermSize,
+  onChangeThreshold,
+  onChangeThresholdComparator,
+  onChangeWindowSize,
+  onChangeWindowUnit,
+  onChangeSizeValue,
+  onTestFetch,
+  onCopyQuery,
+  excludeHitsFromPreviousRun,
+  onChangeExcludeHitsFromPreviousRun,
+  canSelectMultiTerms,
+  onChangeSourceFields,
+}: RuleCommonExpressionsProps) => {
   const [isExcludeHitsDisabled, setIsExcludeHitsDisabled] = useState<boolean>(false);
 
   useEffect(() => {

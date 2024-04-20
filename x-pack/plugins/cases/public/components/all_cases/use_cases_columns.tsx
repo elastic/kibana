@@ -388,12 +388,7 @@ const iconWrapperCss = css`
   }
 `;
 
-export const ExternalServiceColumn = (
-  {
-    theCase,
-    connectors
-  }: Props
-) => {
+export const ExternalServiceColumn = ({ theCase, connectors }: Props) => {
   const { triggersActionsUi } = useKibana().services;
   const { actions } = useApplicationCapabilities();
 

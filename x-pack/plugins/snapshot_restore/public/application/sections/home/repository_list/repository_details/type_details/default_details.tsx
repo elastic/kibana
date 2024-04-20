@@ -16,11 +16,7 @@ interface Props {
   repository: Repository;
 }
 
-export const DefaultDetails = (
-  {
-    repository: { name, settings }
-  }: Props
-) => {
+export const DefaultDetails = ({ repository: { name, settings } }: Props) => {
   return (
     <Fragment>
       <EuiTitle size="s">

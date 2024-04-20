@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,

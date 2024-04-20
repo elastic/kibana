@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import { EuiText, EuiSpacer, EuiSuperSelectOption } from '@elastic/eui';
 

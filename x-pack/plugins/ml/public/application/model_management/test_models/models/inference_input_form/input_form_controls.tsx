@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
@@ -20,14 +19,12 @@ interface Props {
   showCreatePipelineButton?: boolean;
 }
 
-export const InputFormControls = (
-  {
-    testButtonDisabled,
-    createPipelineButtonDisabled,
-    inferrer,
-    showCreatePipelineButton
-  }: Props
-) => {
+export const InputFormControls = ({
+  testButtonDisabled,
+  createPipelineButtonDisabled,
+  inferrer,
+  showCreatePipelineButton,
+}: Props) => {
   return (
     <>
       <EuiFlexItem grow={false}>

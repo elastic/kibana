@@ -32,29 +32,20 @@ interface TermDef {
   label: string | number;
 }
 
-const Term = (
-  {
-    label
-  }: TermDef
-) => (<EuiFlexItem grow={false}>
-  <strong>
-    <EuiTextColor color="subdued">{label}:</EuiTextColor>
-  </strong>
-</EuiFlexItem>);
+const Term = ({ label }: TermDef) => (
+  <EuiFlexItem grow={false}>
+    <strong>
+      <EuiTextColor color="subdued">{label}:</EuiTextColor>
+    </strong>
+  </EuiFlexItem>
+);
 
-const Definition = (
-  {
-    label
-  }: TermDef
-) => (<EuiFlexItem>
-  <EuiTextColor color="subdued">{label}</EuiTextColor>
-</EuiFlexItem>);
-const MetadataPopover = (
-  {
-    id,
-    onDocumentDelete
-  }: MetaDataProps
-) => {
+const Definition = ({ label }: TermDef) => (
+  <EuiFlexItem>
+    <EuiTextColor color="subdued">{label}</EuiTextColor>
+  </EuiFlexItem>
+);
+const MetadataPopover = ({ id, onDocumentDelete }: MetaDataProps) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
 
@@ -100,12 +91,7 @@ const MetadataPopover = (
   );
 };
 
-export const ResultHeader = (
-  {
-    title,
-    metaData
-  }: Props
-) => {
+export const ResultHeader = ({ title, metaData }: Props) => {
   return (
     <div className="resultHeader">
       <EuiText size="s">

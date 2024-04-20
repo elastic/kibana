@@ -7,7 +7,6 @@
 
 import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -47,17 +46,15 @@ export interface EmbeddableInputTrackerProps {
   onError: (error: Error) => void;
 }
 
-export const EmbeddableInputTracker = (
-  {
-    input$,
-    initialInput,
-    reload$,
-    onOutputChange,
-    onRenderComplete,
-    onLoading,
-    onError
-  }: EmbeddableInputTrackerProps
-) => {
+export const EmbeddableInputTracker = ({
+  input$,
+  initialInput,
+  reload$,
+  onOutputChange,
+  onRenderComplete,
+  onLoading,
+  onError,
+}: EmbeddableInputTrackerProps) => {
   const input = useObservable(input$, initialInput);
 
   const [manualReload$] = useState<BehaviorSubject<number>>(
@@ -121,25 +118,23 @@ export const EmbeddableInputTracker = (
  * @param partitions
  * @constructor
  */
-export const ChartGridEmbeddableWrapper = (
-  {
-    viewType = CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
-    fn,
-    metricField,
-    maxSeriesToPlot,
-    splitField,
-    partitions,
-    onError,
-    onLoading,
-    onRenderComplete,
-    onChange,
-    emptyState
-  }: EmbeddableChangePointChartProps & {
-    onRenderComplete: () => void;
-    onLoading: (isLoading: boolean) => void;
-    onError: (error: Error) => void;
-  }
-) => {
+export const ChartGridEmbeddableWrapper = ({
+  viewType = CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
+  fn,
+  metricField,
+  maxSeriesToPlot,
+  splitField,
+  partitions,
+  onError,
+  onLoading,
+  onRenderComplete,
+  onChange,
+  emptyState,
+}: EmbeddableChangePointChartProps & {
+  onRenderComplete: () => void;
+  onLoading: (isLoading: boolean) => void;
+  onError: (error: Error) => void;
+}) => {
   const { filters, query, searchBounds, interval } = useFilterQueryUpdates();
 
   const fieldConfig = useMemo(() => {

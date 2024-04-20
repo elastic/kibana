@@ -17,12 +17,7 @@ interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
 }
 
-const SameFamilyCalloutComponent = (
-  {
-    children,
-    enrichedFieldMetadata
-  }: Props
-) => {
+const SameFamilyCalloutComponent = ({ children, enrichedFieldMetadata }: Props) => {
   const title = useMemo(
     () => (
       <span data-test-subj="title">

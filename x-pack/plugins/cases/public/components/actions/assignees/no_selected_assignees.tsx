@@ -9,13 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTextAlign } 
 import React from 'react';
 import * as i18n from './translations';
 
-const NoSelectedAssigneesComponent = (
-  {
-    totalSelectedCases
-  }: {
-    totalSelectedCases: number;
-  }
-) => {
+const NoSelectedAssigneesComponent = ({ totalSelectedCases }: { totalSelectedCases: number }) => {
   return (
     <EuiFlexGroup
       alignItems="center"

@@ -43,13 +43,7 @@ const ValueWrapper = React.memo<{ value: LegendItem['value'] }>(({ value }) =>
 
 ValueWrapper.displayName = 'ValueWrapper';
 
-const DraggableLegendItemComponent = (
-  {
-    legendItem
-  }: {
-    legendItem: LegendItem;
-  }
-) => {
+const DraggableLegendItemComponent = ({ legendItem }: { legendItem: LegendItem }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { color, count, dataProviderId, field, scopeId, value } = legendItem;
 

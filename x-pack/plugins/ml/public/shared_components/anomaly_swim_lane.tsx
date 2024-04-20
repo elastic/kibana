@@ -9,7 +9,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
-import React, { useEffect, useMemo, useRef, type FC } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type {
   AnomalySwimLaneEmbeddableApi,
@@ -23,20 +23,18 @@ export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInp
   executionContext: KibanaExecutionContext;
 }
 
-export const AnomalySwimLane = (
-  {
-    id,
-    jobIds,
-    swimlaneType,
-    viewBy,
-    timeRange,
-    filters,
-    query,
-    refreshConfig,
-    perPage,
-    executionContext
-  }: AnomalySwimLaneProps
-) => {
+export const AnomalySwimLane = ({
+  id,
+  jobIds,
+  swimlaneType,
+  viewBy,
+  timeRange,
+  filters,
+  query,
+  refreshConfig,
+  perPage,
+  executionContext,
+}: AnomalySwimLaneProps) => {
   const embeddableApi = useRef<AnomalySwimLaneEmbeddableApi>();
 
   const rawState: AnomalySwimLaneEmbeddableState = useMemo(() => {

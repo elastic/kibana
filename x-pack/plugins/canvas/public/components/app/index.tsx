@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { ScopedHistory } from '@kbn/core/public';
 import { useNavLinkService } from '../../services';
@@ -28,13 +28,7 @@ class ShortcutManagerContextWrapper extends React.Component {
   }
 }
 
-export const App = (
-  {
-    history
-  }: {
-    history: ScopedHistory;
-  }
-) => {
+export const App = ({ history }: { history: ScopedHistory }) => {
   const { updatePath } = useNavLinkService();
 
   useEffect(() => {

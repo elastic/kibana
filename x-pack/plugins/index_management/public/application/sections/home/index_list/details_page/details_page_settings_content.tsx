@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -71,13 +71,7 @@ interface Props {
   reloadIndexSettings: () => void;
 }
 
-export const DetailsPageSettingsContent = (
-  {
-    data,
-    indexName,
-    reloadIndexSettings
-  }: Props
-) => {
+export const DetailsPageSettingsContent = ({ data, indexName, reloadIndexSettings }: Props) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const {
     config: { editableIndexSettings },
@@ -156,7 +150,7 @@ export const DetailsPageSettingsContent = (
   );
   return (
     // using "rowReverse" to keep the card on the left side to be on top of the code block on smaller screens
-    (<EuiFlexGroup
+    <EuiFlexGroup
       wrap
       direction="rowReverse"
       css={css`
@@ -312,6 +306,6 @@ export const DetailsPageSettingsContent = (
           )}
         </EuiPanel>
       </EuiFlexItem>
-    </EuiFlexGroup>)
+    </EuiFlexGroup>
   );
 };

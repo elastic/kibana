@@ -24,28 +24,25 @@ interface Props {
   pattern: string;
 }
 
-const IlmPhaseCountsComponent = (
-  {
-    ilmExplainPhaseCounts,
-    pattern
-  }: Props
-) => (<PhaseCountsFlexGroup data-test-subj="ilmPhaseCounts" gutterSize="none">
-  {phases.map((phase) =>
-    ilmExplainPhaseCounts[phase] != null && ilmExplainPhaseCounts[phase] > 0 ? (
-      <EuiFlexItem key={phase} grow={false}>
-        <EuiToolTip
-          content={getPatternIlmPhaseDescription({
-            indices: ilmExplainPhaseCounts[phase],
-            pattern,
-            phase,
-          })}
-        >
-          <EuiBadge color="hollow">{`${phase} (${ilmExplainPhaseCounts[phase]})`}</EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    ) : null
-  )}
-</PhaseCountsFlexGroup>);
+const IlmPhaseCountsComponent = ({ ilmExplainPhaseCounts, pattern }: Props) => (
+  <PhaseCountsFlexGroup data-test-subj="ilmPhaseCounts" gutterSize="none">
+    {phases.map((phase) =>
+      ilmExplainPhaseCounts[phase] != null && ilmExplainPhaseCounts[phase] > 0 ? (
+        <EuiFlexItem key={phase} grow={false}>
+          <EuiToolTip
+            content={getPatternIlmPhaseDescription({
+              indices: ilmExplainPhaseCounts[phase],
+              pattern,
+              phase,
+            })}
+          >
+            <EuiBadge color="hollow">{`${phase} (${ilmExplainPhaseCounts[phase]})`}</EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+      ) : null
+    )}
+  </PhaseCountsFlexGroup>
+);
 
 IlmPhaseCountsComponent.displayName = 'IlmPhaseCountsComponent';
 

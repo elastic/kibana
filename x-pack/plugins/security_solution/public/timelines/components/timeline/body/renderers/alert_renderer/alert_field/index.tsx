@@ -27,54 +27,53 @@ interface Props {
   values: string[] | number[] | null | undefined;
 }
 
-const AlertFieldComponent = (
-  {
-    contextId,
-    'data-test-subj': dataTestSubj = 'alertField',
-    eventId,
-    field,
-    fieldType = DEFAULT_FIELD_TYPE,
-    isAggregatable = true,
-    isDraggable,
-    prefix,
-    suffix,
-    scopeId,
-    values
-  }: Props
-) => values != null ? (
-  <AlertFieldFlexGroup
-    alignItems="center"
-    data-test-subj={dataTestSubj}
-    $scopeId={scopeId}
-    gutterSize="none"
-  >
-    {prefix != null && (
-      <EuiFlexItem data-test-subj="prefix" grow={false}>
-        {prefix}
-      </EuiFlexItem>
-    )}
-    {values.map((x, i) => (
-      <EuiFlexItem key={`${x}-${i}`} grow={false}>
-        <AlertFieldBadge
-          contextId={`${contextId}-alert-field`}
-          eventId={eventId}
-          field={field}
-          fieldType={fieldType}
-          isAggregatable={isAggregatable}
-          isDraggable={isDraggable}
-          showSeparator={i < values.length - 1}
-          scopeId={scopeId}
-          value={x}
-        />
-      </EuiFlexItem>
-    ))}
-    {suffix != null && (
-      <EuiFlexItem data-test-subj="suffix" grow={false}>
-        {suffix}
-      </EuiFlexItem>
-    )}
-  </AlertFieldFlexGroup>
-) : null;
+const AlertFieldComponent = ({
+  contextId,
+  'data-test-subj': dataTestSubj = 'alertField',
+  eventId,
+  field,
+  fieldType = DEFAULT_FIELD_TYPE,
+  isAggregatable = true,
+  isDraggable,
+  prefix,
+  suffix,
+  scopeId,
+  values,
+}: Props) =>
+  values != null ? (
+    <AlertFieldFlexGroup
+      alignItems="center"
+      data-test-subj={dataTestSubj}
+      $scopeId={scopeId}
+      gutterSize="none"
+    >
+      {prefix != null && (
+        <EuiFlexItem data-test-subj="prefix" grow={false}>
+          {prefix}
+        </EuiFlexItem>
+      )}
+      {values.map((x, i) => (
+        <EuiFlexItem key={`${x}-${i}`} grow={false}>
+          <AlertFieldBadge
+            contextId={`${contextId}-alert-field`}
+            eventId={eventId}
+            field={field}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
+            isDraggable={isDraggable}
+            showSeparator={i < values.length - 1}
+            scopeId={scopeId}
+            value={x}
+          />
+        </EuiFlexItem>
+      ))}
+      {suffix != null && (
+        <EuiFlexItem data-test-subj="suffix" grow={false}>
+          {suffix}
+        </EuiFlexItem>
+      )}
+    </AlertFieldFlexGroup>
+  ) : null;
 
 AlertFieldComponent.displayName = 'AlertFieldComponent';
 

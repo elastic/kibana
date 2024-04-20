@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { PartialTheme } from '@elastic/charts';
 import {
@@ -32,13 +31,7 @@ interface Props {
   width: string;
 }
 
-export const EventRateChart = (
-  {
-    eventRateChartData,
-    height,
-    width
-  }: Props
-) => {
+export const EventRateChart = ({ eventRateChartData, height, width }: Props) => {
   const { euiColorLightShade } = useCurrentEuiTheme();
   const theme: PartialTheme = {
     scales: { histogramPadding: 0.2 },

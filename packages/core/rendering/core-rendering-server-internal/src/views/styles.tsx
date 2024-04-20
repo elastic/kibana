@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 
 interface Props {
@@ -14,12 +14,7 @@ interface Props {
   stylesheetPaths: string[];
 }
 
-export const Styles = (
-  {
-    darkMode,
-    stylesheetPaths
-  }: Props
-) => {
+export const Styles = ({ darkMode, stylesheetPaths }: Props) => {
   return (
     <>
       {darkMode !== 'system' && <InlineStyles darkMode={darkMode} />}
@@ -30,13 +25,7 @@ export const Styles = (
   );
 };
 
-const InlineStyles = (
-  {
-    darkMode
-  }: {
-    darkMode: boolean;
-  }
-) => {
+const InlineStyles = ({ darkMode }: { darkMode: boolean }) => {
   // must be kept in sync with
   // packages/core/apps/core-apps-server-internal/assets/legacy_theme.js
   /* eslint-disable react/no-danger */

@@ -13,12 +13,10 @@ export interface CategoriesBadgesProps {
   selectedCategoryIds: string[];
 }
 
-const CategoriesBadgesComponent = (
-  {
-    setSelectedCategoryIds,
-    selectedCategoryIds
-  }: CategoriesBadgesProps
-) => {
+const CategoriesBadgesComponent = ({
+  setSelectedCategoryIds,
+  selectedCategoryIds,
+}: CategoriesBadgesProps) => {
   const { euiTheme } = useEuiTheme();
   const onUnselectCategory = useCallback(
     (categoryId: string) => {

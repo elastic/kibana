@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
@@ -41,14 +40,12 @@ export interface LogCategorizationAppStateProps {
   showFrozenDataTierChoice?: boolean;
 }
 
-export const LogCategorizationAppState = (
-  {
-    dataView,
-    savedSearch,
-    appDependencies,
-    showFrozenDataTierChoice = true
-  }: LogCategorizationAppStateProps
-) => {
+export const LogCategorizationAppState = ({
+  dataView,
+  savedSearch,
+  appDependencies,
+  showFrozenDataTierChoice = true,
+}: LogCategorizationAppStateProps) => {
   if (!dataView) return null;
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_categorization');

@@ -54,12 +54,7 @@ interface Props {
   dataStreams?: string[];
 }
 
-export const StepReview = React.memo((
-  {
-    dataStreams,
-    componentTemplate
-  }: Props
-) => {
+export const StepReview = React.memo(({ dataStreams, componentTemplate }: Props) => {
   const { name } = componentTemplate;
 
   const serializedComponentTemplate = serializeComponentTemplate(
@@ -247,22 +242,16 @@ export const StepReview = React.memo((
         tabs={[
           {
             id: 'summary',
-            name: i18n.translate(
-              'xpack.idxMgmt.componentTemplateForm.stepReview.summaryTabTitle',
-              {
-                defaultMessage: 'Summary',
-              }
-            ),
+            name: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepReview.summaryTabTitle', {
+              defaultMessage: 'Summary',
+            }),
             content: <SummaryTab />,
           },
           {
             id: 'request',
-            name: i18n.translate(
-              'xpack.idxMgmt.componentTemplateForm.stepReview.requestTabTitle',
-              {
-                defaultMessage: 'Request',
-              }
-            ),
+            name: i18n.translate('xpack.idxMgmt.componentTemplateForm.stepReview.requestTabTitle', {
+              defaultMessage: 'Request',
+            }),
             content: <RequestTab />,
           },
         ]}

@@ -17,7 +17,6 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -71,13 +70,7 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
-const EditRulePageComponent = (
-  {
-    rule
-  }: {
-    rule: RuleResponse;
-  }
-) => {
+const EditRulePageComponent = ({ rule }: { rule: RuleResponse }) => {
   const [, dispatchToaster] = useStateToaster();
   const [
     {

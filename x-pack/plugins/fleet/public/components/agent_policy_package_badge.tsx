@@ -19,14 +19,12 @@ interface Props {
   pkgTitle: string;
 }
 
-export const AgentPolicyPackageBadge = (
-  {
-    excludeFleetServer,
-    pkgName,
-    pkgVersion,
-    pkgTitle
-  }: Props
-) => {
+export const AgentPolicyPackageBadge = ({
+  excludeFleetServer,
+  pkgName,
+  pkgVersion,
+  pkgTitle,
+}: Props) => {
   return (
     <EuiBadge color="hollow" isDisabled={excludeFleetServer && pkgName === FLEET_SERVER_PACKAGE}>
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>

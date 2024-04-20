@@ -8,12 +8,7 @@
 import React, { memo } from 'react';
 import { CellComponentProps } from '../types';
 
-const DefaultCellComponent = (
-  {
-    columnId,
-    alert
-  }: CellComponentProps
-) => {
+const DefaultCellComponent = ({ columnId, alert }: CellComponentProps) => {
   const value = (alert && alert[columnId]) ?? [];
 
   if (Array.isArray(value)) {

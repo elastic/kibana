@@ -17,13 +17,7 @@ interface StatisticCardProps {
   actionPath?: string;
 }
 
-export const StatisticCard = (
-  {
-    title,
-    count = 0,
-    actionPath
-  }: StatisticCardProps
-) => {
+export const StatisticCard = ({ title, count = 0, actionPath }: StatisticCardProps) => {
   const linkableCard = (
     <EuiCardTo
       to={actionPath || ''}

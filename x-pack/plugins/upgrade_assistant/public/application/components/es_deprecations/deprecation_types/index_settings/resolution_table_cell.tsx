@@ -58,11 +58,7 @@ interface Props {
   };
 }
 
-export const IndexSettingsResolutionCell = (
-  {
-    status
-  }: Props
-) => {
+export const IndexSettingsResolutionCell = ({ status }: Props) => {
   const { statusType } = status;
   if (statusType === 'in_progress') {
     return (

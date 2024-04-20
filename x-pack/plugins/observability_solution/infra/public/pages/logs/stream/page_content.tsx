@@ -64,15 +64,13 @@ export const ConnectedStreamPageContent = () => {
   );
 };
 
-export const StreamPageContentForState = (
-  {
-    logStreamPageState,
-    logStreamPageCallbacks
-  }: {
-    logStreamPageState: LogStreamPageState;
-    logStreamPageCallbacks: LogStreamPageCallbacks;
-  }
-) => {
+export const StreamPageContentForState = ({
+  logStreamPageState,
+  logStreamPageCallbacks,
+}: {
+  logStreamPageState: LogStreamPageState;
+  logStreamPageCallbacks: LogStreamPageCallbacks;
+}) => {
   if (
     logStreamPageState.matches('uninitialized') ||
     logStreamPageState.matches({ hasLogViewIndices: 'uninitialized' }) ||

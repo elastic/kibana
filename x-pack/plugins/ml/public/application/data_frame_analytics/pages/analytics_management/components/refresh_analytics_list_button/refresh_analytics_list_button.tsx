@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';

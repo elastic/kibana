@@ -19,13 +19,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const CredentialsComponent = (
-  {
-    readOnly,
-    isLoading,
-    isOAuth
-  }: Props
-) => {
+const CredentialsComponent = ({ readOnly, isLoading, isOAuth }: Props) => {
   return (
     <>
       <EuiFlexGroup direction="column">

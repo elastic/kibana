@@ -32,14 +32,12 @@ interface OnboardingProps {
   spaceId: string;
 }
 
-export const OnboardingComponent = (
-  {
-    indicesExist,
-    productTypes,
-    onboardingSteps,
-    spaceId
-  }: OnboardingProps
-) => {
+export const OnboardingComponent = ({
+  indicesExist,
+  productTypes,
+  onboardingSteps,
+  spaceId,
+}: OnboardingProps) => {
   const {
     onStepClicked,
     toggleTaskCompleteStatus,

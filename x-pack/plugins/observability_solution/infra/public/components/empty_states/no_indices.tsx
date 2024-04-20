@@ -17,13 +17,7 @@ interface NoIndicesProps extends Omit<EuiEmptyPromptProps, 'body' | 'title'> {
 }
 
 // Represents a fully constructed page, including page template.
-export const NoIndices = (
-  {
-    body,
-    title,
-    ...rest
-  }: NoIndicesProps
-) => {
+export const NoIndices = ({ body, title, ...rest }: NoIndicesProps) => {
   return (
     <PageTemplate isEmptyState={true}>
       <KibanaPageTemplate.EmptyPrompt

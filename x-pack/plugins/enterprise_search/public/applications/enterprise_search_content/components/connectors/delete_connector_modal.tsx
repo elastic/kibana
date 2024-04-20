@@ -29,11 +29,7 @@ import { ConnectorsLogic } from './connectors_logic';
 export interface DeleteConnectorModalProps {
   isCrawler: boolean;
 }
-export const DeleteConnectorModal = (
-  {
-    isCrawler
-  }: DeleteConnectorModalProps
-) => {
+export const DeleteConnectorModal = ({ isCrawler }: DeleteConnectorModalProps) => {
   const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic);
   const {
     deleteModalConnectorId: connectorId,

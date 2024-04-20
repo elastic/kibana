@@ -7,7 +7,7 @@
 
 import './expandable_section.scss';
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import {
@@ -49,18 +49,16 @@ export interface ExpandableSectionProps {
   urlStateKey: ExpandablePanels;
 }
 
-export const ExpandableSection = (
-  {
-    headerItems,
-    content,
-    isExpanded: isExpandedDefault,
-    contentPadding = false,
-    dataTestId,
-    title,
-    docsLink,
-    urlStateKey
-  }: ExpandableSectionProps
-) => {
+export const ExpandableSection = ({
+  headerItems,
+  content,
+  isExpanded: isExpandedDefault,
+  contentPadding = false,
+  dataTestId,
+  title,
+  docsLink,
+  urlStateKey,
+}: ExpandableSectionProps) => {
   const overrides = useMemo(
     () => (isExpandedDefault !== undefined ? { [urlStateKey]: isExpandedDefault } : undefined),
     [urlStateKey, isExpandedDefault]

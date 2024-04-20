@@ -34,12 +34,7 @@ interface Props {
   integration?: string | null;
 }
 
-export const DocumentationPage = (
-  {
-    packageInfo,
-    integration
-  }: Props
-) => {
+export const DocumentationPage = ({ packageInfo, integration }: Props) => {
   const { docLinks } = useStartServices();
 
   const content = (
@@ -85,13 +80,7 @@ type RegistryInputWithStreams = RegistryInput & {
   streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
 };
 
-const StreamsSection = (
-  {
-    streams
-  }: {
-    streams: RegistryInputWithStreams['streams'];
-  }
-) => {
+const StreamsSection = ({ streams }: { streams: RegistryInputWithStreams['streams'] }) => {
   if (streams.length === 0) {
     return null;
   }
@@ -132,15 +121,13 @@ const StreamsSection = (
   );
 };
 
-const Inputs = (
-  {
-    packageInfo,
-    integration
-  }: {
-    packageInfo: PackageInfo;
-    integration?: string | null;
-  }
-) => {
+const Inputs = ({
+  packageInfo,
+  integration,
+}: {
+  packageInfo: PackageInfo;
+  integration?: string | null;
+}) => {
   const inputs = useMemo(
     () =>
       packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
@@ -202,13 +189,7 @@ const Inputs = (
   );
 };
 
-const PackageVars = (
-  {
-    vars
-  }: {
-    vars: PackageInfo['vars'];
-  }
-) => {
+const PackageVars = ({ vars }: { vars: PackageInfo['vars'] }) => {
   if (!vars) {
     return null;
   }
@@ -230,13 +211,7 @@ const PackageVars = (
   );
 };
 
-const VarsTable = (
-  {
-    vars
-  }: {
-    vars: RegistryVarsEntry[];
-  }
-) => {
+const VarsTable = ({ vars }: { vars: RegistryVarsEntry[] }) => {
   const columns = useMemo((): EuiInMemoryTableProps<RegistryVarsEntry>['columns'] => {
     return [
       {

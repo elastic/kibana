@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { uniqBy } from 'lodash';
 import { EuiFilterButton, EuiPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,12 +15,7 @@ import { MlEntitySelector, type MlEntitySelectorProps } from '../../components/m
 /**
  * Custom filter component to use with {@link EuiInMemoryTable}
  */
-export const EntityFilter = React.memo((
-  {
-    query,
-    onChange
-  }: CustomComponentProps
-) => {
+export const EntityFilter = React.memo(({ query, onChange }: CustomComponentProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const hasActiveFilters = query.hasOrFieldClause('job_id') || query.hasSimpleFieldClause('job_id');

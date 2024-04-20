@@ -36,13 +36,7 @@ interface LayoutProps {
   pageChrome?: BreadcrumbTrail;
 }
 
-export const PersonalDashboardLayout = (
-  {
-    children,
-    isLoading,
-    pageChrome
-  }: LayoutProps
-) => {
+export const PersonalDashboardLayout = ({ children, isLoading, pageChrome }: LayoutProps) => {
   const { readOnlyMode } = useValues(HttpLogic);
 
   return (

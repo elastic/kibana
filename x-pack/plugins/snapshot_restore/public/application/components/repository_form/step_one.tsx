@@ -42,14 +42,12 @@ interface Props {
   validation: RepositoryValidation;
 }
 
-export const RepositoryFormStepOne = (
-  {
-    repository,
-    onNext,
-    updateRepository,
-    validation
-  }: Props
-) => {
+export const RepositoryFormStepOne = ({
+  repository,
+  onNext,
+  updateRepository,
+  validation,
+}: Props) => {
   // Load repository types
   const {
     error: repositoryTypesError,

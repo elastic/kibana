@@ -32,20 +32,18 @@ interface OperatorState {
   'aria-label'?: string;
 }
 
-export const OperatorComponent = (
-  {
-    isClearable = false,
-    isDisabled = false,
-    isLoading = false,
-    onChange,
-    operator,
-    operatorOptions,
-    operatorInputWidth = 150,
-    placeholder,
-    selectedField,
-    'aria-label': ariaLabel
-  }: OperatorState
-): JSX.Element => {
+export const OperatorComponent = ({
+  isClearable = false,
+  isDisabled = false,
+  isLoading = false,
+  onChange,
+  operator,
+  operatorOptions,
+  operatorInputWidth = 150,
+  placeholder,
+  selectedField,
+  'aria-label': ariaLabel,
+}: OperatorState): JSX.Element => {
   const getLabel = useCallback(({ message }): string => message, []);
   const optionsMemo = useMemo(
     (): OperatorOption[] =>

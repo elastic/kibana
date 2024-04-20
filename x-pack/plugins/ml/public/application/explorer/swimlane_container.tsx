@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -175,31 +174,29 @@ export interface SwimlaneProps {
  * Anomaly swim lane container responsible for handling resizing, pagination and
  * providing swim lane vis with required props.
  */
-export const SwimlaneContainer = (
-  {
-    id,
-    onResize,
-    perPage,
-    fromPage,
-    swimlaneLimit,
-    onPaginationChange,
-    isLoading,
-    noDataWarning,
-    filterActive,
-    swimlaneData,
-    swimlaneType,
-    selection,
-    onCellsSelection,
-    timeBuckets,
-    chartsService,
-    showTimeline = true,
-    showYAxis = true,
-    showLegend = true,
-    'data-test-subj': dataTestSubj,
-    yAxisWidth,
-    onRenderComplete
-  }: SwimlaneProps
-) => {
+export const SwimlaneContainer = ({
+  id,
+  onResize,
+  perPage,
+  fromPage,
+  swimlaneLimit,
+  onPaginationChange,
+  isLoading,
+  noDataWarning,
+  filterActive,
+  swimlaneData,
+  swimlaneType,
+  selection,
+  onCellsSelection,
+  timeBuckets,
+  chartsService,
+  showTimeline = true,
+  showYAxis = true,
+  showLegend = true,
+  'data-test-subj': dataTestSubj,
+  yAxisWidth,
+  onRenderComplete,
+}: SwimlaneProps) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const {

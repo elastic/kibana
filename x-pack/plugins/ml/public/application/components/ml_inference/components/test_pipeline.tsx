@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useEffect, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -57,13 +56,7 @@ interface Props {
   mode: TestPipelineMode;
 }
 
-export const TestPipeline = memo((
-  {
-    state,
-    sourceIndex,
-    mode
-  }: Props
-) => {
+export const TestPipeline = memo(({ state, sourceIndex, mode }: Props) => {
   const [simulatePipelineResult, setSimulatePipelineResult] = useState<
     undefined | estypes.IngestSimulateResponse
   >();

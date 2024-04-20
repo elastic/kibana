@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
@@ -16,12 +15,7 @@ interface Props {
   destIndex?: string;
 }
 
-export const DataViewPrompt = (
-  {
-    destIndex,
-    color
-  }: Props
-) => {
+export const DataViewPrompt = ({ destIndex, color }: Props) => {
   const {
     services: {
       http: { basePath },

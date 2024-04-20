@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,17 +16,15 @@ import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import type { Option } from '../../../common/components/multi_select_picker';
 import { MultiSelectPicker } from '../../../common/components/multi_select_picker';
 
-export const DataVisualizerFieldTypeFilter = (
-  {
-    indexedFieldTypes,
-    setVisibleFieldTypes,
-    visibleFieldTypes
-  }: {
-    indexedFieldTypes: string[];
-    setVisibleFieldTypes(q: string[]): void;
-    visibleFieldTypes: string[];
-  }
-) => {
+export const DataVisualizerFieldTypeFilter = ({
+  indexedFieldTypes,
+  setVisibleFieldTypes,
+  visibleFieldTypes,
+}: {
+  indexedFieldTypes: string[];
+  setVisibleFieldTypes(q: string[]): void;
+  visibleFieldTypes: string[];
+}) => {
   const euiTheme = useCurrentEuiTheme();
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {

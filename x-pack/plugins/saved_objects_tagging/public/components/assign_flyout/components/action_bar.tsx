@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,16 +18,14 @@ export interface AssignFlyoutActionBarProps {
   onDeselectAll: () => void;
 }
 
-export const AssignFlyoutActionBar = (
-  {
-    resultCount,
-    initiallyAssigned,
-    pendingChanges,
-    onReset,
-    onSelectAll,
-    onDeselectAll
-  }: AssignFlyoutActionBarProps
-) => {
+export const AssignFlyoutActionBar = ({
+  resultCount,
+  initiallyAssigned,
+  pendingChanges,
+  onReset,
+  onSelectAll,
+  onDeselectAll,
+}: AssignFlyoutActionBarProps) => {
   return (
     <div className="tagAssignFlyout__actionBar">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">

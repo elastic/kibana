@@ -34,11 +34,7 @@ interface EditContextFlyoutProps {
   onClose: () => void;
 }
 
-export const EditContextFlyout = (
-  {
-    onClose
-  }: EditContextFlyoutProps
-) => {
+export const EditContextFlyout = ({ onClose }: EditContextFlyoutProps) => {
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);

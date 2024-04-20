@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -74,7 +74,7 @@ const i18nTexts = {
     // NOTE: hardcoding the missing privilege because the WithPrivileges HOC
     // doesnt provide a way to retrieve which specific privileges an index
     // is missing.
-    (<FormattedMessage
+    <FormattedMessage
       id="xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription"
       defaultMessage="The deprecation logs will continue to be indexed, but you won't be able to analyze them until you have the read index {privilegesCount, plural, one {privilege} other {privileges}} for: {missingPrivileges}"
       values={{
@@ -83,7 +83,7 @@ const i18nTexts = {
         ),
         privilegesCount: privilegesMissing?.index?.length,
       }}
-    />)
+    />
   ),
 };
 
@@ -92,12 +92,7 @@ interface Props {
   privilegesMissing: MissingPrivileges;
 }
 
-const FixDeprecationLogsUI = (
-  {
-    hasPrivileges,
-    privilegesMissing
-  }: Props
-) => {
+const FixDeprecationLogsUI = ({ hasPrivileges, privilegesMissing }: Props) => {
   const {
     services: {
       core: { docLinks },

@@ -60,27 +60,21 @@ const ExpandableAdvancedSettings = ({ children }) => {
     </EuiFlexItem>
   );
 };
-const AddIntegrationError = (
-  {
-    error,
-    title
-  }: {
-    error: Error | string;
-    title?: JSX.Element;
-  }
-) => (<Error
-  title={
-    title ? (
-      title
-    ) : (
-      <FormattedMessage
-        id="xpack.fleet.addIntegration.errorTitle"
-        defaultMessage="Error adding integration"
-      />
-    )
-  }
-  error={error}
-/>);
+const AddIntegrationError = ({ error, title }: { error: Error | string; title?: JSX.Element }) => (
+  <Error
+    title={
+      title ? (
+        title
+      ) : (
+        <FormattedMessage
+          id="xpack.fleet.addIntegration.errorTitle"
+          defaultMessage="Error adding integration"
+        />
+      )
+    }
+    error={error}
+  />
+);
 
 export const AddIntegrationPageStep = (props: MultiPageStepLayoutProps) => {
   const { onNext, onBack, isManaged, setIsManaged, packageInfo, integrationInfo, agentPolicy } =

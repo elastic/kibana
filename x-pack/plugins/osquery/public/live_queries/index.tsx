@@ -39,29 +39,27 @@ interface LiveQueryProps {
   agentSelection?: AgentSelection;
 }
 
-const LiveQueryComponent = (
-  {
-    agentId,
-    agentIds,
-    alertIds,
-    agentPolicyIds,
-    onSuccess,
-    query,
-    savedQueryId,
+const LiveQueryComponent = ({
+  agentId,
+  agentIds,
+  alertIds,
+  agentPolicyIds,
+  onSuccess,
+  query,
+  savedQueryId,
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    ecs_mapping,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  ecs_mapping,
 
-    queryField,
-    ecsMappingField,
-    formType,
-    enabled,
-    hideAgentsField,
-    packId,
-    agentSelection,
-    timeout
-  }: LiveQueryProps
-) => {
+  queryField,
+  ecsMappingField,
+  formType,
+  enabled,
+  hideAgentsField,
+  packId,
+  agentSelection,
+  timeout,
+}: LiveQueryProps) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
   const initialAgentSelection = useMemo(() => {

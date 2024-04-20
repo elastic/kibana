@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -43,15 +43,13 @@ export interface Props {
   onClose: () => void;
 }
 
-export const PipelineDetailsFlyout = (
-  {
-    pipeline,
-    onClose,
-    onEditClick,
-    onCloneClick,
-    onDeleteClick
-  }: Props
-) => {
+export const PipelineDetailsFlyout = ({
+  pipeline,
+  onClose,
+  onEditClick,
+  onCloneClick,
+  onDeleteClick,
+}: Props) => {
   const [showPopover, setShowPopover] = useState(false);
   const actionMenuItems = [
     /**

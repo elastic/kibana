@@ -29,12 +29,7 @@ interface TableRowProps {
   rowFieldNames: DeprecationTableColumns[];
 }
 
-const ReindexTableRowCells = (
-  {
-    rowFieldNames,
-    deprecation
-  }: TableRowProps
-) => {
+const ReindexTableRowCells = ({ rowFieldNames, deprecation }: TableRowProps) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const reindexState = useReindexContext();
 

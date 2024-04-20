@@ -56,13 +56,7 @@ export interface Props {
   openToggleRef: React.MutableRefObject<null | HTMLAnchorElement | HTMLButtonElement>;
 }
 
-const TimelineSavingProgressComponent = (
-  {
-    timelineId
-  }: {
-    timelineId: TimelineId;
-  }
-) => {
+const TimelineSavingProgressComponent = ({ timelineId }: { timelineId: TimelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const isSaving = useShallowEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isSaving
@@ -73,14 +67,12 @@ const TimelineSavingProgressComponent = (
 
 const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
 
-const StatefulTimelineComponent = (
-  {
-    renderCellValue,
-    rowRenderers,
-    timelineId,
-    openToggleRef
-  }: Props
-) => {
+const StatefulTimelineComponent = ({
+  renderCellValue,
+  rowRenderers,
+  timelineId,
+  openToggleRef,
+}: Props) => {
   const dispatch = useDispatch();
 
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(

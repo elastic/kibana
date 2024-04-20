@@ -6,20 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, FC } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import type { AppContext } from './types';
 
 const FilesManagementAppContext = createContext<AppContext>(null as unknown as AppContext);
 
-export const FilesManagementAppContextProvider = (
-  {
-    children,
-    filesClient,
-    getFileKindDefinition,
-    getAllFindKindDefinitions
-  }: AppContext
-) => {
+export const FilesManagementAppContextProvider = ({
+  children,
+  filesClient,
+  getFileKindDefinition,
+  getAllFindKindDefinitions,
+}: AppContext) => {
   return (
     <FilesManagementAppContext.Provider
       value={{ filesClient, getFileKindDefinition, getAllFindKindDefinitions }}

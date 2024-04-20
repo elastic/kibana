@@ -14,11 +14,7 @@ import { kafkaCompressionType } from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
 
-export const OutputFormKafkaCompression = (
-  props: {
-    inputs: OutputFormInputsType;
-  }
-) => {
+export const OutputFormKafkaCompression = (props: { inputs: OutputFormInputsType }) => {
   const { inputs } = props;
 
   const kafkaCompressionTypeOptions = useMemo(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -15,13 +15,7 @@ import {
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-export const DefaultToDataNodesNotice = (
-  {
-    phase
-  }: {
-    phase: PhaseWithAllocation;
-  }
-) => {
+export const DefaultToDataNodesNotice = ({ phase }: { phase: PhaseWithAllocation }) => {
   return (
     <EuiCallOut
       data-test-subj="defaultToDataNodesNotice"

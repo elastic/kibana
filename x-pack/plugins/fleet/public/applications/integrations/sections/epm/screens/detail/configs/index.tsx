@@ -31,11 +31,7 @@ interface ConfigsProps {
   packageInfo: PackageInfo;
 }
 
-export const Configs = (
-  {
-    packageInfo
-  }: ConfigsProps
-) => {
+export const Configs = ({ packageInfo }: ConfigsProps) => {
   const { notifications, docLinks } = useStartServices();
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
   const notInstalled = packageInfo.status !== 'installing';

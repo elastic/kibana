@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useCanvasShareableState } from '../../../context';
 import { Refs } from '../../../types';
@@ -22,11 +22,7 @@ interface Props {
 /**
  * The Settings Popover for Canvas Shareable Workpads.
  */
-export const SettingsComponent = (
-  {
-    refs
-  }: Props
-) => {
+export const SettingsComponent = ({ refs }: Props) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const button = (
     <EuiButtonIcon

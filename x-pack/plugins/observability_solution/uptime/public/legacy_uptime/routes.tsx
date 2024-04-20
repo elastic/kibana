@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -158,12 +158,7 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit = (
-  {
-    path,
-    title
-  }: Pick<RouteProps, 'path' | 'title'>
-) => {
+const RouteInit = ({ path, title }: Pick<RouteProps, 'path' | 'title'>) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);

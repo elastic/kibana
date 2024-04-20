@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import { EuiBasicTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
@@ -25,11 +25,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const DateContent = (
-  {
-    config
-  }: FieldDataRowProps
-) => {
+export const DateContent = ({ config }: FieldDataRowProps) => {
   const { stats } = config;
   if (stats === undefined) return null;
 

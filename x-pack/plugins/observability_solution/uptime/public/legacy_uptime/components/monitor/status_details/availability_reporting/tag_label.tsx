@@ -20,13 +20,7 @@ const BadgeItem = styled.div`
   }
 `;
 
-export const TagLabel = (
-  {
-    color,
-    label,
-    status
-  }: StatusTag
-) => {
+export const TagLabel = ({ color, label, status }: StatusTag) => {
   return (
     <BadgeItem>
       <EuiBadge color={status === STATUS.DOWN ? 'danger' : 'success'}>{label}</EuiBadge>

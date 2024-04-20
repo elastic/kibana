@@ -46,14 +46,12 @@ export const defaultFlyoutProps = {
   'aria-labelledby': 'componentTemplateDetailsFlyoutTitle',
 };
 
-export const ComponentTemplateDetailsFlyoutContent = (
-  {
-    componentTemplateName,
-    onClose,
-    actions,
-    showSummaryCallToAction
-  }: Props
-) => {
+export const ComponentTemplateDetailsFlyoutContent = ({
+  componentTemplateName,
+  onClose,
+  actions,
+  showSummaryCallToAction,
+}: Props) => {
   const { api } = useComponentTemplatesContext();
 
   const decodedComponentTemplateName = attemptToURIDecode(componentTemplateName)!;

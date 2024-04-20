@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useRef, useLayoutEffect, useState } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
@@ -34,11 +34,7 @@ export const useHeaderActionMenuMounter = (
   return mounter;
 };
 
-export const HeaderActionMenu = (
-  {
-    mounter
-  }: HeaderActionMenuProps
-) => {
+export const HeaderActionMenu = ({ mounter }: HeaderActionMenuProps) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 

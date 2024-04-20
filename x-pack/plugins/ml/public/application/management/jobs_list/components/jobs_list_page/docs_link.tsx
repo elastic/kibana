@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -13,13 +12,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useMlKibana } from '../../../../contexts/kibana';
 import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
-export const DocsLink = (
-  {
-    currentTabId
-  }: {
-    currentTabId: MlSavedObjectType;
-  }
-) => {
+export const DocsLink = ({ currentTabId }: { currentTabId: MlSavedObjectType }) => {
   const {
     services: {
       docLinks: {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { Axis, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
 import { getYRange } from './utils';
@@ -22,11 +21,7 @@ function tickFormatter(d: number): string {
   return (Math.round(d * 100) / 100).toString();
 }
 
-export const Axes = (
-  {
-    chartData
-  }: Props
-) => {
+export const Axes = ({ chartData }: Props) => {
   const yDomain = getYRange(chartData);
 
   return (

@@ -21,13 +21,11 @@ interface Props {
   fleetServerHost: string;
 }
 
-export const CloudFormationInstructions = (
-  {
-    enrollmentAPIKey,
-    cloudSecurityIntegration,
-    fleetServerHost
-  }: Props
-) => {
+export const CloudFormationInstructions = ({
+  enrollmentAPIKey,
+  cloudSecurityIntegration,
+  fleetServerHost,
+}: Props) => {
   const { cloudFormationUrl, error, isError } = useCreateCloudFormationUrl({
     enrollmentAPIKey,
     cloudFormationProps: cloudSecurityIntegration?.cloudFormationProps,

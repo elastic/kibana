@@ -22,15 +22,13 @@ interface ActionAlertsFilterQueryProps {
   ruleTypeId?: string;
 }
 
-export const ActionAlertsFilterQuery = (
-  {
-    state,
-    onChange,
-    appName,
-    featureIds,
-    ruleTypeId
-  }: ActionAlertsFilterQueryProps
-) => {
+export const ActionAlertsFilterQuery = ({
+  state,
+  onChange,
+  appName,
+  featureIds,
+  ruleTypeId,
+}: ActionAlertsFilterQueryProps) => {
   const [query, setQuery] = useState(state ?? { kql: '', filters: [] });
 
   const queryEnabled = useMemo(() => Boolean(state), [state]);

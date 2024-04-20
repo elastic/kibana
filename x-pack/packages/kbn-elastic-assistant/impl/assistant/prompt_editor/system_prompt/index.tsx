@@ -24,16 +24,14 @@ interface Props {
   isFlyoutMode: boolean;
 }
 
-const SystemPromptComponent = (
-  {
-    conversation,
-    editingSystemPromptId,
-    isSettingsModalVisible,
-    onSystemPromptSelectionChange,
-    setIsSettingsModalVisible,
-    isFlyoutMode
-  }: Props
-) => {
+const SystemPromptComponent = ({
+  conversation,
+  editingSystemPromptId,
+  isSettingsModalVisible,
+  onSystemPromptSelectionChange,
+  setIsSettingsModalVisible,
+  isFlyoutMode,
+}: Props) => {
   const { allSystemPrompts } = useAssistantContext();
 
   const selectedPrompt = useMemo(() => {

@@ -6,7 +6,6 @@
  */
 
 import type { History } from 'history';
-import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
@@ -24,12 +23,7 @@ interface RouterProps {
   history: History;
 }
 
-const PageRouterComponent = (
-  {
-    children,
-    history
-  }: RouterProps
-) => {
+const PageRouterComponent = ({ children, history }: RouterProps) => {
   const { cases } = useKibana().services;
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);

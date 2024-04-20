@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
@@ -44,12 +44,7 @@ interface Props {
 /**
  * Top-level layout control for the data tier allocation field.
  */
-export const DataTierAllocationField = (
-  {
-    phase,
-    description
-  }: Props
-) => {
+export const DataTierAllocationField = ({ phase, description }: Props) => {
   const {
     services: { cloud },
   } = useKibana();

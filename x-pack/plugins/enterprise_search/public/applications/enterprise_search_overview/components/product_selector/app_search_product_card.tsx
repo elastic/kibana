@@ -17,24 +17,24 @@ export interface AppSearchProductCardProps {
   hasShadow: boolean;
 }
 
-export const AppSearchProductCard = (
-  {
-    hasBorder = true,
-    hasShadow = true
-  }: AppSearchProductCardProps
-) => (<ProductCard
-  hasBorder={hasBorder}
-  hasShadow={hasShadow}
-  description={i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
-    defaultMessage:
-      'A bespoke solution for apps and websites, providing the tools you need to design, implement, and effectively manage those user-facing search experiences.',
-  })}
-  emptyCta
-  cta={i18n.translate('xpack.enterpriseSearch.appSearch.cta', {
-    defaultMessage: 'Explore',
-  })}
-  icon="logoAppSearch"
-  name={APP_SEARCH_PLUGIN.NAME}
-  productId={APP_SEARCH_PLUGIN.ID}
-  url={APP_SEARCH_PLUGIN.URL}
-/>);
+export const AppSearchProductCard = ({
+  hasBorder = true,
+  hasShadow = true,
+}: AppSearchProductCardProps) => (
+  <ProductCard
+    hasBorder={hasBorder}
+    hasShadow={hasShadow}
+    description={i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
+      defaultMessage:
+        'A bespoke solution for apps and websites, providing the tools you need to design, implement, and effectively manage those user-facing search experiences.',
+    })}
+    emptyCta
+    cta={i18n.translate('xpack.enterpriseSearch.appSearch.cta', {
+      defaultMessage: 'Explore',
+    })}
+    icon="logoAppSearch"
+    name={APP_SEARCH_PLUGIN.NAME}
+    productId={APP_SEARCH_PLUGIN.ID}
+    url={APP_SEARCH_PLUGIN.URL}
+  />
+);

@@ -116,15 +116,13 @@ const flavors: {
 /**
  * A pure component of an entire page that can be displayed when Kibana "has no data", specifically for Analytics.
  */
-export const AnalyticsNoDataPage = (
-  {
-    onDataViewCreated,
-    onESQLNavigationComplete,
-    allowAdHocDataView,
-    showPlainSpinner,
-    ...services
-  }: AnalyticsNoDataPageProps
-) => {
+export const AnalyticsNoDataPage = ({
+  onDataViewCreated,
+  onESQLNavigationComplete,
+  allowAdHocDataView,
+  showPlainSpinner,
+  ...services
+}: AnalyticsNoDataPageProps) => {
   const { prependBasePath, kibanaGuideDocLink, getHttp: get, pageFlavor } = services;
   const { hasApiKeys } = useObservable(useMemo(() => getHasApiKeys$({ get }), [get])) ?? {};
 

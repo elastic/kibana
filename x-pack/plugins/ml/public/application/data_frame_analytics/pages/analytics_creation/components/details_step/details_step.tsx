@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiForm } from '@elastic/eui';
 
@@ -14,15 +13,13 @@ import { DetailsStepDetails } from './details_step_details';
 import { DetailsStepForm } from './details_step_form';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const DetailsStep = (
-  {
-    actions,
-    state,
-    setCurrentStep,
-    step,
-    stepActivated
-  }: CreateAnalyticsStepProps
-) => {
+export const DetailsStep = ({
+  actions,
+  state,
+  setCurrentStep,
+  step,
+  stepActivated,
+}: CreateAnalyticsStepProps) => {
   const showForm = step === ANALYTICS_STEPS.DETAILS;
   const showDetails = step !== ANALYTICS_STEPS.DETAILS && stepActivated === true;
 

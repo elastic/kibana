@@ -18,12 +18,10 @@ interface Props {
   messageText?: string;
 }
 
-export const UnsavedChangesPrompt = (
-  {
-    hasUnsavedChanges,
-    messageText = DEFAULT_MESSAGE_TEXT
-  }: Props
-) => {
+export const UnsavedChangesPrompt = ({
+  hasUnsavedChanges,
+  messageText = DEFAULT_MESSAGE_TEXT,
+}: Props) => {
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {

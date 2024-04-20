@@ -44,20 +44,18 @@ interface CodeBoxProps {
   consoleRequest?: string;
 }
 
-export const CodeBox = (
-  {
-    application,
-    codeSnippet,
-    consolePlugin,
-    languageType,
-    languages,
-    assetBasePath,
-    selectedLanguage,
-    setSelectedLanguage,
-    sharePlugin,
-    consoleRequest
-  }: CodeBoxProps
-) => {
+export const CodeBox = ({
+  application,
+  codeSnippet,
+  consolePlugin,
+  languageType,
+  languages,
+  assetBasePath,
+  selectedLanguage,
+  setSelectedLanguage,
+  sharePlugin,
+  consoleRequest,
+}: CodeBoxProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const items = languages.map((language) => (

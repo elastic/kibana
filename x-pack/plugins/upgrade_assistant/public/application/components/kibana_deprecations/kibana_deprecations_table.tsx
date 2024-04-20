@@ -89,14 +89,12 @@ interface Props {
   deprecationResolutionState?: DeprecationResolutionState;
 }
 
-export const KibanaDeprecationsTable = (
-  {
-    deprecations,
-    reload,
-    toggleFlyout,
-    deprecationResolutionState
-  }: Props
-) => {
+export const KibanaDeprecationsTable = ({
+  deprecations,
+  reload,
+  toggleFlyout,
+  deprecationResolutionState,
+}: Props) => {
   const columns: Array<EuiBasicTableColumn<KibanaDeprecationDetails>> = [
     {
       field: 'level',

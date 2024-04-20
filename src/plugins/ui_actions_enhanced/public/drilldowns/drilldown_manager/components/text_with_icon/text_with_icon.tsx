@@ -24,16 +24,14 @@ export interface TextWithIconProps {
   iconTooltip?: React.ReactNode;
 }
 
-export const TextWithIcon = (
-  {
-    color,
-    tooltip,
-    icon,
-    iconColor,
-    iconTooltip,
-    children
-  }: TextWithIconProps
-) => {
+export const TextWithIcon = ({
+  color,
+  tooltip,
+  icon,
+  iconColor,
+  iconTooltip,
+  children,
+}: TextWithIconProps) => {
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
       {!!icon && (

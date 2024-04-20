@@ -18,12 +18,7 @@ export interface OutputSectionProps {
   deleteOutput: (output: Output) => void;
 }
 
-export const OutputSection = (
-  {
-    outputs,
-    deleteOutput
-  }: OutputSectionProps
-) => {
+export const OutputSection = ({ outputs, deleteOutput }: OutputSectionProps) => {
   const authz = useAuthz();
   const { getHref } = useLink();
   const { docLinks } = useStartServices();

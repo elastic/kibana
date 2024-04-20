@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DomainDeprecationDetails } from '@kbn/core/public';
 
@@ -16,11 +16,7 @@ interface Props {
   setIsFixed: (isFixed: boolean) => void;
 }
 
-export const KibanaDeprecationIssuesPanel = (
-  {
-    setIsFixed
-  }: Props
-) => {
+export const KibanaDeprecationIssuesPanel = ({ setIsFixed }: Props) => {
   const {
     services: {
       core: { deprecations },

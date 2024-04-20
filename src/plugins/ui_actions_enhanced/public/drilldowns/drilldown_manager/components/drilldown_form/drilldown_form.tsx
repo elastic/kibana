@@ -43,15 +43,13 @@ export interface FormDrilldownWizardProps {
   disabled?: boolean;
 }
 
-export const DrilldownForm = (
-  {
-    name = '',
-    onNameChange,
-    triggers,
-    disabled,
-    children
-  }: FormDrilldownWizardProps
-) => {
+export const DrilldownForm = ({
+  name = '',
+  onNameChange,
+  triggers,
+  disabled,
+  children,
+}: FormDrilldownWizardProps) => {
   if (!!triggers && !triggers.items.length) {
     // Below callout is not translated, because this message is only for developers.
     return (

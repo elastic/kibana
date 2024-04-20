@@ -32,15 +32,13 @@ const FlexItemWithoutLabel = styled(EuiFlexItem)`
   text-align: center;
 `;
 
-export const EntryItem = (
-  {
-    entry,
-    indexPattern,
-    threatIndexPatterns,
-    showLabel,
-    onChange
-  }: EntryItemProps
-): JSX.Element => {
+export const EntryItem = ({
+  entry,
+  indexPattern,
+  threatIndexPatterns,
+  showLabel,
+  onChange,
+}: EntryItemProps): JSX.Element => {
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);

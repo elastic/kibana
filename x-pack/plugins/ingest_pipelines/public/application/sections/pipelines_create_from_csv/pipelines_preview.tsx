@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -31,15 +31,13 @@ interface Props {
   hasError: boolean;
 }
 
-export const PipelinesPreview = (
-  {
-    processors,
-    onDownload,
-    onClickToCreatePipeline,
-    onUpdateProcessors,
-    hasError
-  }: Props
-) => {
+export const PipelinesPreview = ({
+  processors,
+  onDownload,
+  onClickToCreatePipeline,
+  onUpdateProcessors,
+  hasError,
+}: Props) => {
   const [isValidJson, setIsValidJson] = useState<boolean>(true);
   const [processorsJson, setProcessorsJson] = useState<string>('');
 

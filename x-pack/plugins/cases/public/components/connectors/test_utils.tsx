@@ -13,12 +13,10 @@ interface MockFormWrapperComponentProps {
   fields?: Record<string, unknown>;
 }
 
-export const MockFormWrapperComponent = (
-  {
-    children,
-    fields = {}
-  }: MockFormWrapperComponentProps
-) => {
+export const MockFormWrapperComponent = ({
+  children,
+  fields = {},
+}: MockFormWrapperComponentProps) => {
   const { form } = useForm({
     defaultValue: { fields },
   });

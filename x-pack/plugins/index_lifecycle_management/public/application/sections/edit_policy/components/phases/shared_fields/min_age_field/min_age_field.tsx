@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 
@@ -46,11 +46,7 @@ interface Props {
   phase: PhaseWithTiming;
 }
 
-export const MinAgeField = (
-  {
-    phase
-  }: Props
-): React.ReactElement => {
+export const MinAgeField = ({ phase }: Props): React.ReactElement => {
   const minAgeValuePath = `phases.${phase}.min_age`;
   const minAgeUnitPath = `_meta.${phase}.minAgeUnit`;
 

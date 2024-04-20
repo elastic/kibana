@@ -701,23 +701,21 @@ export const ExpressionRow = (props: ExpressionRowProps) => {
   );
 };
 
-const ThresholdElement = (
-  {
-    updateComparator,
-    updateThreshold,
-    threshold,
-    metric,
-    comparator,
-    errors
-  }: {
-    updateComparator: (c?: string) => void;
-    updateThreshold: (t?: number[]) => void;
-    threshold: InventoryMetricConditions['threshold'];
-    comparator: InventoryMetricConditions['comparator'];
-    errors: IErrorObject;
-    metric?: SnapshotMetricType;
-  }
-) => {
+const ThresholdElement = ({
+  updateComparator,
+  updateThreshold,
+  threshold,
+  metric,
+  comparator,
+  errors,
+}: {
+  updateComparator: (c?: string) => void;
+  updateThreshold: (t?: number[]) => void;
+  threshold: InventoryMetricConditions['threshold'];
+  comparator: InventoryMetricConditions['comparator'];
+  errors: IErrorObject;
+  metric?: SnapshotMetricType;
+}) => {
   return (
     <>
       <div css={StyledExpressionCss}>

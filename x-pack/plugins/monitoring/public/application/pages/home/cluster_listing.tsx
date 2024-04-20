@@ -13,7 +13,6 @@ import { Listing } from '../../../components/cluster/listing';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
-import { ComponentProps } from '../../route_init';
 import { useTable } from '../../hooks/use_table';
 import { PageTemplate, TabMenuItem } from '../page_template';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';

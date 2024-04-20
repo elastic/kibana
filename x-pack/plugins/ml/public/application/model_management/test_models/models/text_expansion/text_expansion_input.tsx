@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -16,13 +15,7 @@ import { TextInput } from '../text_input';
 import type { TextExpansionInference } from './text_expansion_inference';
 import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
-const QueryInput = (
-  {
-    inferrer
-  }: {
-    inferrer: TextExpansionInference;
-  }
-) => {
+const QueryInput = ({ inferrer }: { inferrer: TextExpansionInference }) => {
   const questionText = useObservable(inferrer.getQueryText$(), inferrer.getQueryText());
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
@@ -36,18 +35,16 @@ interface Props {
   firstWizardStep: WIZARD_STEPS;
 }
 
-export const Wizard = (
-  {
-    jobCreator,
-    chartLoader,
-    mapLoader,
-    resultsLoader,
-    chartInterval,
-    jobValidator,
-    existingJobsAndGroups,
-    firstWizardStep = WIZARD_STEPS.TIME_RANGE
-  }: Props
-) => {
+export const Wizard = ({
+  jobCreator,
+  chartLoader,
+  mapLoader,
+  resultsLoader,
+  chartInterval,
+  jobValidator,
+  existingJobsAndGroups,
+  firstWizardStep = WIZARD_STEPS.TIME_RANGE,
+}: Props) => {
   const [jobCreatorUpdated, setJobCreatorUpdate] = useState(0);
   const jobCreatorUpdate = useCallback(() => {
     setJobCreatorUpdate((prev) => prev + 1);

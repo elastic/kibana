@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
@@ -23,11 +22,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const SingleMetricSettings = (
-  {
-    setIsValid
-  }: Props
-) => {
+export const SingleMetricSettings = ({ setIsValid }: Props) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const navigateToPath = useNavigateToPath();
 

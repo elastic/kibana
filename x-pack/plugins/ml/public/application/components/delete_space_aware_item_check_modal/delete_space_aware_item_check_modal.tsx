@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -231,17 +230,15 @@ interface Props {
   hasManagedJob?: boolean;
 }
 
-export const DeleteSpaceAwareItemCheckModal = (
-  {
-    canDeleteCallback,
-    onCloseCallback,
-    refreshJobsCallback,
-    mlSavedObjectType,
-    ids,
-    setDidUntag,
-    hasManagedJob
-  }: Props
-) => {
+export const DeleteSpaceAwareItemCheckModal = ({
+  canDeleteCallback,
+  onCloseCallback,
+  refreshJobsCallback,
+  mlSavedObjectType,
+  ids,
+  setDidUntag,
+  hasManagedJob,
+}: Props) => {
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
   const [hasUntagged, setHasUntagged] = useState<boolean>(false);

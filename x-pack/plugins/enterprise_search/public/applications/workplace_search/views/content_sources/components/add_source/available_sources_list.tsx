@@ -42,11 +42,7 @@ interface AvailableSourcesListProps {
   sources: SourceDataItem[];
 }
 
-export const AvailableSourcesList = (
-  {
-    sources
-  }: AvailableSourcesListProps
-) => {
+export const AvailableSourcesList = ({ sources }: AvailableSourcesListProps) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const getSourceCard = ({

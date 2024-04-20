@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
 import { ArgumentProps } from '../../../../types/arguments';
@@ -28,20 +28,15 @@ export interface Props extends ArgumentProps {
   argId: string;
 }
 
-export const NumberFormatArgInput = (
-  {
-    numberFormats,
-    onValueChange,
-    argValue,
-    argId
-  }: Props
-) => (<FormatSelect
-  argId={argId}
-  argValue={argValue}
-  formatOptions={numberFormats}
-  onValueChange={onValueChange}
-  defaultCustomFormat="0.0a"
-/>);
+export const NumberFormatArgInput = ({ numberFormats, onValueChange, argValue, argId }: Props) => (
+  <FormatSelect
+    argId={argId}
+    argValue={argValue}
+    formatOptions={numberFormats}
+    onValueChange={onValueChange}
+    defaultCustomFormat="0.0a"
+  />
+);
 
 NumberFormatArgInput.propTypes = {
   numberFormats: PropTypes.arrayOf(

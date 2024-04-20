@@ -9,7 +9,6 @@
 import './app.scss';
 
 import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -27,11 +26,7 @@ export interface AppProps {
   onSuccess?(): void;
 }
 
-export const App = (
-  {
-    onSuccess
-  }: AppProps
-) => {
+export const App = ({ onSuccess }: AppProps) => {
   const [page, setPage] = useState<'token' | 'manual' | 'success'>('token');
   const [cluster, setCluster] =
     useState<Omit<ClusterConfigurationFormProps, 'onCancel' | 'onSuccess'>>();

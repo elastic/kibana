@@ -20,13 +20,7 @@ interface Props {
   name: string;
 }
 
-export const ValueBoostForm = (
-  {
-    boost,
-    index,
-    name
-  }: Props
-) => {
+export const ValueBoostForm = ({ boost, index, name }: Props) => {
   const { updateBoostValue } = useActions(RelevanceTuningLogic);
   const values = boost.value;
 

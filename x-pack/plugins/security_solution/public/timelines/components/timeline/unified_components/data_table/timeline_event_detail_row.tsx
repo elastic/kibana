@@ -39,15 +39,13 @@ export type TimelineEventDetailRowProps = RenderCellValueProps & TimelineEventDe
  * a event/alert is expanded (i.e. when flyout is open and user is viewing the details of the event)
  *
  * */
-export const TimelineEventDetailRow = memo(function TimelineEventDetailRow(
-  {
-    rowIndex,
-    event,
-    setCellProps,
-    timelineId,
-    enabledRowRenderers
-  }: TimelineEventDetailRowProps
-) {
+export const TimelineEventDetailRow = memo(function TimelineEventDetailRow({
+  rowIndex,
+  event,
+  setCellProps,
+  timelineId,
+  enabledRowRenderers,
+}: TimelineEventDetailRowProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   /*

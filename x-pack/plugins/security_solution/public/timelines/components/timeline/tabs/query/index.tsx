@@ -85,33 +85,31 @@ export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
-export const QueryTabContentComponent = (
-  {
-    activeTab,
-    columns,
-    dataProviders,
-    end,
-    filters,
-    timelineId,
-    isLive,
-    itemsPerPage,
-    itemsPerPageOptions,
-    kqlMode,
-    kqlQueryExpression,
-    kqlQueryLanguage,
-    onEventClosed,
-    renderCellValue,
-    rowRenderers,
-    show,
-    showCallOutUnauthorizedMsg,
-    showExpandedDetails,
-    start,
-    status,
-    sort,
-    timerangeKind,
-    expandedDetail
-  }: Props
-) => {
+export const QueryTabContentComponent = ({
+  activeTab,
+  columns,
+  dataProviders,
+  end,
+  filters,
+  timelineId,
+  isLive,
+  itemsPerPage,
+  itemsPerPageOptions,
+  kqlMode,
+  kqlQueryExpression,
+  kqlQueryLanguage,
+  onEventClosed,
+  renderCellValue,
+  rowRenderers,
+  show,
+  showCallOutUnauthorizedMsg,
+  showExpandedDetails,
+  start,
+  status,
+  sort,
+  timerangeKind,
+  expandedDetail,
+}: Props) => {
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();

@@ -21,16 +21,14 @@ interface Props {
   >['renderOption'];
 }
 
-export const DropDown = (
-  {
-    renderOption,
-    changeHandler,
-    options,
-    placeholder = 'Search ...',
-    testSubj,
-    isDisabled
-  }: Props
-) => {
+export const DropDown = ({
+  renderOption,
+  changeHandler,
+  options,
+  placeholder = 'Search ...',
+  testSubj,
+  isDisabled,
+}: Props) => {
   return (
     <EuiComboBox
       fullWidth

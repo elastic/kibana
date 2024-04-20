@@ -17,25 +17,21 @@ const StyledEuiText = styled(EuiText)`
   white-space: normal;
 `;
 
-export const AgentDetailsIntegrationInputStatus = memo((
-  {
-    inputStatusFormatter
-  }: {
-    inputStatusFormatter: InputStatusFormatter;
+export const AgentDetailsIntegrationInputStatus = memo(
+  ({ inputStatusFormatter }: { inputStatusFormatter: InputStatusFormatter }) => {
+    return inputStatusFormatter.hasError ? (
+      <EuiCallOut
+        title={inputStatusFormatter.getErrorTitleFromStatus()}
+        color="danger"
+        iconType="error"
+        data-test-subj="integrationInputErrorCallOut"
+      >
+        <StyledEuiText size="s" data-test-subj="integrationInputErrorDescription">
+          {inputStatusFormatter.description}
+        </StyledEuiText>
+      </EuiCallOut>
+    ) : (
+      <EuiText size="s">{inputStatusFormatter.description}</EuiText>
+    );
   }
-) => {
-  return inputStatusFormatter.hasError ? (
-    <EuiCallOut
-      title={inputStatusFormatter.getErrorTitleFromStatus()}
-      color="danger"
-      iconType="error"
-      data-test-subj="integrationInputErrorCallOut"
-    >
-      <StyledEuiText size="s" data-test-subj="integrationInputErrorDescription">
-        {inputStatusFormatter.description}
-      </StyledEuiText>
-    </EuiCallOut>
-  ) : (
-    <EuiText size="s">{inputStatusFormatter.description}</EuiText>
-  );
-});
+);

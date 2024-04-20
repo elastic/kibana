@@ -7,7 +7,6 @@
  */
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';

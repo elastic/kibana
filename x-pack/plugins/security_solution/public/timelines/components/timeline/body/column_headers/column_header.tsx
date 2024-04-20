@@ -60,17 +60,15 @@ interface ColumneHeaderProps {
   timelineId: string;
 }
 
-const ColumnHeaderComponent = (
-  {
-    draggableIndex,
-    header,
-    timelineId,
-    isDragging,
-    onFilterChange,
-    sort,
-    tabType
-  }: ColumneHeaderProps
-) => {
+const ColumnHeaderComponent = ({
+  draggableIndex,
+  header,
+  timelineId,
+  isDragging,
+  onFilterChange,
+  sort,
+  tabType,
+}: ColumneHeaderProps) => {
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
   const restoreFocus = useCallback(() => keyboardHandlerRef.current?.focus(), []);

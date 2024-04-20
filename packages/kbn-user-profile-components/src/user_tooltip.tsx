@@ -8,7 +8,6 @@
 
 import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { UserProfileUserInfo } from './user_profile';
@@ -34,13 +33,7 @@ export interface UserToolTipProps extends Omit<EuiToolTipProps, 'content' | 'tit
 /**
  * Renders a tooltip with user information
  */
-export const UserToolTip = (
-  {
-    user,
-    avatar,
-    ...rest
-  }: UserToolTipProps
-) => {
+export const UserToolTip = ({ user, avatar, ...rest }: UserToolTipProps) => {
   const displayName = getUserDisplayName(user);
   return (
     <EuiToolTip

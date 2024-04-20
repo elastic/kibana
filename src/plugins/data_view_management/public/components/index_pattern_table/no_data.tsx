@@ -33,13 +33,11 @@ export interface NoDataProps {
   setShowCreateDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const NoDataServerlessSearch = (
-  {
-    uiSettings,
-    http,
-    docLinks
-  }: Pick<NoDataProps, 'uiSettings' | 'http' | 'docLinks'>
-) => {
+const NoDataServerlessSearch = ({
+  uiSettings,
+  http,
+  docLinks,
+}: Pick<NoDataProps, 'uiSettings' | 'http' | 'docLinks'>) => {
   const { hasApiKeys, error, isLoading } =
     useObservable(useMemo(() => getHasApiKeys$(http), [http])) ?? {};
 
@@ -63,17 +61,15 @@ const NoDataServerlessSearch = (
 /**
  * @internal
  */
-export const NoData = (
-  {
-    noDataPage,
-    docLinks,
-    http,
-    uiSettings,
-    application,
-    dataViewController,
-    setShowCreateDialog
-  }: NoDataProps
-) => {
+export const NoData = ({
+  noDataPage,
+  docLinks,
+  http,
+  uiSettings,
+  application,
+  dataViewController,
+  setShowCreateDialog,
+}: NoDataProps) => {
   const flavor = noDataPage?.getAnalyticsNoDataPageFlavor() ?? 'kibana';
 
   switch (flavor) {

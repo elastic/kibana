@@ -20,11 +20,7 @@ interface PackViewInActionProps {
   };
   actionId?: string;
 }
-const PackViewInDiscoverActionComponent = (
-  {
-    item
-  }: PackViewInActionProps
-) => {
+const PackViewInDiscoverActionComponent = ({ item }: PackViewInActionProps) => {
   const { action_id: actionId, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,

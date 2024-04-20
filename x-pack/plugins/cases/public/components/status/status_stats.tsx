@@ -17,14 +17,7 @@ export interface Props {
   dataTestSubj?: string;
 }
 
-const StatusStatsComponent = (
-  {
-    caseCount,
-    caseStatus,
-    isLoading,
-    dataTestSubj
-  }: Props
-) => {
+const StatusStatsComponent = ({ caseCount, caseStatus, isLoading, dataTestSubj }: Props) => {
   const statusStats = useMemo(
     () => [
       {

@@ -40,12 +40,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export const DocumentCreationButtons = (
-  {
-    isFlyout = false,
-    disabled = false
-  }: Props
-) => {
+export const DocumentCreationButtons = ({ isFlyout = false, disabled = false }: Props) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
 
   const { search } = useLocation() as Location;

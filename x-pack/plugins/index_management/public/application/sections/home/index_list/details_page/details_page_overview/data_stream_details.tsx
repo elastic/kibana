@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -19,13 +19,7 @@ import { useAppContext } from '../../../../../app_context';
 import { humanizeTimeStamp } from '../../../data_stream_list/humanize_time_stamp';
 import { OverviewCard } from './overview_card';
 
-export const DataStreamDetails = (
-  {
-    dataStreamName
-  }: {
-    dataStreamName: string;
-  }
-) => {
+export const DataStreamDetails = ({ dataStreamName }: { dataStreamName: string }) => {
   const { error, data: dataStream, isLoading, resendRequest } = useLoadDataStream(dataStreamName);
   const {
     core: { getUrlForApp },

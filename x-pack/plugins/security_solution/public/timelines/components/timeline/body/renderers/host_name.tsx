@@ -36,21 +36,19 @@ interface Props {
   title?: string;
 }
 
-const HostNameComponent = (
-  {
-    fieldName,
-    fieldType,
-    isAggregatable,
-    Component,
-    contextId,
-    eventId,
-    isDraggable,
-    isButton,
-    onClick,
-    title,
-    value
-  }: Props
-) => {
+const HostNameComponent = ({
+  fieldName,
+  fieldType,
+  isAggregatable,
+  Component,
+  contextId,
+  eventId,
+  isDraggable,
+  isButton,
+  onClick,
+  title,
+  value,
+}: Props) => {
   const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
   const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
     'expandableTimelineFlyoutEnabled'

@@ -42,16 +42,14 @@ export interface PageTemplateProps {
   product?: string;
 }
 
-export const PageTemplate = (
-  {
-    title,
-    pageTitle,
-    tabs,
-    getPageData,
-    product,
-    children
-  }: PageTemplateProps
-) => {
+export const PageTemplate = ({
+  title,
+  pageTitle,
+  tabs,
+  getPageData,
+  product,
+  children,
+}: PageTemplateProps) => {
   useTitle('', title);
 
   const { currentTimerange } = useMonitoringTimeContainerContext();

@@ -12,7 +12,9 @@ import type { CellValueElementProps } from '../../../../../common/types';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { RenderCellValue } from '../../../../detections/configurations/security_solution_detections';
 
-export const PreviewRenderCellValue = (props: EuiDataGridCellValueElementProps & CellValueElementProps) => {
+export const PreviewRenderCellValue = (
+  props: EuiDataGridCellValueElementProps & CellValueElementProps
+) => {
   return (
     <RenderCellValue
       {...props}

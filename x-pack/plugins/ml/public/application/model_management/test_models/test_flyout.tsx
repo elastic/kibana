@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,27 +17,24 @@ interface Props {
   model: ModelItem;
   onClose: () => void;
 }
-export const TestTrainedModelFlyout = (
-  {
-    model,
-    onClose
-  }: Props
-) => (<EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
-  <EuiFlyoutHeader hasBorder>
-    <EuiTitle size="m">
-      <h2>
-        <FormattedMessage
-          id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
-          defaultMessage="Test trained model"
-        />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-    <EuiTitle size="xs">
-      <h4>{model.model_id}</h4>
-    </EuiTitle>
-  </EuiFlyoutHeader>
-  <EuiFlyoutBody>
-    <TestTrainedModelContent model={model} />
-  </EuiFlyoutBody>
-</EuiFlyout>);
+export const TestTrainedModelFlyout = ({ model, onClose }: Props) => (
+  <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2>
+          <FormattedMessage
+            id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
+            defaultMessage="Test trained model"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <h4>{model.model_id}</h4>
+      </EuiTitle>
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <TestTrainedModelContent model={model} />
+    </EuiFlyoutBody>
+  </EuiFlyout>
+);

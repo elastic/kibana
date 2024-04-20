@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,12 +23,7 @@ interface Props {
   solutions: FeatureCatalogueSolution[];
 }
 
-export const SolutionsSection = (
-  {
-    addBasePath,
-    solutions
-  }: Props
-) => {
+export const SolutionsSection = ({ addBasePath, solutions }: Props) => {
   if (solutions.length) {
     solutions = solutions.sort(sortByOrder);
 

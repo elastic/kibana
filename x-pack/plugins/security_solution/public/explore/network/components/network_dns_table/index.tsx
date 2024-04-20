@@ -50,20 +50,18 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkDnsTableComponent = (
-  {
-    data,
-    fakeTotalCount,
-    id,
-    isInspect,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    setQuerySkip,
-    totalCount,
-    type
-  }: NetworkDnsTableProps
-) => {
+const NetworkDnsTableComponent = ({
+  data,
+  fakeTotalCount,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  setQuerySkip,
+  totalCount,
+  type,
+}: NetworkDnsTableProps) => {
   const dispatch = useDispatch();
   const getNetworkDnsSelector = useMemo(() => networkSelectors.dnsSelector(), []);
   const { activePage, isPtrIncluded, limit, sort } = useDeepEqualSelector(getNetworkDnsSelector);

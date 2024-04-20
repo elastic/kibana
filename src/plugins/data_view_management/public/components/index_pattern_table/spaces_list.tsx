@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
@@ -26,16 +26,7 @@ const noun = i18n.translate('indexPatternManagement.indexPatternTable.savedObjec
   defaultMessage: 'data view',
 });
 
-export const SpacesList = (
-  {
-    spacesApi,
-    capabilities,
-    spaceIds,
-    id,
-    title,
-    refresh
-  }: Props
-) => {
+export const SpacesList = ({ spacesApi, capabilities, spaceIds, id, title, refresh }: Props) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   function onClose() {

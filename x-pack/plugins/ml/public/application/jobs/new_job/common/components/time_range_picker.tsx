@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
 import type { Moment } from 'moment';
 import moment from 'moment';
@@ -25,12 +24,7 @@ interface Props {
   timeRange: TimeRange;
 }
 
-export const TimeRangePicker = (
-  {
-    setTimeRange,
-    timeRange
-  }: Props
-) => {
+export const TimeRangePicker = ({ setTimeRange, timeRange }: Props) => {
   const {
     services: { uiSettings },
   } = useMlKibana();

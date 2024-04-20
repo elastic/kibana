@@ -20,22 +20,20 @@ import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysi
 import { useVisibilityState } from '../../../../utils/use_visibility_state';
 import { CategoryQualityWarningReasonDescription } from '../../log_analysis_job_status/quality_warning_notices';
 
-export const IndexSetupDatasetFilter = (
-  {
-    availableDatasets,
-    datasetFilter,
-    isDisabled,
-    onChangeDatasetFilter
-  }: {
-    availableDatasets: Array<{
-      dataset: string;
-      warnings: QualityWarning[];
-    }>;
-    datasetFilter: DatasetFilter;
-    isDisabled?: boolean;
-    onChangeDatasetFilter: (datasetFilter: DatasetFilter) => void;
-  }
-) => {
+export const IndexSetupDatasetFilter = ({
+  availableDatasets,
+  datasetFilter,
+  isDisabled,
+  onChangeDatasetFilter,
+}: {
+  availableDatasets: Array<{
+    dataset: string;
+    warnings: QualityWarning[];
+  }>;
+  datasetFilter: DatasetFilter;
+  isDisabled?: boolean;
+  onChangeDatasetFilter: (datasetFilter: DatasetFilter) => void;
+}) => {
   const { isVisible, hide, show } = useVisibilityState(false);
 
   const changeDatasetFilter = useCallback(
@@ -106,13 +104,7 @@ export const IndexSetupDatasetFilter = (
   );
 };
 
-const DatasetWarningMarker = (
-  {
-    warnings
-  }: {
-    warnings: QualityWarning[];
-  }
-) => {
+const DatasetWarningMarker = ({ warnings }: { warnings: QualityWarning[] }) => {
   const warningDescriptions = warnings.flatMap((warning) =>
     warning.type === 'categoryQualityWarning'
       ? warning.reasons.map((reason) => (

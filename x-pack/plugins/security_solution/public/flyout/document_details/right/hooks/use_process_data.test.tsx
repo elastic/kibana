@@ -7,7 +7,6 @@
 
 import { getUserDisplayName, useProcessData } from './use_process_data';
 import { renderHook } from '@testing-library/react-hooks';
-import type { FC } from 'react';
 import { RightPanelContext } from '../context';
 import React from 'react';
 

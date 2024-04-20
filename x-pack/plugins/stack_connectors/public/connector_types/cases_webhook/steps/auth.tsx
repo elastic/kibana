@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -31,12 +31,7 @@ interface Props {
   readOnly: boolean;
 }
 
-export const AuthStep = (
-  {
-    display,
-    readOnly
-  }: Props
-) => {
+export const AuthStep = ({ display, readOnly }: Props) => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: ['config.hasAuth', '__internal__.hasHeaders'],

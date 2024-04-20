@@ -38,11 +38,7 @@ const getUpdatedFlowTargetPath = (
   return `${newPathame}${location.search}`;
 };
 
-export const FlowTargetSelectConnectedComponent = (
-  {
-    flowTarget
-  }: Props
-) => {
+export const FlowTargetSelectConnectedComponent = ({ flowTarget }: Props) => {
   const history = useHistory();
   const location = useLocation();
 

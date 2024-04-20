@@ -21,11 +21,7 @@ interface Props {
   height: string;
 }
 
-const Container = (
-  {
-    height
-  }: Props & ResponsiveWrapperProps
-) => {
+const Container = ({ height }: Props & ResponsiveWrapperProps) => {
   const {
     query,
     absoluteDateRangeStart,

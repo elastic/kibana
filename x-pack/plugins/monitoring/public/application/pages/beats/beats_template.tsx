@@ -13,12 +13,7 @@ interface BeatsTemplateProps extends PageTemplateProps {
   instance?: any;
 }
 
-export const BeatsTemplate = (
-  {
-    instance,
-    ...props
-  }: BeatsTemplateProps
-) => {
+export const BeatsTemplate = ({ instance, ...props }: BeatsTemplateProps) => {
   const tabs: TabMenuItem[] = [];
 
   if (!instance) {

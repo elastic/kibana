@@ -25,57 +25,49 @@ import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { ApiKey } from '../../api_key/api_key';
 
-const ConfirmModal = (
-  {
-    onCancel,
-    onConfirm
-  }: {
-    onCancel: () => void;
-    onConfirm: () => void;
-  }
-) => (<EuiConfirmModal
-  title={i18n.translate(
-    'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.title',
-    {
-      defaultMessage: 'Generate an Elasticsearch API key',
-    }
-  )}
-  onCancel={onCancel}
-  onConfirm={onConfirm}
-  cancelButtonText={i18n.translate(
-    'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.cancelButton.label',
-    {
-      defaultMessage: 'Cancel',
-    }
-  )}
-  confirmButtonText={i18n.translate(
-    'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.confirmButton.label',
-    {
-      defaultMessage: 'Generate API key',
-    }
-  )}
-  defaultFocusedButton="confirm"
->
-  {i18n.translate(
-    'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.description',
-    {
-      defaultMessage:
-        'Generating a new API key will invalidate the previous key. Are you sure you want to generate a new API key? This can not be undone.',
-    }
-  )}
-</EuiConfirmModal>);
+const ConfirmModal = ({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) => (
+  <EuiConfirmModal
+    title={i18n.translate(
+      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.title',
+      {
+        defaultMessage: 'Generate an Elasticsearch API key',
+      }
+    )}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    cancelButtonText={i18n.translate(
+      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.cancelButton.label',
+      {
+        defaultMessage: 'Cancel',
+      }
+    )}
+    confirmButtonText={i18n.translate(
+      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.confirmButton.label',
+      {
+        defaultMessage: 'Generate API key',
+      }
+    )}
+    defaultFocusedButton="confirm"
+  >
+    {i18n.translate(
+      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.description',
+      {
+        defaultMessage:
+          'Generating a new API key will invalidate the previous key. Are you sure you want to generate a new API key? This can not be undone.',
+      }
+    )}
+  </EuiConfirmModal>
+);
 
-export const ApiKeyConfig = (
-  {
-    hasApiKey,
-    indexName,
-    isNative
-  }: {
-    hasApiKey: boolean;
-    indexName: string;
-    isNative: boolean;
-  }
-) => {
+export const ApiKeyConfig = ({
+  hasApiKey,
+  indexName,
+  isNative,
+}: {
+  hasApiKey: boolean;
+  indexName: string;
+  isNative: boolean;
+}) => {
   const { makeRequest, apiReset } = useActions(GenerateConnectorApiKeyApiLogic);
   const { data, status } = useValues(GenerateConnectorApiKeyApiLogic);
   useEffect(() => {

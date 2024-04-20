@@ -26,13 +26,7 @@ interface Props {
   title: string;
 }
 
-const CompareFieldsTableComponent = (
-  {
-    enrichedFieldMetadata,
-    getTableColumns,
-    title
-  }: Props
-) => {
+const CompareFieldsTableComponent = ({ enrichedFieldMetadata, getTableColumns, title }: Props) => {
   const columns = useMemo(() => getTableColumns(), [getTableColumns]);
 
   return (

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,12 +20,7 @@ export interface PageProps {
 
 const RESULTS_PER_PAGE = 20;
 
-export const Page = (
-  {
-    nextStepPath,
-    extraButtons
-  }: PageProps
-) => {
+export const Page = ({ nextStepPath, extraButtons }: PageProps) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,11 +32,7 @@ export interface Props {
   onClose: () => void;
 }
 
-export const JobSpacesSyncFlyout = (
-  {
-    onClose
-  }: Props
-) => {
+export const JobSpacesSyncFlyout = ({ onClose }: Props) => {
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);
   const [canSync, setCanSync] = useState(false);

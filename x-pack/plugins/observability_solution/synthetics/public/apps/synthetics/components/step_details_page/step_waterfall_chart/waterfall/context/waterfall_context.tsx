@@ -54,31 +54,29 @@ export interface IWaterfallContext {
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
-export const WaterfallProvider = (
-  {
-    children,
-    data,
-    markerItems,
-    onElementClick,
-    onProjectionClick,
-    onSidebarClick,
-    showOnlyHighlightedNetworkRequests,
-    showCustomMarks,
-    sidebarItems,
-    metadata,
-    renderTooltipItem,
-    totalNetworkRequests,
-    highlightedNetworkRequests,
-    fetchedNetworkRequests,
-    activeStep,
-    activeFilters,
-    setActiveFilters,
-    setOnlyHighlighted,
-    setShowCustomMarks,
-    query,
-    setQuery
-  }: IWaterfallContext
-) => {
+export const WaterfallProvider = ({
+  children,
+  data,
+  markerItems,
+  onElementClick,
+  onProjectionClick,
+  onSidebarClick,
+  showOnlyHighlightedNetworkRequests,
+  showCustomMarks,
+  sidebarItems,
+  metadata,
+  renderTooltipItem,
+  totalNetworkRequests,
+  highlightedNetworkRequests,
+  fetchedNetworkRequests,
+  activeStep,
+  activeFilters,
+  setActiveFilters,
+  setOnlyHighlighted,
+  setShowCustomMarks,
+  query,
+  setQuery,
+}: IWaterfallContext) => {
   return (
     <WaterfallContext.Provider
       value={{

@@ -47,12 +47,7 @@ function displayOutputType(type: string) {
   }
 }
 
-export const OutputsTable = (
-  {
-    outputs,
-    deleteOutput
-  }: OutputsTableProps
-) => {
+export const OutputsTable = ({ outputs, deleteOutput }: OutputsTableProps) => {
   const authz = useAuthz();
   const { getHref } = useLink();
 

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiCallOut, EuiPopover, EuiToolTip } from '@elastic/eui';
@@ -23,12 +22,7 @@ interface AddControlProps extends Partial<EuiButtonIconProps> {
   onClick: () => void;
 }
 
-export const AddControl = (
-  {
-    onClick,
-    ...rest
-  }: AddControlProps
-) => {
+export const AddControl = ({ onClick, ...rest }: AddControlProps) => {
   const { isDisabled } = rest;
   return (
     <EuiToolTip content={isDisabled ? ADD_CONTROLS_MAX_LIMIT : ADD_CONTROLS}>
@@ -50,11 +44,7 @@ interface SaveControlsProps {
   onClick: () => void;
 }
 
-export const SaveControls = (
-  {
-    onClick
-  }: SaveControlsProps
-) => {
+export const SaveControls = ({ onClick }: SaveControlsProps) => {
   const {
     hasPendingChanges,
     openPendingChangesPopover,

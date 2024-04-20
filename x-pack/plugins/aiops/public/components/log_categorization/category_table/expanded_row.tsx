@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 
@@ -21,12 +20,7 @@ interface ExpandedRowProps {
   displayExamples?: boolean;
 }
 
-export const ExpandedRow = (
-  {
-    category,
-    displayExamples = true
-  }: ExpandedRowProps
-) => {
+export const ExpandedRow = ({ category, displayExamples = true }: ExpandedRowProps) => {
   const { euiTheme } = useEuiTheme();
   const cssExpandedRow = css({
     marginRight: euiTheme.size.xxl,
@@ -66,14 +60,7 @@ export const ExpandedRow = (
   );
 };
 
-const Section = (
-  {
-    title,
-    children
-  }: {
-    title: string;
-  }
-) => {
+const Section = ({ title, children }: { title: string }) => {
   return (
     <>
       <EuiText size="s">

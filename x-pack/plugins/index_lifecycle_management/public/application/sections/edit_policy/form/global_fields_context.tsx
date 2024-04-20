@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, FunctionComponent, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_imports';
 
 /**

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { useLocation, Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';

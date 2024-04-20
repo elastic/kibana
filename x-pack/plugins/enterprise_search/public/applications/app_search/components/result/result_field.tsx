@@ -20,14 +20,7 @@ interface Props {
   type?: FieldType;
 }
 
-export const ResultField = (
-  {
-    field,
-    raw,
-    snippet,
-    type
-  }: Props
-) => {
+export const ResultField = ({ field, raw, snippet, type }: Props) => {
   return (
     <div className="appSearchResultField">
       <div className="appSearchResultField__key eui-textTruncate">

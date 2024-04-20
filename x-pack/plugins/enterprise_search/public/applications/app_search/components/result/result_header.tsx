@@ -27,17 +27,15 @@ interface Props {
   showClick: boolean;
 }
 
-export const ResultHeader = (
-  {
-    showScore,
-    resultMeta,
-    isMetaEngine,
-    actions,
-    documentLink,
-    resultPosition,
-    showClick
-  }: Props
-) => {
+export const ResultHeader = ({
+  showScore,
+  resultMeta,
+  isMetaEngine,
+  actions,
+  documentLink,
+  resultPosition,
+  showClick,
+}: Props) => {
   return (
     <header className="appSearchResultHeader">
       <EuiFlexGroup

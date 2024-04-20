@@ -25,17 +25,15 @@ interface Props {
   onSave: (repository: Repository | EmptyRepository) => void;
 }
 
-export const RepositoryForm = (
-  {
-    repository: originalRepository,
-    isManagedRepository,
-    isEditing,
-    isSaving,
-    saveError,
-    clearSaveError,
-    onSave
-  }: Props
-) => {
+export const RepositoryForm = ({
+  repository: originalRepository,
+  isManagedRepository,
+  isEditing,
+  isSaving,
+  saveError,
+  clearSaveError,
+  onSave,
+}: Props) => {
   const [currentStep, setCurrentStep] = useState<1 | 2>(isEditing ? 2 : 1);
 
   // Repository state

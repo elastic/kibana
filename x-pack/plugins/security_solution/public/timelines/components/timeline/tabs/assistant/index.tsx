@@ -15,22 +15,24 @@ const AssistantTabContainer = styled.div`
   width: 100%;
 `;
 
-const AssistantTab = memo((
-  {
+const AssistantTab = memo(
+  ({
     shouldRefocusPrompt,
-    setConversationTitle
+    setConversationTitle,
   }: {
     shouldRefocusPrompt: boolean;
     setConversationTitle: Dispatch<SetStateAction<string>>;
-  }
-) => (<AssistantTabContainer>
-  <Assistant
-    conversationTitle={TIMELINE_CONVERSATION_TITLE}
-    embeddedLayout
-    setConversationTitle={setConversationTitle}
-    shouldRefocusPrompt={shouldRefocusPrompt}
-  />
-</AssistantTabContainer>));
+  }) => (
+    <AssistantTabContainer>
+      <Assistant
+        conversationTitle={TIMELINE_CONVERSATION_TITLE}
+        embeddedLayout
+        setConversationTitle={setConversationTitle}
+        shouldRefocusPrompt={shouldRefocusPrompt}
+      />
+    </AssistantTabContainer>
+  )
+);
 
 AssistantTab.displayName = 'AssistantTab';
 

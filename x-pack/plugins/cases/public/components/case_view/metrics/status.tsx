@@ -122,13 +122,7 @@ const useGetLifespanMetrics = (
   }, [features, metrics]);
 };
 
-const CreationDate = React.memo((
-  {
-    date
-  }: {
-    date: string;
-  }
-) => {
+const CreationDate = React.memo(({ date }: { date: string }) => {
   const creationDate = getMaybeDate(date);
   if (!creationDate.isValid()) {
     return getEmptyCellValue();
@@ -171,45 +165,16 @@ const getOpenCloseDuration = (openDate: string, closeDate: string | null): strin
   return formatDuration(closeDateObject.diff(openDateObject));
 };
 
-const CaseStatusMetricsItem = React.memo((
-  {
+const CaseStatusMetricsItem = React.memo(
+  ({
     title,
     value,
-    euiTheme
+    euiTheme,
   }: {
     title: string;
     value: JSX.Element | string;
     euiTheme: EuiThemeComputed<{}>;
-  }
-) => (<EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-  <EuiFlexItem
-    css={css`
-      font-size: ${euiTheme.size.m};
-      font-weight: bold;
-    `}
-  >
-    {title}
-  </EuiFlexItem>
-  <EuiFlexItem>{value}</EuiFlexItem>
-</EuiFlexGroup>));
-CaseStatusMetricsItem.displayName = 'CaseStatusMetricsItem';
-
-const CaseStatusMetricsOpenCloseDuration = React.memo((
-  {
-    title,
-    value,
-    reopens,
-    euiTheme
-  }: {
-    title: string;
-    value?: string;
-    reopens: string[];
-    euiTheme: EuiThemeComputed<{}>;
-  }
-) => {
-  const valueText = getOpenCloseDurationText(value, reopens);
-
-  return (
+  }) => (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem
         css={css`
@@ -219,14 +184,45 @@ const CaseStatusMetricsOpenCloseDuration = React.memo((
       >
         {title}
       </EuiFlexItem>
-      {value != null && caseWasReopened(reopens) ? (
-        <ValueWithExplanationIcon value={valueText} explanationValues={reopens} />
-      ) : (
-        <EuiFlexItem>{valueText}</EuiFlexItem>
-      )}
+      <EuiFlexItem>{value}</EuiFlexItem>
     </EuiFlexGroup>
-  );
-});
+  )
+);
+CaseStatusMetricsItem.displayName = 'CaseStatusMetricsItem';
+
+const CaseStatusMetricsOpenCloseDuration = React.memo(
+  ({
+    title,
+    value,
+    reopens,
+    euiTheme,
+  }: {
+    title: string;
+    value?: string;
+    reopens: string[];
+    euiTheme: EuiThemeComputed<{}>;
+  }) => {
+    const valueText = getOpenCloseDurationText(value, reopens);
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+        <EuiFlexItem
+          css={css`
+            font-size: ${euiTheme.size.m};
+            font-weight: bold;
+          `}
+        >
+          {title}
+        </EuiFlexItem>
+        {value != null && caseWasReopened(reopens) ? (
+          <ValueWithExplanationIcon value={valueText} explanationValues={reopens} />
+        ) : (
+          <EuiFlexItem>{valueText}</EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }
+);
 CaseStatusMetricsOpenCloseDuration.displayName = 'OpenCloseDuration';
 
 const getOpenCloseDurationText = (value: string | undefined, reopens: string[]) => {
@@ -243,44 +239,38 @@ const caseWasReopened = (reopens: string[]) => {
   return reopens.length > 0;
 };
 
-const ValueWithExplanationIcon = React.memo((
-  {
-    value,
-    explanationValues
-  }: {
-    value: string | JSX.Element;
-    explanationValues: string[];
-  }
-) => {
-  const content = (
-    <>
-      {CASE_REOPENED_ON}
-      {explanationValues.map((explanationValue, index) => {
-        return (
-          <React.Fragment key={`explanation-value-${index}`}>
-            <FormattedRelativePreferenceDate
-              data-test-subj={`case-metrics-lifespan-reopen-${index}`}
-              value={explanationValue}
-              stripMs={true}
-            />
-            {isNotLastItem(index, explanationValues.length) ? <EuiSpacer size="xs" /> : null}
-          </React.Fragment>
-        );
-      })}
-    </>
-  );
+const ValueWithExplanationIcon = React.memo(
+  ({ value, explanationValues }: { value: string | JSX.Element; explanationValues: string[] }) => {
+    const content = (
+      <>
+        {CASE_REOPENED_ON}
+        {explanationValues.map((explanationValue, index) => {
+          return (
+            <React.Fragment key={`explanation-value-${index}`}>
+              <FormattedRelativePreferenceDate
+                data-test-subj={`case-metrics-lifespan-reopen-${index}`}
+                value={explanationValue}
+                stripMs={true}
+              />
+              {isNotLastItem(index, explanationValues.length) ? <EuiSpacer size="xs" /> : null}
+            </React.Fragment>
+          );
+        })}
+      </>
+    );
 
-  return (
-    <EuiFlexItem data-test-subj="case-metrics-lifespan-reopen-icon">
-      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>{value}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={content} position="right" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
-});
+    return (
+      <EuiFlexItem data-test-subj="case-metrics-lifespan-reopen-icon">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>{value}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip content={content} position="right" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  }
+);
 ValueWithExplanationIcon.displayName = 'ValueWithExplanationIcon';
 
 const isNotLastItem = (index: number, arrayLength: number): boolean => index + 1 < arrayLength;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFormRow, EuiText } from '@elastic/eui';
 
@@ -24,49 +24,49 @@ interface CreateDataViewFormProps {
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export const CreateDataViewForm = (
-  {
-    canCreateDataView,
-    createDataView,
-    dataViewTitleExists,
-    setCreateDataView,
-    dataViewAvailableTimeFields,
-    dataViewTimeField,
-    onTimeFieldChanged
-  }: CreateDataViewFormProps
-) => (<>
-  <EuiFormRow
-    isInvalid={(createDataView && dataViewTitleExists) || canCreateDataView === false}
-    error={[
-      ...(canCreateDataView === false
-        ? [
-            <EuiText size="xs" color="warning">
-              {i18n.translate('xpack.ml.dataViewUtils.dataViewPermissionWarning', {
-                defaultMessage: 'You need permission to create data views.',
-              })}
-            </EuiText>,
-          ]
-        : []),
-      ...(createDataView && dataViewTitleExists
-        ? [
-            i18n.translate('xpack.ml.dataViewUtils.dataViewTitleError', {
-              defaultMessage: 'A data view with this title already exists.',
-            }),
-          ]
-        : []),
-    ]}
-  >
-    <CreateDataViewSwitch
-      canCreateDataView={canCreateDataView}
-      createDataView={createDataView}
-      setCreateDataView={setCreateDataView}
-    />
-  </EuiFormRow>
-  {createDataView && !dataViewTitleExists && dataViewAvailableTimeFields.length > 0 && (
-    <CreateDataViewTimeField
-      dataViewAvailableTimeFields={dataViewAvailableTimeFields}
-      dataViewTimeField={dataViewTimeField}
-      onTimeFieldChanged={onTimeFieldChanged}
-    />
-  )}
-</>);
+export const CreateDataViewForm = ({
+  canCreateDataView,
+  createDataView,
+  dataViewTitleExists,
+  setCreateDataView,
+  dataViewAvailableTimeFields,
+  dataViewTimeField,
+  onTimeFieldChanged,
+}: CreateDataViewFormProps) => (
+  <>
+    <EuiFormRow
+      isInvalid={(createDataView && dataViewTitleExists) || canCreateDataView === false}
+      error={[
+        ...(canCreateDataView === false
+          ? [
+              <EuiText size="xs" color="warning">
+                {i18n.translate('xpack.ml.dataViewUtils.dataViewPermissionWarning', {
+                  defaultMessage: 'You need permission to create data views.',
+                })}
+              </EuiText>,
+            ]
+          : []),
+        ...(createDataView && dataViewTitleExists
+          ? [
+              i18n.translate('xpack.ml.dataViewUtils.dataViewTitleError', {
+                defaultMessage: 'A data view with this title already exists.',
+              }),
+            ]
+          : []),
+      ]}
+    >
+      <CreateDataViewSwitch
+        canCreateDataView={canCreateDataView}
+        createDataView={createDataView}
+        setCreateDataView={setCreateDataView}
+      />
+    </EuiFormRow>
+    {createDataView && !dataViewTitleExists && dataViewAvailableTimeFields.length > 0 && (
+      <CreateDataViewTimeField
+        dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+        dataViewTimeField={dataViewTimeField}
+        onTimeFieldChanged={onTimeFieldChanged}
+      />
+    )}
+  </>
+);

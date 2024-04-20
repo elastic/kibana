@@ -22,13 +22,7 @@ interface Props {
   error: Error;
 }
 
-export const SectionError = (
-  {
-    title,
-    error,
-    ...rest
-  }: Props
-) => {
+export const SectionError = ({ title, error, ...rest }: Props) => {
   const {
     cause: causeRoot, // wrapEsError() on the server adds a "cause" array
     message,

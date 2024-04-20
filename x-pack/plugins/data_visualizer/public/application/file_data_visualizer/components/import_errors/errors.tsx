@@ -6,7 +6,6 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -25,12 +24,7 @@ interface Props {
   statuses: Statuses;
 }
 
-export const ImportErrors = (
-  {
-    errors,
-    statuses
-  }: Props
-) => {
+export const ImportErrors = ({ errors, statuses }: Props) => {
   return (
     <EuiCallOut title={title(statuses)} color="danger" iconType="cross">
       {errors.map((e, i) => (
@@ -101,13 +95,7 @@ function title(statuses: Statuses) {
   }
 }
 
-const ImportError = (
-  {
-    error
-  }: {
-    error: any;
-  }
-) => {
+const ImportError = ({ error }: { error: any }) => {
   const errorObj = toString(error);
   return (
     <>

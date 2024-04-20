@@ -26,12 +26,7 @@ export interface FleetProxiesSectionProps {
   deleteFleetProxy: (proxy: FleetProxy) => void;
 }
 
-export const FleetProxiesSection = (
-  {
-    proxies,
-    deleteFleetProxy
-  }: FleetProxiesSectionProps
-) => {
+export const FleetProxiesSection = ({ proxies, deleteFleetProxy }: FleetProxiesSectionProps) => {
   const authz = useAuthz();
   const { getHref } = useLink();
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../../common/types';
@@ -21,12 +21,7 @@ interface Props {
   targetNodeRole: DataTierRole;
 }
 
-export const WillUseFallbackTierUsingNodeAttributesNotice = (
-  {
-    phase,
-    targetNodeRole
-  }: Props
-) => {
+export const WillUseFallbackTierUsingNodeAttributesNotice = ({ phase, targetNodeRole }: Props) => {
   return (
     <EuiCallOut
       data-test-subj="willUseFallbackTierUsingNodeAttributesNotice"

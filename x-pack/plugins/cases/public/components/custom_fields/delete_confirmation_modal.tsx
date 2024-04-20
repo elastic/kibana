@@ -15,13 +15,11 @@ interface ConfirmDeleteCaseModalProps {
   onConfirm: () => void;
 }
 
-const DeleteConfirmationModalComponent = (
-  {
-    label,
-    onCancel,
-    onConfirm
-  }: ConfirmDeleteCaseModalProps
-) => {
+const DeleteConfirmationModalComponent = ({
+  label,
+  onCancel,
+  onConfirm,
+}: ConfirmDeleteCaseModalProps) => {
   return (
     <EuiConfirmModal
       buttonColor="danger"

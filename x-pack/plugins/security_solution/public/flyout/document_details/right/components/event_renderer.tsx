@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiTitle } from '@elastic/eui';
 import styled from '@emotion/styled';

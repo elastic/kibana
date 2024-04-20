@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -42,14 +41,12 @@ export interface DataSourceContextProviderProps {
  * @param children
  * @constructor
  */
-export const DataSourceContextProvider = (
-  {
-    dataViewId,
-    savedSearchId,
-    children,
-    onChange
-  }: DataSourceContextProviderProps
-) => {
+export const DataSourceContextProvider = ({
+  dataViewId,
+  savedSearchId,
+  children,
+  onChange,
+}: DataSourceContextProviderProps) => {
   const [value, setValue] = useState<DataViewAndSavedSearch>();
   const [error, setError] = useState<Error>();
 

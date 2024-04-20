@@ -18,13 +18,7 @@ interface AutoDownloadProps {
   onDownload?: () => void;
 }
 
-export const AutoDownload = (
-  {
-    blob,
-    name,
-    onDownload
-  }: AutoDownloadProps
-) => {
+export const AutoDownload = ({ blob, name, onDownload }: AutoDownloadProps) => {
   const anchorRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {

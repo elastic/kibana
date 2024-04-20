@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { MlPages } from '../../../locator';
@@ -29,12 +28,7 @@ const FORM_IDS = {
 
 const MATCHED_CREATED_BY_TAGS = ['ml-module-metrics-ui-hosts'];
 
-export const FeedBackButton = (
-  {
-    jobIds,
-    page
-  }: Props
-) => {
+export const FeedBackButton = ({ jobIds, page }: Props) => {
   const { jobs: getJobs } = useJobsApiService();
   const {
     services: { kibanaVersion },

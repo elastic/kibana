@@ -24,14 +24,12 @@ type VisDimensionArgInputProps = {
   };
 } & ResolvedArgProps<ResolvedColumns>;
 
-const VisDimensionArgInput = (
-  {
-    argValue,
-    typeInstance,
-    onValueChange,
-    resolved: { columns }
-  }: VisDimensionArgInputProps
-) => {
+const VisDimensionArgInput = ({
+  argValue,
+  typeInstance,
+  onValueChange,
+  resolved: { columns },
+}: VisDimensionArgInputProps) => {
   const [value, setValue] = useState(argValue);
   const confirm = typeInstance?.options?.confirm;
 

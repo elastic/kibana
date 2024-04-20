@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import { EuiPagination } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';

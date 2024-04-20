@@ -84,11 +84,13 @@ const modalProps: RulesSettingsModalProps = {
   onSave: jest.fn(),
 };
 
-const RulesSettingsModalWithProviders = (props: RulesSettingsModalProps) => (<IntlProvider locale="en">
-  <QueryClientProvider client={queryClient}>
-    <RulesSettingsModal {...props} />
-  </QueryClientProvider>
-</IntlProvider>);
+const RulesSettingsModalWithProviders = (props: RulesSettingsModalProps) => (
+  <IntlProvider locale="en">
+    <QueryClientProvider client={queryClient}>
+      <RulesSettingsModal {...props} />
+    </QueryClientProvider>
+  </IntlProvider>
+);
 
 const waitForModalLoad = async (options?: {
   flappingSection?: boolean;

@@ -24,16 +24,14 @@ interface MatchParams {
   name: string;
 }
 
-export const TemplateClone = (
-  {
-    match: {
-      params: { name },
-    },
+export const TemplateClone = ({
+  match: {
+    params: { name },
+  },
 
-    location,
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+  location,
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const decodedTemplateName = attemptToURIDecode(name)!;
   const {
     config: { enableLegacyTemplates },

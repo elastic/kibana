@@ -32,15 +32,13 @@ interface PlatinumLicensePopoverProps {
   subscriptionLink?: string;
 }
 
-export const PlatinumLicensePopover = (
-  {
-    button,
-    isPopoverOpen,
-    closePopover,
-    stackManagementHref,
-    subscriptionLink
-  }: PlatinumLicensePopoverProps
-) => {
+export const PlatinumLicensePopover = ({
+  button,
+  isPopoverOpen,
+  closePopover,
+  stackManagementHref,
+  subscriptionLink,
+}: PlatinumLicensePopoverProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>

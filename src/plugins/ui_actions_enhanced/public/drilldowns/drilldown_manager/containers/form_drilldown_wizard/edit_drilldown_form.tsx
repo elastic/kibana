@@ -25,11 +25,7 @@ export interface EditDrilldownFormProps {
   state: DrilldownState;
 }
 
-export const EditDrilldownForm = (
-  {
-    state
-  }: EditDrilldownFormProps
-) => {
+export const EditDrilldownForm = ({ state }: EditDrilldownFormProps) => {
   const drilldowns = useDrilldownManager();
   const name = state.useName();
   const triggers = state.useTriggers();

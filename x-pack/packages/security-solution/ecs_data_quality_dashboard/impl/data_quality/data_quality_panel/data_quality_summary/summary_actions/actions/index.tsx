@@ -29,15 +29,13 @@ export interface Props {
   }) => void;
 }
 
-const ActionsComponent = (
-  {
-    addSuccessToast,
-    canUserCreateAndReadCases,
-    getMarkdownComments,
-    ilmPhases,
-    openCreateCaseFlyout
-  }: Props
-) => {
+const ActionsComponent = ({
+  addSuccessToast,
+  canUserCreateAndReadCases,
+  getMarkdownComments,
+  ilmPhases,
+  openCreateCaseFlyout,
+}: Props) => {
   const { disabled: addToNewCaseDisabled, onAddToNewCase } = useAddToNewCase({
     canUserCreateAndReadCases,
     openCreateCaseFlyout,

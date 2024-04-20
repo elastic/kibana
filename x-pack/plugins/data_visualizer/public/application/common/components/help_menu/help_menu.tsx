@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { INDEX_DATA_VISUALIZER_NAME } from '../../constants';
@@ -15,11 +14,7 @@ interface HelpMenuProps {
 }
 
 // Component for adding a documentation link to the help menu
-export const HelpMenu = React.memo((
-  {
-    docLink
-  }: HelpMenuProps
-) => {
+export const HelpMenu = React.memo(({ docLink }: HelpMenuProps) => {
   const { chrome } = useDataVisualizerKibana().services;
 
   useEffect(() => {

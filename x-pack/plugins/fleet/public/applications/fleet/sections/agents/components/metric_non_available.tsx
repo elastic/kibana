@@ -11,13 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../types';
 
-export const MetricNonAvailable = (
-  {
-    agentPolicy
-  }: {
-    agentPolicy?: AgentPolicy;
-  }
-) => {
+export const MetricNonAvailable = ({ agentPolicy }: { agentPolicy?: AgentPolicy }) => {
   const isMonitoringEnabled = agentPolicy?.monitoring_enabled?.includes('metrics');
 
   return (

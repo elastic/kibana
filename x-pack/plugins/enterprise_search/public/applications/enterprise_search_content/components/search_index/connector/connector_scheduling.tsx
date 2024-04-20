@@ -32,13 +32,7 @@ interface SchedulePanelProps {
   description: string;
   title: string;
 }
-export const SchedulePanel = (
-  {
-    title,
-    description,
-    children
-  }: SchedulePanelProps
-) => {
+export const SchedulePanel = ({ title, description, children }: SchedulePanelProps) => {
   return (
     <>
       <EuiSplitPanel.Outer>

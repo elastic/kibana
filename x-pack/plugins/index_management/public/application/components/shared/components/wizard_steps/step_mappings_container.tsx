@@ -16,11 +16,7 @@ interface Props {
   esDocsBase: string;
 }
 
-export const StepMappingsContainer = (
-  {
-    esDocsBase
-  }: Props
-) => {
+export const StepMappingsContainer = ({ esDocsBase }: Props) => {
   const { defaultValue, updateContent, getSingleContentData } = Forms.useContent<
     CommonWizardSteps,
     'mappings'

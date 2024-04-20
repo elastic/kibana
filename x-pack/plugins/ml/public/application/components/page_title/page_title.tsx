@@ -6,7 +6,6 @@
  */
 
 import { css } from '@emotion/react';
-import type { FC } from 'react';
 import React from 'react';
 
 const cssPageTitle = css({
@@ -17,8 +16,4 @@ interface PageTitleProps {
   title: string;
 }
 
-export const PageTitle = (
-  {
-    title
-  }: PageTitleProps
-) => <div css={cssPageTitle}>{title}</div>;
+export const PageTitle = ({ title }: PageTitleProps) => <div css={cssPageTitle}>{title}</div>;

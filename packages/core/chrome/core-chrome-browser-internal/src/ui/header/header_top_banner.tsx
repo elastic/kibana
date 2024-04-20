@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import type { ChromeUserBanner } from '@kbn/core-chrome-browser';
@@ -16,11 +16,7 @@ export interface HeaderTopBannerProps {
   headerBanner$: Observable<ChromeUserBanner | undefined>;
 }
 
-export const HeaderTopBanner = (
-  {
-    headerBanner$
-  }: HeaderTopBannerProps
-) => {
+export const HeaderTopBanner = ({ headerBanner$ }: HeaderTopBannerProps) => {
   const headerBanner = useObservable(headerBanner$, undefined);
   if (!headerBanner) {
     return null;

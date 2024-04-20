@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -47,29 +46,29 @@ const columns = [
   },
 ];
 
-export const EvaluationQualityMetricsTable = (
-  {
-    evaluationMetricsItems
-  }: {
-    evaluationMetricsItems: ClassificationMetricItem[];
-  }
-) => (<>
-  <EuiAccordion
-    id="recall-and-accuracy"
-    buttonContent={
-      <FormattedMessage
-        id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRecallAndAccuracy"
-        defaultMessage="Per class recall and accuracy"
-      />
-    }
-  >
-    <EuiPanel>
-      <EuiInMemoryTable<ClassificationMetricItem>
-        items={evaluationMetricsItems}
-        columns={columns}
-        pagination
-        sorting
-      />
-    </EuiPanel>
-  </EuiAccordion>
-</>);
+export const EvaluationQualityMetricsTable = ({
+  evaluationMetricsItems,
+}: {
+  evaluationMetricsItems: ClassificationMetricItem[];
+}) => (
+  <>
+    <EuiAccordion
+      id="recall-and-accuracy"
+      buttonContent={
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRecallAndAccuracy"
+          defaultMessage="Per class recall and accuracy"
+        />
+      }
+    >
+      <EuiPanel>
+        <EuiInMemoryTable<ClassificationMetricItem>
+          items={evaluationMetricsItems}
+          columns={columns}
+          pagination
+          sorting
+        />
+      </EuiPanel>
+    </EuiAccordion>
+  </>
+);

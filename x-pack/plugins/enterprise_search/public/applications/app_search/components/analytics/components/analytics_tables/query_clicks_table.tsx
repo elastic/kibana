@@ -24,11 +24,7 @@ interface Props {
 }
 type Columns = Array<EuiBasicTableColumn<QueryClick>>;
 
-export const QueryClicksTable = (
-  {
-    items
-  }: Props
-) => {
+export const QueryClicksTable = ({ items }: Props) => {
   const DOCUMENT_COLUMN = {
     ...FIRST_COLUMN_PROPS,
     field: 'document',

@@ -26,13 +26,11 @@ export const InlineLogViewSplashPage = (props: InlineLogViewSplashPageProps) => 
   );
 };
 
-export const InlineLogViewSplashPrompt = (
-  {
-    revertToDefaultLogView
-  }: {
-    revertToDefaultLogView: InlineLogViewSplashPageProps['revertToDefaultLogView'];
-  }
-) => {
+export const InlineLogViewSplashPrompt = ({
+  revertToDefaultLogView,
+}: {
+  revertToDefaultLogView: InlineLogViewSplashPageProps['revertToDefaultLogView'];
+}) => {
   const title = (
     <FormattedMessage
       id="xpack.infra.ml.splash.inlineLogView.title"

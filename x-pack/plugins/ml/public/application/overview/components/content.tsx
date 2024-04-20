@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { AnomalyDetectionPanel } from './anomaly_detection_panel';
@@ -21,13 +21,11 @@ interface Props {
   setDfaLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const OverviewContent = (
-  {
-    createAnomalyDetectionJobDisabled,
-    setAdLazyJobCount,
-    setDfaLazyJobCount
-  }: Props
-) => {
+export const OverviewContent = ({
+  createAnomalyDetectionJobDisabled,
+  setAdLazyJobCount,
+  setDfaLazyJobCount,
+}: Props) => {
   const {
     services: {
       uiSettings,

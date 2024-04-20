@@ -7,7 +7,6 @@
 import { omit } from 'lodash';
 import React, {
   createContext,
-  FunctionComponent,
   useCallback,
   useContext,
   useEffect,
@@ -61,14 +60,12 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
 }
 
-export const PipelineProcessorsContextProvider = (
-  {
-    value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
-    onUpdate,
-    onFlyoutOpen,
-    children
-  }: Props
-) => {
+export const PipelineProcessorsContextProvider = ({
+  value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
+  onUpdate,
+  onFlyoutOpen,
+  children,
+}: Props) => {
   const initRef = useRef(false);
 
   const [mode, setMode] = useState<EditorMode>(() => ({

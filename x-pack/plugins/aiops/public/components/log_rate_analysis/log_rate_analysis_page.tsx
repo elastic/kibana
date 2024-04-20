@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 
@@ -39,11 +38,7 @@ interface Props {
   stickyHistogram?: boolean;
 }
 
-export const LogRateAnalysisPage = (
-  {
-    stickyHistogram
-  }: Props
-) => {
+export const LogRateAnalysisPage = ({ stickyHistogram }: Props) => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 

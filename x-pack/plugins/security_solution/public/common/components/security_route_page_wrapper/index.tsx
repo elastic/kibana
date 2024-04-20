@@ -36,13 +36,11 @@ interface SecurityRoutePageWrapperProps {
  * </PluginTemplateWrapper>
  * ```
  */
-export const SecurityRoutePageWrapper = (
-  {
-    children,
-    pageName,
-    redirectOnMissing
-  }: SecurityRoutePageWrapperProps
-) => {
+export const SecurityRoutePageWrapper = ({
+  children,
+  pageName,
+  redirectOnMissing,
+}: SecurityRoutePageWrapperProps) => {
   const link = useLinkInfo(pageName);
   const UpsellPage = useUpsellingPage(pageName);
 

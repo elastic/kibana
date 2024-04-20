@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode, FunctionComponent } from 'react';
+import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -71,29 +71,27 @@ export interface PackageListGridProps {
   showSearchTools?: boolean;
 }
 
-export const PackageListGrid = (
-  {
-    isLoading,
-    controls,
-    title,
-    list,
-    searchTerm,
-    setSearchTerm,
-    selectedCategory,
-    setCategory,
-    categories,
-    availableSubCategories,
-    setSelectedSubCategory,
-    selectedSubCategory,
-    setUrlandReplaceHistory,
-    setUrlandPushHistory,
-    showMissingIntegrationMessage = false,
-    callout,
-    showCardLabels = true,
-    showControls = true,
-    showSearchTools = true
-  }: PackageListGridProps
-) => {
+export const PackageListGrid = ({
+  isLoading,
+  controls,
+  title,
+  list,
+  searchTerm,
+  setSearchTerm,
+  selectedCategory,
+  setCategory,
+  categories,
+  availableSubCategories,
+  setSelectedSubCategory,
+  selectedSubCategory,
+  setUrlandReplaceHistory,
+  setUrlandPushHistory,
+  showMissingIntegrationMessage = false,
+  callout,
+  showCardLabels = true,
+  showControls = true,
+  showSearchTools = true,
+}: PackageListGridProps) => {
   const localSearchRef = useLocalSearch(list, !!isLoading);
 
   const [isPopoverOpen, setPopover] = useState(false);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { useKibana } from '../../lib/kibana';
 import { ExternalLink } from './external_link';
@@ -17,13 +16,7 @@ interface DocLinkProps {
   linkText: string;
 }
 
-const DocLink = (
-  {
-    guidePath = 'security',
-    docPath,
-    linkText
-  }: DocLinkProps
-) => {
+const DocLink = ({ guidePath = 'security', docPath, linkText }: DocLinkProps) => {
   const { services } = useKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = services.docLinks;
 

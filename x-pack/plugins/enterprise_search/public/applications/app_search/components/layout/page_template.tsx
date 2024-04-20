@@ -14,14 +14,12 @@ import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { useAppSearchNav } from './nav';
 
-export const AppSearchPageTemplate = (
-  {
-    children,
-    pageChrome,
-    pageViewTelemetry,
-    ...pageTemplateProps
-  }: Omit<PageTemplateProps, 'useEndpointHeaderActions'>
-) => {
+export const AppSearchPageTemplate = ({
+  children,
+  pageChrome,
+  pageViewTelemetry,
+  ...pageTemplateProps
+}: Omit<PageTemplateProps, 'useEndpointHeaderActions'>) => {
   return (
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}

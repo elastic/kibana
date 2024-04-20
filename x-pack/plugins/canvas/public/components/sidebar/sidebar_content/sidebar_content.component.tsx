@@ -61,23 +61,17 @@ const GroupedElementSidebar = () => (
   </Fragment>
 );
 
-const SingleElementSidebar = (
-  {
-    selectedElementId
-  }: {
-    selectedElementId: string | null;
-  }
-) => (<Fragment>
-  <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
-  <ElementSettings selectedElementId={selectedElementId} />
-</Fragment>);
+const SingleElementSidebar = ({ selectedElementId }: { selectedElementId: string | null }) => (
+  <Fragment>
+    <SidebarHeader title={strings.getSingleElementSidebarTitle()} showLayerControls />
+    <ElementSettings selectedElementId={selectedElementId} />
+  </Fragment>
+);
 
-export const SidebarContent = (
-  {
-    selectedToplevelNodes,
-    selectedElementId
-  }: SidebarContentProps
-) => {
+export const SidebarContent = ({
+  selectedToplevelNodes,
+  selectedElementId,
+}: SidebarContentProps) => {
   if (selectedToplevelNodes.length > 1) {
     return <MultiElementSidebar />;
   }

@@ -18,14 +18,7 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const LoggingActionFields = (
-  {
-    action,
-    editAction,
-    errors,
-    hasErrors
-  }: Props
-) => {
+export const LoggingActionFields = ({ action, editAction, errors, hasErrors }: Props) => {
   const { text } = action;
   return (
     <ErrableFormRow

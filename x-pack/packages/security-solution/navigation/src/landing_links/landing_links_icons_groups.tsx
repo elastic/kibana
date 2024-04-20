@@ -22,13 +22,11 @@ export interface LandingSubLinkProps {
   onLinkClick?: (id: string) => void;
 }
 
-export const LandingLinksIconsGroups = React.memo(function LandingLinksIconsGroups(
-  {
-    items,
-    urlState,
-    onLinkClick
-  }: LandingLinksIconsGroupsProps
-) {
+export const LandingLinksIconsGroups = React.memo(function LandingLinksIconsGroups({
+  items,
+  urlState,
+  onLinkClick,
+}: LandingLinksIconsGroupsProps) {
   return (
     <EuiFlexGroup gutterSize="xl" wrap>
       {items.map(({ links, ...link }) => (

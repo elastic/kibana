@@ -19,12 +19,7 @@ interface Props {
 
 const statuses = getStatusConfiguration();
 
-const CaseStatusComponent = (
-  {
-    status,
-    dataTestSubj
-  }: Props
-) => {
+const CaseStatusComponent = ({ status, dataTestSubj }: Props) => {
   return (
     <EuiBadge
       data-test-subj={dataTestSubj ? dataTestSubj : `case-status-badge-${status}`}

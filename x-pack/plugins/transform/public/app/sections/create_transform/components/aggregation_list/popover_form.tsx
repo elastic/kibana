@@ -38,14 +38,7 @@ interface Props {
   onChange(d: PivotAggsConfig): void;
 }
 
-export const PopoverForm = (
-  {
-    defaultData,
-    otherAggNames,
-    onChange,
-    options
-  }: Props
-) => {
+export const PopoverForm = ({ defaultData, otherAggNames, onChange, options }: Props) => {
   const [aggConfigDef, setAggConfigDef] = useState(cloneDeep(defaultData));
 
   const [aggName, setAggName] = useState(defaultData.aggName);

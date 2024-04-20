@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 
 import { EuiFieldSearch, EuiText, useEuiTheme, EuiIcon, EuiScreenReaderOnly } from '@elastic/eui';
@@ -31,19 +30,17 @@ export interface Props {
   setSelectedSubCategory?: (c: string | undefined) => void;
 }
 
-export const SearchBox = (
-  {
-    searchTerm,
-    setSearchTerm,
-    selectedCategory,
-    setCategory,
-    categories,
-    availableSubCategories,
-    setSelectedSubCategory,
-    selectedSubCategory,
-    setUrlandReplaceHistory
-  }: Props
-) => {
+export const SearchBox = ({
+  searchTerm,
+  setSearchTerm,
+  selectedCategory,
+  setCategory,
+  categories,
+  availableSubCategories,
+  setSelectedSubCategory,
+  selectedSubCategory,
+  setUrlandReplaceHistory,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const onQueryChange = (e: any) => {

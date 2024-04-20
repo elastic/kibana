@@ -8,7 +8,6 @@
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -99,16 +98,14 @@ interface DetectionEngineAlertTableProps {
   onRuleChange?: () => void;
 }
 
-export const AlertsTableComponent = (
-  {
-    configId,
-    inputFilters,
-    tableId = TableId.alertsOnAlertsPage,
-    sourcererScope = SourcererScopeName.detections,
-    isLoading,
-    onRuleChange
-  }: DetectionEngineAlertTableProps
-) => {
+export const AlertsTableComponent = ({
+  configId,
+  inputFilters,
+  tableId = TableId.alertsOnAlertsPage,
+  sourcererScope = SourcererScopeName.detections,
+  isLoading,
+  onRuleChange,
+}: DetectionEngineAlertTableProps) => {
   const { triggersActionsUi, uiSettings } = useKibana().services;
 
   const { from, to, setQuery } = useGlobalTime();

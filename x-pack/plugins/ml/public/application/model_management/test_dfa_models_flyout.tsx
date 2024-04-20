@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,12 +19,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const TestDfaModelsFlyout = (
-  {
-    model,
-    onClose
-  }: Props
-) => {
+export const TestDfaModelsFlyout = ({ model, onClose }: Props) => {
   const sourceIndex = useMemo(
     () =>
       Array.isArray(model.metadata?.analytics_config.source.index)

@@ -29,11 +29,7 @@ interface EditDescriptionProps {
   connector: Connector;
 }
 
-export const EditDescription = (
-  {
-    connector
-  }: EditDescriptionProps
-) => {
+export const EditDescription = ({ connector }: EditDescriptionProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newDescription, setNewDescription] = useState(connector.description || '');
   const { http } = useKibanaServices();

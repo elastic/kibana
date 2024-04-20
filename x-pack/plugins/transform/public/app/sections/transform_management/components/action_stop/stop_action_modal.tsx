@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
@@ -13,13 +12,7 @@ import type { StopAction } from './use_stop_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-export const StopActionModal = (
-  {
-    closeModal,
-    items,
-    stopAndCloseModal
-  }: StopAction
-) => {
+export const StopActionModal = ({ closeModal, items, stopAndCloseModal }: StopAction) => {
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
 
   const isBulkAction = items.length > 1;

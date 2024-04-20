@@ -82,12 +82,7 @@ const ConvertFieldBadge = styled(ProviderFieldBadge)`
   }
 `;
 
-const TemplateFieldBadgeComponent = (
-  {
-    type,
-    toggleType
-  }: TemplateFieldBadgeProps
-) => {
+const TemplateFieldBadgeComponent = ({ type, toggleType }: TemplateFieldBadgeProps) => {
   if (type !== DataProviderType.template) {
     return (
       <ConvertFieldBadge onClick={toggleType}>{i18n.CONVERT_TO_TEMPLATE_FIELD}</ConvertFieldBadge>

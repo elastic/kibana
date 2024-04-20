@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,12 +17,7 @@ interface FieldTypeIconProps {
   type: string;
 }
 
-export const FieldTypeIcon = (
-  {
-    tooltipEnabled = false,
-    type
-  }: FieldTypeIconProps
-) => {
+export const FieldTypeIcon = ({ tooltipEnabled = false, type }: FieldTypeIconProps) => {
   const label =
     getFieldTypeName(type) ??
     i18n.translate('xpack.dataVisualizer.fieldTypeIcon.fieldTypeTooltip', {

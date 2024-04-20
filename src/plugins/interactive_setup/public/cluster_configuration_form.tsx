@@ -32,7 +32,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
@@ -67,22 +66,20 @@ export interface ClusterConfigurationFormProps {
   onSuccess?(): void;
 }
 
-export const ClusterConfigurationForm = (
-  {
-    host,
-    authRequired,
-    certificateChain,
+export const ClusterConfigurationForm = ({
+  host,
+  authRequired,
+  certificateChain,
 
-    defaultValues = {
-      username: 'kibana_system',
-      password: '',
-      caCert: '',
-    },
+  defaultValues = {
+    username: 'kibana_system',
+    password: '',
+    caCert: '',
+  },
 
-    onCancel,
-    onSuccess
-  }: ClusterConfigurationFormProps
-) => {
+  onCancel,
+  onSuccess,
+}: ClusterConfigurationFormProps) => {
   const { http } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
@@ -318,16 +315,14 @@ export interface CertificatePanelProps {
   onClick?(): void;
 }
 
-export const CertificatePanel = (
-  {
-    certificate,
-    onClick,
-    type,
-    compressed = false
-  }: CertificatePanelProps
-) => {
+export const CertificatePanel = ({
+  certificate,
+  onClick,
+  type,
+  compressed = false,
+}: CertificatePanelProps) => {
   return (
-    (<EuiPanel color={compressed ? 'subdued' : undefined} hasBorder={!compressed}>
+    <EuiPanel color={compressed ? 'subdued' : undefined} hasBorder={!compressed}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiIcon type="document" size="l" />
@@ -410,18 +405,14 @@ export const CertificatePanel = (
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>)
+    </EuiPanel>
   );
 };
 
 export interface CertificateChainProps {
   certificateChain: Certificate[];
 }
-const CertificateChain = (
-  {
-    certificateChain
-  }: CertificateChainProps
-) => {
+const CertificateChain = ({ certificateChain }: CertificateChainProps) => {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -489,11 +480,7 @@ export interface ForgotPasswordPopoverProps {
   username: string;
 }
 
-export const ForgotPasswordPopover = (
-  {
-    username
-  }: ForgotPasswordPopoverProps
-) => {
+export const ForgotPasswordPopover = ({ username }: ForgotPasswordPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (

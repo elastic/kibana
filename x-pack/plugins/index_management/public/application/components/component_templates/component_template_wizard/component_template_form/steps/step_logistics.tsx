@@ -42,13 +42,7 @@ interface Props {
   isEditing?: boolean;
 }
 
-export const StepLogistics = React.memo((
-  {
-    defaultValue,
-    isEditing,
-    onChange
-  }: Props
-) => {
+export const StepLogistics = React.memo(({ defaultValue, isEditing, onChange }: Props) => {
   const { form } = useForm({
     schema: logisticsFormSchema,
     defaultValue,
@@ -246,11 +240,7 @@ export const StepLogistics = React.memo((
               defaultMessage="Arbitrary information about the template, stored in the cluster state. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink
-                    href={documentation.componentTemplatesMetadata}
-                    target="_blank"
-                    external
-                  >
+                  <EuiLink href={documentation.componentTemplatesMetadata} target="_blank" external>
                     {i18n.translate(
                       'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDocumentionLink',
                       {

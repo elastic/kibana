@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core-http-browser';
 
@@ -52,13 +52,7 @@ interface Props {
  * an array of indices, for example "deleteIndices(indexNames)".
  *
  */
-export const ManageIndexButton = (
-  {
-    index,
-    reloadIndexDetails,
-    navigateToIndicesList
-  }: Props
-) => {
+export const ManageIndexButton = ({ index, reloadIndexDetails, navigateToIndicesList }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // the "index actions context menu" component is expecting an array of indices, the same as on the indices list

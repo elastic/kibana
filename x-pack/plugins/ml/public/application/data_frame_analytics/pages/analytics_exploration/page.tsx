@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,15 +26,13 @@ import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 
-export const Page = (
-  {
-    jobId,
-    analysisType
-  }: {
-    jobId: string;
-    analysisType: DataFrameAnalysisConfigType;
-  }
-) => {
+export const Page = ({
+  jobId,
+  analysisType,
+}: {
+  jobId: string;
+  analysisType: DataFrameAnalysisConfigType;
+}) => {
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
   const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!jobId);
   const [jobsExist, setJobsExist] = useState(true);

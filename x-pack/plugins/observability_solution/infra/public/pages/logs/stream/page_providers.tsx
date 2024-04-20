@@ -43,14 +43,12 @@ const ViewLogInContext = ({ children }) => {
   );
 };
 
-const LogEntriesStateProvider = (
-  {
-    children,
-    logStreamPageState
-  }: {
-    logStreamPageState: InitializedLogStreamPageState;
-  }
-) => {
+const LogEntriesStateProvider = ({
+  children,
+  logStreamPageState,
+}: {
+  logStreamPageState: InitializedLogStreamPageState;
+}) => {
   const { logViewReference } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
   const {
@@ -75,14 +73,12 @@ const LogEntriesStateProvider = (
   );
 };
 
-const LogHighlightsState = (
-  {
-    children,
-    logStreamPageState
-  }: {
-    logStreamPageState: InitializedLogStreamPageState;
-  }
-) => {
+const LogHighlightsState = ({
+  children,
+  logStreamPageState,
+}: {
+  logStreamPageState: InitializedLogStreamPageState;
+}) => {
   const { logViewReference, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const serializedParsedQuery = useMemo(
@@ -102,16 +98,14 @@ const LogHighlightsState = (
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogStreamPageContentProviders = (
-  {
-    children,
-    logStreamPageState,
-    logStreamPageCallbacks
-  }: {
-    logStreamPageState: InitializedLogStreamPageState;
-    logStreamPageCallbacks: LogStreamPageCallbacks;
-  }
-) => {
+export const LogStreamPageContentProviders = ({
+  children,
+  logStreamPageState,
+  logStreamPageCallbacks,
+}: {
+  logStreamPageState: InitializedLogStreamPageState;
+  logStreamPageCallbacks: LogStreamPageCallbacks;
+}) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>

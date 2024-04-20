@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, type ChangeEvent, type FC } from 'react';
+import React, { useEffect, useMemo, useState, type ChangeEvent } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -38,14 +38,12 @@ interface FieldFilterPopoverProps {
 
 // This component is mostly inspired by EUI's Data Grid Column Selector
 // https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/column_selector.tsx
-export const FieldFilterPopover = (
-  {
-    disabled,
-    disabledApplyButton,
-    uniqueFieldNames,
-    onChange
-  }: FieldFilterPopoverProps
-) => {
+export const FieldFilterPopover = ({
+  disabled,
+  disabledApplyButton,
+  uniqueFieldNames,
+  onChange,
+}: FieldFilterPopoverProps) => {
   const euiThemeContext = useEuiTheme();
   // Inspired by https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/_data_grid_column_selector.scss
   const fieldSelectPopover = useMemo(

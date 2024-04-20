@@ -19,16 +19,14 @@ interface MatchParams {
   componentTemplateName?: string;
 }
 
-export const ComponentTemplateListContainer = (
-  {
-    match: {
-      params: { componentTemplateName },
-    },
+export const ComponentTemplateListContainer = ({
+  match: {
+    params: { componentTemplateName },
+  },
 
-    location,
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+  location,
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const { executionContext } = useComponentTemplatesContext();
 
   useExecutionContext(executionContext, {

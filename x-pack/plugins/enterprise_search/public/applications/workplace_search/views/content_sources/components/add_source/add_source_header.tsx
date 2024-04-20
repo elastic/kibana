@@ -28,13 +28,7 @@ interface AddSourceHeaderProps {
   categories?: string[];
 }
 
-export const AddSourceHeader = (
-  {
-    name,
-    serviceType,
-    categories = []
-  }: AddSourceHeaderProps
-) => {
+export const AddSourceHeader = ({ name, serviceType, categories = [] }: AddSourceHeaderProps) => {
   return (
     <>
       <EuiSpacer size="s" />

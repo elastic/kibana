@@ -29,17 +29,15 @@ export interface SavedSearchEmbeddableBaseProps {
   interceptedWarnings?: SearchResponseWarning[];
 }
 
-export const SavedSearchEmbeddableBase = (
-  {
-    isLoading,
-    totalHitCount,
-    prepend,
-    append,
-    dataTestSubj,
-    interceptedWarnings,
-    children
-  }: SavedSearchEmbeddableBaseProps
-) => {
+export const SavedSearchEmbeddableBase = ({
+  isLoading,
+  totalHitCount,
+  prepend,
+  append,
+  dataTestSubj,
+  interceptedWarnings,
+  children,
+}: SavedSearchEmbeddableBaseProps) => {
   return (
     <EuiFlexGroup
       css={containerStyles}

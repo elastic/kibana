@@ -13,26 +13,22 @@ export interface IndexOverviewPanelProps {
   footer?: React.ReactNode | React.ReactNode[];
 }
 
-export const IndexOverviewPanel = (
-  {
-    title,
-    footer,
-    children
-  }: IndexOverviewPanelProps
-) => (<EuiSplitPanel.Outer grow>
-  <EuiSplitPanel.Inner>
-    <EuiTitle size="xxs">
-      <h6>{title}</h6>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-    {children}
-  </EuiSplitPanel.Inner>
-  {footer && (
-    <EuiSplitPanel.Inner grow={false} color="subdued">
-      {footer}
+export const IndexOverviewPanel = ({ title, footer, children }: IndexOverviewPanelProps) => (
+  <EuiSplitPanel.Outer grow>
+    <EuiSplitPanel.Inner>
+      <EuiTitle size="xxs">
+        <h6>{title}</h6>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {children}
     </EuiSplitPanel.Inner>
-  )}
-</EuiSplitPanel.Outer>);
+    {footer && (
+      <EuiSplitPanel.Inner grow={false} color="subdued">
+        {footer}
+      </EuiSplitPanel.Inner>
+    )}
+  </EuiSplitPanel.Outer>
+);
 
 export const IndexOverviewPanelStat = ({ children }) => (
   <EuiTitle size="l">

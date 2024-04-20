@@ -73,15 +73,13 @@ const refreshedTimeframe = (startDate: string, endDate: string) => {
   };
 };
 
-const RulePreviewComponent = (
-  {
-    isDisabled,
-    defineRuleData,
-    aboutRuleData,
-    scheduleRuleData,
-    exceptionsList
-  }: RulePreviewProps
-) => {
+const RulePreviewComponent = ({
+  isDisabled,
+  defineRuleData,
+  aboutRuleData,
+  scheduleRuleData,
+  exceptionsList,
+}: RulePreviewProps) => {
   const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
 

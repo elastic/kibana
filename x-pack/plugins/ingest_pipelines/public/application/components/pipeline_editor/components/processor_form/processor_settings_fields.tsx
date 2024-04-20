@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../../../shared_imports';
@@ -19,11 +19,7 @@ export interface Props {
   processor?: ProcessorInternal;
 }
 
-export const ProcessorSettingsFields = (
-  {
-    processor
-  }: Props
-) => {
+export const ProcessorSettingsFields = ({ processor }: Props) => {
   return (
     <>
       <ProcessorTypeField initialType={processor?.type} />

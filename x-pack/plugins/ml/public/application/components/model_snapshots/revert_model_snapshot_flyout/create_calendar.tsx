@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,17 +41,15 @@ interface Props {
   chartReady: boolean;
 }
 
-export const CreateCalendar = (
-  {
-    calendarEvents,
-    setCalendarEvents,
-    minSelectableTimeStamp,
-    maxSelectableTimeStamp,
-    eventRateData,
-    anomalies,
-    chartReady
-  }: Props
-) => {
+export const CreateCalendar = ({
+  calendarEvents,
+  setCalendarEvents,
+  minSelectableTimeStamp,
+  maxSelectableTimeStamp,
+  eventRateData,
+  anomalies,
+  chartReady,
+}: Props) => {
   const maxSelectableTimeMoment = moment(maxSelectableTimeStamp);
   const minSelectableTimeMoment = moment(minSelectableTimeStamp);
 
@@ -264,30 +261,25 @@ interface ChartProps {
   overlayColor: string;
 }
 
-const Chart = memo((
-  {
-    eventRateData,
-    anomalies,
-    loading,
-    onBrushEnd,
-    overlayRanges,
-    overlayColor
-  }: ChartProps
-) => (<EventRateChart
-  eventRateChartData={eventRateData}
-  anomalyData={anomalies}
-  loading={loading}
-  height={'100px'}
-  width={'100%'}
-  fadeChart={true}
-  overlayRanges={overlayRanges.map((c) => ({
-    start: c.start,
-    end: c.end,
-    color: overlayColor,
-    showMarker: false,
-  }))}
-  onBrushEnd={onBrushEnd as BrushEndListener}
-/>));
+const Chart = memo(
+  ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges, overlayColor }: ChartProps) => (
+    <EventRateChart
+      eventRateChartData={eventRateData}
+      anomalyData={anomalies}
+      loading={loading}
+      height={'100px'}
+      width={'100%'}
+      fadeChart={true}
+      overlayRanges={overlayRanges.map((c) => ({
+        start: c.start,
+        end: c.end,
+        color: overlayColor,
+        showMarker: false,
+      }))}
+      onBrushEnd={onBrushEnd as BrushEndListener}
+    />
+  )
+);
 
 function filterIncompleteEvents(event: CalendarEvent): event is CalendarEvent {
   return event.start !== null && event.end !== null;

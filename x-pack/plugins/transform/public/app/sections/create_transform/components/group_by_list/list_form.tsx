@@ -26,14 +26,7 @@ interface ListProps {
   onChange(id: string, item: PivotGroupByConfig): void;
 }
 
-export const GroupByListForm = (
-  {
-    deleteHandler,
-    list,
-    onChange,
-    options
-  }: ListProps
-) => {
+export const GroupByListForm = ({ deleteHandler, list, onChange, options }: ListProps) => {
   const listKeys = Object.keys(list);
   return (
     <>

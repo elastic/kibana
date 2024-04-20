@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,11 +19,9 @@ export interface AnomalyDetectionAlertsOverviewChart {
   seriesType?: 'bar_stacked' | 'line';
 }
 
-export const AnomalyDetectionAlertsOverviewChart = (
-  {
-    seriesType = 'line'
-  }: AnomalyDetectionAlertsOverviewChart
-) => {
+export const AnomalyDetectionAlertsOverviewChart = ({
+  seriesType = 'line',
+}: AnomalyDetectionAlertsOverviewChart) => {
   const {
     services: {
       lens: { EmbeddableComponent },

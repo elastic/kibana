@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,13 +33,7 @@ interface Props {
   onChange: (v: CanvasVariable['value']) => void;
 }
 
-export const VarValueField = (
-  {
-    type,
-    value,
-    onChange
-  }: Props
-) => {
+export const VarValueField = ({ type, value, onChange }: Props) => {
   const idPrefix = htmlIdGenerator()();
 
   const options = [

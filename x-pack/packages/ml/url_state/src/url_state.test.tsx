@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, type FC } from 'react';
+import React, { useEffect } from 'react';
 import { render, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 

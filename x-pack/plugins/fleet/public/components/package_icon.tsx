@@ -22,16 +22,14 @@ const Icon = styled(EuiIcon)`
   margin-block-end: unset !important;
 `;
 
-export const PackageIcon = (
-  {
-    packageName,
-    integrationName,
-    version,
-    icons,
-    tryApi,
-    ...euiIconProps
-  }: UsePackageIconType & Omit<EuiIconProps, 'type'>
-) => {
+export const PackageIcon = ({
+  packageName,
+  integrationName,
+  version,
+  icons,
+  tryApi,
+  ...euiIconProps
+}: UsePackageIconType & Omit<EuiIconProps, 'type'>) => {
   const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
   // @ts-expect-error loading="lazy" is not supported by EuiIcon
   return <Icon size="s" type={iconType} {...euiIconProps} loading="lazy" />;

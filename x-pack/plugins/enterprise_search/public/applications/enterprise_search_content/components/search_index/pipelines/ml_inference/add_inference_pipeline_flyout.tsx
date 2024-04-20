@@ -227,14 +227,12 @@ export const AddInferencePipelineHorizontalSteps = () => {
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
-export const AddInferencePipelineFooter = (
-  {
-    ingestionMethod,
-    onClose
-  }: AddInferencePipelineFlyoutProps & {
-    ingestionMethod: string;
-  }
-) => {
+export const AddInferencePipelineFooter = ({
+  ingestionMethod,
+  onClose,
+}: AddInferencePipelineFlyoutProps & {
+  ingestionMethod: string;
+}) => {
   const {
     addInferencePipelineModal: modal,
     isPipelineDataValid,

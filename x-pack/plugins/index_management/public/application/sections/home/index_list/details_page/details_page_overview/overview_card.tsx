@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
@@ -23,14 +23,12 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export const OverviewCard = (
-  {
-    title,
-    content: { left: contentLeft, right: contentRight },
-    footer: { left: footerLeft, right: footerRight } = {},
-    'data-test-subj': dataTestSubj
-  }: Props
-) => {
+export const OverviewCard = ({
+  title,
+  content: { left: contentLeft, right: contentRight },
+  footer: { left: footerLeft, right: footerRight } = {},
+  'data-test-subj': dataTestSubj,
+}: Props) => {
   return (
     <EuiFlexItem>
       <EuiSplitPanel.Outer grow hasBorder={true} data-test-subj={dataTestSubj}>

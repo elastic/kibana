@@ -20,11 +20,7 @@ interface Props {
   monitorStatus: Ping | null;
 }
 
-export const MonitorRedirects = (
-  {
-    monitorStatus
-  }: Props
-) => {
+export const MonitorRedirects = ({ monitorStatus }: Props) => {
   const list = monitorStatus?.http?.response?.redirects;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

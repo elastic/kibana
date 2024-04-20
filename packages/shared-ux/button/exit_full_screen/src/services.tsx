@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { useContext } from 'react';
 
 import type {
   Services,
@@ -19,12 +19,10 @@ const ExitFullScreenButtonContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const ExitFullScreenButtonProvider = (
-  {
-    children,
-    ...services
-  }: ExitFullScreenButtonServices
-) => {
+export const ExitFullScreenButtonProvider = ({
+  children,
+  ...services
+}: ExitFullScreenButtonServices) => {
   return (
     <ExitFullScreenButtonContext.Provider value={services}>
       {children}
@@ -35,12 +33,10 @@ export const ExitFullScreenButtonProvider = (
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ExitFullScreenButtonKibanaProvider = (
-  {
-    children,
-    ...services
-  }: ExitFullScreenButtonKibanaDependencies
-) => {
+export const ExitFullScreenButtonKibanaProvider = ({
+  children,
+  ...services
+}: ExitFullScreenButtonKibanaDependencies) => {
   return (
     <ExitFullScreenButtonContext.Provider
       value={{

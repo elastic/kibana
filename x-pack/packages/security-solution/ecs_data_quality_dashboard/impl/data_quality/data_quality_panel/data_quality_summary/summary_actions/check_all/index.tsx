@@ -48,20 +48,18 @@ interface Props {
 
 const DELAY_AFTER_EVERY_CHECK_COMPLETES = 3000; // ms
 
-const CheckAllComponent = (
-  {
-    formatBytes,
-    formatNumber,
-    ilmPhases,
-    incrementCheckAllIndiciesChecked,
-    onCheckCompleted,
-    patternIndexNames,
-    patterns,
-    setCheckAllIndiciesChecked,
-    setCheckAllTotalIndiciesToCheck,
-    setIndexToCheck
-  }: Props
-) => {
+const CheckAllComponent = ({
+  formatBytes,
+  formatNumber,
+  ilmPhases,
+  incrementCheckAllIndiciesChecked,
+  onCheckCompleted,
+  patternIndexNames,
+  patterns,
+  setCheckAllIndiciesChecked,
+  setCheckAllTotalIndiciesToCheck,
+  setIndexToCheck,
+}: Props) => {
   const { httpFetch, isILMAvailable } = useDataQualityContext();
   const abortController = useRef(new AbortController());
   const [isRunning, setIsRunning] = useState<boolean>(false);

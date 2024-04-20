@@ -12,10 +12,8 @@ interface Props {
   alertsCount: number;
 }
 
-export const AlertsBadge = (
-  {
-    alertsCount
-  }: Props
-) => (<EuiBadge color="danger" data-test-subj="alertsBadge">
-  {alertsCount}
-</EuiBadge>);
+export const AlertsBadge = ({ alertsCount }: Props) => (
+  <EuiBadge color="danger" data-test-subj="alertsBadge">
+    {alertsCount}
+  </EuiBadge>
+);

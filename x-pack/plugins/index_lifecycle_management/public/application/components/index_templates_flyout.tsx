@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,13 +26,7 @@ interface Props {
   indexTemplates: string[];
   close: () => void;
 }
-export const IndexTemplatesFlyout = (
-  {
-    policyName,
-    indexTemplates,
-    close
-  }: Props
-) => {
+export const IndexTemplatesFlyout = ({ policyName, indexTemplates, close }: Props) => {
   const {
     services: { getUrlForApp },
   } = useKibana();

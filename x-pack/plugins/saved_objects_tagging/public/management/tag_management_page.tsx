@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { Query } from '@elastic/eui';
@@ -31,17 +31,15 @@ interface TagManagementPageParams {
   assignableTypes: string[];
 }
 
-export const TagManagementPage = (
-  {
-    setBreadcrumbs,
-    core,
-    tagClient,
-    tagCache,
-    assignmentService,
-    capabilities,
-    assignableTypes
-  }: TagManagementPageParams
-) => {
+export const TagManagementPage = ({
+  setBreadcrumbs,
+  core,
+  tagClient,
+  tagCache,
+  assignmentService,
+  capabilities,
+  assignableTypes,
+}: TagManagementPageParams) => {
   const { application, http, ...startServices } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);

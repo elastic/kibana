@@ -46,13 +46,7 @@ export interface StatCardProps {
   title: string;
 }
 
-export const StatCard = (
-  {
-    title,
-    content,
-    footer
-  }: StatCardProps
-) => {
+export const StatCard = ({ title, content, footer }: StatCardProps) => {
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder grow>
       <EuiSplitPanel.Inner>
@@ -93,12 +87,7 @@ const configureLabel = i18n.translate(
   }
 );
 
-export const ConnectorStats = (
-  {
-    connector,
-    indexData
-  }: ConnectorStatsProps
-) => {
+export const ConnectorStats = ({ connector, indexData }: ConnectorStatsProps) => {
   const { connectorTypes } = useValues(KibanaLogic);
   const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
   return (

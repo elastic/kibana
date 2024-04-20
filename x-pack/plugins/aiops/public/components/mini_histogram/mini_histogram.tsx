@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 
@@ -31,15 +30,13 @@ interface MiniHistogramProps {
   barHighlightColorOverride?: string;
 }
 
-export const MiniHistogram = (
-  {
-    chartData,
-    isLoading,
-    label,
-    barColorOverride,
-    barHighlightColorOverride
-  }: MiniHistogramProps
-) => {
+export const MiniHistogram = ({
+  chartData,
+  isLoading,
+  label,
+  barColorOverride,
+  barHighlightColorOverride,
+}: MiniHistogramProps) => {
   const { charts } = useAiopsAppContext();
 
   const euiTheme = useEuiTheme();

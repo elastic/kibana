@@ -40,17 +40,15 @@ export interface Props {
   'data-test-subj'?: string;
 }
 
-export const Panel = (
-  {
-    children,
-    width,
-    className = '',
-    backgroundColor,
-    border,
-    'data-test-subj': dataTestSubj,
-    ...rest
-  }: Props & React.HTMLProps<HTMLDivElement>
-) => {
+export const Panel = ({
+  children,
+  width,
+  className = '',
+  backgroundColor,
+  border,
+  'data-test-subj': dataTestSubj,
+  ...rest
+}: Props & React.HTMLProps<HTMLDivElement>) => {
   const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({
     hasContent: false,
     hasFooter: false,

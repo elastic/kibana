@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useState, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,13 +57,7 @@ const fetchSchemas = memoize(
   (jsonSchemaApi, path, method) => path + method
 );
 
-export const JsonEditorFlyout = (
-  {
-    isDisabled,
-    jobEditorMode,
-    datafeedEditorMode
-  }: Props
-) => {
+export const JsonEditorFlyout = ({ isDisabled, jobEditorMode, datafeedEditorMode }: Props) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
@@ -297,17 +290,15 @@ export const JsonEditorFlyout = (
   );
 };
 
-const FlyoutButton = (
-  {
-    isDisabled,
-    onClick,
-    editJsonMode
-  }: {
-    isDisabled: boolean;
-    onClick(): void;
-    editJsonMode: boolean;
-  }
-) => {
+const FlyoutButton = ({
+  isDisabled,
+  onClick,
+  editJsonMode,
+}: {
+  isDisabled: boolean;
+  onClick(): void;
+  editJsonMode: boolean;
+}) => {
   const previewJsonTitle = i18n.translate('xpack.ml.newJob.wizard.previewJsonButton', {
     defaultMessage: 'Preview JSON',
   });
@@ -325,23 +316,21 @@ const FlyoutButton = (
   );
 };
 
-const Contents = (
-  {
-    title,
-    value,
-    editJson,
-    onChange,
-    heightOffset = 0,
-    schema
-  }: {
-    title: string;
-    value: string;
-    editJson: boolean;
-    onChange(s: string): void;
-    heightOffset?: number;
-    schema?: object;
-  }
-) => {
+const Contents = ({
+  title,
+  value,
+  editJson,
+  onChange,
+  heightOffset = 0,
+  schema,
+}: {
+  title: string;
+  value: string;
+  editJson: boolean;
+  onChange(s: string): void;
+  heightOffset?: number;
+  schema?: object;
+}) => {
   // the ace editor requires a fixed height
   const editorHeight = useMemo(
     () => `${window.innerHeight - 230 - heightOffset}px`,

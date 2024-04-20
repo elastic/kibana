@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import tinycolor from 'tinycolor2';
 
@@ -20,16 +20,14 @@ export interface Props extends ColorManagerProps {
   colors?: string[];
 }
 
-export const ColorPicker = (
-  {
-    colors = [],
-    hasButtons = false,
-    onAddColor,
-    onChange,
-    onRemoveColor,
-    value = ''
-  }: Props
-) => {
+export const ColorPicker = ({
+  colors = [],
+  hasButtons = false,
+  onAddColor,
+  onChange,
+  onRemoveColor,
+  value = '',
+}: Props) => {
   const tc = tinycolor(value);
   const isValidColor = tc.isValid();
 

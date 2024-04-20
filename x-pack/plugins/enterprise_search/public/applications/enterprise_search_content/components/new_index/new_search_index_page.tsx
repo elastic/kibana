@@ -171,11 +171,7 @@ const getConnectorModeBadge = (isNative?: boolean) => {
 export interface NewSearchIndexPageProps {
   type: string;
 }
-export const NewSearchIndexPage = (
-  {
-    type
-  }: NewSearchIndexPageProps
-) => {
+export const NewSearchIndexPage = ({ type }: NewSearchIndexPageProps) => {
   const { connectorTypes } = useValues(KibanaLogic);
   const { search } = useLocation();
   const { service_type: inputServiceType, connector_type: inputConnectorType } =

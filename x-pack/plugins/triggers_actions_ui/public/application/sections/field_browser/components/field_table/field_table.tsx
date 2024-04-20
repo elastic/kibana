@@ -45,19 +45,17 @@ export interface FieldTableProps extends Pick<FieldBrowserProps, 'columnIds' | '
   onHide: () => void;
 }
 
-const FieldTableComponent = (
-  {
-    columnIds,
-    filteredBrowserFields,
-    filterSelectedEnabled,
-    getFieldTableColumns,
-    onFilterSelectedChange,
-    onHide,
-    onToggleColumn,
-    searchInput,
-    selectedCategoryIds
-  }: FieldTableProps
-) => {
+const FieldTableComponent = ({
+  columnIds,
+  filteredBrowserFields,
+  filterSelectedEnabled,
+  getFieldTableColumns,
+  onFilterSelectedChange,
+  onHide,
+  onToggleColumn,
+  searchInput,
+  selectedCategoryIds,
+}: FieldTableProps) => {
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

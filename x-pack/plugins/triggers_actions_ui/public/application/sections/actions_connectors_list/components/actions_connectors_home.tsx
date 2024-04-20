@@ -27,15 +27,13 @@ export interface MatchParams {
   section: Section;
 }
 
-export const ActionsConnectorsHome = (
-  {
-    match: {
-      params: { section },
-    },
+export const ActionsConnectorsHome = ({
+  match: {
+    params: { section },
+  },
 
-    history
-  }: RouteComponentProps<MatchParams>
-) => {
+  history,
+}: RouteComponentProps<MatchParams>) => {
   const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
 
   const tabs: Array<{

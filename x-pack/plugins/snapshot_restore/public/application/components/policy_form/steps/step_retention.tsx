@@ -31,13 +31,7 @@ const getExpirationTimeOptions = (unitSize = '0') =>
     value,
   }));
 
-export const PolicyStepRetention = (
-  {
-    policy,
-    updatePolicy,
-    errors
-  }: StepProps
-) => {
+export const PolicyStepRetention = ({ policy, updatePolicy, errors }: StepProps) => {
   const { retention = {} } = policy;
   const { docLinks } = useCore();
 

@@ -17,13 +17,7 @@ interface Props {
 }
 
 // Represents a fully constructed page, including page template.
-export const ErrorPage = (
-  {
-    detailedMessage,
-    retry,
-    shortMessage
-  }: Props
-) => {
+export const ErrorPage = ({ detailedMessage, retry, shortMessage }: Props) => {
   return (
     <PageTemplate isEmptyState={true}>
       <EuiCallOut

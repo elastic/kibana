@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';

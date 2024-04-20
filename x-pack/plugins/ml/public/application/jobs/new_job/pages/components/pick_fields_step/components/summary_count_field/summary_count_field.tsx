@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 
 import { SummaryCountFieldSelect } from './summary_count_field_select';

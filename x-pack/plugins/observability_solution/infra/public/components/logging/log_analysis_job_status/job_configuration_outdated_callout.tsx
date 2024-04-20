@@ -11,32 +11,32 @@ import React from 'react';
 
 import { RecreateJobCallout } from './recreate_job_callout';
 
-export const JobConfigurationOutdatedCallout = (
-  {
-    hasSetupCapabilities,
-    moduleName,
-    onRecreateMlJob
-  }: {
-    hasSetupCapabilities: boolean;
-    moduleName: string;
-    onRecreateMlJob: () => void;
-  }
-) => (<RecreateJobCallout
-  hasSetupCapabilities={hasSetupCapabilities}
-  title={i18n.translate('xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutTitle', {
-    defaultMessage: 'The {moduleName} ML job configuration is outdated',
-    values: {
-      moduleName,
-    },
-  })}
-  onRecreateMlJob={onRecreateMlJob}
->
-  <FormattedMessage
-    id="xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage"
-    defaultMessage="The {moduleName} ML job was created using a different source configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
-    values={{
-      moduleName,
-    }}
-    tagName="p"
-  />
-</RecreateJobCallout>);
+export const JobConfigurationOutdatedCallout = ({
+  hasSetupCapabilities,
+  moduleName,
+  onRecreateMlJob,
+}: {
+  hasSetupCapabilities: boolean;
+  moduleName: string;
+  onRecreateMlJob: () => void;
+}) => (
+  <RecreateJobCallout
+    hasSetupCapabilities={hasSetupCapabilities}
+    title={i18n.translate('xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutTitle', {
+      defaultMessage: 'The {moduleName} ML job configuration is outdated',
+      values: {
+        moduleName,
+      },
+    })}
+    onRecreateMlJob={onRecreateMlJob}
+  >
+    <FormattedMessage
+      id="xpack.infra.logs.analysis.jobConfigurationOutdatedCalloutMessage"
+      defaultMessage="The {moduleName} ML job was created using a different source configuration. Recreate the job to apply the current configuration. This removes previously detected anomalies."
+      values={{
+        moduleName,
+      }}
+      tagName="p"
+    />
+  </RecreateJobCallout>
+);

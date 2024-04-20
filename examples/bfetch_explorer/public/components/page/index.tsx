@@ -14,13 +14,7 @@ export interface PageProps {
   sidebar?: React.ReactNode;
 }
 
-export const Page = (
-  {
-    title = 'Untitled',
-    sidebar,
-    children
-  }: PageProps
-) => {
+export const Page = ({ title = 'Untitled', sidebar, children }: PageProps) => {
   return (
     <EuiPageTemplate offset={0} grow={true}>
       <EuiPageTemplate.Sidebar>{sidebar}</EuiPageTemplate.Sidebar>

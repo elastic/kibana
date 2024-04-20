@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { RuleDetailTabs } from '../../../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
@@ -22,14 +21,12 @@ interface LinkToRuleDetailsProps {
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
 
-const LinkToRuleDetailsComponent = (
-  {
-    referenceName,
-    referenceId,
-    external,
-    dataTestSubj
-  }: LinkToRuleDetailsProps
-) => {
+const LinkToRuleDetailsComponent = ({
+  referenceName,
+  referenceId,
+  external,
+  dataTestSubj,
+}: LinkToRuleDetailsProps) => {
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}

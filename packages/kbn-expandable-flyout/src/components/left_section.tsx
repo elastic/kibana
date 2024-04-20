@@ -24,12 +24,7 @@ interface LeftSectionProps {
 /**
  * Left section of the expanded flyout rendering a panel
  */
-export const LeftSection = (
-  {
-    component,
-    width
-  }: LeftSectionProps
-) => {
+export const LeftSection = ({ component, width }: LeftSectionProps) => {
   const style = useMemo<React.CSSProperties>(
     () => ({ height: '100%', width: `${width}px` }),
     [width]

@@ -35,11 +35,7 @@ interface ViewQueryFlyoutProps {
   onClose: () => void;
 }
 
-export const ViewQueryFlyout = (
-  {
-    onClose
-  }: ViewQueryFlyoutProps
-) => {
+export const ViewQueryFlyout = ({ onClose }: ViewQueryFlyoutProps) => {
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
   const { fields } = useIndicesFields(selectedIndices);

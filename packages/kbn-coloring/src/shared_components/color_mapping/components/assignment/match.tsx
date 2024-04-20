@@ -13,27 +13,25 @@ import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ColorMapping } from '../../config';
 
-export const Match = (
-  {
-    index,
-    rule,
-    updateValue,
-    options,
-    specialTokens,
-    assignmentValuesCounter
-  }: {
-    index: number;
-    rule:
-      | ColorMapping.RuleAuto
-      | ColorMapping.RuleMatchExactly
-      | ColorMapping.RuleMatchExactlyCI
-      | ColorMapping.RuleRegExp;
-    updateValue: (values: Array<string | string[]>) => void;
-    options: Array<string | string[]>;
-    specialTokens: Map<unknown, string>;
-    assignmentValuesCounter: Map<string | string[], number>;
-  }
-) => {
+export const Match = ({
+  index,
+  rule,
+  updateValue,
+  options,
+  specialTokens,
+  assignmentValuesCounter,
+}: {
+  index: number;
+  rule:
+    | ColorMapping.RuleAuto
+    | ColorMapping.RuleMatchExactly
+    | ColorMapping.RuleMatchExactlyCI
+    | ColorMapping.RuleRegExp;
+  updateValue: (values: Array<string | string[]>) => void;
+  options: Array<string | string[]>;
+  specialTokens: Map<unknown, string>;
+  assignmentValuesCounter: Map<string | string[], number>;
+}) => {
   const duplicateWarning = i18n.translate(
     'coloring.colorMapping.assignments.duplicateCategoryWarning',
     {

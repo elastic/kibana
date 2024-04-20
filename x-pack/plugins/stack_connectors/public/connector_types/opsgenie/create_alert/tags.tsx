@@ -38,13 +38,7 @@ const options: Array<EuiComboBoxOptionOption<string>> = [
   },
 ];
 
-const TagsComponent = (
-  {
-    onChange,
-    values,
-    executionMode
-  }: TagsProps
-) => {
+const TagsComponent = ({ onChange, values, executionMode }: TagsProps) => {
   const tagOptions = useMemo(() => values.map((value) => getTagAsOption(value)), [values]);
 
   const onCreateOption = useCallback(

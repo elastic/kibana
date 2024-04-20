@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
@@ -28,12 +28,7 @@ interface TransformTaskStateBadgeProps {
   reason?: TransformStats['reason'];
 }
 
-export const TransformTaskStateBadge = (
-  {
-    state,
-    reason
-  }: TransformTaskStateBadgeProps
-) => {
+export const TransformTaskStateBadge = ({ state, reason }: TransformTaskStateBadgeProps) => {
   const color = STATE_COLOR[state];
 
   if (state === TRANSFORM_STATE.FAILED && reason !== undefined) {

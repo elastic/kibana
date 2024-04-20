@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
@@ -23,14 +23,12 @@ interface EditTransformFlyoutFormTextInputProps {
   placeHolder?: boolean;
 }
 
-export const EditTransformFlyoutFormTextInput = (
-  {
-    field,
-    label,
-    helpText,
-    placeHolder = false
-  }: EditTransformFlyoutFormTextInputProps
-) => {
+export const EditTransformFlyoutFormTextInput = ({
+  field,
+  label,
+  helpText,
+  placeHolder = false,
+}: EditTransformFlyoutFormTextInputProps) => {
   const { defaultValue, errorMessages, value } = useFormField(field);
   const { setFormField } = useEditTransformFlyoutActions();
   const upperCaseField = capitalizeFirstLetter(field);

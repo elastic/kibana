@@ -19,12 +19,7 @@ export interface MountPointPortalProps {
 /**
  * Utility component to portal a part of a react application into the provided `MountPoint`.
  */
-export const MountPointPortal = (
-  {
-    children,
-    setMountPoint
-  }: MountPointPortalProps
-) => {
+export const MountPointPortal = ({ children, setMountPoint }: MountPointPortalProps) => {
   // state used to force re-renders when the element changes
   const [shouldRender, setShouldRender] = useState(false);
   const el = useRef<HTMLElement>();

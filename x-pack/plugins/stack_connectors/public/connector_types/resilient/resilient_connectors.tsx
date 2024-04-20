@@ -23,12 +23,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   { id: 'apiKeySecret', label: i18n.API_KEY_SECRET_LABEL, isPasswordField: true },
 ];
 
-const ResilientConnectorFields = (
-  {
-    readOnly,
-    isEdit
-  }: ActionConnectorFieldsProps
-) => {
+const ResilientConnectorFields = ({ readOnly, isEdit }: ActionConnectorFieldsProps) => {
   return (
     <SimpleConnectorForm
       isEdit={isEdit}

@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FC } from 'react';
 import React, { Fragment, useState, useContext, useEffect } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
@@ -70,15 +69,13 @@ const excludeFrequentOptions: EuiComboBoxOptionOption[] = [
   { label: 'over' },
 ];
 
-export const AdvancedDetectorModal = (
-  {
-    payload,
-    fields,
-    aggs,
-    detectorChangeHandler,
-    closeModal
-  }: Props
-) => {
+export const AdvancedDetectorModal = ({
+  payload,
+  fields,
+  aggs,
+  detectorChangeHandler,
+  closeModal,
+}: Props) => {
   const { jobCreator: jc } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
 

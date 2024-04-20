@@ -19,16 +19,14 @@ interface Props {
   exampleCount: number;
   onReload: () => void;
 }
-export const LogEntryExampleMessages = (
-  {
-    isLoading,
-    hasFailedLoading,
-    exampleCount,
-    hasResults,
-    onReload,
-    children
-  }: Props
-) => {
+export const LogEntryExampleMessages = ({
+  isLoading,
+  hasFailedLoading,
+  exampleCount,
+  hasResults,
+  onReload,
+  children,
+}: Props) => {
   return (
     <Wrapper>
       {isLoading ? (

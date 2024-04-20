@@ -19,13 +19,11 @@ interface SecurityPrivilegesFormProps {
   error?: React.ReactNode | React.ReactNode[];
 }
 
-export const SecurityPrivilegesForm = (
-  {
-    roleDescriptors,
-    onChangeRoleDescriptors,
-    error
-  }: SecurityPrivilegesFormProps
-) => {
+export const SecurityPrivilegesForm = ({
+  roleDescriptors,
+  onChangeRoleDescriptors,
+  error,
+}: SecurityPrivilegesFormProps) => {
   return (
     <div data-test-subj="create-api-role-descriptors-code-editor-container">
       <EuiLink

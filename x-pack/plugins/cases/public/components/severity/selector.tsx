@@ -18,14 +18,12 @@ interface Props {
   isDisabled: boolean;
 }
 
-export const SeveritySelector = (
-  {
-    selectedSeverity,
-    onSeverityChange,
-    isLoading,
-    isDisabled
-  }: Props
-) => {
+export const SeveritySelector = ({
+  selectedSeverity,
+  onSeverityChange,
+  isLoading,
+  isDisabled,
+}: Props) => {
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
     const severityData = severities[severity];

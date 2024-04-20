@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, RefCallback, useCallback, useState } from 'react';
+import React, { RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   ShapeDrawerComponent,
@@ -29,11 +29,7 @@ function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBo
   };
 }
 
-export const ShapePreview = (
-  {
-    shape
-  }: Props
-) => {
+export const ShapePreview = ({ shape }: Props) => {
   const [shapeData, setShapeData] = useState<SvgConfig>(getDefaultShapeData());
 
   const shapeRef = useCallback<RefCallback<ShapeRef>>((node) => {

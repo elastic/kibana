@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -20,13 +19,11 @@ interface Props {
   hideCloseJobModalVisible(): void;
   forceCloseJob(): void;
 }
-export const CloseJobConfirm = (
-  {
-    combinedJobState,
-    hideCloseJobModalVisible,
-    forceCloseJob
-  }: Props
-) => {
+export const CloseJobConfirm = ({
+  combinedJobState,
+  hideCloseJobModalVisible,
+  forceCloseJob,
+}: Props) => {
   return (
     <EuiConfirmModal
       title={

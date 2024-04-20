@@ -37,18 +37,16 @@ interface ThreatMatchInputProps {
   onValidityChange?: (isValid: boolean) => void;
 }
 
-const ThreatMatchInputComponent = (
-  {
-    threatIndexModified,
-    handleResetThreatIndices,
-    threatMapping,
-    indexPatterns,
-    threatIndexPatterns,
-    threatIndexPatternsLoading,
-    threatBrowserFields,
-    onValidityChange
-  }: ThreatMatchInputProps
-) => {
+const ThreatMatchInputComponent = ({
+  threatIndexModified,
+  handleResetThreatIndices,
+  threatMapping,
+  indexPatterns,
+  threatIndexPatterns,
+  threatIndexPatternsLoading,
+  threatBrowserFields,
+  onValidityChange,
+}: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
 
   const { isInvalid: isThreatMappingInvalid, errorMessage } =

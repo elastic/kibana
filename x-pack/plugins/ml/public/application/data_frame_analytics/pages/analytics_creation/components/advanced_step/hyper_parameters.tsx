@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,13 +19,7 @@ interface Props extends CreateAnalyticsFormProps {
   advancedParamErrors: AdvancedParamErrors;
 }
 
-export const HyperParameters = (
-  {
-    actions,
-    state,
-    advancedParamErrors
-  }: Props
-) => {
+export const HyperParameters = ({ actions, state, advancedParamErrors }: Props) => {
   const { setFormState } = actions;
 
   const {

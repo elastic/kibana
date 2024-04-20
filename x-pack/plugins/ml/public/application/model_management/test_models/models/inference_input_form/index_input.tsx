@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, FormEventHandler } from 'react';
+import type { FormEventHandler } from 'react';
 import React, { useState, useMemo, useCallback } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
@@ -35,11 +35,7 @@ interface Props {
   inferrer: InferrerType;
 }
 
-export const IndexInputForm = (
-  {
-    inferrer
-  }: Props
-) => {
+export const IndexInputForm = ({ inferrer }: Props) => {
   const {
     currentContext: { defaultSelectedDataViewId, createPipelineFlyoutOpen },
   } = useTestTrainedModelsContext();

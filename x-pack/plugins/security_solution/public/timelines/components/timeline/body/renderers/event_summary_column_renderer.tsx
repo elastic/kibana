@@ -78,19 +78,17 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
   },
 };
 
-const SummaryCell = (
-  {
-    ecsData,
-    rowRenderers,
-    scopeId,
-    values
-  }: {
-    scopeId: string;
-    ecsData: Ecs;
-    rowRenderers: RowRenderer[];
-    values: string[] | undefined | null;
-  }
-) => {
+const SummaryCell = ({
+  ecsData,
+  rowRenderers,
+  scopeId,
+  values,
+}: {
+  scopeId: string;
+  ecsData: Ecs;
+  rowRenderers: RowRenderer[];
+  values: string[] | undefined | null;
+}) => {
   const rowRenderer = useMemo(
     () => getRowRenderer({ data: ecsData, rowRenderers }),
     [ecsData, rowRenderers]

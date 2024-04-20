@@ -8,7 +8,7 @@
 import { EuiButton, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, Fragment } from 'react';
+import React, { Fragment } from 'react';
 
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
@@ -21,13 +21,11 @@ interface SearchSelectionProps {
 
 const fixedPageSize: number = 8;
 
-export const SearchSelection = (
-  {
-    onSearchSelected,
-    createNewDataView,
-    canEditDataView
-  }: SearchSelectionProps
-) => {
+export const SearchSelection = ({
+  onSearchSelected,
+  createNewDataView,
+  canEditDataView,
+}: SearchSelectionProps) => {
   const { contentManagement, uiSettings } = useAppDependencies();
 
   return (

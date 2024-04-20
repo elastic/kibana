@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment/moment';
-import React, { FC } from 'react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';

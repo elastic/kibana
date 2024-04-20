@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiCodeBlock,
   EuiTabbedContent,
@@ -27,14 +27,7 @@ interface Props {
   response?: string;
 }
 
-export const RequestFlyout = (
-  {
-    onClose,
-    requestBody,
-    response,
-    links
-  }: Props
-) => {
+export const RequestFlyout = ({ onClose, requestBody, response, links }: Props) => {
   return (
     <EuiFlyout onClose={onClose} maxWidth={640}>
       <EuiFlyoutHeader>

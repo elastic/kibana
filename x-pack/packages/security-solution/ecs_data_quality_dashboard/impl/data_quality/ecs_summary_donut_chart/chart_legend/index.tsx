@@ -31,12 +31,7 @@ interface Props {
   setSelectedTabId: (tabId: string) => void;
 }
 
-const ChartLegendComponent = (
-  {
-    partitionedFieldMetadata,
-    setSelectedTabId
-  }: Props
-) => {
+const ChartLegendComponent = ({ partitionedFieldMetadata, setSelectedTabId }: Props) => {
   const showIncompatibleTab = useCallback(
     () => setSelectedTabId(INCOMPATIBLE_TAB_ID),
     [setSelectedTabId]

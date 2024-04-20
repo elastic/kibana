@@ -23,12 +23,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const InlineLoading = (
-  {
-    children,
-    ...rest
-  }: Props
-) => {
+export const InlineLoading = ({ children, ...rest }: Props) => {
   return (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -43,11 +38,7 @@ export const InlineLoading = (
   );
 };
 
-export const SectionLoading = (
-  {
-    children
-  }: Props
-) => {
+export const SectionLoading = ({ children }: Props) => {
   return (
     <EuiEmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}
@@ -62,11 +53,7 @@ export const SectionLoading = (
  * For tabbed sections, or within the context of a wizard,
  * the <SectionLoading/> component may be more appropriate
  */
-export const PageLoading = (
-  {
-    children
-  }: Props
-) => {
+export const PageLoading = ({ children }: Props) => {
   return (
     <EuiPageTemplate.EmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}

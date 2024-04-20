@@ -107,17 +107,15 @@ const UnverifiedCallout = () => {
   );
 };
 
-export const PrereleaseCallout = (
-  {
-    packageName,
-    packageTitle,
-    latestGAVersion
-  }: {
-    packageName: string;
-    latestGAVersion?: string;
-    packageTitle: string;
-  }
-) => {
+export const PrereleaseCallout = ({
+  packageName,
+  packageTitle,
+  latestGAVersion,
+}: {
+  packageName: string;
+  latestGAVersion?: string;
+  packageTitle: string;
+}) => {
   const { getHref } = useLink();
   const overviewPathLatestGA = getHref('integration_details_overview', {
     pkgkey: `${packageName}-${latestGAVersion}`,
@@ -159,13 +157,7 @@ export const getAnchorId = (name: string | undefined, index?: number) => {
   return index ? `${baseId}-${index}` : baseId;
 };
 
-export const OverviewPage = memo((
-  {
-    packageInfo,
-    integrationInfo,
-    latestGAVersion
-  }: Props
-) => {
+export const OverviewPage = memo(({ packageInfo, integrationInfo, latestGAVersion }: Props) => {
   const screenshots = useMemo(
     () => integrationInfo?.screenshots || packageInfo.screenshots || [],
     [integrationInfo, packageInfo.screenshots]

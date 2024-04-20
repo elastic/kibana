@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,24 +14,21 @@ interface InterimResultsControlProps {
   onChange: (update: boolean) => void;
 }
 
-export const InterimResultsControl = React.memo((
-  {
-    value,
-    onChange
-  }: InterimResultsControlProps
-) => {
-  return (
-    <EuiFormRow>
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.ml.interimResultsControl.label"
-            defaultMessage="Include interim results"
-          />
-        }
-        checked={value ?? false}
-        onChange={onChange.bind(null, !value)}
-      />
-    </EuiFormRow>
-  );
-});
+export const InterimResultsControl = React.memo(
+  ({ value, onChange }: InterimResultsControlProps) => {
+    return (
+      <EuiFormRow>
+        <EuiSwitch
+          label={
+            <FormattedMessage
+              id="xpack.ml.interimResultsControl.label"
+              defaultMessage="Include interim results"
+            />
+          }
+          checked={value ?? false}
+          onChange={onChange.bind(null, !value)}
+        />
+      </EuiFormRow>
+    );
+  }
+);

@@ -18,7 +18,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -32,13 +31,7 @@ interface FieldTypeTableItem {
   description: string;
 }
 
-export const FieldTypesHelpPopover = (
-  {
-    fieldTypes
-  }: {
-    fieldTypes: string[];
-  }
-) => {
+export const FieldTypesHelpPopover = ({ fieldTypes }: { fieldTypes: string[] }) => {
   {
     const { services } = useDataVisualizerKibana();
     const { docLinks } = services;

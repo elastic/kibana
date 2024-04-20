@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import copy from 'copy-to-clipboard';
 import { i18n } from '@kbn/i18n';
 
@@ -29,12 +29,7 @@ interface Props {
   setVariables: (variables: CanvasVariable[]) => void;
 }
 
-export const VarConfig = (
-  {
-    variables,
-    setVariables
-  }: Props
-) => {
+export const VarConfig = ({ variables, setVariables }: Props) => {
   const { success } = useNotifyService();
   const onDeleteVar = (v: CanvasVariable) => {
     const index = variables.findIndex((targetVar: CanvasVariable) => {

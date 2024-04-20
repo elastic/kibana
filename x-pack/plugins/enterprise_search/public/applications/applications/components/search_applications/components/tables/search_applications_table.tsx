@@ -42,16 +42,14 @@ interface SearchApplicationsListTableProps {
   searchApplications: EnterpriseSearchApplication[];
   viewSearchApplicationIndices: (searchApplicationName: string) => void;
 }
-export const SearchApplicationsListTable = (
-  {
-    searchApplications,
-    isLoading,
-    meta,
-    onChange,
-    onDelete,
-    viewSearchApplicationIndices
-  }: SearchApplicationsListTableProps
-) => {
+export const SearchApplicationsListTable = ({
+  searchApplications,
+  isLoading,
+  meta,
+  onChange,
+  onDelete,
+  viewSearchApplicationIndices,
+}: SearchApplicationsListTableProps) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchApplication>> = [

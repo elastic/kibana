@@ -6,7 +6,6 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -31,11 +30,7 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
-export const WelcomeContent = (
-  {
-    hasPermissionToImport
-  }: Props
-) => {
+export const WelcomeContent = ({ hasPermissionToImport }: Props) => {
   const {
     services: {
       fileUpload: { getMaxBytesFormatted },

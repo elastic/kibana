@@ -20,13 +20,7 @@ import { GithubLink } from '@kbn/search-api-panels';
 import React from 'react';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
 
-export const ConnectorIngestionPanel = (
-  {
-    assetBasePath
-  }: {
-    assetBasePath: string;
-  }
-) => {
+export const ConnectorIngestionPanel = ({ assetBasePath }: { assetBasePath: string }) => {
   const { createConnector } = useCreateConnector();
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s">

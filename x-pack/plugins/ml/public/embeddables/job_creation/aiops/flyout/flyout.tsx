@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -33,15 +32,13 @@ interface Props {
   onClose: () => void;
 }
 
-export const CreateCategorizationJobFlyout = (
-  {
-    onClose,
-    dataView,
-    field,
-    query,
-    timeRange
-  }: Props
-) => {
+export const CreateCategorizationJobFlyout = ({
+  onClose,
+  dataView,
+  field,
+  query,
+  timeRange,
+}: Props) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>

@@ -32,16 +32,14 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 
-const JiraParamsFields = (
-  {
-    actionConnector,
-    actionParams,
-    editAction,
-    errors,
-    index,
-    messageVariables
-  }: ActionParamsProps<JiraActionParams>
-) => {
+const JiraParamsFields = ({
+  actionConnector,
+  actionParams,
+  editAction,
+  errors,
+  index,
+  messageVariables,
+}: ActionParamsProps<JiraActionParams>) => {
   const {
     http,
     notifications: { toasts },

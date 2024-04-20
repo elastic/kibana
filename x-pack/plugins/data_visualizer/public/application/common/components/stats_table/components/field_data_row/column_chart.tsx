@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import classNames from 'classnames';
 
@@ -39,16 +38,14 @@ interface Props {
 const zeroSize = { bottom: 0, left: 0, right: 0, top: 0 };
 const size = { width: 100, height: 10 };
 
-export const ColumnChart = (
-  {
-    chartData,
-    columnType,
-    dataTestSubj,
-    hideLabel,
-    maxChartColumns,
-    isNumeric
-  }: Props
-) => {
+export const ColumnChart = ({
+  chartData,
+  columnType,
+  dataTestSubj,
+  hideLabel,
+  maxChartColumns,
+  isNumeric,
+}: Props) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns, isNumeric);
 
   return (

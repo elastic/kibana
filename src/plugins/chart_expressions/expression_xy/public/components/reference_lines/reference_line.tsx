@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { Position } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ReferenceLineConfig } from '../../../common/types';
@@ -25,18 +25,16 @@ interface ReferenceLineProps {
   yAxesMap: AxesMap;
 }
 
-export const ReferenceLine = (
-  {
-    layer,
-    axesConfiguration,
-    xAxisFormatter,
-    formatters,
-    paddingMap,
-    isHorizontal,
-    nextValue,
-    yAxesMap
-  }: ReferenceLineProps
-) => {
+export const ReferenceLine = ({
+  layer,
+  axesConfiguration,
+  xAxisFormatter,
+  formatters,
+  paddingMap,
+  isHorizontal,
+  nextValue,
+  yAxesMap,
+}: ReferenceLineProps) => {
   const {
     decorations: [decorationConfig],
     columnToLabel,

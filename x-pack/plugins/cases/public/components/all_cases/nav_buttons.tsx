@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -22,11 +21,7 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const NavButtons = (
-  {
-    actionsErrors
-  }: Props
-) => {
+export const NavButtons = ({ actionsErrors }: Props) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const { euiTheme } = useEuiTheme();

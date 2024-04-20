@@ -25,7 +25,7 @@ const SnapshotRestoreAppLink = () => {
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    (<EuiButton
+    <EuiButton
       href={snapshotRestoreUrl}
       onClick={() => {
         uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_BACKUP_DATA_ON_PREM_CLICK);
@@ -36,7 +36,7 @@ const SnapshotRestoreAppLink = () => {
         id="xpack.upgradeAssistant.overview.snapshotRestoreLink"
         defaultMessage="Create snapshot"
       />
-    </EuiButton>)
+    </EuiButton>
   );
 };
 

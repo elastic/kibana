@@ -24,15 +24,13 @@ export interface Props {
   iconOnly?: boolean;
 }
 
-const NewChatByTitleComponent = (
-  {
-    children = i18n.NEW_CHAT,
-    conversationTitle,
-    iconType,
-    promptContextId,
-    iconOnly = false
-  }: Props
-) => {
+const NewChatByTitleComponent = ({
+  children = i18n.NEW_CHAT,
+  conversationTitle,
+  iconType,
+  promptContextId,
+  iconOnly = false,
+}: Props) => {
   const { showAssistantOverlay } = useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:

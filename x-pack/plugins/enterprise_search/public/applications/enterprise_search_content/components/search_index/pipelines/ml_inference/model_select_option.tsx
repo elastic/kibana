@@ -23,17 +23,15 @@ import { TrainedModelHealth } from '../ml_model_health';
 
 import { LicenseBadge } from './license_badge';
 
-export const ModelSelectOption = (
-  {
-    modelId,
-    title,
-    description,
-    isPlaceholder,
-    licenseType,
-    deploymentState,
-    deploymentStateReason
-  }: EuiSelectableOption<MlModel>
-) => {
+export const ModelSelectOption = ({
+  modelId,
+  title,
+  description,
+  isPlaceholder,
+  licenseType,
+  deploymentState,
+  deploymentStateReason,
+}: EuiSelectableOption<MlModel>) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize={useIsWithinMaxBreakpoint('s') ? 'xs' : 'l'}>
       <EuiFlexItem style={{ overflow: 'hidden' }}>

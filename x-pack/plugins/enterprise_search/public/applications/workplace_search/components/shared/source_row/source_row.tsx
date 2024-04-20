@@ -56,29 +56,27 @@ interface SourceRowProps extends ISourceRow {
   source: ContentSourceDetails;
 }
 
-export const SourceRow = (
-  {
-    source: {
-      id,
-      serviceType,
-      searchable,
-      supportedByLicense,
-      status,
-      statusMessage,
-      name,
-      documentCount,
-      isFederatedSource,
-      errorReason,
-      allowsReauth,
-      activities,
-      mainIcon,
-    },
+export const SourceRow = ({
+  source: {
+    id,
+    serviceType,
+    searchable,
+    supportedByLicense,
+    status,
+    statusMessage,
+    name,
+    documentCount,
+    isFederatedSource,
+    errorReason,
+    allowsReauth,
+    activities,
+    mainIcon,
+  },
 
-    onSearchableToggle,
-    isOrganization,
-    showDetails
-  }: SourceRowProps
-) => {
+  onSearchableToggle,
+  isOrganization,
+  showDetails,
+}: SourceRowProps) => {
   const isIndexing = status === statuses.INDEXING;
   const hasError = status === statuses.ERROR || status === statuses.DISCONNECTED;
   const showReauthenticate =

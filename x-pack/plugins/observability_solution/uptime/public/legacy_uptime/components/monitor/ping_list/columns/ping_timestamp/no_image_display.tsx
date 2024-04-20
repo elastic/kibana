@@ -14,12 +14,7 @@ export interface NoImageDisplayProps {
   isLoading?: boolean;
 }
 
-export const NoImageDisplay = (
-  {
-    imageCaption,
-    isLoading
-  }: NoImageDisplayProps
-) => {
+export const NoImageDisplay = ({ imageCaption, isLoading }: NoImageDisplayProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem>{isLoading ? <LoadingImageState /> : <NoImageAvailable />}</EuiFlexItem>

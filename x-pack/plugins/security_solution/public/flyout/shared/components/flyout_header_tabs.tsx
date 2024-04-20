@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiTabs } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -17,12 +16,7 @@ interface FlyoutHeaderTabsProps extends React.ComponentProps<typeof EuiTabs> {
 /**
  * Wrapper of `EuiTabs`, setting bottom margin to align with the flyout header divider
  */
-export const FlyoutHeaderTabs = memo((
-  {
-    children,
-    ...flyoutTabsProps
-  }: FlyoutHeaderTabsProps
-) => {
+export const FlyoutHeaderTabs = memo(({ children, ...flyoutTabsProps }: FlyoutHeaderTabsProps) => {
   return (
     <EuiTabs
       size="l"

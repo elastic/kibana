@@ -24,11 +24,7 @@ interface ChatSidebarProps {
   selectedIndicesCount: number;
 }
 
-export const ChatSidebar = (
-  {
-    selectedIndicesCount
-  }: ChatSidebarProps
-) => {
+export const ChatSidebar = ({ selectedIndicesCount }: ChatSidebarProps) => {
   const { euiTheme } = useEuiTheme();
   const accordions = [
     {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,13 +18,11 @@ interface Props {
   fieldFormat?: any; // Kibana formatter for field being viewed
 }
 
-export const MetricDistributionChartTooltipHeader = (
-  {
-    chartPoint,
-    maxWidth,
-    fieldFormat
-  }: Props
-) => {
+export const MetricDistributionChartTooltipHeader = ({
+  chartPoint,
+  maxWidth,
+  fieldFormat,
+}: Props) => {
   if (chartPoint === undefined) {
     return null;
   }

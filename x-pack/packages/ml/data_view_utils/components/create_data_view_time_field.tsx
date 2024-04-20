@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,13 +17,11 @@ interface CreateDataViewTimeFieldProps {
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export const CreateDataViewTimeField = (
-  {
-    dataViewAvailableTimeFields,
-    dataViewTimeField,
-    onTimeFieldChanged
-  }: CreateDataViewTimeFieldProps
-) => {
+export const CreateDataViewTimeField = ({
+  dataViewAvailableTimeFields,
+  dataViewTimeField,
+  onTimeFieldChanged,
+}: CreateDataViewTimeFieldProps) => {
   const noTimeFieldLabel = i18n.translate('xpack.ml.dataViewUtils.noTimeFieldOptionLabel', {
     defaultMessage: "I don't want to use the time field option",
   });

@@ -113,31 +113,29 @@ export interface EventsViewerProps {
  * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
  * NOTE: As of writting, it is not used in the Case_View component
  */
-const StatefulEventsViewerComponent = (
-  {
-    additionalFilters,
-    additionalRightMenuOptions,
-    bulkActions,
-    cellActionsTriggerId,
-    clearSelected,
-    currentFilter,
-    defaultModel,
-    end,
-    entityType = 'events',
-    hasCrudPermissions = true,
-    indexNames,
-    leadingControlColumns,
-    onRuleChange,
-    pageFilters,
-    renderCellValue,
-    rowRenderers,
-    setSelected,
-    sourcererScope,
-    start,
-    tableId,
-    unit = defaultUnit
-  }: EventsViewerProps & PropsFromRedux
-) => {
+const StatefulEventsViewerComponent = ({
+  additionalFilters,
+  additionalRightMenuOptions,
+  bulkActions,
+  cellActionsTriggerId,
+  clearSelected,
+  currentFilter,
+  defaultModel,
+  end,
+  entityType = 'events',
+  hasCrudPermissions = true,
+  indexNames,
+  leadingControlColumns,
+  onRuleChange,
+  pageFilters,
+  renderCellValue,
+  rowRenderers,
+  setSelected,
+  sourcererScope,
+  start,
+  tableId,
+  unit = defaultUnit,
+}: EventsViewerProps & PropsFromRedux) => {
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
   const tableContext = useMemo(() => ({ tableId }), [tableId]);
@@ -633,6 +631,4 @@ const connector = connect(undefined, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulEventsViewer = connector(
-  StatefulEventsViewerComponent
-);
+export const StatefulEventsViewer = connector(StatefulEventsViewerComponent);

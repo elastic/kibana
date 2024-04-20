@@ -43,11 +43,7 @@ import {
 } from '../../common/components/event_log';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 
-const getEmptyFunctionComponent = (
-  {
-    children
-  }: SpacesContextProps
-) => <>{children}</>;
+const getEmptyFunctionComponent = ({ children }: SpacesContextProps) => <>{children}</>;
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {

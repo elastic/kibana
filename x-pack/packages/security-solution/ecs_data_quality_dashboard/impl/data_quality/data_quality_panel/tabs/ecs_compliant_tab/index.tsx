@@ -30,13 +30,11 @@ interface Props {
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }
 
-const EcsCompliantTabComponent = (
-  {
-    indexName,
-    onAddToNewCase,
-    partitionedFieldMetadata
-  }: Props
-) => {
+const EcsCompliantTabComponent = ({
+  indexName,
+  onAddToNewCase,
+  partitionedFieldMetadata,
+}: Props) => {
   const emptyPromptBody = useMemo(() => <EmptyPromptBody body={i18n.ECS_COMPLIANT_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ECS_COMPLIANT_EMPTY_TITLE} />, []);
 

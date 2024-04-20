@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -27,11 +26,7 @@ interface ExpandedRowPreviewPaneProps {
   transformConfig: TransformConfigUnion;
 }
 
-export const ExpandedRowPreviewPane = (
-  {
-    transformConfig
-  }: ExpandedRowPreviewPaneProps
-) => {
+export const ExpandedRowPreviewPane = ({ transformConfig }: ExpandedRowPreviewPaneProps) => {
   const toastNotifications = useToastNotifications();
 
   const { searchQuery, validationStatus, previewRequest, runtimeMappings } = useMemo(

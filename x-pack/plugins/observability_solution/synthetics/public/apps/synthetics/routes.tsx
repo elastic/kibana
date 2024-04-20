@@ -6,7 +6,7 @@
  */
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -165,12 +165,7 @@ const getRoutes = (
   ];
 };
 
-const RouteInit = (
-  {
-    path,
-    title
-  }: Pick<RouteProps, 'path' | 'title'>
-) => {
+const RouteInit = ({ path, title }: Pick<RouteProps, 'path' | 'title'>) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);

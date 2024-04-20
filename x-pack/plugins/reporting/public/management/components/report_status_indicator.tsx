@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common/constants';
@@ -53,11 +53,7 @@ const i18nTexts = {
     }),
 };
 
-export const ReportStatusIndicator = (
-  {
-    job
-  }: Props
-) => {
+export const ReportStatusIndicator = ({ job }: Props) => {
   const hasIssues = useMemo<boolean>(() => jobHasIssues(job), [job]);
 
   let icon: JSX.Element;

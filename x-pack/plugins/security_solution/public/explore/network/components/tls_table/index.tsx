@@ -44,20 +44,18 @@ const rowItems: ItemsPerRow[] = [
 
 export const tlsTableId = 'tls-table';
 
-const TlsTableComponent = (
-  {
-    data,
-    fakeTotalCount,
-    id,
-    isInspect,
-    loading,
-    loadPage,
-    setQuerySkip,
-    showMorePagesIndicator,
-    totalCount,
-    type
-  }: TlsTableProps
-) => {
+const TlsTableComponent = ({
+  data,
+  fakeTotalCount,
+  id,
+  isInspect,
+  loading,
+  loadPage,
+  setQuerySkip,
+  showMorePagesIndicator,
+  totalCount,
+  type,
+}: TlsTableProps) => {
   const dispatch = useDispatch();
   const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getTlsSelector(state, type));

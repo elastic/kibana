@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
@@ -59,22 +59,18 @@ const cancelButtonText = i18n.translate(
   }
 );
 
-export const SwitchModal = (
-  {
-    onCancel,
-    onConfirm,
-    type
-  }: Props
-) => (<EuiConfirmModal
-  title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
-  onCancel={onCancel}
-  onConfirm={onConfirm}
-  cancelButtonText={cancelButtonText}
-  confirmButtonText={
-    type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
-  }
-  buttonColor="danger"
-  defaultFocusedButton="confirm"
->
-  <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
-</EuiConfirmModal>);
+export const SwitchModal = ({ onCancel, onConfirm, type }: Props) => (
+  <EuiConfirmModal
+    title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    cancelButtonText={cancelButtonText}
+    confirmButtonText={
+      type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
+    }
+    buttonColor="danger"
+    defaultFocusedButton="confirm"
+  >
+    <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
+  </EuiConfirmModal>
+);

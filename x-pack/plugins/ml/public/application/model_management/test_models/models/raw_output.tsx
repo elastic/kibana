@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FC } from 'react';
 import React from 'react';
 import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -25,13 +24,7 @@ type ResultResponses = Array<
   estypes.MlInferTrainedModelResponse | RawTextClassificationResponse | RawTextEmbeddingResponse
 >;
 
-export const RawOutput = (
-  {
-    inferrer
-  }: {
-    inferrer: InferrerType;
-  }
-) => {
+export const RawOutput = ({ inferrer }: { inferrer: InferrerType }) => {
   const inferenceError = useObservable(inferrer.getInferenceError$(), inferrer.getInferenceError());
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
   const inferenceResult = useObservable(

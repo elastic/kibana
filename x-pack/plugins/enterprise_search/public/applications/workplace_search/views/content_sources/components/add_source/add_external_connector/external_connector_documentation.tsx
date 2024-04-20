@@ -16,12 +16,10 @@ interface ExternalConnectorDocumentationProps {
   documentationUrl: string;
 }
 
-export const ExternalConnectorDocumentation = (
-  {
-    name,
-    documentationUrl
-  }: ExternalConnectorDocumentationProps
-) => {
+export const ExternalConnectorDocumentation = ({
+  name,
+  documentationUrl,
+}: ExternalConnectorDocumentationProps) => {
   return (
     <EuiText size="s">
       <p>

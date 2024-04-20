@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import type { StartAction } from './use_start_action';
 
-export const StartActionModal = (
-  {
-    closeModal,
-    item,
-    startAndCloseModal
-  }: StartAction
-) => {
+export const StartActionModal = ({ closeModal, item, startAndCloseModal }: StartAction) => {
   return (
     <>
       {item !== undefined && (

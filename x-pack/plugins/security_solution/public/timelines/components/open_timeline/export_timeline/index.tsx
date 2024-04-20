@@ -17,42 +17,42 @@ export interface ExportTimeline {
   isEnableDownloader: boolean;
 }
 
-export const EditTimelineActionsComponent = (
-  {
-    deleteTimelines,
-    ids,
-    savedSearchIds,
-    isEnableDownloader,
-    isDeleteTimelineModalOpen,
-    onComplete,
-    title
-  }: {
-    deleteTimelines: DeleteTimelines | undefined;
-    ids: string[];
-    savedSearchIds?: string[];
-    isEnableDownloader: boolean;
-    isDeleteTimelineModalOpen: boolean;
-    onComplete: () => void;
-    title: string;
-  }
-) => (<>
-  <TimelineDownloader
-    data-test-subj="TimelineDownloader"
-    exportedIds={ids}
-    isEnableDownloader={isEnableDownloader}
-    onComplete={onComplete}
-  />
-  {deleteTimelines != null && (
-    <DeleteTimelineModalOverlay
-      data-test-subj="DeleteTimelineModalOverlay"
-      deleteTimelines={deleteTimelines}
-      isModalOpen={isDeleteTimelineModalOpen}
+export const EditTimelineActionsComponent = ({
+  deleteTimelines,
+  ids,
+  savedSearchIds,
+  isEnableDownloader,
+  isDeleteTimelineModalOpen,
+  onComplete,
+  title,
+}: {
+  deleteTimelines: DeleteTimelines | undefined;
+  ids: string[];
+  savedSearchIds?: string[];
+  isEnableDownloader: boolean;
+  isDeleteTimelineModalOpen: boolean;
+  onComplete: () => void;
+  title: string;
+}) => (
+  <>
+    <TimelineDownloader
+      data-test-subj="TimelineDownloader"
+      exportedIds={ids}
+      isEnableDownloader={isEnableDownloader}
       onComplete={onComplete}
-      savedObjectIds={ids}
-      savedSearchIds={savedSearchIds}
-      title={title}
     />
-  )}
-</>);
+    {deleteTimelines != null && (
+      <DeleteTimelineModalOverlay
+        data-test-subj="DeleteTimelineModalOverlay"
+        deleteTimelines={deleteTimelines}
+        isModalOpen={isDeleteTimelineModalOpen}
+        onComplete={onComplete}
+        savedObjectIds={ids}
+        savedSearchIds={savedSearchIds}
+        title={title}
+      />
+    )}
+  </>
+);
 
 export const EditTimelineActions = React.memo(EditTimelineActionsComponent);

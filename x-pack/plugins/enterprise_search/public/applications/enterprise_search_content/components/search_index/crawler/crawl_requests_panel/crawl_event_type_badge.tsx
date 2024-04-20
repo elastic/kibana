@@ -15,13 +15,7 @@ import { CrawlEvent, CrawlType } from '../../../../api/crawler/types';
 
 import { readableCrawlTypes } from './constants';
 
-export const CrawlEventTypeBadge = (
-  {
-    event
-  }: {
-    event: CrawlEvent;
-  }
-) => {
+export const CrawlEventTypeBadge = ({ event }: { event: CrawlEvent }) => {
   if (event.stage === 'process') {
     return (
       <EuiBadge color="hollow">

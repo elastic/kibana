@@ -22,14 +22,12 @@ export interface RowProps {
   selectedThirdParty: ConnectorMappingTarget;
 }
 
-const FieldMappingRowComponent = (
-  {
-    isLoading,
-    casesField,
-    selectedActionType,
-    selectedThirdParty
-  }: RowProps
-) => {
+const FieldMappingRowComponent = ({
+  isLoading,
+  casesField,
+  selectedActionType,
+  selectedThirdParty,
+}: RowProps) => {
   const selectedActionTypeCapitalized = useMemo(
     () => capitalize(selectedActionType),
     [selectedActionType]

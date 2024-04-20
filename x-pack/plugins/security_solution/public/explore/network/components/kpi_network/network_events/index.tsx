@@ -33,12 +33,7 @@ export const networkEventsStatsItems: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiNetworkEventsComponent = (
-  {
-    from,
-    to
-  }: NetworkKpiProps
-) => {
+const NetworkKpiNetworkEventsComponent = ({ from, to }: NetworkKpiProps) => {
   return <KpiBaseComponent id={ID} statItems={networkEventsStatsItems} from={from} to={to} />;
 };
 

@@ -55,16 +55,14 @@ type ActivePanelNav = string | null;
 /**
  * The Solution side navigation main component
  */
-export const SolutionSideNav = React.memo(function SolutionSideNav(
-  {
-    items,
-    categories,
-    selectedId,
-    panelBottomOffset,
-    panelTopOffset,
-    tracker
-  }: SolutionSideNavProps
-) {
+export const SolutionSideNav = React.memo(function SolutionSideNav({
+  items,
+  categories,
+  selectedId,
+  panelBottomOffset,
+  panelTopOffset,
+  tracker,
+}: SolutionSideNavProps) {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
 
   const [activePanelNavId, setActivePanelNavId] = useState<ActivePanelNav>(null);
@@ -157,16 +155,14 @@ interface SolutionSideNavItemsProps {
  * Renders either the top or bottom panel items, considering the categories if present.
  * When `categories` is received all links that do not belong to any category are ignored.
  */
-const SolutionSideNavItems = React.memo(function SolutionSideNavItems(
-  {
-    items,
-    categories,
-    selectedId,
-    activePanelNavId,
-    isMobileSize,
-    onOpenPanelNav
-  }: SolutionSideNavItemsProps
-) {
+const SolutionSideNavItems = React.memo(function SolutionSideNavItems({
+  items,
+  categories,
+  selectedId,
+  activePanelNavId,
+  isMobileSize,
+  onOpenPanelNav,
+}: SolutionSideNavItemsProps) {
   if (!categories?.length) {
     return (
       <>
@@ -232,15 +228,13 @@ interface SolutionSideNavItemProps {
  * Renders a single item for the main side navigation panel,
  * and it adds a button to open the item secondary panel if needed.
  */
-const SolutionSideNavItem = React.memo(function SolutionSideNavItem(
-  {
-    item,
-    isSelected,
-    isActive,
-    isMobileSize,
-    onOpenPanelNav
-  }: SolutionSideNavItemProps
-) {
+const SolutionSideNavItem = React.memo(function SolutionSideNavItem({
+  item,
+  isSelected,
+  isActive,
+  isMobileSize,
+  onOpenPanelNav,
+}: SolutionSideNavItemProps) {
   const { euiTheme } = useEuiTheme();
   const { tracker } = useTelemetryContext();
 
@@ -336,16 +330,14 @@ interface SolutionSideNavPanelsProps {
  * The Solution side navigation panels component.
  * Renders the secondary panel according to the `activePanelNavId` received.
  */
-const SolutionSideNavPanels = React.memo(function SolutionSideNavPanels(
-  {
-    items,
-    activePanelNavId,
-    onClose,
-    onOutsideClick,
-    bottomOffset,
-    topOffset
-  }: SolutionSideNavPanelsProps
-) {
+const SolutionSideNavPanels = React.memo(function SolutionSideNavPanels({
+  items,
+  activePanelNavId,
+  onClose,
+  onOutsideClick,
+  bottomOffset,
+  topOffset,
+}: SolutionSideNavPanelsProps) {
   const activePanelNavItem = useMemo<SolutionSideNavItem | undefined>(
     () => items.find(({ id }) => id === activePanelNavId),
     [items, activePanelNavId]

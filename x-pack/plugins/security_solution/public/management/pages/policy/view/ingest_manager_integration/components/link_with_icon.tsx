@@ -6,7 +6,6 @@
  */
 
 import styled from 'styled-components';
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { LinkToAppProps } from '../../../../../../common/components/endpoint/link_to_app';
@@ -24,13 +23,7 @@ type ComponentProps = LinkToAppProps & {
   size?: 'm' | 'l';
 };
 
-export const LinkWithIcon = memo((
-  {
-    children,
-    size = 'l',
-    ...props
-  }: ComponentProps
-) => {
+export const LinkWithIcon = memo(({ children, size = 'l', ...props }: ComponentProps) => {
   return (
     <LinkToApp {...props}>
       <LinkLabel size={size}>{children}</LinkLabel>

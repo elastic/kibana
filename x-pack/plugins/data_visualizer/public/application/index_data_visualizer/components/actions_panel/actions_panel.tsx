@@ -7,7 +7,6 @@
 
 import { css } from '@emotion/react';
 import { flatten } from 'lodash';
-import type { FC } from 'react';
 import React, { Fragment, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,14 +30,12 @@ interface Props {
 
 const ACTIONS_PANEL_WIDTH = '240px';
 
-export const ActionsPanel = (
-  {
-    dataView,
-    searchString,
-    searchQueryLanguage,
-    getAdditionalLinks
-  }: Props
-) => {
+export const ActionsPanel = ({
+  dataView,
+  searchString,
+  searchQueryLanguage,
+  getAdditionalLinks,
+}: Props) => {
   const [globalState] = useUrlState('_g');
 
   const [discoverLink, setDiscoverLink] = useState('');

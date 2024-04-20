@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
@@ -38,11 +38,7 @@ export interface IndexDetailOverviewProps {
   index: Index;
 }
 
-export const IndexDetailOverview = (
-  {
-    index
-  }: IndexDetailOverviewProps
-) => {
+export const IndexDetailOverview = ({ index }: IndexDetailOverviewProps) => {
   const [aliasesFlyoutOpen, setAliasesFlyoutOpen] = React.useState<boolean>(false);
   const { data, isLoading, isError } = useIndex(index.name);
   const indexAliases =

@@ -52,11 +52,7 @@ interface IndexStatusDetailsProps {
   option?: SearchIndexSelectableOption;
 }
 
-export const IndexStatusDetails = (
-  {
-    option
-  }: IndexStatusDetailsProps
-) => {
+export const IndexStatusDetails = ({ option }: IndexStatusDetailsProps) => {
   return !option ? (
     <></>
   ) : (

@@ -17,33 +17,31 @@ import {} from '@elastic/eui';
 import { AgentStatusBadges } from './status_badges';
 import type { SelectionMode } from './types';
 
-export const AgentTableHeader = (
-  {
-    agentStatus,
-    totalAgents,
-    selectableAgents,
-    managedAgentsOnCurrentPage,
-    selectionMode,
-    setSelectionMode,
-    selectedAgents,
-    setSelectedAgents,
-    showInactive,
-    clearFilters,
-    isUsingFilter
-  }: {
-    agentStatus?: { [k in SimplifiedAgentStatus]: number };
-    showInactive: boolean;
-    totalAgents: number;
-    selectableAgents: number;
-    managedAgentsOnCurrentPage: number;
-    selectionMode: SelectionMode;
-    setSelectionMode: (mode: SelectionMode) => void;
-    selectedAgents: Agent[];
-    setSelectedAgents: (agents: Agent[]) => void;
-    clearFilters: () => void;
-    isUsingFilter: boolean;
-  }
-) => {
+export const AgentTableHeader = ({
+  agentStatus,
+  totalAgents,
+  selectableAgents,
+  managedAgentsOnCurrentPage,
+  selectionMode,
+  setSelectionMode,
+  selectedAgents,
+  setSelectedAgents,
+  showInactive,
+  clearFilters,
+  isUsingFilter,
+}: {
+  agentStatus?: { [k in SimplifiedAgentStatus]: number };
+  showInactive: boolean;
+  totalAgents: number;
+  selectableAgents: number;
+  managedAgentsOnCurrentPage: number;
+  selectionMode: SelectionMode;
+  setSelectionMode: (mode: SelectionMode) => void;
+  selectedAgents: Agent[];
+  setSelectedAgents: (agents: Agent[]) => void;
+  clearFilters: () => void;
+  isUsingFilter: boolean;
+}) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">

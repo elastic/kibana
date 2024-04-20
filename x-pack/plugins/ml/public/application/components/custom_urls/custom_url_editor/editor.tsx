@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent, FC } from 'react';
+import type { ChangeEvent } from 'react';
 import React, { useState, useRef, useEffect } from 'react';
 import { type Moment } from 'moment';
 
@@ -81,18 +81,16 @@ interface CustomUrlEditorProps {
 /*
  * React component for the form for editing a custom URL.
  */
-export const CustomUrlEditor = (
-  {
-    customUrl,
-    setEditCustomUrl,
-    savedCustomUrls,
-    dashboards,
-    dataViewListItems,
-    showCustomTimeRangeSelector,
-    job,
-    isPartialDFAJob
-  }: CustomUrlEditorProps
-) => {
+export const CustomUrlEditor = ({
+  customUrl,
+  setEditCustomUrl,
+  savedCustomUrls,
+  dashboards,
+  dataViewListItems,
+  showCustomTimeRangeSelector,
+  job,
+  isPartialDFAJob,
+}: CustomUrlEditorProps) => {
   const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
   const [hasTimefield, setHasTimefield] = useState<boolean>(false);
   const [addIntervalTimerange, setAddIntervalTimerange] = useState<boolean>(false);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 import React, { useState } from 'react';
 
 import {
@@ -60,15 +60,13 @@ export interface CustomUrlListProps {
  * React component for listing the custom URLs added to a job,
  * with buttons for testing and deleting each custom URL.
  */
-export const CustomUrlList = (
-  {
-    job,
-    customUrls,
-    onChange: setCustomUrls,
-    dataViewListItems,
-    isPartialDFAJob
-  }: CustomUrlListProps
-) => {
+export const CustomUrlList = ({
+  job,
+  customUrls,
+  onChange: setCustomUrls,
+  dataViewListItems,
+  isPartialDFAJob,
+}: CustomUrlListProps) => {
   const {
     services: {
       http,

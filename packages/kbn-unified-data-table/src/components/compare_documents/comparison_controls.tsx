@@ -24,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, ReactNode, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocumentDiffMode } from './types';
 
@@ -367,18 +367,16 @@ const enableShowDiffTooltip = i18n.translate('unifiedDataTable.enableShowDiff', 
   defaultMessage: 'You need to enable Show diff',
 });
 
-const DiffModeEntry = (
-  {
-    children,
-    entryDiffMode,
-    diffMode,
-    disabled,
-    setDiffMode
-  }: Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
-    entryDiffMode: DocumentDiffMode;
-    disabled?: boolean;
-  }
-) => {
+const DiffModeEntry = ({
+  children,
+  entryDiffMode,
+  diffMode,
+  disabled,
+  setDiffMode,
+}: Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
+  entryDiffMode: DocumentDiffMode;
+  disabled?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (

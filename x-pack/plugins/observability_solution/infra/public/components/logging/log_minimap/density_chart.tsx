@@ -21,15 +21,7 @@ interface DensityChartProps {
   height: number;
 }
 
-export const DensityChart = (
-  {
-    buckets,
-    start,
-    end,
-    width,
-    height
-  }: DensityChartProps
-) => {
+export const DensityChart = ({ buckets, start, end, width, height }: DensityChartProps) => {
   if (start >= end || height <= 0 || width <= 0 || buckets.length <= 0) {
     return null;
   }

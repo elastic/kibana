@@ -75,22 +75,20 @@ const MyEuiSelect = styled(EuiSelect)`
 // This component is similar to the ScheduleItem component, but instead of combining the value
 // and unit into a single string it keeps them separate. This makes the component simpler and
 // allows for easier validation of values and units in APIs as well.
-const DurationInputComponent = (
-  {
-    durationValueField,
-    durationUnitField,
-    minimumValue = 0,
-    isDisabled,
+const DurationInputComponent = ({
+  durationValueField,
+  durationUnitField,
+  minimumValue = 0,
+  isDisabled,
 
-    durationUnitOptions = [
-      { value: 's', text: I18n.SECONDS },
-      { value: 'm', text: I18n.MINUTES },
-      { value: 'h', text: I18n.HOURS },
-    ],
+  durationUnitOptions = [
+    { value: 's', text: I18n.SECONDS },
+    { value: 'm', text: I18n.MINUTES },
+    { value: 'h', text: I18n.HOURS },
+  ],
 
-    ...props
-  }: DurationInputProps
-) => {
+  ...props
+}: DurationInputProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(durationValueField);
   const { value: durationValue, setValue: setDurationValue } = durationValueField;
   const { value: durationUnit, setValue: setDurationUnit } = durationUnitField;

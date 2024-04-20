@@ -35,15 +35,13 @@ export interface OwnProps {
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
 export type OverviewHostProps = OwnProps;
 
-const OverviewHostComponent = (
-  {
-    endDate,
-    filterQuery,
-    indexNames,
-    startDate,
-    setQuery
-  }: OverviewHostProps
-) => {
+const OverviewHostComponent = ({
+  endDate,
+  filterQuery,
+  indexNames,
+  startDate,
+  setQuery,
+}: OverviewHostProps) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(OverviewHostQueryId);

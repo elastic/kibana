@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -23,13 +22,7 @@ interface Props {
   rareDetectorType: RARE_DETECTOR_TYPE;
 }
 
-export const RareDetectors = (
-  {
-    setIsValid,
-    rareDetectorType,
-    setRareDetectorType
-  }: Props
-) => {
+export const RareDetectors = ({ setIsValid, rareDetectorType, setRareDetectorType }: Props) => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
   const [detectorValid, setDetectorValid] = useState(false);

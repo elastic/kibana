@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -33,16 +32,14 @@ interface ModuleJobsProps {
 
 export const SETUP_RESULTS_WIDTH = '200px';
 
-export const ModuleJobs = (
-  {
-    jobs,
-    jobPrefix,
-    jobOverrides,
-    saveState,
-    existingGroupIds,
-    onJobOverridesChange
-  }: ModuleJobsProps
-) => {
+export const ModuleJobs = ({
+  jobs,
+  jobPrefix,
+  jobOverrides,
+  saveState,
+  existingGroupIds,
+  onJobOverridesChange,
+}: ModuleJobsProps) => {
   const isSaving = saveState === SAVE_STATE.SAVING;
 
   const [jobToEdit, setJobToEdit] = useState<ModuleJobUI | null>(null);

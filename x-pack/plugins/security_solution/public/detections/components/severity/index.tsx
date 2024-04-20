@@ -45,14 +45,12 @@ interface Props {
   severity: string;
 }
 
-const SeverityComponent = (
-  {
-    severity
-  }: Props
-) => (<SeverityBadge color={getBadgeColorFromSeverity(severity)} data-test-subj="severity-badge">
-  <EuiText color={getTextColorFromSeverity(severity)} data-test-subj="severity-text" size="xs">
-    {severity}
-  </EuiText>
-</SeverityBadge>);
+const SeverityComponent = ({ severity }: Props) => (
+  <SeverityBadge color={getBadgeColorFromSeverity(severity)} data-test-subj="severity-badge">
+    <EuiText color={getTextColorFromSeverity(severity)} data-test-subj="severity-text" size="xs">
+      {severity}
+    </EuiText>
+  </SeverityBadge>
+);
 
 export const Severity = React.memo(SeverityComponent);

@@ -107,20 +107,18 @@ const getComponentByType = (type?: keyof typeof FIELD_TYPES) => {
   return UseField;
 };
 
-const FormRow = (
-  {
-    id,
-    label,
-    readOnly,
-    isPasswordField,
-    isRequired = true,
-    isUrlField,
-    helpText,
-    defaultValue,
-    euiFieldProps = {},
-    type
-  }: FormRowProps
-) => {
+const FormRow = ({
+  id,
+  label,
+  readOnly,
+  isPasswordField,
+  isRequired = true,
+  isUrlField,
+  helpText,
+  defaultValue,
+  euiFieldProps = {},
+  type,
+}: FormRowProps) => {
   const dataTestSub = `${id}-input`;
   const UseField = getComponentByType(type);
   return (
@@ -162,15 +160,13 @@ const FormRow = (
   );
 };
 
-const SimpleConnectorFormComponent = (
-  {
-    isEdit,
-    readOnly,
-    configFormSchema,
-    secretsFormSchema,
-    configFormSchemaAfterSecrets = []
-  }: SimpleConnectorFormProps
-) => {
+const SimpleConnectorFormComponent = ({
+  isEdit,
+  readOnly,
+  configFormSchema,
+  secretsFormSchema,
+  configFormSchemaAfterSecrets = [],
+}: SimpleConnectorFormProps) => {
   return (
     <>
       {configFormSchema.map(({ id, ...restConfigSchema }, index) => (

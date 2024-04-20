@@ -22,7 +22,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import type { FC, ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -140,36 +140,34 @@ export interface Columns<T, U = T> {
   width?: string;
 }
 
-const PaginatedTableComponent = (
-  {
-    activePage,
-    columns,
-    dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
-    headerCount,
-    headerFilters,
-    headerSupplement,
-    headerTitle,
-    headerTooltip,
-    headerUnit,
-    headerSubtitle,
-    id,
-    isInspect,
-    itemsPerRow,
-    limit,
-    loading,
-    loadPage,
-    onChange = noop,
-    pageOfItems,
-    setQuerySkip,
-    showMorePagesIndicator,
-    sorting = null,
-    split,
-    stackHeader,
-    totalCount,
-    updateActivePage,
-    updateLimitPagination
-  }: SiemTables
-) => {
+const PaginatedTableComponent = ({
+  activePage,
+  columns,
+  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
+  headerCount,
+  headerFilters,
+  headerSupplement,
+  headerTitle,
+  headerTooltip,
+  headerUnit,
+  headerSubtitle,
+  id,
+  isInspect,
+  itemsPerRow,
+  limit,
+  loading,
+  loadPage,
+  onChange = noop,
+  pageOfItems,
+  setQuerySkip,
+  showMorePagesIndicator,
+  sorting = null,
+  split,
+  stackHeader,
+  totalCount,
+  updateActivePage,
+  updateLimitPagination,
+}: SiemTables) => {
   const [myLoading, setMyLoading] = useState(loading);
   const [myActivePage, setActivePage] = useState(activePage);
   const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);

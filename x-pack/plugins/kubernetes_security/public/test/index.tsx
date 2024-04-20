@@ -113,15 +113,11 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper = (
-    {
-      children
-    }: {
-      children: React.ReactElement;
-    }
-  ) => (<AppRootProvider history={history} coreStart={coreStart}>
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  </AppRootProvider>);
+  const AppWrapper = ({ children }: { children: React.ReactElement }) => (
+    <AppRootProvider history={history} coreStart={coreStart}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </AppRootProvider>
+  );
 
   const render: UiRender = (ui, options = {}) => {
     return reactRender(ui, {

@@ -29,14 +29,12 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const AzureSettings = (
-  {
-    repository,
-    isManagedRepository,
-    updateRepositorySettings,
-    settingErrors
-  }: Props
-) => {
+export const AzureSettings = ({
+  repository,
+  isManagedRepository,
+  updateRepositorySettings,
+  settingErrors,
+}: Props) => {
   const {
     settings: {
       client,

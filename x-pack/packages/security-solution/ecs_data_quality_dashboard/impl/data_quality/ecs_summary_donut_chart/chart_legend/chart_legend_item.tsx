@@ -22,43 +22,43 @@ interface Props {
   textWidth?: number;
 }
 
-const ChartLegendItemComponent = (
-  {
-    color,
-    count,
-    dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
-    onClick,
-    text,
-    textWidth
-  }: Props
-) => (<ChartLegendLink
-  color="text"
-  data-test-subj={dataTestSubj}
-  disabled={onClick == null}
-  onClick={onClick}
->
-  <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content={text}>
-        {color != null ? (
-          <EuiHealth color={color}>
+const ChartLegendItemComponent = ({
+  color,
+  count,
+  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
+  onClick,
+  text,
+  textWidth,
+}: Props) => (
+  <ChartLegendLink
+    color="text"
+    data-test-subj={dataTestSubj}
+    disabled={onClick == null}
+    onClick={onClick}
+  >
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={text}>
+          {color != null ? (
+            <EuiHealth color={color}>
+              <FixedWidthLegendText className="eui-textTruncate" size="xs" $width={textWidth}>
+                {text}
+              </FixedWidthLegendText>
+            </EuiHealth>
+          ) : (
             <FixedWidthLegendText className="eui-textTruncate" size="xs" $width={textWidth}>
               {text}
             </FixedWidthLegendText>
-          </EuiHealth>
-        ) : (
-          <FixedWidthLegendText className="eui-textTruncate" size="xs" $width={textWidth}>
-            {text}
-          </FixedWidthLegendText>
-        )}
-      </EuiToolTip>
-    </EuiFlexItem>
+          )}
+        </EuiToolTip>
+      </EuiFlexItem>
 
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs">{count}</EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</ChartLegendLink>);
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">{count}</EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </ChartLegendLink>
+);
 
 ChartLegendItemComponent.displayName = 'ChartLegendItemComponent';
 

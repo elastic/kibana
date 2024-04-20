@@ -20,11 +20,7 @@ interface StartNewChatProps {
   onStartClick: () => void;
 }
 
-export const StartNewChat = (
-  {
-    onStartClick
-  }: StartNewChatProps
-) => {
+export const StartNewChat = ({ onStartClick }: StartNewChatProps) => {
   const { euiTheme } = useEuiTheme();
   const { data: connectors } = useLoadConnectors();
   const { watch } = useFormContext();

@@ -7,7 +7,7 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { FC } from 'react';
+import React from 'react';
 
 import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';

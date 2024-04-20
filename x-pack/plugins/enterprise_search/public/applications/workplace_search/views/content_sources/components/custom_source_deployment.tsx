@@ -25,13 +25,7 @@ interface Props {
   baseServiceType?: string;
   small?: boolean;
 }
-export const CustomSourceDeployment = (
-  {
-    source,
-    baseServiceType,
-    small = false
-  }: Props
-) => {
+export const CustomSourceDeployment = ({ source, baseServiceType, small = false }: Props) => {
   const { name, id } = source;
 
   const sourceData = getSourceData('custom', baseServiceType);

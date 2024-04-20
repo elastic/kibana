@@ -15,11 +15,7 @@ interface Props {
   dataStreams: string[] | string | undefined;
 }
 
-export const CollapsibleDataStreamsList = (
-  {
-    dataStreams
-  }: Props
-) => {
+export const CollapsibleDataStreamsList = ({ dataStreams }: Props) => {
   const { isShowingFullList, setIsShowingFullList, items, hiddenItemsCount } = useCollapsibleList({
     items: dataStreams,
   });

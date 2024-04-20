@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { StatsBarStat } from './stat';
@@ -39,12 +38,7 @@ interface StatsBarProps {
   dataTestSub: string;
 }
 
-export const StatsBar = (
-  {
-    stats,
-    dataTestSub
-  }: StatsBarProps
-) => {
+export const StatsBar = ({ stats, dataTestSub }: StatsBarProps) => {
   const { euiTheme } = useEuiTheme();
   const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
   return (

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type {
   ChromeProjectNavigationNode,
@@ -45,13 +45,7 @@ export interface Props {
   panelContentProvider?: PanelContentProvider;
 }
 
-const NavigationComp = (
-  {
-    navigationTree$,
-    dataTestSubj,
-    panelContentProvider
-  }: Props
-) => {
+const NavigationComp = ({ navigationTree$, dataTestSubj, panelContentProvider }: Props) => {
   const { activeNodes$ } = useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);

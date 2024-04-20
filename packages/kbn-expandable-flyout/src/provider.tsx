@@ -7,7 +7,7 @@
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import React, { FC, PropsWithChildren, useEffect, useMemo } from 'react';
+import React, { PropsWithChildren, useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
@@ -86,12 +86,10 @@ interface ExpandableFlyoutProviderProps {
 /**
  * Wrap your plugin with this context for the ExpandableFlyout React component.
  */
-export const ExpandableFlyoutProvider = (
-  {
-    children,
-    urlKey
-  }: PropsWithChildren<ExpandableFlyoutProviderProps>
-) => {
+export const ExpandableFlyoutProvider = ({
+  children,
+  urlKey,
+}: PropsWithChildren<ExpandableFlyoutProviderProps>) => {
   return (
     <ExpandableFlyoutContextProvider urlKey={urlKey}>
       <ReduxProvider context={Context} store={store}>

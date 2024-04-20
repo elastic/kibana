@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,11 +32,7 @@ import { CollapsiblePanel } from '../../../components/collapsible_panel';
 interface Props {
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
-export const AnalyticsPanel = (
-  {
-    setLazyJobCount
-  }: Props
-) => {
+export const AnalyticsPanel = ({ setLazyJobCount }: Props) => {
   const refresh = useRefresh();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);

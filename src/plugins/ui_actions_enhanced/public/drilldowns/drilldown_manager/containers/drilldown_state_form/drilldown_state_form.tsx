@@ -17,12 +17,7 @@ export interface DrilldownStateFormProps {
   disabled?: boolean;
 }
 
-export const DrilldownStateForm = (
-  {
-    state,
-    disabled
-  }: DrilldownStateFormProps
-) => {
+export const DrilldownStateForm = ({ state, disabled }: DrilldownStateFormProps) => {
   const drilldowns = useDrilldownManager();
   const name = state.useName();
   const triggers = state.useTriggers();

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Option } from '../../../common/components/multi_select_picker';
@@ -19,14 +18,12 @@ interface Props {
   showEmptyFields: boolean;
 }
 
-export const DataVisualizerFieldNamesFilter = (
-  {
-    overallStats,
-    setVisibleFieldNames,
-    visibleFieldNames,
-    showEmptyFields
-  }: Props
-) => {
+export const DataVisualizerFieldNamesFilter = ({
+  overallStats,
+  setVisibleFieldNames,
+  visibleFieldNames,
+  showEmptyFields,
+}: Props) => {
   const items: Option[] = useMemo(() => {
     const options: Option[] = [];
     if (overallStats) {

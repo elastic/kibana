@@ -15,41 +15,36 @@ interface IndicesListProps {
   hasBorder?: boolean;
 }
 
-export const IndicesList = (
-  {
-    indices,
-    onRemoveClick,
-    hasBorder
-  }: IndicesListProps
-) => indices?.length ? (
-  <EuiFormRow
-    fullWidth
-    label={i18n.translate('xpack.searchPlayground.sources.indices.label', {
-      defaultMessage: 'Selected indices',
-    })}
-    labelType="legend"
-  >
-    <EuiListGroup bordered={hasBorder} maxWidth={false} wrapText>
-      {indices.map((index) => (
-        <EuiListGroupItem
-          key={index}
-          wrapText
-          color="primary"
-          label={index}
-          size="s"
-          extraAction={{
-            alwaysShow: true,
-            'aria-label': i18n.translate('xpack.searchPlayground.sources.indices.removeIndex', {
-              defaultMessage: 'Remove index from sources',
-            }),
-            color: 'text',
-            iconType: 'minusInCircle',
-            onClick: () => onRemoveClick(index),
-            disabled: indices.length === 1,
-            'data-test-subj': `removeIndexButton`,
-          }}
-        />
-      ))}
-    </EuiListGroup>
-  </EuiFormRow>
-) : null;
+export const IndicesList = ({ indices, onRemoveClick, hasBorder }: IndicesListProps) =>
+  indices?.length ? (
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.searchPlayground.sources.indices.label', {
+        defaultMessage: 'Selected indices',
+      })}
+      labelType="legend"
+    >
+      <EuiListGroup bordered={hasBorder} maxWidth={false} wrapText>
+        {indices.map((index) => (
+          <EuiListGroupItem
+            key={index}
+            wrapText
+            color="primary"
+            label={index}
+            size="s"
+            extraAction={{
+              alwaysShow: true,
+              'aria-label': i18n.translate('xpack.searchPlayground.sources.indices.removeIndex', {
+                defaultMessage: 'Remove index from sources',
+              }),
+              color: 'text',
+              iconType: 'minusInCircle',
+              onClick: () => onRemoveClick(index),
+              disabled: indices.length === 1,
+              'data-test-subj': `removeIndexButton`,
+            }}
+          />
+        ))}
+      </EuiListGroup>
+    </EuiFormRow>
+  ) : null;

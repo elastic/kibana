@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -22,45 +21,45 @@ interface Props {
   selectedId?: string;
 }
 
-export const AnalyticsIdSelectorControls = (
-  {
-    setIsIdSelectorFlyoutVisible,
-    selectedId
-  }: Props
-) => (<>
-  <EuiFlexGroup gutterSize="xs" alignItems="center">
-    <EuiFlexItem grow={false}>
-      {selectedId ? (
-        <EuiBadge
-          key={`${selectedId}-id`}
-          data-test-subj={`mlAnalyticsIdSelectionBadge ${selectedId}`}
-          color="hollow"
+export const AnalyticsIdSelectorControls = ({
+  setIsIdSelectorFlyoutVisible,
+  selectedId,
+}: Props) => (
+  <>
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem grow={false}>
+        {selectedId ? (
+          <EuiBadge
+            key={`${selectedId}-id`}
+            data-test-subj={`mlAnalyticsIdSelectionBadge ${selectedId}`}
+            color="hollow"
+          >
+            {selectedId}
+          </EuiBadge>
+        ) : null}
+        {!selectedId ? (
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.noIdsSelectedLabel"
+              defaultMessage="No Analytics ID selected"
+            />
+          </EuiText>
+        ) : null}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="xs"
+          iconType="pencil"
+          onClick={setIsIdSelectorFlyoutVisible.bind(null, true)}
+          data-test-subj="mlButtonEditAnalyticsIdSelection"
         >
-          {selectedId}
-        </EuiBadge>
-      ) : null}
-      {!selectedId ? (
-        <EuiText size={'xs'}>
           <FormattedMessage
-            id="xpack.ml.dataframe.analytics.noIdsSelectedLabel"
-            defaultMessage="No Analytics ID selected"
+            id="xpack.ml.dataframe.analytics.editSelection"
+            defaultMessage="Edit selection"
           />
-        </EuiText>
-      ) : null}
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        size="xs"
-        iconType="pencil"
-        onClick={setIsIdSelectorFlyoutVisible.bind(null, true)}
-        data-test-subj="mlButtonEditAnalyticsIdSelection"
-      >
-        <FormattedMessage
-          id="xpack.ml.dataframe.analytics.editSelection"
-          defaultMessage="Edit selection"
-        />
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiHorizontalRule />
-</>);
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiHorizontalRule />
+  </>
+);

@@ -76,17 +76,15 @@ interface GroupManagerModalProps {
   saveItems(): void;
 }
 
-export const GroupManagerModal = (
-  {
-    children,
-    label,
-    allItems,
-    numSelected,
-    hideModal,
-    selectAll,
-    saveItems
-  }: GroupManagerModalProps
-) => {
+export const GroupManagerModal = ({
+  children,
+  label,
+  allItems,
+  numSelected,
+  hideModal,
+  selectAll,
+  saveItems,
+}: GroupManagerModalProps) => {
   const { group, managerModalFormErrors } = useValues(GroupLogic);
   const { contentSources } = useValues(GroupsLogic);
 

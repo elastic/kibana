@@ -34,12 +34,7 @@ export const hostsStatItems: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiHostsComponent = (
-  {
-    from,
-    to
-  }: HostsKpiProps
-) => {
+const HostsKpiHostsComponent = ({ from, to }: HostsKpiProps) => {
   return <KpiBaseComponent id={ID} statItems={hostsStatItems} from={from} to={to} />;
 };
 

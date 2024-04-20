@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, MouseEventHandler } from 'react';
+import type { MouseEventHandler } from 'react';
 import React from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,16 +21,14 @@ interface NewSelectionIdBadgesProps {
   showAllBadges?: boolean;
 }
 
-export const NewSelectionIdBadges = (
-  {
-    limit,
-    maps,
-    newSelection,
-    onDeleteClick,
-    onLinkClick,
-    showAllBadges
-  }: NewSelectionIdBadgesProps
-) => {
+export const NewSelectionIdBadges = ({
+  limit,
+  maps,
+  newSelection,
+  onDeleteClick,
+  onLinkClick,
+  showAllBadges,
+}: NewSelectionIdBadgesProps) => {
   const badges = [];
 
   for (let i = 0; i < newSelection.length; i++) {

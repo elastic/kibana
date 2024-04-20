@@ -27,15 +27,13 @@ const OPTIONS = [
   },
 ];
 
-export const SelectInterval = (
-  {
-    interval,
-    onChange
-  }: {
-    interval: string;
-    onChange: (interval: string) => void;
-  }
-) => {
+export const SelectInterval = ({
+  interval,
+  onChange,
+}: {
+  interval: string;
+  onChange: (interval: string) => void;
+}) => {
   const onChangeCb = useCallback(
     (e) => {
       onChange(e.target.value);

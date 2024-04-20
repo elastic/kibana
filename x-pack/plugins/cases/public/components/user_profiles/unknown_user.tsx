@@ -14,11 +14,7 @@ interface CaseUnknownUserAvatarProps {
   size: UserAvatarProps['size'];
 }
 
-const CaseUnknownUserAvatarComponent = (
-  {
-    size
-  }: CaseUnknownUserAvatarProps
-) => {
+const CaseUnknownUserAvatarComponent = ({ size }: CaseUnknownUserAvatarProps) => {
   return <UserAvatar data-test-subj="case-user-profile-avatar-unknown-user" size={size} />;
 };
 CaseUnknownUserAvatarComponent.displayName = 'UnknownUserAvatar';

@@ -202,33 +202,31 @@ export async function onSaveSearch({
   showSaveModal(saveModal);
 }
 
-const SaveSearchObjectModal = (
-  {
-    isTimeBased,
-    services,
-    title,
-    description,
-    tags,
-    showCopyOnSave,
-    initialCopyOnSave,
-    timeRestore: savedTimeRestore,
-    onSave,
-    onClose,
-    managed
-  }: {
-    isTimeBased: boolean;
-    services: DiscoverServices;
-    title: string;
-    showCopyOnSave: boolean;
-    initialCopyOnSave?: boolean;
-    description?: string;
-    timeRestore?: boolean;
-    tags: string[];
-    onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
-    onClose: () => void;
-    managed: boolean;
-  }
-) => {
+const SaveSearchObjectModal = ({
+  isTimeBased,
+  services,
+  title,
+  description,
+  tags,
+  showCopyOnSave,
+  initialCopyOnSave,
+  timeRestore: savedTimeRestore,
+  onSave,
+  onClose,
+  managed,
+}: {
+  isTimeBased: boolean;
+  services: DiscoverServices;
+  title: string;
+  showCopyOnSave: boolean;
+  initialCopyOnSave?: boolean;
+  description?: string;
+  timeRestore?: boolean;
+  tags: string[];
+  onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
+  onClose: () => void;
+  managed: boolean;
+}) => {
   const { savedObjectsTagging } = services;
   const [timeRestore, setTimeRestore] = useState<boolean>(
     (isTimeBased && savedTimeRestore) || false

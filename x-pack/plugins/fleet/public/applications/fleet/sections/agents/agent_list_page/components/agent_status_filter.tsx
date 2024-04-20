@@ -66,57 +66,55 @@ const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
   margin-left: 10px;
 `;
 
-const InactiveAgentsTourStep = (
-  {
-    children,
-    isOpen,
-    setInactiveAgentsCalloutHasBeenDismissed
-  }: {
-    isOpen: boolean;
-    setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
-  }
-) => (<EuiTourStep
-  content={
-    <EuiText size="s">
-      <FormattedMessage
-        id="xpack.fleet.agentList.inactiveAgentsTourStepContent"
-        defaultMessage="Some agents have become inactive and have been hidden. Use status filters to show inactive or unenrolled agents."
-      />
-    </EuiText>
-  }
-  isStepOpen={isOpen}
-  minWidth={300}
-  step={1}
-  stepsTotal={0}
-  title=""
-  onFinish={() => {}}
-  anchorPosition="upCenter"
-  maxWidth={280}
-  footerAction={
-    <EuiLink
-      onClick={() => {
-        setInactiveAgentsCalloutHasBeenDismissed(true);
-      }}
-    >
-      <FormattedMessage
-        id="xpack.fleet.addAgentHelpPopover.footActionButton"
-        defaultMessage="Got it"
-      />
-    </EuiLink>
-  }
->
-  {children as React.ReactElement}
-</EuiTourStep>);
+const InactiveAgentsTourStep = ({
+  children,
+  isOpen,
+  setInactiveAgentsCalloutHasBeenDismissed,
+}: {
+  isOpen: boolean;
+  setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
+}) => (
+  <EuiTourStep
+    content={
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.fleet.agentList.inactiveAgentsTourStepContent"
+          defaultMessage="Some agents have become inactive and have been hidden. Use status filters to show inactive or unenrolled agents."
+        />
+      </EuiText>
+    }
+    isStepOpen={isOpen}
+    minWidth={300}
+    step={1}
+    stepsTotal={0}
+    title=""
+    onFinish={() => {}}
+    anchorPosition="upCenter"
+    maxWidth={280}
+    footerAction={
+      <EuiLink
+        onClick={() => {
+          setInactiveAgentsCalloutHasBeenDismissed(true);
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.addAgentHelpPopover.footActionButton"
+          defaultMessage="Got it"
+        />
+      </EuiLink>
+    }
+  >
+    {children as React.ReactElement}
+  </EuiTourStep>
+);
 
-export const AgentStatusFilter = (
-  props: {
-    selectedStatus: string[];
-    onSelectedStatusChange: (status: string[]) => void;
-    disabled?: boolean;
-    totalInactiveAgents: number;
-    isOpenByDefault?: boolean;
-  }
-) => {
+export const AgentStatusFilter = (props: {
+  selectedStatus: string[];
+  onSelectedStatusChange: (status: string[]) => void;
+  disabled?: boolean;
+  totalInactiveAgents: number;
+  isOpenByDefault?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
   const {
     selectedStatus,

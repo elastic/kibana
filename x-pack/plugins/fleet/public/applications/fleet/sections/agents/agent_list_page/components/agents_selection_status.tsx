@@ -31,25 +31,23 @@ const Button = styled(EuiButtonEmpty)`
   }
 `;
 
-export const AgentsSelectionStatus = (
-  {
-    totalAgents,
-    selectableAgents,
-    managedAgentsOnCurrentPage,
-    selectionMode,
-    setSelectionMode,
-    selectedAgents,
-    setSelectedAgents
-  }: {
-    totalAgents: number;
-    selectableAgents: number;
-    managedAgentsOnCurrentPage: number;
-    selectionMode: SelectionMode;
-    setSelectionMode: (mode: SelectionMode) => void;
-    selectedAgents: Agent[];
-    setSelectedAgents: (agents: Agent[]) => void;
-  }
-) => {
+export const AgentsSelectionStatus = ({
+  totalAgents,
+  selectableAgents,
+  managedAgentsOnCurrentPage,
+  selectionMode,
+  setSelectionMode,
+  selectedAgents,
+  setSelectedAgents,
+}: {
+  totalAgents: number;
+  selectableAgents: number;
+  managedAgentsOnCurrentPage: number;
+  selectionMode: SelectionMode;
+  setSelectionMode: (mode: SelectionMode) => void;
+  selectedAgents: Agent[];
+  setSelectedAgents: (agents: Agent[]) => void;
+}) => {
   const showSelectionInfoAndOptions =
     (selectionMode === 'manual' && selectedAgents.length > 0) ||
     (selectionMode === 'query' && totalAgents > 0);

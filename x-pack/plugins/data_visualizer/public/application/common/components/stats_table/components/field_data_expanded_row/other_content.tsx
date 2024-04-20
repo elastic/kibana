@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../examples_list';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 
-export const OtherContent = (
-  {
-    config
-  }: FieldDataRowProps
-) => {
+export const OtherContent = ({ config }: FieldDataRowProps) => {
   const { stats } = config;
   if (stats === undefined) return null;
   return stats.count === undefined ? (

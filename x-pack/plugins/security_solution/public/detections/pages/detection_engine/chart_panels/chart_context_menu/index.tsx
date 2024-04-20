@@ -20,16 +20,14 @@ interface Props {
   onReset?: () => void;
 }
 
-const ChartContextMenuComponent = (
-  {
-    defaultStackByField,
-    defaultStackByField1,
-    onReset = noop,
-    queryId,
-    setStackBy,
-    setStackByField1
-  }: Props
-) => {
+const ChartContextMenuComponent = ({
+  defaultStackByField,
+  defaultStackByField1,
+  onReset = noop,
+  queryId,
+  setStackBy,
+  setStackByField1,
+}: Props) => {
   const onResetStackByFields = useCallback(() => {
     onReset();
 

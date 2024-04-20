@@ -50,11 +50,7 @@ import { SearchApplicationsListLogic } from './search_applications_list_logic';
 interface CreateSearchApplicationButtonProps {
   disabled: boolean;
 }
-export const CreateSearchApplicationButton = (
-  {
-    disabled
-  }: CreateSearchApplicationButtonProps
-) => {
+export const CreateSearchApplicationButton = ({ disabled }: CreateSearchApplicationButtonProps) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   return (
@@ -119,11 +115,7 @@ interface ListProps {
   createSearchApplicationFlyoutOpen?: boolean;
 }
 
-export const SearchApplicationsList = (
-  {
-    createSearchApplicationFlyoutOpen
-  }: ListProps
-) => {
+export const SearchApplicationsList = ({ createSearchApplicationFlyoutOpen }: ListProps) => {
   const {
     closeDeleteSearchApplicationModal,
     fetchSearchApplications,

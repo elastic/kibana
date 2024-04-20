@@ -23,13 +23,7 @@ const DescriptionLine = ({ children }: { children: React.ReactNode }) => (
   </EuiFlexItem>
 );
 
-export const FrequencyDescription = (
-  {
-    frequency
-  }: {
-    frequency?: RuleActionFrequency;
-  }
-) => {
+export const FrequencyDescription = ({ frequency }: { frequency?: RuleActionFrequency }) => {
   if (!frequency) {
     return null;
   }

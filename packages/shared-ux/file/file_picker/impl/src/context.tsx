@@ -7,7 +7,6 @@
  */
 
 import React, { createContext, useContext, useMemo, useEffect } from 'react';
-import type { FunctionComponent } from 'react';
 import { useFilesContext, FilesContextValue } from '@kbn/shared-ux-file-context';
 import { FileJSON } from '@kbn/shared-ux-file-types';
 import { FilePickerState, createFilePickerState } from './file_picker_state';
@@ -30,16 +29,14 @@ interface FilePickerContextProps
   uploadMeta?: unknown;
 }
 
-export const FilePickerContext = (
-  {
-    kind,
-    shouldAllowDelete,
-    pageSize,
-    multiple,
-    children,
-    uploadMeta
-  }: FilePickerContextProps
-) => {
+export const FilePickerContext = ({
+  kind,
+  shouldAllowDelete,
+  pageSize,
+  multiple,
+  children,
+  uploadMeta,
+}: FilePickerContextProps) => {
   const filesContext = useFilesContext();
   const { client } = filesContext;
   const state = useMemo(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
@@ -17,13 +17,11 @@ interface FieldFilterApplyButtonProps {
   tooltipContent?: string;
 }
 
-export const FieldFilterApplyButton = (
-  {
-    disabled,
-    onClick,
-    tooltipContent
-  }: FieldFilterApplyButtonProps
-) => {
+export const FieldFilterApplyButton = ({
+  disabled,
+  onClick,
+  tooltipContent,
+}: FieldFilterApplyButtonProps) => {
   const button = (
     <EuiButton
       data-test-subj={`aiopsFieldFilterApplyButton${disabled ? ' disabled' : ''}`}

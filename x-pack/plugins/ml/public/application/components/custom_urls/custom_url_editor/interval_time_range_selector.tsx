@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, FC } from 'react';
+import type { Dispatch } from 'react';
 import React from 'react';
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,13 +19,11 @@ interface IntervalTimerangeSelectorProps {
 /*
  * React component for the form for adding a custom time range.
  */
-export const IntervalTimerangeSelector = (
-  {
-    setAddIntervalTimerange,
-    addIntervalTimerange,
-    disabled
-  }: IntervalTimerangeSelectorProps
-) => {
+export const IntervalTimerangeSelector = ({
+  setAddIntervalTimerange,
+  addIntervalTimerange,
+  disabled,
+}: IntervalTimerangeSelectorProps) => {
   return (
     <>
       <EuiSpacer size="xs" />

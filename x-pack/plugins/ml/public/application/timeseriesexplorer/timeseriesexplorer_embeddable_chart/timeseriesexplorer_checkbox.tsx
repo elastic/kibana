@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiCheckbox, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 
@@ -16,14 +15,7 @@ interface Props {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const TimeseriesExplorerCheckbox = (
-  {
-    id,
-    label,
-    checked,
-    onChange
-  }: Props
-) => {
+export const TimeseriesExplorerCheckbox = ({ id, label, checked, onChange }: Props) => {
   const checkboxId = useMemo(() => `id-${htmlIdGenerator()()}`, []);
   return (
     <EuiFlexItem grow={false}>

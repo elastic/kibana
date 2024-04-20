@@ -48,14 +48,12 @@ import { FeatureStatesFormField } from '../../../feature_states_form_field';
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
-export const RestoreSnapshotStepLogistics = (
-  {
-    snapshotDetails,
-    restoreSettings,
-    updateRestoreSettings,
-    errors
-  }: StepProps
-) => {
+export const RestoreSnapshotStepLogistics = ({
+  snapshotDetails,
+  restoreSettings,
+  updateRestoreSettings,
+  errors,
+}: StepProps) => {
   const { i18n } = useServices();
   const { docLinks } = useCore();
   const {

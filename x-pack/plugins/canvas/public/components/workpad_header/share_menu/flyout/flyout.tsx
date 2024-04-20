@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 
 import {
@@ -42,11 +42,7 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ShareWebsiteFlyout = (
-  {
-    onClose
-  }: Pick<Props, 'onClose'>
-) => {
+export const ShareWebsiteFlyout = ({ onClose }: Pick<Props, 'onClose'>) => {
   const { renderedWorkpad, unsupportedRenderers } = useSelector((state: State) => ({
     renderedWorkpad: getRenderedWorkpad(state),
     unsupportedRenderers: getUnsupportedRenderers(state),

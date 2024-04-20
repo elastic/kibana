@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { ScaleType, AreaSeries, CurveType } from '@elastic/charts';
 import type { ModelItem } from '../../../../common/results_loader';
@@ -30,11 +29,7 @@ const areaSeriesStyle = {
   },
 };
 
-export const ModelBounds = (
-  {
-    modelData
-  }: Props
-) => {
+export const ModelBounds = ({ modelData }: Props) => {
   const { MODEL_COLOR } = useChartColors();
   const model = modelData === undefined ? [] : modelData;
   return (

@@ -15,11 +15,9 @@ export interface FleetServerCloudUnhealthyCalloutProps {
   deploymentUrl: string;
 }
 
-export const FleetServerCloudUnhealthyCallout = (
-  {
-    deploymentUrl
-  }: FleetServerCloudUnhealthyCalloutProps
-) => {
+export const FleetServerCloudUnhealthyCallout = ({
+  deploymentUrl,
+}: FleetServerCloudUnhealthyCalloutProps) => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut

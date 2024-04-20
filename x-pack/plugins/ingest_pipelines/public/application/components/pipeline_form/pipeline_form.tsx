@@ -39,17 +39,15 @@ const defaultFormValue: Pipeline = Object.freeze({
   _meta: {},
 });
 
-export const PipelineForm = (
-  {
-    defaultValue = defaultFormValue,
-    onSave,
-    isSaving,
-    saveError,
-    isEditing,
-    onCancel,
-    canEditName
-  }: PipelineFormProps
-) => {
+export const PipelineForm = ({
+  defaultValue = defaultFormValue,
+  onSave,
+  isSaving,
+  saveError,
+  isEditing,
+  onCancel,
+  canEditName,
+}: PipelineFormProps) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -13,13 +12,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { Description } from './description';
 import { ChangeDataViewModal } from './change_data_view';
 
-export const ChangeDataView = (
-  {
-    isDisabled
-  }: {
-    isDisabled: boolean;
-  }
-) => {
+export const ChangeDataView = ({ isDisabled }: { isDisabled: boolean }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   return (

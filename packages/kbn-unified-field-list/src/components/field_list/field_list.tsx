@@ -39,16 +39,14 @@ export interface FieldListProps {
  * @public
  * @constructor
  */
-export const FieldList = (
-  {
-    'data-test-subj': dataTestSubject = 'fieldList',
-    isProcessing,
-    prepend,
-    append,
-    className,
-    children
-  }: FieldListProps
-) => {
+export const FieldList = ({
+  'data-test-subj': dataTestSubject = 'fieldList',
+  isProcessing,
+  prepend,
+  append,
+  className,
+  children,
+}: FieldListProps) => {
   return (
     <EuiFlexGroup
       gutterSize="none"

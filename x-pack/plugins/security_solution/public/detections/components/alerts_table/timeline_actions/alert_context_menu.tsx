@@ -63,18 +63,16 @@ interface AlertContextMenuProps {
   refetch: (() => void) | undefined;
 }
 
-const AlertContextMenuComponent = (
-  {
-    ariaLabel = i18n.MORE_ACTIONS,
-    ariaRowindex,
-    columnValues,
-    disabled,
-    ecsRowData,
-    onRuleChange,
-    scopeId,
-    refetch
-  }: AlertContextMenuProps
-) => {
+const AlertContextMenuComponent = ({
+  ariaLabel = i18n.MORE_ACTIONS,
+  ariaRowindex,
+  columnValues,
+  disabled,
+  ecsRowData,
+  onRuleChange,
+  scopeId,
+  refetch,
+}: AlertContextMenuProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
 
@@ -361,20 +359,18 @@ type AddExceptionFlyoutWrapperProps = Omit<
  * Due to the conditional nature of the flyout and how we use the `ecsData` field,
  * we cannot use the fetch hook within the flyout component itself
  */
-export const AddExceptionFlyoutWrapper = (
-  {
-    ruleId,
-    ruleRuleId,
-    ruleIndices,
-    ruleDataViewId,
-    ruleName,
-    exceptionListType,
-    eventId,
-    onCancel,
-    onConfirm,
-    alertStatus
-  }: AddExceptionFlyoutWrapperProps
-) => {
+export const AddExceptionFlyoutWrapper = ({
+  ruleId,
+  ruleRuleId,
+  ruleIndices,
+  ruleDataViewId,
+  ruleName,
+  exceptionListType,
+  eventId,
+  onCancel,
+  onConfirm,
+  alertStatus,
+}: AddExceptionFlyoutWrapperProps) => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
 

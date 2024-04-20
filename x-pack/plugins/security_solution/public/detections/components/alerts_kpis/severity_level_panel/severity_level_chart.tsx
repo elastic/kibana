@@ -28,13 +28,7 @@ export interface SeverityLevelProps {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 
-export const SeverityLevelChart = (
-  {
-    data,
-    isLoading,
-    addFilter
-  }: SeverityLevelProps
-) => {
+export const SeverityLevelChart = ({ data, isLoading, addFilter }: SeverityLevelProps) => {
   const columns = useMemo(() => getSeverityTableColumns(), []);
 
   const count = useMemo(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
 
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -24,14 +24,12 @@ interface Props {
   isLoadingFeatures?: boolean;
 }
 
-export const FeatureStatesFormField = (
-  {
-    isLoadingFeatures = false,
-    featuresOptions,
-    selectedOptions,
-    onUpdateFormSettings
-  }: Props
-) => {
+export const FeatureStatesFormField = ({
+  isLoadingFeatures = false,
+  featuresOptions,
+  selectedOptions,
+  onUpdateFormSettings,
+}: Props) => {
   const { i18n } = useServices();
 
   const optionsList = useMemo(() => {

@@ -29,15 +29,13 @@ interface SelectClientProps {
   src?: string;
 }
 
-export const LanguageClientPanel = (
-  {
-    language,
-    setSelectedLanguage,
-    isSelectedLanguage,
-    assetBasePath,
-    src
-  }: SelectClientProps
-) => {
+export const LanguageClientPanel = ({
+  language,
+  setSelectedLanguage,
+  isSelectedLanguage,
+  assetBasePath,
+  src,
+}: SelectClientProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (

@@ -13,13 +13,7 @@ import type { TimelineProps } from './types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 
-export const TimelineMarkDownRendererComponent = (
-  {
-    id,
-    title,
-    graphEventId
-  }: TimelineProps
-) => {
+export const TimelineMarkDownRendererComponent = ({ id, title, graphEventId }: TimelineProps) => {
   const { addError } = useAppToasts();
 
   const handleTimelineClick = useTimelineClick();

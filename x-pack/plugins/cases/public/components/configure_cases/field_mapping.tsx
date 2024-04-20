@@ -20,13 +20,7 @@ export interface FieldMappingProps {
   mappings: CaseConnectorMapping[];
 }
 
-const FieldMappingComponent = (
-  {
-    actionTypeName,
-    isLoading,
-    mappings
-  }: FieldMappingProps
-) => {
+const FieldMappingComponent = ({ actionTypeName, isLoading, mappings }: FieldMappingProps) => {
   const sFontSize = useEuiFontSize('s').fontSize;
   return mappings.length ? (
     <EuiFlexGroup direction="column" gutterSize="none">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import {
   PipelineProcessorsContextProvider,
@@ -17,14 +17,12 @@ interface Props extends ProcessorsContextProps {
   children: React.ReactNode;
 }
 
-export const ProcessorsEditorContextProvider = (
-  {
-    children,
-    onUpdate,
-    value,
-    onFlyoutOpen
-  }: Props
-) => {
+export const ProcessorsEditorContextProvider = ({
+  children,
+  onUpdate,
+  value,
+  onFlyoutOpen,
+}: Props) => {
   return (
     <TestPipelineContextProvider>
       <PipelineProcessorsContextProvider

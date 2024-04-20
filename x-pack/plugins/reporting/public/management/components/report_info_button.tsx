@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { Job } from '@kbn/reporting-public/job';
 
 interface Props {
@@ -15,12 +15,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const ReportInfoButton = (
-  {
-    job,
-    onClick
-  }: Props
-) => {
+export const ReportInfoButton = ({ job, onClick }: Props) => {
   let message = i18n.translate('xpack.reporting.listing.table.reportInfoButtonTooltip', {
     defaultMessage: 'See report info.',
   });

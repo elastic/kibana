@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 // @ts-expect-error untyped local
 import * as pageActions from '../../state/actions/pages';
@@ -16,13 +16,7 @@ import { PageManager as Component } from './page_manager.component';
 import { State } from '../../../types';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
-export const PageManager = (
-  {
-    onPreviousPage
-  }: {
-    onPreviousPage: () => void;
-  }
-) => {
+export const PageManager = ({ onPreviousPage }: { onPreviousPage: () => void }) => {
   const dispatch = useDispatch();
   const propsFromState = useSelector((state: State) => ({
     isWriteable: isWriteable(state) && canUserWrite(state),

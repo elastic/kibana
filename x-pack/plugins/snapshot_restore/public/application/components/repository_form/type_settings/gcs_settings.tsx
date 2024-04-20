@@ -23,14 +23,12 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const GCSSettings = (
-  {
-    repository,
-    isManagedRepository,
-    updateRepositorySettings,
-    settingErrors
-  }: Props
-) => {
+export const GCSSettings = ({
+  repository,
+  isManagedRepository,
+  updateRepositorySettings,
+  settingErrors,
+}: Props) => {
   const {
     settings: {
       bucket,

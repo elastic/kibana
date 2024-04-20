@@ -50,26 +50,26 @@ interface OwnProps {
 
 export type FlowTargetSelectProps = OwnProps;
 
-const FlowTargetSelectComponent = (
-  {
-    id,
-    isLoading = false,
-    selectedDirection,
-    selectedTarget,
-    displayTextOverride = [],
-    updateFlowTargetAction
-  }: FlowTargetSelectProps
-) => (<EuiSuperSelect
-  options={
-    selectedDirection
-      ? toggleTargetOptions(id, displayTextOverride).filter((option) =>
-          option.directions.includes(selectedDirection)
-        )
-      : toggleTargetOptions(id, displayTextOverride)
-  }
-  valueOfSelected={selectedTarget}
-  onChange={updateFlowTargetAction}
-  isLoading={isLoading}
-/>);
+const FlowTargetSelectComponent = ({
+  id,
+  isLoading = false,
+  selectedDirection,
+  selectedTarget,
+  displayTextOverride = [],
+  updateFlowTargetAction,
+}: FlowTargetSelectProps) => (
+  <EuiSuperSelect
+    options={
+      selectedDirection
+        ? toggleTargetOptions(id, displayTextOverride).filter((option) =>
+            option.directions.includes(selectedDirection)
+          )
+        : toggleTargetOptions(id, displayTextOverride)
+    }
+    valueOfSelected={selectedTarget}
+    onChange={updateFlowTargetAction}
+    isLoading={isLoading}
+  />
+);
 
 export const FlowTargetSelect = React.memo(FlowTargetSelectComponent);

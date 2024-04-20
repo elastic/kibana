@@ -22,14 +22,7 @@ interface Props {
   onClick?: ActionsNavigation['onClick'];
 }
 
-const HostIsolationCommentEventComponent = (
-  {
-    type,
-    endpoints,
-    href,
-    onClick
-  }: Props
-) => {
+const HostIsolationCommentEventComponent = ({ type, endpoints, href, onClick }: Props) => {
   const endpointDetailsHref = href ? href(endpoints[0].endpointId) : '';
 
   const onLinkClick = useCallback(

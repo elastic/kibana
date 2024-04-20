@@ -80,7 +80,7 @@ export const VectorSearchGuide = () => {
   const { application } = useValues(KibanaLogic);
 
   return (
-    (<EnterpriseSearchVectorSearchPageTemplate
+    <EnterpriseSearchVectorSearchPageTemplate
       restrictWidth
       pageHeader={{
         description: (
@@ -246,6 +246,6 @@ export const VectorSearchGuide = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EnterpriseSearchVectorSearchPageTemplate>)
+    </EnterpriseSearchVectorSearchPageTemplate>
   );
 };

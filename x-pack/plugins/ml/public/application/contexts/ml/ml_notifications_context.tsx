@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useState, useEffect } from 'react';
 import { combineLatest, timer } from 'rxjs';
 import { switchMap, map, tap, retry } from 'rxjs';

@@ -6,7 +6,6 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -82,26 +81,20 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers = (
-  {
-    services,
-    history,
-    authc,
-    onChange,
-    children
-  }: ProvidersProps
-) => (<KibanaRenderContextProvider {...services}>
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <Router history={history}>
-        <ReadonlyBadge
-          featureId="api_keys"
-          tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
-            defaultMessage: 'Unable to create or edit API keys',
-          })}
-        />
-        <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-      </Router>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
-</KibanaRenderContextProvider>);
+export const Providers = ({ services, history, authc, onChange, children }: ProvidersProps) => (
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <Router history={history}>
+          <ReadonlyBadge
+            featureId="api_keys"
+            tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
+              defaultMessage: 'Unable to create or edit API keys',
+            })}
+          />
+          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+        </Router>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
+);

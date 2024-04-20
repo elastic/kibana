@@ -23,15 +23,13 @@ interface Props {
   troubleshootLink: string;
 }
 
-export const ConfirmIncomingData = (
-  {
-    agentIds,
-    installedPolicy,
-    agentDataConfirmed,
-    setAgentDataConfirmed,
-    troubleshootLink
-  }: Props
-) => {
+export const ConfirmIncomingData = ({
+  agentIds,
+  installedPolicy,
+  agentDataConfirmed,
+  setAgentDataConfirmed,
+  troubleshootLink,
+}: Props) => {
   const { incomingData, isLoading } = usePollingIncomingData(agentIds);
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(installedPolicy?.name);
   const { guidedOnboarding } = useStartServices();

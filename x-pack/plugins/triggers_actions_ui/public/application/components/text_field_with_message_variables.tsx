@@ -58,21 +58,19 @@ const Wrapper = ({
     <>{children}</>
   );
 
-export const TextFieldWithMessageVariables = (
-  {
-    buttonTitle,
-    messageVariables,
-    paramsProperty,
-    index,
-    inputTargetValue,
-    editAction,
-    errors,
-    formRowProps,
-    defaultValue,
-    wrapField = false,
-    showButtonTitle
-  }: Props
-) => {
+export const TextFieldWithMessageVariables = ({
+  buttonTitle,
+  messageVariables,
+  paramsProperty,
+  index,
+  inputTargetValue,
+  editAction,
+  errors,
+  formRowProps,
+  defaultValue,
+  wrapField = false,
+  showButtonTitle,
+}: Props) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
 
   const onSelectMessageVariable = useCallback(

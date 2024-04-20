@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';

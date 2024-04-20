@@ -28,12 +28,10 @@ const defaultFields: Fields = {
   subcategory: [],
 };
 
-const ServiceNowITSMFieldsPreviewComponent = (
-  {
-    connector,
-    fields
-  }: ConnectorFieldsPreviewProps<ServiceNowITSMFieldsType>
-) => {
+const ServiceNowITSMFieldsPreviewComponent = ({
+  connector,
+  fields,
+}: ConnectorFieldsPreviewProps<ServiceNowITSMFieldsType>) => {
   const {
     severity = null,
     urgency = null,

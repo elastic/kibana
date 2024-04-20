@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, HTMLAttributes } from 'react';
+import React, { HTMLAttributes } from 'react';
 import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {
@@ -23,14 +23,7 @@ interface Props {
   'aria-label'?: string;
 }
 
-export const ChartWrapper = (
-  {
-    loading = false,
-    height = '100%',
-    children,
-    ...rest
-  }: Props
-) => {
+export const ChartWrapper = ({ loading = false, height = '100%', children, ...rest }: Props) => {
   const opacity = loading === true ? 0.3 : 1;
 
   return (

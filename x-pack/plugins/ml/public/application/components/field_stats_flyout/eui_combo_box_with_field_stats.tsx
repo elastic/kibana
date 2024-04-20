@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -25,12 +24,10 @@ export const optionCss = css`
   }
 `;
 
-export const EuiComboBoxWithFieldStats = (
-  {
-    options,
-    ...restProps
-  }: EuiComboBoxProps<string | number | string[] | undefined>
-) => {
+export const EuiComboBoxWithFieldStats = ({
+  options,
+  ...restProps
+}: EuiComboBoxProps<string | number | string[] | undefined>) => {
   const { renderOption } = useFieldStatsTrigger();
   const comboBoxOptions: EuiComboBoxOptionOption[] = useMemo(
     () =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, Dispatch, FC, SetStateAction, useState } from 'react';
+import React, { createContext, Dispatch, SetStateAction, useState } from 'react';
 
 export interface BlockListContextValue {
   blockListIndicatorValue: string;

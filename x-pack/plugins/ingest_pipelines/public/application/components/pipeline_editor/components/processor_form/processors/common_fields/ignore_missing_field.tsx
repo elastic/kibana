@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
@@ -45,9 +45,11 @@ export const fieldsConfig: FieldsConfig = {
 
 type Props = Partial<FieldConfig>;
 
-export const IgnoreMissingField = (props: Props) => (<UseField
-  config={{ ...fieldsConfig.ignore_missing, ...props }}
-  component={ToggleField}
-  path="fields.ignore_missing"
-  data-test-subj="ignoreMissingSwitch"
-/>);
+export const IgnoreMissingField = (props: Props) => (
+  <UseField
+    config={{ ...fieldsConfig.ignore_missing, ...props }}
+    component={ToggleField}
+    path="fields.ignore_missing"
+    data-test-subj="ignoreMissingSwitch"
+  />
+);
