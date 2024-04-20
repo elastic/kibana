@@ -48,6 +48,7 @@
     "@kbn/cloud-plugin",
     "@kbn/serverless",
     "@kbn/triggers-actions-ui-plugin",
+    "@kbn/apm-utils"
   ],
   "exclude": ["target/**/*"]
 }

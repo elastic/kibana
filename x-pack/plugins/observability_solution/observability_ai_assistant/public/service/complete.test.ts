@@ -284,6 +284,7 @@ describe('complete', () => {
           '@timestamp': expect.any(String),
           message: {
             content: expect.any(String),
+            data: expect.any(String),
             name: 'my_action',
             role: MessageRole.User,
           },

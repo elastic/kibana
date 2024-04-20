@@ -38,7 +38,7 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
     '@timestamp': new Date().toISOString(),
     message: {
       role: MessageRole.System,
-      content: '',
+      content: 'System',
     },
   }),
 };

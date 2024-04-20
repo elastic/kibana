@@ -24,9 +24,11 @@ export function createFunctionResponseError({
         name: error.name,
         message: error.message,
         cause: error.cause,
-        stack: error.stack,
       },
       message: message || error.message,
+    },
+    data: {
+      stack: error.stack,
     },
   });
 }
