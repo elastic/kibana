@@ -62,6 +62,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const lens = getPageObject('lens');
   const listingTable = getService('listingTable');
   const toasts = getService('toasts');
+  const browser = getService('browser');
 
   const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
@@ -275,10 +276,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         };
 
         before(async () => {
+          await browser.refresh();
+
           for (const owner of TOTAL_OWNERS) {
             const theCase = await cases.api.createCase({ owner });
             createdCases.set(owner, theCase.id);
           }
+        });
+
+        beforeEach(async () => {
+          await browser.refresh();
         });
 
         after(async () => {
