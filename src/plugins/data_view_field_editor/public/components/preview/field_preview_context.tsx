@@ -135,7 +135,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     const doc = document?.fields
       ? Object.keys(document?._source).reduce((acc, key) => {
           const fld = document?.fields[key];
-          acc[key] = fld.length === 1 ? fld[0] : fld;
+          acc[key] = fld?.length === 1 ? fld[0] : fld;
           return acc;
         }, {} as Record<string, unknown>)
       : {};
