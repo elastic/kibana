@@ -764,7 +764,7 @@ describe('Alerts Client', () => {
 
           expect(spy).toHaveBeenCalledTimes(2);
           expect(spy).toHaveBeenNthCalledWith(1, 'active');
-          expect(spy).toHaveBeenNthCalledWith(2, 'recovered');
+          expect(spy).toHaveBeenNthCalledWith(2, 'recoveredCurrent');
 
           expect(logger.error).toHaveBeenCalledWith(
             "Error writing alert(2) to .alerts-test.alerts-default - alert(2) doesn't exist in active alerts"

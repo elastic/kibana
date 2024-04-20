@@ -16,13 +16,19 @@ import React, {
 } from 'react';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
 import type { GroupTableItem } from './types';
 
+type InitialAnalysisStart = number | WindowParameters | undefined;
 type SignificantItemOrNull = SignificantItem | null;
 type GroupOrNull = GroupTableItem | null;
 
-interface LogRateAnalysisResultsTableRow {
+interface LogRateAnalysisState {
+  autoRunAnalysis: boolean;
+  setAutoRunAnalysis: Dispatch<SetStateAction<boolean>>;
+  initialAnalysisStart: InitialAnalysisStart;
+  setInitialAnalysisStart: Dispatch<SetStateAction<InitialAnalysisStart>>;
   pinnedSignificantItem: SignificantItemOrNull;
   setPinnedSignificantItem: Dispatch<SetStateAction<SignificantItemOrNull>>;
   pinnedGroup: GroupOrNull;
@@ -36,12 +42,38 @@ interface LogRateAnalysisResultsTableRow {
   clearAllRowState: () => void;
 }
 
-export const logRateAnalysisResultsTableRowContext = createContext<
-  LogRateAnalysisResultsTableRow | undefined
->(undefined);
+const LogRateAnalysisStateContext = createContext<LogRateAnalysisState | undefined>(undefined);
 
-export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) => {
-  // State that will be shared with all components
+/**
+ * Props for LogRateAnalysisStateProvider.
+ */
+interface LogRateAnalysisStateProviderProps {
+  /** The parameters to be used to trigger an analysis. */
+  initialAnalysisStart?: InitialAnalysisStart;
+}
+
+/**
+ * Context provider component that manages and provides global state for Log Rate Analysis.
+ * This provider handles several pieces of state important for controlling and displaying
+ * log rate analysis data, such as the control of automatic analysis runs, and the management
+ * of both pinned and selected significant items and groups.
+ *
+ * The state includes mechanisms for setting initial analysis parameters, toggling analysis,
+ * and managing the current selection and pinned state of significant items and groups.
+ *
+ * @param props - Props object containing initial settings for the analysis,
+ * including children components to be wrapped by the Provider.
+ * @returns A context provider wrapping children with access to log rate analysis state.
+ */
+export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps> = (props) => {
+  const { children, initialAnalysisStart: incomingInitialAnalysisStart } = props;
+
+  const [autoRunAnalysis, setAutoRunAnalysis] = useState(true);
+  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
+    number | WindowParameters | undefined
+  >(incomingInitialAnalysisStart);
+
+  // Row state that will be shared with all components
   const [pinnedSignificantItem, setPinnedSignificantItem] = useState<SignificantItemOrNull>(null);
   const [pinnedGroup, setPinnedGroup] = useState<GroupOrNull>(null);
   const [selectedSignificantItem, setSelectedSignificantItem] =
@@ -66,8 +98,12 @@ export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) =>
     }
   }, [selectedGroup, pinnedGroup]);
 
-  const contextValue: LogRateAnalysisResultsTableRow = useMemo(
+  const contextValue: LogRateAnalysisState = useMemo(
     () => ({
+      autoRunAnalysis,
+      setAutoRunAnalysis,
+      initialAnalysisStart,
+      setInitialAnalysisStart,
       pinnedSignificantItem,
       setPinnedSignificantItem,
       pinnedGroup,
@@ -86,6 +122,10 @@ export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) =>
       },
     }),
     [
+      autoRunAnalysis,
+      setAutoRunAnalysis,
+      initialAnalysisStart,
+      setInitialAnalysisStart,
       pinnedSignificantItem,
       setPinnedSignificantItem,
       pinnedGroup,
@@ -101,19 +141,26 @@ export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) =>
 
   return (
     // Provider managing the state
-    <logRateAnalysisResultsTableRowContext.Provider value={contextValue}>
+    <LogRateAnalysisStateContext.Provider value={contextValue}>
       {children}
-    </logRateAnalysisResultsTableRowContext.Provider>
+    </LogRateAnalysisStateContext.Provider>
   );
 };
 
-export const useLogRateAnalysisResultsTableRowContext = () => {
-  const logRateAnalysisResultsTableRow = useContext(logRateAnalysisResultsTableRowContext);
+/**
+ * Custom hook for accessing the state of log rate analysis from the LogRateAnalysisStateContext.
+ * This hook must be used within a component that is a descendant of the LogRateAnalysisStateContext provider.
+ *
+ * @returns The current state of the log rate analysis.
+ * @throws Throws an error if the hook is used outside of its Provider context.
+ */
+export const useLogRateAnalysisStateContext = () => {
+  const logRateAnalysisState = useContext(LogRateAnalysisStateContext);
 
   // If `undefined`, throw an error.
-  if (logRateAnalysisResultsTableRow === undefined) {
-    throw new Error('useLogRateAnalysisResultsTableRowContext was used outside of its Provider');
+  if (logRateAnalysisState === undefined) {
+    throw new Error('useLogRateAnalysisStateContext was used outside of its Provider');
   }
 
-  return logRateAnalysisResultsTableRow;
+  return logRateAnalysisState;
 };
