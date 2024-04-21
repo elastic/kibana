@@ -59,9 +59,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
         await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+
+        await retry.waitFor('wait for the modal to open', async () => {
+          return testSubjects.exists('all-cases-modal');
+        });
+
         await testSubjects.click('cases-table-add-case-filter-bar');
 
-        await retry.waitFor('wait for the flyout to exist', async () => {
+        await retry.waitFor('wait for the flyout to open', async () => {
           return testSubjects.exists('create-case-flyout');
         });
 
