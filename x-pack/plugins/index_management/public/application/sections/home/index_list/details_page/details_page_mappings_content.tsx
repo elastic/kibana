@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -32,10 +32,7 @@ import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSelectableOption,
-  EuiSelectableOptionCheckedType,
-} from '@elastic/eui/src/components/selectable/selectable_option';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { Index } from '../../../../../../common';
 import { useAppContext } from '../../../../app_context';
 import { DocumentFieldsSearch } from '../../../../components/mappings_editor/components/document_fields/document_fields_search';
@@ -43,7 +40,6 @@ import { FieldsList } from '../../../../components/mappings_editor/components/do
 import { SearchResult } from '../../../../components/mappings_editor/components/document_fields/search_fields';
 import {
   extractMappingsDefinition,
-  normalize,
   searchFields,
 } from '../../../../components/mappings_editor/lib';
 import { MappingsEditorParsedMetadata } from '../../../../components/mappings_editor/mappings_editor';
@@ -58,90 +54,10 @@ import { deNormalize } from '../../../../components/mappings_editor/lib';
 import { updateIndexMappings } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import {
-  DataType,
-  Fields,
-  NormalizedField,
-  NormalizedFields,
-  State,
-} from '../../../../components/mappings_editor/types';
-
-/**
- * get all the fields from given state which matches selected DataTypes from filter
- *
- * @param state The state that we are using depending on the context (when adding new fields, static state is used)
- * @param filteredDataTypes data types array from which fields are filtered from given state
- */
-
-const getFieldsMatchingFilterFromState = (
-  state: State,
-  filteredDataTypes: string[]
-): {
-  [id: string]: NormalizedField;
-} => {
-  const getFieldId = (fieldId: string) => {
-    if (filteredDataTypes.includes(state.fields.byId[fieldId].source.type)) {
-      return fieldId;
-    } else {
-      return undefined;
-    }
-  };
-
-  const getfieldIds = () => {
-    return Object.entries(state.fields.byId).map(([k, v]) => getFieldId(k));
-  };
-
-  return Object.fromEntries(
-    Object.entries(state.fields.byId).filter(([id]) => getfieldIds().includes(id))
-  );
-};
-
-/** returns normalized field that matches the dataTypes from the filteredDataTypes array
- * @param state The state that we are using depending on the context (when adding new fields, static state is used)
- * @param filteredDataTypes data types array from which fields are filtered from given state
- */
-const getFieldsFromState = (state: State, filteredDataTypes?: string[]): NormalizedField[] => {
-  const getField = (fieldId: string) => {
-    if (filteredDataTypes) {
-      if (filteredDataTypes?.includes(state.fields.byId[fieldId].source.type)) {
-        return state.fields.byId[fieldId];
-      } else {
-        return {} as NormalizedField;
-      }
-    } else {
-      return state.fields.byId[fieldId];
-    }
-  };
-  const fields = () => {
-    // when showing filtered fields from nested fields, check matching filter for all fields
-    if (filteredDataTypes) {
-      return Object.entries(state.fields.byId).map(([k, v]) => getField(k));
-    } else {
-      return state.fields.rootLevelFields.map((id) => getField(id));
-    }
-  };
-  return fields().filter((k) => Object.keys(k).length !== 0);
-};
-
-/** returns all field types from the fields, including multifield and child fields
- * @param allFields fields from state
- * @param fieldArray array that stores all datatypes from fields
- */
-const getAllFieldTypesFromState = (allFields: Fields, fieldArray: DataType[] = []): DataType[] => {
-  function filterUnique(value: DataType, index: number, array: string[]) {
-    return array.indexOf(value) === index;
-  }
-  const getallFieldsIncludingNestedFields = (fields: Fields) => {
-    Object.entries(Object.values(fields)).forEach(([_, v]) => {
-      if (v.type) fieldArray.push(v.type);
-      if (v.fields) getallFieldsIncludingNestedFields(v.fields);
-      if (v.properties) getallFieldsIncludingNestedFields(v.properties);
-    });
-  };
-
-  getallFieldsIncludingNestedFields(allFields);
-
-  return fieldArray.filter(filterUnique);
-};
+  getFieldsFromState,
+  getFieldsMatchingFilterFromState,
+} from '../../../../components/mappings_editor/lib';
+import { NormalizedFields, State } from '../../../../components/mappings_editor/types';
 
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
@@ -222,49 +138,60 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   }, [state.fields.byId]);
 
   const [previousState, setPreviousState] = useState<State>(state);
-  const [previousStateFields, setPreviousStateFields] = useState<NormalizedField[]>(
-    getFieldsFromState(state)
-  );
 
   const [isFilterByPopoverVisible, setIsFilterPopoverVisible] = useState<boolean>(false);
 
-  const [selectedFieldTypes, setSelectedFieldTypes] = useState<EuiSelectableOption[]>([
-    {
-      checked: undefined as EuiSelectableOptionCheckedType,
-      label: '',
-    },
-  ]);
+  const previousStateSelectedDataTypes: string[] = useMemo(() => {
+    return previousState.filter.selectedOptions
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+  }, [previousState.filter.selectedOptions]);
 
-  const [prevSelectedFieldTypes, setPrevSelectedFieldTypes] = useState<EuiSelectableOption[]>([
-    {
-      checked: undefined as EuiSelectableOptionCheckedType,
-      label: '',
-    },
-  ]);
-
-  const allFieldsTypes: DataType[] = useMemo(() => {
-    return getAllFieldTypesFromState(deNormalize(normalize(mappingsDefinition?.properties)));
-  }, [mappingsDefinition]);
-
-  const selectedDataTypes: string[] = useMemo(() => {
-    if (!isAddingFields) {
-      return selectedFieldTypes
+  const setPreviousStateSelectedOptions = useCallback(
+    (options: EuiSelectableOption[]) => {
+      const selectedDataTypes: string[] = options
         .filter((option) => option.checked === 'on')
         .map((option) => option.label);
-    } else {
-      return prevSelectedFieldTypes
-        .filter((option) => option.checked === 'on')
-        .map((option) => option.label);
-    }
-  }, [selectedFieldTypes, isAddingFields, prevSelectedFieldTypes]);
 
-  useEffect(() => {
-    const newSelectedFieldTypes = allFieldsTypes.map((dataType) => ({
-      checked: undefined,
-      label: dataType.toString(),
-    }));
-    setSelectedFieldTypes(newSelectedFieldTypes);
-  }, [allFieldsTypes]);
+      setPreviousState({
+        ...previousState,
+        filter: {
+          filteredFields: getFieldsFromState(
+            previousState.fields,
+            selectedDataTypes.length > 0 ? selectedDataTypes : undefined
+          ),
+          selectedOptions: options,
+          selectedDataTypes,
+        },
+        search: {
+          term: previousState.search.term,
+          result: searchFields(
+            previousState.search.term,
+            selectedDataTypes.length > 0
+              ? getFieldsMatchingFilterFromState(previousState, selectedDataTypes)
+              : previousState.fields.byId
+          ),
+        },
+      });
+    },
+    [previousState]
+  );
+
+  const setSelectedOptions = useCallback(
+    (options) => {
+      dispatch({
+        type: 'filter:update',
+        value: {
+          selectedOptions: options,
+        },
+      });
+      dispatch({
+        type: 'search:update',
+        value: state.search.term,
+      });
+    },
+    [dispatch, state.search.term]
+  );
 
   const [saveMappingError, setSaveMappingError] = useState<string | undefined>(undefined);
   const [isJSONVisible, setIsJSONVisible] = useState<boolean>(false);
@@ -274,7 +201,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
 
   const onCancelAddingNewFields = useCallback(() => {
     setAddingFields(!isAddingFields);
-    setSelectedFieldTypes(prevSelectedFieldTypes);
+
     //  reset mappings to previous state
     dispatch({
       type: 'editor.replaceMappings',
@@ -286,15 +213,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         },
       },
     });
-  }, [isAddingFields, dispatch, previousState, prevSelectedFieldTypes]);
+  }, [isAddingFields, dispatch, previousState]);
 
   const addFieldButtonOnClick = useCallback(() => {
     setAddingFields(!isAddingFields);
 
     // when adding new field, save previous state. This state is then used by FieldsList component to show only saved mappings.
-    setPreviousStateFields(getFieldsFromState(state));
     setPreviousState(state);
-    setPrevSelectedFieldTypes(selectedFieldTypes);
 
     // reset mappings and change status to create field.
     dispatch({
@@ -308,7 +233,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         },
       },
     });
-  }, [dispatch, isAddingFields, state, selectedFieldTypes]);
+  }, [dispatch, isAddingFields, state]);
 
   const updateMappings = useCallback(async () => {
     try {
@@ -329,63 +254,45 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     }
   }, [state.fields, indexName, refetchMapping]);
 
-  const filterPreviousFieldsMatchingSearchandFilter = useMemo(() => {
-    return getFieldsMatchingFilterFromState(previousState, selectedDataTypes);
-  }, [previousState, selectedDataTypes]);
-
-  const filterStateFieldsMatchingSearchandFilter: {
-    [id: string]: NormalizedField;
-  } = useMemo(() => {
-    return getFieldsMatchingFilterFromState(state, selectedDataTypes);
-  }, [state, selectedDataTypes]);
-
   const onSearchChange = useCallback(
     (value: string) => {
       if (isAddingFields) {
-        if (selectedDataTypes.length > 0) {
-          setPreviousState({
-            ...previousState,
-            search: {
-              term: value,
-              result: searchFields(value, filterPreviousFieldsMatchingSearchandFilter),
-            },
-          });
-        } else {
-          setPreviousState({
-            ...previousState,
-            search: {
-              term: value,
-              result: searchFields(value, previousState.fields.byId),
-            },
-          });
-        }
+        setPreviousState({
+          ...previousState,
+          search: {
+            term: value,
+            result: searchFields(
+              value,
+              previousStateSelectedDataTypes.length > 0
+                ? getFieldsMatchingFilterFromState(previousState, previousStateSelectedDataTypes)
+                : previousState.fields.byId
+            ),
+          },
+        });
       } else {
-        if (selectedDataTypes.length > 0) {
-          dispatch({
-            type: 'editor.replaceMappings',
-            value: {
-              ...state,
-              search: {
-                term: value,
-                result: searchFields(value, filterStateFieldsMatchingSearchandFilter),
-              },
-            },
-          });
-        } else {
-          dispatch({ type: 'search:update', value });
-        }
+        dispatch({ type: 'search:update', value });
       }
     },
-    [
-      dispatch,
-      previousState,
-      isAddingFields,
-      selectedDataTypes,
-      filterPreviousFieldsMatchingSearchandFilter,
-      filterStateFieldsMatchingSearchandFilter,
-      state,
-    ]
+    [dispatch, previousState, isAddingFields, previousStateSelectedDataTypes]
   );
+
+  const onClearSearch = useCallback(() => {
+    setPreviousState({
+      ...previousState,
+      search: {
+        term: '',
+        result: searchFields(
+          '',
+          previousState.filter.selectedDataTypes.length > 0
+            ? getFieldsMatchingFilterFromState(
+                previousState,
+                previousState.filter.selectedDataTypes
+              )
+            : previousState.fields.byId
+        ),
+      },
+    });
+  }, [previousState]);
 
   const searchTerm = isAddingFields ? previousState.search.term.trim() : state.search.term.trim();
 
@@ -407,9 +314,21 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       iconSide="right"
       isDisabled={isJSONVisible}
       onClick={() => setIsFilterPopoverVisible(!isFilterByPopoverVisible)}
-      numFilters={!isAddingFields ? selectedFieldTypes.length : prevSelectedFieldTypes.length}
-      hasActiveFilters={selectedDataTypes.length > 0}
-      numActiveFilters={selectedDataTypes.length}
+      numFilters={
+        !isAddingFields
+          ? state.filter.selectedOptions.length
+          : previousState.filter.selectedOptions.length
+      }
+      hasActiveFilters={
+        !isAddingFields
+          ? state.filter.selectedDataTypes.length > 0
+          : previousState.filter.selectedDataTypes.length > 0
+      }
+      numActiveFilters={
+        !isAddingFields
+          ? state.filter.selectedDataTypes.length
+          : previousState.filter.selectedDataTypes.length
+      }
       isSelected={isFilterByPopoverVisible}
       data-test-subj="indexDetailsMappingsFilterByFieldTypeButton"
     >
@@ -422,6 +341,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     <SearchResult
       result={previousState.search.result}
       documentFieldsState={previousState.documentFields}
+      onClearSearch={onClearSearch}
     />
   ) : (
     <SearchResult result={state.search.result} documentFieldsState={state.documentFields} />
@@ -430,12 +350,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const fieldsListComponent = isAddingFields ? (
     <FieldsList
       fields={
-        selectedDataTypes.length > 0
-          ? getFieldsFromState(
-              previousState,
-              selectedDataTypes.length > 0 ? selectedDataTypes : undefined
-            )
-          : previousStateFields
+        previousStateSelectedDataTypes.length > 0
+          ? previousState.filter.filteredFields
+          : getFieldsFromState(previousState.fields)
       }
       state={previousState}
       setPreviousState={setPreviousState}
@@ -443,10 +360,11 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     />
   ) : (
     <FieldsList
-      fields={getFieldsFromState(
-        state,
-        selectedDataTypes.length > 0 ? selectedDataTypes : undefined
-      )}
+      fields={
+        state.filter.selectedDataTypes.length > 0
+          ? state.filter.filteredFields
+          : getFieldsFromState(state.fields)
+      }
       state={state}
       isAddingFields={isAddingFields}
     />
@@ -593,6 +511,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               >
                 <EuiSelectable
                   searchable
+                  data-test-subj="filterItem"
                   searchProps={{
                     placeholder: i18n.translate(
                       'xpack.idxMgmt.indexDetails.mappings.filterByFieldType.searchPlaceholder',
@@ -601,17 +520,21 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                       }
                     ),
                   }}
-                  options={!isAddingFields ? selectedFieldTypes : prevSelectedFieldTypes}
+                  options={
+                    !isAddingFields
+                      ? state.filter.selectedOptions
+                      : previousState.filter.selectedOptions
+                  }
                   onChange={(options) => {
                     if (!isAddingFields) {
-                      setSelectedFieldTypes(options);
+                      setSelectedOptions(options);
                     } else {
-                      setPrevSelectedFieldTypes(options);
+                      setPreviousStateSelectedOptions(options);
                     }
                   }}
                 >
                   {(list, search) => (
-                    <div style={{ width: 300 }}>
+                    <div style={{ width: 200 }}>
                       <EuiPopoverTitle
                         paddingSize="s"
                         data-test-subj="indexDetailsMappingsFilterByFieldTypeSearch"

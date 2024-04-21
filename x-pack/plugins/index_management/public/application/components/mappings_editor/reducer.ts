@@ -9,6 +9,8 @@ import { PARAMETERS_DEFINITION } from './constants';
 import {
   getAllChildFields,
   getFieldMeta,
+  getFieldsFromState,
+  getFieldsMatchingFilterFromState,
   getMaxNestedDepth,
   getUniqueId,
   normalize,
@@ -211,6 +213,11 @@ export const reducer = (state: State, action: Action): State => {
         search: {
           term: action.value?.search?.term ?? '',
           result: action.value?.search?.result ?? [],
+        },
+        filter: {
+          filteredFields: action.value.filter.filteredFields,
+          selectedOptions: action.value.filter.selectedOptions,
+          selectedDataTypes: action.value.filter.selectedDataTypes,
         },
       };
     }
@@ -607,18 +614,47 @@ export const reducer = (state: State, action: Action): State => {
       return nextState;
     }
     case 'search:update': {
-      return {
-        ...state,
-        search: {
-          term: action.value,
-          result: searchFields(action.value, state.fields.byId),
-        },
-      };
+      if (state.filter.selectedDataTypes.length > 0) {
+        return {
+          ...state,
+          search: {
+            term: action.value,
+            result: searchFields(
+              action.value,
+              getFieldsMatchingFilterFromState(state, state.filter.selectedDataTypes)
+            ),
+          },
+        };
+      } else {
+        return {
+          ...state,
+          search: {
+            term: action.value,
+            result: searchFields(action.value, state.fields.byId),
+          },
+        };
+      }
     }
     case 'validity:update': {
       return {
         ...state,
         isValid: action.value,
+      };
+    }
+    case 'filter:update': {
+      const selectedDataTypes: string[] = action.value.selectedOptions
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.label);
+      return {
+        ...state,
+        filter: {
+          filteredFields: getFieldsFromState(
+            state.fields,
+            selectedDataTypes.length > 0 ? selectedDataTypes : undefined
+          ),
+          selectedOptions: action.value.selectedOptions,
+          selectedDataTypes,
+        },
       };
     }
   }

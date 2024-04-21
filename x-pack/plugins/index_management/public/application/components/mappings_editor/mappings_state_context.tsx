@@ -54,6 +54,11 @@ export const StateProvider: React.FC = ({ children }) => {
       term: '',
       result: [],
     },
+    filter: {
+      filteredFields: [],
+      selectedOptions: [],
+      selectedDataTypes: [],
+    },
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);

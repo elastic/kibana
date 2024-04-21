@@ -506,16 +506,54 @@ describe('<IndexDetailsPage />', () => {
       );
     });
     describe('Filter field by filter Type', () => {
+      const mockIndexMappingResponse: any = {
+        ...testIndexMappings.mappings,
+        properties: {
+          ...testIndexMappings.mappings.properties,
+          name: {
+            type: 'text',
+          },
+        },
+      };
       beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: mockIndexMappingResponse,
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
         testBed.component.update();
         await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
-        await testBed.actions.mappings.clickFilterByFieldType();
       });
-      test('popover is visible and shows list of available field types', () => {
+      test('popover is visible and shows list of available field types', async () => {
+        await testBed.actions.mappings.clickFilterByFieldType();
         expect(testBed.exists('euiSelectableList')).toBe(true);
         expect(testBed.exists('indexDetailsMappingsFilterByFieldTypeSearch')).toBe(true);
         expect(testBed.exists('euiSelectableList')).toBe(true);
-        expect(testBed.find('euiSelectableList')).toHaveLength(1);
+      });
+      test('can select a field type and list view changes', async () => {
+        await testBed.actions.mappings.clickFilterByFieldType();
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+        expect(testBed.actions.mappings.getTreeViewContent('nameField-fieldName')).toContain(
+          'name'
+        );
+        expect(testBed.find('@timestampField-fieldName')).not.toContain('@timestamp');
+      });
+      test('can search field with filter', async () => {
+        expect(testBed.find('fieldName')).toHaveLength(2);
+
+        // set filter
+        await testBed.actions.mappings.clickFilterByFieldType();
+        await testBed.actions.mappings.selectFilterFieldType(
+          'indexDetailsMappingsSelectFilter-text'
+        );
+
+        await testBed.actions.mappings.setSearchBarValue('na');
+        expect(testBed.find('fieldName')).toHaveLength(1);
+        expect(testBed.actions.mappings.findSearchResult()).not.toBe('@timestamp');
+        expect(testBed.actions.mappings.findSearchResult()).toBe('name');
       });
     });
     describe('Add a new field ', () => {

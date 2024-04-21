@@ -42,6 +42,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
     mappings: {
       addNewMappingFieldNameAndType: (mappingFields?: MappingField[]) => Promise<void>;
       clickFilterByFieldType: () => Promise<void>;
+      selectFilterFieldType: (fieldType: string) => Promise<void>;
       clickAddFieldButton: () => Promise<void>;
       clickSaveMappingsButton: () => Promise<void>;
       getCodeBlockContent: () => string;
@@ -52,6 +53,8 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getTreeViewContent: (fieldName: string) => string;
       clickToggleViewButton: () => Promise<void>;
       isSearchBarDisabled: () => boolean;
+      setSearchBarValue: (searchValue: string) => Promise<void>;
+      findSearchResult: () => string;
     };
     settings: {
       getCodeBlockContent: () => string;
@@ -223,8 +226,27 @@ export const setup = async ({
       });
       component.update();
     },
+    selectFilterFieldType: async (fieldType: string) => {
+      expect(testBed.exists('indexDetailsMappingsSelectFilter-text')).toBe(true);
+      await act(async () => {
+        find(fieldType).simulate('click');
+      });
+      component.update();
+    },
     isSearchBarDisabled: () => {
       return find('indexDetailsMappingsFieldSearch').prop('disabled');
+    },
+    setSearchBarValue: async (searchValue: string) => {
+      await act(async () => {
+        testBed
+          .find('indexDetailsMappingsFieldSearch')
+          .simulate('change', { target: { value: searchValue } });
+      });
+      component.update();
+    },
+    findSearchResult: () => {
+      expect(testBed.exists('fieldName')).toBe(true);
+      return testBed.find('fieldName').text();
     },
     clickAddFieldButton: async () => {
       expect(exists('indexDetailsMappingsAddField')).toBe(true);

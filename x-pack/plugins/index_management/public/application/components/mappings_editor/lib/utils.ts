@@ -22,6 +22,7 @@ import {
   GenericObject,
   RuntimeFields,
   NormalizedRuntimeFields,
+  State,
 } from '../types';
 
 import {
@@ -601,4 +602,88 @@ export const deNormalizeRuntimeFields = (fields: NormalizedRuntimeFields): Runti
       [name]: rest,
     };
   }, {} as RuntimeFields);
+};
+
+/**
+ * get all the fields from given state which matches selected DataTypes from filter
+ *
+ * @param state The state that we are using depending on the context (when adding new fields, static state is used)
+ * @param filteredDataTypes data types array from which fields are filtered from given state
+ */
+
+export const getFieldsMatchingFilterFromState = (
+  state: State,
+  filteredDataTypes: string[]
+): {
+  [id: string]: NormalizedField;
+} => {
+  const getFieldId = (fieldId: string) => {
+    if (filteredDataTypes.includes(state.fields.byId[fieldId].source.type)) {
+      return fieldId;
+    } else {
+      return undefined;
+    }
+  };
+
+  const getfieldIds = () => {
+    return Object.entries(state.fields.byId).map(([k, v]) => getFieldId(k));
+  };
+
+  return Object.fromEntries(
+    Object.entries(state.fields.byId).filter(([id]) => getfieldIds().includes(id))
+  );
+};
+
+/** returns normalized field that matches the dataTypes from the filteredDataTypes array
+ * @param normalizedFields fields that we are using, depending on the context (when adding new fields, static state is used)
+ * @param filteredDataTypes data types array from which fields are filtered from given state
+ */
+export const getFieldsFromState = (
+  normalizedFields: NormalizedFields,
+  filteredDataTypes?: string[]
+): NormalizedField[] => {
+  const getField = (fieldId: string) => {
+    if (filteredDataTypes) {
+      if (filteredDataTypes?.includes(normalizedFields.byId[fieldId].source.type)) {
+        return normalizedFields.byId[fieldId];
+      } else {
+        return {} as NormalizedField;
+      }
+    } else {
+      return normalizedFields.byId[fieldId];
+    }
+  };
+  const fields = () => {
+    // when showing filtered fields from nested fields, check matching filter for all fields
+    if (filteredDataTypes) {
+      return Object.entries(normalizedFields.byId).map(([k, _]) => getField(k));
+    } else {
+      return normalizedFields.rootLevelFields.map((id) => getField(id));
+    }
+  };
+  return fields().filter((k) => Object.keys(k).length !== 0);
+};
+
+/** returns all field types from the fields, including multifield and child fields
+ * @param allFields fields from state
+ * @param fieldArray array that stores all datatypes from fields
+ */
+export const getAllFieldTypesFromState = (
+  allFields: Fields,
+  fieldArray: DataType[] = []
+): DataType[] => {
+  function filterUnique(value: DataType, index: number, array: string[]) {
+    return array.indexOf(value) === index;
+  }
+  const getallFieldsIncludingNestedFields = (fields: Fields) => {
+    Object.entries(Object.values(fields)).forEach(([_, v]) => {
+      if (v.type) fieldArray.push(v.type);
+      if (v.fields) getallFieldsIncludingNestedFields(v.fields);
+      if (v.properties) getallFieldsIncludingNestedFields(v.properties);
+    });
+  };
+
+  getallFieldsIncludingNestedFields(allFields);
+
+  return fieldArray.filter(filterUnique);
 };

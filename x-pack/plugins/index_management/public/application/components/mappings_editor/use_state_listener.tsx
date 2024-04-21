@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { EuiSelectableOption } from '@elastic/eui';
 import {
   DocumentFieldsStatus,
   Field,
@@ -22,6 +23,8 @@ import {
   stripUndefinedValues,
   normalizeRuntimeFields,
   deNormalizeRuntimeFields,
+  getAllFieldTypesFromState,
+  getFieldsFromState,
 } from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
 
@@ -32,6 +35,7 @@ interface Args {
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
     runtime: RuntimeFields;
+    // selectedOptions: EuiSelectableOption[];
   };
   status?: DocumentFieldsStatus;
 }
@@ -47,6 +51,14 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
     () => normalizeRuntimeFields(runtimeFields),
     [runtimeFields]
   );
+  const fieldTypesOptions: EuiSelectableOption[] = useMemo(() => {
+    const allFieldsTypes = getAllFieldTypesFromState(deNormalize(normalize(mappedFields)));
+    return allFieldsTypes.map((dataType) => ({
+      checked: undefined,
+      label: dataType.toString(),
+      'data-test-subj': `indexDetailsMappingsSelectFilter-${dataType}`,
+    }));
+  }, [mappedFields]);
 
   const calculateStatus = (fieldStatus: string | undefined, rootLevelFields: string | any[]) => {
     if (fieldStatus) return fieldStatus;
@@ -163,7 +175,19 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
           editor: 'default',
         },
         runtimeFields: parsedRuntimeFieldsDefaultValue,
+        filter: {
+          selectedOptions: fieldTypesOptions,
+          filteredFields: getFieldsFromState(parsedFieldsDefaultValue),
+          selectedDataTypes: [],
+        },
       },
     });
-  }, [value, parsedFieldsDefaultValue, dispatch, status, parsedRuntimeFieldsDefaultValue]);
+  }, [
+    value,
+    parsedFieldsDefaultValue,
+    dispatch,
+    status,
+    parsedRuntimeFieldsDefaultValue,
+    fieldTypesOptions,
+  ]);
 };
