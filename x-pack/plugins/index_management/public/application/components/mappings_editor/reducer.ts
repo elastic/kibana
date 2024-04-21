@@ -211,8 +211,8 @@ export const reducer = (state: State, action: Action): State => {
           status: 'idle',
         },
         search: {
-          term: action.value?.search?.term ?? '',
-          result: action.value?.search?.result ?? [],
+          term: '',
+          result: [],
         },
         filter: {
           filteredFields: action.value.filter.filteredFields,
@@ -614,26 +614,18 @@ export const reducer = (state: State, action: Action): State => {
       return nextState;
     }
     case 'search:update': {
-      if (state.filter.selectedDataTypes.length > 0) {
-        return {
-          ...state,
-          search: {
-            term: action.value,
-            result: searchFields(
-              action.value,
-              getFieldsMatchingFilterFromState(state, state.filter.selectedDataTypes)
-            ),
-          },
-        };
-      } else {
-        return {
-          ...state,
-          search: {
-            term: action.value,
-            result: searchFields(action.value, state.fields.byId),
-          },
-        };
-      }
+      return {
+        ...state,
+        search: {
+          term: action.value,
+          result: searchFields(
+            action.value,
+            state.filter.selectedDataTypes.length > 0
+              ? getFieldsMatchingFilterFromState(state, state.filter.selectedDataTypes)
+              : state.fields.byId
+          ),
+        },
+      };
     }
     case 'validity:update': {
       return {

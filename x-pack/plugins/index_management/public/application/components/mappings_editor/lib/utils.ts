@@ -626,7 +626,7 @@ export const getFieldsMatchingFilterFromState = (
   };
 
   const getfieldIds = () => {
-    return Object.entries(state.fields.byId).map(([k, v]) => getFieldId(k));
+    return Object.entries(state.fields.byId).map(([key, _]) => getFieldId(key));
   };
 
   return Object.fromEntries(
@@ -636,7 +636,7 @@ export const getFieldsMatchingFilterFromState = (
 
 /** returns normalized field that matches the dataTypes from the filteredDataTypes array
  * @param normalizedFields fields that we are using, depending on the context (when adding new fields, static state is used)
- * @param filteredDataTypes data types array from which fields are filtered from given state
+ * @param filteredDataTypes data types array from which fields are filtered from given state. When there are no filter selected, array would be undefined
  */
 export const getFieldsFromState = (
   normalizedFields: NormalizedFields,
@@ -656,12 +656,12 @@ export const getFieldsFromState = (
   const fields = () => {
     // when showing filtered fields from nested fields, check matching filter for all fields
     if (filteredDataTypes) {
-      return Object.entries(normalizedFields.byId).map(([k, _]) => getField(k));
+      return Object.entries(normalizedFields.byId).map(([key, _]) => getField(key));
     } else {
       return normalizedFields.rootLevelFields.map((id) => getField(id));
     }
   };
-  return fields().filter((k) => Object.keys(k).length !== 0);
+  return fields().filter((id) => Object.keys(id).length !== 0);
 };
 
 /** returns all field types from the fields, including multifield and child fields
@@ -676,10 +676,10 @@ export const getAllFieldTypesFromState = (
     return array.indexOf(value) === index;
   }
   const getallFieldsIncludingNestedFields = (fields: Fields) => {
-    Object.entries(Object.values(fields)).forEach(([_, v]) => {
-      if (v.type) fieldArray.push(v.type);
-      if (v.fields) getallFieldsIncludingNestedFields(v.fields);
-      if (v.properties) getallFieldsIncludingNestedFields(v.properties);
+    Object.entries(Object.values(fields)).forEach(([_, field]) => {
+      if (field.type) fieldArray.push(field.type);
+      if (field.fields) getallFieldsIncludingNestedFields(field.fields);
+      if (field.properties) getallFieldsIncludingNestedFields(field.properties);
     });
   };
 

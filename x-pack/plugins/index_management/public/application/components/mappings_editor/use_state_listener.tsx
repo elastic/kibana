@@ -35,7 +35,6 @@ interface Args {
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
     runtime: RuntimeFields;
-    // selectedOptions: EuiSelectableOption[];
   };
   status?: DocumentFieldsStatus;
 }
