@@ -15,6 +15,7 @@ import type { PluginsStart } from '../plugin';
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 
 interface InternalProps<T> {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   fn: () => Promise<FC<T>>;
   getStartServices: StartServicesAccessor<PluginsStart>;
   showLoadingSpinner?: boolean;

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-
-declare const FilterLists: FC<{
+declare const FilterLists: (props:{
   canCreateFilter: boolean;
   canDeleteFilter: boolean;
-}>;
+}) => JSX.Element;

@@ -19,7 +19,7 @@ export class ActionInternal<Context extends object = object>
   public readonly id: string;
   public readonly type: string;
   public readonly order: number;
-  public readonly MenuItem?: (props: ActionMenuItemProps<any>) => React.ReactElement | null;
+  public readonly MenuItem?: (props: ActionMenuItemProps<any>) => React.ReactElement;
   public readonly grouping?: PresentableGrouping<Context>;
   public readonly showNotification?: boolean;
   public readonly disabled?: boolean;

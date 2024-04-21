@@ -16,7 +16,7 @@ import { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugi
 
 const getLazyComponent = (
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>
-): React.LazyExoticComponent<React.FC<PersistableStateAttachmentViewProps>> =>
+): React.LazyExoticComponent<(props: PersistableStateAttachmentViewProps) => JSX.Element | null> =>
   React.lazy(() => {
     return Promise.resolve().then(() => {
       return {

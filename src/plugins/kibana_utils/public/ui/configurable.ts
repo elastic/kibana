@@ -7,7 +7,6 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { FC } from 'react';
 
 /**
  * Represents something that can be configured by user using UI.
@@ -29,7 +28,7 @@ export interface Configurable<
   /**
    * Component to be rendered when collecting configuration for this item.
    */
-  readonly CollectConfig: FC<CollectConfigProps<Config, Context>>;
+  readonly CollectConfig: (props: CollectConfigProps<Config, Context>) => JSX.Element | null;
 }
 
 /**

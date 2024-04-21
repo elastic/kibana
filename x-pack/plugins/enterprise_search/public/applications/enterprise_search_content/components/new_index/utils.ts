@@ -32,7 +32,7 @@ export function getIngestionMethodIconType(type: string): string {
   }
 }
 
-export function getIngestionMethodButtonIcon(type: string): React.FC | string {
+export function getIngestionMethodButtonIcon(type: string): () => JSX.Element | string {
   switch (type) {
     case INGESTION_METHOD_IDS.CRAWLER:
       return CrawlerIcon;

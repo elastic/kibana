@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { FC } from 'react';
-
 import { kea, MakeLogicType } from 'kea';
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -52,14 +50,14 @@ export interface KibanaLogicProps {
   esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
-  indexMappingComponent?: React.FC<IndexMappingProps>;
+  indexMappingComponent?: (props: IndexMappingProps) => JSX.Element;
   isSidebarEnabled: boolean;
   lens?: LensPublicStart;
   ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
-  renderHeaderActions(HeaderActions?: FC): void;
+  renderHeaderActions(HeaderActions?: () => JSX.Element): void;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
@@ -82,7 +80,7 @@ export interface KibanaValues {
   esConfig: ESConfig;
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
-  indexMappingComponent: React.FC<IndexMappingProps> | null;
+  indexMappingComponent: (props: IndexMappingProps) => JSX.Element | null;
   isCloud: boolean;
   isSidebarEnabled: boolean;
   lens: LensPublicStart | null;
@@ -90,7 +88,7 @@ export interface KibanaValues {
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
-  renderHeaderActions(HeaderActions?: FC): void;
+  renderHeaderActions(HeaderActions?: () => JSX.Element): void;
   searchPlayground: SearchPlaygroundPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;

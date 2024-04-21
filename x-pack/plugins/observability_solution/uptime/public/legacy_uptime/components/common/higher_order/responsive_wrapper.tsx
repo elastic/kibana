@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { FC } from 'react';
+import React  from 'react';
 import styled from 'styled-components';
 
 const ResponsiveWrapper = styled.div`
@@ -29,7 +29,7 @@ export interface ResponsiveWrapperProps {
  * @param Component The component to wrap.
  */
 export const withResponsiveWrapper =
-  <P extends {} & ResponsiveWrapperProps>(Component: FC<P>): FC<ResponsiveWrapperProps & P> =>
+  <P extends {} & ResponsiveWrapperProps>(Component: (props:P) => JSX.Element): (props: ResponsiveWrapperProps & P) => JSX.Element =>
   ({ isResponsive, ...rest }: ResponsiveWrapperProps) =>
     isResponsive ? (
       <ResponsiveWrapper data-test-subj="uptimeWithResponsiveWrapper--wrapper">

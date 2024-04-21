@@ -41,7 +41,7 @@ interface Props {
       container: boolean;
     };
   };
-  StatusComponent: React.FC<{ stats: Stats }>;
+  StatusComponent: (props: { stats: Stats }) => JSX.Element;
 }
 
 const createCharts = (series: unknown[], props: Partial<Props>) => {

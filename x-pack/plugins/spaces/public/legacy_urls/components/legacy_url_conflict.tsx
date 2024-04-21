@@ -12,7 +12,7 @@ import type { LegacyUrlConflictProps } from '../types';
 
 export const getLegacyUrlConflict = async (
   internalProps: InternalProps
-): Promise<React.FC<LegacyUrlConflictProps>> => {
+): Promise<(props: LegacyUrlConflictProps) => JSX.Element> => {
   const { LegacyUrlConflictInternal } = await import('./legacy_url_conflict_internal');
   return (props: LegacyUrlConflictProps) => {
     return <LegacyUrlConflictInternal {...{ ...internalProps, ...props }} />;

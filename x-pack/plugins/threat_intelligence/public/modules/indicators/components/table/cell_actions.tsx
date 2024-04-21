@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { Indicator } from '../../../../../common/types/indicator';
 import { AddToTimelineCellAction } from '../../../timeline/components/add_to_timeline';
@@ -37,13 +37,13 @@ export interface CellActionsProps
  * It displays the FilterIn, FilterOut and AddToTimeline icons in the popover
  * when the user hovers above a cell.
  */
-export const CellActions: VFC<CellActionsProps> = ({
+export const CellActions = ({
   rowIndex,
   columnId,
   Component,
   indicators,
   pagination,
-}) => {
+}: CellActionsProps) => {
   const indicator = indicators[rowIndex % pagination.pageSize];
   const { key, value } = getIndicatorFieldAndValue(indicator, columnId);
   if (!fieldAndValueValid(key, value)) {

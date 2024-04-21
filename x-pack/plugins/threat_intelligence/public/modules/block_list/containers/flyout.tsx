@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import {
   CreateExceptionListItemSchema,
   EntriesArray,
@@ -28,7 +28,7 @@ export interface BlockListFlyoutProps {
  * - the flyout component: https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/management/components/artifact_list_page/components/artifact_flyout.tsx
  * - the form component: https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/management/pages/blocklist/view/components/blocklist_form.tsx
  */
-export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }) => {
+export const BlockListFlyout = ({ indicatorFileHash }: BlockListFlyoutProps) => {
   const { setBlockListIndicatorValue } = useBlockListContext();
   const { blockList } = useSecurityContext();
   const Component = blockList.getFlyoutComponent();

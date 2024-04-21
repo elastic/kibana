@@ -128,7 +128,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactNode }>;
+  AppWrapper: (props: { children: React.ReactNode }) => JSX.Element;
   getFilesClient: () => ScopedFilesClient;
 }
 

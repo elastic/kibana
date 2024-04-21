@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import deepEqual from 'react-fast-compare';
 import { ArgTemplateFormProps } from '../arg_form/arg_template_form';
@@ -13,7 +13,10 @@ import { ArgTemplateFormProps } from '../arg_form/arg_template_form';
 type Props = ArgTemplateFormProps['argumentProps'];
 
 export const withDebounceArg =
-  (Arg: FC<Props>, debouncePeriod: number = 150): FC<Props> =>
+  (
+    Arg: (props: Props) => JSX.Element | null,
+    debouncePeriod: number = 150
+  ): ((props: Props) => JSX.Element | null) =>
   ({ argValue, onValueChange, ...restProps }) => {
     const [localArgValue, setArgValue] = useState(argValue);
 

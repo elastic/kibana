@@ -8,7 +8,7 @@
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import type { ReactElement } from 'react';
-import React, { type VFC } from 'react';
+import React from 'react';
 import { useAccordionState } from '../hooks/use_accordion_state';
 
 export const HEADER_TEST_ID = 'Header';
@@ -46,14 +46,14 @@ export interface ExpandableSectionProps {
  * The state (expanded vs collapsed) can be saved in local storage if the localStorageKey is provided.
  * This allows the state to be preserved when opening new flyouts or when refreshing the page.
  */
-export const ExpandableSection: VFC<ExpandableSectionProps> = ({
+export const ExpandableSection = ({
   expanded,
   title,
   children,
   gutterSize = 'none',
   localStorageKey,
   'data-test-subj': dataTestSub,
-}) => {
+}: ExpandableSectionProps) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { renderContent, state, toggle } = useAccordionState(expanded);
 

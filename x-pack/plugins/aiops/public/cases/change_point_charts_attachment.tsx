@@ -7,7 +7,6 @@
 
 import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { FC } from 'react';
 import React from 'react';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -17,7 +16,7 @@ import deepEqual from 'fast-deep-equal';
 import type { EmbeddableChangePointChartProps } from '../embeddable';
 
 export const initComponent = memoize(
-  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<EmbeddableChangePointChartProps>) => {
+  (fieldFormats: FieldFormatsStart, EmbeddableComponent: (props: EmbeddableChangePointChartProps) => JSX.Element) => {
     return React.memo(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState } = props;

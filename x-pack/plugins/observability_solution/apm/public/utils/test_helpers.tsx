@@ -57,7 +57,7 @@ export function mockMoment() {
 }
 
 // Useful for getting the rendered href from any kind of link component
-export async function getRenderedHref(Component: React.FC, location: Location) {
+export async function getRenderedHref(Component: () => JSX.Element, location: Location) {
   const mockSpaces = {
     getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
   };

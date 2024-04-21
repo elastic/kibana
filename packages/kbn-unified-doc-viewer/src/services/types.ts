@@ -50,7 +50,7 @@ export interface DocViewRenderProps {
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
 }
-export type DocViewerComponent = React.FC<DocViewRenderProps>;
+export type DocViewerComponent = (props: DocViewRenderProps) => JSX.Element | null;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
   renderProps: DocViewRenderProps

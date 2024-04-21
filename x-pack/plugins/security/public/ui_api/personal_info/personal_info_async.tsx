@@ -9,7 +9,7 @@ import React from 'react';
 
 import type { PersonalInfoProps } from './personal_info';
 
-export const getPersonalInfoComponent = async (): Promise<React.FC<PersonalInfoProps>> => {
+export const getPersonalInfoComponent = async (): Promise<(props: PersonalInfoProps) => JSX.Element> => {
   const { PersonalInfo } = await import('./personal_info');
   return (props: PersonalInfoProps) => {
     return <PersonalInfo {...props} />;

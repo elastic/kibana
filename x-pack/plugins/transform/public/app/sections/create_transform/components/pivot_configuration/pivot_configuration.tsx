@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, createContext, useMemo } from 'react';
 
 import { EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
@@ -24,7 +23,7 @@ export const PivotConfigurationContext = createContext<
   StepDefineFormHook['pivotConfig'] | undefined
 >(undefined);
 
-export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
+export const PivotConfiguration = memo<StepDefineFormHook['pivotConfig']>(
   ({ actions, state }) => {
     const {
       ml: { useFieldStatsTrigger, FieldStatsInfoButton },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 import { IndicatorFieldsTable } from './fields_table';
@@ -29,7 +29,7 @@ export interface IndicatorsFlyoutTableProps {
  * Displays all the properties and values of an {@link Indicator} in table view,
  * using the {@link EuiInMemoryTable} from the @elastic/eui library.
  */
-export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({ indicator }) => {
+export const IndicatorsFlyoutTable = ({ indicator }: IndicatorsFlyoutTableProps) => {
   const items: string[] = Object.keys(indicator.fields);
 
   return items.length === 0 ? (

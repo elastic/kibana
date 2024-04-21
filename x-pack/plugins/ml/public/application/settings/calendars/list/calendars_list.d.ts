@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-
-declare const CalendarsList: FC<{
+declare const CalendarsList: (props: {
   canCreateCalendar: boolean;
   canDeleteCalendar: boolean;
-}>;
+}) => JSX.Element;

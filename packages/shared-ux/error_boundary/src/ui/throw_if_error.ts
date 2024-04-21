@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { FC } from 'react';
-
 /**
  * This component allows errors to be caught outside of a render tree, and re-thrown within a render tree
  * wrapped by KibanaErrorBoundary. The purpose is to let KibanaErrorBoundary control the user experience when
@@ -15,7 +13,7 @@ import { FC } from 'react';
  *
  * @public
  */
-export const ThrowIfError: FC<{ error: Error | null }> = ({ error }) => {
+export const ThrowIfError = ({ error }: { error: Error | null }) => {
   if (error) {
     throw error;
   }

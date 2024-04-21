@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, VFC } from 'react';
+import React, { ReactNode } from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
@@ -56,7 +56,7 @@ export interface StoryProvidersComponentProps {
 
 const securityLayout = {
   getPluginWrapper:
-    (): FC =>
+    () =>
     ({ children, isEmptyState, emptyPageBody }: any) => {
       if (isEmptyState && emptyPageBody) {
         return <>{emptyPageBody}</>;
@@ -92,10 +92,7 @@ const defaultServices = {
  * Helper functional component used in Storybook stories.
  * Wraps the story with our {@link SecuritySolutionContext} and KibanaReactContext.
  */
-export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
-  children,
-  kibana = {},
-}) => {
+export const StoryProvidersComponent = ({ children, kibana }: StoryProvidersComponentProps) => {
   const KibanaReactContext = createKibanaReactContext({
     ...defaultServices,
     ...kibana,

@@ -44,7 +44,7 @@ interface WithLensDataParams<Props, OutputState> {
 }
 
 export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
-  Component: React.FC<T & OutputState>,
+  Component: (props: T & OutputState) => JSX.Element,
   {
     dataLoadTransform,
     getAttributes,

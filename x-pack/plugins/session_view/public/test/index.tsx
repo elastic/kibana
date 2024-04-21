@@ -30,7 +30,7 @@ export interface AppContextTestRender {
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
    * `AppRootContext`
    */
-  AppWrapper: React.FC<any>;
+  AppWrapper: (props: any) => JSX.Element;
   /**
    * Renders the given UI within the created `AppWrapper` providing the given UI a mocked
    * endpoint runtime context environment

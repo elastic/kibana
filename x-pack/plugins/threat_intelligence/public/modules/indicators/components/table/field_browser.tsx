@@ -6,7 +6,6 @@
  */
 
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
-import { VFC } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 export interface IndicatorsFieldBrowserProps {
@@ -16,12 +15,12 @@ export interface IndicatorsFieldBrowserProps {
   onToggleColumn: (columnId: string) => void;
 }
 
-export const IndicatorsFieldBrowser: VFC<IndicatorsFieldBrowserProps> = ({
+export const IndicatorsFieldBrowser = ({
   browserFields,
   columnIds,
   onResetColumns,
   onToggleColumn,
-}) => {
+}: IndicatorsFieldBrowserProps) => {
   const { triggersActionsUi } = useKibana().services;
 
   return triggersActionsUi.getFieldBrowser({

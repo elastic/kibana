@@ -433,7 +433,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   }
 }
 
-export const AnnotationFlyout: FC<any> = (props) => {
+export const AnnotationFlyout = (props) => {
   const annotationUpdatesService = useContext(MlAnnotationUpdatesContext);
   const annotationProp = useObservable(annotationUpdatesService.isAnnotationInitialized$());
 

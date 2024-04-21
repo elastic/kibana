@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import type { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
 import type { FILTERS } from './constants';
 
 export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
 
-type FilterAggForm<T> = FC<{
+type FilterAggForm<T> = (props: {
   /** Filter aggregation related configuration */
   config: Partial<T> | undefined;
   /** Callback for configuration updates */
@@ -20,7 +19,7 @@ type FilterAggForm<T> = FC<{
   selectedField?: string;
   /** Whether the configuration is valid */
   isValid?: boolean;
-}>;
+}) => JSX.Element;
 
 interface FilterAggTypeConfig<U, R> {
   /** Form component */

@@ -41,7 +41,7 @@ interface CloudDefendAppDeps {
   params: AppMountParameters;
 }
 
-export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
+export const TestProvider = ({
   core = coreMock.createStart(),
   deps = {
     data: dataPluginMock.createStartContract(),
@@ -49,7 +49,7 @@ export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
   },
   params = coreMock.createAppMountParameters(),
   children,
-} = {}) => {
+}: Partial<CloudDefendAppDeps> = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>

@@ -124,17 +124,17 @@ export interface TableListViewKibanaDependencies {
   savedObjectsTagging?: {
     ui: {
       components: {
-        TagList: React.FC<{
+        TagList: (props: {
           object: {
             references: SavedObjectsReference[];
           };
           onClick?: (tag: Tag) => void;
           tagRender?: (tag: Tag) => JSX.Element;
-        }>;
-        SavedObjectSaveModalTagSelector: React.FC<{
+        }) => JSX.Element | null;
+        SavedObjectSaveModalTagSelector: (props: {
           initialSelection: string[];
           onTagsSelected: (ids: string[]) => void;
-        }>;
+        }) => JSX.Element | null;
       };
       parseSearchQuery: (
         query: string,

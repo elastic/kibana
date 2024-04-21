@@ -9,7 +9,6 @@
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { PropsWithChildren } from 'react';
 import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs/types';
 
@@ -17,7 +16,7 @@ import { PresentationLabsService } from './services/labs/types';
 export interface PresentationUtilPluginSetup {}
 
 export interface PresentationUtilPluginStart {
-  ContextProvider: (props: PropsWithChildren<{}>) => React.ReactElement;
+  ContextProvider: ({ children }: { children?: React.ReactNode }) => JSX.Element;
   labsService: PresentationLabsService;
   registerExpressionsLanguage: typeof registerExpressionsLanguage;
 }

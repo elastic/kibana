@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +35,7 @@ export interface PreviewAlertConditionProps {
   alertParams: MlAnomalyDetectionAlertParams;
 }
 
-const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
+const AlertInstancePreview = React.memo<PreviewResponse['results'][number]>(
   ({ jobIds, timestampIso8601, score, topInfluencers, topRecords }) => {
     const listItems = [
       {
@@ -114,10 +113,10 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
   }
 );
 
-export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
+export const PreviewAlertCondition = ({
   alertingApiService,
   alertParams,
-}) => {
+}: PreviewAlertConditionProps) => {
   const sampleSize = ALERT_PREVIEW_SAMPLE_SIZE;
 
   const [lookBehindInterval, setLookBehindInterval] = useState<string>();

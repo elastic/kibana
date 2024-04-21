@@ -6,7 +6,7 @@
  */
 
 import { EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
-import type { ReactElement, VFC } from 'react';
+import type { ReactElement } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { FlyoutHeader } from '../../../../shared/components/flyout_header';
@@ -43,7 +43,7 @@ export interface PanelHeaderProps {
  * Header at the top of the left section.
  * Displays the investigation and insights tabs (visualize is hidden for 8.9).
  */
-export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
+export const LeftPanelHeader = memo<PanelHeaderProps>(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
     const onSelectedTabChanged = (id: EntityDetailsLeftPanelTab) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (

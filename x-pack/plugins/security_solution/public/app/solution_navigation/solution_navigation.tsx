@@ -36,7 +36,7 @@ export const withNavigationProvider = <T extends object>(
 const getPanelContent = (
   core: CoreStart,
   solutionNavLinks$: SolutionNavLinks$
-): React.FC<PanelComponentProps> => {
+): ((props: PanelComponentProps) => JSX.Element) => {
   const PanelContentProvider = React.memo(function PanelContentProvider({
     selectedNode: { id: linkId },
     closePanel,

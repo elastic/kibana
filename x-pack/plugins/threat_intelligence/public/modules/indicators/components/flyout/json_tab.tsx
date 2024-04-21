@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
@@ -22,7 +22,7 @@ export interface IndicatorsFlyoutJsonProps {
  * Displays all the properties and values of an {@link Indicator} in json view,
  * using the {@link EuiCodeBlock} from the @elastic/eui library.
  */
-export const IndicatorsFlyoutJson: VFC<IndicatorsFlyoutJsonProps> = ({ indicator }) => {
+export const IndicatorsFlyoutJson = ({ indicator }: IndicatorsFlyoutJsonProps) => {
   return Object.keys(indicator).length === 0 ? (
     <IndicatorEmptyPrompt />
   ) : (

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
@@ -74,8 +73,8 @@ export interface EvaluatePanelProps {
 interface Props {
   jobId: string;
   title: string;
-  EvaluatePanel: FC<EvaluatePanelProps>;
-  FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps>;
+  EvaluatePanel: (props: EvaluatePanelProps) => JSX.Element;
+  FeatureImportanceSummaryPanel: (props: FeatureImportanceSummaryPanelProps) => JSX.Element;
 }
 
 export const ExplorationPageWrapper = ({

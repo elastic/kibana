@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-
 export interface CloudStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
@@ -173,7 +171,7 @@ export interface CloudSetup {
    *
    * @param contextProvider The React component from the Service Provider.
    */
-  registerCloudService: (contextProvider: FC) => void;
+  registerCloudService: (contextProvider: () => JSX.Element) => void;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.

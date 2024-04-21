@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
@@ -23,7 +23,7 @@ export default {
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
-const Template: ComponentStory<FC<FiltersBuilderProps>> = (args) => <FiltersBuilder {...args} />;
+const Template: ComponentStory<(props: FiltersBuilderProps) => JSX.Element> = (args: FiltersBuilderProps) => <FiltersBuilder {...args} />;
 
 export const Default = Template.bind({});
 

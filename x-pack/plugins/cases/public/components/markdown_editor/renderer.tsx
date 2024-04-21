@@ -18,8 +18,8 @@ interface Props {
   textSize?: EuiMarkdownFormatProps['textSize'];
 }
 
-const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps> => {
-  const MarkdownLinkProcessingComponent = memo((props: EuiLinkAnchorProps) => (
+const withDisabledLinks = (disableLinks?: boolean) => {
+  const MarkdownLinkProcessingComponent = memo<EuiLinkAnchorProps>((props) => (
     <MarkdownLink {...props} disableLinks={disableLinks} />
   ));
 

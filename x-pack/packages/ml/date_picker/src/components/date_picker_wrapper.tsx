@@ -107,7 +107,7 @@ interface DatePickerWrapperProps {
 /**
  * DatePickerWrapper React Component
  *
- * @type {FC<DatePickerWrapperProps>}
+ * @type {React.FC<DatePickerWrapperProps>}
  * @param props - `DatePickerWrapper` component props
  * @returns {React.ReactElement} The DatePickerWrapper component.
  */

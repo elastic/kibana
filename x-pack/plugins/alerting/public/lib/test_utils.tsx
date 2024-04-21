@@ -29,7 +29,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: CoreStart;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: (props: { children: React.ReactNode }) => JSX.Element | null;
   mocked: {
     setBadge: jest.Mock;
   };
@@ -78,7 +78,7 @@ export const createAppMockRenderer = ({
       setBadge: mockedSetBadge,
     },
   };
-  const AppWrapper = React.memo(({ children }: { children: React.ReactElement }) => (
+  const AppWrapper = React.memo<{ children: React.ReactNode }>(({ children }) => (
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={services}>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

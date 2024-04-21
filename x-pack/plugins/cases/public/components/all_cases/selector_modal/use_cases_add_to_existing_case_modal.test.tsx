@@ -40,9 +40,7 @@ const useCasesToastMock = useCasesToast as jest.Mock;
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
-const TestComponent: React.FC<AddToExistingCaseModalProps> = (
-  props: AddToExistingCaseModalProps = {}
-) => {
+const TestComponent = (props: AddToExistingCaseModalProps = {}) => {
   const hook = useCasesAddToExistingCaseModal({ onSuccess, ...props });
 
   const onClick = () => {

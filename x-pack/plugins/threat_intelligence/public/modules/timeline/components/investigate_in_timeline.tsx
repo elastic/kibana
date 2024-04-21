@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigateInTimeline } from '../hooks/use_investigate_in_timeline';
@@ -35,11 +35,11 @@ export interface InvestigateInTimelineProps {
  *
  * @returns investigate in timeline for a context menu
  */
-export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> = ({
+export const InvestigateInTimelineContextMenu = ({
   data,
   onClick,
   'data-test-subj': dataTestSub,
-}) => {
+}: InvestigateInTimelineProps) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   if (!investigateInTimelineFn) {
     return null;
@@ -72,10 +72,10 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
  *
  * @returns add to timeline button icon
  */
-export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = ({
+export const InvestigateInTimelineButtonIcon = ({
   data,
   'data-test-subj': dataTestSub,
-}) => {
+}: InvestigateInTimelineProps) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   if (!investigateInTimelineFn) {
     return null;

@@ -102,7 +102,7 @@ describe('AppSearchConfigured', () => {
   });
 
   describe('routes with ability checks', () => {
-    const runRouteAbilityCheck = (routeAbility: string, View: React.FC) => {
+    const runRouteAbilityCheck = (routeAbility: string, View: (props) => JSX.Element) => {
       describe(View.name, () => {
         it(`renders ${View.name} when user ${routeAbility} is true`, () => {
           setMockValues({ myRole: { [routeAbility]: true } });

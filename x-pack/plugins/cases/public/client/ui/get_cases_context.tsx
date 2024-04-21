@@ -58,7 +58,7 @@ export const getCasesContextLazy = ({
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
->): (() => React.FC<GetCasesContextProps>) => {
+>): (() => (props: GetCasesContextProps) => JSX.Element) => {
   const CasesProviderLazyWrapperWithRegistry = ({
     children,
     ...props

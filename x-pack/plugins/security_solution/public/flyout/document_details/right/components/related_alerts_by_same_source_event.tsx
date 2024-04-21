@@ -27,10 +27,10 @@ export interface RelatedAlertsBySameSourceEventProps {
 /**
  * Show related alerts by same source event in summary row
  */
-export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSourceEventProps> = ({
+export const RelatedAlertsBySameSourceEvent = ({
   originalEventId,
   scopeId,
-}) => {
+}: RelatedAlertsBySameSourceEventProps) => {
   const { loading, error, dataCount } = useFetchRelatedAlertsBySameSourceEvent({
     originalEventId,
     scopeId,

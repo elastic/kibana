@@ -7,7 +7,7 @@
  */
 
 import React, { useContext, useCallback, useMemo, PropsWithChildren } from 'react';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -36,8 +36,8 @@ export interface Theme {
 export interface Services {
   openFlyout(node: ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
   notifyError: NotifyFn;
-  TagList?: FC<{ references: SavedObjectsReference[] }>;
-  TagSelector?: React.FC<TagSelectorProps>;
+  TagList?: (props: { references: SavedObjectsReference[] }) => JSX.Element | null;
+  TagSelector?: (props: TagSelectorProps) => JSX.Element | null;
 }
 
 const ContentEditorContext = React.createContext<Services | null>(null);
@@ -89,7 +89,7 @@ export interface ContentEditorKibanaDependencies {
   savedObjectsTagging?: {
     ui: {
       components: {
-        TagList: React.FC<{
+        TagList: (props: {
           object: {
             references: SavedObjectsReference[];
           };
@@ -99,8 +99,8 @@ export interface ContentEditorKibanaDependencies {
             color: string;
             managed: boolean;
           }) => void;
-        }>;
-        SavedObjectSaveModalTagSelector: React.FC<TagSelectorProps>;
+        }) => JSX.Element | null;
+        SavedObjectSaveModalTagSelector: (props: TagSelectorProps) => JSX.Element | null;
       };
     };
   };

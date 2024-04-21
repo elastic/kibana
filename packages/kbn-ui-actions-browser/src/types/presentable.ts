@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
-
 /**
  * Represents something that can be displayed to user in UI.
  */
@@ -27,7 +25,7 @@ export interface Presentable<Context = unknown> {
    * Component to render when displaying this entity as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  readonly MenuItem?: FC<{ context: Context }>;
+  readonly MenuItem?: (props: { context: Context }) => JSX.Element;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.

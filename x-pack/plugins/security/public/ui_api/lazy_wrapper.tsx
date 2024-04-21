@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
+import type { PropsWithChildren, PropsWithRef, ReactElement } from 'react';
 import React, { lazy, useMemo } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -13,7 +13,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 
 interface InternalProps<T> {
-  fn: () => Promise<FC<T>>;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  fn: () => Promise<React.FC<T>>;
   core: CoreStart;
   props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>;
 }

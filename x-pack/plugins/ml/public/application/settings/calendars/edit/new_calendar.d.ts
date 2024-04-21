@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-
-declare const NewCalendar: FC<{
+declare const NewCalendar: (props: {
   calendarId?: string;
   canCreateCalendar: boolean;
   canDeleteCalendar: boolean;
-}>;
+}) => JSX.Element;

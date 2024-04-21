@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
+import { ComponentType, NamedExoticComponent, ReactElement, ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -147,7 +147,7 @@ export interface SecuritySolutionPluginContext {
 
   useGlobalTime: () => TimeRange;
 
-  SiemSearchBar: VFC<any>;
+  SiemSearchBar: (props: any) => void;
 
   /**
    * Register query in security solution store for tracking and centralized refresh support

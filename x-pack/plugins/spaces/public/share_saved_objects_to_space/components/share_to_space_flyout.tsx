@@ -10,7 +10,7 @@ import React from 'react';
 import type { ShareToSpaceFlyoutProps } from '../types';
 
 export const getShareToSpaceFlyoutComponent = async (): Promise<
-  React.FC<ShareToSpaceFlyoutProps>
+  (props: ShareToSpaceFlyoutProps) => JSX.Element
 > => {
   const { ShareToSpaceFlyoutInternal } = await import('./share_to_space_flyout_internal');
   return (props: ShareToSpaceFlyoutProps) => {

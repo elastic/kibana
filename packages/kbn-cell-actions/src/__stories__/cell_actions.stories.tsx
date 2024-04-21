@@ -49,7 +49,7 @@ export default {
   ],
 };
 
-const CellActionsTemplate: ComponentStory<React.FC<CellActionsProps>> = (args) => (
+const CellActionsTemplate: ComponentStory<(props: CellActionsProps) => JSX.Element> = (args: CellActionsProps) => (
   <CellActions {...args}>Field value</CellActions>
 );
 

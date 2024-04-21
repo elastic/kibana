@@ -25,7 +25,7 @@ export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery
 
 export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
-): React.FC<OwnProps & T> {
+): (props: OwnProps & T) => JSX.Element {
   const ManageQuery = (props: OwnProps & T) => {
     const { deleteQuery, id, inspect = null, loading, refetch, setQuery } = props;
 

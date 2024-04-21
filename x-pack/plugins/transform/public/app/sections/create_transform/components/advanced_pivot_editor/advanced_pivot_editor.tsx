@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
@@ -17,7 +16,7 @@ import { CodeEditor } from '@kbn/code-editor';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> = memo(
+export const AdvancedPivotEditor = memo<StepDefineFormHook['advancedPivotEditor']>(
   ({
     actions: { convertToJson, setAdvancedEditorConfig, setAdvancedPivotEditorApplyButtonEnabled },
     state: { advancedEditorConfigLastApplied, advancedEditorConfig, xJsonMode },

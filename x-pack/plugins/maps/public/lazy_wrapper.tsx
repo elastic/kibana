@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 
 const Fallback = () => (
@@ -15,7 +15,7 @@ const Fallback = () => (
 );
 
 interface Props<T> {
-  getLazyComponent: () => FC<T>;
+  getLazyComponent: () => (props: T) => JSX.Element | null;
   lazyComponentProps: JSX.IntrinsicAttributes & T;
 }
 

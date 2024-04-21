@@ -10,7 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 const withSuspenseUpsell = <T extends object = {}>(
   Component: React.ComponentType<T>
-): React.FC<T> =>
+): ((props: T) => JSX.Element) =>
   function WithSuspenseUpsell(props) {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="s" />}>

@@ -13,7 +13,7 @@ import { FLYOUT_ERROR_TEST_ID } from './test_ids';
 /**
  * Use this when you need to show an error state in the flyout
  */
-export const FlyoutError: React.VFC = () => (
+export const FlyoutError = () => (
   <EuiFlexItem>
     <EuiEmptyPrompt
       iconType="error"

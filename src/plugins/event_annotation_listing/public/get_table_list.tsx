@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
@@ -25,7 +25,7 @@ export interface EventAnnotationListingPageServices {
   core: CoreStart;
   savedObjectsTagging: SavedObjectsTaggingApi;
   eventAnnotationService: EventAnnotationServiceType;
-  PresentationUtilContextProvider: FC;
+  PresentationUtilContextProvider: ({ children }: { children?: React.ReactNode }) => JSX.Element;
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;

@@ -6,7 +6,6 @@
  */
 import '../_index.scss';
 import { pick } from 'lodash';
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
@@ -52,7 +51,7 @@ const XXL_BREAKPOINT = 1400;
 const localStorage = new Storage(window.localStorage);
 
 export interface DataVisualizerStateContextProviderProps {
-  IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
+  IndexDataVisualizerComponent: (props: IndexDataVisualizerViewProps) => JSX.Element;
   getAdditionalLinks?: GetAdditionalLinks;
 }
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;

@@ -201,7 +201,7 @@ export const renderApp = (
  */
 
 export const renderHeaderActions = (
-  HeaderActions: React.FC,
+  HeaderActions: () => JSX.Element,
   store: Store,
   params: AppMountParameters,
   kibanaHeaderEl: HTMLElement

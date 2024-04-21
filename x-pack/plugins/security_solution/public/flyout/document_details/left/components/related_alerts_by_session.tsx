@@ -29,11 +29,11 @@ export interface RelatedAlertsBySessionProps {
 /**
  * Show related alerts by session in an expandable panel with a table
  */
-export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
+export const RelatedAlertsBySession = ({
   entityId,
   scopeId,
   eventId,
-}) => {
+}: RelatedAlertsBySessionProps) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
     scopeId,

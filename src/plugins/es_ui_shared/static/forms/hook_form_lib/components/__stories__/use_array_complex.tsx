@@ -422,7 +422,7 @@ const ProcessorTypeConfigurator = ({ basePath }: { basePath: string }) => {
   );
 };
 
-const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
+const ProcessorsConfigurator = ({ ruleType }: { ruleType: string }) => {
   return (
     <UseArray
       key={ruleType}

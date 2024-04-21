@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-
-declare const EditFilterList: FC<{
+declare const EditFilterList: (props: {
   filterId?: string;
   canCreateFilter: boolean;
   canDeleteFilter: boolean;
-}>;
+}) => JSX.Element;

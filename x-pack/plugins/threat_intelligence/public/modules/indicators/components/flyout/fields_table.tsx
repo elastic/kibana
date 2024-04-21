@@ -7,7 +7,7 @@
 
 import { EuiBasicTableColumn, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, VFC } from 'react';
+import React, { useMemo } from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorValueActions } from './indicator_value_actions';
@@ -19,11 +19,11 @@ export interface IndicatorFieldsTableProps {
   ['data-test-subj']?: string;
 }
 
-export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
+export const IndicatorFieldsTable = ({
   fields,
   indicator,
   'data-test-subj': dataTestSubj,
-}) => {
+}: IndicatorFieldsTableProps) => {
   const columns = useMemo(
     () =>
       [

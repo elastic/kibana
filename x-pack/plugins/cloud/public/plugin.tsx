@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -56,7 +56,9 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
-  private readonly contextProviders: FC[] = [];
+  private readonly contextProviders: Array<
+    ({ children }: { children?: React.ReactNode }) => JSX.Element
+  > = [];
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {

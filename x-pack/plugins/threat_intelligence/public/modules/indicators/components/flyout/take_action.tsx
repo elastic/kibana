@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import React, { useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
@@ -32,7 +32,7 @@ export interface TakeActionProps {
 /**
  * Component rendered at the bottom of the indicators flyout
  */
-export const TakeAction: VFC<TakeActionProps> = ({ indicator }) => {
+export const TakeAction = ({ indicator }: TakeActionProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const smallContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'smallContextMenuPopover',

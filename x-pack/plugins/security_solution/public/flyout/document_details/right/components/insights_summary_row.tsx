@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactElement, VFC } from 'react';
+import type { ReactElement } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -56,7 +56,7 @@ export interface InsightsSummaryRowProps {
  * Should be used for Entities, Threat intelligence, Prevalence, Correlations and Results components under the Insights section.
  * The colored dot is currently optional but will ultimately be mandatory (waiting on PM and UIUX).
  */
-export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
+export const InsightsSummaryRow = ({
   loading = false,
   error = false,
   icon,
@@ -64,7 +64,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   text,
   color,
   'data-test-subj': dataTestSubj,
-}) => {
+}: InsightsSummaryRowProps) => {
   const { euiTheme } = useEuiTheme();
 
   const loadingDataTestSubj = `${dataTestSubj}Loading`;

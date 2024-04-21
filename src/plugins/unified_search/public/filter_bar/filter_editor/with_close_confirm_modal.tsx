@@ -7,7 +7,7 @@
  */
 
 import { compareFilters, Filter } from '@kbn/es-query';
-import React, { FC, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 
 interface QueryDslFilter {
@@ -39,7 +39,7 @@ const isQueryDslFilterChanged = (original: QueryDslFilter, updated: QueryDslFilt
 
 export function withCloseFilterEditorConfirmModal<
   T extends WithCloseFilterEditorConfirmModalProps = WithCloseFilterEditorConfirmModalProps
->(WrappedComponent: FC<T>) {
+>(WrappedComponent: (props: T) => JSX.Element | null) {
   return function (props: Omit<T, keyof WithCloseFilterEditorConfirmModalProps>) {
     const [actionsOnClose, setActionsOnClose] = useState<Action[]>();
     const [showConfirmModal, setShowConfirmModal] = useState(false);

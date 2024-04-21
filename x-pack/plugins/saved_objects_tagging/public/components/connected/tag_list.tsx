@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { SavedObjectReference } from '@kbn/core/types';
 import { TagListComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -41,9 +41,7 @@ interface GetConnectedTagListOptions {
   cache: ITagsCache;
 }
 
-export const getConnectedTagListComponent = ({
-  cache,
-}: GetConnectedTagListOptions): FC<TagListComponentProps> => {
+export const getConnectedTagListComponent = ({ cache }: GetConnectedTagListOptions) => {
   return (props: TagListComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
     return <SavedObjectTagList {...props} tags={tags} />;

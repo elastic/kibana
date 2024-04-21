@@ -86,7 +86,7 @@ Assuming the UI state machine is provided as shown in the earlier section, the c
 
 **A connected component:**
 ```typescript
-export const ConnectedStreamPageContent: React.FC = () => {
+export const ConnectedStreamPageContent = () => {
   const logStreamPageStateService = useLogStreamPageStateContext();
 
   const [logStreamPageState] = useActor(logStreamPageStateService);
@@ -97,8 +97,10 @@ export const ConnectedStreamPageContent: React.FC = () => {
 
 **A "for state" layout component:**
 ```typescript
-export const StreamPageContentForState: React.FC<{ logStreamPageState: LogStreamPageState }> = ({
+export const StreamPageContentForState = ({
   logStreamPageState, // <-- this could be any state of the page state machine
+}: { 
+  logStreamPageState: LogStreamPageState 
 }) => {
   if (logStreamPageState.matches('uninitialized') || logStreamPageState.matches('loadingLogView')) {
     return <SourceLoadingPage />;

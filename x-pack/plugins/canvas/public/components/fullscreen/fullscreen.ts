@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FC, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import { getWindow } from '../../lib/get_window';
 
@@ -17,7 +17,7 @@ interface Props {
   }) => JSX.Element;
 }
 
-export const Fullscreen: FC<Props> = ({ isFullscreen = false, children }) => {
+export const Fullscreen = ({ isFullscreen = false, children }: Props) => {
   const [width, setWidth] = useState(getWindow().innerWidth);
   const [height, setHeight] = useState(getWindow().innerHeight);
 

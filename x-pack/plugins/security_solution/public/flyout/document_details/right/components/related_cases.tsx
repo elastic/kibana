@@ -23,7 +23,7 @@ export interface RelatedCasesProps {
 /**
  *
  */
-export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
+export const RelatedCases = ({ eventId }: RelatedCasesProps) => {
   const { loading, error, dataCount } = useFetchRelatedCases({ eventId });
   const text = (
     <FormattedMessage

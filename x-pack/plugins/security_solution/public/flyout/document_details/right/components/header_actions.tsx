@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+
 import React, { memo } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +23,7 @@ import { SHARE_BUTTON_TEST_ID } from './test_ids';
 /**
  * Actions displayed in the header menu in the right section of alerts flyout
  */
-export const HeaderActions: VFC = memo(() => {
+export const HeaderActions= memo(() => {
   const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
   const { isAlert, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 

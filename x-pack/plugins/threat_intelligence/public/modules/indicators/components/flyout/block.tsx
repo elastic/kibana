@@ -6,7 +6,7 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { VFC } from 'react';
+import React from 'react';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Indicator } from '../../../../../common/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
@@ -50,11 +50,11 @@ export interface IndicatorBlockProps {
 /**
  * Renders indicator field value in a rectangle, to highlight it even more
  */
-export const IndicatorBlock: VFC<IndicatorBlockProps> = ({
+export const IndicatorBlock = ({
   field,
   indicator,
   'data-test-subj': dataTestSubj,
-}) => {
+}: IndicatorBlockProps) => {
   return (
     <EuiPanel {...panelProps}>
       <VisibleOnHover data-test-subj={`${dataTestSubj}Item`}>

@@ -74,7 +74,7 @@ export const useDatePickerContext = (): DatePickerDependencies => {
 /**
  * React Component that acts as a wrapper for DatePickerContext.
  *
- * @type {FC<DatePickerDependencies>}
+ * @type {React.FC<DatePickerDependencies>}
  * @param props - The component props
  * @returns {React.ReactElement} The DatePickerContextProvider component.
  */

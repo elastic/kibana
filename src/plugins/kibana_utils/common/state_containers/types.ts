@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { Ensure } from '@kbn/utility-types';
-import { FC, ComponentType } from 'react';
+import {  ComponentType } from 'react';
 
 /**
  * Base {@link StateContainer} state shape
@@ -194,4 +194,4 @@ export type Connect<State extends BaseState> = <
   StatePropKeys extends keyof Props
 >(
   mapStateToProp: MapStateToProps<State, Pick<Props, StatePropKeys>>
-) => (component: ComponentType<Props>) => FC<Omit<Props, StatePropKeys>>;
+) => (component: ComponentType<Props>) => (props: Omit<Props, StatePropKeys>) => JSX.Element;

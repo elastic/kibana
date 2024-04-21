@@ -32,7 +32,7 @@ export interface CellComponentProps {
   caseAppId?: string;
 }
 
-export type CellComponent = React.FC<CellComponentProps>;
+export type CellComponent = (props: CellComponentProps) => JSX.Element | null;
 
 export interface SystemCellComponentMap {
   [ALERT_STATUS]: CellComponent;
@@ -58,7 +58,7 @@ type UseCasesAddToExistingCaseModal = (props?: Record<string, unknown>) => {
 
 export interface CasesService {
   ui: {
-    getCasesContext: () => React.FC<any>;
+    getCasesContext: () => (props: any) => JSX.Element;
   };
   hooks: {
     useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
