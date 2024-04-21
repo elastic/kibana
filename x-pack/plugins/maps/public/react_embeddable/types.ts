@@ -16,6 +16,8 @@ import {
   PublishesUnifiedSearch,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
+import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { Observable } from 'rxjs';
 import { MapAttributes } from '../../common/content_management';
 import {
@@ -28,30 +30,32 @@ import { ILayer } from '../classes/layers/layer';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { EventHandlers } from '../reducers/non_serializable_instances';
 
-export interface MapSerializeState extends SerializedTitles {
-  // by-valye
-  attributes?: MapAttributes;
-  // by-reference
-  savedObjectId?: string;
+export type MapSerializeState = SerializedTitles &
+  Partial<DynamicActionsSerializedState> & {
+    // by-valye
+    attributes?: MapAttributes;
+    // by-reference
+    savedObjectId?: string;
 
-  isLayerTOCOpen?: boolean;
-  openTOCDetails?: string[];
-  mapCenter?: MapCenterAndZoom;
-  mapBuffer?: MapExtent;
-  mapSettings?: Partial<MapSettings>;
-  hiddenLayers?: string[];
-  hideFilterActions?: boolean;
-  timeRange?: TimeRange;
-  filterByMapExtent?: boolean;
-  isMovementSynchronized?: boolean;
+    isLayerTOCOpen?: boolean;
+    openTOCDetails?: string[];
+    mapCenter?: MapCenterAndZoom;
+    mapBuffer?: MapExtent;
+    mapSettings?: Partial<MapSettings>;
+    hiddenLayers?: string[];
+    hideFilterActions?: boolean;
+    timeRange?: TimeRange;
+    filterByMapExtent?: boolean;
+    isMovementSynchronized?: boolean;
 
-  // Configuration item that are never persisted
-  // Putting in state as a temporary work around until
-  // MapApi and React component are seperated from embeddable
-  isSharable?: boolean;
-}
+    // Configuration item that are never persisted
+    // Putting in state as a temporary work around until
+    // MapApi and React component are seperated from embeddable
+    isSharable?: boolean;
+  };
 
 export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
+  HasDynamicActions &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &

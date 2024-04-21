@@ -22,7 +22,7 @@ import { SavedMap } from '../routes/map_page';
 import type { MapEmbeddableInput } from '../embeddable/types';
 import { initializeReduxSync } from './initialize_redux_sync';
 import { initializeLibraryTransforms } from './initialize_library_transforms';
-import { getSpacesApi } from '../kibana_services';
+import { getEmbeddableEnhanced, getSpacesApi } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
@@ -59,6 +59,13 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
     const controlledBy = getControlledBy(uuid);
     const title = initializeTitles(state);
     const timeRange = initializeTimeRange(state);
+    const dynamicActionsApi = getEmbeddableEnhanced()?.initializeReactEmbeddableDynamicActions(
+      uuid,
+      () => title.titlesApi.panelTitle.getValue(),
+      state
+    );
+    const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+
     const defaultPanelTitle = new BehaviorSubject<string | undefined>(
       savedMap.getAttributes().title
     );
@@ -83,6 +90,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         ...state,
         ...timeRange.serialize(),
         ...title.serializeTitles(),
+        ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
         ...crossPanelActions.serialize(),
         ...reduxSync.serialize(),
       } as unknown as MapEmbeddablePersistableState);
@@ -96,6 +104,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       {
         defaultPanelTitle,
         ...timeRange.api,
+        ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         ...title.titlesApi,
         ...reduxSync.api,
         ...initializeLibraryTransforms(savedMap, serializeState),
@@ -111,6 +120,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
       {
         ...timeRange.comparators,
         ...title.titleComparators,
+        ...(dynamicActionsApi?.dynamicActionsComparator ?? {}),
         ...crossPanelActions.comparators,
         ...reduxSync.comparators,
       }
@@ -132,6 +142,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
             crossPanelActions.cleanup();
             reduxSync.cleanup();
             unsubscribeFromFetch();
+            maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);
 
