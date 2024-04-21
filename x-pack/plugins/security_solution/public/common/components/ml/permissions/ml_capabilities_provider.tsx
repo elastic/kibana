@@ -29,35 +29,39 @@ export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
-export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }: { children?: React.ReactNode }) => {
-  const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
-    emptyMlCapabilitiesProvider
-  );
-  const http = useHttp();
-  const { addError } = useAppToasts();
-  const { start, result, error } = useGetMlCapabilities();
+export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(
+  ({ children }: { children?: React.ReactNode }) => {
+    const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
+      emptyMlCapabilitiesProvider
+    );
+    const http = useHttp();
+    const { addError } = useAppToasts();
+    const { start, result, error } = useGetMlCapabilities();
 
-  useEffect(() => {
-    start({ http });
-  }, [http, start]);
+    useEffect(() => {
+      start({ http });
+    }, [http, start]);
 
-  useEffect(() => {
-    if (result) {
-      setCapabilities({ ...result, capabilitiesFetched: true });
-    }
-  }, [result]);
+    useEffect(() => {
+      if (result) {
+        setCapabilities({ ...result, capabilitiesFetched: true });
+      }
+    }, [result]);
 
-  useEffect(() => {
-    if (error) {
-      addError(error, {
-        title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
-      });
-    }
-  }, [addError, error]);
+    useEffect(() => {
+      if (error) {
+        addError(error, {
+          title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
+        });
+      }
+    }, [addError, error]);
 
-  return (
-    <MlCapabilitiesContext.Provider value={capabilities}>{children}</MlCapabilitiesContext.Provider>
-  );
-});
+    return (
+      <MlCapabilitiesContext.Provider value={capabilities}>
+        {children}
+      </MlCapabilitiesContext.Provider>
+    );
+  }
+);
 
 MlCapabilitiesProvider.displayName = 'MlCapabilitiesProvider';

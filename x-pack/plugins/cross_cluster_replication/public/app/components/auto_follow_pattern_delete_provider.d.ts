@@ -7,4 +7,4 @@
 
 import { FunctionComponent } from 'react';
 
-declare const AutoFollowPatternDeleteProvider: FunctionComponent<{children: React.ReactNode;}>;
+declare const AutoFollowPatternDeleteProvider: FunctionComponent<{ children: React.ReactNode }>;

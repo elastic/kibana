@@ -39,7 +39,9 @@ const [OuterVerificationProvider, useVerification] = constate(
   }
 );
 
-const InnerVerificationProvider: FunctionComponent<{ children?: React.ReactNode }> = ({ children }) => {
+const InnerVerificationProvider: FunctionComponent<{ children?: React.ReactNode }> = ({
+  children,
+}) => {
   const { http } = useKibana();
   const { status, setStatus, setCode } = useVerification();
 

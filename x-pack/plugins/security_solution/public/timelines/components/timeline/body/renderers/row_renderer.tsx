@@ -12,9 +12,11 @@ interface RowRendererContainerProps {
   children: React.ReactNode;
 }
 
-export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ children }: { children?: React.ReactNode }) => (
-  <EventsTrSupplement className="siemEventsTable__trSupplement--summary">
-    {children}
-  </EventsTrSupplement>
-));
+export const RowRendererContainer = React.memo<RowRendererContainerProps>(
+  ({ children }: { children?: React.ReactNode }) => (
+    <EventsTrSupplement className="siemEventsTable__trSupplement--summary">
+      {children}
+    </EventsTrSupplement>
+  )
+);
 RowRendererContainer.displayName = 'RowRendererContainer';

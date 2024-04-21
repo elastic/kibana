@@ -14,17 +14,19 @@ const EventDetailsWidthContext = createContext(DEFAULT_WIDTH);
 
 export const useEventDetailsWidthContext = () => useContext(EventDetailsWidthContext);
 
-export const EventDetailsWidthProvider = React.memo(({ children }: { children?: React.ReactNode }) => {
-  const { ref, width } = useThrottledResizeObserver();
+export const EventDetailsWidthProvider = React.memo(
+  ({ children }: { children?: React.ReactNode }) => {
+    const { ref, width } = useThrottledResizeObserver();
 
-  return (
-    <>
-      <EventDetailsWidthContext.Provider value={width ?? DEFAULT_WIDTH}>
-        {children}
-      </EventDetailsWidthContext.Provider>
-      <div ref={ref} />
-    </>
-  );
-});
+    return (
+      <>
+        <EventDetailsWidthContext.Provider value={width ?? DEFAULT_WIDTH}>
+          {children}
+        </EventDetailsWidthContext.Provider>
+        <div ref={ref} />
+      </>
+    );
+  }
+);
 
 EventDetailsWidthProvider.displayName = 'EventDetailsWidthProvider';

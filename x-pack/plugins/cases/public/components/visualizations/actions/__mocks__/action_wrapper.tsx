@@ -9,4 +9,6 @@ import React from 'react';
 
 export const ActionWrapper = jest
   .fn()
-  .mockImplementation(({ children }: { children?: React.ReactNode }) => <div data-test-subj="action-wrapper">{children}</div>);
+  .mockImplementation(({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="action-wrapper">{children}</div>
+  ));

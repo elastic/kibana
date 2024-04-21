@@ -18,11 +18,13 @@ export interface EmbeddableProps {
   children: React.ReactNode;
 }
 
-export const Embeddable = React.memo<EmbeddableProps>(({ children }: { children?: React.ReactNode }) => (
-  <section className="siemEmbeddable" data-test-subj="siemEmbeddable">
-    <Panel paddingSize="none" hasBorder>
-      {children}
-    </Panel>
-  </section>
-));
+export const Embeddable = React.memo<EmbeddableProps>(
+  ({ children }: { children?: React.ReactNode }) => (
+    <section className="siemEmbeddable" data-test-subj="siemEmbeddable">
+      <Panel paddingSize="none" hasBorder>
+        {children}
+      </Panel>
+    </section>
+  )
+);
 Embeddable.displayName = 'Embeddable';

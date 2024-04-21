@@ -10,9 +10,10 @@ import { ClientPluginsStart } from '../../../plugin';
 
 export const SyntheticsStartupPluginsContext = createContext<Partial<ClientPluginsStart>>({});
 
-export const SyntheticsStartupPluginsContextProvider: React.FC<PropsWithChildren<Partial<ClientPluginsStart>>> = ({
-  children,
-  ...props
-}) => <SyntheticsStartupPluginsContext.Provider value={{ ...props }} children={children} />;
+export const SyntheticsStartupPluginsContextProvider: React.FC<
+  PropsWithChildren<Partial<ClientPluginsStart>>
+> = ({ children, ...props }) => (
+  <SyntheticsStartupPluginsContext.Provider value={{ ...props }} children={children} />
+);
 
 export const useSyntheticsStartPlugins = () => useContext(SyntheticsStartupPluginsContext);
