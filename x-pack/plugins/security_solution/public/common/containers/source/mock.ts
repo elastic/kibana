@@ -428,6 +428,18 @@ export const mockBrowserFields: BrowserFields = {
         aggregatable: true,
         indexes: DEFAULT_INDEX_PATTERN,
       },
+      'event.kind': {
+        category: 'event',
+        description: 'This defined the type of event eg. alerts',
+        example: 'signal',
+        name: 'event.kind',
+        type: 'string',
+        esTypes: ['keyword'],
+        format: 'string',
+        searchable: true,
+        aggregatable: true,
+        indexes: DEFAULT_INDEX_PATTERN,
+      },
     },
   },
   host: {

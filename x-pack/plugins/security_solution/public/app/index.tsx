@@ -14,25 +14,20 @@ import { AppRoutes } from './app_routes';
 export const renderApp = ({
   element,
   history,
-  onAppLeave,
   services,
   store,
   usageCollection,
   subPluginRoutes,
   theme$,
+  children,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   render(
-    <SecurityApp
-      history={history}
-      onAppLeave={onAppLeave}
-      services={services}
-      store={store}
-      theme$={theme$}
-    >
+    <SecurityApp history={history} services={services} store={store} theme$={theme$}>
       <ApplicationUsageTrackingProvider>
-        <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />
+        {children ??
+          (subPluginRoutes && <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />)}
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element

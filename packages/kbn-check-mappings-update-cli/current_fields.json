@@ -912,6 +912,7 @@
     "tags",
     "version"
   ],
+  "slo-settings": [],
   "space": [
     "name"
   ],
@@ -922,6 +923,7 @@
     "alert.status.enabled",
     "alert.tls",
     "alert.tls.enabled",
+    "config_id",
     "custom_heartbeat_id",
     "enabled",
     "hash",
