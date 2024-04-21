@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { Validator } from '@kbn/ml-form-utils';
+
 import { retentionPolicyMaxAgeInvalidErrorMessage } from './messages';
 
 import { parseDurationAboveZero } from './parse_duration_above_zero';
 import { isRetentionPolicyMaxAge } from './is_retention_policy_max_age';
-import type { Validator } from './types';
 
 /**
  * Validates retention policy max age input.

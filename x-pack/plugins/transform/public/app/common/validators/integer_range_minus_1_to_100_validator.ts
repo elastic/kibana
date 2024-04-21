@@ -7,8 +7,7 @@
 
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
-
-import type { Validator } from './types';
+import type { Validator } from '@kbn/ml-form-utils';
 
 const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformSettingValidations.numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage',

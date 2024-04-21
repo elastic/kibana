@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/ml-form-utils",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "test": "../../../../node_modules/.bin/tsd tsd_tests"
+  }
+}

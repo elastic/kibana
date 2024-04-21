@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export function capitalizeFirstLetter(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+// This is just an empty mock file to provide a workaround to run tsd correctly isolated

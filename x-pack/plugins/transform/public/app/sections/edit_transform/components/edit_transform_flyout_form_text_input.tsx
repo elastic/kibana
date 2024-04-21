@@ -10,11 +10,11 @@ import React, { type FC } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { capitalizeFirstLetter } from '@kbn/ml-form-utils';
 
 import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
 import { useFormField } from '../state_management/selectors/form_field';
 import type { FormFields } from '../state_management/form_field';
-import { capitalizeFirstLetter } from '../utils/capitalize_first_letter';
 
 interface EditTransformFlyoutFormTextInputProps {
   field: FormFields;

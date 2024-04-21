@@ -8,25 +8,31 @@
 import { merge } from 'lodash';
 
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
-import { valueParsers } from '@kbn/ml-form-utils';
 
-import type { PostTransformsUpdateRequestSchema } from '../../../../../common/api_schemas/update_transforms';
-import type { TransformConfigUnion } from '../../../../../common/types/transform';
+import { valueParsers } from './value_parsers';
 
-import type { FormFields, FormFieldsState } from './form_field';
-import type { FormSectionsState } from './form_section';
+import type { State } from './form_slice';
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
 // Considers options like if a value is nullable or optional.
-export const getUpdateValue = (
-  attribute: FormFields,
-  config: TransformConfigUnion,
-  formFields: FormFieldsState,
-  formSections: FormSectionsState,
+export const getUpdateValue = <
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  C,
+  RC extends {}
+>(
+  attribute: FF,
+  config: C,
+  formFields: State<FF, FS, VN>['formFields'],
+  formSections: State<FF, FS, VN>['formSections'],
   enforceFormValue = false
 ) => {
   const formStateAttribute = formFields[attribute];
+
+  if (formStateAttribute.configFieldName === undefined) return {};
+
   const fallbackValue = formStateAttribute.isNullable ? null : formStateAttribute.defaultValue;
 
   const enabledBasedOnSection =
@@ -42,7 +48,7 @@ export const getUpdateValue = (
   const configValue = getNestedProperty(config, formStateAttribute.configFieldName, fallbackValue);
 
   // only get depending values if we're not already in a call to get depending values.
-  const dependsOnConfig: PostTransformsUpdateRequestSchema =
+  const dependsOnConfig = (
     enforceFormValue === false
       ? formStateAttribute.dependsOn.reduce((_dependsOnConfig, dependsOnField) => {
           return merge(
@@ -50,7 +56,8 @@ export const getUpdateValue = (
             getUpdateValue(dependsOnField, config, formFields, formSections, true)
           );
         }, {})
-      : {};
+      : {}
+  ) as RC;
 
   if (
     formValue === formStateAttribute.defaultValue &&
@@ -63,11 +70,11 @@ export const getUpdateValue = (
   // If the resettable section the form field belongs to is disabled,
   // the whole section will be set to `null` to do the actual reset.
   if (formStateAttribute.section !== undefined && !enabledBasedOnSection) {
-    return setNestedProperty(
-      dependsOnConfig,
-      formSections[formStateAttribute.section].configFieldName,
-      null
-    );
+    const section = formSections[formStateAttribute.section];
+
+    if (section.configFieldName !== undefined) {
+      return setNestedProperty(dependsOnConfig, section.configFieldName, null);
+    }
   }
 
   return enabledBasedOnSection && (formValue !== configValue || enforceFormValue)
