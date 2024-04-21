@@ -7,12 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import {
-  Logger,
-  KibanaRequest,
-  KibanaResponseFactory,
-  RouteRegistrar,
-} from '@kbn/core/server';
+import { Logger, KibanaRequest, KibanaResponseFactory, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
@@ -33,10 +28,7 @@ import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMCore, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import { APMConfig } from '../..';
-import {
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from '../../types';
+import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 
 const inspectRt = t.exact(
   t.partial({
@@ -51,10 +43,7 @@ const CLIENT_CLOSED_REQUEST = {
   },
 };
 
-export const inspectableEsQueriesMap = new WeakMap<
-  KibanaRequest,
-  InspectResponse
->();
+export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 
 export function registerRoutes({
   core,
@@ -213,12 +202,7 @@ export function registerRoutes({
     };
 
     if (!version) {
-      (
-        router[method] as RouteRegistrar<
-          typeof method,
-          ApmPluginRequestHandlerContext
-        >
-      )(
+      (router[method] as RouteRegistrar<typeof method, ApmPluginRequestHandlerContext>)(
         {
           path: pathname,
           options,

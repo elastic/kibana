@@ -12,14 +12,10 @@ import { customLogsRoutes } from '../components/app/custom_logs';
 import { systemLogsRoutes } from '../components/app/system_logs';
 import { Home } from '../components/app/home';
 
-export type RouteParams<T extends keyof typeof routes> = DecodeParams<
-  typeof routes[T]['params']
->;
+export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
 type DecodeParams<TParams extends Params | undefined> = {
-  [key in keyof TParams]: TParams[key] extends t.Any
-    ? t.TypeOf<TParams[key]>
-    : never;
+  [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
 };
 
 export interface Params {

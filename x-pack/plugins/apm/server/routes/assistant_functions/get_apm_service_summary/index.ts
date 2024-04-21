@@ -6,10 +6,7 @@
  */
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  rangeQuery,
-  ScopedAnnotationsClient,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -72,141 +69,137 @@ async function getAnomalies({
     return [];
   }
 
-  const mlJobs = (
-    await getMlJobsWithAPMGroup(mlClient.anomalyDetectors)
-  ).filter((job) => job.environment !== environment);
+  const mlJobs = (await getMlJobsWithAPMGroup(mlClient.anomalyDetectors)).filter(
+    (job) => job.environment !== environment
+  );
 
   if (!mlJobs.length) {
     return [];
   }
 
-  const anomaliesResponse = await anomalySearch(
-    mlClient.mlSystem.mlAnomalySearch,
-    {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...apmMlAnomalyQuery({
-                serviceName,
-                transactionType,
-              }),
-              ...rangeQuery(start, end, 'timestamp'),
-              ...apmMlJobsQuery(mlJobs),
-            ],
-          },
+  const anomaliesResponse = await anomalySearch(mlClient.mlSystem.mlAnomalySearch, {
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...apmMlAnomalyQuery({
+              serviceName,
+              transactionType,
+            }),
+            ...rangeQuery(start, end, 'timestamp'),
+            ...apmMlJobsQuery(mlJobs),
+          ],
         },
-        aggs: {
-          by_timeseries_id: {
-            composite: {
-              size: 5000,
-              sources: asMutableArray([
-                {
-                  jobId: {
-                    terms: {
-                      field: 'job_id',
+      },
+      aggs: {
+        by_timeseries_id: {
+          composite: {
+            size: 5000,
+            sources: asMutableArray([
+              {
+                jobId: {
+                  terms: {
+                    field: 'job_id',
+                  },
+                },
+              },
+              {
+                detectorIndex: {
+                  terms: {
+                    field: 'detector_index',
+                  },
+                },
+              },
+              {
+                serviceName: {
+                  terms: {
+                    field: 'partition_field_value',
+                  },
+                },
+              },
+              {
+                transactionType: {
+                  terms: {
+                    field: 'by_field_value',
+                  },
+                },
+              },
+            ] as const),
+          },
+          aggs: {
+            record_scores: {
+              filter: {
+                term: {
+                  result_type: 'record',
+                },
+              },
+              aggs: {
+                top_anomaly: {
+                  top_metrics: {
+                    metrics: asMutableArray([
+                      { field: 'record_score' },
+                      { field: 'actual' },
+                      { field: 'timestamp' },
+                    ] as const),
+                    size: 1,
+                    sort: {
+                      record_score: 'desc',
                     },
                   },
                 },
-                {
-                  detectorIndex: {
-                    terms: {
-                      field: 'detector_index',
-                    },
-                  },
-                },
-                {
-                  serviceName: {
-                    terms: {
-                      field: 'partition_field_value',
-                    },
-                  },
-                },
-                {
-                  transactionType: {
-                    terms: {
-                      field: 'by_field_value',
-                    },
-                  },
-                },
-              ] as const),
+              },
             },
-            aggs: {
-              record_scores: {
-                filter: {
-                  term: {
-                    result_type: 'record',
-                  },
-                },
-                aggs: {
-                  top_anomaly: {
-                    top_metrics: {
-                      metrics: asMutableArray([
-                        { field: 'record_score' },
-                        { field: 'actual' },
-                        { field: 'timestamp' },
-                      ] as const),
-                      size: 1,
-                      sort: {
-                        record_score: 'desc',
-                      },
-                    },
-                  },
-                },
+            model_lower: {
+              min: {
+                field: 'model_lower',
               },
-              model_lower: {
-                min: {
-                  field: 'model_lower',
-                },
-              },
-              model_upper: {
-                max: {
-                  field: 'model_upper',
-                },
+            },
+            model_upper: {
+              max: {
+                field: 'model_upper',
               },
             },
           },
         },
       },
-    }
-  );
+    },
+  });
 
   const jobsById = keyBy(mlJobs, (job) => job.jobId);
 
-  const anomalies =
-    anomaliesResponse.aggregations?.by_timeseries_id.buckets.map((bucket) => {
-      const jobId = bucket.key.jobId as string;
-      const job = maybe(jobsById[jobId]);
+  const anomalies = anomaliesResponse.aggregations?.by_timeseries_id.buckets.map((bucket) => {
+    const jobId = bucket.key.jobId as string;
+    const job = maybe(jobsById[jobId]);
 
-      if (!job) {
-        logger.warn(`Could not find job for id ${jobId}`);
-        return undefined;
-      }
+    if (!job) {
+      logger.warn(`Could not find job for id ${jobId}`);
+      return undefined;
+    }
 
-      const type = getAnomalyDetectorType(Number(bucket.key.detectorIndex));
+    const type = getAnomalyDetectorType(Number(bucket.key.detectorIndex));
 
-      // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
-      const divider = type === AnomalyDetectorType.txFailureRate ? 100 : 1;
+    // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
+    const divider = type === AnomalyDetectorType.txFailureRate ? 100 : 1;
 
-      const metrics = bucket.record_scores.top_anomaly.top[0]?.metrics;
+    const metrics = bucket.record_scores.top_anomaly.top[0]?.metrics;
 
-      if (!metrics) {
-        return undefined;
-      }
+    if (!metrics) {
+      return undefined;
+    }
 
-      return {
-        '@timestamp': new Date(metrics.timestamp as number).toISOString(),
-        metricName: type.replace('tx', 'transaction'),
-        'service.name': bucket.key.serviceName as string,
-        'service.environment': job.environment,
-        'transaction.type': bucket.key.transactionType as string,
-        anomalyScore: metrics.record_score,
-        actualValue: Number(metrics.actual) / divider,
-        expectedBoundsLower: Number(bucket.model_lower.value) / divider,
-        expectedBoundsUpper: Number(bucket.model_upper.value) / divider,
-      };
-    });
+    return {
+      '@timestamp': new Date(metrics.timestamp as number).toISOString(),
+      metricName: type.replace('tx', 'transaction'),
+      'service.name': bucket.key.serviceName as string,
+      'service.environment': job.environment,
+      'transaction.type': bucket.key.transactionType as string,
+      anomalyScore: metrics.record_score,
+      actualValue: Number(metrics.actual) / divider,
+      expectedBoundsLower: Number(bucket.model_lower.value) / divider,
+      expectedBoundsUpper: Number(bucket.model_upper.value) / divider,
+    };
+  });
 
   return compact(anomalies);
 }
@@ -258,63 +251,62 @@ export async function getApmServiceSummary({
   const environment = args['service.environment'] || ENVIRONMENT_ALL.value;
   const transactionType = args['transaction.type'];
 
-  const [environments, metadataDetails, anomalies, annotations, alerts] =
-    await Promise.all([
-      environment === ENVIRONMENT_ALL.value
-        ? getEnvironments({
-            apmEventClient,
-            start,
-            end,
-            size: 10,
-            serviceName,
-            searchAggregatedTransactions: true,
-          })
-        : Promise.resolve([environment]),
-      getServiceMetadataDetails({
-        apmEventClient,
-        start,
-        end,
-        serviceName,
-        environment,
-      }),
-      getAnomalies({
-        serviceName,
-        start,
-        end,
-        environment,
-        mlClient,
-        logger,
-        transactionType,
-      }),
-      getServiceAnnotations({
-        apmEventClient,
-        start,
-        end,
-        searchAggregatedTransactions: true,
-        client: esClient,
-        annotationsClient,
-        environment,
-        logger,
-        serviceName,
-      }),
-      apmAlertsClient.search({
-        size: 100,
-        track_total_hits: false,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
-                ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-                ...rangeQuery(start, end),
-                ...termQuery(SERVICE_NAME, serviceName),
-                ...environmentQuery(environment),
-              ],
-            },
+  const [environments, metadataDetails, anomalies, annotations, alerts] = await Promise.all([
+    environment === ENVIRONMENT_ALL.value
+      ? getEnvironments({
+          apmEventClient,
+          start,
+          end,
+          size: 10,
+          serviceName,
+          searchAggregatedTransactions: true,
+        })
+      : Promise.resolve([environment]),
+    getServiceMetadataDetails({
+      apmEventClient,
+      start,
+      end,
+      serviceName,
+      environment,
+    }),
+    getAnomalies({
+      serviceName,
+      start,
+      end,
+      environment,
+      mlClient,
+      logger,
+      transactionType,
+    }),
+    getServiceAnnotations({
+      apmEventClient,
+      start,
+      end,
+      searchAggregatedTransactions: true,
+      client: esClient,
+      annotationsClient,
+      environment,
+      logger,
+      serviceName,
+    }),
+    apmAlertsClient.search({
+      size: 100,
+      track_total_hits: false,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+              ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
+              ...rangeQuery(start, end),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...environmentQuery(environment),
+            ],
           },
         },
-      }),
-    ]);
+      },
+    }),
+  ]);
 
   return {
     'service.name': serviceName,

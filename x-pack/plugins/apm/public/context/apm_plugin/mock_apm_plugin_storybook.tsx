@@ -19,10 +19,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
-import {
-  APMServiceContext,
-  APMServiceContextValue,
-} from '../apm_service/apm_service_context';
+import { APMServiceContext, APMServiceContextValue } from '../apm_service/apm_service_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';

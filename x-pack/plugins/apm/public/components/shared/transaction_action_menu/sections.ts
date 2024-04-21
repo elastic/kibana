@@ -111,19 +111,17 @@ export const getSections = ({
   const podActions: Action[] = [
     {
       key: 'podLogs',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
-        { defaultMessage: 'Pod logs' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showPodLogsLinkLabel', {
+        defaultMessage: 'Pod logs',
+      }),
       href: podLogsHref,
       condition: !!podId,
     },
     {
       key: 'podMetrics',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
-        { defaultMessage: 'Pod metrics' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showPodMetricsLinkLabel', {
+        defaultMessage: 'Pod metrics',
+      }),
       href: getInfraHref({
         app: 'metrics',
         basePath,
@@ -137,19 +135,17 @@ export const getSections = ({
   const containerActions: Action[] = [
     {
       key: 'containerLogs',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
-        { defaultMessage: 'Container logs' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showContainerLogsLinkLabel', {
+        defaultMessage: 'Container logs',
+      }),
       href: containerLogsHref,
       condition: !!containerId,
     },
     {
       key: 'containerMetrics',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
-        { defaultMessage: 'Container metrics' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel', {
+        defaultMessage: 'Container metrics',
+      }),
       href: getInfraHref({
         app: 'metrics',
         basePath,
@@ -163,19 +159,17 @@ export const getSections = ({
   const hostActions: Action[] = [
     {
       key: 'hostLogs',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
-        { defaultMessage: 'Host logs' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showHostLogsLinkLabel', {
+        defaultMessage: 'Host logs',
+      }),
       href: hostLogsHref,
       condition: !!hostName,
     },
     {
       key: 'hostMetrics',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
-        { defaultMessage: 'Host metrics' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showHostMetricsLinkLabel', {
+        defaultMessage: 'Host metrics',
+      }),
       href: getInfraHref({
         app: 'metrics',
         basePath,
@@ -225,10 +219,9 @@ export const getSections = ({
   const logActions: Action[] = [
     {
       key: 'traceLogs',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
-        { defaultMessage: 'Trace logs' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showTraceLogsLinkLabel', {
+        defaultMessage: 'Trace logs',
+      }),
       href: traceLogsHref,
       condition: true,
     },
@@ -248,12 +241,9 @@ export const getSections = ({
   const kibanaActions: Action[] = [
     {
       key: 'sampleDocument',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
-        {
-          defaultMessage: 'View transaction in Discover',
-        }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel', {
+        defaultMessage: 'View transaction in Discover',
+      }),
       href: getDiscoverHref({
         basePath,
         query: getDiscoverQuery(transaction),
@@ -277,10 +267,9 @@ export const getSections = ({
   const serviceMapActions: Action[] = [
     {
       key: 'serviceMap',
-      label: i18n.translate(
-        'xpack.apm.transactionActionMenu.showInServiceMapLinkLabel',
-        { defaultMessage: 'Show in service map' }
-      ),
+      label: i18n.translate('xpack.apm.transactionActionMenu.showInServiceMapLinkLabel', {
+        defaultMessage: 'Show in service map',
+      }),
       href: serviceMapHref,
       condition: true,
     },
@@ -293,30 +282,19 @@ export const getSections = ({
         title: i18n.translate('xpack.apm.transactionActionMenu.pod.title', {
           defaultMessage: 'Pod details',
         }),
-        subtitle: i18n.translate(
-          'xpack.apm.transactionActionMenu.pod.subtitle',
-          {
-            defaultMessage:
-              'View logs and metrics for this pod to get further details.',
-          }
-        ),
+        subtitle: i18n.translate('xpack.apm.transactionActionMenu.pod.subtitle', {
+          defaultMessage: 'View logs and metrics for this pod to get further details.',
+        }),
         actions: podActions,
       },
       {
         key: 'containerDetails',
-        title: i18n.translate(
-          'xpack.apm.transactionActionMenu.container.title',
-          {
-            defaultMessage: 'Container details',
-          }
-        ),
-        subtitle: i18n.translate(
-          'xpack.apm.transactionActionMenu.container.subtitle',
-          {
-            defaultMessage:
-              'View logs and metrics for this container to get further details.',
-          }
-        ),
+        title: i18n.translate('xpack.apm.transactionActionMenu.container.title', {
+          defaultMessage: 'Container details',
+        }),
+        subtitle: i18n.translate('xpack.apm.transactionActionMenu.container.subtitle', {
+          defaultMessage: 'View logs and metrics for this container to get further details.',
+        }),
         actions: containerActions,
       },
       {
@@ -324,13 +302,9 @@ export const getSections = ({
         title: i18n.translate('xpack.apm.transactionActionMenu.host.title', {
           defaultMessage: 'Host details',
         }),
-        subtitle: i18n.translate(
-          'xpack.apm.transactionActionMenu.host.subtitle',
-          {
-            defaultMessage:
-              'View host logs and metrics to get further details.',
-          }
-        ),
+        subtitle: i18n.translate('xpack.apm.transactionActionMenu.host.subtitle', {
+          defaultMessage: 'View host logs and metrics to get further details.',
+        }),
         actions: hostActions,
       },
       {
@@ -338,12 +312,9 @@ export const getSections = ({
         title: i18n.translate('xpack.apm.transactionActionMenu.trace.title', {
           defaultMessage: 'Trace details',
         }),
-        subtitle: i18n.translate(
-          'xpack.apm.transactionActionMenu.trace.subtitle',
-          {
-            defaultMessage: 'View trace logs to get further details.',
-          }
-        ),
+        subtitle: i18n.translate('xpack.apm.transactionActionMenu.trace.subtitle', {
+          defaultMessage: 'View trace logs to get further details.',
+        }),
         actions: logActions,
       },
       {
@@ -351,28 +322,19 @@ export const getSections = ({
         title: i18n.translate('xpack.apm.transactionActionMenu.status.title', {
           defaultMessage: 'Status details',
         }),
-        subtitle: i18n.translate(
-          'xpack.apm.transactionActionMenu.status.subtitle',
-          {
-            defaultMessage: 'View status to get further details.',
-          }
-        ),
+        subtitle: i18n.translate('xpack.apm.transactionActionMenu.status.subtitle', {
+          defaultMessage: 'View status to get further details.',
+        }),
         actions: uptimeActions,
       },
       {
         key: 'serviceMap',
-        title: i18n.translate(
-          'xpack.apm.transactionActionMenu.serviceMap.title',
-          {
-            defaultMessage: 'Service Map',
-          }
-        ),
-        subtitle: i18n.translate(
-          'xpack.apm.transactionActionMenu.serviceMap.subtitle',
-          {
-            defaultMessage: 'View service map filtered by this trace.',
-          }
-        ),
+        title: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.title', {
+          defaultMessage: 'Service Map',
+        }),
+        subtitle: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.subtitle', {
+          defaultMessage: 'View service map filtered by this trace.',
+        }),
         actions: serviceMapActions,
       },
     ],

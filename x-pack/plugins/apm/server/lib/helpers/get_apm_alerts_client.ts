@@ -12,17 +12,10 @@ import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_s
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
 
-export async function getApmAlertsClient({
-  plugins,
-  request,
-}: APMRouteHandlerResources) {
+export async function getApmAlertsClient({ plugins, request }: APMRouteHandlerResources) {
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
-  const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
-    request
-  );
-  const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices([
-    'apm',
-  ]);
+  const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(request);
+  const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(['apm']);
 
   if (!apmAlertsIndices || isEmpty(apmAlertsIndices)) {
     throw Error('No alert indices exist for "apm"');

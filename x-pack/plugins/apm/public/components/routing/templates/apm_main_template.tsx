@@ -77,8 +77,7 @@ export function ApmMainTemplate({
   // create static data view on initial load
   useFetcher(
     (callApmApi) => {
-      const canCreateDataView =
-        application?.capabilities.savedObjectsManagement.edit;
+      const canCreateDataView = application?.capabilities.savedObjectsManagement.edit;
 
       if (canCreateDataView) {
         return callApmApi('POST /internal/apm/data_view/static');
@@ -91,19 +90,17 @@ export function ApmMainTemplate({
     location.pathname.includes(path)
   );
 
-  const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } =
-    useFetcher(
-      (callApmApi) => {
-        if (!data?.hasData && !shouldBypassNoDataScreen) {
-          return callApmApi('GET /internal/apm/fleet/has_apm_policies');
-        }
-      },
-      [shouldBypassNoDataScreen, data?.hasData]
-    );
+  const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } = useFetcher(
+    (callApmApi) => {
+      if (!data?.hasData && !shouldBypassNoDataScreen) {
+        return callApmApi('GET /internal/apm/fleet/has_apm_policies');
+      }
+    },
+    [shouldBypassNoDataScreen, data?.hasData]
+  );
 
   const isLoading =
-    status === FETCH_STATUS.LOADING ||
-    fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
+    status === FETCH_STATUS.LOADING || fleetApmPoliciesStatus === FETCH_STATUS.LOADING;
 
   const hasApmData = !!data?.hasData;
   const hasApmIntegrations = !!fleetApmPoliciesData?.hasApmPolicies;
@@ -121,9 +118,7 @@ export function ApmMainTemplate({
   useEffect(() => {
     return aiAssistant.setScreenContext({
       screenDescription: [
-        hasApmData
-          ? 'The user has APM data.'
-          : 'The user does not have APM data.',
+        hasApmData ? 'The user has APM data.' : 'The user does not have APM data.',
         hasApmIntegrations
           ? 'The user has the APM integration installed. '
           : 'The user does not have the APM integration installed',
@@ -134,9 +129,7 @@ export function ApmMainTemplate({
     });
   }, [hasApmData, hasApmIntegrations, noDataConfig, aiAssistant]);
 
-  const rightSideItems = [
-    ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
-  ];
+  const rightSideItems = [...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : [])];
 
   const sanitizedPath = getPathForFeedback(window.location.pathname);
   const pageHeaderTitle = (
@@ -154,9 +147,7 @@ export function ApmMainTemplate({
               sanitizedPath={sanitizedPath}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {environmentFilter && <ApmEnvironmentFilter />}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{environmentFilter && <ApmEnvironmentFilter />}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -181,9 +172,7 @@ export function ApmMainTemplate({
     </ObservabilityPageTemplate>
   );
 
-  return (
-    <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>
-  );
+  return <EnvironmentsContextProvider>{pageTemplate}</EnvironmentsContextProvider>;
 
   return pageTemplate;
 }

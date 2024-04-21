@@ -48,8 +48,7 @@ export function registerGetApmCorrelationsFunction({
               properties: {
                 label: {
                   type: 'string',
-                  description:
-                    'A unique, human readable label for the comparison set.',
+                  description: 'A unique, human readable label for the comparison set.',
                 },
                 background: {
                   description: 'The background data set',
@@ -88,8 +87,7 @@ export function registerGetApmCorrelationsFunction({
               },
               start: {
                 type: 'string',
-                description:
-                  'The start of the time range, in Elasticsearch date math, like `now`.',
+                description: 'The start of the time range, in Elasticsearch date math, like `now`.',
               },
               end: {
                 type: 'string',

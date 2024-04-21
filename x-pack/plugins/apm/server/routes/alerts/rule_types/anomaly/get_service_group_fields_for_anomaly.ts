@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
@@ -17,10 +14,7 @@ import {
   TRANSACTION_DURATION,
 } from '../../../../../common/es_fields/apm';
 import { alertingEsClient } from '../../alerting_es_client';
-import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+import { getServiceGroupFields, getServiceGroupFieldsAgg } from '../get_service_group_fields';
 
 export async function getServiceGroupFieldsForAnomaly({
   apmIndices,

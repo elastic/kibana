@@ -20,9 +20,7 @@ interface Props {
   percentiles?: Record<string, number | null>;
 }
 
-function generateAnnotationData(
-  values?: Record<string, number | null>
-): LineAnnotationDatum[] {
+function generateAnnotationData(values?: Record<string, number | null>): LineAnnotationDatum[] {
   return Object.entries(values ?? {}).map((value) => ({
     dataValue: value[1],
     details: `${(+value[0]).toFixed(0)}`,
@@ -40,16 +38,8 @@ export function PercentileAnnotations({ percentiles }: Props) {
     },
   };
 
-  function PercentileTooltip({
-    annotation,
-  }: {
-    annotation: LineAnnotationDatum;
-  }) {
-    return (
-      <span data-cy="percentileTooltipTitle">
-        {annotation.details}th Percentile
-      </span>
-    );
+  function PercentileTooltip({ annotation }: { annotation: LineAnnotationDatum }) {
+    return <span data-cy="percentileTooltipTitle">{annotation.details}th Percentile</span>;
   }
 
   return (
@@ -67,9 +57,7 @@ export function PercentileAnnotations({ percentiles }: Props) {
             <span data-cy="percentile-markers">
               <EuiToolTip
                 title={<PercentileTooltip annotation={annotation} />}
-                content={
-                  <span>Pages loaded: {Math.round(annotation.dataValue)}</span>
-                }
+                content={<span>Pages loaded: {Math.round(annotation.dataValue)}</span>}
               >
                 <>{annotation.details}th</>
               </EuiToolTip>

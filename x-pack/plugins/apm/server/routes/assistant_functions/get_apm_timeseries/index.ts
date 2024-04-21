@@ -203,9 +203,7 @@ export async function getApmTimeseries({
     )
   ).flatMap((statResults) =>
     statResults.flatMap((statResult) => {
-      const changePointType = Object.keys(
-        statResult.change_point?.type ?? {}
-      )?.[0];
+      const changePointType = Object.keys(statResult.change_point?.type ?? {})?.[0];
 
       return {
         stat: statResult.stat,
