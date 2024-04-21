@@ -20,6 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const TEST_DS_NAME = 'test-ds-1';
 
   describe('Data Streams', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/181242
+    this.tags(['failsOnMKI']);
     before(async () => {
       log.debug('Creating required data stream');
       try {
