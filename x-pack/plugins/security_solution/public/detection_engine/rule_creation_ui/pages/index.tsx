@@ -12,19 +12,17 @@ import * as i18n from './translations';
 import { HeaderPage } from '../../../common/components/header_page';
 import type { HeaderPageProps } from '../../../common/components/header_page';
 
-const CustomHeaderPage: React.FC<
-  HeaderPageProps & {
-    togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
-    isRulePreviewVisible: boolean;
-    setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
-  }
-> = ({
+const CustomHeaderPage = ({
   backOptions,
   isLoading,
   title,
   togglePanel,
   isRulePreviewVisible,
   setIsRulePreviewVisible,
+}: HeaderPageProps & {
+  togglePanel: EuiResizableContainerActions['togglePanel'] | undefined;
+  isRulePreviewVisible: boolean;
+  setIsRulePreviewVisible: (value: React.SetStateAction<boolean>) => void;
 }) => (
   <HeaderPage backOptions={backOptions} isLoading={isLoading} title={title}>
     <EuiButton

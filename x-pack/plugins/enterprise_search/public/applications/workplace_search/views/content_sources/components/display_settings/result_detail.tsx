@@ -33,7 +33,7 @@ import { VISIBLE_FIELDS_TITLE, EMPTY_FIELDS_DESCRIPTION, PREVIEW_TITLE } from '.
 import { DisplaySettingsLogic } from './display_settings_logic';
 import { ExampleResultDetailCard } from './example_result_detail_card';
 
-export const ResultDetail: React.FC = () => {
+export const ResultDetail = () => {
   const { toggleFieldEditorModal, setDetailFields, openEditDetailField, removeDetailField } =
     useActions(DisplaySettingsLogic);
 

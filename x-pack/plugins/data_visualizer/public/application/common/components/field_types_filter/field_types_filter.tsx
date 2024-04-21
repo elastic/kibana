@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -25,11 +24,11 @@ interface Props {
   visibleFieldTypes: string[];
 }
 
-export const DataVisualizerFieldTypesFilter: FC<Props> = ({
+export const DataVisualizerFieldTypesFilter = ({
   fields,
   setVisibleFieldTypes,
   visibleFieldTypes,
-}) => {
+}: Props) => {
   const fieldNameTitle = useMemo(
     () =>
       i18n.translate('xpack.dataVisualizer.fieldTypeSelect', {

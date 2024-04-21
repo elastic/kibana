@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Field, FIELD_TYPES, UseField, FieldConfig } from '../../../../../../../shared_imports';
@@ -33,7 +33,7 @@ type Props = Partial<FieldConfig>;
 
 export const TARGET_FIELD_PATH = 'fields.target_field';
 
-export const TargetField: FunctionComponent<Props> = (props) => {
+export const TargetField = (props: Props) => {
   return (
     <UseField
       config={{

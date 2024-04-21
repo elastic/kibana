@@ -37,7 +37,7 @@ interface ThreatMatchInputProps {
   onValidityChange?: (isValid: boolean) => void;
 }
 
-const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
+const ThreatMatchInputComponent = ({
   threatIndexModified,
   handleResetThreatIndices,
   threatMapping,

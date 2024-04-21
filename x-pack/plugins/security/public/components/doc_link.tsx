@@ -6,7 +6,6 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 
 import type { DocLinksStart } from '@kbn/core/public';
@@ -51,9 +50,10 @@ export function useDocLinks(): [DocLinks, GetDocLinkFunction] {
 export interface DocLinkProps {
   app: string;
   doc: string;
+  children: React.ReactNode;
 }
 
-export const DocLink: FunctionComponent<DocLinkProps> = ({ app, doc, children }) => {
+export const DocLink = ({ app, doc, children }: DocLinkProps) => {
   const [, getDocLink] = useDocLinks();
   return (
     <EuiLink href={getDocLink(app, doc)} target="_blank" external>

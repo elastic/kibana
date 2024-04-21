@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
 
-export const ResolvedAt: React.FC = () => {
+export const ResolvedAt = () => {
   const { killerState } = useFindMyKillerState();
 
   const formatter = useDateFormat();

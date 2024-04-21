@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -83,7 +82,7 @@ const tooltipContent = {
   ),
 };
 
-export const EvaluateStat: FC<Props> = ({ isLoading, statType, title, dataTestSubj }) => (
+export const EvaluateStat = ({ isLoading, statType, title, dataTestSubj }: Props) => (
   <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
     <EuiFlexItem grow={false}>
       <EuiStat

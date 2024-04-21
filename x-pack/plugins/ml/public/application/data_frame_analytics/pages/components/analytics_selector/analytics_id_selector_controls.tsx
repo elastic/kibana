@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -22,10 +21,10 @@ interface Props {
   selectedId?: string;
 }
 
-export const AnalyticsIdSelectorControls: FC<Props> = ({
+export const AnalyticsIdSelectorControls = ({
   setIsIdSelectorFlyoutVisible,
   selectedId,
-}) => (
+}: Props) => (
   <>
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>

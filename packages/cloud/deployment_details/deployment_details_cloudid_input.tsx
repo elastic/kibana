@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, type FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-const LearnMoreLink: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => (
+const LearnMoreLink = ({ learnMoreUrl }: { learnMoreUrl: string }) => (
   <EuiLink href={learnMoreUrl}>
     {i18n.translate('cloud.deploymentDetails.cloudIDLabelToolip.learnMoreLink', {
       defaultMessage: 'Learn more',
@@ -28,7 +28,7 @@ const LearnMoreLink: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => (
   </EuiLink>
 );
 
-const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
+const Label = ({ learnMoreUrl }: { learnMoreUrl: string }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -69,9 +69,12 @@ const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
   );
 };
 
-export const DeploymentDetailsCloudIdInput: FC<{ cloudId: string; learnMoreUrl: string }> = ({
+export const DeploymentDetailsCloudIdInput = ({
   cloudId,
   learnMoreUrl,
+}: {
+  cloudId: string;
+  learnMoreUrl: string;
 }) => {
   return (
     <EuiFormRow label={<Label learnMoreUrl={learnMoreUrl} />} fullWidth>

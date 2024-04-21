@@ -15,8 +15,8 @@ export interface StreamingTextProps {
   onStreamingComplete?: () => void;
 }
 
-export const StreamingText: React.FC<StreamingTextProps> = React.memo<StreamingTextProps>(
-  ({ text, children, chunkSize = 5, delay = 100, onStreamingComplete }) => {
+export const StreamingText = React.memo<StreamingTextProps>(
+  ({ text, children, chunkSize = 5, delay = 100, onStreamingComplete }: StreamingTextProps) => {
     const [displayText, setDisplayText] = useState<string>(delay > 0 ? '' : text);
     const [isStreamingComplete, setIsStreamingComplete] = useState<boolean>(
       delay == null || delay === 0

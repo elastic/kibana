@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,9 +101,10 @@ interface ExplorerPageProps {
   queryString?: string;
   updateLanguage?: (language: string) => void;
   dataViews?: DataView[];
+  children: React.ReactNode;
 }
 
-const ExplorerPage: FC<ExplorerPageProps> = ({
+const ExplorerPage = ({
   children,
   jobSelectorProps,
   noInfluencersConfigured,
@@ -115,7 +115,7 @@ const ExplorerPage: FC<ExplorerPageProps> = ({
   dataViews,
   queryString,
   updateLanguage,
-}) => (
+}: ExplorerPageProps) => (
   <>
     <EuiPageHeader>
       <EuiPageHeaderSection style={{ width: '100%' }}>
@@ -170,7 +170,7 @@ export function getDefaultPanelsState() {
   };
 }
 
-export const Explorer: FC<ExplorerUIProps> = ({
+export const Explorer = ({
   invalidTimeRangeError,
   showCharts,
   severity,
@@ -182,7 +182,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   swimLaneSeverity,
   explorerState,
   overallSwimlaneData,
-}) => {
+}: ExplorerUIProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const [anomalyExplorerPanelState, setAnomalyExplorerPanelState] = useStorage(

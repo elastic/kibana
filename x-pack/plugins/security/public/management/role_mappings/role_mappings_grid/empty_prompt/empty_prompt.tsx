@@ -18,10 +18,7 @@ interface EmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
-  history,
-  readOnly = false,
-}) => (
+export const EmptyPrompt = ({ history, readOnly = false }: EmptyPromptProps) => (
   <KibanaPageTemplate.EmptyPrompt
     iconType="managementApp"
     title={

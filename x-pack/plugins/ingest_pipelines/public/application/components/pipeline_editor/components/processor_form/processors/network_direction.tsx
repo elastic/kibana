@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -185,7 +185,7 @@ const getInternalNetworkConfig: (toggleCustom: () => void) => Record<
   },
 });
 
-export const NetworkDirection: FunctionComponent = () => {
+export const NetworkDirection = () => {
   const { getFieldDefaultValue } = useFormContext();
   const isInternalNetowrksFieldDefined =
     getFieldDefaultValue('fields.internal_networks_field') !== undefined;

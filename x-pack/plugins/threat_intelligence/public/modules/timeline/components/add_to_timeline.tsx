@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, VFC } from 'react';
+import React, { useRef } from 'react';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import {
@@ -55,11 +55,11 @@ export interface AddToTimelineCellActionProps extends AddToTimelineProps {
  *
  * @returns add to timeline button or an empty component
  */
-export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
+export const AddToTimelineButtonIcon = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
-}) => {
+}: AddToTimelineProps) => {
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
@@ -85,11 +85,11 @@ export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
  *
  * @returns add to timeline button or an empty component
  */
-export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
+export const AddToTimelineButtonEmpty = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
-}) => {
+}: AddToTimelineProps) => {
   const styles = useStyles();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -144,11 +144,11 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
  *
  * @returns add to timeline {@link EuiContextMenuItem} for a context menu
  */
-export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
+export const AddToTimelineContextMenu = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
-}) => {
+}: AddToTimelineProps) => {
   const styles = useStyles();
 
   const contextMenuRef = useRef<HTMLButtonElement>(null);
@@ -200,12 +200,12 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
  *
  * @returns add to timeline button or an empty component
  */
-export const AddToTimelineCellAction: VFC<AddToTimelineCellActionProps> = ({
+export const AddToTimelineCellAction = ({
   data,
   field,
   Component,
   'data-test-subj': dataTestSubj,
-}) => {
+}: AddToTimelineCellActionProps) => {
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 

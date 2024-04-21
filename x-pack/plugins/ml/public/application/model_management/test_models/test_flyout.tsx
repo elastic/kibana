@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +17,7 @@ interface Props {
   model: ModelItem;
   onClose: () => void;
 }
-export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => (
+export const TestTrainedModelFlyout = ({ model, onClose }: Props) => (
   <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -32,12 +32,12 @@ import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
 import { EditTransformUpdateButton } from './edit_transform_update_button';
 
-export const EditTransformFlyout: FC<EditAction> = ({
+export const EditTransformFlyout = ({
   closeFlyout,
   config,
   dataViewId,
   isFlyoutVisible,
-}) =>
+}: EditAction) =>
   config && isFlyoutVisible ? (
     <EditTransformFlyoutProvider config={config} dataViewId={dataViewId}>
       <EuiFlyout

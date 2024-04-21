@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
@@ -23,7 +23,7 @@ import {
   languageForContentType,
 } from '../utilities';
 
-export const MonacoEditorOutput: FunctionComponent = () => {
+export const MonacoEditorOutput = () => {
   const { settings: readOnlySettings } = useEditorReadContext();
   const {
     lastResult: { data },

@@ -15,9 +15,12 @@ const HelpTextWarningContainer = styled.div`
   margin-top: 10px;
 `;
 
-const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> = ({
+const HelpTextComponent = ({
   href,
   notRunningJobIds,
+}: {
+  href: string;
+  notRunningJobIds: string[];
 }) => (
   <>
     <FormattedMessage

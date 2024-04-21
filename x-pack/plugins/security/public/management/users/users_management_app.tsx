@@ -6,7 +6,6 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect } from 'react-router-dom';
@@ -135,15 +134,10 @@ export interface ProvidersProps {
   history: History;
   authc: AuthenticationServiceSetup;
   onChange?: BreadcrumbsChangeHandler;
+  children: React.ReactNode;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
-  services,
-  history,
-  authc,
-  onChange,
-  children,
-}) => (
+export const Providers = ({ services, history, authc, onChange, children }: ProvidersProps) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <AuthenticationProvider authc={authc}>

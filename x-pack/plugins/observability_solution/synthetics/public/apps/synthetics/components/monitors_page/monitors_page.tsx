@@ -25,7 +25,7 @@ import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
 
-const MonitorManagementPage: React.FC = () => {
+const MonitorManagementPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
   useTrackPageview({ app: 'synthetics', path: 'monitors', delay: 15000 });
 

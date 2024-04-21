@@ -18,7 +18,7 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 
 import GettingStarted from './assets/getting_started.png';
 
-export const SetupGuide: React.FC = () => (
+export const SetupGuide = () => (
   <SetupGuideLayout
     productName={ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME}
     productEuiIcon="logoEnterpriseSearch"

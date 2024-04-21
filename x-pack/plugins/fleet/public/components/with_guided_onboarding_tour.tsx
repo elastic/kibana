@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { FunctionComponent, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -67,14 +67,21 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
 
   return null;
 };
-export const WithGuidedOnboardingTour: FunctionComponent<{
+export const WithGuidedOnboardingTour = ({
+  packageKey,
+  isTourVisible,
+  tourType,
+  children,
+  tourPosition,
+  tourOffset,
+}: {
   packageKey: string;
   isTourVisible: boolean;
   tourType: TourType;
   tourPosition?: EuiTourStepProps['anchorPosition'];
   children: ReactElement;
   tourOffset?: EuiTourStepProps['offset'];
-}> = ({ packageKey, isTourVisible, tourType, children, tourPosition, tourOffset }) => {
+}) => {
   const [isGuidedOnboardingTourOpen, setIsGuidedOnboardingTourOpen] =
     useState<boolean>(isTourVisible);
   useEffect(() => {

@@ -20,7 +20,7 @@ import { VectorSearchGuide } from './components/vector_search_guide/vector_searc
 
 import { ROOT_PATH } from './routes';
 
-export const EnterpriseSearchVectorSearch: React.FC<InitialAppData> = (props) => {
+export const EnterpriseSearchVectorSearch = (props: InitialAppData) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 

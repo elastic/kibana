@@ -62,7 +62,7 @@ export interface SearchAndFilterBarProps {
   latestAgentActionErrors: number;
 }
 
-export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
+export const SearchAndFilterBar = ({
   agentPolicies,
   draftKuery,
   onDraftKueryChange,
@@ -89,7 +89,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   showAgentActivityTour,
   latestAgentActionErrors,
-}) => {
+}: SearchAndFilterBarProps) => {
   const authz = useAuthz();
 
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =

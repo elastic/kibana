@@ -27,7 +27,7 @@ export const SyntheticsCheckStepsPageRightSideItem = () => {
   return <ChecksNavigation timestamp={details.timestamp} details={details} />;
 };
 
-export const SyntheticsCheckSteps: React.FC = () => {
+export const SyntheticsCheckSteps = () => {
   useInitApp();
   useTrackPageview({ app: 'uptime', path: 'syntheticCheckSteps' });
   useTrackPageview({ app: 'uptime', path: 'syntheticCheckSteps', delay: 15000 });

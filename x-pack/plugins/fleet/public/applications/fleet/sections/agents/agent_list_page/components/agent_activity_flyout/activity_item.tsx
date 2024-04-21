@@ -31,11 +31,15 @@ import {
 } from './helpers';
 import { ViewAgentsButton } from './view_agents_button';
 
-export const ActivityItem: React.FunctionComponent<{
+export const ActivityItem = ({
+  action,
+  onClickViewAgents,
+  agentPolicies,
+}: {
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
   agentPolicies: AgentPolicy[];
-}> = ({ action, onClickViewAgents, agentPolicies }) => {
+}) => {
   const completeTitle =
     action.type === 'POLICY_CHANGE' && action.nbAgentsActioned === 0 ? (
       <EuiText>

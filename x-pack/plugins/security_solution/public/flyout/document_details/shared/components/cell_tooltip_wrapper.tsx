@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC, ReactElement } from 'react';
+import type {  ReactElement } from 'react';
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
@@ -24,11 +24,11 @@ export interface CellTooltipWrapperProps {
   children: React.ReactElement;
 }
 
-export const CellTooltipWrapper: VFC<CellTooltipWrapperProps> = ({
+export const CellTooltipWrapper = ({
   tooltip,
   anchorPosition = 'top',
   children,
-}) => (
+}: CellTooltipWrapperProps) => (
   <EuiToolTip content={tooltip} position={anchorPosition}>
     {children}
   </EuiToolTip>

@@ -49,8 +49,8 @@ export interface HeaderProps {
   'data-test-subj'?: string;
 }
 
-const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
-  ({ leftColumn, rightColumn, rightColumnGrow }) => (
+const HeaderColumns = memo(
+  ({ leftColumn, rightColumn, rightColumnGrow }: Omit<HeaderProps, 'tabs'>) => (
     <EuiFlexGroup alignItems="center">
       {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
       {rightColumn ? <EuiFlexItem grow={rightColumnGrow}>{rightColumn}</EuiFlexItem> : null}
@@ -58,7 +58,7 @@ const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
   )
 );
 
-export const Header: React.FC<HeaderProps> = ({
+export const Header = ({
   leftColumn,
   rightColumn,
   rightColumnGrow,
@@ -67,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
   maxWidth,
   tabsClassName,
   'data-test-subj': dataTestSubj,
-}) => (
+}: HeaderProps) => (
   <Container data-test-subj={dataTestSubj}>
     <Wrapper maxWidth={maxWidth}>
       {topContent}

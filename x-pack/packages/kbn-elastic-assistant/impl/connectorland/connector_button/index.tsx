@@ -20,8 +20,8 @@ export interface ConnectorButtonProps {
  * Simple button component for adding a connector. Note: component is basic and does not handle connector
  * add logic. See ConnectorSetup component if wanting to manage connector add logic.
  */
-export const ConnectorButton: React.FC<ConnectorButtonProps> = React.memo<ConnectorButtonProps>(
-  ({ setIsConnectorModalVisible }) => {
+export const ConnectorButton = React.memo<ConnectorButtonProps>(
+  ({ setIsConnectorModalVisible }: ConnectorButtonProps) => {
     const { assistantAvailability } = useAssistantContext();
 
     const title = assistantAvailability.hasConnectorsAllPrivilege

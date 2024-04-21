@@ -7,7 +7,7 @@
  */
 
 import { ComponentMeta } from '@storybook/react';
-import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
+import React, { EventHandler, MouseEvent, useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
 import {
@@ -36,7 +36,7 @@ interface Props {
   children?: React.ReactNode | (({ isCollapsed }: { isCollapsed: boolean }) => React.ReactNode);
 }
 
-const NavigationWrapper: FC<Props & Partial<EuiCollapsibleNavBetaProps>> = (props) => {
+const NavigationWrapper = (props: Props & Partial<EuiCollapsibleNavBetaProps>) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const onCollapseToggle = (nextIsCollapsed: boolean) => {

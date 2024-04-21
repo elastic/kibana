@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiToolTip } from '@elastic/eui';
@@ -15,7 +14,7 @@ interface Props {
   showTooltip: boolean;
 }
 
-export const CreateDataViewToolTip: FC<Props> = ({ children, showTooltip }) => {
+export const CreateDataViewToolTip = ({ children, showTooltip }: Props) => {
   return (
     <EuiToolTip
       position="top"

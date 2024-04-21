@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, FC } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiPopover,
   EuiFlexItem,
@@ -44,12 +44,12 @@ const actionToMenuItem = (
   };
 };
 
-export const ActionBar: FC<ActionBarProps> = ({
+export const ActionBar = ({
   actions,
   onActionSelected,
   selectedCount,
   totalCount,
-}) => {
+}: ActionBarProps) => {
   const [isPopoverOpened, setPopOverOpened] = useState(false);
 
   const closePopover = useCallback(() => {

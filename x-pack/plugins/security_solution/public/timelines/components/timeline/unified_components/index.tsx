@@ -116,7 +116,7 @@ interface Props {
   dataView: DataView;
 }
 
-const UnifiedTimelineComponent: React.FC<Props> = ({
+const UnifiedTimelineComponent = ({
   columns,
   activeTab,
   timelineId,
@@ -135,7 +135,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   updatedAt,
   isTextBasedQuery,
   dataView,
-}) => {
+}: Props) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
 

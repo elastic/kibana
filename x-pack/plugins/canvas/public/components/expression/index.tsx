@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter';
 import { useExpressionsService } from '../../services';
@@ -31,7 +31,7 @@ export interface FormState {
   expression: string;
 }
 
-export const Expression: FC<ExpressionProps> = ({ done }) => {
+export const Expression = ({ done }: ExpressionProps) => {
   const { element, pageId } = useSelector((state: State) => ({
     pageId: getSelectedPage(state),
     element: getSelectedElement(state),
@@ -44,7 +44,7 @@ export const Expression: FC<ExpressionProps> = ({ done }) => {
   return <ExpressionContainer key={element.id} done={done} element={element} pageId={pageId} />;
 };
 
-const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, pageId }) => {
+const ExpressionContainer = ({ done, element, pageId }: ExpressionContainerProps) => {
   const expressions = useExpressionsService();
   const dispatch = useDispatch();
   const [isCompact, setCompact] = useState<boolean>(true);

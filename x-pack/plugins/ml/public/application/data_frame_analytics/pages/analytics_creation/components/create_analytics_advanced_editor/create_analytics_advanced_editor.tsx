@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef } from 'react';
 import { debounce } from 'lodash';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
@@ -20,7 +19,7 @@ import type { CreateAnalyticsFormProps } from '../../../analytics_management/hoo
 import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
+export const CreateAnalyticsAdvancedEditor = (props: CreateAnalyticsFormProps) => {
   const { actions, state } = props;
   const { setAdvancedEditorRawString, setFormState } = actions;
 

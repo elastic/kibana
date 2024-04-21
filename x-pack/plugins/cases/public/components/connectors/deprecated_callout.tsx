@@ -28,7 +28,7 @@ interface Props {
   type?: EuiCallOutProps['color'];
 }
 
-const DeprecatedCalloutComponent: React.FC<Props> = ({ type = 'warning' }) => (
+const DeprecatedCalloutComponent = ({ type = 'warning' }: Props) => (
   <EuiCallOut
     title={DEPRECATED_CONNECTOR_WARNING_TITLE}
     color={type}

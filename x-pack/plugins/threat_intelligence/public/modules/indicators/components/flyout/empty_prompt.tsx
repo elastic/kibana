@@ -7,11 +7,11 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { VFC } from 'react';
+import React from 'react';
 
 export const EMPTY_PROMPT_TEST_ID = 'indicatorEmptyPrompt';
 
-export const IndicatorEmptyPrompt: VFC = () => (
+export const IndicatorEmptyPrompt= () => (
   <EuiEmptyPrompt
     iconType="warning"
     color="danger"

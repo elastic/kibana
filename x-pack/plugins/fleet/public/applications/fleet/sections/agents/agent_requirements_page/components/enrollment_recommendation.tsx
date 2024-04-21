@@ -19,9 +19,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFlyoutContext, useStartServices } from '../../../../hooks';
 
-export const EnrollmentRecommendation: React.FunctionComponent<{
+export const EnrollmentRecommendation = ({
+  showStandaloneTab,
+}: {
   showStandaloneTab: () => void;
-}> = ({ showStandaloneTab }) => {
+}) => {
   const flyoutContext = useFlyoutContext();
 
   const { docLinks } = useStartServices();

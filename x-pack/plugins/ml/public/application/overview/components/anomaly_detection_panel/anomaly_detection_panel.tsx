@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -53,7 +52,7 @@ interface Props {
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLazyJobCount }) => {
+export const AnomalyDetectionPanel = ({ anomalyTimelineService, setLazyJobCount }: Props) => {
   const {
     services: { charts: chartsService },
   } = useMlKibana();

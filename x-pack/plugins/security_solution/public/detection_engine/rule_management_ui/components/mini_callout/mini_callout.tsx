@@ -39,7 +39,7 @@ export interface MiniCalloutProps {
  *
  * @constructor
  */
-const MiniCalloutComponent: React.FC<MiniCalloutProps> = ({
+const MiniCalloutComponent = ({
   color = 'primary',
   dismissible = true,
   iconType,

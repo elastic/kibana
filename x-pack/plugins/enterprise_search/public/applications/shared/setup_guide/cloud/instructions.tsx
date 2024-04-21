@@ -20,7 +20,7 @@ interface Props {
   productName: string;
 }
 
-export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDeploymentLink }) => (
+export const CloudSetupInstructions = ({ productName, cloudDeploymentLink }: Props) => (
   <EuiPageSection>
     <EuiSteps
       headingElement="h2"

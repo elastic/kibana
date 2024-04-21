@@ -22,7 +22,7 @@ interface Props {
   selectedActionType: ActionType | null;
   actionTypeSelectorInline?: boolean;
 }
-export const AddConnectorModal: React.FC<Props> = React.memo(
+export const AddConnectorModal = React.memo(
   ({
     actionTypeRegistry,
     actionTypes,
@@ -31,7 +31,7 @@ export const AddConnectorModal: React.FC<Props> = React.memo(
     onSelectActionType,
     selectedActionType,
     actionTypeSelectorInline = false,
-  }) => (
+  }: Props) => (
     <>
       <ActionTypeSelectorModal
         actionTypes={actionTypes}

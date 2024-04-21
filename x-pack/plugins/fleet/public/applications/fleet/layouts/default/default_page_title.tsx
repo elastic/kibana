@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 
-export const DefaultPageTitle: FunctionComponent = () => {
+export const DefaultPageTitle = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>

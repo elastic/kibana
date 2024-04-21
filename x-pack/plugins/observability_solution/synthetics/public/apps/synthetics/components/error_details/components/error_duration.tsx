@@ -12,7 +12,7 @@ import moment, { Moment } from 'moment';
 import { useErrorFailedTests } from '../hooks/use_error_failed_tests';
 import { useFindMyKillerState } from '../hooks/use_find_my_killer_state';
 
-export const ErrorDuration: React.FC = () => {
+export const ErrorDuration = () => {
   const { failedTests } = useErrorFailedTests();
 
   const state = failedTests?.[0]?.state;

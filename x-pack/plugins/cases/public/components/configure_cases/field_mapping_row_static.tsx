@@ -22,12 +22,12 @@ export interface RowProps {
   selectedThirdParty: ConnectorMappingTarget;
 }
 
-const FieldMappingRowComponent: React.FC<RowProps> = ({
+const FieldMappingRowComponent = ({
   isLoading,
   casesField,
   selectedActionType,
   selectedThirdParty,
-}) => {
+}: RowProps) => {
   const selectedActionTypeCapitalized = useMemo(
     () => capitalize(selectedActionType),
     [selectedActionType]

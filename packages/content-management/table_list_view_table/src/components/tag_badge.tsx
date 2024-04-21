@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +22,7 @@ export interface Props {
 /**
  * The badge representation of a Tag, which is the default display to be used for them.
  */
-export const TagBadge: FC<Props> = ({ tag, onClick }) => {
+export const TagBadge = ({ tag, onClick }: Props) => {
   return (
     <EuiBadge
       color={tag.color}

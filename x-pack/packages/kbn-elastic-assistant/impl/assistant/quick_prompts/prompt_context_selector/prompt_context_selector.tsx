@@ -23,8 +23,13 @@ export type PromptContextSelectorOption = EuiComboBoxOptionOption<{ category: st
 /**
  * Selector for choosing multiple Prompt Context Categories
  */
-export const PromptContextSelector: React.FC<Props> = React.memo(
-  ({ isDisabled, onPromptContextSelectionChange, promptContexts, selectedPromptContexts = [] }) => {
+export const PromptContextSelector = React.memo(
+  ({
+    isDisabled,
+    onPromptContextSelectionChange,
+    promptContexts,
+    selectedPromptContexts = [],
+  }: Props) => {
     // ComboBox options
     const options = useMemo<PromptContextSelectorOption[]>(
       () =>

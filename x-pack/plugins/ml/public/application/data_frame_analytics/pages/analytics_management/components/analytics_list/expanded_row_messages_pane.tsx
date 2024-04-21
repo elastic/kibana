@@ -7,7 +7,6 @@
 
 import './expanded_row_messages_pane.scss';
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
@@ -21,7 +20,7 @@ interface Props {
   dataTestSubj: string;
 }
 
-export const ExpandedRowMessagesPane: FC<Props> = ({ analyticsId, dataTestSubj }) => {
+export const ExpandedRowMessagesPane = ({ analyticsId, dataTestSubj }: Props) => {
   const [messages, setMessages] = useState<JobMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');

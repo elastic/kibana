@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
-export const IgnoreUnavailableSwitch: FC = () => {
+export const IgnoreUnavailableSwitch = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [ignoreUnavailable, setIgnoreUnavailable] = useState(jobCreator.ignoreUnavailable);
 

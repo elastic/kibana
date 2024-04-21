@@ -14,7 +14,7 @@ import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useKibana } from '../common/lib/kibana';
 
-export const AssistantOverlay: React.FC = () => {
+export const AssistantOverlay = () => {
   const { services } = useKibana();
 
   const { data: currentUserAvatar } = useQuery({

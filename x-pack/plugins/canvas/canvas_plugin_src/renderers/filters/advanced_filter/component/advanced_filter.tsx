@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +31,7 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange, commit }) => (
+export const AdvancedFilter = ({ value = '', onChange, commit }: Props) => (
   <form
     onSubmit={(e) => {
       e.preventDefault();

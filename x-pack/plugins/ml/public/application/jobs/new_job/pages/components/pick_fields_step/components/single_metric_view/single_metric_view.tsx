@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
@@ -18,7 +17,7 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const SingleMetricView: FC<Props> = ({ isActive, setCanProceed }) => {
+export const SingleMetricView = ({ isActive, setCanProceed }: Props) => {
   const [metricsValid, setMetricValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 

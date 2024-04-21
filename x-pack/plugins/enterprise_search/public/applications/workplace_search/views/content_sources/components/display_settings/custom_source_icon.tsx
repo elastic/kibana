@@ -13,7 +13,7 @@ interface CustomSourceIconProps {
   color?: string;
 }
 
-export const CustomSourceIcon: React.FC<CustomSourceIconProps> = ({ color = BLACK_RGB }) => (
+export const CustomSourceIcon = ({ color = BLACK_RGB }: CustomSourceIconProps) => (
   <svg
     className="euiIcon euiIcon--medium"
     width="52"

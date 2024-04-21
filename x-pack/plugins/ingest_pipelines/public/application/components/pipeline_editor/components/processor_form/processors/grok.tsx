@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -114,7 +114,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Grok: FunctionComponent = () => {
+export const Grok = () => {
   return (
     <>
       <FieldNameField

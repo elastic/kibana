@@ -32,12 +32,12 @@ export interface FieldNumberSummaryProps {
   'data-test-subj': string;
 }
 
-export const FieldNumberSummary: React.FC<FieldNumberSummaryProps> = ({
+export const FieldNumberSummary = ({
   dataView,
   field,
   numberSummary,
   'data-test-subj': dataTestSubject,
-}) => {
+}: FieldNumberSummaryProps) => {
   if (!numberSummary || !isNumberSummaryValid(numberSummary)) {
     return null;
   }

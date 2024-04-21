@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -18,7 +17,7 @@ interface Props {
   jobId: string;
 }
 
-export const ClassificationExploration: FC<Props> = ({ jobId }) => (
+export const ClassificationExploration = ({ jobId }: Props) => (
   <div className="mlDataFrameAnalyticsClassification">
     <ExplorationPageWrapper
       jobId={jobId}

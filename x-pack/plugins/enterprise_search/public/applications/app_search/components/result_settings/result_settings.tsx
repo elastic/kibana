@@ -36,7 +36,7 @@ const UNSAVED_MESSAGE = i18n.translate(
   { defaultMessage: 'Result Settings have not been saved. Are you sure you want to leave?' }
 );
 
-export const ResultSettings: React.FC = () => {
+export const ResultSettings = () => {
   const { dataLoading, schema, stagedUpdates, resultFieldsAtDefaultSettings, resultFieldsEmpty } =
     useValues(ResultSettingsLogic);
   const {

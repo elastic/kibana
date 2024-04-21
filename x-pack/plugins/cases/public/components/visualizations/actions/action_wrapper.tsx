@@ -24,11 +24,11 @@ interface Props {
   currentAppId?: string;
 }
 
-const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
+const ActionWrapperWithContext = ({
   children,
   caseContextProps,
   currentAppId,
-}) => {
+}: PropsWithChildren<Props>) => {
   const { application, i18n, theme } = useKibana().services;
 
   const owner = getCaseOwnerByAppId(currentAppId);
@@ -58,7 +58,7 @@ type ActionWrapperComponentProps = PropsWithChildren<
   CasesUIActionProps & { currentAppId?: string }
 >;
 
-const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
+const ActionWrapperComponent = ({
   core,
   plugins,
   storage,
@@ -66,7 +66,7 @@ const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
   children,
   caseContextProps,
   currentAppId,
-}) => {
+}: ActionWrapperComponentProps) => {
   return (
     <KibanaContextProvider
       services={{

@@ -45,7 +45,7 @@ export interface Props {
   type: string;
 }
 
-export const NewConnectorTemplate: React.FC<Props> = ({
+export const NewConnectorTemplate = ({
   buttonLoading,
   disabled,
   error,
@@ -53,7 +53,7 @@ export const NewConnectorTemplate: React.FC<Props> = ({
   onSubmit,
   type,
   isBeta,
-}) => {
+}: Props) => {
   const { fullIndexName, fullIndexNameExists, fullIndexNameIsValid, rawName } =
     useValues(NewConnectorLogic);
   const { setRawName } = useActions(NewConnectorLogic);

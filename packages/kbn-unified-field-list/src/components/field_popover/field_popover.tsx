@@ -15,13 +15,13 @@ export interface FieldPopoverProps extends EuiPopoverProps {
   renderContent?: () => React.ReactNode;
 }
 
-export const FieldPopover: React.FC<FieldPopoverProps> = ({
+export const FieldPopover = ({
   isOpen,
   closePopover,
   renderHeader,
   renderContent,
   ...otherPopoverProps
-}) => {
+}: FieldPopoverProps) => {
   let header = null;
   let content = null;
 

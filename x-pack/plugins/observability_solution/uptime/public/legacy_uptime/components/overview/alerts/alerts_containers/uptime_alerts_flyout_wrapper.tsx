@@ -11,7 +11,7 @@ import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { UptimeAlertsFlyoutWrapperComponent } from '../uptime_alerts_flyout_wrapper';
 import { selectAlertFlyoutVisibility, selectAlertFlyoutType } from '../../../../state/selectors';
 
-export const UptimeAlertsFlyoutWrapper: React.FC = () => {
+export const UptimeAlertsFlyoutWrapper = () => {
   const dispatch = useDispatch();
   const setAddFlyoutVisibility = (value: boolean) => dispatch(setAlertFlyoutVisible(value));
 

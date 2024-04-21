@@ -65,7 +65,7 @@ export type UserRiskScoreColumns = [
   Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
 ];
 
-const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
+const UserRiskScoreTableComponent = ({
   data,
   id,
   isInspect,
@@ -75,7 +75,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   severityCount,
   totalCount,
   type,
-}) => {
+}: UserRiskScoreTableProps) => {
   const dispatch = useDispatch();
 
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);

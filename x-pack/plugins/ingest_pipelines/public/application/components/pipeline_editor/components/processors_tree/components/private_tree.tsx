@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MutableRefObject, useEffect, useMemo } from 'react';
+import React, { MutableRefObject, useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import List from 'react-virtualized/dist/commonjs/List';
@@ -59,7 +59,7 @@ const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
  * enables users to click outside of the tree and cancel moving a
  * processor.
  */
-export const PrivateTree: FunctionComponent<PrivateProps> = ({
+export const PrivateTree = ({
   processors,
   selector,
   movingProcessor,
@@ -67,7 +67,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   level,
   windowScrollerRef,
   listRef,
-}) => {
+}: PrivateProps) => {
   const selectors: string[][] = useMemo(() => {
     return processors.map((_, idx) => selector.concat(String(idx)));
   }, [processors, selector]);

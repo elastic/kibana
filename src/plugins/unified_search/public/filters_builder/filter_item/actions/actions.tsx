@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -19,7 +19,7 @@ import { strings } from './action_strings';
 import { FilterItemActionsProps } from './types';
 import { actionButtonCss } from '../filter_item.styles';
 
-export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?: boolean }> = ({
+export const FilterItemActions = ({
   disabled = false,
   disableRemove = false,
   hideOr = false,
@@ -30,6 +30,8 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
   onRemoveFilter,
   onOrButtonClick,
   onAddButtonClick,
+}: FilterItemActionsProps & {
+  minimizePaddings?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const actionButtonClassName = actionButtonCss(euiTheme);

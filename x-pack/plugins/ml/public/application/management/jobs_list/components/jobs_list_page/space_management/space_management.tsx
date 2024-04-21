@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,7 +36,7 @@ interface Props {
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 
-export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
+export const SpaceManagement = ({ spacesApi, setCurrentTab }: Props) => {
   const { getList } = useManagementApiService();
 
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType | null>(null);
@@ -240,9 +239,12 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   );
 };
 
-export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boolean }> = ({
+export const RefreshButton = ({
   onRefreshClick,
   isRefreshing,
+}: {
+  onRefreshClick: () => void;
+  isRefreshing: boolean;
 }) => (
   <EuiButtonEmpty
     data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}

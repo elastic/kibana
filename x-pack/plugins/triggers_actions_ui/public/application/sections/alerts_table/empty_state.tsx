@@ -30,12 +30,17 @@ const panelStyle = {
   maxWidth: 500,
 };
 
-export const EmptyState: React.FC<{
+export const EmptyState = ({
+  height = 'tall',
+  controls,
+  getInspectQuery,
+  showInpectButton,
+}: {
   height?: keyof typeof heights;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   getInspectQuery: GetInspectQuery;
   showInpectButton?: boolean;
-}> = ({ height = 'tall', controls, getInspectQuery, showInpectButton }) => {
+}) => {
   return (
     <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
       <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">

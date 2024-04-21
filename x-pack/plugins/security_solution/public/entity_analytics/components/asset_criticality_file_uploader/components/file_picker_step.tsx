@@ -41,8 +41,8 @@ const listStyle = css`
   line-height: ${euiThemeVars.euiLineHeight};
 `;
 
-export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
-  React.memo(({ onFileChange, errorMessage, isLoading }) => {
+export const AssetCriticalityFilePickerStep = React.memo(
+  ({ onFileChange, errorMessage, isLoading }: AssetCriticalityFilePickerStepProps) => {
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
     return (
@@ -163,6 +163,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
         )}
       </>
     );
-  });
+  }
+);
 
 AssetCriticalityFilePickerStep.displayName = 'AssetCriticalityFilePickerStep';

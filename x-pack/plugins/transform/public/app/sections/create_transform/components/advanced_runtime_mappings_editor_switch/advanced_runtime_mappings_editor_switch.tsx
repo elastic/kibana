@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,7 @@ import { SwitchModal } from './switch_modal';
 import type { useAdvancedRuntimeMappingsEditor } from '../step_define/hooks/use_advanced_runtime_mappings_editor';
 
 type Props = ReturnType<typeof useAdvancedRuntimeMappingsEditor>;
-export const AdvancedRuntimeMappingsEditorSwitch: FC<Props> = (props) => {
+export const AdvancedRuntimeMappingsEditorSwitch = (props: Props) => {
   const {
     actions: { toggleRuntimeMappingsEditor, setRuntimeMappingsEditorSwitchModalVisible },
     state: {

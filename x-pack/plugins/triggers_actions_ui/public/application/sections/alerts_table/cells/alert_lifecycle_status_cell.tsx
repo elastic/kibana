@@ -20,7 +20,7 @@ const mutedBadgeStyle = css`
   padding-inline: ${euiThemeVars.euiSizeXS};
 `;
 
-const AlertLifecycleStatusCellComponent: React.FC<CellComponentProps> = (props) => {
+const AlertLifecycleStatusCellComponent = (props: CellComponentProps) => {
   const { alert, showAlertStatusWithFlapping } = props;
   const { isMuted } = useAlertMutedState(alert);
 

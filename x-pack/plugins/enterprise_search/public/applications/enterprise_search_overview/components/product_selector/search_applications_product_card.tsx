@@ -18,10 +18,10 @@ export interface SearchApplicationProductCardProps {
   hasShadow: boolean;
 }
 
-export const SearchApplicationsProductCard: React.FC<SearchApplicationProductCardProps> = ({
+export const SearchApplicationsProductCard = ({
   hasBorder = true,
   hasShadow = true,
-}) => (
+}: SearchApplicationProductCardProps) => (
   <ProductCard
     hasBorder={hasBorder}
     hasShadow={hasShadow}

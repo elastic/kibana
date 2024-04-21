@@ -58,7 +58,7 @@ interface Props {
   theme?: PartialTheme;
 }
 
-const BodyComponent: React.FC<Props> = ({
+const BodyComponent = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   endDate,
@@ -74,7 +74,7 @@ const BodyComponent: React.FC<Props> = ({
   startDate,
   theme,
   baseTheme,
-}) => {
+}: Props) => {
   const {
     onCheckCompleted,
     patternIndexNames,

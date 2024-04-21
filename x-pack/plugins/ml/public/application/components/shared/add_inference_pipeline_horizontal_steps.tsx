@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,7 +27,7 @@ const DISABLED = 'disabled';
 const COMPLETE = 'complete';
 const INCOMPLETE = 'incomplete';
 
-export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
+export const AddInferencePipelineHorizontalSteps = memo(
   ({
     step,
     setStep,
@@ -36,7 +35,7 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
     isConfigureProcessorStepValid,
     hasProcessorStep,
     pipelineCreated,
-  }) => {
+  }: Props) => {
     const currentStepIndex = steps.findIndex((s) => s === step);
 
     const navSteps: EuiStepsHorizontalProps['steps'] = [

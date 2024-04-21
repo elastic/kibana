@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
@@ -19,7 +18,7 @@ interface Props {
   name: string;
 }
 
-export const FieldBadge: FC<Props> = ({ type, value, name }) => {
+export const FieldBadge = ({ type, value, name }: Props) => {
   const { euiColorLightestShade, euiColorLightShade } = useCurrentEuiTheme();
   const supportedType = getSupportedFieldType(type ?? 'unknown');
   const tooltip = type

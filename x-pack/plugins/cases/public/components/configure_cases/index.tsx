@@ -58,7 +58,7 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   }
 `;
 
-export const ConfigureCases: React.FC = React.memo(() => {
+export const ConfigureCases = React.memo(() => {
   const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);

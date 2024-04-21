@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useRef, MouseEventHandler, useCallback } from 'react';
+import React, { useRef, MouseEventHandler, useCallback } from 'react';
 
 import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
 
@@ -25,12 +25,12 @@ import { redirectAppLinksStyles } from './redirect_app_links.styles';
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
+export const RedirectAppLinks = ({
   children,
   navigateToUrl,
   currentAppId,
   ...containerProps
-}) => {
+}: RedirectAppLinksComponentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(

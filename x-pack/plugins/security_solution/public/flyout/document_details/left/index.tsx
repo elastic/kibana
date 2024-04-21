@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -36,7 +35,7 @@ export interface LeftPanelProps extends FlyoutPanelProps {
   };
 }
 
-export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
+export const LeftPanel = memo(({ path }: Partial<LeftPanelProps>) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();

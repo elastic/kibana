@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -27,7 +27,7 @@ import {
   type TransformEnabledFeatures,
 } from './serverless_context';
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
+export const App = ({ history }: { history: ScopedHistory }) => (
   <Router history={history}>
     <Routes>
       <Route

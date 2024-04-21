@@ -38,7 +38,7 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const CustomTabComponent: React.FC<Props> = ({
+const CustomTabComponent = ({
   addSuccessToast,
   docsCount,
   formatBytes,
@@ -48,7 +48,7 @@ const CustomTabComponent: React.FC<Props> = ({
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
-}) => {
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const markdownComments: string[] = useMemo(
     () =>

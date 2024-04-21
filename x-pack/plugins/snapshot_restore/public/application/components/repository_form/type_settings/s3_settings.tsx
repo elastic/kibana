@@ -31,12 +31,12 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const S3Settings: React.FunctionComponent<Props> = ({
+export const S3Settings = ({
   repository,
   isManagedRepository,
   updateRepositorySettings,
   settingErrors,
-}) => {
+}: Props) => {
   const {
     settings: {
       bucket,

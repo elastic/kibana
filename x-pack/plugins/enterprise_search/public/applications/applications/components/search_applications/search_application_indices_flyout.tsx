@@ -39,7 +39,7 @@ import { SearchApplicationError } from '../search_application/search_application
 
 import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
-export const SearchApplicationIndicesFlyout: React.FC = () => {
+export const SearchApplicationIndicesFlyout = () => {
   const {
     searchApplicationData,
     searchApplicationName,

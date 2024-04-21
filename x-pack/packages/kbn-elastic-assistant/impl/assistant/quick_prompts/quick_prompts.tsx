@@ -37,8 +37,8 @@ interface QuickPromptsProps {
  * text, and support for adding new quick prompts and editing existing. Also supports overflow of quick prompts,
  * and localstorage for storing new and edited prompts.
  */
-export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
-  ({ setInput, setIsSettingsModalVisible, trackPrompt, isFlyoutMode }) => {
+export const QuickPrompts = React.memo(
+  ({ setInput, setIsSettingsModalVisible, trackPrompt, isFlyoutMode }: QuickPromptsProps) => {
     const [quickPromptsContainerRef, { width }] = useMeasure();
 
     const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab } =

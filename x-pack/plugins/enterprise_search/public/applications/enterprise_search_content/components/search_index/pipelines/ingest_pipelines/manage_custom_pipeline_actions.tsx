@@ -20,7 +20,7 @@ const revertContextMenuItemCSS = css`
   color: ${euiThemeVars.euiColorDanger};
 `;
 
-export const ManageCustomPipelineActions: React.FC = () => {
+export const ManageCustomPipelineActions = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openDeleteModal } = useActions(PipelinesLogic);
 

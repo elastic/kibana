@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import { useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -16,7 +15,7 @@ import { i18nTexts } from '../i18n_texts';
 import { useFilePickerContext } from '../context';
 import { FileCard } from './file_card';
 
-export const FileGrid: FunctionComponent = () => {
+export const FileGrid = () => {
   const { state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const files = useObservable(state.files$, []);

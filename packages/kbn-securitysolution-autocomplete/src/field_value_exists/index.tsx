@@ -17,11 +17,11 @@ interface AutocompleteFieldExistsProps {
   'aria-label'?: string;
 }
 
-export const AutocompleteFieldExistsComponent: React.FC<AutocompleteFieldExistsProps> = ({
+export const AutocompleteFieldExistsComponent = ({
   placeholder,
   rowLabel,
   'aria-label': ariaLabel,
-}): JSX.Element => (
+}: AutocompleteFieldExistsProps): JSX.Element => (
   <EuiFormRow label={rowLabel} fullWidth>
     <EuiComboBox
       placeholder={placeholder}

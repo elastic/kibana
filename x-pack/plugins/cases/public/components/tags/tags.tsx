@@ -16,7 +16,7 @@ interface TagsProps {
   gutterSize?: EuiBadgeGroupProps['gutterSize'];
 }
 
-const TagsComponent: React.FC<TagsProps> = ({ tags, color = 'default', gutterSize }) => (
+const TagsComponent = ({ tags, color = 'default', gutterSize }: TagsProps) => (
   <>
     {tags.length > 0 && (
       <EuiBadgeGroup gutterSize={gutterSize}>

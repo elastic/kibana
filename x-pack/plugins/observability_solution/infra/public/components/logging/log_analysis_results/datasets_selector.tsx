@@ -13,12 +13,17 @@ import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
 
 type DatasetOptionProps = EuiComboBoxOptionOption<string>;
 
-export const DatasetsSelector: React.FunctionComponent<{
+export const DatasetsSelector = ({
+  availableDatasets,
+  isLoading = false,
+  onChangeDatasetSelection,
+  selectedDatasets,
+}: {
   availableDatasets: string[];
   isLoading?: boolean;
   onChangeDatasetSelection: (datasets: string[]) => void;
   selectedDatasets: string[];
-}> = ({ availableDatasets, isLoading = false, onChangeDatasetSelection, selectedDatasets }) => {
+}) => {
   const options = useMemo<DatasetOptionProps[]>(
     () =>
       availableDatasets.map((dataset) => ({

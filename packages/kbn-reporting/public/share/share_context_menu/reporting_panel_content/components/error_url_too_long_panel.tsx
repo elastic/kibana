@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,7 +21,7 @@ const i18nTexts = {
   }),
 };
 
-export const ErrorUrlTooLongPanel: FunctionComponent<Props> = ({ isUnsaved }) => (
+export const ErrorUrlTooLongPanel = ({ isUnsaved }: Props) => (
   <EuiCallOut title={i18nTexts.title} size="s" iconType="warning" color="danger">
     <EuiText size="s">
       <p>

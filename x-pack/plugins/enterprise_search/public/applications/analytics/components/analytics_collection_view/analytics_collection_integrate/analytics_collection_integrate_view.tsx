@@ -185,9 +185,9 @@ const apiKeyStep = (
   ),
 });
 
-export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionIntegrateProps> = ({
+export const AnalyticsCollectionIntegrateView = ({
   analyticsCollection,
-}) => {
+}: AnalyticsCollectionIntegrateProps) => {
   const [selectedTab, setSelectedTab] = useState<TabKey>('javascriptEmbed');
   const [apiKeyModelOpen, setApiKeyModalOpen] = useState<boolean>(false);
   const { navigateToUrl } = useValues(KibanaLogic);

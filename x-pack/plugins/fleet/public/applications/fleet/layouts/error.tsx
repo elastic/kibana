@@ -22,9 +22,12 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
-export const ErrorLayout: React.FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
+export const ErrorLayout = ({
   isAddIntegrationsPath,
   children,
+}: {
+  children: React.ReactNode;
+  isAddIntegrationsPath: boolean;
 }) => (
   <EuiErrorBoundary>
     {isAddIntegrationsPath ? (
@@ -37,65 +40,64 @@ export const ErrorLayout: React.FunctionComponent<{ isAddIntegrationsPath: boole
   </EuiErrorBoundary>
 );
 
-export const PermissionsError: React.FunctionComponent<{
-  error: string;
-  requiredFleetRole?: string;
-}> = React.memo(({ error, requiredFleetRole }) => {
-  if (error === 'MISSING_SECURITY') {
-    return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
-  }
+export const PermissionsError = React.memo(
+  ({ error, requiredFleetRole }: { error: string; requiredFleetRole?: string }) => {
+    if (error === 'MISSING_SECURITY') {
+      return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
+    }
 
-  if (error === 'MISSING_PRIVILEGES') {
+    if (error === 'MISSING_PRIVILEGES') {
+      return (
+        <Panel data-test-subj="missingPrivilegesPrompt">
+          <EuiEmptyPrompt
+            iconType="securityApp"
+            title={
+              <h2 data-test-subj="missingPrivilegesPromptTitle">
+                <FormattedMessage
+                  id="xpack.fleet.permissionDeniedErrorTitle"
+                  defaultMessage="Permission denied"
+                />
+              </h2>
+            }
+            body={
+              <p data-test-subj="missingPrivilegesPromptMessage">
+                {requiredFleetRole ? (
+                  <FormattedMessage
+                    id="xpack.fleet.pagePermissionDeniedErrorMessage"
+                    defaultMessage="You are not authorized to access that page. It requires the {roleName} Kibana privilege for Fleet."
+                    values={{
+                      roleName: <EuiCode>{requiredFleetRole}</EuiCode>,
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.permissionDeniedErrorMessage"
+                    defaultMessage="You are not authorized to access Fleet. It requires the {roleName1} Kibana privilege for Fleet, and the {roleName2} or {roleName1} privilege for Integrations."
+                    values={{
+                      roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
+                      roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
+                    }}
+                  />
+                )}
+              </p>
+            }
+          />
+        </Panel>
+      );
+    }
+
     return (
-      <Panel data-test-subj="missingPrivilegesPrompt">
-        <EuiEmptyPrompt
-          iconType="securityApp"
-          title={
-            <h2 data-test-subj="missingPrivilegesPromptTitle">
-              <FormattedMessage
-                id="xpack.fleet.permissionDeniedErrorTitle"
-                defaultMessage="Permission denied"
-              />
-            </h2>
-          }
-          body={
-            <p data-test-subj="missingPrivilegesPromptMessage">
-              {requiredFleetRole ? (
-                <FormattedMessage
-                  id="xpack.fleet.pagePermissionDeniedErrorMessage"
-                  defaultMessage="You are not authorized to access that page. It requires the {roleName} Kibana privilege for Fleet."
-                  values={{
-                    roleName: <EuiCode>{requiredFleetRole}</EuiCode>,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.permissionDeniedErrorMessage"
-                  defaultMessage="You are not authorized to access Fleet. It requires the {roleName1} Kibana privilege for Fleet, and the {roleName2} or {roleName1} privilege for Integrations."
-                  values={{
-                    roleName1: <EuiCode>&quot;All&quot;</EuiCode>,
-                    roleName2: <EuiCode>&quot;Read&quot;</EuiCode>,
-                  }}
-                />
-              )}
-            </p>
-          }
-        />
-      </Panel>
+      <Error
+        title={
+          <FormattedMessage
+            id="xpack.fleet.permissionsRequestErrorMessageTitle"
+            defaultMessage="Unable to check permissions"
+          />
+        }
+        error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
+          defaultMessage: 'There was a problem checking Fleet permissions',
+        })}
+      />
     );
   }
-
-  return (
-    <Error
-      title={
-        <FormattedMessage
-          id="xpack.fleet.permissionsRequestErrorMessageTitle"
-          defaultMessage="Unable to check permissions"
-        />
-      }
-      error={i18n.translate('xpack.fleet.permissionsRequestErrorMessageDescription', {
-        defaultMessage: 'There was a problem checking Fleet permissions',
-      })}
-    />
-  );
-});
+);

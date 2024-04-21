@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { BetaCallOut } from './beta_callout';
 
-export const BetaConnectorCallout: React.FC = () => (
+export const BetaConnectorCallout = () => (
   <BetaCallOut
     title={i18n.translate('xpack.enterpriseSearch.betaConnectorCalloutTitle', {
       defaultMessage: 'Beta connector',

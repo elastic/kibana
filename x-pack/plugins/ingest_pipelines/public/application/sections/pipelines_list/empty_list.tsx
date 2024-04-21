@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiButton, EuiPopover, EuiContextMenu, EuiPageTemplate } from '@elastic/eui';
@@ -15,7 +15,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../shared_imports';
 import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
 
-export const EmptyList: FunctionComponent = () => {
+export const EmptyList = () => {
   const { services } = useKibana();
   const history = useHistory() as ScopedHistory;
   const [showPopover, setShowPopover] = useState<boolean>(false);

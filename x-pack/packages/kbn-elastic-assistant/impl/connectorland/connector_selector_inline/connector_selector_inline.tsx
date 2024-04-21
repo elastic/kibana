@@ -62,16 +62,15 @@ const placeholderButtonClassName = css`
 /**
  * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
-export const ConnectorSelectorInline: React.FC<Props> = React.memo(
+export const ConnectorSelectorInline = React.memo(
   ({
     isDisabled = false,
     selectedConnectorId,
     selectedConversation,
     isFlyoutMode,
-
     onConnectorIdSelected,
     onConnectorSelected,
-  }) => {
+  }: Props) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();

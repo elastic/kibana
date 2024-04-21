@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, memo } from 'react';
 
 import {
@@ -64,7 +63,7 @@ interface Props {
   tag?: string;
 }
 
-export const ProcessorConfiguration: FC<Props> = memo(
+export const ProcessorConfiguration = memo(
   ({
     condition,
     fieldMap,
@@ -75,7 +74,7 @@ export const ProcessorConfiguration: FC<Props> = memo(
     modelType,
     setHasUnsavedChanges,
     tag,
-  }) => {
+  }: Props) => {
     const {
       services: {
         docLinks: { links },

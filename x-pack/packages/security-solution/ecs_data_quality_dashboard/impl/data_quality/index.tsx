@@ -66,7 +66,7 @@ interface Props {
 }
 
 /** Renders the `Data Quality` dashboard content */
-const DataQualityPanelComponent: React.FC<Props> = ({
+const DataQualityPanelComponent = ({
   toasts,
   baseTheme,
   canUserCreateAndReadCases,
@@ -86,7 +86,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   setLastChecked,
   startDate,
   theme,
-}) => {
+}: Props) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
       value != null ? numeral(value).format(defaultBytesFormat) : EMPTY_STAT,

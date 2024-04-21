@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, UseField, Field, ToggleField } from '../../../../../../shared_imports';
@@ -48,7 +48,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const DotExpander: FunctionComponent = () => {
+export const DotExpander = () => {
   return (
     <>
       <FieldNameField

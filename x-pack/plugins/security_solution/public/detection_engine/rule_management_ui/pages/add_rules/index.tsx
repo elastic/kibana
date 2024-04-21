@@ -26,7 +26,7 @@ import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/component
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to';
 
-const AddRulesPageComponent: React.FC = () => {
+const AddRulesPageComponent = () => {
   const { navigateToApp } = useKibana().services.application;
 
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey }] = useUserData();

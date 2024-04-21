@@ -30,7 +30,7 @@ export interface FieldVisualizeButtonProps {
   visualizeInfo?: VisualizeInformation;
 }
 
-export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.memo(
+export const FieldVisualizeButton = React.memo(
   ({
     field,
     dataView,
@@ -41,7 +41,7 @@ export const FieldVisualizeButton: React.FC<FieldVisualizeButtonProps> = React.m
     uiActions,
     buttonProps,
     visualizeInfo,
-  }) => {
+  }: FieldVisualizeButtonProps) => {
     if (!visualizeInfo) {
       return null;
     }

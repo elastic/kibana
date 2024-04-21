@@ -8,7 +8,7 @@
 import type { PropsOf } from '@elastic/eui';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import _ from 'lodash';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';
@@ -18,11 +18,11 @@ interface Props extends PropsOf<typeof EuiText> {
   'data-test-subj'?: string;
 }
 
-export const PrivilegeDisplay: FC<Props> = (props: Props) => {
+export const PrivilegeDisplay = (props: Props) => {
   return <SimplePrivilegeDisplay {...props} />;
 };
 
-const SimplePrivilegeDisplay: FC<Props> = (props: Props) => {
+const SimplePrivilegeDisplay = (props: Props) => {
   const { privilege, ...rest } = props;
 
   const text = <EuiText {...rest}>{getDisplayValue(privilege)}</EuiText>;

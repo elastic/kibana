@@ -90,9 +90,9 @@ const createDefaultRatioRuleParams = (
   ],
 });
 
-export const ExpressionEditor: React.FC<
-  RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
-> = (props) => {
+export const ExpressionEditor = (
+  props: RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
+) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const {
     services: { logsShared },
@@ -115,7 +115,7 @@ export const ExpressionEditor: React.FC<
   );
 };
 
-export const SourceStatusWrapper: React.FC = ({ children }) => {
+export const SourceStatusWrapper = ({ children }: { children: React.ReactNode }) => {
   const { load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
 
   return (
@@ -151,8 +151,8 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
   );
 };
 
-export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>> = (
-  props
+export const Editor = (
+  props: RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>
 ) => {
   const { setRuleParams, ruleParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);

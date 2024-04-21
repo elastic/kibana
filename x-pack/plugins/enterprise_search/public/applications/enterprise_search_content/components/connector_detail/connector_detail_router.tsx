@@ -20,7 +20,7 @@ import { IndexViewLogic } from '../search_index/index_view_logic';
 import { ConnectorDetail } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
 
-export const ConnectorDetailRouter: React.FC = () => {
+export const ConnectorDetailRouter = () => {
   useEffect(() => {
     const unmountName = IndexNameLogic.mount();
     const unmountView = ConnectorViewLogic.mount();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { BorderForm } from './border_form';
@@ -29,11 +29,7 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ExtendedTemplate: FunctionComponent<Props> = ({
-  getArgValue,
-  setArgValue,
-  workpad,
-}) => (
+export const ExtendedTemplate = ({ getArgValue, setArgValue, workpad }: Props) => (
   <div>
     <EuiTitle size="xxxs" textTransform="uppercase">
       <h6>{strings.getAppearanceTitle()}</h6>

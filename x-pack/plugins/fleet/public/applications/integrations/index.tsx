@@ -24,7 +24,7 @@ export interface ProtectedRouteProps extends RouteProps {
   restrictedPath?: string;
 }
 
-export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
+export const ProtectedRoute = ({
   isAllowed = false,
   restrictedPath = '/',
   ...routeProps
@@ -74,7 +74,7 @@ export function renderApp(
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage,
-  UsageTracker: React.FC
+  UsageTracker: () => JSX.Element
 ) {
   ReactDOM.render(
     <UsageTracker>

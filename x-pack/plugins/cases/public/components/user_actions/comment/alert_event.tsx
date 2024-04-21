@@ -26,8 +26,15 @@ interface MultipleAlertsProps extends SingleAlertProps {
   totalAlerts: number;
 }
 
-const RuleLink: React.FC<SingleAlertProps> = memo(
-  ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData, actionId }) => {
+const RuleLink = memo(
+  ({
+    onRuleDetailsClick,
+    getRuleDetailsHref,
+    ruleId,
+    ruleName,
+    loadingAlertData,
+    actionId,
+  }: SingleAlertProps) => {
     const onLinkClick = useCallback(
       (ev) => {
         ev.preventDefault();
@@ -61,14 +68,14 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
 
 RuleLink.displayName = 'RuleLink';
 
-const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
+const SingleAlertCommentEventComponent = ({
   actionId,
   getRuleDetailsHref,
   loadingAlertData = false,
   onRuleDetailsClick,
   ruleId,
   ruleName,
-}) => {
+}: SingleAlertProps) => {
   return (
     <span data-test-subj={`single-alert-user-action-${actionId}`}>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
@@ -88,7 +95,7 @@ SingleAlertCommentEventComponent.displayName = 'SingleAlertCommentEvent';
 
 export const SingleAlertCommentEvent = memo(SingleAlertCommentEventComponent);
 
-const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
+const MultipleAlertsCommentEventComponent = ({
   actionId,
   getRuleDetailsHref,
   loadingAlertData = false,
@@ -96,7 +103,7 @@ const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
   ruleId,
   ruleName,
   totalAlerts,
-}) => {
+}: MultipleAlertsProps) => {
   return (
     <span data-test-subj={`multiple-alerts-user-action-${actionId}`}>
       {`${i18n.MULTIPLE_ALERTS_COMMENT_LABEL_TITLE(totalAlerts)}`}{' '}

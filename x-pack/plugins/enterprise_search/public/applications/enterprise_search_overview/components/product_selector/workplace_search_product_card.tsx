@@ -18,11 +18,11 @@ export interface WorkplaceSearchProductCardProps {
   isWorkplaceSearchAdmin: boolean;
 }
 
-export const WorkplaceSearchProductCard: React.FC<WorkplaceSearchProductCardProps> = ({
+export const WorkplaceSearchProductCard = ({
   hasBorder = true,
   hasShadow = true,
   isWorkplaceSearchAdmin,
-}) => (
+}: WorkplaceSearchProductCardProps) => (
   <ProductCard
     hasBorder={hasBorder}
     hasShadow={hasShadow}

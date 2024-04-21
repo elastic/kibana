@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';

@@ -26,10 +26,13 @@ import { ConnectorNameAndDescriptionFlyout } from './connector/connector_name_an
 import { ConnectorNameAndDescriptionLogic } from './connector/connector_name_and_description/connector_name_and_description_logic';
 import { OverviewLogic } from './overview.logic';
 
-const EditDescription: React.FC<{
+const EditDescription = ({
+  label,
+  onClick,
+}: {
   label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
-}> = ({ label, onClick }) => (
+}) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -38,7 +41,7 @@ const EditDescription: React.FC<{
   </EuiFlexGroup>
 );
 
-export const NameAndDescriptionStats: React.FC = () => {
+export const NameAndDescriptionStats = () => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const hideStats = isLoading || isError;
   const { setIsEditing: setIsFlyoutVisible } = useActions(ConnectorNameAndDescriptionLogic);

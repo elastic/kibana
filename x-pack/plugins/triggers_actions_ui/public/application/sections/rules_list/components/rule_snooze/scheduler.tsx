@@ -56,7 +56,7 @@ const useDefaultTimzezone = () => {
   return kibanaTz;
 };
 
-export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
+export const RuleSnoozeScheduler = ({
   onClose,
   initialSchedule,
   hasTitle = true,
@@ -93,7 +93,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   );
 };
 
-const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
+const RuleSnoozeSchedulerPanel = ({
   onSaveSchedule,
   initialSchedule,
   isLoading,
@@ -101,7 +101,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   bulkSnoozeSchedule = false,
   showDelete = false,
   inPopover = false,
-}) => {
+}: PanelOpts) => {
   // These two states form a state machine for whether or not the user's clicks on the datepicker apply to the start/end date or start/end time
   // - State A: After the user clicks a start date:
   //    - Next date click will change the end date and move to state B

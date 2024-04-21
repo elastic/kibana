@@ -71,7 +71,7 @@ export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_EXCLUDE_LABEL = i18n.transl
   }
 );
 
-export const IndexingRulesTable: React.FC = () => {
+export const IndexingRulesTable = () => {
   const { contentSource } = useValues(SourceLogic);
   const indexingRulesInstanceId = 'IndexingRulesTable';
   const { indexingRules } = useValues(

@@ -27,6 +27,7 @@ interface StorybookContextDecoratorProps {
   context: Parameters<DecoratorFn>[1];
   servicesApplicationOverride?: Partial<ApplicationStart>;
   servicesOverride?: Partial<KibanaServices>;
+  children: React.ReactNode;
 }
 
 const queryClient = new QueryClient();
@@ -50,7 +51,7 @@ const notifications: NotificationsStart = {
   showErrorDialog: () => {},
 };
 
-export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps> = (props) => {
+export const StorybookContextDecorator = (props: StorybookContextDecoratorProps) => {
   const { children, context, servicesApplicationOverride, servicesOverride } = props;
   const { globals } = context;
   const { euiTheme } = globals;

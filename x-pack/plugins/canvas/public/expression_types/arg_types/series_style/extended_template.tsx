@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
+import React, { ChangeEvent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
@@ -36,7 +36,7 @@ export type Props = {
   };
 } & ResolvedArgProps<ResolvedLabels>;
 
-export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
+export const ExtendedTemplate = (props: Props) => {
   const {
     typeInstance,
     onValueChange,

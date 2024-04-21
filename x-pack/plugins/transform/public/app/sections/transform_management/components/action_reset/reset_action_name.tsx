@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
 
@@ -84,11 +84,7 @@ export interface ResetActionNameProps {
   isBulkAction: boolean;
 }
 
-export const ResetActionName: FC<ResetActionNameProps> = ({
-  items,
-  canResetTransform,
-  disabled,
-}) => {
+export const ResetActionName = ({ items, canResetTransform, disabled }: ResetActionNameProps) => {
   const content = getResetActionDisabledMessage({
     items,
     canResetTransform,

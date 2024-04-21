@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
@@ -37,7 +36,7 @@ export const overviewPanelDefaultState = Object.freeze({
   dfaJobs: true,
 });
 
-export const OverviewPage: FC = () => {
+export const OverviewPage = () => {
   const [canViewMlNodes, canCreateJob] = usePermissionCheck(['canViewMlNodes', 'canCreateJob']);
 
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();

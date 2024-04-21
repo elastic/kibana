@@ -10,7 +10,6 @@
  * of the anomalies table.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,7 +49,7 @@ interface Props {
   job: ExplorerJob;
 }
 
-export const AnomalyDetails: FC<Props> = ({
+export const AnomalyDetails = ({
   anomaly,
   examples,
   definition,
@@ -60,7 +59,7 @@ export const AnomalyDetails: FC<Props> = ({
   influencerFilter,
   tabIndex,
   job,
-}) => {
+}: Props) => {
   if (examples !== undefined && examples.length > 0) {
     const tabs = [
       {
@@ -114,14 +113,21 @@ export const AnomalyDetails: FC<Props> = ({
   );
 };
 
-const Contents: FC<{
+const Contents = ({
+  anomaly,
+  isAggregatedData,
+  filter,
+  influencersLimit,
+  influencerFilter,
+  job,
+}: {
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
   filter: EntityCellFilter;
   influencersLimit: number;
   influencerFilter: EntityCellFilter;
   job: ExplorerJob;
-}> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
+}) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
@@ -163,7 +169,7 @@ const Contents: FC<{
   );
 };
 
-const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly }) => {
+const Description = ({ anomaly }: { anomaly: MlAnomaliesTableRecordExtended }) => {
   const { anomalyDescription, mvDescription } = getAnomalyDescription(anomaly);
 
   return (
@@ -182,12 +188,17 @@ const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly 
   );
 };
 
-const Details: FC<{
+const Details = ({
+  anomaly,
+  isAggregatedData,
+  filter,
+  job,
+}: {
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
   filter: EntityCellFilter;
   job: ExplorerJob;
-}> = ({ anomaly, isAggregatedData, filter, job }) => {
+}) => {
   const isInterimResult = anomaly.source?.is_interim ?? false;
   return (
     <>
@@ -227,11 +238,15 @@ const Details: FC<{
   );
 };
 
-const Influencers: FC<{
+const Influencers = ({
+  anomaly,
+  influencersLimit,
+  influencerFilter,
+}: {
   anomaly: MlAnomaliesTableRecordExtended;
   influencersLimit: number;
   influencerFilter: EntityCellFilter;
-}> = ({ anomaly, influencersLimit, influencerFilter }) => {
+}) => {
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
   const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
 
@@ -302,9 +317,12 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] }> = ({
+const CategoryExamples = ({
   definition,
   examples,
+}: {
+  definition: CategoryDefinition;
+  examples: string[];
 }) => {
   return (
     <EuiFlexGroup

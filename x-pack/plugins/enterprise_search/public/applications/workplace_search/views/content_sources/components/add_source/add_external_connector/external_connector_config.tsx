@@ -39,7 +39,7 @@ import { ExternalConnectorDocumentation } from './external_connector_documentati
 import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { ExternalConnectorLogic } from './external_connector_logic';
 
-export const ExternalConnectorConfig: React.FC = () => {
+export const ExternalConnectorConfig = () => {
   const { baseServiceType } = useParams<{ baseServiceType?: string }>();
   const sourceData = getSourceData('external', baseServiceType);
   const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);

@@ -38,12 +38,17 @@ const CommandCode = styled.div.attrs(() => {
   margin-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
-export const GenerateServiceTokenComponent: React.FunctionComponent<{
+export const GenerateServiceTokenComponent = ({
+  serviceToken,
+  generateServiceToken,
+  isLoadingServiceToken,
+  isRemote = false,
+}: {
   serviceToken?: string;
   generateServiceToken: (remote?: boolean) => void;
   isLoadingServiceToken: boolean;
   isRemote?: boolean;
-}> = ({ serviceToken, generateServiceToken, isLoadingServiceToken, isRemote = false }) => {
+}) => {
   const { docLinks } = useStartServices();
   const { permissionsError, isPermissionsLoading } = useCheckPermissions();
 

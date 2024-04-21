@@ -20,38 +20,37 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
 `;
 
-export const AgentDetailsContent: React.FunctionComponent<{
-  agent: Agent;
-  agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
-  return (
-    <>
-      <EuiFlexGroup alignItems="flexStart">
-        <FlexItemWithMinWidth>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.fleet.agentDetails.overviewSectionTitle"
-                defaultMessage="Overview"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <AgentDetailsOverviewSection agent={agent} agentPolicy={agentPolicy} />
-        </FlexItemWithMinWidth>
-        <FlexItemWithMinWidth>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.fleet.agentDetails.integrationsSectionTitle"
-                defaultMessage="Integrations"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} />
-        </FlexItemWithMinWidth>
-      </EuiFlexGroup>
-    </>
-  );
-});
+export const AgentDetailsContent = memo(
+  ({ agent, agentPolicy }: { agent: Agent; agentPolicy?: AgentPolicy }) => {
+    return (
+      <>
+        <EuiFlexGroup alignItems="flexStart">
+          <FlexItemWithMinWidth>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.fleet.agentDetails.overviewSectionTitle"
+                  defaultMessage="Overview"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <AgentDetailsOverviewSection agent={agent} agentPolicy={agentPolicy} />
+          </FlexItemWithMinWidth>
+          <FlexItemWithMinWidth>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.fleet.agentDetails.integrationsSectionTitle"
+                  defaultMessage="Integrations"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <AgentDetailsIntegrations agent={agent} agentPolicy={agentPolicy} />
+          </FlexItemWithMinWidth>
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);

@@ -29,11 +29,11 @@ interface ConfirmDeleteDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDeleteDescription: React.FunctionComponent<ConfirmDeleteDescriptionProps> = ({
+const ConfirmDeleteDescription = ({
   downloadSource,
   agentCount,
   agentPolicyCount,
-}) => (
+}: ConfirmDeleteDescriptionProps) => (
   <FormattedMessage
     id="xpack.fleet.settings.deleteDowloadSource.confirmModalText"
     defaultMessage="This action will delete {downloadSourceName} agent binary source. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"

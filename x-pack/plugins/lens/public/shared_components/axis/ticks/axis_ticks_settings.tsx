@@ -27,11 +27,11 @@ export interface AxisTicksSettingsProps {
   isAxisLabelVisible: boolean;
 }
 
-export const AxisTicksSettings: React.FunctionComponent<AxisTicksSettingsProps> = ({
+export const AxisTicksSettings = ({
   axis,
   isAxisLabelVisible,
   updateTicksVisibilityState,
-}) => {
+}: AxisTicksSettingsProps) => {
   const onTicksStatusChange = useCallback(
     (visible) => updateTicksVisibilityState(visible, axis),
     [axis, updateTicksVisibilityState]

@@ -15,7 +15,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const TlsTableManage = manageQuery(TlsTable);
 
-const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
+const TlsQueryTabBodyComponent = ({
   endDate,
   filterQuery,
   flowTarget,
@@ -25,7 +25,7 @@ const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
   skip,
   startDate,
   type,
-}) => {
+}: FTQueryTabBodyProps) => {
   const queryId = `${ID}-${type}`;
   const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, memo, useMemo } from 'react';
 
 import {
@@ -32,8 +31,8 @@ interface Props {
   handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;
 }
 
-export const AdditionalAdvancedSettings: FC<Props> = memo(
-  ({ handleAdvancedConfigUpdate, condition, tag }) => {
+export const AdditionalAdvancedSettings = memo(
+  ({ handleAdvancedConfigUpdate, condition, tag }: Props) => {
     const [additionalSettings, setAdditionalSettings] = useState<
       Partial<AdditionalSettings> | undefined
     >(condition || tag ? { condition, tag } : undefined);

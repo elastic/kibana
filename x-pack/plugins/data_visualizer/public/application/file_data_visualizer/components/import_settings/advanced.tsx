@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 
 import {
@@ -48,7 +47,7 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const AdvancedSettings: FC<Props> = ({
+export const AdvancedSettings = ({
   index,
   dataView,
   initialized,
@@ -68,7 +67,7 @@ export const AdvancedSettings: FC<Props> = ({
   onCombinedFieldsChange,
   results,
   canCreateDataView,
-}) => {
+}: Props) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -185,7 +184,7 @@ interface JsonEditorProps {
   onChange(value: string): void;
 }
 
-const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const IndexSettings = ({ initialized, data, onChange }: JsonEditorProps) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -209,7 +208,7 @@ const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => 
   );
 };
 
-const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const Mappings = ({ initialized, data, onChange }: JsonEditorProps) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -233,7 +232,7 @@ const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
   );
 };
 
-const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const IngestPipeline = ({ initialized, data, onChange }: JsonEditorProps) => {
   return (
     <React.Fragment>
       <EuiFormRow

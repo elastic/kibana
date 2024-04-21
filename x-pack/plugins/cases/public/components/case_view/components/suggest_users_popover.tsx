@@ -21,9 +21,12 @@ import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import type { CurrentUserProfile } from '../../types';
 
-const PopoverButton: React.FC<{ togglePopover: () => void; isDisabled: boolean }> = ({
+const PopoverButton = ({
   togglePopover,
   isDisabled,
+}: {
+  togglePopover: () => void;
+  isDisabled: boolean;
 }) => (
   <EuiToolTip position="left" content={i18n.EDIT_ASSIGNEES}>
     <EuiButtonIcon
@@ -47,7 +50,7 @@ export interface SuggestUsersPopoverProps {
   onClosePopover: () => void;
 }
 
-const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
+const SuggestUsersPopoverComponent = ({
   assignedUsersWithProfiles,
   currentUserProfile,
   isLoading,
@@ -55,7 +58,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   onUsersChange,
   togglePopover,
   onClosePopover,
-}) => {
+}: SuggestUsersPopoverProps) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();

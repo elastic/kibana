@@ -44,11 +44,11 @@ export interface DrilldownTemplateTableProps {
   onClone?: (ids: string[]) => void;
 }
 
-export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
+export const DrilldownTemplateTable = ({
   items,
   onCreate,
   onClone,
-}) => {
+}: DrilldownTemplateTableProps) => {
   const [selected, setSelected] = useState<string[]>([]);
 
   const columns: Array<EuiBasicTableColumn<DrilldownTemplateTableItem>> = [

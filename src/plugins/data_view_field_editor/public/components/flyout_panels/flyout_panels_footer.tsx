@@ -10,9 +10,11 @@ import { EuiFlyoutFooter, EuiFlyoutFooterProps } from '@elastic/eui';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 
-export const PanelFooter: React.FC<
-  { children: React.ReactNode } & Omit<EuiFlyoutFooterProps, 'children'>
-> = (props) => {
+export const PanelFooter = (
+  props: {
+    children: React.ReactNode;
+  } & Omit<EuiFlyoutFooterProps, 'children'>
+) => {
   const { registerFooter } = useFlyoutPanelContext();
 
   useEffect(() => {

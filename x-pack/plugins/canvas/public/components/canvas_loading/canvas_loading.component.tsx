@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiPanel, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -16,9 +16,7 @@ const strings = {
     }),
 };
 
-export const CanvasLoading: FC<{ msg?: string }> = ({
-  msg = `${strings.getLoadingLabel()}...`,
-}) => (
+export const CanvasLoading = ({ msg = `${strings.getLoadingLabel()}...` }: { msg?: string }) => (
   <div className="canvasContainer--loading">
     <EuiPanel>
       <EuiLoadingChart size="m" />

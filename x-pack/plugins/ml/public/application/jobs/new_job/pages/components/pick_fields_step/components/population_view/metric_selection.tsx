@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useReducer, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
@@ -27,7 +26,7 @@ interface Props {
 
 type DetectorFieldValues = Record<number, string[]>;
 
-export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
+export const PopulationDetectors = ({ setIsValid }: Props) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

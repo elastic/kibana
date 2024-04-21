@@ -27,12 +27,7 @@ interface InputProps {
   };
 }
 
-export const TextInput: React.FunctionComponent<InputProps> = ({
-  label,
-  inputProps,
-  placeholder,
-  dataTestSubj,
-}) => (
+export const TextInput = ({ label, inputProps, placeholder, dataTestSubj }: InputProps) => (
   <EuiFormRow fullWidth label={label} {...inputProps.formRowProps}>
     <EuiFieldText
       data-test-subj={dataTestSubj}
@@ -43,12 +38,7 @@ export const TextInput: React.FunctionComponent<InputProps> = ({
   </EuiFormRow>
 );
 
-export const TextAreaInput: React.FunctionComponent<InputProps> = ({
-  label,
-  inputProps,
-  placeholder,
-  dataTestSubj,
-}) => (
+export const TextAreaInput = ({ label, inputProps, placeholder, dataTestSubj }: InputProps) => (
   <EuiFormRow fullWidth label={label} {...inputProps.formRowProps}>
     <EuiTextArea
       fullWidth

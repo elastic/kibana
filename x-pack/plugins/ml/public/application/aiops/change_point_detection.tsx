@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +22,7 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 
-export const ChangePointDetectionPage: FC = () => {
+export const ChangePointDetectionPage = () => {
   const { services } = useMlKibana();
   const { showNodeInfo } = useEnabledFeatures();
 

@@ -20,7 +20,7 @@ import { generateEnginePath } from '../../engine';
 
 import { VIEW_API_LOGS } from '../constants';
 
-export const RecentApiLogs: React.FC = () => {
+export const RecentApiLogs = () => {
   const { fetchApiLogs, pollForApiLogs } = useActions(ApiLogsLogic);
 
   useEffect(() => {

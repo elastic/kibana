@@ -36,7 +36,7 @@ const roleOptions = [
   },
 ] as RoleType[];
 
-export const RoleMapping: React.FC = () => {
+export const RoleMapping = () => {
   const {
     handleSaveMapping,
     handleAttributeValueChange,

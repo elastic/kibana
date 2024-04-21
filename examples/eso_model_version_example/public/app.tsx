@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
-export const MyPluginComponent: React.FC = () => {
+export const MyPluginComponent = () => {
   const [generated, setGenerated] = useState('');
   const [rawDocs, setRawDocs] = useState('');
   const [objects, setObjects] = useState('');

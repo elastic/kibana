@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +14,7 @@ interface SaveChangesButtonProps {
   disabled: boolean;
 }
 
-export const SaveChangesButton: FC<SaveChangesButtonProps> = ({ onClick, disabled }) => (
+export const SaveChangesButton = ({ onClick, disabled }: SaveChangesButtonProps) => (
   <EuiButtonEmpty
     size="xs"
     onClick={onClick}

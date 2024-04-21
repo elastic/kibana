@@ -86,13 +86,13 @@ function isVersionUnsupported(version?: string) {
   return semverLt(version, ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION);
 }
 
-export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
+export const AgentUpgradeAgentModal = ({
   onClose,
   agents,
   agentCount,
   isScheduled = false,
   isUpdating = false,
-}) => {
+}: AgentUpgradeAgentModalProps) => {
   const { notifications, docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion() || '';
   const config = useConfig();
@@ -683,9 +683,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   );
 };
 
-export const UpgradeModalWarningCallout: React.FunctionComponent<{ warningMessage: string }> = ({
-  warningMessage,
-}) => {
+export const UpgradeModalWarningCallout = ({ warningMessage }: { warningMessage: string }) => {
   const { docLinks } = useStartServices();
   return (
     <EuiCallOut

@@ -22,7 +22,7 @@ export interface MissingValuesOptionProps {
   isFittingEnabled?: boolean;
 }
 
-export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
+export const MissingValuesOptions = ({
   onFittingFnChange,
   fittingFunction,
   emphasizeFitting,
@@ -30,7 +30,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
   onEndValueChange,
   endValue,
   isFittingEnabled = true,
-}) => {
+}: MissingValuesOptionProps) => {
   return (
     <>
       {isFittingEnabled && (

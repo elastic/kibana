@@ -22,13 +22,13 @@ interface ConfigDocsLinksProps {
   discussUrl?: string;
 }
 
-export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
+export const ConfigDocsLinks = ({
   name,
   documentationUrl,
   applicationPortalUrl,
   applicationLinkTitle,
   discussUrl,
-}) => (
+}: ConfigDocsLinksProps) => (
   <EuiFlexGroup justifyContent="flexStart" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty flush="left" iconType="popout" href={documentationUrl} target="_blank">

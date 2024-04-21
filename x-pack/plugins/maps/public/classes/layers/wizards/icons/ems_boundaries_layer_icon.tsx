@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
-export const EMSBoundariesLayerIcon: FunctionComponent = () => (
+export const EMSBoundariesLayerIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="49"

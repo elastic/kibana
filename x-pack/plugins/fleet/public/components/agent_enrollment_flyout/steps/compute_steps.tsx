@@ -47,7 +47,7 @@ import {
   IncomingDataConfirmationStep,
 } from '.';
 
-export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
+export const StandaloneSteps = ({
   agentPolicy,
   agentPolicies,
   selectedPolicy,
@@ -60,7 +60,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   setSelectedAPIKeyId,
   isK8s,
   cloudSecurityIntegration,
-}) => {
+}: InstructionProps) => {
   const core = useStartServices();
   const { notifications } = core;
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
@@ -197,7 +197,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   return <EuiSteps steps={instructionsSteps} />;
 };
 
-export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
+export const ManagedSteps = ({
   agentPolicy,
   agentPolicies,
   selectedPolicy,
@@ -215,7 +215,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
-}) => {
+}: InstructionProps) => {
   const core = useStartServices();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;

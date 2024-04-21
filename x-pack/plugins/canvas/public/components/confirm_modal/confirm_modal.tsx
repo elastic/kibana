@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 export interface Props {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export interface Props {
   className?: string;
 }
 
-export const ConfirmModal: FunctionComponent<Props> = (props) => {
+export const ConfirmModal = (props: Props) => {
   const {
     isOpen,
     title,

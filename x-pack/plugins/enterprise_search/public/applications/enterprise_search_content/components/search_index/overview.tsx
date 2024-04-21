@@ -32,7 +32,7 @@ import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 import { SyncJobs } from './sync_jobs/sync_jobs';
 
-export const SearchIndexOverview: React.FC = () => {
+export const SearchIndexOverview = () => {
   const { indexData } = useValues(OverviewLogic);
   const { error } = useValues(IndexViewLogic);
   const { isCloud } = useValues(KibanaLogic);

@@ -14,7 +14,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const TitleComponent: React.FC<Props> = ({ isLoading }) => (
+const TitleComponent = ({ isLoading }: Props) => (
   <CommonUseField
     path="title"
     componentProps={{

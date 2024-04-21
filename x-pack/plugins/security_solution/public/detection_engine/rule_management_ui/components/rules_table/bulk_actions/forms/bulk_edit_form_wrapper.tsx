@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { EuiFlyoutSize } from '@elastic/eui';
 import {
@@ -36,7 +35,7 @@ interface BulkEditFormWrapperProps {
   flyoutSize?: EuiFlyoutSize;
 }
 
-const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
+const BulkEditFormWrapperComponent = ({
   form,
   title,
   banner,
@@ -44,7 +43,7 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
   onClose,
   onSubmit,
   flyoutSize = 's',
-}) => {
+}: BulkEditFormWrapperProps) => {
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RulesBulkEditForm',
   });

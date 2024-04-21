@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +15,7 @@ interface Props {
   navigateToSourceSelection: () => void;
 }
 
-export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, navigateToSourceSelection }) => {
+export const CreateAnalyticsButton = ({ isDisabled, navigateToSourceSelection }: Props) => {
   const handleClick = () => {
     navigateToSourceSelection();
   };

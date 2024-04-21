@@ -31,8 +31,14 @@ interface SelectRuleTypeProps {
   isUpdateView: boolean;
 }
 
-export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
-  ({ describedByIds = [], field, isUpdateView, hasValidLicense, isMlAdmin }) => {
+export const SelectRuleType = memo(
+  ({
+    describedByIds = [],
+    field,
+    isUpdateView,
+    hasValidLicense,
+    isMlAdmin,
+  }: SelectRuleTypeProps) => {
     const ruleType = field.value as Type;
     const setType = useCallback(
       (type: Type) => {

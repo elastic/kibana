@@ -167,7 +167,7 @@ export interface Props {
   sizeInBytes: number | undefined;
 }
 
-const SummaryActionsComponent: React.FC<Props> = ({
+const SummaryActionsComponent = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   formatBytes,
@@ -186,7 +186,7 @@ const SummaryActionsComponent: React.FC<Props> = ({
   totalIndices,
   totalIndicesChecked,
   sizeInBytes,
-}) => {
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const [indexToCheck, setIndexToCheck] = useState<IndexToCheck | null>(null);
   const [checkAllIndiciesChecked, setCheckAllIndiciesChecked] = useState<number>(0);

@@ -132,7 +132,7 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   );
 };
 
-export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
+export const KibanaInstancePage = ({ clusters }: ComponentProps) => {
   const { instance }: { instance: string } = useParams();
 
   const globalState = useContext(GlobalStateContext);

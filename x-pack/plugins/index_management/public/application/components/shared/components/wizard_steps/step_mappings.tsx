@@ -35,8 +35,8 @@ interface Props {
   indexSettings?: IndexSettings;
 }
 
-export const StepMappings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue = {}, onChange, indexSettings, esDocsBase, esNodesPlugins }) => {
+export const StepMappings = React.memo(
+  ({ defaultValue = {}, onChange, indexSettings, esDocsBase, esNodesPlugins }: Props) => {
     const [mappings, setMappings] = useState(defaultValue);
     const { docLinks } = useAppContext();
 

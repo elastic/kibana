@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { Observable } from 'rxjs';
 
 import { EuiProviderProps } from '@elastic/eui';
@@ -16,9 +16,10 @@ import { KibanaThemeProvider as KbnThemeProvider } from '@kbn/react-kibana-conte
 export interface KibanaThemeProviderProps {
   theme$: Observable<CoreTheme>;
   modify?: EuiProviderProps<{}>['modify'];
+  children: React.ReactNode;
 }
 
 /** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme */
-export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => (
+export const KibanaThemeProvider = ({ theme$, modify, children }: KibanaThemeProviderProps) => (
   <KbnThemeProvider {...{ theme: { theme$ }, modify }}>{children}</KbnThemeProvider>
 );

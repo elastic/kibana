@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import type { FunctionComponent } from 'react';
+import React from 'react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { EuiConfirmModal } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useFilePickerContext } from '../../context';
 import { i18nTexts } from '../../i18n_texts';
 
-export const DeletePrompt: FunctionComponent = () => {
+export const DeletePrompt = () => {
   const [deleting, setDeleting] = React.useState(false);
   const isMounted = useMountedState();
   const { state } = useFilePickerContext();

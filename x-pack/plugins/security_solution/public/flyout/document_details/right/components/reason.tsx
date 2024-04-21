@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -26,7 +25,7 @@ import { useRightPanelContext } from '../context';
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
-export const Reason: FC = () => {
+export const Reason = () => {
   const { telemetry } = useKibana().services;
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
     useRightPanelContext();

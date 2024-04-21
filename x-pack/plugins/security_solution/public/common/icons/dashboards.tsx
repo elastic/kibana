@@ -6,7 +6,7 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconDashboards: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+export const IconDashboards = ({ ...props }: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={16}

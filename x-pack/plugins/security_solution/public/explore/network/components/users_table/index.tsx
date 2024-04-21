@@ -53,7 +53,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const usersTableId = 'users-table';
 
-const UsersTableComponent: React.FC<UsersTableProps> = ({
+const UsersTableComponent = ({
   data,
   fakeTotalCount,
   flowTarget,
@@ -65,7 +65,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   showMorePagesIndicator,
   totalCount,
   type,
-}) => {
+}: UsersTableProps) => {
   const dispatch = useDispatch();
   const getUsersSelector = useMemo(() => networkSelectors.usersSelector(), []);
   const { activePage, sort, limit } = useDeepEqualSelector(getUsersSelector);

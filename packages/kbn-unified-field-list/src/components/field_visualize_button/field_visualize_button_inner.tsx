@@ -19,12 +19,12 @@ interface FieldVisualizeButtonInnerProps {
   buttonProps?: Partial<EuiButtonProps>;
 }
 
-export const FieldVisualizeButtonInner: React.FC<FieldVisualizeButtonInnerProps> = ({
+export const FieldVisualizeButtonInner = ({
   field,
   visualizeInfo,
   handleVisualizeLinkClick,
   buttonProps,
-}) => {
+}: FieldVisualizeButtonInnerProps) => {
   return (
     <>
       {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}

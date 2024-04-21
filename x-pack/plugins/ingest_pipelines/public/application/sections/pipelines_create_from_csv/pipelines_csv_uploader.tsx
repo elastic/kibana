@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiFilePicker,
@@ -37,7 +37,7 @@ function getOptions(actions: FieldCopyAction[]) {
   }));
 }
 
-export const PipelinesCsvUploader: FC<Props> = ({
+export const PipelinesCsvUploader = ({
   actionOptions,
   onFilePickerChange,
   onFileUpload,
@@ -45,7 +45,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
   isUploaded,
   hasError,
   hasFile,
-}) => {
+}: Props) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
   const { services } = useKibana();
 

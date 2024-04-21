@@ -81,12 +81,12 @@ const STANDARD_SOURCES_EMPTY_TABLE_DESCRIPTION = (
   />
 );
 
-export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
+export const PrivateSourcesTable = ({
   sourceType,
   sourceSection: { isEnabled: sectionEnabled, contentSources },
   updateSource,
   updateEnabled,
-}) => {
+}: PrivateSourcesTableProps) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { isEnabled } = useValues(SecurityLogic);
 

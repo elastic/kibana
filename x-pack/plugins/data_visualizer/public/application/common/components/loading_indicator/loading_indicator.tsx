@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-export const LoadingIndicator: FC = () => (
+export const LoadingIndicator = () => (
   <Fragment>
     <EuiSpacer size="xxl" />
     <EuiFlexGroup justifyContent="spaceAround">

@@ -12,7 +12,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow, EuiText, EuiTextArea } from '@elastic/eui';
@@ -24,12 +23,12 @@ interface Props {
   pipelineName: string;
 }
 
-export const PipelineNameAndDescription: FC<Props> = ({
+export const PipelineNameAndDescription = ({
   pipelineName,
   pipelineNameError,
   pipelineDescription,
   handlePipelineConfigUpdate,
-}) => {
+}: Props) => {
   const handleConfigChange = (value: string, type: string) => {
     handlePipelineConfigUpdate({ [type]: value });
   };

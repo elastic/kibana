@@ -18,7 +18,7 @@ import {
  * @param props
  * @constructor
  */
-export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
+export const DiscoverGrid = (props: UnifiedDataTableProps) => {
   return (
     <UnifiedDataTable
       showColumnTokens

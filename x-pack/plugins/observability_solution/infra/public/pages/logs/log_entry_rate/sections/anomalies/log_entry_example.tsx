@@ -72,7 +72,7 @@ type Props = LogEntryExample & {
   anomaly: LogEntryAnomaly;
 };
 
-export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessage = ({
   id,
   dataset,
   message,
@@ -80,7 +80,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   tiebreaker,
   timeRange,
   anomaly,
-}) => {
+}: Props) => {
   const {
     services: { ml, http, application },
   } = useKibanaContextForPlugin();
@@ -279,9 +279,7 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   },
 ];
 
-export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
-  dateTime: number;
-}> = ({ dateTime }) => {
+export const LogEntryExampleMessageHeaders = ({ dateTime }: { dateTime: number }) => {
   return (
     <LogEntryExampleMessageHeadersWrapper>
       <>

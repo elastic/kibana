@@ -28,7 +28,7 @@ import { CrawlerLogic } from '../crawler_logic';
 import { crawlStatusColors, readableCrawlerStatuses } from './constants';
 import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 
-export const CrawlRequestsTable: React.FC = () => {
+export const CrawlRequestsTable = () => {
   const { events } = useValues(CrawlerLogic);
   const { fetchCrawlRequest } = useActions(CrawlDetailLogic);
 

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const InvalidCssVersionCallout: FC = () => {
+export const InvalidCssVersionCallout = () => {
   return (
     <EuiCallOut
       color="warning"

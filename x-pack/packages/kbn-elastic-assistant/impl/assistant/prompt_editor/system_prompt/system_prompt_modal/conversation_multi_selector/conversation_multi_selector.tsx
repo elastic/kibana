@@ -22,13 +22,13 @@ interface Props {
 /**
  * Selector for choosing multiple Conversations
  */
-export const ConversationMultiSelector: React.FC<Props> = React.memo(
+export const ConversationMultiSelector = React.memo(
   ({
     conversations,
     isDisabled = false,
     onConversationSelectionChange,
     selectedConversations = [],
-  }) => {
+  }: Props) => {
     // ComboBox options
     const options = useMemo<EuiComboBoxOptionOption[]>(
       () =>

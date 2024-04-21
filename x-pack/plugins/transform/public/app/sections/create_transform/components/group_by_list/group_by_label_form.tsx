@@ -26,13 +26,13 @@ interface Props {
   onChange(item: PivotGroupByConfig): void;
 }
 
-export const GroupByLabelForm: React.FC<Props> = ({
+export const GroupByLabelForm = ({
   deleteHandler,
   item,
   otherAggNames,
   onChange,
   options,
-}) => {
+}: Props) => {
   const [isPopoverVisible, setPopoverVisibility] = useState(false);
 
   function update(updateItem: PivotGroupByConfig) {

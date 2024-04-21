@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { META_ENGINES_DOCS_URL } from '../../../routes';
 
-export const EmptyMetaEnginesState: React.FC = () => (
+export const EmptyMetaEnginesState = () => (
   <EuiEmptyPrompt
     title={
       <h3>

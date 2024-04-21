@@ -22,7 +22,7 @@ interface Props {
   onChange: ({ minute, hour, day }: { minute?: string; hour?: string; day?: string }) => void;
 }
 
-export const CronWeekly: React.FunctionComponent<Props> = ({
+export const CronWeekly = ({
   disabled,
   minute,
   minuteOptions,
@@ -31,7 +31,7 @@ export const CronWeekly: React.FunctionComponent<Props> = ({
   day,
   dayOptions,
   onChange,
-}) => (
+}: Props) => (
   <Fragment>
     <EuiFormRow
       label={
@@ -55,7 +55,6 @@ export const CronWeekly: React.FunctionComponent<Props> = ({
         data-test-subj="cronFrequencyWeeklyDaySelect"
       />
     </EuiFormRow>
-
     <EuiFormRow
       label={
         <FormattedMessage

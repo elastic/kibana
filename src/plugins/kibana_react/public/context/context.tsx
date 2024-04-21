@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
 import { createReactOverlays } from '../overlays';
 import { createNotifications } from '../notifications';
@@ -28,8 +28,8 @@ export const useKibana = <Extra extends object = {}>(): KibanaReactContextValue<
 
 export const withKibana = <Props extends { kibana: KibanaReactContextValue<{}> }>(
   type: React.ComponentType<Props>
-): React.FC<Omit<Props, 'kibana'>> => {
-  const EnhancedType: React.FC<Omit<Props, 'kibana'>> = (props: Omit<Props, 'kibana'>) => {
+): ((props: Omit<Props, 'kibana'>) => React.ReactElement) => {
+  const EnhancedType = (props: Omit<Props, 'kibana'>) => {
     const kibana = useKibana();
     return React.createElement(type, { ...props, kibana } as Props);
   };
@@ -45,9 +45,12 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
     notifications: createNotifications(services),
   };
 
-  const Provider: React.FC<{ services?: Services }> = ({
-    services: newServices = {},
+  const Provider = ({
+    services: newServices = {} as Services,
     children,
+  }: {
+    services?: Services;
+    children?: React.ReactNode;
   }) => {
     const oldValue = useKibana();
     const { value: newValue } = useMemo(

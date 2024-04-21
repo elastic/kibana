@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import './help_popover.scss';
 
-export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {
+export const HelpPopoverButton = ({ onClick }: { onClick: EuiLinkButtonProps['onClick'] }) => {
   return (
     <EuiButtonIcon
       className="mlHelpPopover__buttonIcon"
@@ -29,9 +28,10 @@ export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> =
 interface HelpPopoverProps {
   anchorPosition?: EuiPopoverProps['anchorPosition'];
   title?: string;
+  children: React.ReactNode;
 }
 
-export const HelpPopover: FC<HelpPopoverProps> = ({ anchorPosition, children, title }) => {
+export const HelpPopover = ({ anchorPosition, children, title }: HelpPopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (

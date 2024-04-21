@@ -12,9 +12,10 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface FlyoutPanelProps {
   title: string;
+  children?: React.ReactNode;
 }
 
-export const FlyoutPanel: React.FC<FlyoutPanelProps> = ({ children, title }) => {
+export const FlyoutPanel = ({ children, title }: FlyoutPanelProps) => {
   return (
     <EuiPanel paddingSize="l" color="subdued" hasShadow={false}>
       <EuiTitle size="xs">

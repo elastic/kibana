@@ -134,7 +134,7 @@ const steps: EuiContainedStepProps[] = [
   },
 ];
 
-export const NlpEnrichmentPanel: React.FC = () => (
+export const NlpEnrichmentPanel = () => (
   <>
     <EuiSpacer />
     <EuiFlexGroup direction="column">

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { css } from '@emotion/css';
 import {
@@ -344,7 +344,7 @@ interface Props {
   navNode: ChromeProjectNavigationNode;
 }
 
-export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode }) => {
+export const NavigationSectionUI = React.memo(({ navNode: _navNode }: Props) => {
   const { activeNodes } = useNavigation();
   const { navigateToUrl, isSideNavCollapsed } = useServices();
 

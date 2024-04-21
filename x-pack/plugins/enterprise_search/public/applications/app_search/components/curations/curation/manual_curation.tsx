@@ -24,7 +24,7 @@ import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultLogic, AddResultFlyout } from './results';
 import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
-export const ManualCuration: React.FC = () => {
+export const ManualCuration = () => {
   const { curationId } = useParams() as { curationId: string };
   const logic = CurationLogic({ curationId });
   const { onSelectPageTab } = useActions(logic);

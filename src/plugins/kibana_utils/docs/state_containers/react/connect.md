@@ -7,7 +7,7 @@ interface Props {
   name: string;
   punctuation: '.' | ',' | '!',
 }
-const Demo: React.FC<Props> = ({ name, punctuation }) =>
+const Demo = ({ name, punctuation }: Props) =>
   <div>Hello, {name}{punctuation}</div>;
 
 const store = createStateContainer({ userName: 'John' });

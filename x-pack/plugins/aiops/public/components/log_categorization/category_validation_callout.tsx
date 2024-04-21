@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
@@ -17,7 +16,7 @@ interface Props {
   validationResults: FieldValidationResults | null;
 }
 
-export const FieldValidationCallout: FC<Props> = ({ validationResults }) => {
+export const FieldValidationCallout = ({ validationResults }: Props) => {
   if (validationResults === null) {
     return null;
   }

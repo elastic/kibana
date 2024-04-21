@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiDescribedFormGroup, EuiTitle, EuiFormRow, EuiSwitch } from '@elastic/eui';
@@ -26,7 +26,7 @@ export interface Props {
   areErrorsVisible: boolean;
 }
 
-export const ConnectionMode: FunctionComponent<Props> = (props) => {
+export const ConnectionMode = (props: Props) => {
   const { fields, onFieldsChange } = props;
   const { mode } = fields;
   const { isCloudEnabled } = useAppContext();

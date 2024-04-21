@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -42,7 +41,7 @@ interface Props {
   timeRange: TimeRange;
 }
 
-export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
+export const CreateJob = ({ dataView, field, query, timeRange }: Props) => {
   const {
     services: {
       data,

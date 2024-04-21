@@ -47,14 +47,14 @@ interface AddSubtechniqueProps {
   onFieldChange: (threats: Threats) => void;
 }
 
-export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
+export const MitreAttackSubtechniqueFields = ({
   field,
   idAria,
   isDisabled,
   threatIndex,
   techniqueIndex,
   onFieldChange,
-}): JSX.Element => {
+}: AddSubtechniqueProps): JSX.Element => {
   const values = field.value as Threats;
   const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
 

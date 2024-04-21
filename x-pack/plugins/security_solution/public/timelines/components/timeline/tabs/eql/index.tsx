@@ -65,7 +65,7 @@ const NO_SORTING: Sort[] = [];
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
-export const EqlTabContentComponent: React.FC<Props> = ({
+export const EqlTabContentComponent = ({
   activeTab,
   columns,
   end,
@@ -81,7 +81,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   showExpandedDetails,
   start,
   timerangeKind,
-}) => {
+}: Props) => {
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();

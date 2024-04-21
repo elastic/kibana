@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -53,7 +52,7 @@ export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
   sortDirection: 'desc',
 });
 
-export const NotificationsList: FC = () => {
+export const NotificationsList = () => {
   const {
     services: {
       mlServices: { mlApiServices },

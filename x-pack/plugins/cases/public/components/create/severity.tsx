@@ -20,7 +20,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const SeverityComponent: React.FC<Props> = ({ isLoading }) => (
+const SeverityComponent = ({ isLoading }: Props) => (
   <UseField<CaseSeverity>
     path={'severity'}
     componentProps={{

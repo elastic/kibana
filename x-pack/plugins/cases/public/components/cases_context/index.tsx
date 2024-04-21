@@ -62,8 +62,9 @@ export interface CasesContextProps
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
-export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: QueryClient }> = ({
+export const CasesProvider = ({
   children,
+
   value: {
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
@@ -74,7 +75,12 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
     releasePhase = 'ga',
     getFilesClient,
   },
+
   queryClient = casesQueryClient,
+}: {
+  children: React.ReactNode;
+  value: CasesContextProps;
+  queryClient?: QueryClient;
 }) => {
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 

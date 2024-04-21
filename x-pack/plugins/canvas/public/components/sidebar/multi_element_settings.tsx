@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,7 +25,7 @@ const strings = {
     }),
 };
 
-export const MultiElementSettings: FunctionComponent = () => (
+export const MultiElementSettings = () => (
   <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">
     <EuiText size="s">
       <p>{strings.getMultipleElementsDescription()}</p>

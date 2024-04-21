@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import type { FC } from 'react';
 
 import { ContentEditorFlyoutContent } from './editor_flyout_content';
 import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_content';
@@ -25,6 +24,6 @@ type CommonProps = Pick<
 
 export type Props = CommonProps;
 
-export const ContentEditorFlyoutContentContainer: FC<Props> = (props) => {
+export const ContentEditorFlyoutContentContainer = (props: Props) => {
   return <ContentEditorFlyoutContent {...props} />;
 };

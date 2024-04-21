@@ -76,7 +76,7 @@ const StyledLinkButton = styled(EuiButton)`
   }
 `;
 
-const EventsByDatasetComponent: React.FC<Props> = ({
+const EventsByDatasetComponent = ({
   combinedQueries,
   deleteQuery,
   filters,
@@ -98,7 +98,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   toggleTopN,
   hideQueryToggle = false,
-}) => {
+}: Props) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
   useEffect(() => {

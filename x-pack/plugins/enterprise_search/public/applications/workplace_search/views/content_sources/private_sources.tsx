@@ -37,7 +37,7 @@ import {
 import { SourcesLogic } from './sources_logic';
 import { SourcesView } from './sources_view';
 
-export const PrivateSources: React.FC = () => {
+export const PrivateSources = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { initializeSources, setSourceSearchability, resetSourcesState } = useActions(SourcesLogic);
 

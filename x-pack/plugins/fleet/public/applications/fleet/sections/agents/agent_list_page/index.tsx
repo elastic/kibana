@@ -44,7 +44,7 @@ import {
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
-export const AgentListPage: React.FunctionComponent<{}> = () => {
+export const AgentListPage = () => {
   const { cloud } = useStartServices();
   useBreadcrumbs('agent_list');
 

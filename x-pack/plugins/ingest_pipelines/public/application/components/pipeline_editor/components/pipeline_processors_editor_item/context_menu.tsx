@@ -6,7 +6,7 @@
  */
 
 import classNames from 'classnames';
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 
@@ -22,7 +22,7 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export const ContextMenu: FunctionComponent<Props> = (props) => {
+export const ContextMenu = (props: Props) => {
   const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled, hidden } = props;
   const [isOpen, setIsOpen] = useState<boolean>(false);
 

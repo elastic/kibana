@@ -27,7 +27,7 @@ interface Props {
   values: string[] | number[] | null | undefined;
 }
 
-const AlertFieldComponent: React.FC<Props> = ({
+const AlertFieldComponent = ({
   contextId,
   'data-test-subj': dataTestSubj = 'alertField',
   eventId,
@@ -39,7 +39,7 @@ const AlertFieldComponent: React.FC<Props> = ({
   suffix,
   scopeId,
   values,
-}) =>
+}: Props) =>
   values != null ? (
     <AlertFieldFlexGroup
       alignItems="center"

@@ -73,16 +73,7 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIpComponent: React.FC<{
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
-  truncate?: boolean;
-  value: string | object | null | undefined;
-}> = ({
+const NonDecoratedIpComponent = ({
   contextId,
   eventId,
   fieldName,
@@ -91,6 +82,15 @@ const NonDecoratedIpComponent: React.FC<{
   isDraggable,
   truncate,
   value,
+}: {
+  contextId: string;
+  eventId: string;
+  fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
+  isDraggable: boolean;
+  truncate?: boolean;
+  value: string | object | null | undefined;
 }) => {
   const key = useMemo(
     () =>
@@ -151,7 +151,7 @@ interface AddressLinksItemProps extends Omit<AddressLinksProps, 'addresses'> {
   address: string;
 }
 
-const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
+const AddressLinksItemComponent = ({
   address,
   Component,
   contextId,
@@ -164,7 +164,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   onClick,
   truncate,
   title,
-}) => {
+}: AddressLinksItemProps) => {
   const key = `address-links-draggable-wrapper-${getUniqueId({
     contextId,
     eventId,
@@ -295,7 +295,7 @@ interface AddressLinksProps {
   title?: string;
 }
 
-const AddressLinksComponent: React.FC<AddressLinksProps> = ({
+const AddressLinksComponent = ({
   addresses,
   Component,
   contextId,
@@ -308,7 +308,7 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   onClick,
   truncate,
   title,
-}) => {
+}: AddressLinksProps) => {
   const uniqAddresses = useMemo(() => uniq(addresses), [addresses]);
 
   const content = useMemo(
@@ -362,20 +362,7 @@ const AddressLinks = React.memo(
     deepEqual(prevProps.addresses, nextProps.addresses)
 );
 
-const FormattedIpComponent: React.FC<{
-  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  contextId: string;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isButton?: boolean;
-  isDraggable: boolean;
-  onClick?: () => void;
-  title?: string;
-  truncate?: boolean;
-  value: string | object | null | undefined;
-}> = ({
+const FormattedIpComponent = ({
   Component,
   contextId,
   eventId,
@@ -388,6 +375,19 @@ const FormattedIpComponent: React.FC<{
   title,
   truncate,
   value,
+}: {
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  contextId: string;
+  eventId: string;
+  fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
+  isButton?: boolean;
+  isDraggable: boolean;
+  onClick?: () => void;
+  title?: string;
+  truncate?: boolean;
+  value: string | object | null | undefined;
 }) => {
   if (isString(value) && !isEmpty(value)) {
     try {

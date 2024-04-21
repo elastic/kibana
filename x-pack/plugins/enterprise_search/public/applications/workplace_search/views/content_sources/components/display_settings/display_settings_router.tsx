@@ -20,7 +20,7 @@ import {
 
 import { DisplaySettings } from './display_settings';
 
-export const DisplaySettingsRouter: React.FC = () => {
+export const DisplaySettingsRouter = () => {
   const { isOrganization } = useValues(AppLogic);
   return (
     <Routes>

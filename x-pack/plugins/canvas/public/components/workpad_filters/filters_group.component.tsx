@@ -6,7 +6,7 @@
  */
 
 import { EuiAccordion } from '@elastic/eui';
-import React, { FC } from 'react';
+import React from 'react';
 import { FormattedFilterViewInstance } from '../../../types';
 import { createFilledFilterView } from '../../lib/filter';
 import { Filter } from './filter.component';
@@ -22,7 +22,7 @@ const panelStyle = {
   paddingTop: '15px',
 };
 
-export const FiltersGroup: FC<Props> = ({ filtersGroup, id }) => {
+export const FiltersGroup = ({ filtersGroup, id }: Props) => {
   const { name, filters: groupFilters } = filtersGroup;
 
   const filledFilterViews: FormattedFilterViewInstance[] = groupFilters.map((filter) => {

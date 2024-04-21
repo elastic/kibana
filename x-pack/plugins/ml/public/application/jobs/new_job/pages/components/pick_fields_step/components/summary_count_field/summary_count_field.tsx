@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 
 import { SummaryCountFieldSelect } from './summary_count_field_select';
@@ -18,7 +17,7 @@ import type {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const SummaryCountField: FC = () => {
+export const SummaryCountField = () => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

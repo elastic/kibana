@@ -15,7 +15,7 @@ interface Props {
 
 import { DEACTIVATED_USER_CALLOUT_LABEL, DEACTIVATED_USER_CALLOUT_DESCRIPTION } from './constants';
 
-export const DeactivatedUserCallout: React.FC<Props> = ({ isNew }) => (
+export const DeactivatedUserCallout = ({ isNew }: Props) => (
   <>
     {!isNew && <EuiSpacer />}
     <EuiText size="s">

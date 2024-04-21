@@ -25,7 +25,7 @@ interface EditServiceTypeProps {
   connector: Connector;
 }
 
-export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
+export const EditServiceType = ({ connector }: EditServiceTypeProps) => {
   const { http } = useKibanaServices();
   const connectorTypes = useConnectorTypes();
   const queryClient = useQueryClient();

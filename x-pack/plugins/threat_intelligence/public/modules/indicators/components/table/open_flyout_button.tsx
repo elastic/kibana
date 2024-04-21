@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { Indicator } from '../../../../../common/types/indicator';
 import { BUTTON_TEST_ID } from './test_ids';
@@ -29,11 +29,11 @@ export interface OpenIndicatorFlyoutButtonProps {
 /**
  * Button added to the actions column of the indicators table to open/close the IndicatorFlyout component.
  */
-export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
+export const OpenIndicatorFlyoutButton = ({
   indicator,
   onOpen,
   isOpen,
-}) => {
+}: OpenIndicatorFlyoutButtonProps) => {
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL}>
       <EuiButtonIcon

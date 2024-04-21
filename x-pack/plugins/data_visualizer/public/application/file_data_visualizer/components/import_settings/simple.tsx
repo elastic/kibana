@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
@@ -26,7 +25,7 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const SimpleSettings: FC<Props> = ({
+export const SimpleSettings = ({
   index,
   initialized,
   onIndexChange,
@@ -35,7 +34,7 @@ export const SimpleSettings: FC<Props> = ({
   indexNameError,
   combinedFields,
   canCreateDataView,
-}) => {
+}: Props) => {
   return (
     <React.Fragment>
       <EuiFormRow

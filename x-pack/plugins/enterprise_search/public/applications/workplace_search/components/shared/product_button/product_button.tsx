@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 
-export const ProductButton: React.FC = () => {
+export const ProductButton = () => {
   const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {

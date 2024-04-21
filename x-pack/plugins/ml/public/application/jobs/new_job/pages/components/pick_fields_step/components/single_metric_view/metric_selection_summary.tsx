@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { SingleMetricJobCreator } from '../../../../../common/job_creator';
@@ -17,7 +16,7 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 
 const DTR_IDX = 0;
 
-export const SingleMetricDetectorsSummary: FC = () => {
+export const SingleMetricDetectorsSummary = () => {
   const {
     jobCreator: jc,
     chartLoader,

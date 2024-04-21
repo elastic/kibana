@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, VFC } from 'react';
+import React, { useMemo } from 'react';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { unwrapValue } from '../../utils/unwrap_value';
 import { IndicatorFieldsTable } from './fields_table';
@@ -32,10 +32,10 @@ interface HighlightedValuesTableProps {
 /**
  * Displays highlighted indicator values based on indicator type
  */
-export const HighlightedValuesTable: VFC<HighlightedValuesTableProps> = ({
+export const HighlightedValuesTable = ({
   indicator,
   'data-test-subj': dataTestSubj,
-}) => {
+}: HighlightedValuesTableProps) => {
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
   const highlightedFields: string[] = useMemo(

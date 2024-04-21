@@ -11,7 +11,7 @@ import { demoTimelineData } from '../../../../common/demo_data/timeline';
 import { threatMatchRowRenderer } from '../../timeline/body/renderers/cti/threat_match_row_renderer';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const ThreatMatchExampleComponent: React.FC = () => (
+const ThreatMatchExampleComponent = () => (
   <>
     {threatMatchRowRenderer.renderRow({
       data: demoTimelineData[31].ecs,

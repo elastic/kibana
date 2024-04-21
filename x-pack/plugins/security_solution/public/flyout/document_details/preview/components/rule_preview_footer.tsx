@@ -17,7 +17,7 @@ import { RULE_PREVIEW_FOOTER_TEST_ID } from './test_ids';
 /**
  * Footer in rule preview panel
  */
-export const RulePreviewFooter: React.FC = memo(() => {
+export const RulePreviewFooter = memo(() => {
   const { scopeId, eventId, ruleId } = usePreviewPanelContext();
 
   return ruleId ? (

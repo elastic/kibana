@@ -21,7 +21,7 @@ interface Props {
   phase: PhaseWithDownsample;
 }
 
-export const DownsampleField: React.FunctionComponent<Props> = ({ phase }) => {
+export const DownsampleField = ({ phase }: Props) => {
   // const { docLinks } = useKibana().services;
 
   const downsampleEnabledPath = `_meta.${phase}.downsample.enabled`;

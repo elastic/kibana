@@ -14,7 +14,7 @@ import { SendEnterpriseSearchTelemetry } from '../../shared/telemetry';
 
 import { EnterpriseSearchApplicationsPageTemplate } from './layout/page_template';
 
-export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
+export const NotFound = ({ pageChrome = [] }: PageTemplateProps) => {
   return (
     <EnterpriseSearchApplicationsPageTemplate
       pageChrome={[...pageChrome, '404']}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -90,8 +89,18 @@ export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
 
 ExceptionItemsSummary.displayName = 'ExceptionItemsSummary';
 
-const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color']; isSmall?: boolean }> = memo(
-  ({ children, value, color, isSmall = false, ...commonProps }) => {
+const SummaryStat = memo(
+  ({
+    children,
+    value,
+    color,
+    isSmall = false,
+  }: {
+    children: React.ReactNode;
+    value: number;
+    color?: EuiBadgeProps['color'];
+    isSmall?: boolean;
+  }) => {
     return (
       <EuiText className="eui-displayInlineBlock" size={isSmall ? 'xs' : 's'}>
         <StyledEuiFlexGroup

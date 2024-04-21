@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { EuiButton } from '@elastic/eui';
@@ -36,8 +35,8 @@ export interface AssigneesApplyPanelProps {
 /**
  * The popover to allow selection of users from a list
  */
-export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
-  ({ searchInputId, assignedUserIds, onApply }) => {
+export const AssigneesApplyPanel = memo(
+  ({ searchInputId, assignedUserIds, onApply }: AssigneesApplyPanelProps) => {
     /**
      * We use `selectedUserIds` to keep track of currently selected user ids,
      * whereas `assignedUserIds` holds actually assigned user ids.

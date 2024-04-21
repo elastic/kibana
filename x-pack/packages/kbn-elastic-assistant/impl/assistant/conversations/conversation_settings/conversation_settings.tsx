@@ -20,7 +20,6 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { Conversation, Prompt } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -35,7 +34,6 @@ import { getGenAiConfig } from '../../../connectorland/helpers';
 import { ConversationsBulkActions } from '../../api';
 
 export interface ConversationSettingsProps {
-  actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
@@ -56,7 +54,7 @@ export interface ConversationSettingsProps {
 /**
  * Settings for adding/removing conversation and configuring default system prompt and connector.
  */
-export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
+export const ConversationSettings = React.memo(
   ({
     allSystemPrompts,
     assistantStreamingEnabled,
@@ -71,7 +69,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     setConversationSettings,
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
-  }) => {
+  }: ConversationSettingsProps) => {
     const defaultSystemPrompt = useMemo(() => {
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: undefined });
     }, [allSystemPrompts]);

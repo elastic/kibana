@@ -8,12 +8,10 @@
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CheckBoxField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { CaseCustomFieldText } from '../../../../common/types/domain';
-import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
 import * as i18n from '../translations';
 
-const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = () => {
+const ConfigureComponent = () => {
   const config = getTextFieldConfig({
     required: false,
     label: i18n.DEFAULT_VALUE.toLocaleLowerCase(),

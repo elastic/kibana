@@ -26,7 +26,7 @@ import { SourceLogic } from '../../source_logic';
 import { FrequencyItem } from './frequency_item';
 import { SynchronizationLogic } from './synchronization_logic';
 
-export const SyncFrequency: React.FC = () => {
+export const SyncFrequency = () => {
   const { contentSource } = useValues(SourceLogic);
   const {
     schedule: {

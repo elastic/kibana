@@ -42,9 +42,10 @@ export const UptimeThemeContext = createContext(defaultContext);
 
 interface ThemeContextProps {
   darkMode: boolean;
+  children: React.ReactNode;
 }
 
-export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMode, children }) => {
+export const UptimeThemeContextProvider = ({ darkMode, children }: ThemeContextProps) => {
   let colors: UptimeAppColors;
   if (darkMode) {
     colors = {

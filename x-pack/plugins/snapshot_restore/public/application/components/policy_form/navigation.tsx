@@ -16,12 +16,12 @@ interface Props {
   isFormValid: boolean;
 }
 
-export const PolicyNavigation: React.FunctionComponent<Props> = ({
+export const PolicyNavigation = ({
   currentStep,
   maxCompletedStep,
   updateCurrentStep,
   isFormValid,
-}) => {
+}: Props) => {
   const { i18n } = useServices();
 
   const steps = [

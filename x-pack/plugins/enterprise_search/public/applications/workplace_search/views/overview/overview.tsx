@@ -40,7 +40,7 @@ const HEADER_DESCRIPTION = i18n.translate(
   { defaultMessage: "Your organizations's statistics and activity" }
 );
 
-export const Overview: React.FC = () => {
+export const Overview = () => {
   const {
     organization: { name: orgName, defaultOrgName, kibanaUIsEnabled },
   } = useValues(AppLogic);

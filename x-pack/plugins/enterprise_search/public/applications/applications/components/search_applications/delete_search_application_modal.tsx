@@ -21,10 +21,10 @@ export interface DeleteSearchApplicationModalProps {
   searchApplicationName: string;
 }
 
-export const DeleteSearchApplicationModal: React.FC<DeleteSearchApplicationModalProps> = ({
+export const DeleteSearchApplicationModal = ({
   searchApplicationName,
   onClose,
-}) => {
+}: DeleteSearchApplicationModalProps) => {
   const { deleteSearchApplication } = useActions(SearchApplicationsListLogic);
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { isDeleteLoading } = useValues(SearchApplicationsListLogic);

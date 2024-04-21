@@ -22,12 +22,12 @@ interface MetaEnginesTableNameContentProps {
   showRow: (name: string) => void;
 }
 
-export const MetaEnginesTableNameColumnContent: React.FC<MetaEnginesTableNameContentProps> = ({
+export const MetaEnginesTableNameColumnContent = ({
   item: { name, schemaConflicts, engine_count: engineCount },
   isExpanded,
   hideRow,
   showRow,
-}) => (
+}: MetaEnginesTableNameContentProps) => (
   <EuiFlexGroup direction="column" gutterSize="none">
     {renderEngineLink(name)}
     <button

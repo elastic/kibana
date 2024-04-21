@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { InPortal, OutPortal } from 'react-reverse-portal';
 import { EuiSkeletonText } from '@elastic/eui';
@@ -14,7 +13,7 @@ import { MlPageControlsContext } from '../ml_page/ml_page';
 /**
  * Component for setting the page header content.
  */
-export const MlPageHeader: FC = ({ children }) => {
+export const MlPageHeader = ({ children }: { children: React.ReactNode }) => {
   const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
 
   useEffect(() => {
@@ -31,7 +30,7 @@ export const MlPageHeader: FC = ({ children }) => {
 /**
  * Renders content of the {@link MlPageHeader}
  */
-export const MlPageHeaderRenderer: FC = () => {
+export const MlPageHeaderRenderer = () => {
   const { headerPortal, isHeaderMounted } = useContext(MlPageControlsContext);
 
   return isHeaderMounted ? <OutPortal node={headerPortal} /> : <EuiSkeletonText lines={1} />;

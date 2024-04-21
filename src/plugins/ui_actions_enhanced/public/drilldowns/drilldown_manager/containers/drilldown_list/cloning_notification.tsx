@@ -7,7 +7,7 @@
  */
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 const txtDismiss = i18n.translate(
@@ -31,7 +31,7 @@ export interface CloningNotificationProps {
   count?: number;
 }
 
-export const CloningNotification: React.FC<CloningNotificationProps> = ({ count = 1 }) => {
+export const CloningNotification = ({ count = 1 }: CloningNotificationProps) => {
   const [dismissed, setDismissed] = React.useState(false);
 
   if (dismissed) return null;

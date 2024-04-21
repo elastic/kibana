@@ -6,7 +6,6 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/react';
@@ -30,7 +29,7 @@ import {
 /**
  * Displays the rule description of a signal document.
  */
-export const AlertDescription: FC = () => {
+export const AlertDescription = () => {
   const { telemetry } = useKibana().services;
   const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
     useRightPanelContext();

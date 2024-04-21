@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -21,7 +21,7 @@ interface Props {
   readOnly: boolean;
 }
 
-export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
+export const GetStep = ({ display, readOnly }: Props) => (
   <span data-test-subj="getStep" style={{ display: display ? 'block' : 'none' }}>
     <EuiText>
       <h3>{i18n.STEP_3}</h3>

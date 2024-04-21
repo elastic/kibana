@@ -39,13 +39,13 @@ interface NoResultsSuggestionProps {
   onDisableFilters: NoResultsSuggestionWhenFiltersProps['onDisableFilters'];
 }
 
-export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
+export const NoResultsSuggestions = ({
   dataView,
   isTimeBased,
   query,
   filters,
   onDisableFilters,
-}) => {
+}: NoResultsSuggestionProps) => {
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const { data, uiSettings, timefilter } = services;

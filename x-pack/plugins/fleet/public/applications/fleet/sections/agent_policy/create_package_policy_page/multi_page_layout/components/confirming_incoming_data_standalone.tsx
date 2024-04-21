@@ -13,9 +13,7 @@ interface Props {
   troubleshootLink: string;
 }
 
-export const ConfirmIncomingDataStandalone: React.FunctionComponent<Props> = ({
-  troubleshootLink,
-}) => {
+export const ConfirmIncomingDataStandalone = ({ troubleshootLink }: Props) => {
   return (
     <>
       <EuiText>

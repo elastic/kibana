@@ -26,7 +26,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const NoticeModal: React.FunctionComponent<Props> = ({ noticePath, onClose }) => {
+export const NoticeModal = ({ noticePath, onClose }: Props) => {
   const { notifications } = useStartServices();
   const [notice, setNotice] = useState<string | undefined>(undefined);
 

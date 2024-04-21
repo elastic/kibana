@@ -18,7 +18,7 @@ interface Props {
   cutoff?: number;
 }
 
-export const TruncatedEnginesList: React.FC<Props> = ({ engines, cutoff = 3 }) => {
+export const TruncatedEnginesList = ({ engines, cutoff = 3 }: Props) => {
   if (!engines?.length) return null;
 
   const displayedEngines = engines.slice(0, cutoff);

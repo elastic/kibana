@@ -62,7 +62,7 @@ const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false):
   return dateObj.valueOf();
 };
 
-export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
+export const MetricsExplorerChartContextMenu = ({
   onFilter,
   options,
   series,

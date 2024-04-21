@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React, { VFC } from 'react';
+import React from 'react';
 import { EMPTY_VALUE } from '../constants/common';
 import { dateFormatter } from '../utils/dates';
 import { useDateFormat, useTimeZone } from '../hooks/use_kibana_ui_settings';
@@ -18,7 +18,7 @@ export interface DateFormatterProps {
   dateFormat?: string;
 }
 
-export const DateFormatter: VFC<DateFormatterProps> = ({ date, dateFormat }) => {
+export const DateFormatter = ({ date, dateFormat }: DateFormatterProps) => {
   const userTimeZone = useTimeZone();
   const userFormat = useDateFormat();
 

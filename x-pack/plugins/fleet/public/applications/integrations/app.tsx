@@ -51,19 +51,7 @@ const EmptyContext = () => <></>;
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
  * and no routes defined
  */
-export const IntegrationsAppContext: React.FC<{
-  basepath: string;
-  startServices: FleetStartServices;
-  config: FleetConfigType;
-  history: AppMountParameters['history'];
-  kibanaVersion: string;
-  extensions: UIExtensionsStorage;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-  /** For testing purposes only */
-  routerHistory?: History<any>; // TODO remove
-  fleetStatus?: FleetStatusProviderProps;
-}> = memo(
+export const IntegrationsAppContext = memo(
   ({
     children,
     startServices,
@@ -74,6 +62,19 @@ export const IntegrationsAppContext: React.FC<{
     setHeaderActionMenu,
     theme$,
     fleetStatus,
+  }: {
+    children: React.ReactNode;
+    basepath: string;
+    startServices: FleetStartServices;
+    config: FleetConfigType;
+    history: AppMountParameters['history'];
+    kibanaVersion: string;
+    extensions: UIExtensionsStorage;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    theme$: AppMountParameters['theme$'];
+    /** For testing purposes only */
+    routerHistory?: History<any>; // TODO remove;
+    fleetStatus?: FleetStatusProviderProps;
   }) => {
     const theme = useObservable(theme$);
     const isDarkMode = theme && theme.darkMode;
@@ -160,7 +161,6 @@ export const AppRoutes = memo(() => {
           }}
         />
       </Routes>
-
       {flyoutContext.isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout
@@ -174,7 +174,6 @@ export const AppRoutes = memo(() => {
           />
         </EuiPortal>
       )}
-
       {flyoutContext.isFleetServerFlyoutOpen && (
         <EuiPortal>
           <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />

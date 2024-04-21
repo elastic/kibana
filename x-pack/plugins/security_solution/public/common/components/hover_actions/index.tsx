@@ -129,7 +129,7 @@ const isFocusTrapDisabled = ({
   return !ownFocus;
 };
 
-export const HoverActions: React.FC<Props> = React.memo(
+export const HoverActions = React.memo(
   ({
     additionalContent = null,
     closePopOver,
@@ -154,7 +154,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     toggleColumn,
     toggleTopN,
     values,
-  }) => {
+  }: Props) => {
     const [stKeyboardEvent, setStKeyboardEvent] = useState<React.KeyboardEvent>();
     const [isActive, setIsActive] = useState(false);
     const [isOverflowPopoverOpen, setIsOverflowPopoverOpen] = useState(false);

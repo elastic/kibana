@@ -34,7 +34,7 @@ const mapRoleToMessageComponent = {
   ),
 };
 
-export const MessageList: React.FC<MessageListProps> = ({ messages }) => (
+export const MessageList = ({ messages }: MessageListProps) => (
   <EuiCommentList gutterSize="m">
     {messages.map((message) => (
       <React.Fragment key={message.id}>

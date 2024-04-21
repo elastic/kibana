@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 
 import type {
   NoDataViewsPromptServices,
@@ -19,10 +19,10 @@ const NoDataViewsPromptContext = React.createContext<NoDataViewsPromptServices |
 /**
  * Abstract external service Provider.
  */
-export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
+export const NoDataViewsPromptProvider = ({
   children,
   ...services
-}) => {
+}: PropsWithChildren<NoDataViewsPromptServices>) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, onTryESQL, esqlDocLink } =
@@ -46,10 +46,10 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependencies> = ({
+export const NoDataViewsPromptKibanaProvider = ({
   children,
   ...services
-}) => {
+}: PropsWithChildren<NoDataViewsPromptKibanaDependencies>) => {
   const {
     share,
     coreStart: {

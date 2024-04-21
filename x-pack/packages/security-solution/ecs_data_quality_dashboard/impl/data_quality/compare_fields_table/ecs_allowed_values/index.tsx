@@ -21,7 +21,7 @@ interface Props {
   allowedValues: AllowedValue[] | undefined;
 }
 
-const EcsAllowedValuesComponent: React.FC<Props> = ({ allowedValues }) =>
+const EcsAllowedValuesComponent = ({ allowedValues }: Props) =>
   allowedValues == null ? (
     <EuiCode data-test-subj="ecsAllowedValuesEmpty">{EMPTY_PLACEHOLDER}</EuiCode>
   ) : (

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
@@ -121,7 +120,7 @@ export const useCreateFormattedExample = () => {
   return createFormattedExample;
 };
 
-export const FormattedPatternExamples: FC<Props> = ({ category, count }) => {
+export const FormattedPatternExamples = ({ category, count }: Props) => {
   const createFormattedExample = useCreateFormattedExample();
 
   const e = useMemo(() => {
@@ -141,7 +140,7 @@ export const FormattedPatternExamples: FC<Props> = ({ category, count }) => {
   return <WrapInText>{e}</WrapInText>;
 };
 
-export const FormattedRegex: FC<Props> = ({ category }) => {
+export const FormattedRegex = ({ category }: Props) => {
   const { tokenStyle, wildcardStyle } = useStyles();
 
   const { regex } = category;
@@ -165,7 +164,7 @@ export const FormattedRegex: FC<Props> = ({ category }) => {
   );
 };
 
-export const FormattedTokens: FC<Props> = ({ category }) => {
+export const FormattedTokens = ({ category }: Props) => {
   const { tokenStyle } = useStyles();
 
   return (
@@ -175,7 +174,7 @@ export const FormattedTokens: FC<Props> = ({ category }) => {
   );
 };
 
-const WrapInText: FC = ({ children }) => (
+const WrapInText = ({ children }: { children: React.ReactNode }) => (
   <EuiText css={{ fontWeight: 'bold' }} size="s">
     {children}
   </EuiText>

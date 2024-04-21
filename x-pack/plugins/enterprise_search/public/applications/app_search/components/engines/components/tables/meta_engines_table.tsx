@@ -40,13 +40,13 @@ export interface ConflictingEnginesSets {
   [key: string]: Set<string>;
 }
 
-export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
+export const MetaEnginesTable = ({
   items,
   loading,
   noItemsMessage,
   pagination,
   onChange,
-}) => {
+}: EnginesTableProps) => {
   const { expandedSourceEngines } = useValues(MetaEnginesTableLogic);
   const { hideRow, fetchOrDisplayRow } = useActions(MetaEnginesTableLogic);
   const {

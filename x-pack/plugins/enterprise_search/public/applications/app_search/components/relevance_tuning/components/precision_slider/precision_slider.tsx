@@ -28,7 +28,7 @@ import { STEP_DESCRIPTIONS } from './constants';
 
 import './precision_slider.scss';
 
-export const PrecisionSlider: React.FC = () => {
+export const PrecisionSlider = () => {
   const {
     searchSettings: { precision },
   } = useValues(RelevanceTuningLogic);

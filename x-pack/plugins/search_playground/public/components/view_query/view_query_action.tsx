@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewQueryFlyout } from './view_query_flyout';
 import { ChatForm, ChatFormFields } from '../../types';
 
-export const ViewQueryAction: React.FC = () => {
+export const ViewQueryAction = () => {
   const [showFlyout, setShowFlyout] = useState(false);
   const { watch } = useFormContext<ChatForm>();
   const selectedIndices: string[] = watch(ChatFormFields.indices);

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { EuiProvider } from '@elastic/eui';
 import { useBreakpoints } from './use_breakpoints';
 
-const wrapper: FC = ({ children }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiProvider
     modify={{
       // set in apm/public/application/index.tsx

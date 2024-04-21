@@ -39,9 +39,11 @@ export function getConfirmFleetServerConnectionStep({
   };
 }
 
-const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
+const ConfirmFleetServerConnectionStepContent = ({
+  hasRecentlyEnrolledFleetServers,
+}: {
   hasRecentlyEnrolledFleetServers: boolean;
-}> = ({ hasRecentlyEnrolledFleetServers }) => {
+}) => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
 

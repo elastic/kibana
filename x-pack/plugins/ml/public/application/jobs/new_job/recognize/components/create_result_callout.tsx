@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiCallOut, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,8 +17,8 @@ interface CreateResultCalloutProps {
   onReset: () => {};
 }
 
-export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
-  ({ saveState, resultsUrl, onReset }) => {
+export const CreateResultCallout = memo(
+  ({ saveState, resultsUrl, onReset }: CreateResultCalloutProps) => {
     if (saveState === SAVE_STATE.NOT_SAVED) {
       return null;
     }

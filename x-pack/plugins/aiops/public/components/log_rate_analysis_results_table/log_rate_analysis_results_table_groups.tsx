@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 
@@ -68,7 +67,7 @@ interface LogRateAnalysisResultsTableProps {
   zeroDocsFallback?: boolean;
 }
 
-export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTableProps> = ({
+export const LogRateAnalysisResultsGroupsTable = ({
   significantItems,
   groupTableItems,
   loading,
@@ -78,7 +77,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   barColorOverride,
   barHighlightColorOverride,
   zeroDocsFallback = false,
-}) => {
+}: LogRateAnalysisResultsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<'docCount' | 'pValue'>(

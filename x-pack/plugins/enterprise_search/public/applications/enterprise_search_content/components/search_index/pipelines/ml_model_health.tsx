@@ -115,11 +115,11 @@ export interface TrainedModelHealthProps {
   isDownloadable?: boolean;
 }
 
-export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
+export const TrainedModelHealth = ({
   modelState,
   modelStateReason,
   isDownloadable,
-}) => {
+}: TrainedModelHealthProps) => {
   let modelHealth: {
     healthColor: string;
     healthText: React.ReactNode;

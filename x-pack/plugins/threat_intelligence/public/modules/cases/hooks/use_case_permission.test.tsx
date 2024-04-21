@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../../../hooks/use_kibana';
@@ -17,7 +17,7 @@ const casesServiceMock = casesPluginMock.createStartContract();
 
 const getProviderComponent =
   (mockedServices: unknown) =>
-  ({ children }: { children: ReactNode }) =>
+  ({ children }: { children?: ReactNode }) =>
     (
       <TestProvidersComponent>
         <KibanaContext.Provider value={{ services: mockedServices } as any}>
@@ -43,7 +43,7 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC = getProviderComponent(mockedServices);
+    const ProviderComponent = getProviderComponent(mockedServices);
 
     const indicatorName: string = 'abc';
 
@@ -67,7 +67,7 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC = getProviderComponent(mockedServices);
+    const ProviderComponent = getProviderComponent(mockedServices);
 
     const indicatorName: string = 'abc';
 
@@ -91,7 +91,7 @@ describe('useCasePermission', () => {
       },
     };
     // @ts-ignore
-    const ProviderComponent: FC = getProviderComponent(mockedServices);
+    const ProviderComponent = getProviderComponent(mockedServices);
 
     const indicatorName: string = EMPTY_VALUE;
 

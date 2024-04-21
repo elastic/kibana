@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -22,9 +21,9 @@ describe('when using PaginatedContent', () => {
     item: Foo;
   }
 
-  type ItemComponentType = FC<ItemComponentProps>;
+  type ItemComponentType = (props: ItemComponentProps) => JSX.Element;
 
-  type PropsForPaginatedContent = PaginatedContentProps<Foo, FC<ItemComponentProps>>;
+  type PropsForPaginatedContent = PaginatedContentProps<Foo, ItemComponentType>;
 
   const ItemComponent: ItemComponentType = jest.fn((props) => (
     <div className="foo-item">{'hi'}</div>

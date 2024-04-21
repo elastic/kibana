@@ -59,7 +59,7 @@ export const useAgentPolicyFormContext = () => {
   return React.useContext(AgentPolicyFormContext);
 };
 
-export const AgentPolicyForm: React.FunctionComponent<Props> = ({
+export const AgentPolicyForm = ({
   agentPolicy,
   updateAgentPolicy,
   withSysMonitoring,
@@ -67,7 +67,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   validation,
   isEditing = false,
   updateAdvancedSettingsHasErrors,
-}) => {
+}: Props) => {
   const authz = useAuthz();
   const hasFleetAllAgentPoliciesPrivileges = !authz.fleet.allAgentPolicies;
 

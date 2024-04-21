@@ -105,7 +105,7 @@ interface Props {
   updatePatternRollup: (patternRollup: PatternRollup, requestTime?: number) => void;
 }
 
-const PatternComponent: React.FC<Props> = ({
+const PatternComponent = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   endDate,
@@ -125,7 +125,7 @@ const PatternComponent: React.FC<Props> = ({
   baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
-}) => {
+}: Props) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { isILMAvailable } = useDataQualityContext();
   const [sorting, setSorting] = useState<SortConfig>(defaultSort);

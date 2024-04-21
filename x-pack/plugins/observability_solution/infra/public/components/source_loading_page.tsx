@@ -10,7 +10,7 @@ import React from 'react';
 
 import { LoadingPage } from './loading_page';
 
-export const SourceLoadingPage: React.FunctionComponent = () => (
+export const SourceLoadingPage = () => (
   <LoadingPage
     data-test-subj="sourceLoadingPage"
     message={

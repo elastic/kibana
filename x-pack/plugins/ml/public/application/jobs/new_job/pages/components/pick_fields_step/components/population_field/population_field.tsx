@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 
 import type { Field } from '@kbn/ml-anomaly-utils';
@@ -17,7 +16,7 @@ import { Description } from './description';
 import type { PopulationJobCreator, RareJobCreator } from '../../../../../common/job_creator';
 import { isPopulationJobCreator } from '../../../../../common/job_creator';
 
-export const PopulationFieldSelector: FC = () => {
+export const PopulationFieldSelector = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator | RareJobCreator;
 

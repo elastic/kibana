@@ -26,7 +26,7 @@ import './error_state_prompt.scss';
  */
 const WORKPLACE_SEARCH_PERSONAL_DASHBOARD_PATH = '/p/';
 
-export const ErrorStatePrompt: React.FC = () => {
+export const ErrorStatePrompt = () => {
   const { setChromeIsVisible, history } = useValues(KibanaLogic);
   const isWorkplaceSearchPersonalDashboardRoute = history.location.pathname.includes(
     WORKPLACE_SEARCH_PERSONAL_DASHBOARD_PATH
@@ -66,7 +66,7 @@ export const ErrorStatePrompt: React.FC = () => {
   );
 };
 
-export const ErrorStateCallout: React.FC = () => {
+export const ErrorStateCallout = () => {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.enterpriseSearch.errorConnectingCallout.title', {
@@ -86,7 +86,7 @@ export const ErrorStateCallout: React.FC = () => {
   );
 };
 
-const ErrorBody: React.FC = () => {
+const ErrorBody = () => {
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { config, cloud } = useValues(KibanaLogic);
   return (

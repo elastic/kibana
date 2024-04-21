@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { AppLogic } from '../../../../app_logic';
 import { CredentialsLogic } from '../../credentials_logic';
 
-export const FormKeyEngineAccess: React.FC = () => {
+export const FormKeyEngineAccess = () => {
   const { myRole } = useValues(AppLogic);
   const { setAccessAllEngines } = useActions(CredentialsLogic);
   const { fullEngineAccessChecked } = useValues(CredentialsLogic);
@@ -97,7 +97,7 @@ export const FormKeyEngineAccess: React.FC = () => {
   );
 };
 
-export const EngineSelection: React.FC = () => {
+export const EngineSelection = () => {
   const { onEngineSelect } = useActions(CredentialsLogic);
   const { activeApiToken, engines } = useValues(CredentialsLogic);
 

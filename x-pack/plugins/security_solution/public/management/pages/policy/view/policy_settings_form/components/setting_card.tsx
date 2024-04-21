@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,7 +62,7 @@ export type SettingCardProps = React.PropsWithChildren<{
   selected?: boolean;
 }>;
 
-export const SettingCard: FC<SettingCardProps> = memo(
+export const SettingCard = memo(
   ({
     type,
     supportedOss,
@@ -72,7 +72,7 @@ export const SettingCard: FC<SettingCardProps> = memo(
     children,
     selected = true,
     mode = 'edit',
-  }) => {
+  }: SettingCardProps) => {
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
     const getTestId = useTestIdGenerator(dataTestSubj);
 

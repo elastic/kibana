@@ -21,14 +21,14 @@ export interface TimelineRefetchProps {
   skip?: boolean;
 }
 
-const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
+const TimelineRefetchComponent = ({
   id,
   inputId,
   inspect,
   loading,
   refetch,
   skip,
-}) => {
+}: TimelineRefetchProps) => {
   const dispatch = useDispatch();
 
   useEffect(() => {

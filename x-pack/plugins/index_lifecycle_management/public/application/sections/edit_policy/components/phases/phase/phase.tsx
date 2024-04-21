@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import {
   EuiFlexGroup,
@@ -31,6 +31,7 @@ import './phase.scss';
 import { PhaseTitle } from './phase_title';
 
 interface Props {
+  children?: React.ReactNode;
   phase: PhaseType;
   /**
    * Settings that should always be visible on the phase when it is enabled.
@@ -38,7 +39,7 @@ interface Props {
   topLevelSettings?: React.ReactNode;
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
+export const Phase = ({ children, topLevelSettings, phase }: Props) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],

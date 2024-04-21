@@ -41,14 +41,14 @@ interface ConfigCompletedProps {
   showFeedbackLink?: boolean;
 }
 
-export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
+export const ConfigCompleted = ({
   name,
   advanceStep,
   accountContextOnly,
   header,
   privateSourcesEnabled,
   showFeedbackLink,
-}) => (
+}: ConfigCompletedProps) => (
   <>
     {header}
     <EuiSpacer size="xxl" />

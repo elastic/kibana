@@ -39,12 +39,12 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   },
 ];
 
-export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
+export const ThreatIntelPanelView = ({
   isInspectEnabled = true,
   listItems,
   splitPanel,
   totalCount = 0,
-}) => {
+}: LinkPanelViewProps) => {
   return (
     <LinkPanel
       {...{

@@ -44,14 +44,14 @@ interface WithLensDataParams<Props, OutputState> {
 }
 
 export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
-  Component: React.FC<T & OutputState>,
+  Component: (props: T & OutputState) => JSX.Element,
   {
     dataLoadTransform,
     getAttributes,
     initialValues,
   }: WithLensDataParams<Omit<T, keyof OutputState>, OutputState>
 ) => {
-  const ComponentWithLensData: React.FC<T & WithLensDataInputProps> = (props) => {
+  const ComponentWithLensData = (props: T & WithLensDataInputProps) => {
     const { lens } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
     const [data, setData] = useState<OutputState>(initialValues);

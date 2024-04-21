@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import {
   EuiFlexGroup,
@@ -162,7 +162,7 @@ const ProcessorTypeConfigurator = ({ basePath }: { basePath: string }) => {
   );
 };
 
-const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
+const ProcessorsConfigurator = ({ ruleType }: { ruleType: string }) => {
   return (
     <UseArray
       key={ruleType}
@@ -222,7 +222,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
   );
 };
 
-const FormContent: FC = () => {
+const FormContent = () => {
   const [{ ruleType }] = useFormData({ watch: 'ruleType' });
 
   return (
@@ -422,7 +422,7 @@ const ProcessorTypeConfigurator = ({ basePath }: { basePath: string }) => {
   );
 };
 
-const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
+const ProcessorsConfigurator = ({ ruleType }: { ruleType: string }) => {
   return (
     <UseArray
       key={ruleType}

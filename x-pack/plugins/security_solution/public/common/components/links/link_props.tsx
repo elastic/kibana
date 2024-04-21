@@ -66,7 +66,7 @@ export const useSecuritySolutionLinkProps: GetSecuritySolutionLinkProps = ({
 
 const withSecuritySolutionLinkProps = <T extends { id: string; urlState?: string }>(
   WrappedComponent: React.ComponentType<T>
-): React.FC<Omit<T, 'id' | 'urlState'> & { deepLinkId: SecurityPageName }> =>
+): ((props: <Omit<T, 'id' | 'urlState'> & { deepLinkId: SecurityPageName }>) => JSX.Element) =>
   React.memo(function WithSecuritySolutionProps({ deepLinkId, ...rest }) {
     const getUrlStateQueryParams = useGetUrlStateQueryParams();
     const urlState = getUrlStateQueryParams(deepLinkId);

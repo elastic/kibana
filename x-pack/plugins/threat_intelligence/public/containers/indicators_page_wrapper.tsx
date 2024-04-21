@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, VFC } from 'react';
+import React, { memo, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { IndicatorsPage } from '../modules/indicators/pages/indicators';
@@ -19,7 +19,7 @@ const queryClient = new QueryClient();
 
 const casesContextOwner = [APP_ID];
 
-export const IndicatorsPageWrapper: VFC = () => {
+export const IndicatorsPageWrapper= () => {
   const { cases } = useKibana().services;
   const CasesContext = useMemo(() => cases.ui.getCasesContext(), [cases.ui]);
   const permissions: CasesPermissions = useMemo(() => cases.helpers.canUseCases(), [cases.helpers]);

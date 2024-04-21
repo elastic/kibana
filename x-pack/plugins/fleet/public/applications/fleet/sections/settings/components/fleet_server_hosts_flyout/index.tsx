@@ -44,12 +44,12 @@ export interface FleetServerHostsFlyoutProps {
   proxies: FleetProxy[];
 }
 
-export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFlyoutProps> = ({
+export const FleetServerHostsFlyout = ({
   onClose,
   fleetServerHost,
   defaultFleetServerHost,
   proxies,
-}) => {
+}: FleetServerHostsFlyoutProps) => {
   const { docLinks, cloud } = useStartServices();
 
   const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);

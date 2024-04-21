@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import {
   Axis,
   BarSeries,
@@ -49,12 +49,12 @@ export interface IndicatorsBarChartProps {
 /**
  * Displays a barchart of aggregated indicators using the @elastic/charts library.
  */
-export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
+export const IndicatorsBarChart = ({
   indicators,
   dateRange,
   field,
   height = DEFAULT_CHART_HEIGHT,
-}) => {
+}: IndicatorsBarChartProps) => {
   return (
     <EuiThemeProvider>
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>

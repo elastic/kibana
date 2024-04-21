@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
 import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import type {
   MigrateFunctionsObject,
@@ -48,9 +47,11 @@ export class ActionFactory<
   public readonly minimalLicense?: LicenseType;
   public readonly licenseFeatureName?: string;
   public readonly order: number;
-  public readonly MenuItem?: FC<ActionMenuItemProps<any>>;
+  public readonly MenuItem?: (props: ActionMenuItemProps<any>) => JSX.Element;
 
-  public readonly CollectConfig: FC<CollectConfigProps<Config, FactoryContext>>;
+  public readonly CollectConfig: (
+    props: CollectConfigProps<Config, FactoryContext>
+  ) => JSX.Element | null;
   public readonly createConfig: (context: FactoryContext) => Config;
   public readonly isConfigValid: (config: Config, context: FactoryContext) => boolean;
   public readonly migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;

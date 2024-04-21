@@ -68,7 +68,7 @@ const ActionsContainer = styled.div`
 const emptySchema = {};
 const emptySchemaDetectors: EuiDataGridSchemaDetector[] = [];
 
-const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
+const HeaderActionsComponent = memo(
   ({
     width,
     browserFields,
@@ -82,7 +82,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     tabType,
     timelineId,
     fieldBrowserOptions,
-  }) => {
+  }: HeaderActionProps) => {
     const { triggersActionsUi } = useKibana().services;
     const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
     const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();

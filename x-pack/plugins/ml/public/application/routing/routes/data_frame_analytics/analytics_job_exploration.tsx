@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useUrlState } from '@kbn/ml-url-state';
@@ -43,7 +42,7 @@ export const analyticsJobExplorationRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
 
   const [globalState] = useUrlState('_g');

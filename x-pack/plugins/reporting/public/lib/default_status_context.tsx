@@ -6,19 +6,20 @@
  */
 
 import { ClientConfigType } from '@kbn/reporting-public';
-import React, { createContext, FunctionComponent } from 'react';
+import React, { createContext } from 'react';
 import { IlmPolicyStatusContextProvider } from './ilm_policy_status_context';
 
 const PolicyStatusContext = createContext<undefined>(undefined);
 
 interface PolicyStatusContextProviderProps {
   config: ClientConfigType;
+  children: React.ReactNode;
 }
 
-export const PolicyStatusContextProvider: FunctionComponent<PolicyStatusContextProviderProps> = ({
+export const PolicyStatusContextProvider = ({
   children,
   ...props
-}) => {
+}: PolicyStatusContextProviderProps) => {
   return props.config.statefulSettings.enabled ? (
     <IlmPolicyStatusContextProvider>{children}</IlmPolicyStatusContextProvider>
   ) : (

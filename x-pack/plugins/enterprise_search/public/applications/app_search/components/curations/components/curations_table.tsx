@@ -30,7 +30,7 @@ import { AutomatedIcon } from './automated_icon';
 
 import './curations_table.scss';
 
-export const CurationsTable: React.FC = () => {
+export const CurationsTable = () => {
   const { dataLoading, curations, meta } = useValues(CurationsLogic);
   const { onPaginate, deleteCuration } = useActions(CurationsLogic);
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FC } from 'react';
 import { ExpressionValueFilter } from '@kbn/expressions-plugin/common';
 
 export enum FilterType {
@@ -47,13 +46,13 @@ export type ComplexFilterViewField<FilterValue> = (
 export interface SimpleFilterViewField {
   label: string;
   formatter?: (value?: unknown) => string | null;
-  component?: FC<any>;
+  component?: (props: any) => JSX.Element | null;
 }
 
 export interface FormattedFilterViewField {
   label: string;
   formattedValue: string;
-  component?: FC<any>;
+  component?: (props: any) => JSX.Element | null;
 }
 
 export type FilterViewInstance<FilterValue = unknown> = Record<

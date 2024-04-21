@@ -8,10 +8,13 @@
 import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-const LoadingPlaceholdersComponent: React.FC<{
+const LoadingPlaceholdersComponent = ({
+  lines,
+  placeholders,
+}: {
   lines: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
   placeholders: number;
-}> = ({ lines, placeholders }) => (
+}) => (
   <>
     {[...Array(placeholders).keys()].map((_, i) => (
       <React.Fragment key={i}>

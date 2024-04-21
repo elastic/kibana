@@ -15,7 +15,7 @@ import { useField } from './use_field';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 
-export const FieldComponent: React.FC<FieldProps> = ({
+export const FieldComponent = ({
   fieldInputWidth,
   fieldTypeFilter = [],
   indexPattern,
@@ -29,7 +29,7 @@ export const FieldComponent: React.FC<FieldProps> = ({
   acceptsCustomOptions = false,
   showMappingConflicts = false,
   'aria-label': ariaLabel,
-}): JSX.Element => {
+}: FieldProps): JSX.Element => {
   const {
     isInvalid,
     comboOptions,

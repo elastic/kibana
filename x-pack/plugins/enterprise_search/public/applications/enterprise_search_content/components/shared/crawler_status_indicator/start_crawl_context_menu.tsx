@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CrawlCustomSettingsFlyoutLogic } from '../../search_index/crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout_logic';
 import { CrawlerLogic } from '../../search_index/crawler/crawler_logic';
 
-export const StartCrawlContextMenu: React.FC = () => {
+export const StartCrawlContextMenu = () => {
   const { reApplyCrawlRules, startCrawl } = useActions(CrawlerLogic);
   const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(CrawlCustomSettingsFlyoutLogic);
   const [isPopoverOpen, setPopover] = useState(false);

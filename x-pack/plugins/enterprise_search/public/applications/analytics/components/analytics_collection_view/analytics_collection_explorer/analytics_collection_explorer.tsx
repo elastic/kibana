@@ -18,7 +18,7 @@ import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_log
 
 import { AnalyticsCollectionExplorerTable } from './analytics_collection_explorer_table';
 
-export const AnalyticsCollectionExplorer: React.FC = ({}) => {
+export const AnalyticsCollectionExplorer = ({}) => {
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);
   const { reset } = useActions(AnalyticsCollectionExploreTableLogic);
 

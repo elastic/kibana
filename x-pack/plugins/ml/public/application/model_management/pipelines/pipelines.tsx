@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiButtonEmpty,
@@ -28,7 +27,7 @@ interface ModelPipelinesProps {
   ingestStats: IngestStatsResponse;
 }
 
-export const ModelPipelines: FC<ModelPipelinesProps> = ({ pipelines, ingestStats }) => {
+export const ModelPipelines = ({ pipelines, ingestStats }: ModelPipelinesProps) => {
   const {
     services: { share },
   } = useMlKibana();

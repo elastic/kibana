@@ -34,7 +34,7 @@ interface IngestDataProps {
   additionalIngestionPanel?: React.ReactNode;
 }
 
-export const IngestData: React.FC<IngestDataProps> = ({
+export const IngestData = ({
   codeSnippet,
   selectedLanguage,
   setSelectedLanguage,
@@ -46,7 +46,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
   languages,
   consoleRequest,
   additionalIngestionPanel,
-}) => {
+}: IngestDataProps) => {
   return (
     <OverviewPanel
       description={i18n.translate('searchApiPanels.welcomeBanner.ingestData.description', {

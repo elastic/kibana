@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { PipelineProcessorsEditor } from '../components';
 
-export const ProcessorsEditor: FunctionComponent = () => {
+export const ProcessorsEditor = () => {
   return <PipelineProcessorsEditor stateSlice="processors" />;
 };

@@ -26,10 +26,7 @@ export type DeletePackagePoliciesPrompt = (
 
 type OnSuccessCallback = (packagePoliciesDeleted: string[]) => void;
 
-export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
-  agentPolicy,
-  children,
-}) => {
+export const PackagePolicyDeleteProvider = ({ agentPolicy, children }: Props) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },

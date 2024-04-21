@@ -54,7 +54,7 @@ const NUM_EXECUTIONS_OPTIONS = [120, 60, 30, 15].map((value) => ({
   ),
 }));
 
-export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
+export const ExecutionDurationChart = ({
   executionDuration,
   numberOfExecutions,
   onChangeDuration,

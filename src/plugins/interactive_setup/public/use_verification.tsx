@@ -8,7 +8,6 @@
 
 import { EuiModal, EuiModalHeader } from '@elastic/eui';
 import constate from 'constate';
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -18,6 +17,7 @@ import { VerificationCodeForm } from './verification_code_form';
 
 export interface VerificationProps {
   defaultCode?: string;
+  children: React.ReactNode;
 }
 
 const [OuterVerificationProvider, useVerification] = constate(
@@ -38,7 +38,7 @@ const [OuterVerificationProvider, useVerification] = constate(
   }
 );
 
-const InnerVerificationProvider: FunctionComponent = ({ children }) => {
+const InnerVerificationProvider = ({ children }: { children: React.ReactNode }) => {
   const { http } = useKibana();
   const { status, setStatus, setCode } = useVerification();
 
@@ -72,10 +72,7 @@ const InnerVerificationProvider: FunctionComponent = ({ children }) => {
   );
 };
 
-export const VerificationProvider: FunctionComponent<VerificationProps> = ({
-  defaultCode,
-  children,
-}) => {
+export const VerificationProvider = ({ defaultCode, children }: VerificationProps) => {
   return (
     <OuterVerificationProvider defaultCode={defaultCode}>
       <InnerVerificationProvider>{children}</InnerVerificationProvider>

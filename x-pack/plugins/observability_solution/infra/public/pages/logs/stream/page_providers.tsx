@@ -24,7 +24,7 @@ import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
-const ViewLogInContext: React.FC = ({ children }) => {
+const ViewLogInContext = ({ children }: { children: React.ReactNode }) => {
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewReference } = useLogViewContext();
 
@@ -43,9 +43,13 @@ const ViewLogInContext: React.FC = ({ children }) => {
   );
 };
 
-const LogEntriesStateProvider: React.FC<{
+const LogEntriesStateProvider = ({
+  children,
+  logStreamPageState,
+}: {
+  children: React.ReactNode;
   logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+}) => {
   const { logViewReference } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
   const {
@@ -70,9 +74,13 @@ const LogEntriesStateProvider: React.FC<{
   );
 };
 
-const LogHighlightsState: React.FC<{
+const LogHighlightsState = ({
+  children,
+  logStreamPageState,
+}: {
+  children: React.ReactNode;
   logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+}) => {
   const { logViewReference, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const serializedParsedQuery = useMemo(
@@ -92,10 +100,15 @@ const LogHighlightsState: React.FC<{
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogStreamPageContentProviders: React.FC<{
+export const LogStreamPageContentProviders = ({
+  children,
+  logStreamPageState,
+  logStreamPageCallbacks,
+}: {
+  children: React.ReactNode;
   logStreamPageState: InitializedLogStreamPageState;
   logStreamPageCallbacks: LogStreamPageCallbacks;
-}> = ({ children, logStreamPageState, logStreamPageCallbacks }) => {
+}) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>

@@ -14,7 +14,7 @@ import { useKibana } from '../hooks/use_kibana';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { StartChatPanel } from './start_chat_panel';
 
-export const SetUpConnectorPanelForStartChat: React.FC = () => {
+export const SetUpConnectorPanelForStartChat = () => {
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
   const [showCallout, setShowAddedCallout] = useState(false);
   const {

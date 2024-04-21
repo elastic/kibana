@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,16 +20,17 @@ interface DetectorTitleProps {
     value: string | null;
   };
   deleteDetector?: (dtrIds: number) => void;
+  children?: React.ReactNode;
 }
 
-export const DetectorTitle: FC<DetectorTitleProps> = ({
+export const DetectorTitle = ({
   index,
   agg,
   field,
   byField,
   deleteDetector,
   children,
-}) => {
+}: DetectorTitleProps) => {
   const splitField = children === false && byField !== undefined ? byField.field : null;
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">

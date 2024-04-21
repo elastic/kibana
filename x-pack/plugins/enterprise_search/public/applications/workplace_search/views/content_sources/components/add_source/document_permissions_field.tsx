@@ -36,11 +36,11 @@ interface Props {
   setValue(indexPermissionsValue: boolean): void;
 }
 
-export const DocumentPermissionsField: React.FC<Props> = ({
+export const DocumentPermissionsField = ({
   needsPermissions,
   indexPermissionsValue,
   setValue,
-}) => {
+}: Props) => {
   const whichDocsLink = (
     <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
       {CONNECT_WHICH_OPTION_LINK}

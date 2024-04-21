@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,7 +41,7 @@ interface Props {
   chartReady: boolean;
 }
 
-export const CreateCalendar: FC<Props> = ({
+export const CreateCalendar = ({
   calendarEvents,
   setCalendarEvents,
   minSelectableTimeStamp,
@@ -50,7 +49,7 @@ export const CreateCalendar: FC<Props> = ({
   eventRateData,
   anomalies,
   chartReady,
-}) => {
+}: Props) => {
   const maxSelectableTimeMoment = moment(maxSelectableTimeStamp);
   const minSelectableTimeMoment = moment(minSelectableTimeStamp);
 
@@ -262,8 +261,8 @@ interface ChartProps {
   overlayColor: string;
 }
 
-const Chart: FC<ChartProps> = memo(
-  ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges, overlayColor }) => (
+const Chart = memo(
+  ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges, overlayColor }: ChartProps) => (
     <EventRateChart
       eventRateChartData={eventRateData}
       anomalyData={anomalies}
@@ -279,14 +278,7 @@ const Chart: FC<ChartProps> = memo(
       }))}
       onBrushEnd={onBrushEnd as BrushEndListener}
     />
-  ),
-  (prev: ChartProps, next: ChartProps) => {
-    // only redraw if the calendar ranges have changes
-    return (
-      prev.overlayRanges.length === next.overlayRanges.length &&
-      JSON.stringify(prev.overlayRanges) === JSON.stringify(next.overlayRanges)
-    );
-  }
+  )
 );
 
 function filterIncompleteEvents(event: CalendarEvent): event is CalendarEvent {

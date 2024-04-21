@@ -14,7 +14,7 @@ import { ErrorBoundary } from '../error_boundary';
 
 export type FieldPopoverFooterProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
 
-const FieldPopoverFooterComponent: React.FC<FieldPopoverFooterProps> = (props) => {
+const FieldPopoverFooterComponent = (props: FieldPopoverFooterProps) => {
   const [visualizeButton, setVisualizeButton] = useState<JSX.Element | null>(null);
   const [categorizeButton, setCategorizeButton] = useState<JSX.Element | null>(null);
 
@@ -42,7 +42,7 @@ const FieldPopoverFooterComponent: React.FC<FieldPopoverFooterProps> = (props) =
   ) : null;
 };
 
-export const FieldPopoverFooter: React.FC<FieldPopoverFooterProps> = (props) => {
+export const FieldPopoverFooter = (props: FieldPopoverFooterProps) => {
   return (
     <ErrorBoundary>
       <FieldPopoverFooterComponent {...props} />

@@ -55,12 +55,12 @@ interface StepPanelProps {
   rule: RuleResponse;
 }
 
-const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
+const StepAboutRuleToggleDetailsComponent = ({
   stepData,
   stepDataDetails,
   loading,
   rule,
-}) => {
+}: StepPanelProps) => {
   const [selectedToggleOption, setToggleOption] = useState('details');
   const [aboutPanelHeight, setAboutPanelHeight] = useState(0);
 

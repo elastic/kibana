@@ -20,12 +20,12 @@ interface SourcesListProps {
   removeFilteredSource(sourceId: string): void;
 }
 
-export const SourcesList: React.FC<SourcesListProps> = ({
+export const SourcesList = ({
   contentSources,
   filteredSources,
   addFilteredSource,
   removeFilteredSource,
-}) => {
+}: SourcesListProps) => {
   const { euiTheme } = useEuiTheme();
 
   const sourceIds = contentSources.map(({ id }) => id);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 
@@ -61,7 +60,7 @@ interface Props {
   displayExamples?: boolean;
 }
 
-export const CategoryTable: FC<Props> = ({
+export const CategoryTable = ({
   categories,
   eventRate,
   dataViewId,
@@ -78,7 +77,7 @@ export const CategoryTable: FC<Props> = ({
   additionalFilter,
   navigateToDiscover = true,
   displayExamples = true,
-}) => {
+}: Props) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();

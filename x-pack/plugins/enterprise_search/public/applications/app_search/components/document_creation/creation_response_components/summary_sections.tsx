@@ -17,7 +17,7 @@ import { DocumentCreationLogic } from '..';
 import { ExampleDocumentJson, MoreDocumentsText } from './summary_documents';
 import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';
 
-export const InvalidDocumentsSummary: React.FC = () => {
+export const InvalidDocumentsSummary = () => {
   const {
     summary: { invalidDocuments },
   } = useValues(DocumentCreationLogic);
@@ -46,7 +46,7 @@ export const InvalidDocumentsSummary: React.FC = () => {
   ) : null;
 };
 
-export const ValidDocumentsSummary: React.FC = () => {
+export const ValidDocumentsSummary = () => {
   const {
     summary: { validDocuments },
   } = useValues(DocumentCreationLogic);
@@ -82,7 +82,7 @@ export const ValidDocumentsSummary: React.FC = () => {
   );
 };
 
-export const SchemaFieldsSummary: React.FC = () => {
+export const SchemaFieldsSummary = () => {
   const {
     summary: { newSchemaFields },
   } = useValues(DocumentCreationLogic);

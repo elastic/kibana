@@ -23,7 +23,7 @@ const QUERY_DETAIL_TITLE = i18n.translate(
   { defaultMessage: 'Query' }
 );
 
-export const QueryDetail: React.FC = () => {
+export const QueryDetail = () => {
   const { query } = useDecodedParams();
   const queryTitle = query === '""' ? query : `"${query}"`;
 

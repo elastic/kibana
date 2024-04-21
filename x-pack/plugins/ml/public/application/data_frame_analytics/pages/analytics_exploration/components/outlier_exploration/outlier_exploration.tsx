@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
@@ -42,7 +41,7 @@ interface ExplorationProps {
   jobId: string;
 }
 
-export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
+export const OutlierExploration = React.memo(({ jobId }: ExplorationProps) => {
   const { dataView, dataViewErrorMessage, jobConfig, needsDestDataView } =
     useResultsViewConfig(jobId);
   const [pageUrlState, setPageUrlState] = useExplorationUrlState();

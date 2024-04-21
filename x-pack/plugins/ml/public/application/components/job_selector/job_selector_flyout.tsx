@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -58,7 +57,7 @@ export interface JobSelectorFlyoutProps {
   onTimeRangeConfigChange?: (v: boolean) => void;
 }
 
-export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
+export const JobSelectorFlyoutContent = ({
   dateFormatTz,
   selectedIds = [],
   singleSelection,
@@ -70,7 +69,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   applyTimeRangeConfig,
   onTimeRangeConfigChange,
   withTimeRangeSelector = true,
-}) => {
+}: JobSelectorFlyoutProps) => {
   const {
     services: {
       notifications,

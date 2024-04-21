@@ -29,7 +29,7 @@ import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_craw
 
 import { DeleteDomainModalLogic } from './delete_domain_modal_logic';
 
-export const DeleteDomainModal: React.FC = () => {
+export const DeleteDomainModal = () => {
   DeleteCrawlerDomainApiLogic.mount();
   const { deleteDomain, hideModal } = useActions(DeleteDomainModalLogic);
   const { domain, isLoading, isHidden } = useValues(DeleteDomainModalLogic);

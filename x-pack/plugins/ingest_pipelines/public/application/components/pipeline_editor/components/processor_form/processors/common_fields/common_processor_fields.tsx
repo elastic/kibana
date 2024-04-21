@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PainlessLang } from '@kbn/monaco';
 
@@ -64,7 +64,7 @@ const tagConfig: FieldConfig = {
   type: FIELD_TYPES.TEXT,
 };
 
-export const CommonProcessorFields: FunctionComponent = () => {
+export const CommonProcessorFields = () => {
   const suggestionProvider = PainlessLang.getSuggestionProvider('processor_conditional');
 
   return (

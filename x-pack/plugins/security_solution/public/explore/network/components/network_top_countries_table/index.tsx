@@ -54,7 +54,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopCountriesTableId = 'networkTopCountries-top-talkers';
 
-const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps> = ({
+const NetworkTopCountriesTableComponent = ({
   data,
   fakeTotalCount,
   flowTargeted,
@@ -67,7 +67,7 @@ const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps>
   showMorePagesIndicator,
   totalCount,
   type,
-}) => {
+}: NetworkTopCountriesTableProps) => {
   const dispatch = useDispatch();
   const getTopCountriesSelector = useMemo(() => networkSelectors.topCountriesSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>

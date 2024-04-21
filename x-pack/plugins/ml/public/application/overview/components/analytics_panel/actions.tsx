@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +22,7 @@ interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-export const ViewLink: FC<Props> = ({ item }) => {
+export const ViewLink = ({ item }: Props) => {
   const { disabled, tooltipContent } = getViewLinkStatus(item);
 
   const viewJobResultsButtonText = i18n.translate(

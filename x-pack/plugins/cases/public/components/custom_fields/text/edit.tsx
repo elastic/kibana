@@ -52,12 +52,12 @@ interface FormWrapper {
   onChange: (state: FormState) => void;
 }
 
-const FormWrapperComponent: React.FC<FormWrapper> = ({
+const FormWrapperComponent = ({
   initialValue,
   customFieldConfiguration,
   isLoading,
   onChange,
-}) => {
+}: FormWrapper) => {
   const { form } = useForm<{ value: string }>({
     defaultValue: {
       value:
@@ -105,13 +105,13 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
 
 FormWrapperComponent.displayName = 'FormWrapper';
 
-const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+const EditComponent = ({
   customField,
   customFieldConfiguration,
   onSubmit,
   isLoading,
   canUpdate,
-}) => {
+}: React.ComponentProps<CustomFieldType<CaseCustomFieldText>['Edit']>) => {
   const initialValue = customField?.value ?? '';
   const [isEdit, setIsEdit] = useState(false);
   const [formState, setFormState] = useState<FormState>({

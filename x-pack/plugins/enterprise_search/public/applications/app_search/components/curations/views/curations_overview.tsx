@@ -16,7 +16,7 @@ import { CurationsTable, EmptyState } from '../components';
 import { SuggestionsTable } from '../components/suggestions_table';
 import { CurationsLogic } from '../curations_logic';
 
-export const CurationsOverview: React.FC = () => {
+export const CurationsOverview = () => {
   const { curations } = useValues(CurationsLogic);
   const {
     engine: { adaptive_relevance_suggestions_active: adaptiveRelevanceSuggestionsActive },

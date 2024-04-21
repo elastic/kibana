@@ -8,7 +8,7 @@
 import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';
@@ -21,13 +21,7 @@ interface DensityChartProps {
   height: number;
 }
 
-export const DensityChart: React.FC<DensityChartProps> = ({
-  buckets,
-  start,
-  end,
-  width,
-  height,
-}) => {
+export const DensityChart = ({ buckets, start, end, width, height }: DensityChartProps) => {
   if (start >= end || height <= 0 || width <= 0 || buckets.length <= 0) {
     return null;
   }

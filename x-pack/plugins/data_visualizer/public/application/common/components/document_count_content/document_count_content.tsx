@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -55,7 +54,7 @@ const CalculatingProbabilityMessage = (
   </div>
 );
 
-export const DocumentCountContent: FC<Props> = ({
+export const DocumentCountContent = ({
   documentCountStats,
   totalCount,
   samplingProbability,
@@ -64,7 +63,7 @@ export const DocumentCountContent: FC<Props> = ({
   randomSamplerPreference,
   setRandomSamplerPreference,
   showSettings = true,
-}) => {
+}: Props) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
   const onShowSamplingOptions = useCallback(() => {

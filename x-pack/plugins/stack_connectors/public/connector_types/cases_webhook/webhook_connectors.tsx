@@ -52,9 +52,7 @@ const fields = {
   ],
 };
 type PossibleStepNumbers = 1 | 2 | 3 | 4;
-const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-}) => {
+const CasesWebhookActionConnectorFields = ({ readOnly }: ActionConnectorFieldsProps) => {
   const { docLinks } = useKibana().services;
   const { isValid, getFields, validateFields } = useFormContext();
   const [currentStep, setCurrentStep] = useState<PossibleStepNumbers>(1);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import {
@@ -33,7 +32,7 @@ interface Props {
   targetFieldError: string | undefined;
 }
 
-export const PipelineDetails: FC<Props> = memo(
+export const PipelineDetails = memo(
   ({
     handlePipelineConfigUpdate,
     modelId,
@@ -42,7 +41,7 @@ export const PipelineDetails: FC<Props> = memo(
     pipelineDescription,
     targetField,
     targetFieldError,
-  }) => {
+  }: Props) => {
     const handleConfigChange = (value: string, type: string) => {
       handlePipelineConfigUpdate({ [type]: value });
     };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import type { AggFieldPair, SplitField } from '@kbn/ml-anomaly-utils';
@@ -31,7 +30,7 @@ interface ChartGridProps {
   loading?: boolean;
 }
 
-export const ChartGrid: FC<ChartGridProps> = ({
+export const ChartGrid = ({
   aggFieldPairList,
   chartSettings,
   splitField,
@@ -42,7 +41,7 @@ export const ChartGrid: FC<ChartGridProps> = ({
   deleteDetector,
   jobType,
   loading = false,
-}) => {
+}: ChartGridProps) => {
   const animateSplit = useAnimateSplit();
 
   return (

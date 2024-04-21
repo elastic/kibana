@@ -8,7 +8,7 @@
 import React from 'react';
 
 // TODO: This icon will be added to EUI soon - we should remove this custom SVG when once it's available in EUI
-export const CursorIcon: React.FC = ({ ...props }) => (
+export const CursorIcon = ({ ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="euiIcon"

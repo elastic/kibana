@@ -33,7 +33,7 @@ import { DeleteConnectorModal } from './delete_connector_modal';
 import { ConnectorConfiguration } from './connector_config/connector_configuration';
 import { useConnector } from '../../hooks/api/use_connector';
 
-export const EditConnector: React.FC = () => {
+export const EditConnector = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
 

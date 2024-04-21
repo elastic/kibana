@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { SeriesColorAccessor } from '@elastic/charts';
 import {
@@ -32,7 +31,7 @@ interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];
 }
 
-export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview }) => {
+export const MemoryPreviewChart = ({ memoryOverview }: MemoryPreviewChartProps) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const {
     services: { charts: chartsService },

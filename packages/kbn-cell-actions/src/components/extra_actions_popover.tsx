@@ -32,14 +32,14 @@ interface ActionsPopOverProps {
   button: JSX.Element;
 }
 
-export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
+export const ExtraActionsPopOver = ({
   anchorPosition,
   actions,
   actionContext,
   isOpen,
   closePopOver,
   button,
-}) => (
+}: ActionsPopOverProps) => (
   <EuiPopover
     button={button}
     isOpen={isOpen}
@@ -104,11 +104,11 @@ type ExtraActionsPopOverContentProps = Pick<
   'actionContext' | 'closePopOver' | 'actions'
 >;
 
-const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
+const ExtraActionsPopOverContent = ({
   actionContext,
   actions,
   closePopOver,
-}) => {
+}: ExtraActionsPopOverContentProps) => {
   const items = useMemo(
     () =>
       actions.map((action) => (

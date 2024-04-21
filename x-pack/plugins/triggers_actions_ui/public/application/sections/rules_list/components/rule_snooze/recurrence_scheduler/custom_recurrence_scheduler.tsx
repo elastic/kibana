@@ -36,12 +36,12 @@ interface CustomRecurrenceSchedulerProps {
   minimumRecurrenceDays: number;
 }
 
-export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
+export const CustomRecurrenceScheduler = ({
   startDate,
   onChange,
   initialState,
   minimumRecurrenceDays,
-}) => {
+}: CustomRecurrenceSchedulerProps) => {
   const [initialStartDate] = useState(startDate);
   const [frequency, setFrequency] = useState(initialState.freq);
   const [interval, setInterval] = useState(

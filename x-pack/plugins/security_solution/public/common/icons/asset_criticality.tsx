@@ -6,7 +6,7 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconAssetCriticality: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+export const IconAssetCriticality = ({ ...props }: SVGProps<SVGSVGElement>) => (
   <svg
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

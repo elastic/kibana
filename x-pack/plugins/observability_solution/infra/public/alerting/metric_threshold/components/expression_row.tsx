@@ -57,6 +57,7 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
   dataView: DataViewBase;
+  children?: React.ReactNode;
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -74,7 +75,7 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow = (props: ExpressionRowProps) => {
   const [isExpanded, toggle] = useToggle(true);
 
   const {
@@ -368,14 +369,21 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 };
 
-const ThresholdElement: React.FC<{
+const ThresholdElement = ({
+  updateComparator,
+  updateThreshold,
+  threshold,
+  isMetricPct,
+  comparator,
+  errors,
+}: {
   updateComparator: (c?: string) => void;
   updateThreshold: (t?: number[]) => void;
   threshold: MetricExpression['threshold'];
   isMetricPct: boolean;
   comparator: MetricExpression['comparator'];
   errors: IErrorObject;
-}> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
+}) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,7 +59,7 @@ export interface Props {
   history: ScopedHistory;
 }
 
-export const ComponentTable: FunctionComponent<Props> = ({
+export const ComponentTable = ({
   componentTemplates,
   defaultFilter,
   onReloadClick,
@@ -67,7 +67,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   onEditClick,
   onCloneClick,
   history,
-}) => {
+}: Props) => {
   const { trackMetric } = useComponentTemplatesContext();
 
   // By default, we want to show all the component templates that are not deprecated.

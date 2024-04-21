@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
@@ -33,11 +33,11 @@ interface WarningMessageProps {
   mode?: 'old' | 'new';
 }
 
-const SwitchToOldLibraryMessage: FC<WarningMessageProps> = ({
+const SwitchToOldLibraryMessage = ({
   canEditAdvancedSettings,
   advancedSettingsLink,
   mode = 'old',
-}) => {
+}: WarningMessageProps) => {
   return (
     <>
       {canEditAdvancedSettings && (
@@ -68,7 +68,7 @@ const SwitchToOldLibraryMessage: FC<WarningMessageProps> = ({
   );
 };
 
-const ContactAdminMessage: FC<WarningMessageProps> = ({ canEditAdvancedSettings }) => {
+const ContactAdminMessage = ({ canEditAdvancedSettings }: WarningMessageProps) => {
   return (
     <>
       {!canEditAdvancedSettings && (
@@ -81,7 +81,7 @@ const ContactAdminMessage: FC<WarningMessageProps> = ({ canEditAdvancedSettings 
   );
 };
 
-const GaugeWarningFormatMessage: FC<WarningMessageProps> = (props) => {
+const GaugeWarningFormatMessage = (props: WarningMessageProps) => {
   return (
     <FormattedMessage
       id="visualizations.newGaugeChart.notificationMessage"
@@ -98,7 +98,7 @@ const GaugeWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   );
 };
 
-const PieWarningFormatMessage: FC<WarningMessageProps> = (props) => {
+const PieWarningFormatMessage = (props: WarningMessageProps) => {
   return (
     <FormattedMessage
       id="visualizations.oldPieChart.notificationMessage"
@@ -115,7 +115,7 @@ const PieWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   );
 };
 
-const ControlsWarningFormatMessage: FC<WarningMessageProps> = (props) => {
+const ControlsWarningFormatMessage = (props: WarningMessageProps) => {
   return (
     <FormattedMessage
       id="visualizations.controls.notificationMessage"
@@ -130,7 +130,7 @@ const warningMessages = {
   [CHARTS_TO_BE_DEPRECATED.controls]: ControlsWarningFormatMessage,
 };
 
-export const VizChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }) => {
+export const VizChartWarning = ({ chartType, chartConfigToken, mode }: Props) => {
   const { services } = useKibana<VisualizeServices>();
   const canEditAdvancedSettings = services.application.capabilities.advancedSettings.save;
   const advancedSettingsLink = services.application.getUrlForApp('management', {

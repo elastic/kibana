@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -17,7 +16,7 @@ interface Props {
   dataTestSubj: string;
 }
 
-export const ExpandedRowJsonPane: FC<Props> = ({ json, dataTestSubj }) => {
+export const ExpandedRowJsonPane = ({ json, dataTestSubj }: Props) => {
   return (
     <EuiFlexGroup data-test-subj={dataTestSubj}>
       <EuiFlexItem>

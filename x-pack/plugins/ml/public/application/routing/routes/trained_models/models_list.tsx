@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -47,7 +46,7 @@ export const modelsListRouteFactory = (
   'data-test-subj': 'mlPageModelManagement',
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetTrainedModels'], basicResolvers());
 
   return (

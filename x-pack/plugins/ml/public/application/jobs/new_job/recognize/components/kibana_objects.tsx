@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -28,8 +27,8 @@ export interface KibanaObjectItemProps {
   isSaving: boolean;
 }
 
-export const KibanaObjectList: FC<KibanaObjectItemProps> = memo(
-  ({ objectType, kibanaObjects, isSaving }) => {
+export const KibanaObjectList = memo(
+  ({ objectType, kibanaObjects, isSaving }: KibanaObjectItemProps) => {
     const kibanaObjectLabels: Record<string, string> = {
       dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {
         defaultMessage: 'Dashboards',

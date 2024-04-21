@@ -257,7 +257,7 @@ Current public contracts owned by the legacy service:
 ```js
 // ui/management/index
 interface API {
-  SidebarNav: React.FC<any>;
+  SidebarNav: (props:any) => JSX.Element;
   management: new ManagementSection();
   MANAGEMENT_BREADCRUMB: {
     text: string;

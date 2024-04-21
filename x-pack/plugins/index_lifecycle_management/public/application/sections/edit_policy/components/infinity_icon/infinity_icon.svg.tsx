@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
-export const InfinityIconSvg: FunctionComponent = (props) => {
+export const InfinityIconSvg = (props: React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
       viewBox="0 0 16 16"

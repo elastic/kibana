@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useConfiguration } from '../../../form';
@@ -30,7 +30,7 @@ const i18nTexts = {
   },
 };
 
-export const WarmPhase: FunctionComponent = () => {
+export const WarmPhase = () => {
   const {
     isUsingSearchableSnapshotInHotPhase,
     isUsingDownsampleInHotPhase,

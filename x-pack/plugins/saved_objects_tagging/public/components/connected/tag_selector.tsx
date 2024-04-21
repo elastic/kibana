@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { TagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../../common';
@@ -23,7 +23,7 @@ export const getConnectedTagSelectorComponent = ({
   cache,
   capabilities,
   openCreateModal,
-}: GetConnectedTagSelectorOptions): FC<TagSelectorComponentProps> => {
+}: GetConnectedTagSelectorOptions) => {
   return (props: TagSelectorComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
     return (

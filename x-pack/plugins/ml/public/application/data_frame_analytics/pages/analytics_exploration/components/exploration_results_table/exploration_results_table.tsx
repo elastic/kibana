@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -31,8 +30,8 @@ interface Props {
   searchQuery: ResultsSearchQuery;
 }
 
-export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ dataView, jobConfig, needsDestDataView, searchQuery }) => {
+export const ExplorationResultsTable = React.memo(
+  ({ dataView, jobConfig, needsDestDataView, searchQuery }: Props) => {
     const {
       services: {
         mlServices: { mlApiServices },

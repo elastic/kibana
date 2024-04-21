@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 
 import type { Field } from '@kbn/ml-anomaly-utils';
@@ -16,7 +15,7 @@ import { newJobCapsService } from '../../../../../../../services/new_job_capabil
 import { Description } from './description';
 import type { RareJobCreator } from '../../../../../common/job_creator';
 
-export const RareFieldSelector: FC = () => {
+export const RareFieldSelector = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
 

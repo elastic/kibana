@@ -99,11 +99,11 @@ const PassedFailedCounters = ({ passed, failed }: Pick<Props, 'passed' | 'failed
   );
 };
 
-const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
+const DistributionBar = ({
   passed,
   failed,
   distributionOnClick,
-}) => {
+}: Omit<Props, 'pageEnd' | 'pageStart'>) => {
   const { euiTheme } = useEuiTheme();
 
   return (

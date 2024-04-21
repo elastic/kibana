@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +21,7 @@ import {
 
 const fixedPageSize: number = 20;
 
-export const SourceSelection: FC = () => {
+export const SourceSelection = () => {
   const {
     services: {
       savedSearch: savedSearchService,

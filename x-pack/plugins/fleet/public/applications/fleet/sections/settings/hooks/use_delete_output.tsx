@@ -28,11 +28,7 @@ interface ConfirmDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
-  output,
-  agentCount,
-  agentPolicyCount,
-}) => (
+const ConfirmDescription = ({ output, agentCount, agentPolicyCount }: ConfirmDescriptionProps) => (
   <FormattedMessage
     id="xpack.fleet.settings.deleteOutput.confirmModalText"
     defaultMessage="This action will delete {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"

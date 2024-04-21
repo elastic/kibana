@@ -60,7 +60,7 @@ interface ColumneHeaderProps {
   timelineId: string;
 }
 
-const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
+const ColumnHeaderComponent = ({
   draggableIndex,
   header,
   timelineId,
@@ -68,7 +68,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   onFilterChange,
   sort,
   tabType,
-}) => {
+}: ColumneHeaderProps) => {
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
   const restoreFocus = useCallback(() => keyboardHandlerRef.current?.focus(), []);

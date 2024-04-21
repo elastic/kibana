@@ -46,14 +46,14 @@ export const createProcessStep = (props: ProcessStepProps): EuiContainedStepProp
       : undefined,
 });
 
-export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
+export const ProcessStep = ({
   cleanUpAndSetUp,
   errorMessages,
   isConfigurationValid,
   setUp,
   setupStatus,
   viewResults,
-}) => {
+}: ProcessStepProps) => {
   return (
     <EuiText size="s">
       {setupStatus.type === 'pending' ? (

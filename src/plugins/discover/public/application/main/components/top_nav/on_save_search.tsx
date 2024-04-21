@@ -202,19 +202,7 @@ export async function onSaveSearch({
   showSaveModal(saveModal);
 }
 
-const SaveSearchObjectModal: React.FC<{
-  isTimeBased: boolean;
-  services: DiscoverServices;
-  title: string;
-  showCopyOnSave: boolean;
-  initialCopyOnSave?: boolean;
-  description?: string;
-  timeRestore?: boolean;
-  tags: string[];
-  onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
-  onClose: () => void;
-  managed: boolean;
-}> = ({
+const SaveSearchObjectModal = ({
   isTimeBased,
   services,
   title,
@@ -226,6 +214,18 @@ const SaveSearchObjectModal: React.FC<{
   onSave,
   onClose,
   managed,
+}: {
+  isTimeBased: boolean;
+  services: DiscoverServices;
+  title: string;
+  showCopyOnSave: boolean;
+  initialCopyOnSave?: boolean;
+  description?: string;
+  timeRestore?: boolean;
+  tags: string[];
+  onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
+  onClose: () => void;
+  managed: boolean;
 }) => {
   const { savedObjectsTagging } = services;
   const [timeRestore, setTimeRestore] = useState<boolean>(

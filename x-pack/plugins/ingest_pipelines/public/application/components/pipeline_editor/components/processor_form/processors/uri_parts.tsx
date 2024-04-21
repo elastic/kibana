@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
@@ -59,7 +59,7 @@ export const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const UriParts: FunctionComponent = () => {
+export const UriParts = () => {
   return (
     <>
       <FieldNameField

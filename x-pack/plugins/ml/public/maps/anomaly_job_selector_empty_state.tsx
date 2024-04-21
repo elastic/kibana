@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
@@ -15,7 +14,7 @@ interface Props {
   canCreateJobs: boolean;
 }
 
-export const AnomalyJobSelectorEmptyState: FC<Props> = ({ jobsManagementPath, canCreateJobs }) => (
+export const AnomalyJobSelectorEmptyState = ({ jobsManagementPath, canCreateJobs }: Props) => (
   <EuiEmptyPrompt
     layout="vertical"
     hasBorder={false}

@@ -42,7 +42,7 @@ import { SourceLayout } from '../source_layout';
 import { IndexingRulesTable } from './indexing_rules_table';
 import { SynchronizationLogic } from './synchronization_logic';
 
-export const AssetsAndObjects: React.FC = () => {
+export const AssetsAndObjects = () => {
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { thumbnailsChecked, contentExtractionChecked, hasUnsavedAssetsAndObjectsChanges } =
     useValues(SynchronizationLogic({ contentSource }));

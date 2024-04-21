@@ -46,7 +46,7 @@ const fetchAgentPolicies = async () => {
   return response;
 };
 
-export const AgentPolicyDebugger: React.FunctionComponent = () => {
+export const AgentPolicyDebugger = () => {
   const { getHref } = useLink();
   const [selectedPolicyId, setSelectedPolicyId] = useState<string>();
 

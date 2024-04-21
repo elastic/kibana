@@ -139,8 +139,10 @@ const RiskScoreUpdateModal = ({
   );
 };
 
-const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | null }> = ({
+const RiskEngineHealth = ({
   currentRiskEngineStatus,
+}: {
+  currentRiskEngineStatus?: RiskEngineStatus | null;
 }) => {
   if (!currentRiskEngineStatus) {
     return <EuiHealth color="subdued">{'-'}</EuiHealth>;
@@ -151,12 +153,17 @@ const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | 
   return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
 };
 
-const RiskEngineStatusRow: React.FC<{
+const RiskEngineStatusRow = ({
+  currentRiskEngineStatus,
+  onSwitchClick,
+  isLoading,
+  privileges,
+}: {
   currentRiskEngineStatus?: RiskEngineStatus | null;
   onSwitchClick: () => void;
   isLoading: boolean;
   privileges: RiskEngineMissingPrivilegesResponse;
-}> = ({ currentRiskEngineStatus, onSwitchClick, isLoading, privileges }) => {
+}) => {
   const userHasRequiredPrivileges =
     'hasAllRequiredPrivileges' in privileges && privileges.hasAllRequiredPrivileges;
   const btnIsDisabled = !currentRiskEngineStatus || isLoading || !userHasRequiredPrivileges;
@@ -189,9 +196,11 @@ const RiskEngineStatusRow: React.FC<{
   );
 };
 
-export const RiskScoreEnableSection: React.FC<{
+export const RiskScoreEnableSection = ({
+  privileges,
+}: {
   privileges: RiskEngineMissingPrivilegesResponse;
-}> = ({ privileges }) => {
+}) => {
   const { addSuccess } = useAppToasts();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();

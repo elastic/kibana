@@ -21,13 +21,13 @@ interface MatchDetailsProps {
   sourceValue: string;
 }
 
-export const MatchDetails: React.FC<MatchDetailsProps> = ({
+export const MatchDetails = ({
   contextId,
   eventId,
   isDraggable,
   sourceField,
   sourceValue,
-}) => (
+}: MatchDetailsProps) => (
   <EuiFlexGroup
     alignItems="center"
     data-test-subj="threat-match-details"

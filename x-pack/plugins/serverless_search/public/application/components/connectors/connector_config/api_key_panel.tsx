@@ -26,7 +26,7 @@ import { useCreateApiKey } from '../../../hooks/api/use_create_api_key';
 interface ApiKeyPanelProps {
   connector: Connector;
 }
-export const ApiKeyPanel: React.FC<ApiKeyPanelProps> = ({ connector }) => {
+export const ApiKeyPanel = ({ connector }: ApiKeyPanelProps) => {
   const { data, isLoading, mutate } = useCreateApiKey();
   return (
     <EuiPanel hasBorder>

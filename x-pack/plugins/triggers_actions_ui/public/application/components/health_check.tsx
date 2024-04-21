@@ -26,6 +26,7 @@ import { alertingFrameworkHealth } from '../lib/rule_api/health';
 interface Props {
   inFlyout?: boolean;
   waitForCheck: boolean;
+  children: React.ReactNode;
 }
 
 interface HealthStatus {
@@ -34,11 +35,7 @@ interface HealthStatus {
   hasPermanentEncryptionKey: boolean;
 }
 
-export const HealthCheck: React.FunctionComponent<Props> = ({
-  children,
-  waitForCheck,
-  inFlyout = false,
-}) => {
+export const HealthCheck = ({ children, waitForCheck, inFlyout = false }: Props) => {
   const { http, docLinks } = useKibana().services;
   const { setLoadingHealthCheck } = useHealthContext();
   const [alertingHealth, setAlertingHealth] = React.useState<Option<HealthStatus>>(none);

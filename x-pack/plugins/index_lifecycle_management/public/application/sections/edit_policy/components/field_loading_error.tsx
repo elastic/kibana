@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonIcon } from '@elastic/eui';
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
   'aria-label'?: string;
 }
 
-export const FieldLoadingError: FunctionComponent<Props> = (props) => {
+export const FieldLoadingError = (props: Props) => {
   const { title, body, resendRequest } = props;
   return (
     <>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiLink, EuiIcon, EuiText, EuiToolTip, type IconType } from '@elastic/eui';
 
@@ -18,14 +18,14 @@ interface TableActionButtonProps {
   onClick: () => void;
 }
 
-export const TableActionButton: FC<TableActionButtonProps> = ({
+export const TableActionButton = ({
   iconType,
   dataTestSubjPostfix,
   isDisabled,
   label,
   tooltipText,
   onClick,
-}) => {
+}: TableActionButtonProps) => {
   const buttonContent = (
     <>
       <EuiIcon type={iconType} css={{ marginRight: '8px' }} />

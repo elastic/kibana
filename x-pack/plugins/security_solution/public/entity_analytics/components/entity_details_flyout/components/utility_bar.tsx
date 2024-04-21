@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { useCallback, useState } from 'react';
 
 import {
@@ -26,7 +25,7 @@ interface Props {
   riskInputs: InputAlert[];
 }
 
-export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ riskInputs }) => {
+export const RiskInputsUtilityBar = React.memo(({ riskInputs }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);

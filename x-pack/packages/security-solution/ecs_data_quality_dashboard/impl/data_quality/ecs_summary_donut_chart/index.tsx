@@ -89,7 +89,7 @@ interface Props {
   baseTheme: Theme;
 }
 
-const EcsSummaryDonutChartComponent: React.FC<Props> = ({
+const EcsSummaryDonutChartComponent = ({
   defaultTabId,
   getGroupByFieldsOnClick,
   height = DEFAULT_HEIGHT,
@@ -97,7 +97,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
   setSelectedTabId,
   theme = {},
   baseTheme,
-}) => {
+}: Props) => {
   const summaryData = useMemo(
     () => getSummaryData(partitionedFieldMetadata),
     [partitionedFieldMetadata]

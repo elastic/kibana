@@ -35,7 +35,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
+const VisualizationActionsComponent = ({
   applyGlobalQueriesAndFilters = true,
   className,
   extraActions,
@@ -54,7 +54,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   stackByField,
   withActions = DEFAULT_ACTIONS,
   casesAttachmentMetadata,
-}) => {
+}: VisualizationActionsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
 

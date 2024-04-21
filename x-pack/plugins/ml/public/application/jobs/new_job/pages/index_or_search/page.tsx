@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,17 +16,12 @@ import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
+  extraButtons?: React.ReactNode;
 }
 
 const RESULTS_PER_PAGE = 20;
 
-export const Page: FC<PageProps> = ({
-  nextStepPath,
-  extraButtons,
-}: {
-  nextStepPath: string;
-  extraButtons?: React.ReactNode;
-}) => {
+export const Page = ({ nextStepPath, extraButtons }: PageProps) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 

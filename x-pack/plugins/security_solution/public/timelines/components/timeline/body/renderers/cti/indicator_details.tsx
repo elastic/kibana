@@ -27,14 +27,14 @@ interface IndicatorDetailsProps {
   isDraggable?: boolean;
 }
 
-export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
+export const IndicatorDetails = ({
   contextId,
   eventId,
   feedName,
   indicatorReference,
   indicatorType,
   isDraggable,
-}) => (
+}: IndicatorDetailsProps) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="threat-match-indicator-details"

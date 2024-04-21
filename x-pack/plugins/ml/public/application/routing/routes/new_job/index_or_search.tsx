@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -210,7 +209,7 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode, extraButtons }) => {
+const PageWrapper = ({ nextStepPath, mode, extraButtons }: IndexOrSearchPageProps) => {
   const {
     services: {
       http: { basePath },

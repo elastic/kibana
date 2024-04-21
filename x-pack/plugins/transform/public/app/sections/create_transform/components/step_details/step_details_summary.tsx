@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -13,7 +13,7 @@ import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type { StepDetailsExposedState } from './common';
 
-export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
+export const StepDetailsSummary = React.memo((props: StepDetailsExposedState) => {
   const {
     continuousModeDateField,
     createDataView,

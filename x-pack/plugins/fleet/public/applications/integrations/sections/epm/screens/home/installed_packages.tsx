@@ -56,7 +56,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const InstalledIntegrationsInfoCallout: React.FC = () => (
+const InstalledIntegrationsInfoCallout = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -75,7 +75,7 @@ const InstalledIntegrationsInfoCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
+const UpdatesAvailableCallout = ({ count }: { count: number }) => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
       defaultMessage:
@@ -96,7 +96,7 @@ const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
   </EuiCallOut>
 );
 
-const VerificationWarningCallout: React.FC = () => {
+const VerificationWarningCallout = () => {
   const { docLinks } = useStartServices();
 
   return (
@@ -127,10 +127,13 @@ const VerificationWarningCallout: React.FC = () => {
   );
 };
 
-export const InstalledPackages: React.FC<{
+export const InstalledPackages = ({
+  installedPackages,
+  isLoading,
+}: {
   installedPackages: PackageListItem[];
   isLoading: boolean;
-}> = ({ installedPackages, isLoading }) => {
+}) => {
   useBreadcrumbs('integrations_installed');
 
   const { packageVerificationKeyId } = useGetPackageVerificationKeyId();

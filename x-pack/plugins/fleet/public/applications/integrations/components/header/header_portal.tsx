@@ -6,7 +6,6 @@
  */
 
 import type { AppMountParameters } from '@kbn/core/public';
-import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
@@ -15,9 +14,10 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 export interface Props {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
+  children: React.ReactNode;
 }
 
-export const HeaderPortal: FC<Props> = ({ children, setHeaderActionMenu, theme$ }) => {
+export const HeaderPortal = ({ children, setHeaderActionMenu, theme$ }: Props) => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {

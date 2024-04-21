@@ -19,12 +19,17 @@ import { css } from '@emotion/react';
 
 import { useStartServices } from '../hooks';
 
-export const ApiKeyField: React.FunctionComponent<{
+export const ApiKeyField = ({
+  apiKeyId,
+  length,
+  sendGetAPIKey,
+  tokenGetter,
+}: {
   apiKeyId: string;
   length: number;
   sendGetAPIKey: (id: string) => Promise<SendRequestResponse>;
   tokenGetter: (response: SendRequestResponse) => string | undefined;
-}> = ({ apiKeyId, length, sendGetAPIKey, tokenGetter }) => {
+}) => {
   const { euiTheme } = useEuiTheme();
   const { notifications } = useStartServices();
   const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');

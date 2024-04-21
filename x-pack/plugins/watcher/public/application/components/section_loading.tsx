@@ -13,7 +13,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => {
+export const SectionLoading = ({ children }: Props) => {
   return (
     <EuiEmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}

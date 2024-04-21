@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 
-export const SelectEngineType: React.FC = () => {
+export const SelectEngineType = () => {
   const { engineType } = useValues(EngineCreationLogic);
   const { setEngineType, setCreationStep } = useActions(EngineCreationLogic);
 

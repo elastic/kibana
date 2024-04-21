@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { RouteComponentProps, Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
@@ -24,7 +24,7 @@ const mergeQueryStrings = (query: string, queryFromHash: string) => {
   return stringify({ ...queryObject, ...hashObject });
 };
 
-export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
+export const CanvasRouter = ({ history }: { history: History }) => (
   <Router history={history}>
     <Route
       path="/"

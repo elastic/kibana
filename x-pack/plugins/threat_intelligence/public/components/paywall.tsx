@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
 
-export const Paywall: VFC = () => {
+export const Paywall= () => {
   const {
     services: { application },
   } = useKibana();

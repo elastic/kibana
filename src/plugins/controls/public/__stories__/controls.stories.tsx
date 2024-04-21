@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
-import React, { useEffect, useMemo, useState, useCallback, FC } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -71,10 +71,13 @@ const storybookStubOptionsListRequest = async (
   );
 replaceOptionsListMethod(storybookStubOptionsListRequest);
 
-export const ControlGroupStoryComponent: FC<{
+export const ControlGroupStoryComponent = ({
+  panels,
+  edit,
+}: {
   panels?: ControlsPanels;
   edit?: boolean;
-}> = ({ panels, edit }) => {
+}) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [embeddable, setEmbeddable] = useState<ControlGroupContainer>();
   const [viewMode, setViewMode] = useState<ViewMode>(

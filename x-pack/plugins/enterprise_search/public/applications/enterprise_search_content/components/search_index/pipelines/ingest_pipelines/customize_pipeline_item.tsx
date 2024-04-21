@@ -28,7 +28,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 
 import { PipelinesLogic } from '../pipelines_logic';
 
-export const CopyAndCustomizePipelinePanel: React.FC = () => {
+export const CopyAndCustomizePipelinePanel = () => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);

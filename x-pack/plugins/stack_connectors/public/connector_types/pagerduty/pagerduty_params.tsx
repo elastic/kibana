@@ -26,13 +26,13 @@ import { PagerDutyActionParams } from '../types';
 import { LinksList } from './links_list';
 import { OPTIONAL_LABEL } from './translations';
 
-const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
+const PagerDutyParamsFields = ({
   actionParams,
   editAction,
   index,
   messageVariables,
   errors,
-}) => {
+}: ActionParamsProps<PagerDutyActionParams>) => {
   const { euiTheme } = useEuiTheme();
 
   const {

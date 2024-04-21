@@ -19,12 +19,12 @@ interface ConnectorCardProps {
   isLoading: boolean;
 }
 
-const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
+const ConnectorCardDisplay = ({
   connectorType,
   title,
   listItems,
   isLoading,
-}) => {
+}: ConnectorCardProps) => {
   const { triggersActionsUi } = useKibana().services;
 
   return (

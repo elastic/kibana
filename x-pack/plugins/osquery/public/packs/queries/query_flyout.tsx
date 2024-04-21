@@ -51,12 +51,12 @@ interface QueryFlyoutProps {
   onClose: () => void;
 }
 
-const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
+const QueryFlyoutComponent = ({
   uniqueQueryIds,
   defaultValue,
   onSave,
   onClose,
-}) => {
+}: QueryFlyoutProps) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const [isEditMode] = useState(!!defaultValue);
   const { serializer, idSet, ...hooksForm } = usePackQueryForm({

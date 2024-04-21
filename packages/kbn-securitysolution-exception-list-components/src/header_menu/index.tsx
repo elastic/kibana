@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, ReactElement, useMemo, useState } from 'react';
+import React, { ReactElement, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -48,7 +48,7 @@ const popoverHeightStyle = css`
   overflow-x: hidden;
   overflow-y: auto;
 `;
-const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
+const HeaderMenuComponent = ({
   text,
   dataTestSubj,
   actions,
@@ -59,7 +59,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   iconSide = 'left',
   anchorPosition = 'downCenter',
   panelPaddingSize = 's',
-}) => {
+}: HeaderMenuComponentProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);

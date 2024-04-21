@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import {
   Navigation,
   NavigationKibanaProvider,
@@ -19,7 +19,7 @@ export interface Props {
   deps: NavigationKibanaDependencies;
 }
 
-export const SideNavigation: FC<Props> = ({ navProps, deps }) => {
+export const SideNavigation = ({ navProps, deps }: Props) => {
   return (
     <NavigationKibanaProvider {...deps}>
       <Navigation {...navProps} />

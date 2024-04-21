@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
@@ -22,16 +22,17 @@ const containerSize = {
 const PartitionVisRenderer = () => getPartitionVisRenderer({ getStartDeps });
 
 type Props = {
+  children: React.ReactNode;
   visType: PartitionChartProps['visType'];
   syncColors: PartitionChartProps['syncColors'];
 } & PartitionChartProps['visConfig'];
 
-const PartitionVis: ComponentStory<FC<Props>> = ({
+const PartitionVis: ComponentStory<(props: Props) => JSX.Element> = ({
   visType,
   syncColors,
   children,
   ...visConfig
-}) => (
+}: Props) => (
   <Render
     renderer={PartitionVisRenderer}
     config={{ visType, syncColors, visConfig, visData: data }}

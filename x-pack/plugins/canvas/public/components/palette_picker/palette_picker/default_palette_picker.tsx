@@ -7,7 +7,7 @@
 
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
+import React from 'react';
 import { RequiredComponentProps } from '../types';
 import { findPalette, prepareColorPalette } from '../utils';
 
@@ -18,7 +18,7 @@ const strings = {
     }),
 };
 
-export const DefaultPalettePicker: FC<RequiredComponentProps> = (props) => {
+export const DefaultPalettePicker = (props: RequiredComponentProps) => {
   const { palette, palettes, onChange = () => {} } = props;
   const colorPalettes = palettes.map(prepareColorPalette);
 

@@ -46,7 +46,7 @@ export interface TestPipelineConfig {
   verbose?: boolean;
 }
 
-export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
+export const TestPipelineFlyout = ({
   handleTestPipeline,
   resetTestOutput,
   isRunningTest,
@@ -59,7 +59,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   setSelectedTab,
   testingError,
   onClose,
-}) => {
+}: Props) => {
   let tabContent;
 
   if (selectedTab === 'output') {

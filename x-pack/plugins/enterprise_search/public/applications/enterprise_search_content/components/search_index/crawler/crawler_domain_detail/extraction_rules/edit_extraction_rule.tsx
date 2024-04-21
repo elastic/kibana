@@ -96,12 +96,12 @@ const extractionFilterOptions = [
   value: ruleOption,
 }));
 
-export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
+export const EditExtractionRule = ({
   cancelEditing,
   extractionRule,
   isNewRule,
   saveRule,
-}) => {
+}: EditExtractionRuleProps) => {
   const { closeEditRuleFlyout, openEditRuleFlyout } = useActions(ExtractionRulesLogic);
   const { fieldRuleFlyoutVisible, fieldRuleToEdit, fieldRuleToEditIsNew } =
     useValues(ExtractionRulesLogic);

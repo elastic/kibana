@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
@@ -30,7 +29,7 @@ import { SearchBarWrapper } from './search_bar';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 import { type ChangePointType } from './constants';
 
-export const ChangePointDetectionPage: FC = () => {
+export const ChangePointDetectionPage = () => {
   const [isFlyoutVisible, setFlyoutVisible] = useState<boolean>(false);
 
   const {

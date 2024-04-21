@@ -8,7 +8,6 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison from '@kbn/rison';
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -989,7 +988,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   );
 };
 
-export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
+export const LinksMenu = (props: Omit<LinksMenuProps, 'onItemClick'>) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onButtonClick = setPopoverOpen.bind(null, !isPopoverOpen);

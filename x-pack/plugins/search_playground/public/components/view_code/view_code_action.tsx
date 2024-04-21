@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ChatForm, ChatFormFields } from '../../types';
 import { ViewCodeFlyout } from './view_code_flyout';
 
-export const ViewCodeAction: React.FC = () => {
+export const ViewCodeAction = () => {
   const { watch } = useFormContext<ChatForm>();
   const [showFlyout, setShowFlyout] = useState(false);
   const selectedIndices = watch(ChatFormFields.indices);

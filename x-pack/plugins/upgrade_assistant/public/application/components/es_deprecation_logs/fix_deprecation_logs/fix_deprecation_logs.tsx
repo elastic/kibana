@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -92,7 +92,7 @@ interface Props {
   privilegesMissing: MissingPrivileges;
 }
 
-const FixDeprecationLogsUI: FunctionComponent<Props> = ({ hasPrivileges, privilegesMissing }) => {
+const FixDeprecationLogsUI = ({ hasPrivileges, privilegesMissing }: Props) => {
   const {
     services: {
       core: { docLinks },

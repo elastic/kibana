@@ -45,18 +45,19 @@ export const createQueryWithMarkup =
     });
 
 interface FormTestComponentProps {
+  children: React.ReactNode;
   formDefaultValue?: Record<string, unknown>;
   onSubmit?: jest.Mock;
   schema?: FormSchema<Record<string, unknown>>;
 }
 
 // eslint-disable-next-line react/display-name
-export const FormTestComponent: React.FC<FormTestComponentProps> = ({
+export const FormTestComponent = ({
   children,
   onSubmit,
   formDefaultValue,
   schema,
-}) => {
+}: FormTestComponentProps) => {
   const { form } = useForm({ onSubmit, defaultValue: formDefaultValue, schema });
 
   return (

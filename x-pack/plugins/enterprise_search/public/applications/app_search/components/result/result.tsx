@@ -41,7 +41,7 @@ interface Props {
 
 const RESULT_CUTOFF = 5;
 
-export const Result: React.FC<Props> = ({
+export const Result = ({
   result,
   isMetaEngine,
   showScore = false,
@@ -51,7 +51,7 @@ export const Result: React.FC<Props> = ({
   dragHandleProps,
   resultPosition,
   showClick = false,
-}) => {
+}: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const ID = 'id';

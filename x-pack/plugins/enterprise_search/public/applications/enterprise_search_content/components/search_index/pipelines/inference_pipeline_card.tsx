@@ -38,7 +38,7 @@ import { TrainedModelHealth } from './ml_model_health';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
-export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline) => {
+export const TrainedModelHealthPopover = (pipeline: InferencePipeline) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
@@ -187,7 +187,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
   );
 };
 
-export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
+export const InferencePipelineCard = (pipeline: InferencePipeline) => {
   const { modelId, pipelineName, types: modelTypes } = pipeline;
   const modelIdDisplay = modelId && modelId.length > 0 ? modelId : MODEL_REDACTED_VALUE;
   const modelType = getMLType(modelTypes);

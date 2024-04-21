@@ -34,7 +34,7 @@ export type AIConnector = ActionConnector & {
   apiProvider?: OpenAiProviderType;
 };
 
-export const ConnectorSelector: React.FC<Props> = React.memo(
+export const ConnectorSelector = React.memo(
   ({
     isDisabled = false,
     isOpen = false,
@@ -42,7 +42,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     selectedConnectorId,
     onConnectorSelectionChange,
     setIsOpen,
-  }) => {
+  }: Props) => {
     const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
     // Connector Modal State
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);

@@ -22,15 +22,7 @@ import { isAdvancedVar, validationHasErrors } from '../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
-export const PackagePolicyInputConfig: React.FunctionComponent<{
-  hasInputStreams: boolean;
-  packageInputVars?: RegistryVarsEntry[];
-  packagePolicyInput: NewPackagePolicyInput;
-  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
-  inputVarsValidationResults: PackagePolicyConfigValidationResults;
-  forceShowErrors?: boolean;
-  isEditPage?: boolean;
-}> = memo(
+export const PackagePolicyInputConfig = memo(
   ({
     hasInputStreams,
     packageInputVars,
@@ -39,6 +31,14 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     inputVarsValidationResults,
     forceShowErrors,
     isEditPage = false,
+  }: {
+    hasInputStreams: boolean;
+    packageInputVars?: RegistryVarsEntry[];
+    packagePolicyInput: NewPackagePolicyInput;
+    updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
+    inputVarsValidationResults: PackagePolicyConfigValidationResults;
+    forceShowErrors?: boolean;
+    isEditPage?: boolean;
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);

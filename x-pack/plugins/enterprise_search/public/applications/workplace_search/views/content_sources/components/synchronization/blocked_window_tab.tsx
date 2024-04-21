@@ -18,7 +18,7 @@ import { SourceLogic } from '../../source_logic';
 import { BlockedWindowItem } from './blocked_window_item';
 import { SynchronizationLogic } from './synchronization_logic';
 
-export const BlockedWindows: React.FC = () => {
+export const BlockedWindows = () => {
   const { contentSource } = useValues(SourceLogic);
   const {
     schedule: { blockedWindows },

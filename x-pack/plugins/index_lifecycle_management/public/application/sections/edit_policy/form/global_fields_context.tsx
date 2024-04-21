@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, FunctionComponent, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_imports';
 
 /**
@@ -56,7 +56,7 @@ export const globalFields: Record<keyof GlobalFields, { path: string; config?: F
     },
   };
 
-export const GlobalFieldsProvider: FunctionComponent = ({ children }) => {
+export const GlobalFieldsProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <UseMultiFields<GlobalFieldsTypes> fields={globalFields}>
       {(fields) => {

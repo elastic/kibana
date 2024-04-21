@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { ResultSettingsLogic } from '..';
 import { FieldResultSetting } from '../types';
 
-export const NonTextFieldsBody: React.FC = () => {
+export const NonTextFieldsBody = () => {
   const { nonTextResultFields } = useValues(ResultSettingsLogic);
   const { toggleRawForField } = useActions(ResultSettingsLogic);
 

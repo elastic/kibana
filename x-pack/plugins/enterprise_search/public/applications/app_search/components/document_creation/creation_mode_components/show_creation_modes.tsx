@@ -22,7 +22,7 @@ import { DocumentCreationLogic, DocumentCreationButtons } from '..';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 
-export const ShowCreationModes: React.FC = () => {
+export const ShowCreationModes = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (

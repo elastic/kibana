@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
@@ -31,12 +30,12 @@ interface MlAnomalyAlertFlyoutProps {
  * @param onSave
  * @constructor
  */
-export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
+export const MlAnomalyAlertFlyout = ({
   initialAlert,
   jobIds,
   onCloseFlyout,
   onSave,
-}) => {
+}: MlAnomalyAlertFlyoutProps) => {
   const {
     services: { triggersActionsUi },
   } = useMlKibana();
@@ -98,11 +97,11 @@ interface JobListMlAnomalyAlertFlyoutProps {
  * @param unsetShowFunction
  * @constructor
  */
-export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> = ({
+export const JobListMlAnomalyAlertFlyout = ({
   setShowFunction,
   unsetShowFunction,
   onSave,
-}) => {
+}: JobListMlAnomalyAlertFlyoutProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [jobIds, setJobIds] = useState<JobId[] | undefined>();
 
@@ -136,7 +135,7 @@ interface EditRuleFlyoutProps {
   onSave: () => void;
 }
 
-export const EditAlertRule: FC<EditRuleFlyoutProps> = ({ initialAlert, onSave }) => {
+export const EditAlertRule = ({ initialAlert, onSave }: EditRuleFlyoutProps) => {
   const [isVisible, setIsVisible] = useState(false);
   return (
     <>

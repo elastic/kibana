@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -63,7 +63,7 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
   }
 };
 
-const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+const DiscoverAppLink = ({ checkpoint }: Props) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -125,7 +125,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   );
 };
 
-const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+const ObservabilityAppLink = ({ checkpoint }: Props) => {
   const {
     services: {
       core: { http },
@@ -164,7 +164,7 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   );
 };
 
-export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
+export const ExternalLinks = ({ checkpoint }: Props) => {
   const { infra: hasInfraPlugin } = useAppContext().plugins;
 
   return (

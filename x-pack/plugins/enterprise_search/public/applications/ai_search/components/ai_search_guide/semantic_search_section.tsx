@@ -20,7 +20,7 @@ import { ElserPanel } from './elser_panel';
 import { NlpEnrichmentPanel } from './nlp_enrichment_panel';
 import { VectorSearchPanel } from './vector_search_panel';
 
-export const SemanticSearchSection: React.FC = () => {
+export const SemanticSearchSection = () => {
   const [currentExpandedId, setCurrentExpandedId] = useState<string | undefined>('elserAccordion');
 
   return (

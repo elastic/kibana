@@ -68,7 +68,7 @@ import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 
 import { SourceLayout } from './source_layout';
 
-export const SourceSettings: React.FC = () => {
+export const SourceSettings = () => {
   const {
     updateContentSource,
     removeContentSource,

@@ -30,7 +30,7 @@ import illustration from './illustration.svg';
 
 import './byo_source_prompt.scss';
 
-export const BYOSourcePrompt: React.FC = () => {
+export const BYOSourcePrompt = () => {
   const { externalConfigured } = useValues(SourcesLogic);
 
   return (

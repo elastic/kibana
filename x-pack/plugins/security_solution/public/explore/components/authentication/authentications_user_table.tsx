@@ -27,7 +27,7 @@ import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 
-const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps> = ({
+const AuthenticationsUserTableComponent = ({
   endDate,
   filterQuery,
   indexNames,
@@ -37,7 +37,7 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   setQuery,
   deleteQuery,
   userName,
-}) => {
+}: AuthenticationsUserTableProps) => {
   const dispatch = useDispatch();
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);

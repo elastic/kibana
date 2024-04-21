@@ -69,7 +69,7 @@ interface Props {
   isCurrentRequestIncremented: boolean;
 }
 
-export const AgentListTable: React.FC<Props> = (props: Props) => {
+export const AgentListTable = (props: Props) => {
   const {
     agents,
     isLoading,

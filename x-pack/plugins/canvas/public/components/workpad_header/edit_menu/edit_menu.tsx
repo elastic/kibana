@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { useContext } from 'react';
 import { connect } from 'react-redux';
 import { compose, withHandlers, withProps } from 'react-recompose';
 import { Dispatch } from 'redux';
@@ -120,7 +120,7 @@ const mergeProps = (
   };
 };
 
-export const EditMenuWithContext: FC<ComponentProps> = (props) => {
+export const EditMenuWithContext = (props: ComponentProps) => {
   const { undo, redo } = useContext(WorkpadRoutingContext);
 
   return <Component {...props} undoHistory={undo} redoHistory={redo} />;

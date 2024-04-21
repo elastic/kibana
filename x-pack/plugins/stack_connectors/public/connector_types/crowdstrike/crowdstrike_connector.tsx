@@ -40,10 +40,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-const CrowdstrikeActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-}) => (
+const CrowdstrikeActionConnectorFields = ({ readOnly, isEdit }: ActionConnectorFieldsProps) => (
   <SimpleConnectorForm
     isEdit={isEdit}
     readOnly={readOnly}

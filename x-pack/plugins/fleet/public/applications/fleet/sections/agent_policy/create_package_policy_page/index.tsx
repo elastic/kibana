@@ -15,7 +15,7 @@ import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
-export const CreatePackagePolicyPage: React.FC<{}> = () => {
+export const CreatePackagePolicyPage = () => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);

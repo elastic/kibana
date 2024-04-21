@@ -17,13 +17,13 @@ export interface ESFieldSelectProps {
   fields: string[];
 }
 
-export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = ({
+export const ESFieldSelect = ({
   value,
   fields = [],
   onChange,
   onFocus,
   onBlur,
-}) => {
+}: ESFieldSelectProps) => {
   const selectedOption = value ? [{ label: value }] : [];
   const options = fields.map((field) => ({ label: field }));
   return (

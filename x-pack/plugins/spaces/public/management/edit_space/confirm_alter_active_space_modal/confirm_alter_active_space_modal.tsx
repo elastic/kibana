@@ -17,7 +17,7 @@ interface Props {
   intl: InjectedIntl;
 }
 
-const ConfirmAlterActiveSpaceModalUI: React.FC<Props> = (props) => (
+const ConfirmAlterActiveSpaceModalUI = (props: Props) => (
   <EuiConfirmModal
     onConfirm={props.onConfirm}
     onCancel={props.onCancel}

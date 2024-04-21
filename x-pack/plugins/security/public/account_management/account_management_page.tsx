@@ -6,7 +6,6 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -19,7 +18,7 @@ import { canUserHaveProfile } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
 
-export const AccountManagementPage: FunctionComponent = () => {
+export const AccountManagementPage = () => {
   const { services } = useKibana<CoreStart>();
 
   const currentUser = useCurrentUser();

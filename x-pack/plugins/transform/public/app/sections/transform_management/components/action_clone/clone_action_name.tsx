@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -23,7 +23,7 @@ interface CloneActionNameProps {
   disabled: boolean;
 }
 
-export const CloneActionName: FC<CloneActionNameProps> = ({ disabled }) => {
+export const CloneActionName = ({ disabled }: CloneActionNameProps) => {
   if (disabled) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>

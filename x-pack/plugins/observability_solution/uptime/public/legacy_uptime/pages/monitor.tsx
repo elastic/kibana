@@ -17,7 +17,7 @@ import { setSelectedMonitorId } from '../state/actions';
 import { getMonitorAlertsAction } from '../state/alerts/alerts';
 import { useInitApp } from '../hooks/use_init_app';
 
-export const MonitorPage: React.FC = () => {
+export const MonitorPage = () => {
   const dispatch = useDispatch();
 
   useInitApp();

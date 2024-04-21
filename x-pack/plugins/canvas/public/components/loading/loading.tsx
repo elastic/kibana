@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
@@ -16,11 +16,7 @@ interface Props {
   text?: string;
 }
 
-export const Loading: FC<Props> = ({
-  animated = false,
-  text = '',
-  backgroundColor = '#000000',
-}) => {
+export const Loading = ({ animated = false, text = '', backgroundColor = '#000000' }: Props) => {
   if (animated) {
     return (
       <div className="canvasLoading">

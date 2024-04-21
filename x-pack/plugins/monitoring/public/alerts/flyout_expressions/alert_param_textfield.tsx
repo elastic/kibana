@@ -16,7 +16,7 @@ interface Props {
   errors: string[];
   setRuleParams: (property: string, value: string) => void;
 }
-export const AlertParamTextField: React.FC<Props> = (props: Props) => {
+export const AlertParamTextField = (props: Props) => {
   const { name, label, setRuleParams, errors, placeholder } = props;
   const [value, setValue] = useState(props.value);
   return (

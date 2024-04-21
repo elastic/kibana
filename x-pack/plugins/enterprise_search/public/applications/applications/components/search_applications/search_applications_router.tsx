@@ -20,7 +20,7 @@ import { SearchApplicationRouter } from '../search_application/search_applicatio
 
 import { SearchApplicationsList } from './search_applications_list';
 
-export const SearchApplicationsRouter: React.FC = () => {
+export const SearchApplicationsRouter = () => {
   return (
     <Routes>
       <Route exact path={SEARCH_APPLICATIONS_PATH}>

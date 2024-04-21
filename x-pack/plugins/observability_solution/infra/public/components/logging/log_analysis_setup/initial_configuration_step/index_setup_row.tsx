@@ -12,18 +12,18 @@ import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysi
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
 import { AvailableIndex, ValidationUIError } from './validation';
 
-export const IndexSetupRow: React.FC<{
-  index: AvailableIndex;
-  isDisabled: boolean;
-  onChangeDatasetFilter: (indexName: string, datasetFilter: DatasetFilter) => void;
-  onChangeIsSelected: (indexName: string, isSelected: boolean) => void;
-  previousQualityWarnings: QualityWarning[];
-}> = ({
+export const IndexSetupRow = ({
   index,
   isDisabled,
   onChangeDatasetFilter,
   onChangeIsSelected,
   previousQualityWarnings,
+}: {
+  index: AvailableIndex;
+  isDisabled: boolean;
+  onChangeDatasetFilter: (indexName: string, datasetFilter: DatasetFilter) => void;
+  onChangeIsSelected: (indexName: string, isSelected: boolean) => void;
+  previousQualityWarnings: QualityWarning[];
 }) => {
   const changeIsSelected = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

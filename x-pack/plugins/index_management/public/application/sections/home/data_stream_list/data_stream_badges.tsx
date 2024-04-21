@@ -15,7 +15,7 @@ interface Props {
   dataStream: DataStream;
 }
 
-export const DataStreamsBadges: React.FunctionComponent<Props> = ({ dataStream }) => {
+export const DataStreamsBadges = ({ dataStream }: Props) => {
   const badges = [];
   if (isManaged(dataStream)) {
     badges.push(

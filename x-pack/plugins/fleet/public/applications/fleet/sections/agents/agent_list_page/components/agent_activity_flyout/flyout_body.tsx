@@ -36,17 +36,7 @@ const ButtonsFlexGroup = styled(EuiFlexGroup)`
   padding-left: 24px;
 `;
 
-export const FlyoutBody: React.FunctionComponent<{
-  isFirstLoading: boolean;
-  currentActions: ActionStatus[];
-  abortUpgrade: (action: ActionStatus) => Promise<void>;
-  onClickViewAgents: (action: ActionStatus) => Promise<void>;
-  areActionsFullyLoaded: boolean;
-  onClickShowMore: () => void;
-  dateFilter: moment.Moment | null;
-  onChangeDateFilter: (date: moment.Moment | null) => void;
-  agentPolicies: AgentPolicy[];
-}> = ({
+export const FlyoutBody = ({
   isFirstLoading,
   currentActions,
   abortUpgrade,
@@ -56,6 +46,16 @@ export const FlyoutBody: React.FunctionComponent<{
   dateFilter,
   onChangeDateFilter,
   agentPolicies,
+}: {
+  isFirstLoading: boolean;
+  currentActions: ActionStatus[];
+  abortUpgrade: (action: ActionStatus) => Promise<void>;
+  onClickViewAgents: (action: ActionStatus) => Promise<void>;
+  areActionsFullyLoaded: boolean;
+  onClickShowMore: () => void;
+  dateFilter: moment.Moment | null;
+  onChangeDateFilter: (date: moment.Moment | null) => void;
+  agentPolicies: AgentPolicy[];
 }) => {
   // Loading
   if (isFirstLoading) {

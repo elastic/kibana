@@ -29,8 +29,8 @@ export interface CopyProps extends HoverActionComponentProps {
   isHoverAction?: boolean;
 }
 
-const CopyButton: React.FC<CopyProps> = React.memo(
-  ({ Component, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }) => {
+const CopyButton = React.memo(
+  ({ Component, field, isHoverAction, onClick, keyboardEvent, ownFocus, value }: CopyProps) => {
     const { addSuccess } = useAppToasts();
     const panelRef = useRef<HTMLDivElement | null>(null);
     useEffect(() => {

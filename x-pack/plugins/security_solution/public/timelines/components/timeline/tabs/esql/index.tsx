@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
@@ -41,7 +40,7 @@ interface DiscoverTabContentProps {
   timelineId: string;
 }
 
-export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) => {
+export const DiscoverTabContent = ({ timelineId }: DiscoverTabContentProps) => {
   const history = useHistory();
   const {
     services: {

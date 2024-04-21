@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type {
   ExceptionListItemIdentifiers,
@@ -43,7 +42,7 @@ interface ListExceptionItemsProps {
   onCreateExceptionListItem: () => void;
 }
 
-const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
+const ListExceptionItemsComponent = ({
   isReadOnly,
   exceptions,
   listType,
@@ -59,7 +58,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   onEditExceptionItem,
   onPaginationChange,
   onCreateExceptionListItem,
-}) => {
+}: ListExceptionItemsProps) => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const editButtonText = useMemo(() => {

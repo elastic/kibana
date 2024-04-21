@@ -51,7 +51,7 @@ interface Props {
   showLayerControls?: boolean;
 }
 
-export const SidebarHeader: React.FC<Props> = (props) => {
+export const SidebarHeader = (props: Props) => {
   const pageId = useSelector<State, string>((state) => getSelectedPage(state));
   const selectedNodes = useSelector<State, Array<string | undefined>>(
     (state) => getSelectedNodes(state, pageId),

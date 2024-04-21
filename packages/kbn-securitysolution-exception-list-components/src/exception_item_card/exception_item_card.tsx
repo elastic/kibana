@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, ElementType } from 'react';
+import React, { ElementType } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiCommentProps } from '@elastic/eui';
 import type {
   CommentsArray,
@@ -40,7 +40,7 @@ export interface ExceptionItemProps {
   showValueListModal: ElementType;
 }
 
-const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
+const ExceptionItemCardComponent = ({
   disableActions = false,
   exceptionItem,
   listType,
@@ -54,7 +54,7 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
   onDeleteException,
   onEditException,
   showValueListModal,
-}) => {
+}: ExceptionItemProps) => {
   const { actions, formattedComments } = useExceptionItemCard({
     listType,
     editActionLabel,

@@ -14,9 +14,10 @@ interface PageProps {
   title: string;
   crumb?: string;
   isHome?: boolean;
+  children: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = (props) => {
+export const Page = (props: PageProps) => {
   const { title, crumb, isHome, children } = props;
 
   const history = useHistory();

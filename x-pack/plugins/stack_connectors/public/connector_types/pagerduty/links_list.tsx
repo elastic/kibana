@@ -29,13 +29,13 @@ type LinksListProps = Pick<
 > &
   Pick<PagerDutyActionParams, 'links'>;
 
-export const LinksList: React.FC<LinksListProps> = ({
+export const LinksList = ({
   editAction,
   errors,
   index,
   links,
   messageVariables,
-}) => {
+}: LinksListProps) => {
   const areLinksInvalid = Array.isArray(errors.links) && errors.links.length > 0;
 
   return (

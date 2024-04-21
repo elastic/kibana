@@ -46,6 +46,7 @@ interface ConnectorConfigurationProps {
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
+  children?: React.ReactNode;
 }
 
 interface ConfigEntry extends ConnectorConfigProperties {
@@ -80,7 +81,7 @@ export const LicenseContext = createContext<{
   stackManagementLink: undefined,
 });
 
-export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationProps> = ({
+export const ConnectorConfigurationComponent = ({
   children,
   connector,
   hasPlatinumLicense,
@@ -88,7 +89,7 @@ export const ConnectorConfigurationComponent: React.FC<ConnectorConfigurationPro
   saveConfig,
   subscriptionLink,
   stackManagementLink,
-}) => {
+}: ConnectorConfigurationProps) => {
   const configurationRef = useRef<ConnectorConfiguration>({});
   const {
     configuration,

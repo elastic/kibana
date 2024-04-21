@@ -68,7 +68,7 @@ const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const queryClient = new QueryClient();
 
-export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
+export const WithPermissionsAndSetup = memo(({ children }: { children: React.ReactNode }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
@@ -165,17 +165,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
  * and no routes defined
  */
-export const FleetAppContext: React.FC<{
-  startServices: FleetStartServices;
-  config: FleetConfigType;
-  history: AppMountParameters['history'];
-  kibanaVersion: string;
-  extensions: UIExtensionsStorage;
-  theme$: AppMountParameters['theme$'];
-  /** For testing purposes only */
-  routerHistory?: History<any>;
-  fleetStatus?: FleetStatusProviderProps;
-}> = memo(
+export const FleetAppContext = memo(
   ({
     children,
     startServices,
@@ -186,6 +176,17 @@ export const FleetAppContext: React.FC<{
     routerHistory,
     theme$,
     fleetStatus,
+  }: {
+    children: React.ReactNode;
+    startServices: FleetStartServices;
+    config: FleetConfigType;
+    history: AppMountParameters['history'];
+    kibanaVersion: string;
+    extensions: UIExtensionsStorage;
+    theme$: AppMountParameters['theme$'];
+    /** For testing purposes only */
+    routerHistory?: History<any>;
+    fleetStatus?: FleetStatusProviderProps;
   }) => {
     const darkModeObservable = useObservable(theme$);
     const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
@@ -266,7 +267,6 @@ export const AppRoutes = memo(
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
-
         <Routes>
           <Route path={FLEET_ROUTING_PATHS.agents}>
             {authz.fleet.readAgents ? (
@@ -358,7 +358,6 @@ export const AppRoutes = memo(
             }}
           />
         </Routes>
-
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>
             <AgentEnrollmentFlyout
@@ -372,7 +371,6 @@ export const AppRoutes = memo(
             />
           </EuiPortal>
         )}
-
         {flyoutContext.isFleetServerFlyoutOpen && (
           <EuiPortal>
             <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />

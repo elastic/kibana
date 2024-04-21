@@ -86,7 +86,7 @@ import { SourceLogic } from '../source_logic';
 import { CustomSourceDeployment } from './custom_source_deployment';
 import { SourceLayout } from './source_layout';
 
-export const Overview: React.FC = () => {
+export const Overview = () => {
   const { contentSource } = useValues(SourceLogic);
   const { initializeSourceSynchronization } = useActions(SourceLogic);
   const { isOrganization } = useValues(AppLogic);

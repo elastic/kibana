@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useChangePointDetectionControlsContext } from './change_point_detection_context';
@@ -17,8 +17,8 @@ interface MetricFieldSelectorProps {
   inline?: boolean;
 }
 
-export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
-  ({ value, onChange, inline = true }) => {
+export const MetricFieldSelector = React.memo(
+  ({ value, onChange, inline = true }: MetricFieldSelectorProps) => {
     const { fieldStats } = useAiopsAppContext();
     const { metricFieldOptions } = useChangePointDetectionControlsContext();
 

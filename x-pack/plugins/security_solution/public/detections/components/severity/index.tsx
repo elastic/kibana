@@ -45,7 +45,7 @@ interface Props {
   severity: string;
 }
 
-const SeverityComponent: React.FC<Props> = ({ severity }) => (
+const SeverityComponent = ({ severity }: Props) => (
   <SeverityBadge color={getBadgeColorFromSeverity(severity)} data-test-subj="severity-badge">
     <EuiText color={getTextColorFromSeverity(severity)} data-test-subj="severity-text" size="xs">
       {severity}

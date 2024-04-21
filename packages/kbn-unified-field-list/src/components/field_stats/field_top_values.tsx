@@ -25,7 +25,7 @@ export interface FieldTopValuesProps {
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
-export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
+export const FieldTopValues = ({
   areExamples,
   buckets,
   dataView,
@@ -35,7 +35,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   'data-test-subj': dataTestSubject,
   onAddFilter,
   overrideFieldTopValueBar,
-}) => {
+}: FieldTopValuesProps) => {
   if (!buckets?.length) {
     return null;
   }

@@ -30,8 +30,9 @@ import { ConnectorContentScheduling } from './full_content';
 interface SchedulePanelProps {
   description: string;
   title: string;
+  children: React.ReactNode;
 }
-export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description, children }) => {
+export const SchedulePanel = ({ title, description, children }: SchedulePanelProps) => {
   return (
     <>
       <EuiSplitPanel.Outer>
@@ -67,7 +68,7 @@ interface ConnectorContentSchedulingProps {
   updateScheduling: (configuration: SchedulingConfiguraton) => void;
 }
 
-export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingProps> = ({
+export const ConnectorSchedulingComponent = ({
   children,
   connector,
   configurationPathOnClick,
@@ -80,7 +81,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   shouldShowIncrementalSync,
   updateConnectorStatus,
   updateScheduling,
-}) => {
+}: ConnectorContentSchedulingProps) => {
   const [hasFullSyncChanges, setHasFullSyncChanges] = useState<boolean>(false);
   const [hasAccessSyncChanges, setAccessSyncChanges] = useState<boolean>(false);
   const [hasIncrementalSyncChanges, setIncrementalSyncChanges] = useState<boolean>(false);

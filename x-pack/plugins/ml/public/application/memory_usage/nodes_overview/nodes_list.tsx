@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
@@ -50,7 +49,7 @@ export interface NodesListProps {
   compactView?: boolean;
 }
 
-export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
+export const NodesList = ({ compactView = false }: NodesListProps) => {
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const refresh = useRefresh();

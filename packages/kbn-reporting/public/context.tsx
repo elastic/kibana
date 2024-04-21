@@ -7,7 +7,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import React, { createContext, useContext, type FunctionComponent } from 'react';
+import React, { createContext, useContext } from 'react';
 import { ReportingAPIClient } from './reporting_api_client';
 
 interface ContextValue {
@@ -17,10 +17,15 @@ interface ContextValue {
 
 const InternalApiClientContext = createContext<undefined | ContextValue>(undefined);
 
-export const InternalApiClientProvider: FunctionComponent<{
+export const InternalApiClientProvider = ({
+  apiClient,
+  http,
+  children,
+}: {
   apiClient: ReportingAPIClient;
   http: HttpSetup;
-}> = ({ apiClient, http, children }) => {
+  children: React.ReactNode;
+}) => {
   return (
     <InternalApiClientContext.Provider value={{ http, apiClient }}>
       {children}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type {
   FieldStatsProps,
@@ -23,12 +22,17 @@ import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 const DEFAULT_DSL_QUERY = getDefaultDatafeedQuery();
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 
-export const FieldStatsContent: FC<{
+export const FieldStatsContent = ({
+  dataView: selectedDataView,
+  fieldStatsServices,
+  timeRangeMs,
+  dslQuery,
+}: {
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
-}> = ({ dataView: selectedDataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
+}) => {
   const { fieldName } = useFieldStatsFlyoutContext();
 
   // Format timestamp to ISO formatted date strings

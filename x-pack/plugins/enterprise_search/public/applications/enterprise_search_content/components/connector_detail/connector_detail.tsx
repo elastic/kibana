@@ -42,7 +42,7 @@ export enum ConnectorDetailTabId {
   SCHEDULING = 'scheduling',
 }
 
-export const ConnectorDetail: React.FC = () => {
+export const ConnectorDetail = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
   const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } =

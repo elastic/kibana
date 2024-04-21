@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createContext, type FC, useContext } from 'react';
+import { createContext, useContext } from 'react';
 
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -119,12 +119,13 @@ export interface AiopsAppDependencies {
       renderOption: EuiComboBoxProps<string>['renderOption'];
       closeFlyout: () => void;
     };
-    FieldStatsFlyoutProvider: FC<{
+    FieldStatsFlyoutProvider: (props: {
+      children: React.ReactNode;
       dataView: DataView;
       fieldStatsServices: FieldStatsServices;
       timeRangeMs?: TimeRangeMs;
       dslQuery?: FieldStatsProps['dslQuery'];
-    }>;
+    }) => JSX.Element;
   };
   presentationUtil?: PresentationUtilPluginStart;
   embeddable?: EmbeddableStart;

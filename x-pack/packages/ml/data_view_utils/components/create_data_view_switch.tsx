@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 
@@ -17,11 +17,11 @@ interface CreateDataViewSwitchProps {
   setCreateDataView: (d: boolean) => void;
 }
 
-export const CreateDataViewSwitch: FC<CreateDataViewSwitchProps> = ({
+export const CreateDataViewSwitch = ({
   canCreateDataView,
   createDataView,
   setCreateDataView,
-}) => (
+}: CreateDataViewSwitchProps) => (
   <EuiSwitch
     name="mlCreateDataView"
     disabled={canCreateDataView === false}

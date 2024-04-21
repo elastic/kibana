@@ -25,7 +25,7 @@ import { ResultSettingsLogic } from '../result_settings_logic';
 
 import { SampleResponseLogic } from './sample_response_logic';
 
-export const SampleResponse: React.FC = () => {
+export const SampleResponse = () => {
   const { reducedServerResultFields } = useValues(ResultSettingsLogic);
 
   const { query, response } = useValues(SampleResponseLogic);

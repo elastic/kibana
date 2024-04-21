@@ -41,7 +41,7 @@ interface Props {
   alerts: AlertsByName;
   stateFilter?: (state: AlertState) => boolean;
 }
-export const AlertsBadge: React.FC<Props> = (props: Props) => {
+export const AlertsBadge = (props: Props) => {
   // We do not always have the alerts that each consumer wants due to licensing
   const { stateFilter = () => true } = props;
   const alertsList = Object.values(props.alerts).flat();

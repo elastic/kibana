@@ -22,7 +22,7 @@ const TEST_ID = {
   FALLBACK_COMPONENT: 'fallback_component',
 };
 
-const FallbackComponent: React.FC = () => <div data-test-subj={TEST_ID.FALLBACK_COMPONENT} />;
+const FallbackComponent = () => <div data-test-subj={TEST_ID.FALLBACK_COMPONENT} />;
 
 const dataViewMockFn = jest.fn();
 

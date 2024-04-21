@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent, MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
@@ -37,7 +37,7 @@ interface CasesTableProps {
   isLoadingColumns: boolean;
 }
 
-export const CasesTable: FunctionComponent<CasesTableProps> = ({
+export const CasesTable = ({
   columns,
   data,
   goToCreateCase,
@@ -52,7 +52,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   tableRef,
   tableRowProps,
   isLoadingColumns,
-}) => {
+}: CasesTableProps) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
   const { euiTheme } = useEuiTheme();

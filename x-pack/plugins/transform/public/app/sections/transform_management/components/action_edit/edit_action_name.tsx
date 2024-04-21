@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +22,7 @@ export const editActionNameText = i18n.translate(
   }
 );
 
-export const EditActionName: FC = () => {
+export const EditActionName = () => {
   const { canCreateTransform } = useTransformCapabilities();
 
   if (!canCreateTransform) {

@@ -24,7 +24,7 @@ interface DisabledLinkPanelProps {
   titleCopy: string;
 }
 
-const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
+const DisabledLinkPanelComponent = ({
   bodyCopy,
   buttonCopy,
   dataTestSubjPrefix,
@@ -34,7 +34,7 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
   listItems,
   moreButtons,
   titleCopy,
-}) => {
+}: DisabledLinkPanelProps) => {
   return (
     <LinkPanelViewComponent
       listItems={listItems}

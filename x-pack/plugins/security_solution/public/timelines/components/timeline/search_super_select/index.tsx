@@ -70,7 +70,7 @@ const getBasicSelectableOptions = (timelineId: string) => [
   } as EuiSelectableOption,
 ];
 
-const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProps> = ({
+const SearchTimelineSuperSelectComponent = ({
   isDisabled,
   hideUntitled = false,
   timelineId,
@@ -79,7 +79,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   onTimelineChange,
   placeholder,
   'aria-label': ariaLabel,
-}) => {
+}: SearchTimelineSuperSelectProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const handleClosePopover = useCallback(() => {

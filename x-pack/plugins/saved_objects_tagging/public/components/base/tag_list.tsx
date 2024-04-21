@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiBadgeGroup } from '@elastic/eui';
 import { TagWithOptionalId } from '../../../common/types';
 import { TagBadge } from './tag_badge';
@@ -19,7 +19,7 @@ export interface TagListProps {
 /**
  * Displays a list of tag
  */
-export const TagList: FC<TagListProps> = ({ tags, onClick, tagRender }) => {
+export const TagList = ({ tags, onClick, tagRender }: TagListProps) => {
   return (
     <EuiBadgeGroup>
       {tags.map((tag) =>

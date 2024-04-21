@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import type { IconType } from '@elastic/eui';
@@ -33,7 +32,7 @@ export interface LinkCardProps {
 
 // Component for rendering a card which links to the Create Job page, displaying an
 // icon, card title, description and link.
-export const LinkCard: FC<LinkCardProps> = ({
+export const LinkCard = ({
   icon,
   iconAreaLabel,
   title,
@@ -42,7 +41,7 @@ export const LinkCard: FC<LinkCardProps> = ({
   href,
   isDisabled,
   'data-test-subj': dataTestSubj,
-}) => {
+}: LinkCardProps) => {
   const euiTheme = useCurrentEuiTheme();
 
   const linkHrefAndOnClickProps = {

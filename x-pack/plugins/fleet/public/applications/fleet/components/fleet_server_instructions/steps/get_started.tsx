@@ -42,7 +42,7 @@ export function getGettingStartedStep(props: QuickStartCreateForm): EuiStepProps
   };
 }
 
-const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> = ({
+const GettingStartedStepContent = ({
   fleetServerHosts,
   fleetServerHost: selectedFleetServerHost,
   setFleetServerHost,
@@ -51,7 +51,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   inputs,
   submit,
   onClose,
-}) => {
+}: QuickStartCreateForm) => {
   const { getHref } = useLink();
 
   if (status === 'success') {

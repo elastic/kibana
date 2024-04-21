@@ -41,7 +41,7 @@ export interface ProductCardProps {
   url?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
+export const ProductCard = ({
   cta,
   description,
   emptyCta = false,
@@ -53,7 +53,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   rightPanelItems,
   name,
   url,
-}) => {
+}: ProductCardProps) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
 
   return (

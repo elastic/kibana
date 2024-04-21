@@ -35,7 +35,7 @@ export interface FieldPopoverHeaderProps {
   onDeleteField?: (fieldName: string) => unknown;
 }
 
-export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
+export const FieldPopoverHeader = ({
   field,
   closePopover,
   buttonAddFieldToWorkspaceProps,
@@ -46,7 +46,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   onAddFilter,
   onEditField,
   onDeleteField,
-}) => {
+}: FieldPopoverHeaderProps) => {
   if (!field) {
     return null;
   }

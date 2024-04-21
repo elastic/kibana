@@ -31,7 +31,7 @@ import {
 } from './sections';
 import { useConfig } from './app_context';
 
-export const App: React.FunctionComponent = () => {
+export const App = () => {
   const { slm_ui: slmUi } = useConfig();
   const { apiError } = useAuthorizationContext();
 

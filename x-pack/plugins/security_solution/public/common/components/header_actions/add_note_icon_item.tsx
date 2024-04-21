@@ -19,12 +19,12 @@ interface AddEventNoteActionProps {
   toggleShowNotes: () => void;
 }
 
-const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
+const AddEventNoteActionComponent = ({
   ariaLabel,
   showNotes,
   timelineType,
   toggleShowNotes,
-}) => {
+}: AddEventNoteActionProps) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
   return (

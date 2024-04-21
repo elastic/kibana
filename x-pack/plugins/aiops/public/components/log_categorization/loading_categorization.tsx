@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiButton,
@@ -22,7 +21,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const LoadingCategorization: FC<Props> = ({ onClose }) => (
+export const LoadingCategorization = ({ onClose }: Props) => (
   <>
     <EuiSpacer size="l" />
     <EuiFlexGroup justifyContent="spaceAround">

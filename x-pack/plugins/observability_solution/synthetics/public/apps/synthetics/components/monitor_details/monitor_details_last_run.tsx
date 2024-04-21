@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
-export const MonitorDetailsLastRun: React.FC = () => {
+export const MonitorDetailsLastRun = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
   let description: string | ReactElement = latestPing
     ? moment(latestPing.timestamp).fromNow()

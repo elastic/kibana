@@ -48,7 +48,7 @@ export interface Props {
 
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
-const SelectSystemPromptComponent: React.FC<Props> = ({
+const SelectSystemPromptComponent = ({
   allSystemPrompts,
   compressed = false,
   conversation,
@@ -64,7 +64,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   setIsSettingsModalVisible,
   showTitles = false,
   isFlyoutMode = false,
-}) => {
+}: Props) => {
   const { setSelectedSettingsTab } = useAssistantContext();
   const { setApiConfig } = useConversation();
 

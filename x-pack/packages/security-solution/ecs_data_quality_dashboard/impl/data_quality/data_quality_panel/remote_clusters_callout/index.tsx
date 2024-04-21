@@ -10,7 +10,7 @@ import React from 'react';
 
 import * as i18n from './translations';
 
-const RemoteClustersCalloutComponent: React.FC = () => (
+const RemoteClustersCalloutComponent = () => (
   <EuiCallOut data-test-subj="remoteClustersCallout" color="primary" size="s" title={i18n.TITLE}>
     <p>{i18n.TO_CHECK_INDICES_ON_REMOTE_CLUSTERS}</p>
   </EuiCallOut>

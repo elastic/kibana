@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +27,7 @@ import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
 
 const EDITOR_HEIGHT = '800px';
 
-export const EditCategorizationAnalyzerFlyout: FC = () => {
+export const EditCategorizationAnalyzerFlyout = () => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
@@ -122,7 +121,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
   );
 };
 
-const FlyoutButton: FC<{ onClick(): void }> = ({ onClick }) => {
+const FlyoutButton = ({ onClick }: { onClick(): void }) => {
   return (
     <EuiButtonEmpty onClick={onClick} flush="left" data-test-subj="mlJobWizardButtonPreviewJobJson">
       <FormattedMessage
@@ -133,11 +132,15 @@ const FlyoutButton: FC<{ onClick(): void }> = ({ onClick }) => {
   );
 };
 
-const Contents: FC<{
+const Contents = ({
+  title,
+  value,
+  onChange,
+}: {
   title: string;
   value: string;
   onChange(s: string): void;
-}> = ({ title, value, onChange }) => {
+}) => {
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

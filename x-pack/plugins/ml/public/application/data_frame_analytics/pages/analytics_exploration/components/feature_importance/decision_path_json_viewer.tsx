@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 import type { FeatureImportance } from '@kbn/ml-data-frame-analytics-utils';
@@ -13,6 +12,6 @@ import type { FeatureImportance } from '@kbn/ml-data-frame-analytics-utils';
 interface DecisionPathJSONViewerProps {
   featureImportance: FeatureImportance[];
 }
-export const DecisionPathJSONViewer: FC<DecisionPathJSONViewerProps> = ({ featureImportance }) => {
+export const DecisionPathJSONViewer = ({ featureImportance }: DecisionPathJSONViewerProps) => {
   return <EuiCodeBlock isCopyable={true}>{JSON.stringify(featureImportance)}</EuiCodeBlock>;
 };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +36,7 @@ export interface AnalyticsProgressStats {
   totalPhases: number;
 }
 
-export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) => {
+export const CreateStepFooter = ({ jobId, jobType, showProgress }: Props) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [jobFinished, setJobFinished] = useState<boolean>(false);
@@ -120,7 +119,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
 
   return (
     <>
-      {showJobAssignWarning && <NewJobAwaitingNodeWarning jobType="data-frame-analytics" />}
+      {showJobAssignWarning && <NewJobAwaitingNodeWarning />}
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
           {showProgress && (

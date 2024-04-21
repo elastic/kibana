@@ -41,30 +41,28 @@ const queryClient = new QueryClient({
   },
 });
 
-const getTestComponent =
-  (params: PageUrlParams): React.FC =>
-  () => {
-    const coreStart = coreMock.createStart();
-    const core = {
-      ...coreStart,
-      application: {
-        ...coreStart.application,
-        capabilities: {
-          ...coreStart.application.capabilities,
-          siem: { crud: true },
-        },
+const getTestComponent = (params: PageUrlParams) => () => {
+  const coreStart = coreMock.createStart();
+  const core = {
+    ...coreStart,
+    application: {
+      ...coreStart.application,
+      capabilities: {
+        ...coreStart.application.capabilities,
+        siem: { crud: true },
       },
-    };
-    return (
-      <TestProvider core={core}>
-        <Rules
-          {...({
-            match: { params },
-          } as RouteComponentProps<PageUrlParams>)}
-        />
-      </TestProvider>
-    );
+    },
   };
+  return (
+    <TestProvider core={core}>
+      <Rules
+        {...({
+          match: { params },
+        } as RouteComponentProps<PageUrlParams>)}
+      />
+    </TestProvider>
+  );
+};
 
 describe('<Rules />', () => {
   beforeEach(() => {

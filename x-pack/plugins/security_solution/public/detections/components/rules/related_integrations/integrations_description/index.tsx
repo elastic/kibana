@@ -21,10 +21,13 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-export const IntegrationDescriptionComponent: React.FC<{
+export const IntegrationDescriptionComponent = ({
+  integration,
+  dataTestSubj = 'integrationDescription',
+}: {
   integration: IntegrationDetails;
   dataTestSubj?: string;
-}> = ({ integration, dataTestSubj = 'integrationDescription' }) => {
+}) => {
   return (
     <Wrapper data-test-subj={`${dataTestSubj}-${integration.packageName}`}>
       <IntegrationLink integration={integration} />{' '}
@@ -36,10 +39,13 @@ export const IntegrationDescriptionComponent: React.FC<{
 
 export const IntegrationDescription = React.memo(IntegrationDescriptionComponent);
 
-export const RelatedIntegrationsDescription: React.FC<{
+export const RelatedIntegrationsDescription = ({
+  relatedIntegrations,
+  dataTestSubj = 'relatedIntegrationsDescription',
+}: {
   relatedIntegrations: RelatedIntegrationArray;
   dataTestSubj?: string;
-}> = ({ relatedIntegrations, dataTestSubj = 'relatedIntegrationsDescription' }) => {
+}) => {
   const { integrations } = useRelatedIntegrations(relatedIntegrations);
 
   return (

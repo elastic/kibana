@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -28,7 +27,7 @@ interface MapButtonProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const MapButton: FC<MapButtonProps> = ({ item }) => {
+export const MapButton = ({ item }: MapButtonProps) => {
   const disabled =
     !isRegressionAnalysis(item.config.analysis) &&
     !isOutlierAnalysis(item.config.analysis) &&

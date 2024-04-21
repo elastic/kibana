@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
@@ -24,7 +24,7 @@ interface Props {
 const MOUSE_PADDING_RIGHT = 20;
 const MOUSE_PADDING_BOTTOM = 20;
 
-export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ processor }) => {
+export const PipelineProcessorsItemTooltip = ({ processor }: Props) => {
   const [position, setPosition] = useState<Position | undefined>();
 
   useEffect(() => {

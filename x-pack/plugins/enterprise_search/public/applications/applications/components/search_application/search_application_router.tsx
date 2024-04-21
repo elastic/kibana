@@ -22,7 +22,7 @@ import {
 import { SearchApplicationNameLogic } from './search_application_name_logic';
 import { SearchApplicationView } from './search_application_view';
 
-export const SearchApplicationRouter: React.FC = () => {
+export const SearchApplicationRouter = () => {
   const searchApplicationName = decodeURIComponent(
     useParams<{ searchApplicationName: string }>().searchApplicationName
   );

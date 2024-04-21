@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
@@ -21,7 +20,7 @@ interface Props {
   selectedField: string | null;
 }
 
-export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const CategorizationFieldSelect = ({ fields, changeHandler, selectedField }: Props) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { renderOption, optionCss } = useFieldStatsTrigger();
 

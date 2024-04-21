@@ -31,7 +31,7 @@ import { MeasurePerformanceSection } from './measure_performance_section';
 import { RankAggregationSection } from './rank_aggregation_section';
 import { SemanticSearchSection } from './semantic_search_section';
 
-export const AISearchGuide: React.FC = () => {
+export const AISearchGuide = () => {
   const isMobile = useIsWithinBreakpoints(['xs']);
 
   return (

@@ -23,12 +23,12 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const GCSSettings: React.FunctionComponent<Props> = ({
+export const GCSSettings = ({
   repository,
   isManagedRepository,
   updateRepositorySettings,
   settingErrors,
-}) => {
+}: Props) => {
   const {
     settings: {
       bucket,

@@ -12,9 +12,7 @@ import stringify from 'json-stable-stringify';
 import React from 'react';
 import type { State } from 'xstate';
 
-export const InvalidStateCallout: React.FC<{ state: State<any, any, any, any, any> }> = ({
-  state,
-}) => (
+export const InvalidStateCallout = ({ state }: { state: State<any, any, any, any, any> }) => (
   <EuiCallOut title={invalidStateCalloutTitle} color="danger" iconType="warning">
     <FormattedMessage
       id="xpack.infra.logs.common.invalidStateMessage"

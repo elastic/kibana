@@ -14,13 +14,13 @@ import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const EditComponent: CustomFieldType<CaseCustomFieldToggle>['Edit'] = ({
+const EditComponent = ({
   customField,
   customFieldConfiguration,
   onSubmit,
   isLoading,
   canUpdate,
-}) => {
+}: React.ComponentProps<CustomFieldType<CaseCustomFieldToggle>['Edit']>) => {
   const initialValue = Boolean(customField?.value);
   const title = customFieldConfiguration.label;
 

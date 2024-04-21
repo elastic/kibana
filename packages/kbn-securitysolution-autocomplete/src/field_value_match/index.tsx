@@ -60,7 +60,7 @@ interface AutocompleteFieldMatchProps {
   'aria-label'?: string;
 }
 
-export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
+export const AutocompleteFieldMatchComponent = ({
   placeholder,
   rowLabel,
   selectedField,
@@ -77,7 +77,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   onWarning,
   warning,
   'aria-label': ariaLabel,
-}): JSX.Element => {
+}: AutocompleteFieldMatchProps): JSX.Element => {
   const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);

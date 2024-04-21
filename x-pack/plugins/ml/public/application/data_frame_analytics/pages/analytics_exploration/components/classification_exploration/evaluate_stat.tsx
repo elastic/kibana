@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiStat, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EMPTY_STAT } from '../../../../common/analytics';
@@ -18,13 +17,13 @@ interface Props {
   tooltipContent: string;
 }
 
-export const EvaluateStat: FC<Props> = ({
+export const EvaluateStat = ({
   isLoading,
   title,
   description,
   dataTestSubj,
   tooltipContent,
-}) => (
+}: Props) => (
   <EuiFlexGroup gutterSize="xs" data-test-subj={dataTestSubj}>
     <EuiFlexItem grow={false}>
       <EuiStat

@@ -12,12 +12,12 @@ import React from 'react';
 export type TutorialVariables = Partial<Record<string, unknown>>;
 
 /** @public */
-export type TutorialDirectoryHeaderLinkComponent = React.FC;
+export type TutorialDirectoryHeaderLinkComponent = () => JSX.Element;
 
 /** @public */
-export type TutorialModuleNoticeComponent = React.FC<{
+export type TutorialModuleNoticeComponent = (props:{
   moduleName: string;
-}>;
+}) => JSX.Element;
 
 type CustomStatusCheckCallback = () => Promise<boolean>;
 type CustomComponent = () => Promise<React.ReactNode>;

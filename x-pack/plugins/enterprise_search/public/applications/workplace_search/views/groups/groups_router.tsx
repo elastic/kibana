@@ -19,7 +19,7 @@ import { GroupsLogic } from './groups_logic';
 
 import './groups.scss';
 
-export const GroupsRouter: React.FC = () => {
+export const GroupsRouter = () => {
   const { initializeGroups } = useActions(GroupsLogic);
 
   useEffect(() => {

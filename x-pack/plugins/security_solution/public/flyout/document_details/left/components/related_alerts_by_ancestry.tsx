@@ -29,11 +29,11 @@ export interface RelatedAlertsByAncestryProps {
 /**
  * Show related alerts by ancestry in an expandable panel with a table
  */
-export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = ({
+export const RelatedAlertsByAncestry = ({
   documentId,
   indices,
   scopeId,
-}) => {
+}: RelatedAlertsByAncestryProps) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
     indices,

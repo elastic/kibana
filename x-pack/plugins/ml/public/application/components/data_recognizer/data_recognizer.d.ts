@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type SavedSearch } from '@kbn/saved-search-plugin/public';
 
-declare const DataRecognizer: FC<{
+declare const DataRecognizer: (props: {
   indexPattern: DataView;
   savedSearch: SavedSearch | null;
   results: {
@@ -17,4 +16,4 @@ declare const DataRecognizer: FC<{
     onChange?: Function;
   };
   className?: string;
-}>;
+}) => JSX.Element;

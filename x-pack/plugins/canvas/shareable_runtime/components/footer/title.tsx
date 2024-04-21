@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiLink } from '@elastic/eui';
 import { useCanvasShareableState } from '../../context';
 
@@ -19,7 +19,7 @@ interface Props {
 /**
  * The title of the workpad displayed in the left-hand of the footer.
  */
-export const TitleComponent: FC<Props> = ({ title }) => (
+export const TitleComponent = ({ title }: Props) => (
   <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
       <EuiLink href="https://www.elastic.co" title="Powered by Elastic.co">
@@ -37,7 +37,7 @@ export const TitleComponent: FC<Props> = ({ title }) => (
 /**
  * A store-connected container for the `Title` component.
  */
-export const Title: FC<{}> = () => {
+export const Title = () => {
   const [{ workpad }] = useCanvasShareableState();
 
   if (!workpad) {

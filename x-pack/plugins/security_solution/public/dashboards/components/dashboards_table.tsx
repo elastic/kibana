@@ -33,7 +33,7 @@ const DASHBOARDS_TABLE_SORTING = {
   },
 } as const;
 
-export const DashboardsTable: React.FC = () => {
+export const DashboardsTable = () => {
   const { items, isLoading, error } = useSecurityDashboardsTableItems();
   const columns = useSecurityDashboardsTableColumns();
   const { addError } = useAppToasts();

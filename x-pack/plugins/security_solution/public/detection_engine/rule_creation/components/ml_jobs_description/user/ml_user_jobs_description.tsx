@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -16,7 +15,7 @@ interface MlUserJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds }) => {
+const MlUserJobsDescriptionComponent = ({ jobIds }: MlUserJobsDescriptionProps) => {
   const { isMlUser, jobs } = useInstalledSecurityJobs();
 
   if (!isMlUser) {

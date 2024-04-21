@@ -25,7 +25,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: TriggersAndActionsUiServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: (props: { children: React.ReactElement }) => React.ReactElement | null;
 }
 
 export const createAppMockRenderer = (
@@ -51,7 +51,7 @@ export const createAppMockRenderer = (
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+  const AppWrapper = React.memo(({ children }: { children: React.ReactElement }) => (
     <I18nProvider>
       <KibanaRenderContextProvider {...core}>
         <KibanaContextProvider services={services}>

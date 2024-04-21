@@ -22,7 +22,6 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import type { FC } from 'react';
 import { useEffect, useMemo, useCallback } from 'react';
 import React, { useState } from 'react';
 
@@ -36,7 +35,7 @@ import { JobsExportService } from './jobs_export_service';
 import type { JobDependencies } from './jobs_export_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
-const LoadingSpinner: FC = () => (
+const LoadingSpinner = () => (
   <>
     <EuiSpacer size="l" />
     <EuiFlexGroup justifyContent="spaceAround">
@@ -47,9 +46,12 @@ const LoadingSpinner: FC = () => (
   </>
 );
 
-const SwitchTabsConfirm: FC<{ onCancel: () => void; onConfirm: () => void }> = ({
+const SwitchTabsConfirm = ({
   onCancel,
   onConfirm,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
 }) => (
   <EuiConfirmModal
     title={i18n.translate('xpack.ml.importExport.exportFlyout.switchTabsConfirm.title', {

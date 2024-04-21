@@ -15,7 +15,7 @@ interface IndicesListProps {
   hasBorder?: boolean;
 }
 
-export const IndicesList: React.FC<IndicesListProps> = ({ indices, onRemoveClick, hasBorder }) =>
+export const IndicesList = ({ indices, onRemoveClick, hasBorder }: IndicesListProps) =>
   indices?.length ? (
     <EuiFormRow
       fullWidth

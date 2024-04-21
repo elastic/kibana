@@ -27,7 +27,7 @@ import { SourceLayout } from '../source_layout';
 
 import { SynchronizationLogic } from './synchronization_logic';
 
-export const Synchronization: React.FC = () => {
+export const Synchronization = () => {
   const { contentSource } = useValues(SourceLogic);
   const { updateSyncEnabled } = useActions(SynchronizationLogic({ contentSource }));
 

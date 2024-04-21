@@ -34,13 +34,13 @@ interface Props {
   showAnonymized?: boolean;
 }
 
-const InsightComponent: React.FC<Props> = ({
+const InsightComponent = ({
   initialIsOpen,
   insight,
   onToggle,
   replacements,
   showAnonymized = false,
-}) => {
+}: Props) => {
   const { euiTheme } = useEuiTheme();
 
   // get assistant privileges:

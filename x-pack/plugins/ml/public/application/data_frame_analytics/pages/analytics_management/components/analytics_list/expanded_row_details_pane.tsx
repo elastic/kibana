@@ -7,7 +7,7 @@
 
 import './expanded_row_details_pane.scss';
 
-import type { FC, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import React from 'react';
 
 import {
@@ -37,9 +37,7 @@ interface SectionProps {
   section: SectionConfig;
 }
 
-export const OverallDetails: FC<{
-  overallDetails: SectionConfig;
-}> = ({ overallDetails }) => (
+export const OverallDetails = ({ overallDetails }: { overallDetails: SectionConfig }) => (
   <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
     {overallDetails.items.map((item) => {
       if (item.title === 'badge') {
@@ -98,7 +96,7 @@ export const Stats = ({ section }: { section: SectionConfig }) => (
   </EuiFlexGroup>
 );
 
-export const Section: FC<SectionProps> = ({ section }) => {
+export const Section = ({ section }: SectionProps) => {
   if (section?.items && section.items.length === 0) {
     return null;
   }
@@ -142,14 +140,14 @@ interface ExpandedRowDetailsPaneProps {
   dataTestSubj: string;
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
+export const ExpandedRowDetailsPane = ({
   analysisStats,
   dataCounts,
   memoryUsage,
   overallDetails,
   progress,
   dataTestSubj,
-}) => {
+}: ExpandedRowDetailsPaneProps) => {
   return (
     <>
       <EuiSpacer />

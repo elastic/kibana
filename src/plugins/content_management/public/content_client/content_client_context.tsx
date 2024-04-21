@@ -18,9 +18,12 @@ export const useContentClient = (): ContentClient => {
   return contentClient;
 };
 
-export const ContentClientProvider: React.FC<{ contentClient: ContentClient }> = ({
+export const ContentClientProvider = ({
   contentClient,
   children,
+}: {
+  contentClient: ContentClient;
+  children: React.ReactNode;
 }) => {
   return (
     <ContentClientContext.Provider value={contentClient}>

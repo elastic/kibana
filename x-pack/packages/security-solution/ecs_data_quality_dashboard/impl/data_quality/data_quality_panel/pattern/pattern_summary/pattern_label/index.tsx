@@ -27,13 +27,13 @@ interface Props {
   pattern: string;
 }
 
-const PatternLabelComponent: React.FC<Props> = ({
+const PatternLabelComponent = ({
   ilmExplainPhaseCounts,
   incompatible,
   indices,
   indicesChecked,
   pattern,
-}) => (
+}: Props) => (
   <>
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
@@ -61,7 +61,6 @@ const PatternLabelComponent: React.FC<Props> = ({
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
-
     <EuiSpacer size="xs" />
     {ilmExplainPhaseCounts && (
       <IlmPhaseCounts ilmExplainPhaseCounts={ilmExplainPhaseCounts} pattern={pattern} />

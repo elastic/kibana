@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,7 +45,7 @@ interface Props {
   element: PositionedElement;
 }
 
-export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
+export const ElementSettings = ({ element }: Props) => {
   const tabs = useMemo(() => {
     const filtersTab = isExpressionWithFilters(element.expression) && {
       id: 'filters',

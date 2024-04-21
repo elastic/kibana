@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 
-const UpgradeLicenseCallOutComponent: React.FC = () => {
+const UpgradeLicenseCallOutComponent = () => {
   const { http } = useKibana().services;
 
   return (

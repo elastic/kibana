@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +15,7 @@ import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 
-export const AnalyticsEmptyPrompt: FC = () => {
+export const AnalyticsEmptyPrompt = () => {
   const {
     services: { docLinks },
   } = useMlKibana();

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useRef, useCallback } from 'react';
 
 import type { IntegrationsAppBrowseRouteState } from '../../../types';
@@ -19,7 +18,7 @@ const IntegrationsStateContext = createContext<IntegrationsStateContextValue>({
   getFromIntegrations: () => undefined,
 });
 
-export const IntegrationsStateContextProvider: FunctionComponent = ({ children }) => {
+export const IntegrationsStateContextProvider = ({ children }: { children: React.ReactNode }) => {
   const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
   const fromIntegrationsRef = useRef<undefined | string>(maybeState?.fromIntegrations);
 

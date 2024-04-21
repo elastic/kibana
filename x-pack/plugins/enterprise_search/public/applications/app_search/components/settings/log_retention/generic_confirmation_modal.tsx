@@ -33,14 +33,14 @@ interface GenericConfirmationModalProps {
   onSave(): void;
 }
 
-export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> = ({
+export const GenericConfirmationModal = ({
   description,
   onClose,
   onSave,
   subheading,
   target,
   title,
-}) => {
+}: GenericConfirmationModalProps) => {
   const [inputValue, setInputValue] = useState('');
 
   const onConfirm = () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonIcon,
   EuiComboBoxOptionOption,
@@ -38,10 +38,10 @@ export interface IndicatorBarchartLegendActionProps {
   field: EuiComboBoxOptionOption<string>;
 }
 
-export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionProps> = ({
+export const IndicatorBarchartLegendAction = ({
   data,
   field,
-}) => {
+}: IndicatorBarchartLegendActionProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const group = field.value === 'date' ? moment(data).toISOString() : data;

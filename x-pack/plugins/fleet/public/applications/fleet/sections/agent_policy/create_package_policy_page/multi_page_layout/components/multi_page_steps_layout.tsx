@@ -19,7 +19,7 @@ import type { MultiPageStepLayoutProps } from '../types';
 
 import { PageSteps } from '.';
 
-export const MultiPageStepsLayout: React.FunctionComponent<MultiPageStepLayoutProps> = (props) => {
+export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
   const { packageInfo, integrationInfo, steps, currentStep, error } = props;
 
   if (error) {

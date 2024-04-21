@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useState, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -64,7 +63,7 @@ const useFilterOptions = (): EuiButtonGroupOptionProps[] =>
     []
   );
 
-export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() => {
+export const AssetDocumentTab = memo(() => {
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
   const buttonButtons = useFilterOptions();
   const selectedTab = useMemo(() => {

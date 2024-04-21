@@ -66,10 +66,15 @@ const LeftpaddedNotificationBadge = styled(EuiNotificationBadge)`
   margin-left: 10px;
 `;
 
-const InactiveAgentsTourStep: React.FC<{
+const InactiveAgentsTourStep = ({
+  children,
+  isOpen,
+  setInactiveAgentsCalloutHasBeenDismissed,
+}: {
+  children: React.ReactNode;
   isOpen: boolean;
   setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
-}> = ({ children, isOpen, setInactiveAgentsCalloutHasBeenDismissed }) => (
+}) => (
   <EuiTourStep
     content={
       <EuiText size="s">
@@ -104,13 +109,13 @@ const InactiveAgentsTourStep: React.FC<{
   </EuiTourStep>
 );
 
-export const AgentStatusFilter: React.FC<{
+export const AgentStatusFilter = (props: {
   selectedStatus: string[];
   onSelectedStatusChange: (status: string[]) => void;
   disabled?: boolean;
   totalInactiveAgents: number;
   isOpenByDefault?: boolean;
-}> = (props) => {
+}) => {
   const { euiTheme } = useEuiTheme();
   const {
     selectedStatus,

@@ -37,7 +37,7 @@ import {
 import { getAddPath, getEditPath, getSourcesPath } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';
 
-export const Connectors: React.FC = () => {
+export const Connectors = () => {
   const { initializeConnectors } = useActions(SettingsLogic);
   const { dataLoading, connectors } = useValues(SettingsLogic);
 

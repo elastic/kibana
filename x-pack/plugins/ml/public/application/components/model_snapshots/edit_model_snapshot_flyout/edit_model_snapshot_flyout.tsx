@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,7 +38,7 @@ interface Props {
   closeFlyout(reload: boolean): void;
 }
 
-export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout }) => {
+export const EditModelSnapshotFlyout = ({ snapshot, job, closeFlyout }: Props) => {
   const { toasts } = useNotifications();
   const [description, setDescription] = useState(snapshot.description);
   const [retain, setRetain] = useState(snapshot.retain);

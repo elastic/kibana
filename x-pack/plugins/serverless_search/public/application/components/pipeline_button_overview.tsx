@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibanaServices } from '../hooks/use_kibana';
 
-export const PipelineButtonOverview: React.FC = () => {
+export const PipelineButtonOverview = () => {
   const { http } = useKibanaServices();
 
   return (

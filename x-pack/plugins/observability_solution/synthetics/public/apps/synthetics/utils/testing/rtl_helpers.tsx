@@ -153,8 +153,8 @@ export const mockCore: () => Partial<CoreStart> = () => {
       },
     },
     observabilityShared: {
+      // @ts-ignore
       navigation: {
-        // @ts-ignore
         PageTemplate: KibanaPageTemplate,
       },
     },

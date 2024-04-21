@@ -6,7 +6,6 @@
  */
 
 import { EuiSpacer, EuiTab } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';
@@ -33,30 +32,28 @@ export interface PanelHeaderProps {
   tabs: RightPanelTabType[];
 }
 
-export const PanelHeader: FC<PanelHeaderProps> = memo(
-  ({ selectedTabId, setSelectedTabId, tabs }) => {
-    const { dataFormattedForFieldBrowser } = useRightPanelContext();
-    const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-    const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
-    const renderTabs = tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        key={index}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+export const PanelHeader = memo(({ selectedTabId, setSelectedTabId, tabs }: PanelHeaderProps) => {
+  const { dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
+  const renderTabs = tabs.map((tab, index) => (
+    <EuiTab
+      onClick={() => onSelectedTabChanged(tab.id)}
+      isSelected={tab.id === selectedTabId}
+      key={index}
+      data-test-subj={tab['data-test-subj']}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
 
-    return (
-      <FlyoutHeader>
-        {isAlert ? <AlertHeaderTitle /> : <EventHeaderTitle />}
-        <EuiSpacer size="m" />
-        <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
-      </FlyoutHeader>
-    );
-  }
-);
+  return (
+    <FlyoutHeader>
+      {isAlert ? <AlertHeaderTitle /> : <EventHeaderTitle />}
+      <EuiSpacer size="m" />
+      <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
+    </FlyoutHeader>
+  );
+});
 
 PanelHeader.displayName = 'PanelHeader';

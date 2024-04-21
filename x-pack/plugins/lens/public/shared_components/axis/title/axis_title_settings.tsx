@@ -36,12 +36,12 @@ export interface AxisTitleSettingsProps {
   isAxisTitleVisible: boolean;
 }
 
-export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> = ({
+export const AxisTitleSettings = ({
   axis,
   axisTitle,
   updateTitleState,
   isAxisTitleVisible,
-}) => {
+}: AxisTitleSettingsProps) => {
   const axisState = useMemo(
     () => ({
       title: axisTitle,

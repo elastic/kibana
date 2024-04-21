@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import {
   EuiDescribedFormGroup,
@@ -29,8 +28,8 @@ interface TestsSelectionControlProps {
   errors?: string[];
 }
 
-export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
-  ({ config, onChange, errors }) => {
+export const TestsSelectionControl = React.memo(
+  ({ config, onChange, errors }: TestsSelectionControlProps) => {
     const uiConfig = getResultJobsHealthRuleConfig(config);
 
     const updateCallback = useCallback(

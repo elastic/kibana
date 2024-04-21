@@ -6,7 +6,6 @@
  */
 
 import { css } from '@emotion/react';
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -107,7 +106,7 @@ export interface IndexDataVisualizerViewProps {
   getAdditionalLinks?: GetAdditionalLinks;
 }
 
-export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
+export const IndexDataVisualizerView = (dataVisualizerProps: IndexDataVisualizerViewProps) => {
   const euiTheme = useCurrentEuiTheme();
 
   const [savedRandomSamplerPreference, saveRandomSamplerPreference] = useStorage<

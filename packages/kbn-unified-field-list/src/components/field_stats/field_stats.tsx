@@ -111,7 +111,7 @@ export interface FieldStatsWithDslQuery extends FieldStatsPropsBase {
 
 export type FieldStatsProps = FieldStatsWithKbnQuery | FieldStatsWithDslQuery;
 
-const FieldStatsComponent: React.FC<FieldStatsProps> = ({
+const FieldStatsComponent = ({
   services,
   query,
   dslQuery,
@@ -127,7 +127,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   onAddFilter,
   overrideFieldTopValueBar,
   onStateChange,
-}) => {
+}: FieldStatsProps) => {
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<FieldStatsState>({
     isLoading: false,
@@ -654,7 +654,7 @@ function getCountsElement(
  * @param props
  * @constructor
  */
-const FieldStats: React.FC<FieldStatsProps> = (props) => {
+const FieldStats = (props: FieldStatsProps) => {
   return (
     <ErrorBoundary>
       <FieldStatsComponent {...props} />

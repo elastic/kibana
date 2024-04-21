@@ -20,7 +20,7 @@ const StyledContent = styled.div<{ $isDetails: boolean }>`
   margin: 0 auto;
 `;
 
-export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
+export const DefaultCellRenderer = ({
   data,
   ecsData,
   eventId,
@@ -34,7 +34,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   truncate,
   asPlainText,
   context,
-}) => {
+}: CellValueElementProps) => {
   const asPlainTextDefault = useMemo(() => {
     return (
       getLinkColumnDefinition(header.id, header.type, header.linkField) !== undefined && !isTimeline

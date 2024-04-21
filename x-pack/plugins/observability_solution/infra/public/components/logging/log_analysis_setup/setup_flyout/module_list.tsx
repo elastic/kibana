@@ -20,9 +20,11 @@ import {
 import { LogAnalysisModuleListCard } from './module_list_card';
 import type { ModuleId } from './setup_flyout_state';
 
-export const LogAnalysisModuleList: React.FC<{
+export const LogAnalysisModuleList = ({
+  onViewModuleSetup,
+}: {
   onViewModuleSetup: (module: ModuleId) => void;
-}> = ({ onViewModuleSetup }) => {
+}) => {
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
   const { setupStatus: logEntryRateSetupStatus, jobIds: logEntryRateJobIds } =
     useLogEntryRateModuleContext();

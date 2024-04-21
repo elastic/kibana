@@ -14,7 +14,7 @@ import { NEW_INDEX_PATH, NEW_API_PATH } from '../../routes';
 import { NewIndex } from './new_index';
 import { NewSearchIndexPage } from './new_search_index_page';
 
-export const NewIndexRouter: React.FC = () => {
+export const NewIndexRouter = () => {
   return (
     <Routes>
       <Route path={NEW_INDEX_PATH} exact>

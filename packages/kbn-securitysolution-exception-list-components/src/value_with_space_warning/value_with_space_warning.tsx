@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -23,11 +22,11 @@ const containerCss = css`
   display: inline;
   margin-left: ${euiThemeVars.euiSizeXS};
 `;
-export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
+export const ValueWithSpaceWarning = ({
   value,
   tooltipIconType = 'iInCircle',
   tooltipIconText,
-}) => {
+}: ValueWithSpaceWarningProps) => {
   const { showSpaceWarningIcon, warningText } = useValueWithSpaceWarning({
     value,
     tooltipIconText,

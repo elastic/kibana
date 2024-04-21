@@ -29,7 +29,7 @@ import { AddDomainFormErrors } from './add_domain/add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './add_domain/add_domain_form_submit_button';
 import { AddDomainLogic } from './add_domain/add_domain_logic';
 
-export const EmptyStatePanel: React.FC = () => {
+export const EmptyStatePanel = () => {
   const { openFlyout } = useActions(AddDomainLogic);
   const { events } = useValues(CrawlerLogic);
   return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
@@ -18,7 +18,7 @@ export interface Props extends ColorPickerProps {
   ariaLabel?: string;
 }
 
-export const ColorPickerPopover: FC<Props> = (props: Props) => {
+export const ColorPickerPopover = (props: Props) => {
   const { value, anchorPosition, ariaLabel, ...rest } = props;
   const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <EuiLink

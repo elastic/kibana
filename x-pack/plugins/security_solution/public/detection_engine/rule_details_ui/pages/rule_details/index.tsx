@@ -173,11 +173,11 @@ const RuleFieldsSectionWrapper = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
+const RuleDetailsPageComponent = ({
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
-}) => {
+}: DetectionEngineComponentProps) => {
   const {
     application: {
       navigateToApp,

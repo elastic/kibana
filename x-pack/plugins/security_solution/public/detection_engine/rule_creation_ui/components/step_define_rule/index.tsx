@@ -18,7 +18,6 @@ import {
   EuiRadioGroup,
   EuiToolTip,
 } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
 import styled from 'styled-components';
@@ -161,7 +160,7 @@ const IntendedRuleTypeEuiFormRow = styled(RuleTypeEuiFormRow)`
 `;
 
 // eslint-disable-next-line complexity
-const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+const StepDefineRuleComponent = ({
   isLoading,
   isUpdateView = false,
   kibanaDataViews,
@@ -187,7 +186,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   queryBarSavedId,
   thresholdFields,
   enableThresholdSuppression,
-}) => {
+}: StepDefineRuleProps) => {
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -1121,12 +1120,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 };
 export const StepDefineRule = memo(StepDefineRuleComponent);
 
-const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
+const StepDefineRuleReadOnlyComponent = ({
   addPadding,
   defaultValues: data,
   descriptionColumns,
   indexPattern,
-}) => {
+}: StepDefineRuleReadOnlyProps) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
   const transformFields = useExperimentalFeatureFieldsTransform();
 

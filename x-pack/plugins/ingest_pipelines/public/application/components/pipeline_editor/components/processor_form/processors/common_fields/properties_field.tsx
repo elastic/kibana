@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -32,7 +32,7 @@ interface Props {
   euiFieldProps?: EuiComboBoxProps<string>;
 }
 
-export const PropertiesField: FunctionComponent<Props> = ({ helpText, euiFieldProps }) => {
+export const PropertiesField = ({ helpText, euiFieldProps }: Props) => {
   return (
     <UseField
       config={{

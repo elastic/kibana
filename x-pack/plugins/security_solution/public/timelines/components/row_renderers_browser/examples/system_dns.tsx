@@ -11,7 +11,7 @@ import { createDnsRowRenderer } from '../../timeline/body/renderers/system/gener
 import { demoEndgameDnsRequest } from '../../../../common/demo_data/endgame_ecs/dns';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SystemDnsExampleComponent: React.FC = () => {
+const SystemDnsExampleComponent = () => {
   const systemDnsRowRenderer = createDnsRowRenderer();
 
   return (

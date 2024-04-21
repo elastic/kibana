@@ -44,7 +44,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const tlsTableId = 'tls-table';
 
-const TlsTableComponent: React.FC<TlsTableProps> = ({
+const TlsTableComponent = ({
   data,
   fakeTotalCount,
   id,
@@ -55,7 +55,7 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
   showMorePagesIndicator,
   totalCount,
   type,
-}) => {
+}: TlsTableProps) => {
   const dispatch = useDispatch();
   const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) => getTlsSelector(state, type));

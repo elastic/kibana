@@ -45,13 +45,13 @@ interface Props {
   handleDeleteMapping(roleMappingId: string): void;
 }
 
-export const RoleMappingsTable: React.FC<Props> = ({
+export const RoleMappingsTable = ({
   accessItemKey,
   accessHeader,
   roleMappings,
   initializeRoleMapping,
   handleDeleteMapping,
-}) => {
+}: Props) => {
   const getFirstAttributeName = (rules: RoleRules): string => Object.entries(rules)[0][0];
   const getFirstAttributeValue = (rules: RoleRules): string => Object.entries(rules)[0][1];
 

@@ -23,9 +23,11 @@ import { ModuleId, moduleIds, useLogAnalysisSetupFlyoutStateContext } from './se
 
 const FLYOUT_HEADING_ID = 'logAnalysisSetupFlyoutHeading';
 
-export const LogAnalysisSetupFlyout: React.FC<{
-  allowedModules?: ModuleId[];
-}> = ({ allowedModules = moduleIds }) => {
+export const LogAnalysisSetupFlyout = ({
+  allowedModules = moduleIds,
+}: {
+  allowedModules?: readonly ModuleId[];
+}) => {
   const { closeFlyout, flyoutView, showModuleList, showModuleSetup } =
     useLogAnalysisSetupFlyoutStateContext();
 
@@ -65,11 +67,15 @@ export const LogAnalysisSetupFlyout: React.FC<{
   );
 };
 
-const ModuleSetupView: React.FC<{
+const ModuleSetupView = ({
+  moduleId,
+  onClose,
+  onViewModuleList,
+}: {
   moduleId: ModuleId;
   onClose: () => void;
   onViewModuleList?: () => void;
-}> = ({ moduleId, onClose, onViewModuleList }) => {
+}) => {
   switch (moduleId) {
     case 'logs_ui_analysis':
       return (
@@ -86,9 +92,13 @@ const ModuleSetupView: React.FC<{
   }
 };
 
-const LogAnalysisSetupFlyoutSubPage: React.FC<{
+const LogAnalysisSetupFlyoutSubPage = ({
+  children,
+  onViewModuleList,
+}: {
+  children: React.ReactNode;
   onViewModuleList?: () => void;
-}> = ({ children, onViewModuleList }) => (
+}) => (
   <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
     {onViewModuleList ? (
       <EuiFlexItem grow={false}>

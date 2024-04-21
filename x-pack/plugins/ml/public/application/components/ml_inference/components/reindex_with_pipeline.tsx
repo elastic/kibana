@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
@@ -61,7 +60,7 @@ interface Props {
   sourceIndex?: string;
 }
 
-export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) => {
+export const ReindexWithPipeline = ({ pipelineName, sourceIndex }: Props) => {
   const [selectedIndex, setSelectedIndex] = useState<EuiComboBoxOptionOption[]>(
     sourceIndex ? [{ label: sourceIndex }] : []
   );

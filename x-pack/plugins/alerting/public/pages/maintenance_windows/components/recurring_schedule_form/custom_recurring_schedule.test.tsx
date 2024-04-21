@@ -29,9 +29,12 @@ const initialValue: FormProps = {
 describe('CustomRecurringSchedule', () => {
   let appMockRenderer: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC<{ iv?: FormProps }> = ({
+  const MockHookWrapperComponent = ({
     children,
     iv = initialValue,
+  }: {
+    iv?: FormProps;
+    children: React.ReactNode;
   }) => {
     const { form } = useForm<FormProps>({
       defaultValue: iv,

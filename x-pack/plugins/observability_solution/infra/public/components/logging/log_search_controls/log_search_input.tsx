@@ -9,7 +9,7 @@ import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import classNames from 'classnames';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 

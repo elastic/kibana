@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiSpacer, EuiForm } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
@@ -42,7 +41,7 @@ export type MlAnomalyAlertTriggerProps =
     mlCapabilities: MlCapabilities;
   };
 
-const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
+const MlAnomalyAlertTrigger = ({
   ruleParams,
   setRuleParams,
   setRuleProperty,
@@ -51,7 +50,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertNotifyWhen,
   getStartServices,
   mlCapabilities,
-}) => {
+}: MlAnomalyAlertTriggerProps) => {
   const {
     services: { http },
   } = useKibana();

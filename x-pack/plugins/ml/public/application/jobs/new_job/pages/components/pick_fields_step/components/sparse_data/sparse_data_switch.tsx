@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
@@ -13,7 +12,7 @@ import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
-export const SparseDataSwitch: FC = () => {
+export const SparseDataSwitch = () => {
   const { jobCreator, jobCreatorUpdated, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [sparseData, setSparseData] = useState(jobCreator.sparseData);
   const [enabled, setEnabled] = useState(false);

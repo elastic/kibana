@@ -33,7 +33,7 @@ import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorStats } from './connector_stats';
 import { ConnectorViewLogic } from './connector_view_logic';
 
-export const ConnectorDetailOverview: React.FC = () => {
+export const ConnectorDetailOverview = () => {
   const { indexData } = useValues(IndexViewLogic);
   const { connector, error } = useValues(ConnectorViewLogic);
   const { isCloud } = useValues(KibanaLogic);

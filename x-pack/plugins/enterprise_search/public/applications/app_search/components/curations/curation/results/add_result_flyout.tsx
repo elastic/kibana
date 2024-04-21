@@ -38,7 +38,7 @@ import { CurationLogic } from '../curation_logic';
 
 import { AddResultLogic, CurationResult } from '.';
 
-export const AddResultFlyout: React.FC = () => {
+export const AddResultFlyout = () => {
   const searchLogic = SearchLogic({ id: 'add-results-flyout' });
   const { searchQuery, searchResults, searchDataLoading } = useValues(searchLogic);
   const { closeFlyout } = useActions(AddResultLogic);

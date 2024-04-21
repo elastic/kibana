@@ -39,7 +39,7 @@ const StyledEuiContextMenuPanel = styled(EuiContextMenuPanel)`
   visibility: inherit;
 `;
 
-const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
+const OverflowButton = React.memo(
   ({
     closePopOver,
     Component,
@@ -52,7 +52,7 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
     onClick,
     showTooltip = false,
     value,
-  }) => {
+  }: OverflowButtonProps) => {
     useEffect(() => {
       if (!ownFocus) {
         return;

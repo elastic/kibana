@@ -48,7 +48,7 @@ export const baseBreadcrumbs = [
   }),
 ];
 
-export const SearchIndices: React.FC = () => {
+export const SearchIndices = () => {
   const { fetchIndices, onPaginate, openDeleteModal, setIsFirstRequest } = useActions(IndicesLogic);
   const { meta, indices, hasNoIndices, isLoading, searchParams } = useValues(IndicesLogic);
   const [showHiddenIndices, setShowHiddenIndices] = useState(false);

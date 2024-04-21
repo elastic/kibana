@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { CredentialsLogic } from '../../credentials_logic';
 import { TokenReadWrite } from '../../types';
 
-export const FormKeyReadWriteAccess: React.FC = () => {
+export const FormKeyReadWriteAccess = () => {
   const { setTokenReadWrite } = useActions(CredentialsLogic);
   const { activeApiToken } = useValues(CredentialsLogic);
 

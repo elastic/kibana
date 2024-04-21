@@ -68,12 +68,12 @@ export interface EditOutputFlyoutProps {
   proxies: FleetProxy[];
 }
 
-export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
+export const EditOutputFlyout = ({
   defaultOuput,
   onClose,
   output,
   proxies,
-}) => {
+}: EditOutputFlyoutProps) => {
   useBreadcrumbs('settings');
   const form = useOutputForm(onClose, output, defaultOuput);
   const inputs = form.inputs;

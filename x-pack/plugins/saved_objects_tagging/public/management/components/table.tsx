@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,7 +44,7 @@ const sorting = {
 export const isModifiedOrPrevented = (event: React.MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
-export const TagTable: FC<TagTableProps> = ({
+export const TagTable = ({
   loading,
   capabilities,
   tags,
@@ -57,7 +57,7 @@ export const TagTable: FC<TagTableProps> = ({
   getTagRelationUrl,
   actionBar,
   actions,
-}) => {
+}: TagTableProps) => {
   const columns: Array<EuiBasicTableColumn<TagWithRelations>> = [
     {
       field: 'name',

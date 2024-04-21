@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -107,7 +107,7 @@ const styleButtons = [
   },
 ];
 
-export const TextStylePicker: FC<Props> = ({
+export const TextStylePicker = ({
   align = 'left',
   color,
   colors,
@@ -117,7 +117,7 @@ export const TextStylePicker: FC<Props> = ({
   size = 14,
   underline = false,
   weight = 'normal',
-}) => {
+}: Props) => {
   const [style, setStyle] = useState<StyleProps>({
     align,
     color,

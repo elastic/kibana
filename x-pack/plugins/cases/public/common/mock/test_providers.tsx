@@ -67,7 +67,7 @@ const mockGetFilesClient = () => {
 export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<TestProviderProps> = ({
+const TestProvidersComponent = ({
   children,
   features,
   owner = mockedTestProvidersOwner,
@@ -76,7 +76,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
   license,
-}) => {
+}: TestProviderProps) => {
   const services = createStartServicesMock({ license });
 
   const queryClient = new QueryClient({
@@ -128,7 +128,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactNode }>;
+  AppWrapper: (props: { children: React.ReactNode }) => JSX.Element;
   getFilesClient: () => ScopedFilesClient;
 }
 
@@ -175,7 +175,7 @@ export const createAppMockRenderer = ({
 
   const getFilesClient = mockGetFilesClient();
 
-  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  const AppWrapper = ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>

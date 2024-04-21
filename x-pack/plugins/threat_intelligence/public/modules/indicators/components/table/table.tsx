@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, VFC } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridColumnCellActionProps,
@@ -60,7 +60,7 @@ const gridStyle = {
   fontSize: 's',
 } as const;
 
-export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
+export const IndicatorsTable = ({
   indicators,
   indicatorCount,
   onChangePage,
@@ -70,7 +70,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   isFetching,
   browserFields,
   columnSettings: { columns, columnVisibility, handleResetColumns, handleToggleColumn, sorting },
-}) => {
+}: IndicatorsTableProps) => {
   const [expanded, setExpanded] = useState<Indicator>();
 
   const fieldTypes = useFieldTypes();

@@ -18,7 +18,7 @@ import { CrawlCustomSettingsFlyoutDomainsPanel } from './crawl_custom_settings_f
 import { CrawlCustomSettingsFlyoutMultiCrawlLogic } from './crawl_custom_settings_flyout_multi_crawl_logic';
 import { CrawlCustomSettingsFlyoutSeedUrlsPanel } from './crawl_custom_settings_flyout_seed_urls_panel';
 
-export const CrawlCustomSettingsFlyoutMultiCrawlScheduling: React.FC = () => {
+export const CrawlCustomSettingsFlyoutMultiCrawlScheduling = () => {
   const { domainUrls } = useValues(CrawlCustomSettingsFlyoutDomainConfigLogic);
 
   const {

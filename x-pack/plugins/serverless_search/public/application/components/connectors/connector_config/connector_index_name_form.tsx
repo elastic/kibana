@@ -17,11 +17,11 @@ interface ConnectorIndexNameFormProps {
   onChange: (output: string) => void;
 }
 
-export const ConnectorIndexNameForm: React.FC<ConnectorIndexNameFormProps> = ({
+export const ConnectorIndexNameForm = ({
   indexName,
   onChange,
   isDisabled,
-}) => {
+}: ConnectorIndexNameFormProps) => {
   const [query, setQuery] = useState('');
   const { data: indexNames, isLoading: isLoadingIndices, refetch } = useIndexNameSearch(query);
 

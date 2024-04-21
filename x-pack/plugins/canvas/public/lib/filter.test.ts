@@ -6,7 +6,6 @@
  */
 
 import { fromExpression } from '@kbn/interpreter';
-import { FC } from 'react';
 import {
   Filter as FilterType,
   FilterViewInstance,
@@ -25,7 +24,7 @@ import {
 } from './filter';
 
 const formatterFactory = (value: unknown) => () => JSON.stringify(value);
-const fc: FC<any> = () => null;
+const fc: (props: any) => JSX.Element | null = () => null;
 
 const simpleFilterValue: FilterType = {
   type: 'exactly',

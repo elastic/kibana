@@ -13,13 +13,19 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-export const JobIdFilter: React.FC<{
+export const JobIdFilter = ({
+  selectedJobIds,
+  onSelect,
+  title,
+  jobIds,
+  jobNameById,
+}: {
   selectedJobIds: string[];
   jobIds: string[];
   jobNameById: Record<string, string | undefined>;
   onSelect: (jobIds: string[]) => void;
   title: string;
-}> = ({ selectedJobIds, onSelect, title, jobIds, jobNameById }) => {
+}) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

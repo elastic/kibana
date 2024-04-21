@@ -44,10 +44,7 @@ interface ConfiguredSourcesProps {
   isOrganization: boolean;
 }
 
-export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
-  sources,
-  isOrganization,
-}) => {
+export const ConfiguredSourcesList = ({ sources, isOrganization }: ConfiguredSourcesProps) => {
   const unConnectedTooltip = (
     <span
       className="source-card-configured__not-connected-tooltip"

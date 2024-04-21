@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { Redirect } from 'react-router-dom';
 
 import { SECTION_SLUG } from './constants';
 
-export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;
+export const RedirectToTransformManagement = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;
 
-export const RedirectToCreateTransform: FC<{ savedObjectId: string }> = ({ savedObjectId }) => (
+export const RedirectToCreateTransform = ({ savedObjectId }: { savedObjectId: string }) => (
   <Redirect push to={`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />
 );

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useContext, useCallback, useState } from 'react';
+import React, { useContext, useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import useObservable from 'react-use/lib/useObservable';
 // @ts-expect-error
@@ -31,7 +31,7 @@ import { useIncomingEmbeddable } from '../hooks';
 
 type ContainerProps = Pick<Props, 'registerLayout' | 'unregisterLayout'>;
 
-export const Workpad: FC<ContainerProps> = (props) => {
+export const Workpad = (props: ContainerProps) => {
   const dispatch = useDispatch();
   const [grid, setGrid] = useState<boolean>(false);
   const [transition, setTransition] = useState<any | null>(null);

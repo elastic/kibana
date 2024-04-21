@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 
@@ -16,12 +16,12 @@ interface UseIdAsIndexNameSwitchProps {
   label: string;
 }
 
-export const UseIdAsIndexNameSwitch: FC<UseIdAsIndexNameSwitchProps> = ({
+export const UseIdAsIndexNameSwitch = ({
   destIndexSameAsId,
   isJobCreated,
   setDestIndexSameAsId,
   label,
-}) => (
+}: UseIdAsIndexNameSwitchProps) => (
   <EuiSwitch
     disabled={isJobCreated}
     name="mlCreationWizardUtilsJobIdAsDestIndexName"

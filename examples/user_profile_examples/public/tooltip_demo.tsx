@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { UserAvatarTip, UserToolTip } from '@kbn/user-profile-components';
 import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-components';
 import { EuiCommentList, EuiComment } from '@elastic/eui';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
-export const ToolTipDemo: FunctionComponent = () => {
+export const ToolTipDemo = () => {
   const userProfile: UserProfile<{ avatar: UserProfileAvatarData }> = {
     uid: 'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
     enabled: true,

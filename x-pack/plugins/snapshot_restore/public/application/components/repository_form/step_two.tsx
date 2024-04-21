@@ -37,7 +37,7 @@ interface Props {
   onBack: () => void;
 }
 
-export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
+export const RepositoryFormStepTwo = ({
   repository,
   isManagedRepository,
   isEditing,
@@ -47,7 +47,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   validation,
   saveError,
   onBack,
-}) => {
+}: Props) => {
   const { docLinks } = useCore();
   const hasValidationErrors: boolean = !validation.isValid;
   const {

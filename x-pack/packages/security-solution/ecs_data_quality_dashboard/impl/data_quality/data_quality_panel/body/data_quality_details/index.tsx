@@ -68,7 +68,7 @@ export interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const DataQualityDetailsComponent: React.FC<Props> = ({
+const DataQualityDetailsComponent = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   endDate,
@@ -86,7 +86,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
-}) => {
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const [selectedIndex, setSelectedIndex] = useState<SelectedIndex | null>(null);
 

@@ -9,10 +9,13 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const AgentActivityBadge: React.FunctionComponent<{
+export const AgentActivityBadge = ({
+  recentErrors,
+  onClick,
+}: {
   recentErrors: number;
   onClick: () => void;
-}> = ({ recentErrors, onClick }) => {
+}) => {
   if (recentErrors === 0) {
     return null;
   }

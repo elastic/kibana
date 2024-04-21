@@ -30,13 +30,14 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 export interface IndexManagementAppContextProps {
   core: CoreStart;
   dependencies: AppDependencies;
+  children: React.ReactNode;
 }
 
-export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps> = ({
+export const IndexManagementAppContext = ({
   children,
   core,
   dependencies,
-}) => {
+}: IndexManagementAppContextProps) => {
   const { docLinks, notifications, application, executionContext, overlays, theme } = core;
   const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 

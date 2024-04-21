@@ -58,7 +58,7 @@ function getTimeRemaining(endtime: Date): string {
   return formattedTime;
 }
 
-export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = ({
+export const RulesListNotifyBadge = ({
   snoozeSettings,
   loading = false,
   disabled = false,
@@ -67,7 +67,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   unsnoozeRule,
   showOnHover = false,
   showTooltipInline = false,
-}) => {
+}: RulesListNotifyBadgeProps) => {
   const [requestInFlight, setRequestInFlightLoading] = useState(false);
   const isLoading = loading || requestInFlight;
   const isDisabled = Boolean(disabled) || !snoozeSettings;

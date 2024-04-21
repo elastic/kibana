@@ -16,11 +16,11 @@ interface FieldVisualizeButtonInnerProps {
   buttonProps?: Partial<EuiButtonProps>;
 }
 
-export const FieldCategorizeButtonInner: React.FC<FieldVisualizeButtonInnerProps> = ({
+export const FieldCategorizeButtonInner = ({
   fieldName,
   handleVisualizeLinkClick,
   buttonProps,
-}) => {
+}: FieldVisualizeButtonInnerProps) => {
   return (
     <>
       <EuiButton

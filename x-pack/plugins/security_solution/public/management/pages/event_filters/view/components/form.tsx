@@ -118,8 +118,17 @@ type EventFilterItemEntries = Array<{
   type: Exclude<ExceptionListItemSchema['entries'][number]['type'], 'list'>;
 }>;
 
-export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
-  memo(({ allowSelectOs = true, item: exception, policies, policiesIsLoading, onChange, mode }) => {
+export const EventFiltersForm = memo(
+  ({
+    allowSelectOs = true,
+    item: exception,
+    policies,
+    policiesIsLoading,
+    onChange,
+    mode,
+  }: ArtifactFormComponentProps & {
+    allowSelectOs?: boolean;
+  }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
     const { http } = useKibana().services;
 
@@ -603,6 +612,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         {commentsSection}
       </EuiForm>
     );
-  });
+  }
+);
 
 EventFiltersForm.displayName = 'EventFiltersForm';

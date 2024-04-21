@@ -50,7 +50,7 @@ describe('ActionWrapper', () => {
         <div />
       </ActionWrapper>
     );
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as unknown as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "features": Object {
           "alerts": Object {
@@ -75,7 +75,7 @@ describe('ActionWrapper', () => {
       </ActionWrapper>
     );
 
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as unknown as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "features": Object {
           "alerts": Object {
@@ -100,7 +100,7 @@ describe('ActionWrapper', () => {
       </ActionWrapper>
     );
 
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as unknown as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "features": Object {
           "alerts": Object {
@@ -125,7 +125,7 @@ describe('ActionWrapper', () => {
       </ActionWrapper>
     );
 
-    expect((CasesProvider as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
+    expect((CasesProvider as unknown as jest.Mock).mock.calls[0][0].value).toMatchInlineSnapshot(`
       Object {
         "features": Object {
           "alerts": Object {

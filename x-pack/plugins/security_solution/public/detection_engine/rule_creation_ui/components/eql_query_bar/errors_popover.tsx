@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 
@@ -16,7 +15,7 @@ export interface ErrorsPopoverProps {
   errors: string[];
 }
 
-export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => {
+export const ErrorsPopover = ({ ariaLabel, errors }: ErrorsPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = useCallback(() => {

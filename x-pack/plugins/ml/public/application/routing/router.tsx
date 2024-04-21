@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
 import { type Location } from 'history';
@@ -60,7 +59,13 @@ export interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
-export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {
+export const PageLoader = ({
+  context,
+  children,
+}: {
+  context: RouteResolverContext;
+  children: React.ReactNode;
+}) => {
   const isLoading = !context.initialized;
 
   if (context?.resolvedComponent) {
@@ -80,9 +85,7 @@ export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, chi
  * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
  * use in components further down via `useUrlState()`.
  */
-export const MlRouter: FC<{
-  pageDeps: PageDependencies;
-}> = ({ pageDeps }) => (
+export const MlRouter = ({ pageDeps }: { pageDeps: PageDependencies }) => (
   <Router history={pageDeps.history}>
     <UrlStateProvider>
       <MlNotificationsContextProvider>

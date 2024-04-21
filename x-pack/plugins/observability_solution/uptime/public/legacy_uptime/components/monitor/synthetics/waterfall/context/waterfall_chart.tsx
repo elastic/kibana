@@ -45,6 +45,7 @@ export interface IWaterfallContext {
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
+  children: React.ReactNode;
   totalNetworkRequests: number;
   highlightedNetworkRequests: number;
   fetchedNetworkRequests: number;
@@ -61,7 +62,7 @@ interface ProviderProps {
   activeStep?: JourneyStep;
 }
 
-export const WaterfallProvider: React.FC<ProviderProps> = ({
+export const WaterfallProvider = ({
   children,
   data,
   markerItems,
@@ -77,7 +78,7 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   highlightedNetworkRequests,
   fetchedNetworkRequests,
   activeStep,
-}) => {
+}: ProviderProps) => {
   return (
     <WaterfallContext.Provider
       value={{

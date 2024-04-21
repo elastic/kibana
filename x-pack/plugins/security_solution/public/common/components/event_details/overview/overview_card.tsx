@@ -52,9 +52,10 @@ const OverviewPanel = euiStyled(EuiPanel)`
 
 interface OverviewCardProps {
   title: string;
+  children: React.ReactNode;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({ title, children }) => (
+export const OverviewCard = ({ title, children }: OverviewCardProps) => (
   <OverviewPanel borderRadius="none" hasShadow={false} hasBorder={false} paddingSize="s">
     <EuiText size="s">{title}</EuiText>
     <EuiSpacer size="s" />
@@ -76,17 +77,18 @@ ClampedContent.displayName = 'ClampedContent';
 
 type OverviewCardWithActionsProps = OverviewCardProps & {
   contextId: string;
+  children: React.ReactNode;
   enrichedFieldInfo: EnrichedFieldInfo;
   dataTestSubj?: string;
 };
 
-export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
+export const OverviewCardWithActions = ({
   title,
   children,
   contextId,
   dataTestSubj,
   enrichedFieldInfo,
-}) => (
+}: OverviewCardWithActionsProps) => (
   <OverviewCard title={title}>
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <ClampedContent data-test-subj={dataTestSubj}>{children}</ClampedContent>

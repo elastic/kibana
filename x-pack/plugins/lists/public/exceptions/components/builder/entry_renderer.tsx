@@ -90,7 +90,7 @@ export interface EntryItemProps {
   showValueListModal: ElementType;
 }
 
-export const BuilderEntryItem: React.FC<EntryItemProps> = ({
+export const BuilderEntryItem = ({
   allowLargeValueLists = false,
   autocompleteService,
   entry,
@@ -109,7 +109,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   getExtendedFields,
   exceptionItemIndex,
   showValueListModal,
-}): JSX.Element => {
+}: EntryItemProps): JSX.Element => {
   const sPaddingSize = useEuiPaddingSize('s');
 
   const handleError = useCallback(

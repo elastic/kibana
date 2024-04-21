@@ -35,7 +35,7 @@ import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
 
-export const SearchApplicationIndices: React.FC = () => {
+export const SearchApplicationIndices = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);

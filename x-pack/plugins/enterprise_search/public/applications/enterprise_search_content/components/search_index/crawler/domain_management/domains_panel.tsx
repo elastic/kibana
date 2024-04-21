@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { AddDomainLogic } from './add_domain/add_domain_logic';
 import { DomainsTable } from './domains_table';
 
-export const DomainsPanel: React.FC = () => {
+export const DomainsPanel = () => {
   const { openFlyout } = useActions(AddDomainLogic);
 
   return (

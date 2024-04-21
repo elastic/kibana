@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,15 +22,16 @@ interface StepsNavProps {
   nextActive?: boolean;
   previous?(): void;
   next?(): void;
+  children?: React.ReactNode;
 }
 
-export const WizardNav: FC<StepsNavProps> = ({
+export const WizardNav = ({
   previous,
   previousActive = true,
   next,
   nextActive = true,
   children,
-}) => (
+}: StepsNavProps) => (
   <Fragment>
     <EuiHorizontalRule />
     <EuiFlexGroup>
@@ -51,7 +51,7 @@ export const WizardNav: FC<StepsNavProps> = ({
   </Fragment>
 );
 
-export const PreviousButton: FC<StepsNavProps> = ({ previous, previousActive = true }) => (
+export const PreviousButton = ({ previous, previousActive = true }: StepsNavProps) => (
   <EuiButtonEmpty
     disabled={!previousActive}
     onClick={previous}
@@ -63,7 +63,7 @@ export const PreviousButton: FC<StepsNavProps> = ({ previous, previousActive = t
   </EuiButtonEmpty>
 );
 
-export const NextButton: FC<StepsNavProps> = ({ next, nextActive = true }) => (
+export const NextButton = ({ next, nextActive = true }: StepsNavProps) => (
   <EuiButton
     fill
     disabled={!nextActive}

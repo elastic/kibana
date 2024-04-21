@@ -17,12 +17,12 @@ interface ConfirmDeployAgentPolicyModalProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyModalProps> = ({
+const ConfirmDeployAgentPolicyModalComponent = ({
   onConfirm,
   onCancel,
   agentCount,
   agentPolicyCount,
-}) => (
+}: ConfirmDeployAgentPolicyModalProps) => (
   <EuiConfirmModal
     title={
       <FormattedMessage
@@ -60,8 +60,8 @@ const ConfirmDeployAgentPolicyModalComponent: React.FC<ConfirmDeployAgentPolicyM
         <FormattedMessage
           id="xpack.osquery.agentPolicy.confirmModalCalloutDescription"
           defaultMessage="Fleet has detected that the selected {agentPolicyCount, plural, one {agent policy} other {agent policies}}, is already in use by
-            some of your agents. As a result of this action, Fleet will deploy updates to all agents
-            that use this {agentPolicyCount, plural, one {agent policy} other {agent policies}}."
+          some of your agents. As a result of this action, Fleet will deploy updates to all agents
+          that use this {agentPolicyCount, plural, one {agent policy} other {agent policies}}."
           // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
           values={{
             agentPolicyCount,

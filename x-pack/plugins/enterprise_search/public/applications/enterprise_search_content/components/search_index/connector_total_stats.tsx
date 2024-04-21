@@ -28,7 +28,7 @@ import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
 import { NameAndDescriptionStats } from './name_and_description_stats';
 import { OverviewLogic } from './overview.logic';
 
-export const ConnectorTotalStats: React.FC = () => {
+export const ConnectorTotalStats = () => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const { connectorTypes } = useValues(KibanaLogic);
   const hideStats = isLoading || isError;

@@ -11,7 +11,7 @@ import { ActionFactoryPicker } from '../action_factory_picker';
 import { useDrilldownManager } from '../context';
 import { CreateDrilldownForm } from './create_drilldown_form';
 
-export const FormDrilldownWizard: React.FC = ({}) => {
+export const FormDrilldownWizard = ({}) => {
   const drilldowns = useDrilldownManager();
   const actionFactory = drilldowns.useActionFactory();
 

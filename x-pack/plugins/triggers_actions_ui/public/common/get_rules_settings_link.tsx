@@ -11,7 +11,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 const queryClient = new QueryClient();
 
-const RulesSettingsLinkLazy: React.FC = lazy(
+const RulesSettingsLinkLazy = lazy(
   () => import('../application/components/rules_setting/rules_settings_link')
 );
 

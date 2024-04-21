@@ -137,7 +137,7 @@ const usePanelBottomOffset = (): string | undefined => {
  * Main security navigation component.
  * It takes the links to render from the generic application `links` configs.
  */
-export const SecuritySideNav: React.FC = () => {
+export const SecuritySideNav = () => {
   const items = useSolutionSideNavItems();
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();

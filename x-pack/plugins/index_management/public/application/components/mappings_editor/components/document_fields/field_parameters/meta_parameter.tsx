@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,7 +18,7 @@ interface Props {
   defaultToggleValue: boolean;
 }
 
-export const MetaParameter: FunctionComponent<Props> = ({ defaultToggleValue }) => (
+export const MetaParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterTitle', {
       defaultMessage: 'Set metadata',

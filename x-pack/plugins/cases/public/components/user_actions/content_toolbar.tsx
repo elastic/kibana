@@ -16,11 +16,11 @@ export interface UserActionContentToolbarProps {
   withCopyLinkAction?: boolean;
 }
 
-const UserActionContentToolbarComponent: React.FC<UserActionContentToolbarProps> = ({
+const UserActionContentToolbarComponent = ({
   id,
   withCopyLinkAction = true,
   children,
-}) => (
+}: UserActionContentToolbarProps) => (
   <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
     {withCopyLinkAction ? (
       <EuiFlexItem grow={false}>

@@ -24,7 +24,7 @@ import { AddSourceLogic, OauthParams } from './add_source/add_source_logic';
  * of the params the oauth plugin sends back. The logic file now redirects back to sources with either a
  * success or error message upon completion.
  */
-export const SourceAdded: React.FC = () => {
+export const SourceAdded = () => {
   const { search } = useLocation() as Location;
   const params = parseQueryParams(search) as unknown as OauthParams;
   const state = JSON.parse(params.state);

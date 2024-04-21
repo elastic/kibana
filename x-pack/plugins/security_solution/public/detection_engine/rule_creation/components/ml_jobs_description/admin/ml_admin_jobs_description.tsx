@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import { useSecurityJobs } from '../../../../../common/components/ml_popover/hooks/use_security_jobs';
@@ -16,7 +15,7 @@ interface MlAdminJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlAdminJobsDescriptionComponent: FC<MlAdminJobsDescriptionProps> = ({ jobIds }) => {
+const MlAdminJobsDescriptionComponent = ({ jobIds }: MlAdminJobsDescriptionProps) => {
   const { loading, jobs, refetch: refreshJobs, isMlAdmin } = useSecurityJobs();
 
   if (!isMlAdmin) {

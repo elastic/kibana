@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { CreateDrilldownForm } from '../create_drilldown_form';
 import { Tabs } from '../tabs';
 import { useDrilldownManager } from '../context';
 import { EditDrilldownForm } from '../edit_drilldown_form';
 
-export const DrilldownManagerContent: React.FC = ({}) => {
+export const DrilldownManagerContent = ({}) => {
   const drilldowns = useDrilldownManager();
   const route = drilldowns.useRoute();
 

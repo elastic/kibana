@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,8 +14,8 @@ interface InterimResultsControlProps {
   onChange: (update: boolean) => void;
 }
 
-export const InterimResultsControl: FC<InterimResultsControlProps> = React.memo(
-  ({ value, onChange }) => {
+export const InterimResultsControl = React.memo(
+  ({ value, onChange }: InterimResultsControlProps) => {
     return (
       <EuiFormRow>
         <EuiSwitch

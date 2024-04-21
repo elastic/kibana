@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { useAppContext } from '../../../../app_context';
 import { getEsDeprecationError } from '../../../../lib/get_es_deprecation_error';
@@ -15,7 +15,7 @@ interface Props {
   setIsFixed: (isFixed: boolean) => void;
 }
 
-export const EsDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed }) => {
+export const EsDeprecationIssuesPanel = ({ setIsFixed }: Props) => {
   const {
     services: { api },
   } = useAppContext();

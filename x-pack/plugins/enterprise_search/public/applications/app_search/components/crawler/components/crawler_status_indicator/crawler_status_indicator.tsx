@@ -19,7 +19,7 @@ import { CrawlerStatus } from '../../types';
 import { StartCrawlContextMenu } from './start_crawl_context_menu';
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
-export const CrawlerStatusIndicator: React.FC = () => {
+export const CrawlerStatusIndicator = () => {
   const { domains, mostRecentCrawlRequestStatus } = useValues(CrawlerLogic);
   const { stopCrawl } = useActions(CrawlerLogic);
 

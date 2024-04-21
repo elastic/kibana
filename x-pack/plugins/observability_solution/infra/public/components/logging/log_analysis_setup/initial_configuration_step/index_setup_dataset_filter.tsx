@@ -20,7 +20,12 @@ import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysi
 import { useVisibilityState } from '../../../../utils/use_visibility_state';
 import { CategoryQualityWarningReasonDescription } from '../../log_analysis_job_status/quality_warning_notices';
 
-export const IndexSetupDatasetFilter: React.FC<{
+export const IndexSetupDatasetFilter = ({
+  availableDatasets,
+  datasetFilter,
+  isDisabled,
+  onChangeDatasetFilter,
+}: {
   availableDatasets: Array<{
     dataset: string;
     warnings: QualityWarning[];
@@ -28,7 +33,7 @@ export const IndexSetupDatasetFilter: React.FC<{
   datasetFilter: DatasetFilter;
   isDisabled?: boolean;
   onChangeDatasetFilter: (datasetFilter: DatasetFilter) => void;
-}> = ({ availableDatasets, datasetFilter, isDisabled, onChangeDatasetFilter }) => {
+}) => {
   const { isVisible, hide, show } = useVisibilityState(false);
 
   const changeDatasetFilter = useCallback(
@@ -99,7 +104,7 @@ export const IndexSetupDatasetFilter: React.FC<{
   );
 };
 
-const DatasetWarningMarker: React.FC<{ warnings: QualityWarning[] }> = ({ warnings }) => {
+const DatasetWarningMarker = ({ warnings }: { warnings: QualityWarning[] }) => {
   const warningDescriptions = warnings.flatMap((warning) =>
     warning.type === 'categoryQualityWarning'
       ? warning.reasons.map((reason) => (

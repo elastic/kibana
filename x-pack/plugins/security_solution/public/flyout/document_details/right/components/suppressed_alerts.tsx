@@ -25,7 +25,7 @@ export interface SuppressedAlertsProps {
 /**
  * Show related alerts by ancestry in summary row
  */
-export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppressionCount }) => {
+export const SuppressedAlerts = ({ alertSuppressionCount }: SuppressedAlertsProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>

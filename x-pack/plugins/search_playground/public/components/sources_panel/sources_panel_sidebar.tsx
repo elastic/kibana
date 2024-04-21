@@ -12,7 +12,7 @@ import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { AddIndicesField } from './add_indices_field';
 import { IndicesList } from './indices_list';
 
-export const SourcesPanelSidebar: React.FC = () => {
+export const SourcesPanelSidebar = () => {
   const { indices: selectedIndices, removeIndex, addIndex, loading } = useSourceIndicesFields();
 
   return (

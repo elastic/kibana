@@ -20,18 +20,19 @@ import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { ChatRequestData } from '../common/types';
-import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
-import type { Toolbar } from './components/toolbar';
+import { Playground, PlaygroundToolbar } from './embeddable';
 
 export * from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
 export interface SearchPlaygroundPluginStart {
-  PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
-  PlaygroundToolbar: React.FC<React.ComponentProps<typeof Toolbar>>;
-  Playground: React.FC<React.ComponentProps<typeof App>>;
+  PlaygroundProvider: typeof PlaygroundProviderComponent;
+  PlaygroundToolbar: (
+    props: React.ComponentProps<typeof PlaygroundToolbar>
+  ) => React.ReactElement | null;
+  Playground: (props: React.ComponentProps<typeof Playground>) => React.ReactElement | null;
 }
 
 export interface AppPluginStartDependencies {

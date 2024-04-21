@@ -17,7 +17,7 @@ import { SearchExperiencesGuide } from './components/search_experiences_guide';
 
 import { ROOT_PATH } from './routes';
 
-export const SearchExperiences: React.FC<InitialAppData> = (props) => {
+export const SearchExperiences = (props: InitialAppData) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 

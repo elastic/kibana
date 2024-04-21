@@ -6,7 +6,7 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconKeyword: React.FC<SVGProps<SVGSVGElement>> = (props) => (
+export const IconKeyword = (props: SVGProps<SVGSVGElement>) => (
   <svg
     width="32"
     height="32"

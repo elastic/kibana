@@ -19,7 +19,7 @@ interface Props {
   setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ChartSettingsPopoverComponent: React.FC<Props> = ({
+const ChartSettingsPopoverComponent = ({
   initialPanelId,
   isPopoverOpen,
   panels,

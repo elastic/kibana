@@ -45,11 +45,11 @@ interface Props {
   agentPolicyName: string;
 }
 
-export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
+export const AgentPolicyCreateInlineForm = ({
   updateAgentPolicy,
   isFleetServerPolicy,
   agentPolicyName,
-}) => {
+}: Props) => {
   const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 

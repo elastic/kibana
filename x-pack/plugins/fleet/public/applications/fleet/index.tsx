@@ -24,7 +24,7 @@ export interface ProtectedRouteProps extends RouteProps {
   restrictedPath?: string;
 }
 
-export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
+export const ProtectedRoute = ({
   isAllowed = false,
   restrictedPath = '/',
   ...routeProps

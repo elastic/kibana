@@ -27,7 +27,7 @@ export interface DashboardDrilldownConfigProps {
   onConfigChange: (changes: Partial<DrilldownConfig>) => void;
 }
 
-export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> = ({
+export const DashboardDrilldownConfig = ({
   dashboards,
   onDashboardSelect,
   onSearchChange,

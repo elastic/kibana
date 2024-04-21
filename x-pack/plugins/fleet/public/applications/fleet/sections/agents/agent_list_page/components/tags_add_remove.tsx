@@ -44,7 +44,7 @@ interface Props {
   onClosePopover: () => void;
 }
 
-export const TagsAddRemove: React.FC<Props> = ({
+export const TagsAddRemove = ({
   agentId,
   agents,
   allTags,

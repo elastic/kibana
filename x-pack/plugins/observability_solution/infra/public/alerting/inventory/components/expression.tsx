@@ -110,7 +110,7 @@ export const defaultExpression = {
   },
 } as InventoryMetricConditions;
 
-export const Expressions: React.FC<Props> = (props) => {
+export const Expressions = (props: Props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceContext();
 
@@ -419,6 +419,7 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setRuleParams(id: number, params: Partial<InventoryMetricConditions>): void;
   fields: DerivedIndexPattern['fields'];
+  children?: React.ReactNode;
 }
 
 const NonCollapsibleExpressionCss = css`
@@ -439,7 +440,7 @@ const StyledHealthCss = css`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow = (props: ExpressionRowProps) => {
   const [isExpanded, toggle] = useToggle(true);
 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, fields } =
@@ -701,14 +702,21 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 };
 
-const ThresholdElement: React.FC<{
+const ThresholdElement = ({
+  updateComparator,
+  updateThreshold,
+  threshold,
+  metric,
+  comparator,
+  errors,
+}: {
   updateComparator: (c?: string) => void;
   updateThreshold: (t?: number[]) => void;
   threshold: InventoryMetricConditions['threshold'];
   comparator: InventoryMetricConditions['comparator'];
   errors: IErrorObject;
   metric?: SnapshotMetricType;
-}> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
+}) => {
   return (
     <>
       <div css={StyledExpressionCss}>

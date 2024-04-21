@@ -22,7 +22,7 @@ interface Props {
   value: string | number | undefined | null;
 }
 
-const AssetCriticalityLevelComponent: React.FC<Props> = ({
+const AssetCriticalityLevelComponent = ({
   contextId,
   eventId,
   fieldName,
@@ -30,7 +30,7 @@ const AssetCriticalityLevelComponent: React.FC<Props> = ({
   isAggregatable,
   isDraggable,
   value,
-}) => {
+}: Props) => {
   const color = isString(value) ? CRITICALITY_LEVEL_COLOR[value as CriticalityLevel] : 'normal';
   const stringValue = isString(value) ? value : '';
 

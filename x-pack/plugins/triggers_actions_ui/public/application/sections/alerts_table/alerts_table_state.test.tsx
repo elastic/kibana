@@ -317,7 +317,7 @@ const useBulkGetCasesMock = useBulkGetCases as jest.Mock;
 const maintenanceWindowsMap = getMaintenanceWindowMockMap();
 const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
 
-const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
+const AlertsTableWithLocale = (props: AlertsTableStateProps) => (
   <IntlProvider locale="en">
     <AlertsTableState {...props} />
   </IntlProvider>

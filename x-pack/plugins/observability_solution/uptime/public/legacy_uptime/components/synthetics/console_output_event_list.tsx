@@ -7,7 +7,7 @@
 
 import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React from 'react';
 import { ConsoleEvent } from './console_event';
 import { JourneyStep } from '../../../../common/runtime_types/ping';
 import { JourneyState } from '../../state/reducers/journey';
@@ -21,7 +21,7 @@ const CONSOLE_STEP_TYPES = ['stderr', 'stdout', 'cmd/status'];
 const isConsoleStep = (step: JourneyStep) =>
   CONSOLE_STEP_TYPES.some((type) => type === step.synthetics.type);
 
-export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
+export const ConsoleOutputEventList = ({ journey }: Props) => (
   <div>
     <EuiTitle>
       <h4>

@@ -17,7 +17,7 @@ export interface FieldValueCellProps {
   value: FieldValue | string | number | boolean | null;
 }
 
-export const FieldValueCell: React.FC<FieldValueCellProps> = ({ value }) => {
+export const FieldValueCell = ({ value }: FieldValueCellProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
 
   if (isFieldValue(value)) {

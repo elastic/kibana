@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCommonChartProps } from './use_common_chart_props';
@@ -32,8 +31,8 @@ export interface ChartComponentPropsAll {
   query?: Query;
 }
 
-export const ChartComponent: FC<ChartComponentProps> = React.memo(
-  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete }) => {
+export const ChartComponent = React.memo(
+  ({ annotation, fieldConfig, interval, onLoading, onRenderComplete }: ChartComponentProps) => {
     const {
       lens: { EmbeddableComponent },
     } = useAiopsAppContext();

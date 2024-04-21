@@ -71,7 +71,7 @@ export class CustomIntegrationsPlugin
       })),
     };
 
-    const ContextProvider: React.FC = ({ children }) => (
+    const ContextProvider = ({ children }: { children: React.ReactNode }) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}
       </CustomIntegrationsServicesProvider>

@@ -59,7 +59,7 @@ const RulesSubRoutes = [
   },
 ];
 
-const RulesContainerComponent: React.FC = () => {
+const RulesContainerComponent = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (

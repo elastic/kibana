@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -39,8 +38,8 @@ export interface FilterByAssigneesPopoverProps {
 /**
  * The popover to filter alerts by assigned users
  */
-export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
-  ({ selectedUserIds, onSelectionChange }) => {
+export const FilterByAssigneesPopover = memo(
+  ({ selectedUserIds, onSelectionChange }: FilterByAssigneesPopoverProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 

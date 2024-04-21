@@ -44,7 +44,7 @@ export interface AutocompleteListsData {
   largeLists: ListSchema[];
 }
 
-export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsProps> = ({
+export const AutocompleteFieldListsComponent = ({
   httpService,
   isClearable = false,
   isDisabled = false,
@@ -57,7 +57,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   allowLargeValueLists = false,
   'aria-label': ariaLabel,
   showValueListModal,
-}): JSX.Element => {
+}: AutocompleteFieldListsProps): JSX.Element => {
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
     smallLists: [],

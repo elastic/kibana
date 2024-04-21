@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -42,11 +42,15 @@ interface ChartsGridProps {
  * @param changePoints
  * @constructor
  */
-export const ChartsGrid: FC<{
+export const ChartsGrid = ({
+  changePoints,
+  interval,
+  onRenderComplete,
+}: {
   changePoints: SelectedChangePoint[];
   interval: string;
   onRenderComplete?: () => void;
-}> = ({ changePoints, interval, onRenderComplete }) => {
+}) => {
   // Render is complete when all chart components in the grid are ready
   const loadCounter = useRef<Record<number, boolean>>(
     Object.fromEntries(changePoints.map((v, i) => [i, true]))
@@ -167,7 +171,7 @@ export const ChartsGrid: FC<{
  * @param changePointsDict
  * @constructor
  */
-export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changePointsDict }) => {
+export const ChartsGridContainer = ({ changePoints: changePointsDict }: ChartsGridProps) => {
   const timefilter = useTimefilter();
 
   const initialRefreshSetting = useRef<RefreshInterval>();

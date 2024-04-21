@@ -37,13 +37,13 @@ interface Props {
 /**
  * Settings adding/removing quick prompts. Configure name, color, prompt and category.
  */
-export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
+export const QuickPromptSettings = React.memo<Props>(
   ({
     onSelectedQuickPromptChange,
     quickPromptSettings,
     selectedQuickPrompt,
     setUpdatedQuickPromptSettings,
-  }) => {
+  }: Props) => {
     const { basePromptContexts } = useAssistantContext();
 
     // Prompt

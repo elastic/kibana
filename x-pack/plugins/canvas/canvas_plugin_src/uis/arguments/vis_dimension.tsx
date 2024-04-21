@@ -24,12 +24,12 @@ type VisDimensionArgInputProps = {
   };
 } & ResolvedArgProps<ResolvedColumns>;
 
-const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
+const VisDimensionArgInput = ({
   argValue,
   typeInstance,
   onValueChange,
   resolved: { columns },
-}) => {
+}: VisDimensionArgInputProps) => {
   const [value, setValue] = useState(argValue);
   const confirm = typeInstance?.options?.confirm;
 

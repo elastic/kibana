@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../../shared_imports';
 import { UseField } from '../../../../form';
 import { ROLLOVER_FORM_PATHS } from '../../../../constants';
 
-export const MaxPrimaryShardDocsField: FunctionComponent = () => {
+export const MaxPrimaryShardDocsField = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 400 }}>

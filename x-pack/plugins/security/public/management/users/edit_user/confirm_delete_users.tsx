@@ -6,7 +6,6 @@
  */
 
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -22,11 +21,7 @@ export interface ConfirmDeleteUsersProps {
   onSuccess?(): void;
 }
 
-export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
-  usernames,
-  onCancel,
-  onSuccess,
-}) => {
+export const ConfirmDeleteUsers = ({ usernames, onCancel, onSuccess }: ConfirmDeleteUsersProps) => {
   const { services } = useKibana();
 
   const [state, deleteUsers] = useAsyncFn(async () => {

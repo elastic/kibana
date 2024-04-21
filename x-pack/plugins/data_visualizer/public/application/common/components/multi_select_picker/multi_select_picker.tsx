@@ -16,7 +16,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SerializedStyles } from '@emotion/react';
@@ -51,7 +51,15 @@ interface MultiSelectPickerStyles {
   filterGroup?: SerializedStyles;
   filterItemContainer?: SerializedStyles;
 }
-export const MultiSelectPicker: FC<{
+export const MultiSelectPicker = ({
+  options,
+  onChange,
+  title,
+  checkedOptions,
+  dataTestSubj,
+  postfix,
+  cssStyles,
+}: {
   options: Option[];
   onChange?: (items: string[]) => void;
   title?: string;
@@ -59,7 +67,7 @@ export const MultiSelectPicker: FC<{
   dataTestSubj: string;
   postfix?: React.ReactElement;
   cssStyles?: MultiSelectPickerStyles;
-}> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix, cssStyles }) => {
+}) => {
   const euiTheme = useCurrentEuiTheme();
 
   const [items, setItems] = useState<Option[]>(options);

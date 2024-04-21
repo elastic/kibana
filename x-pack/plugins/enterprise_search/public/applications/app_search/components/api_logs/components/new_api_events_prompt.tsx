@@ -16,7 +16,7 @@ import { ApiLogsLogic } from '..';
 
 import './new_api_events_prompt.scss';
 
-export const NewApiEventsPrompt: React.FC = () => {
+export const NewApiEventsPrompt = () => {
   const { hasNewData } = useValues(ApiLogsLogic);
   const { onUserRefresh } = useActions(ApiLogsLogic);
 

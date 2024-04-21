@@ -47,16 +47,7 @@ const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
   }
 `;
 
-export const StepDefinePackagePolicy: React.FunctionComponent<{
-  agentPolicy?: AgentPolicy;
-  packageInfo: PackageInfo;
-  packagePolicy: NewPackagePolicy;
-  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-  validationResults: PackagePolicyValidationResults | undefined;
-  submitAttempted: boolean;
-  isEditPage?: boolean;
-  noAdvancedToggle?: boolean;
-}> = memo(
+export const StepDefinePackagePolicy = memo(
   ({
     agentPolicy,
     packageInfo,
@@ -66,6 +57,15 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     submitAttempted,
     noAdvancedToggle = false,
     isEditPage = false,
+  }: {
+    agentPolicy?: AgentPolicy;
+    packageInfo: PackageInfo;
+    packagePolicy: NewPackagePolicy;
+    updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
+    validationResults: PackagePolicyValidationResults | undefined;
+    submitAttempted: boolean;
+    isEditPage?: boolean;
+    noAdvancedToggle?: boolean;
   }) => {
     const { docLinks } = useStartServices();
 

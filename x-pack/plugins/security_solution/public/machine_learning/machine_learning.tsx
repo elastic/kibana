@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useRootNavLink } from '../common/links/nav_links';
 
-export const MachineLearning: React.FC = () => {
+export const MachineLearning = () => {
   const link = useRootNavLink(SecurityPageName.mlLanding);
   const { links = [], categories = [], title } = link ?? {};
 

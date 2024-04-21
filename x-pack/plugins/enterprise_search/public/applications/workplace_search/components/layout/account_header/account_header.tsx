@@ -29,7 +29,7 @@ import { AppLogic } from '../../../app_logic';
 import { WORKPLACE_SEARCH_TITLE, ACCOUNT_NAV } from '../../../constants';
 import { PRIVATE_SOURCES_PATH, LOGOUT_ROUTE, PERSONAL_SETTINGS_PATH } from '../../../routes';
 
-export const AccountHeader: React.FC = () => {
+export const AccountHeader = () => {
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);

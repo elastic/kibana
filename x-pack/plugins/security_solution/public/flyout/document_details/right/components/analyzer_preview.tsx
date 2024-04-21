@@ -33,7 +33,7 @@ interface Cache {
 /**
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
-export const AnalyzerPreview: React.FC = () => {
+export const AnalyzerPreview = () => {
   const [cache, setCache] = useState<Partial<Cache>>({});
   const {
     dataFormattedForFieldBrowser: data,

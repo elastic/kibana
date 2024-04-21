@@ -8,7 +8,9 @@
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-const withSuspenseIcon = <T extends object = {}>(Component: React.ComponentType<T>): React.FC<T> =>
+const withSuspenseIcon = <T extends object = {}>(
+  Component: React.ComponentType<T>
+): ((props: T) => JSX.Element) =>
   function WithSuspenseIcon(props) {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="s" />}>

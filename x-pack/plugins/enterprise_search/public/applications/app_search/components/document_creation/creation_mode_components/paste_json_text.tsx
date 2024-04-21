@@ -26,7 +26,7 @@ import { AppLogic } from '../../../app_logic';
 
 import './paste_json_text.scss';
 
-export const PasteJsonTextTabContent: React.FC = () => {
+export const PasteJsonTextTabContent = () => {
   const {
     configuredLimits: {
       engine: { maxDocumentByteSize },
@@ -67,7 +67,7 @@ export const PasteJsonTextTabContent: React.FC = () => {
   );
 };
 
-export const PasteJsonTextFooterContent: React.FC = () => {
+export const PasteJsonTextFooterContent = () => {
   const { textInput, isUploading } = useValues(DocumentCreationLogic);
   const { onSubmitJson, closeDocumentCreation } = useActions(DocumentCreationLogic);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   EuiContextMenu,
@@ -50,7 +50,7 @@ interface Props {
   ) => (event: React.MouseEvent) => void;
 }
 
-export const EditorMenu: FC<Props> = ({
+export const EditorMenu = ({
   factories,
   addPanelActions,
   promotedVisTypes,

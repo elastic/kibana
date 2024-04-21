@@ -20,12 +20,12 @@ interface Props {
   onStatusChanged: (status: CaseStatuses) => void;
 }
 
-const StatusContextMenuComponent: React.FC<Props> = ({
+const StatusContextMenuComponent = ({
   currentStatus,
   disabled = false,
   isLoading = false,
   onStatusChanged,
-}) => {
+}: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(
     () => setIsPopoverOpen((prevPopoverStatus) => !prevPopoverStatus),

@@ -17,12 +17,12 @@ interface Props {
   setExpirationThreshold: (value: number) => void;
 }
 
-export const AlertTlsComponent: React.FC<Props> = ({
+export const AlertTlsComponent = ({
   ageThreshold,
   expirationThreshold,
   setAgeThreshold,
   setExpirationThreshold,
-}) => (
+}: Props) => (
   <>
     <EuiSpacer size="m" />
     <EuiFlexGroup direction="column" gutterSize="none">

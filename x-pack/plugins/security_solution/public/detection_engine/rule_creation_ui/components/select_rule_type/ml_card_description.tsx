@@ -20,9 +20,7 @@ const SmallText = styled.span`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
-const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
-  hasValidLicense = false,
-}) => (
+const MlCardDescriptionComponent = ({ hasValidLicense = false }: MlCardDescriptionProps) => (
   <SmallText>
     {hasValidLicense ? (
       ML_TYPE_DESCRIPTION

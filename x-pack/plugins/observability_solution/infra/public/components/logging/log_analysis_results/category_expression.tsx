@@ -10,43 +10,48 @@ import React, { memo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const RegularExpressionRepresentation: React.FunctionComponent<{
-  maximumSegmentCount?: number;
-  regularExpression: string;
-}> = memo(({ maximumSegmentCount = 30, regularExpression }) => {
-  const segments = regularExpression.split(collapsedRegularExpressionCharacters);
+export const RegularExpressionRepresentation = memo(
+  ({
+    maximumSegmentCount = 30,
+    regularExpression,
+  }: {
+    maximumSegmentCount?: number;
+    regularExpression: string;
+  }) => {
+    const segments = regularExpression.split(collapsedRegularExpressionCharacters);
 
-  return (
-    <CategoryPattern>
-      {segments
-        .slice(0, maximumSegmentCount)
-        .map((segment, segmentIndex) => [
-          segmentIndex > 0 ? (
-            <CategoryPatternWildcard key={`wildcard-${segmentIndex}`}>⁕</CategoryPatternWildcard>
-          ) : null,
-          <CategoryPatternSegment key={`segment-${segmentIndex}`}>
-            {segment.replace(escapedRegularExpressionCharacters, '$1')}
-          </CategoryPatternSegment>,
-        ])}
-      {segments.length > maximumSegmentCount ? (
-        <CategoryPatternWildcard
-          title={i18n.translate(
-            'xpack.infra.logs.logEntryCategories.truncatedPatternSegmentDescription',
-            {
-              defaultMessage:
-                '{extraSegmentCount, plural, one {one more segment} other {# more segments}}',
-              values: {
-                extraSegmentCount: segments.length - maximumSegmentCount,
-              },
-            }
-          )}
-        >
-          &hellip;
-        </CategoryPatternWildcard>
-      ) : null}
-    </CategoryPattern>
-  );
-});
+    return (
+      <CategoryPattern>
+        {segments
+          .slice(0, maximumSegmentCount)
+          .map((segment, segmentIndex) => [
+            segmentIndex > 0 ? (
+              <CategoryPatternWildcard key={`wildcard-${segmentIndex}`}>⁕</CategoryPatternWildcard>
+            ) : null,
+            <CategoryPatternSegment key={`segment-${segmentIndex}`}>
+              {segment.replace(escapedRegularExpressionCharacters, '$1')}
+            </CategoryPatternSegment>,
+          ])}
+        {segments.length > maximumSegmentCount ? (
+          <CategoryPatternWildcard
+            title={i18n.translate(
+              'xpack.infra.logs.logEntryCategories.truncatedPatternSegmentDescription',
+              {
+                defaultMessage:
+                  '{extraSegmentCount, plural, one {one more segment} other {# more segments}}',
+                values: {
+                  extraSegmentCount: segments.length - maximumSegmentCount,
+                },
+              }
+            )}
+          >
+            &hellip;
+          </CategoryPatternWildcard>
+        ) : null}
+      </CategoryPattern>
+    );
+  }
+);
 
 const CategoryPattern = euiStyled.span`
   font-family: ${(props) => props.theme.eui.euiCodeFontFamily};

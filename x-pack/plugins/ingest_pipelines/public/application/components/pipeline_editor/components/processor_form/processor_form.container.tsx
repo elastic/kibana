@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import {
   useForm,
@@ -47,13 +47,13 @@ const formOptions: FormOptions = {
   stripEmptyFields: false,
 };
 
-export const ProcessorFormContainer: FunctionComponent<Props> = ({
+export const ProcessorFormContainer = ({
   processor,
   onFormUpdate,
   onSubmit,
   onClose,
   ...rest
-}) => {
+}: Props) => {
   const { services } = useKibana();
 
   // We need to keep track of the processor form state if the user

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -64,20 +64,20 @@ const getFieldsFromState = (state: State) => {
   };
   return fields();
 };
-export const DetailsPageMappingsContent: FunctionComponent<{
-  index: Index;
-  data: string;
-  showAboutMappings: boolean;
-  jsonData: any;
-  refetchMapping: () => void;
-  isSemanticTextEnabled?: boolean;
-}> = ({
+export const DetailsPageMappingsContent = ({
   index,
   data,
   jsonData,
   refetchMapping,
   showAboutMappings,
   isSemanticTextEnabled = false,
+}: {
+  index: Index;
+  data: string;
+  showAboutMappings: boolean;
+  jsonData: any;
+  refetchMapping: () => void;
+  isSemanticTextEnabled?: boolean;
 }) => {
   const {
     services: { extensionsService },

@@ -38,7 +38,7 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const StatsRollupComponent: React.FC<Props> = ({
+const StatsRollupComponent = ({
   docsCount,
   formatBytes,
   formatNumber,
@@ -47,7 +47,7 @@ const StatsRollupComponent: React.FC<Props> = ({
   indicesChecked,
   pattern,
   sizeInBytes,
-}) => {
+}: Props) => {
   const incompatibleDescription = useMemo(
     () => <StatLabel line1={i18n.INCOMPATIBLE} line2={i18n.FIELDS} />,
     []

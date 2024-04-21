@@ -30,13 +30,13 @@ interface Props {
   onFiltersChange: (filters: Filter[]) => void;
 }
 
-export const ControlsContent: React.FC<Props> = ({
+export const ControlsContent = ({
   dataView,
   filters,
   query,
   timeRange,
   onFiltersChange,
-}) => {
+}: Props) => {
   const [controlPanels, setControlPanels] = useControlPanels(dataView);
   const subscriptions = useRef<Subscription>(new Subscription());
 

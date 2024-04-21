@@ -56,13 +56,13 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'questionInCircle';
 
-export const ResultField: React.FC<ResultFieldProps> = ({
+export const ResultField = ({
   iconType,
   fieldName,
   fieldValue,
   fieldType,
   isExpanded,
-}) => {
+}: ResultFieldProps) => {
   return (
     <EuiTableRow className="resultField">
       <EuiTableRowCell className="resultFieldRowCell" width={euiThemeVars.euiSizeL} valign="middle">

@@ -15,7 +15,7 @@ import { CreateIndexCallout } from './create_index_callout';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 
-export const SourcesPanelForStartChat: React.FC = () => {
+export const SourcesPanelForStartChat = () => {
   const {
     indices: selectedIndices,
     removeIndex,

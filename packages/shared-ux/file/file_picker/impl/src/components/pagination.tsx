@@ -7,13 +7,12 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import { EuiPagination } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useFilePickerContext } from '../context';
 
-export const Pagination: FunctionComponent = () => {
+export const Pagination = () => {
   const { state } = useFilePickerContext();
   const page = useBehaviorSubject(state.currentPage$);
   const files = useObservable(state.files$, []);

@@ -87,7 +87,7 @@ const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) =
   );
 });
 
-const ActionsConnectorsList: React.FunctionComponent = () => {
+const ActionsConnectorsList = () => {
   const {
     http,
     notifications: { toasts },
@@ -588,11 +588,15 @@ function getConnectorName(name: string, connector: ActionConnector): string {
   return connector.isDeprecated ? `${name} ${deprecatedMessage}` : name;
 }
 
-const DeleteOperation: React.FunctionComponent<{
+const DeleteOperation = ({
+  item,
+  canDelete,
+  onDelete,
+}: {
   item: ActionConnectorTableItem;
   canDelete: boolean;
   onDelete: () => void;
-}> = ({ item, canDelete, onDelete }) => {
+}) => {
   if (item.isPreconfigured) {
     return (
       <EuiFlexItem grow={false}>
@@ -639,11 +643,15 @@ const DeleteOperation: React.FunctionComponent<{
   );
 };
 
-const RunOperation: React.FunctionComponent<{
+const RunOperation = ({
+  item,
+  canExecute,
+  onRun,
+}: {
   item: ActionConnectorTableItem;
   canExecute: boolean;
   onRun: () => void;
-}> = ({ item, canExecute, onRun }) => {
+}) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip
@@ -674,7 +682,7 @@ const RunOperation: React.FunctionComponent<{
   );
 };
 
-const NoPermissionPrompt: React.FunctionComponent<{}> = () => (
+const NoPermissionPrompt = () => (
   <EuiEmptyPrompt
     iconType="securityApp"
     title={

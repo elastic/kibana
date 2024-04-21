@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -50,13 +49,10 @@ export class InteractiveSetupPlugin implements Plugin<void, void, {}, {}> {
 export interface ProvidersProps {
   services: CoreStart;
   defaultCode?: string;
+  children: React.ReactNode;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
-  defaultCode,
-  services,
-  children,
-}) => (
+export const Providers = ({ defaultCode, services, children }: ProvidersProps) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaProvider services={services}>
       <VerificationProvider defaultCode={defaultCode}>{children}</VerificationProvider>

@@ -403,13 +403,13 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
 
     const renderTableCellValue = useMemo(() => {
-      const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
+      const Cell = ({
         columnId,
         rowIndex,
         colIndex,
         setCellProps,
         isDetails,
-      }): React.ReactElement | null => {
+      }: EuiDataGridCellValueElementProps): React.ReactElement | null => {
         const pageRowIndex = getPageRowIndex(rowIndex, pagination.pageSize);
         const rowData = pageRowIndex < data.length ? data[pageRowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);

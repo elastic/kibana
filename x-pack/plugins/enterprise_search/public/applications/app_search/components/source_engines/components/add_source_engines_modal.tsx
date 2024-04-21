@@ -31,7 +31,7 @@ import {
 } from '../i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
-export const AddSourceEnginesModal: React.FC = () => {
+export const AddSourceEnginesModal = () => {
   const { addSourceEngines, closeModal, onAddEnginesSelection } = useActions(SourceEnginesLogic);
   const { selectableEngineNames, selectedEngineNamesToAdd, modalLoading } =
     useValues(SourceEnginesLogic);

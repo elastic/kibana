@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -60,14 +60,14 @@ interface Props {
   sendToBack: () => void;
 }
 
-export const SidebarHeader: FunctionComponent<Props> = ({
+export const SidebarHeader = ({
   title,
   showLayerControls = false,
   bringToFront,
   bringForward,
   sendBackward,
   sendToBack,
-}) => (
+}: Props) => (
   <EuiFlexGroup
     className="canvasLayout__sidebarHeader"
     gutterSize="none"

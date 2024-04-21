@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { PageComponent } from '../page';
 import { CanvasRenderedPage } from '../../types';
 import { useCanvasShareableState } from '../../context';
@@ -50,14 +50,14 @@ export interface Props {
 /**
  * The small preview of the page shown within the `Scrubber`.
  */
-export const PagePreviewComponent: FC<Props> = ({
+export const PagePreviewComponent = ({
   height,
   index,
   onClick,
   page,
   workpadHeight,
   workpadWidth,
-}) => {
+}: Props) => {
   const scale = height / workpadHeight;
 
   const transform = {
@@ -86,7 +86,7 @@ export const PagePreviewComponent: FC<Props> = ({
 /**
  * A store-connected container for the `PagePreview` component.
  */
-export const PagePreview: FC<Pick<Props, 'index' | 'height'>> = ({ index, height }) => {
+export const PagePreview = ({ index, height }: Pick<Props, 'index' | 'height'>) => {
   const [{ workpad }, dispatch] = useCanvasShareableState();
 
   if (!workpad) {

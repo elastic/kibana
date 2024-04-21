@@ -11,7 +11,7 @@ import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 
 import type { Props } from './field_editor_flyout_content_container';
 
-export const FieldEditorLoader: React.FC<Props> = (props) => {
+export const FieldEditorLoader = (props: Props) => {
   const [Editor, setEditor] = useState<React.ComponentType<Props> | null>(null);
 
   const loadEditor = useCallback(async () => {

@@ -137,7 +137,7 @@ export const StepDetailPageChildren = () => {
 };
 import { getDynamicSettings } from '../../state/actions/dynamic_settings';
 
-export const StepDetailPage: React.FC = () => {
+export const StepDetailPage = () => {
   useInitApp();
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
   useTrackPageview({ app: 'uptime', path: 'stepDetail' });

@@ -63,7 +63,7 @@ interface AlertContextMenuProps {
   refetch: (() => void) | undefined;
 }
 
-const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
+const AlertContextMenuComponent = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
   columnValues,
@@ -72,7 +72,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   onRuleChange,
   scopeId,
   refetch,
-}) => {
+}: AlertContextMenuProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
 
@@ -359,7 +359,7 @@ type AddExceptionFlyoutWrapperProps = Omit<
  * Due to the conditional nature of the flyout and how we use the `ecsData` field,
  * we cannot use the fetch hook within the flyout component itself
  */
-export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps> = ({
+export const AddExceptionFlyoutWrapper = ({
   ruleId,
   ruleRuleId,
   ruleIndices,
@@ -370,7 +370,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   onCancel,
   onConfirm,
   alertStatus,
-}) => {
+}: AddExceptionFlyoutWrapperProps) => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
 

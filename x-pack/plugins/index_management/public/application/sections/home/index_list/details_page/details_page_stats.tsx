@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -27,9 +27,12 @@ import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SectionLoading, Error } from '../../../../../shared_imports';
 import { loadIndexStatistics, documentationService } from '../../../../services';
 
-export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpen: boolean }> = ({
+export const DetailsPageStats = ({
   indexName,
   isIndexOpen,
+}: {
+  indexName: string;
+  isIndexOpen: boolean;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>();

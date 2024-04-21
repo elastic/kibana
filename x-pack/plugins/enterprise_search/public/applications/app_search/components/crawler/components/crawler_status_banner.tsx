@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { CrawlerLogic } from '../crawler_logic';
 import { CrawlerStatus } from '../types';
 
-export const CrawlerStatusBanner: React.FC = () => {
+export const CrawlerStatusBanner = () => {
   const { mostRecentCrawlRequestStatus } = useValues(CrawlerLogic);
   if (
     mostRecentCrawlRequestStatus === CrawlerStatus.Running ||

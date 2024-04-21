@@ -34,7 +34,7 @@ const getAvailableMethodOptions = (productFeatures: ProductFeatures): INGESTION_
   ];
 };
 
-export const NewIndex: React.FC = () => {
+export const NewIndex = () => {
   const { config, productFeatures } = useValues(KibanaLogic);
   const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
   const { errorConnectingMessage } = useValues(HttpLogic);

@@ -17,7 +17,7 @@ interface Props {
   insight: AlertsInsight;
 }
 
-const AttackChainComponent: React.FC<Props> = ({ insight }) => {
+const AttackChainComponent = ({ insight }: Props) => {
   const tacticMetadata = useMemo(() => getTacticMetadata(insight), [insight]);
 
   return (

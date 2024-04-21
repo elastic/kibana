@@ -87,7 +87,7 @@ export interface ActionWizardProps<
   triggerPickerDocsLink?: string;
 }
 
-export const ActionWizard: React.FC<ActionWizardProps> = ({
+export const ActionWizard = ({
   currentActionFactory,
   actionFactories,
   onActionFactoryChange,
@@ -98,7 +98,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   getTriggerInfo,
   triggers,
   triggerPickerDocsLink,
-}) => {
+}: ActionWizardProps) => {
   // auto pick action factory if there is only 1 available
   React.useEffect(() => {
     if (
@@ -161,13 +161,13 @@ interface TriggerPickerProps {
   triggerPickerDocsLink?: string;
 }
 
-const TriggerPicker: React.FC<TriggerPickerProps> = ({
+const TriggerPicker = ({
   triggers,
   selectedTriggers,
   getTriggerInfo,
   onSelectedTriggersChange,
   triggerPickerDocsLink,
-}) => {
+}: TriggerPickerProps) => {
   const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
     <EuiFormFieldset
@@ -238,7 +238,7 @@ interface SelectedActionFactoryProps<
 
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selectedActionFactory';
 
-const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
+const SelectedActionFactory = ({
   actionFactory,
   onDeselect,
   showDeselect,
@@ -249,7 +249,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   getTriggerInfo,
   onSelectedTriggersChange,
   triggerPickerDocsLink,
-}) => {
+}: SelectedActionFactoryProps) => {
   return (
     <div
       className="auaActionWizard__selectedActionFactoryContainer"
@@ -314,11 +314,11 @@ interface ActionFactorySelectorProps<
 
 export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'actionFactoryItem';
 
-const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
+const ActionFactorySelector = ({
   actionFactories,
   onActionFactorySelected,
   context,
-}) => {
+}: ActionFactorySelectorProps) => {
   if (actionFactories.length === 0) {
     // this is not user facing, as it would be impossible to get into this state
     // just leaving for dev purposes for troubleshooting

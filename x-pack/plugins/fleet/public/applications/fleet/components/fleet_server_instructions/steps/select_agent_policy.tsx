@@ -45,16 +45,16 @@ export const getSelectAgentPolicyStep = ({
   };
 };
 
-const SelectAgentPolicyStepContent: React.FunctionComponent<{
-  policyId?: string;
-  setPolicyId: (v?: string) => void;
-  eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
-  refreshEligibleFleetServerPolicies: () => void;
-}> = ({
+const SelectAgentPolicyStepContent = ({
   policyId,
   setPolicyId,
   eligibleFleetServerPolicies,
   refreshEligibleFleetServerPolicies,
+}: {
+  policyId?: string;
+  setPolicyId: (v?: string) => void;
+  eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
+  refreshEligibleFleetServerPolicies: () => void;
 }) => {
   useEffect(() => {
     // Select default value

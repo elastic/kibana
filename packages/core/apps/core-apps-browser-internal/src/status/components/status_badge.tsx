@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import type { StatusState } from '../lib';
 
@@ -17,7 +17,7 @@ interface StatusBadgeProps {
   'data-test-subj'?: string;
 }
 
-export const StatusBadge: FC<StatusBadgeProps> = (props) => {
+export const StatusBadge = (props: StatusBadgeProps) => {
   return (
     <EuiBadge
       data-test-subj={props['data-test-subj']}

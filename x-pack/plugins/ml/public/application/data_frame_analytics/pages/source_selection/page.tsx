@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -14,7 +13,7 @@ import { useMlKibana } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
 import { SourceSelection } from '../analytics_management/components/source_selection';
 
-export const Page: FC = () => {
+export const Page = () => {
   const {
     services: { docLinks },
   } = useMlKibana();

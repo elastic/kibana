@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import type { MlRoute, PageProps } from '../../router';
+import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import {
@@ -36,7 +35,7 @@ export const dataDriftRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.dataDrift.docTitle', {
     defaultMessage: 'Data Drift',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
@@ -57,7 +56,7 @@ export const dataDriftRouteFactory = (
   'data-test-subj': 'mlPageDataDrift',
 });
 
-const PageWrapper: FC<PageProps> = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (

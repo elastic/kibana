@@ -42,7 +42,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
+const NetworkHttpTableComponent = ({
   data,
   fakeTotalCount,
   id,
@@ -53,7 +53,7 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
   showMorePagesIndicator,
   totalCount,
   type,
-}) => {
+}: NetworkHttpTableProps) => {
   const dispatch = useDispatch();
   const getNetworkHttpSelector = useMemo(() => networkSelectors.httpSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>

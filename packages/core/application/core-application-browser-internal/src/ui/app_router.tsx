@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
@@ -38,7 +38,7 @@ interface Params {
   appId: string;
 }
 
-export const AppRouter: FunctionComponent<Props> = ({
+export const AppRouter = ({
   history,
   analytics,
   mounters,
@@ -48,7 +48,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   appStatuses$,
   setIsMounting,
   hasCustomBranding$,
-}) => {
+}: Props) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
     () => (appPath: string) => new CoreScopedHistory(history, appPath),

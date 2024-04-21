@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
 import { css } from '@emotion/react';
@@ -24,7 +24,7 @@ export default {
   decorators: [(story: Function) => story()],
 };
 
-const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
+const Template: ComponentStory<(props: ColorMappingProps) => JSX.Element> = (args) => {
   const [updatedModel, setUpdateModel] = useState<ColorMapping.Config>(
     DEFAULT_COLOR_MAPPING_CONFIG
   );

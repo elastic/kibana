@@ -24,6 +24,7 @@ interface ChartPanelProps {
   isError?: boolean;
   rightSideItems?: ReactNode[];
   styles?: React.CSSProperties;
+  children: React.ReactNode;
 }
 
 const Loading = () => (
@@ -48,7 +49,7 @@ const Error = () => (
   </EuiFlexGroup>
 );
 
-export const ChartPanel: React.FC<ChartPanelProps> = ({
+export const ChartPanel = ({
   title,
   hasBorder = true,
   isLoading,
@@ -56,7 +57,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   children,
   rightSideItems,
   styles,
-}) => {
+}: ChartPanelProps) => {
   const { euiTheme } = useEuiTheme();
   const renderChart = () => {
     if (isLoading) return <Loading />;

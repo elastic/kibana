@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, memo } from 'react';
 
 import { useEnableDataFeed } from '../../../../../common/components/ml_popover/hooks/use_enable_data_feed';
@@ -20,11 +19,11 @@ interface MlAdminJobDescriptionProps {
   refreshJob: (job: SecurityJob) => void;
 }
 
-const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
+const MlAdminJobDescriptionComponent = ({
   job,
   loading,
   refreshJob,
-}) => {
+}: MlAdminJobDescriptionProps) => {
   const {
     enableDatafeed,
     disableDatafeed,

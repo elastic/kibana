@@ -101,7 +101,7 @@ const editRule: Rule<RuleTypeParams> = {
   ...shared,
 };
 
-const ShowRequestModalWithProviders: React.FunctionComponent<ShowRequestModalProps> = (props) => (
+const ShowRequestModalWithProviders = (props: ShowRequestModalProps) => (
   <IntlProvider locale="en">
     <ShowRequestModal {...props} />
   </IntlProvider>

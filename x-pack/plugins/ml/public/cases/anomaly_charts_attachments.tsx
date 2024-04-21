@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { memoize } from 'lodash';
 import deepEqual from 'fast-deep-equal';
@@ -18,7 +17,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { AnomalyChartsEmbeddableInput } from '../embeddables';
 
 export const initComponent = memoize(
-  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<AnomalyChartsEmbeddableInput>) => {
+  (fieldFormats: FieldFormatsStart, EmbeddableComponent: ((props: AnomalyChartsEmbeddableInput) => JSX.Element)) => {
     return React.memo(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState } = props;

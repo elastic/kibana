@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,7 +19,7 @@ export const DOCS_LINK_TEST_ID = 'tiEmptyPageDocsLink';
 export const EMPTY_PROMPT_TEST_ID = 'tiEmptyPage';
 export const INTEGRATION_LINK_ID = 'tiEmptyPageIntegrationsPageLink';
 
-export const EmptyPage: VFC = () => {
+export const EmptyPage= () => {
   const integrationsPageLink = useIntegrationsPageLink();
   const documentationLink = useTIDocumentationLink();
 

@@ -17,7 +17,7 @@ import {
   NotObscuredByBottomBar,
 } from '..';
 
-export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
+export const ConfirmDataPageStep = (props: MultiPageStepLayoutProps) => {
   const { enrolledAgentIds, packageInfo, isManaged } = props;
   const core = useStartServices();
 

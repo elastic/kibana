@@ -11,7 +11,9 @@ import { EuiText } from '@elastic/eui';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 
-const ViewComponent: CustomFieldType<CaseCustomFieldText>['View'] = ({ customField }) => {
+const ViewComponent = ({
+  customField,
+}: React.ComponentProps<CustomFieldType<CaseCustomFieldText>['View']>) => {
   const value = customField?.value ?? '-';
 
   return <EuiText data-test-subj={`text-custom-field-view-${customField?.key}`}>{value}</EuiText>;

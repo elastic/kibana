@@ -25,7 +25,7 @@ interface RuleExecutionStatusFilterProps {
 
 const sortedRuleExecutionStatusValues = [...RuleExecutionStatusValues].sort();
 
-export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionStatusFilterProps> = ({
+export const RuleExecutionStatusFilter = ({
   selectedStatuses,
   onChange,
 }: RuleExecutionStatusFilterProps) => {

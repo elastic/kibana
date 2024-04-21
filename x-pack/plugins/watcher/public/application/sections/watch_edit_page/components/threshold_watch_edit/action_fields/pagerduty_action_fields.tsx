@@ -19,13 +19,13 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
+export const PagerDutyActionFields = ({
   errors,
   hasErrors,
   action,
   editAction,
   children,
-}) => {
+}: Props) => {
   const { description } = action;
   return (
     <Fragment>

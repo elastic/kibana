@@ -40,7 +40,7 @@ const UseField = getUseField({ component: Field });
 export const toMoment = (value: string): Moment => moment(value);
 export const toString = (value: Moment): string => value.toISOString();
 
-export const RecurringSchedule: React.FC = React.memo(() => {
+export const RecurringSchedule = React.memo(() => {
   const [today] = useState<Moment>(moment());
 
   const [{ startDate, endDate, timezone, recurringSchedule }] = useFormData<FormProps>({

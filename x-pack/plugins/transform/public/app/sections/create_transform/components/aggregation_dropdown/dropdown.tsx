@@ -21,14 +21,14 @@ interface Props {
   >['renderOption'];
 }
 
-export const DropDown: React.FC<Props> = ({
+export const DropDown = ({
   renderOption,
   changeHandler,
   options,
   placeholder = 'Search ...',
   testSubj,
   isDisabled,
-}) => {
+}: Props) => {
   return (
     <EuiComboBox
       fullWidth

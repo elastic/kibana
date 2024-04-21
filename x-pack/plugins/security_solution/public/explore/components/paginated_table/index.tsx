@@ -22,7 +22,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import type { FC, ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -120,7 +120,7 @@ export interface BasicTableProps<T> {
   pageOfItems: unknown[];
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
-  sorting?: SortingBasicTable;
+  sorting?: SortingBasicTable | null;
   split?: boolean;
   stackHeader?: boolean;
   totalCount: number;
@@ -140,7 +140,7 @@ export interface Columns<T, U = T> {
   width?: string;
 }
 
-const PaginatedTableComponent: FC<SiemTables> = ({
+const PaginatedTableComponent = ({
   activePage,
   columns,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
@@ -167,7 +167,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   totalCount,
   updateActivePage,
   updateLimitPagination,
-}) => {
+}: SiemTables) => {
   const [myLoading, setMyLoading] = useState(loading);
   const [myActivePage, setActivePage] = useState(activePage);
   const [loadingInitial, setLoadingInitial] = useState(headerCount === -1);

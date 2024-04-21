@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, memo } from 'react';
 
 import type { EuiSwitchEvent } from '@elastic/eui';
@@ -40,8 +39,8 @@ interface Props {
   takeActionOnFailure: MlInferenceState['takeActionOnFailure'];
 }
 
-export const OnFailureConfiguration: FC<Props> = memo(
-  ({ handleAdvancedConfigUpdate, ignoreFailure, onFailure, takeActionOnFailure }) => {
+export const OnFailureConfiguration = memo(
+  ({ handleAdvancedConfigUpdate, ignoreFailure, onFailure, takeActionOnFailure }: Props) => {
     const {
       services: {
         docLinks: { links },

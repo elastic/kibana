@@ -60,7 +60,7 @@ export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
-export const PinnedTabContentComponent: React.FC<Props> = ({
+export const PinnedTabContentComponent = ({
   columns,
   timelineId,
   itemsPerPage,
@@ -71,7 +71,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   rowRenderers,
   showExpandedDetails,
   sort,
-}) => {
+}: Props) => {
   const {
     browserFields,
     dataViewId,

@@ -21,7 +21,7 @@ const ConfirmTitle = () => (
   />
 );
 
-const ConfirmDescription: React.FunctionComponent = ({}) => (
+const ConfirmDescription = ({}) => (
   <FormattedMessage
     id="xpack.fleet.settings.deleteFleetProxy.confirmModalText"
     defaultMessage="This action will change agent policies currently using that proxy. Are you sure you wish to continue?"

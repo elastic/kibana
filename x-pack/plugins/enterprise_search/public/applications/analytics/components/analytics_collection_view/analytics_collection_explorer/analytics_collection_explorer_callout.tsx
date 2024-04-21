@@ -18,7 +18,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { useDiscoverLink } from '../use_discover_link';
 
-export const AnalyticsCollectionExplorerCallout: React.FC = () => {
+export const AnalyticsCollectionExplorerCallout = () => {
   const { application } = useValues(KibanaLogic);
   const discoverLink = useDiscoverLink();
 

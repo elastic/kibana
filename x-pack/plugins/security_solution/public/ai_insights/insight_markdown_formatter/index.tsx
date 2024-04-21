@@ -20,10 +20,7 @@ interface Props {
   markdown: string;
 }
 
-const InsightMarkdownFormatterComponent: React.FC<Props> = ({
-  disableActions = false,
-  markdown,
-}) => {
+const InsightMarkdownFormatterComponent = ({ disableActions = false, markdown }: Props) => {
   const insightParsingPluginList = useMemo(
     () => [...getDefaultEuiMarkdownParsingPlugins(), InsightMarkdownParser],
     []

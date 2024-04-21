@@ -36,7 +36,7 @@ interface BaseProps {
 type Props = BaseProps &
   Pick<EuiBadgeProps, 'iconType' | 'iconSide' | 'onClick' | 'onClickAriaLabel'>;
 
-const RuleStatusComponent: React.FC<Props> = ({
+const RuleStatusComponent = ({
   contextId,
   eventId,
   fieldName,
@@ -48,7 +48,7 @@ const RuleStatusComponent: React.FC<Props> = ({
   onClickAriaLabel,
   iconSide,
   iconType,
-}) => {
+}: Props) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
   const badge = (
     <StyledEuiBadge

@@ -19,7 +19,7 @@ interface Props {
   reason?: string;
 }
 
-const NoDataComponent: React.FC<Props> = ({ reason }) => (
+const NoDataComponent = ({ reason }: Props) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow>
       <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">

@@ -71,7 +71,7 @@ const getSorting = (sortField: HostsFields, direction: Direction): SortingBasicT
   direction,
 });
 
-const HostsTableComponent: React.FC<HostsTableProps> = ({
+const HostsTableComponent = ({
   data,
   fakeTotalCount,
   id,
@@ -82,7 +82,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   showMorePagesIndicator,
   totalCount,
   type,
-}) => {
+}: HostsTableProps) => {
   const dispatch = useDispatch();
   const { navigateTo } = useNavigateTo();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);

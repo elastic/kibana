@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -13,7 +12,7 @@ import { Description } from './description';
 import { useStringifiedValue } from '../hooks';
 import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
 
-export const QueryDelayInput: FC = () => {
+export const QueryDelayInput = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.queryDelay);

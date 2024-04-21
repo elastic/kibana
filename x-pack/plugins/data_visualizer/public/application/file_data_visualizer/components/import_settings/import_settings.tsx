@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
@@ -38,7 +37,7 @@ interface Props {
   results: FindFileStructureResponse;
 }
 
-export const ImportSettings: FC<Props> = ({
+export const ImportSettings = ({
   index,
   dataView,
   initialized,
@@ -57,7 +56,7 @@ export const ImportSettings: FC<Props> = ({
   combinedFields,
   onCombinedFieldsChange,
   results,
-}) => {
+}: Props) => {
   const {
     services: {
       application: { capabilities },

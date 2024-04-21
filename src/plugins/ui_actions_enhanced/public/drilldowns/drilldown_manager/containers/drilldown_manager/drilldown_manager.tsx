@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { useDrilldownManager } from '../context';
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { DrilldownManagerContent } from './drilldown_manager_content';
@@ -14,7 +14,7 @@ import { RenderDrilldownManagerTitle } from '../drilldown_manager_title';
 import { RenderDrilldownManagerFooter } from '../drilldown_manager_footer';
 import { HelloBar } from '../hello_bar';
 
-export const DrilldownManager: React.FC = ({}) => {
+export const DrilldownManager = ({}) => {
   const drilldowns = useDrilldownManager();
   const route = drilldowns.useRoute();
 

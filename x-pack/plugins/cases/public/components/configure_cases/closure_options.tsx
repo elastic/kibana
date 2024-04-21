@@ -18,11 +18,11 @@ export interface ClosureOptionsProps {
   onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
-const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
+const ClosureOptionsComponent = ({
   closureTypeSelected,
   disabled,
   onChangeClosureType,
-}) => (
+}: ClosureOptionsProps) => (
   <EuiDescribedFormGroup
     fullWidth
     title={<h3>{i18n.CASE_CLOSURE_OPTIONS_TITLE}</h3>}

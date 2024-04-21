@@ -19,9 +19,7 @@ import { PipelinesLogic } from '../pipelines_logic';
 export interface AddMLInferencePipelineButtonProps {
   onClick: () => void;
 }
-export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButtonProps> = ({
-  onClick,
-}) => {
+export const AddMLInferencePipelineButton = ({ onClick }: AddMLInferencePipelineButtonProps) => {
   const { capabilities } = useValues(KibanaLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { canUseMlInferencePipeline, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
@@ -71,11 +69,15 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
   return <AddButton ingestionMethod={ingestionMethod} onClick={onClick} />;
 };
 
-const AddButton: React.FC<{
+const AddButton = ({
+  disabled,
+  ingestionMethod,
+  onClick,
+}: {
   disabled?: boolean;
   ingestionMethod: string;
   onClick?: () => void;
-}> = ({ disabled, ingestionMethod, onClick }) => (
+}) => (
   <EuiButton
     fullWidth
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}

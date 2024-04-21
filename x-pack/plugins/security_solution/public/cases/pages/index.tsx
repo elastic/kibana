@@ -53,7 +53,7 @@ const TimelineDetailsPanel = () => {
   );
 };
 
-const CaseContainerComponent: React.FC = () => {
+const CaseContainerComponent = () => {
   const { cases, telemetry } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);

@@ -28,14 +28,14 @@ interface Props {
 
 const getIndexFromId = (id: string) => parseInt(id.split('_')[1], 10);
 
-export const MultiCheckboxFacetsView: React.FC<Props> = ({
+export const MultiCheckboxFacetsView = ({
   label,
   onMoreClick,
   onRemove,
   onSelect,
   options,
   showMore,
-}) => {
+}: Props) => {
   const getId = htmlIdGenerator();
 
   const optionToCheckBoxGroupOption = (option: FacetValue, index: number) => ({

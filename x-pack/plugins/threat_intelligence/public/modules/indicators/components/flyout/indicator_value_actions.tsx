@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -55,11 +55,11 @@ interface IndicatorValueActions {
  * - in the cases view usage, we only display add to timeline and copy to clipboard.
  * - in the indicators table usave, we display all options
  */
-export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
+export const IndicatorValueActions = ({
   indicator,
   field,
   'data-test-subj': dataTestSubj,
-}) => {
+}: IndicatorValueActions) => {
   const { kqlBarIntegration } = useIndicatorsFlyoutContext();
 
   const [isPopoverOpen, setPopover] = useState(false);

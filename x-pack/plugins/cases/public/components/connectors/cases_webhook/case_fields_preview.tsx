@@ -13,9 +13,7 @@ import type { ConnectorFieldsPreviewProps } from '../types';
 import { ConnectorCard } from '../card';
 import * as i18n from './translations';
 
-const CasesWebhookPreviewComponent: React.FunctionComponent<ConnectorFieldsPreviewProps<null>> = ({
-  connector,
-}) => (
+const CasesWebhookPreviewComponent = ({ connector }: ConnectorFieldsPreviewProps<null>) => (
   <>
     <ConnectorCard
       connectorType={ConnectorTypes.casesWebhook}

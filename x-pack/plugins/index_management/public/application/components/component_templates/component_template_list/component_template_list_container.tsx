@@ -19,15 +19,14 @@ interface MatchParams {
   componentTemplateName?: string;
 }
 
-export const ComponentTemplateListContainer: React.FunctionComponent<
-  RouteComponentProps<MatchParams>
-> = ({
+export const ComponentTemplateListContainer = ({
   match: {
     params: { componentTemplateName },
   },
+
   location,
   history,
-}) => {
+}: RouteComponentProps<MatchParams>) => {
   const { executionContext } = useComponentTemplatesContext();
 
   useExecutionContext(executionContext, {

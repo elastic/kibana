@@ -20,7 +20,7 @@ import { generateEnginePath } from '../../engine';
 
 import { SchemaLogic } from '../schema_logic';
 
-export const SchemaCallouts: React.FC = () => {
+export const SchemaCallouts = () => {
   const {
     myRole: { canManageEngines },
   } = useValues(AppLogic);
@@ -59,7 +59,7 @@ export const SchemaCallouts: React.FC = () => {
   );
 };
 
-export const UnsearchedFieldsCallout: React.FC = () => (
+export const UnsearchedFieldsCallout = () => (
   <EuiCallOut
     iconType="iInCircle"
     title={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.unsearchedFields.title', {
@@ -97,7 +97,7 @@ export const UnsearchedFieldsCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-export const UnconfirmedFieldsCallout: React.FC = () => (
+export const UnconfirmedFieldsCallout = () => (
   <EuiCallOut
     iconType="iInCircle"
     title={i18n.translate(
@@ -119,7 +119,7 @@ export const UnconfirmedFieldsCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-export const ConfirmSchemaButton: React.FC = () => {
+export const ConfirmSchemaButton = () => {
   const { updateSchema } = useActions(SchemaLogic);
   const { isUpdating } = useValues(SchemaLogic);
 
@@ -137,7 +137,7 @@ export const ConfirmSchemaButton: React.FC = () => {
   );
 };
 
-export const MissingSubfieldsCallout: React.FC = () => {
+export const MissingSubfieldsCallout = () => {
   const { incompleteFields } = useValues(SchemaLogic);
 
   return (

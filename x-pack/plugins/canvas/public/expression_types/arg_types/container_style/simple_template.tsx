@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { CanvasWorkpad } from '../../../../types';
@@ -24,7 +24,7 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const SimpleTemplate: FunctionComponent<Props> = ({ getArgValue, setArgValue, workpad }) => (
+export const SimpleTemplate = ({ getArgValue, setArgValue, workpad }: Props) => (
   <div style={{ fontSize: 0 }}>
     <ColorPickerPopover
       value={getArgValue('backgroundColor')}

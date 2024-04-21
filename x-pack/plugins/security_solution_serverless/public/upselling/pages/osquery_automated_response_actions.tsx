@@ -12,8 +12,8 @@ import React from 'react';
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: ProductFeatureKeyType }> =
-  React.memo(({ requiredPLI }) => {
+const OsqueryResponseActionsUpsellingSection = React.memo(
+  ({ requiredPLI }: { requiredPLI: ProductFeatureKeyType }) => {
     const productTypeRequired = getProductTypeByPLI(requiredPLI);
 
     return (
@@ -39,7 +39,8 @@ const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: ProductFea
         }
       />
     );
-  });
+  }
+);
 
 OsqueryResponseActionsUpsellingSection.displayName = 'OsqueryResponseActionsUpsellingSection';
 

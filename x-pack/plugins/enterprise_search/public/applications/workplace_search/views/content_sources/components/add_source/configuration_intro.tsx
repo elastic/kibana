@@ -42,11 +42,7 @@ interface ConfigurationIntroProps {
   advanceStepTo: string;
 }
 
-export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
-  name,
-  advanceStepTo,
-  header,
-}) => (
+export const ConfigurationIntro = ({ name, advanceStepTo, header }: ConfigurationIntroProps) => (
   <>
     {header}
     <EuiSpacer />

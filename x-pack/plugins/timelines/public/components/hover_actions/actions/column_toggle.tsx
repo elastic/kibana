@@ -38,7 +38,7 @@ export interface ColumnToggleProps extends HoverActionComponentProps {
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
-const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
+const ColumnToggleButton = React.memo(
   ({
     Component,
     defaultFocusedButtonRef,
@@ -51,7 +51,7 @@ const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
     showTooltip = false,
     toggleColumn,
     value,
-  }) => {
+  }: ColumnToggleProps) => {
     const label = isObjectArray ? NESTED_COLUMN(field) : COLUMN_TOGGLE(field);
 
     const handleToggleColumn = useCallback(() => {

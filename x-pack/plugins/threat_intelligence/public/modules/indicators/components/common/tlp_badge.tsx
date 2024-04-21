@@ -7,7 +7,7 @@
 
 import { EuiBadge } from '@elastic/eui';
 import capitalize from 'lodash/capitalize';
-import React, { useMemo, VFC } from 'react';
+import React, { useMemo } from 'react';
 import { EMPTY_VALUE } from '../../../../constants/common';
 
 export interface TLPBadgeProps {
@@ -23,7 +23,7 @@ const LEVEL_TO_COLOR: Record<string, string> = {
   clear: 'hollow',
 } as const;
 
-export const TLPBadge: VFC<TLPBadgeProps> = ({ value }) => {
+export const TLPBadge = ({ value }: TLPBadgeProps) => {
   const normalizedValue = value?.toLowerCase().trim();
   const color = LEVEL_TO_COLOR[normalizedValue || ''];
 

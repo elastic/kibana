@@ -34,7 +34,7 @@ import {
   QueryDetail,
 } from './views';
 
-export const AnalyticsRouter: React.FC = () => {
+export const AnalyticsRouter = () => {
   return (
     <Routes>
       <Route exact path={ENGINE_ANALYTICS_PATH}>

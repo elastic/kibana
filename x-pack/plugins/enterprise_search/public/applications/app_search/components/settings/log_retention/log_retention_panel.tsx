@@ -24,7 +24,7 @@ import { LOG_SETTINGS_DOCS_URL } from '../../../routes';
 
 import { LogRetentionLogic, LogRetentionOptions, LogRetentionMessage } from '../../log_retention';
 
-export const LogRetentionPanel: React.FC = () => {
+export const LogRetentionPanel = () => {
   const { toggleLogRetention, fetchLogRetention } = useActions(LogRetentionLogic);
 
   const { logRetention, isLogRetentionUpdating } = useValues(LogRetentionLogic);

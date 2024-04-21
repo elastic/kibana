@@ -6,7 +6,6 @@
  */
 
 import { noop } from 'lodash';
-import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import {
@@ -35,21 +34,27 @@ import {
   ASSIGNEES_TITLE_TEST_ID,
 } from './test_ids';
 
-const UpdateAssigneesButton: FC<{
-  isDisabled: boolean;
-  toolTipMessage: string;
-  togglePopover: () => void;
-}> = memo(({ togglePopover, isDisabled, toolTipMessage }) => (
-  <EuiToolTip position="bottom" content={toolTipMessage}>
-    <EuiButtonIcon
-      aria-label="Update assignees"
-      data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
-      iconType={'plusInCircle'}
-      onClick={togglePopover}
-      isDisabled={isDisabled}
-    />
-  </EuiToolTip>
-));
+const UpdateAssigneesButton = memo(
+  ({
+    togglePopover,
+    isDisabled,
+    toolTipMessage,
+  }: {
+    isDisabled: boolean;
+    toolTipMessage: string;
+    togglePopover: () => void;
+  }) => (
+    <EuiToolTip position="bottom" content={toolTipMessage}>
+      <EuiButtonIcon
+        aria-label="Update assignees"
+        data-test-subj={ASSIGNEES_ADD_BUTTON_TEST_ID}
+        iconType={'plusInCircle'}
+        onClick={togglePopover}
+        isDisabled={isDisabled}
+      />
+    </EuiToolTip>
+  )
+);
 UpdateAssigneesButton.displayName = 'UpdateAssigneesButton';
 
 export interface AssigneesProps {
@@ -77,8 +82,8 @@ export interface AssigneesProps {
 /**
  * Document assignees details displayed in flyout right section header
  */
-export const Assignees: FC<AssigneesProps> = memo(
-  ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }) => {
+export const Assignees = memo(
+  ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }: AssigneesProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 

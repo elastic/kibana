@@ -93,10 +93,7 @@ interface CachedGlobalQueryState {
   timerange: AbsoluteTimeRange | RelativeTimeRange;
 }
 
-const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
-  ruleId,
-  selectAlertsTab,
-}) => {
+const ExecutionLogTableComponent = ({ ruleId, selectAlertsTab }: ExecutionLogTableProps) => {
   const {
     docLinks,
     data: {

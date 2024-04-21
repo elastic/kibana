@@ -50,7 +50,7 @@ interface Props {
   value?: string[] | string | null;
 }
 
-export const ShowTopNButton: React.FC<Props> = React.memo(
+export const ShowTopNButton = React.memo(
   ({
     className,
     Component,
@@ -71,7 +71,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     title,
     value,
     globalFilters,
-  }) => {
+  }: Props) => {
     const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
       ? SourcererScopeName.timeline
       : scopeId != null && isDetectionsAlertsTable(scopeId)

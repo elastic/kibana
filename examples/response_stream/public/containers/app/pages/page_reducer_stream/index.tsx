@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   Chart,
@@ -44,7 +44,7 @@ import { useDeps } from '../../../../hooks/use_deps';
 
 import { getStatusMessage } from './get_status_message';
 
-export const PageReducerStream: FC = () => {
+export const PageReducerStream = () => {
   const {
     core: { http, notifications },
   } = useDeps();

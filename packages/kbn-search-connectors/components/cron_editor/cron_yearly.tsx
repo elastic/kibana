@@ -35,7 +35,7 @@ interface Props {
   }) => void;
 }
 
-export const CronYearly: React.FunctionComponent<Props> = ({
+export const CronYearly = ({
   disabled,
   minute,
   minuteOptions,
@@ -46,7 +46,7 @@ export const CronYearly: React.FunctionComponent<Props> = ({
   month,
   monthOptions,
   onChange,
-}) => (
+}: Props) => (
   <Fragment>
     <EuiFormRow
       label={
@@ -70,7 +70,6 @@ export const CronYearly: React.FunctionComponent<Props> = ({
         data-test-subj="cronFrequencyYearlyMonthSelect"
       />
     </EuiFormRow>
-
     <EuiFormRow
       label={
         <FormattedMessage
@@ -93,7 +92,6 @@ export const CronYearly: React.FunctionComponent<Props> = ({
         data-test-subj="cronFrequencyYearlyDateSelect"
       />
     </EuiFormRow>
-
     <EuiFormRow
       label={
         <FormattedMessage

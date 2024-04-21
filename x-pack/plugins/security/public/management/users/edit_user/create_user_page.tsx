@@ -6,7 +6,6 @@
  */
 
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -15,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UserForm } from './user_form';
 import { useCapabilities } from '../../../components/use_capabilities';
 
-export const CreateUserPage: FunctionComponent = () => {
+export const CreateUserPage = () => {
   const history = useHistory();
   const readOnly = !useCapabilities('users').save;
   const backToUsers = () => history.push('/');

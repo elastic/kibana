@@ -46,13 +46,13 @@ const getConnectorWithoutSecrets = (
   secrets: {},
 });
 
-const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
+const EditConnectorFlyoutComponent = ({
   actionTypeRegistry,
   connector,
   onClose,
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
-}) => {
+}: EditConnectorFlyoutProps) => {
   const {
     docLinks,
     application: { capabilities },

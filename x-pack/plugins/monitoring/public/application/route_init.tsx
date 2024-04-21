@@ -25,13 +25,13 @@ interface RouteInitProps {
   unsetGlobalState?: boolean;
 }
 
-export const RouteInit: React.FC<RouteInitProps> = ({
+export const RouteInit = ({
   path,
   component,
   codePaths,
   fetchAllClusters,
   unsetGlobalState = false,
-}) => {
+}: RouteInitProps) => {
   const globalState = useContext(GlobalStateContext);
   const clusterUuid = fetchAllClusters ? null : globalState.cluster_uuid;
   const location = useLocation();

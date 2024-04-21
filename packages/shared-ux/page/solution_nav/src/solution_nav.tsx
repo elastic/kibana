@@ -7,7 +7,7 @@
  */
 import './solution_nav.scss';
 
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import {
   EuiAvatarProps,
@@ -90,7 +90,7 @@ const generateId = htmlIdGenerator('SolutionNav');
 /**
  * A wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo.
  */
-export const SolutionNav: FC<SolutionNavProps> = ({
+export const SolutionNav = ({
   children,
   headingProps,
   icon,
@@ -102,7 +102,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
   onCollapse,
   canBeCollapsed = true,
   ...rest
-}) => {
+}: SolutionNavProps) => {
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');

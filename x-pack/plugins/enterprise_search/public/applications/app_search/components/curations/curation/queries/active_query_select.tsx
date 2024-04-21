@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CurationLogic } from '../curation_logic';
 
-export const ActiveQuerySelect: React.FC = () => {
+export const ActiveQuerySelect = () => {
   const { setActiveQuery } = useActions(CurationLogic);
   const { queries, activeQuery, queriesLoading } = useValues(CurationLogic);
 

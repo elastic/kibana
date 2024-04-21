@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useRef, type FC } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
@@ -95,7 +95,7 @@ interface DualBrushProps {
  * @param props DualBrushProps component props
  * @returns The DualBrush component.
  */
-export const DualBrush: FC<DualBrushProps> = (props) => {
+export const DualBrush = (props: DualBrushProps) => {
   const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);

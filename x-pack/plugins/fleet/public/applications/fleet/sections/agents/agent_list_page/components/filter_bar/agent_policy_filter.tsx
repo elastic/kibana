@@ -19,7 +19,7 @@ export interface Props {
   agentPolicies: AgentPolicy[];
 }
 
-export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
+export const AgentPolicyFilter = ({
   selectedAgentPolicies,
   onSelectedAgentPoliciesChange,
   agentPolicies,

@@ -21,7 +21,7 @@ const ConfirmTitle = () => (
   />
 );
 
-const ConfirmDescription: React.FunctionComponent = ({}) => (
+const ConfirmDescription = ({}) => (
   <FormattedMessage
     id="xpack.fleet.settings.deleteFleetServerHosts.confirmModalText"
     defaultMessage="This action will change agent policies currently enrolled in this Fleet Server, to instead enroll in your default Fleet server. Are you sure you wish to continue?"

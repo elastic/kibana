@@ -6,7 +6,6 @@
  */
 
 import { parse } from 'query-string';
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
@@ -41,7 +40,7 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMode, share }) => {
+export const RedirectApp = ({ apiClient, screenshotMode, share }: Props) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {

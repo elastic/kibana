@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../../shared_imports';
@@ -14,7 +14,7 @@ import { byteSizeUnits, ROLLOVER_FORM_PATHS } from '../../../../constants';
 import { i18nTexts } from '../../../../i18n_texts';
 import { UnitField } from '../../shared_fields/unit_field';
 
-export const MaxPrimaryShardSizeField: FunctionComponent = () => {
+export const MaxPrimaryShardSizeField = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 400 }}>

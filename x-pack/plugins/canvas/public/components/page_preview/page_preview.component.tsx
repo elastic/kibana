@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { DomPreview } from '../dom_preview';
 import { PageControls } from './page_controls';
@@ -18,7 +18,7 @@ export interface Props {
   onDuplicate: (pageId: string) => void;
   onRemove: (pageId: string) => void;
 }
-export const PagePreview: FC<Props> = ({ isWriteable, page, height, onDuplicate, onRemove }) => (
+export const PagePreview = ({ isWriteable, page, height, onDuplicate, onRemove }: Props) => (
   <div
     className="canvasPageManager__pagePreview"
     style={{ backgroundColor: page.style.background }}

@@ -23,13 +23,13 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
 
-export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
+export const AlertsByTypePanel = ({
   filters,
   query,
   signalIndexName,
   runtimeMappings,
   skip,
-}) => {
+}: ChartsPanelProps) => {
   const isAlertTypeEnabled = useIsExperimentalFeatureEnabled('alertTypeEnabled');
   const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid()}`, []);
 

@@ -94,7 +94,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
   );
 };
 
-export const KibanaOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const KibanaOverviewPage = ({ clusters }: ComponentProps) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();

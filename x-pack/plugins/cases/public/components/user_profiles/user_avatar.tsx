@@ -17,7 +17,7 @@ export interface CaseUserAvatarProps {
   userInfo?: UserInfoWithAvatar;
 }
 
-const CaseUserAvatarComponent: React.FC<CaseUserAvatarProps> = ({ size, userInfo }) => {
+const CaseUserAvatarComponent = ({ size, userInfo }: CaseUserAvatarProps) => {
   const dataTestSubjName = userInfo?.user?.username;
 
   return userInfo?.user !== undefined ? (

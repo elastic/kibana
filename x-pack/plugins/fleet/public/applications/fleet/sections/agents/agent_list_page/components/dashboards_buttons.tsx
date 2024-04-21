@@ -37,7 +37,7 @@ const useDashboardExists = (dashboardId: string) => {
   return { dashboardExists, loading };
 };
 
-export const DashboardsButtons: React.FunctionComponent = () => {
+export const DashboardsButtons = () => {
   const dashboardLocator = useDashboardLocator();
 
   const getDashboardHref = (dashboardId: string) => {

@@ -76,8 +76,8 @@ const getEmailContent = ({ caseTitle, caseUrl }: { caseTitle: string; caseUrl: s
   body: i18n.EMAIL_BODY(caseUrl),
 });
 
-export const UserList: React.FC<UserListProps> = React.memo(
-  ({ theCase, userProfiles, headline, loading, users, dataTestSubj }) => {
+export const UserList = React.memo(
+  ({ theCase, userProfiles, headline, loading, users, dataTestSubj }: UserListProps) => {
     const { getCaseViewUrl } = useCaseViewNavigation();
     const { euiTheme } = useEuiTheme();
     const caseUrl = getCaseViewUrl({ detailName: theCase.id });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
 import type { ExperimentalFeatures, MlFeatures } from '../../../../common/constants/app';
 
@@ -32,15 +31,16 @@ interface Props {
   mlFeatures: MlFeatures;
   showMLNavMenu?: boolean;
   experimentalFeatures?: ExperimentalFeatures;
+  children: React.ReactNode;
 }
 
-export const EnabledFeaturesContextProvider: FC<Props> = ({
+export const EnabledFeaturesContextProvider = ({
   children,
   isServerless,
   showMLNavMenu = true,
   mlFeatures,
   experimentalFeatures,
-}) => {
+}: Props) => {
   const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
     showMLNavMenu,

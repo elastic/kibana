@@ -48,7 +48,7 @@ interface Props {
 /**
  * Settings for adding/removing system prompts. Configure name, prompt and default conversations.
  */
-export const SystemPromptSettings: React.FC<Props> = React.memo(
+export const SystemPromptSettings = React.memo(
   ({
     conversationSettings,
     onSelectedSystemPromptChange,
@@ -59,7 +59,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
     defaultConnector,
-  }) => {
+  }: Props) => {
     // Prompt
     const promptContent = useMemo(
       () => selectedSystemPrompt?.content ?? '',

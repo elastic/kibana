@@ -12,7 +12,7 @@ import { createGenericFileRowRenderer } from '../../timeline/body/renderers/audi
 import { OPENED_FILE, USING } from '../../timeline/body/renderers/auditd/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const AuditdFileExampleComponent: React.FC = () => {
+const AuditdFileExampleComponent = () => {
   const auditdFileRowRenderer = createGenericFileRowRenderer({
     actionName: 'opened-file',
     text: `${OPENED_FILE} ${USING}`,

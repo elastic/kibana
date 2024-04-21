@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,10 +22,13 @@ import {
 } from '../../applications/fleet/hooks';
 import { Loading } from '../loading';
 
-const NoEnrollmentKeysCallout: React.FunctionComponent<{
+const NoEnrollmentKeysCallout = ({
+  agentPolicyId,
+  onCreateEnrollmentApiKey,
+}: {
   agentPolicyId?: string;
   onCreateEnrollmentApiKey: (key: EnrollmentAPIKey) => void;
-}> = ({ agentPolicyId, onCreateEnrollmentApiKey }) => {
+}) => {
   const { notifications } = useStartServices();
 
   const [isLoadingEnrollmentKey, setIsLoadingEnrollmentKey] = useState(false);
@@ -96,12 +98,12 @@ interface Props {
   onKeyChange: (key?: string) => void;
 }
 
-export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
+export const AdvancedAgentAuthenticationSettings = ({
   agentPolicyId,
   selectedApiKeyId,
   initialAuthenticationSettingsOpen = false,
   onKeyChange,
-}) => {
+}: Props) => {
   const { notifications } = useStartServices();
   const [enrollmentAPIKeys, setEnrollmentAPIKeys] = useState<GetEnrollmentAPIKeysResponse['items']>(
     []

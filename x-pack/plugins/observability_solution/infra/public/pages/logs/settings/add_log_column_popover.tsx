@@ -25,11 +25,15 @@ interface SelectableColumnOption {
   columnConfiguration: LogColumnConfiguration;
 }
 
-export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
+export const AddLogColumnButtonAndPopover = ({
+  addLogColumn,
+  availableFields,
+  isDisabled,
+}: {
   addLogColumn: (logColumnConfiguration: LogColumnConfiguration) => void;
   availableFields: string[];
   isDisabled?: boolean;
-}> = ({ addLogColumn, availableFields, isDisabled }) => {
+}) => {
   const { isVisible: isOpen, show: openPopover, hide: closePopover } = useVisibilityState(false);
 
   const availableColumnOptions = useMemo<SelectableColumnOption[]>(
@@ -153,7 +157,7 @@ const selectableListProps = {
   showIcons: false,
 };
 
-const SystemColumnBadge: React.FunctionComponent = () => (
+const SystemColumnBadge = () => (
   <EuiBadge>
     <FormattedMessage
       id="xpack.infra.sourceConfiguration.systemColumnBadgeLabel"

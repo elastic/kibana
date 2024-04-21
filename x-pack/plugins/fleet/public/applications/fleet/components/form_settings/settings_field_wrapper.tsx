@@ -30,11 +30,15 @@ export const validateSchema = (coercedSchema: z.ZodString, newValue: any): strin
   }
 };
 
-export const SettingsFieldWrapper: React.FC<{
+export const SettingsFieldWrapper = ({
+  settingsConfig,
+  typeName,
+  renderItem,
+}: {
   settingsConfig: SettingsConfig;
   typeName: keyof typeof ZodFirstPartyTypeKind;
   renderItem: Function;
-}> = ({ settingsConfig, typeName, renderItem }) => {
+}) => {
   const [error, setError] = useState('');
   const agentPolicyFormContext = useAgentPolicyFormContext();
 

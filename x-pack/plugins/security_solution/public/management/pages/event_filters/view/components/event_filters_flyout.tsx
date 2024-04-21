@@ -46,8 +46,8 @@ export interface EventFiltersFlyoutProps {
   maskProps?: EuiOverlayMaskProps;
 }
 
-export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
-  ({ onCancel: onClose, data, ...flyoutProps }) => {
+export const EventFiltersFlyout = memo(
+  ({ onCancel: onClose, data, ...flyoutProps }: EventFiltersFlyoutProps) => {
     const toasts = useToasts();
     const http = useHttp();
 

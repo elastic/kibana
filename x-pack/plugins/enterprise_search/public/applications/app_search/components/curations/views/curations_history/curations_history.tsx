@@ -15,7 +15,7 @@ import {
   RejectedCurationsHistoryPanel,
 } from './components';
 
-export const CurationsHistory: React.FC = () => {
+export const CurationsHistory = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={2}>

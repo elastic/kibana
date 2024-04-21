@@ -316,9 +316,11 @@ describe('AlertsTable.BulkActions', () => {
     updatedAt: Date.now(),
   };
 
-  const AlertsTableWithBulkActionsContext: React.FunctionComponent<
-    AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
-  > = (props) => {
+  const AlertsTableWithBulkActionsContext = (
+    props: AlertsTableProps & {
+      initialBulkActionsState?: BulkActionsState;
+    }
+  ) => {
     const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 

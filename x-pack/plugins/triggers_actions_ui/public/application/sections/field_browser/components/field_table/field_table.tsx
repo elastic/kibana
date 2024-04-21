@@ -45,7 +45,7 @@ export interface FieldTableProps extends Pick<FieldBrowserProps, 'columnIds' | '
   onHide: () => void;
 }
 
-const FieldTableComponent: React.FC<FieldTableProps> = ({
+const FieldTableComponent = ({
   columnIds,
   filteredBrowserFields,
   filterSelectedEnabled,
@@ -55,7 +55,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   onToggleColumn,
   searchInput,
   selectedCategoryIds,
-}) => {
+}: FieldTableProps) => {
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);

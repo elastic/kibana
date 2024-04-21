@@ -65,7 +65,7 @@ export interface AddToTimelineButtonProps extends HoverActionComponentProps {
   timelineType?: string;
 }
 
-const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
+const AddToTimelineButton = React.memo(
   ({
     Component,
     dataProvider,
@@ -78,7 +78,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     showTooltip = false,
     value,
     timelineType = 'default',
-  }) => {
+  }: AddToTimelineButtonProps) => {
     const dispatch = useDispatch();
     const { addSuccess } = useAppToasts();
     const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });

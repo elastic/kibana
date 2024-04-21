@@ -68,10 +68,10 @@ type OsqueryActionResultsWrapperProps = {
   services: CoreStart & StartPlugins;
 } & OsqueryActionResultProps;
 
-const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
+const OsqueryActionResultWrapperComponent = ({
   services,
   ...restProps
-}) => (
+}: OsqueryActionResultsWrapperProps) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>

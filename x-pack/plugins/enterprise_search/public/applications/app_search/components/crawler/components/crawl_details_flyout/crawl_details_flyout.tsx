@@ -26,7 +26,7 @@ import { CrawlDetailLogic } from '../../crawl_detail_logic';
 
 import { CrawlDetailsPreview } from './crawl_details_preview';
 
-export const CrawlDetailsFlyout: React.FC = () => {
+export const CrawlDetailsFlyout = () => {
   const { closeFlyout, setSelectedTab } = useActions(CrawlDetailLogic);
   const { crawlRequestFromServer, dataLoading, flyoutClosed, selectedTab } =
     useValues(CrawlDetailLogic);

@@ -29,9 +29,12 @@ import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 
-const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
+const ActionColumnComponent = ({
   theCase,
   disableActions,
+}: {
+  theCase: CaseUI;
+  disableActions: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);

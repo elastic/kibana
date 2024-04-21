@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,7 +62,7 @@ const UNKNOWN_ENTITY_TYPE = {
 
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
 
-const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
+const NerOutput = ({ inferrer }: { inferrer: NerInference }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
 
   if (!result) {
@@ -85,7 +85,7 @@ const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
   return <Lines result={result[0]} />;
 };
 
-const Lines: FC<{ result: NerResponse }> = ({ result }) => {
+const Lines = ({ result }: { result: NerResponse }) => {
   const { euiTheme } = useCurrentThemeVars();
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {

@@ -28,8 +28,15 @@ export interface UnifiedFieldListItemStatsProps {
   onAddFilter: FieldStatsProps['onAddFilter'];
 }
 
-export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
-  ({ stateService, services, field, dataView, multiFields, onAddFilter }) => {
+export const UnifiedFieldListItemStats = React.memo(
+  ({
+    stateService,
+    services,
+    field,
+    dataView,
+    multiFields,
+    onAddFilter,
+  }: UnifiedFieldListItemStatsProps) => {
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
       timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,

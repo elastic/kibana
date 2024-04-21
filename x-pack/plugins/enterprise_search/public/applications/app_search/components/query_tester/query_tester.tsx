@@ -16,7 +16,7 @@ import { EngineLogic } from '../engine';
 import { Result } from '../result';
 import { SearchLogic } from '../search';
 
-export const QueryTester: React.FC = () => {
+export const QueryTester = () => {
   const logic = SearchLogic({ id: 'query-tester' });
   const { searchQuery, searchResults, searchDataLoading } = useValues(logic);
   const { search } = useActions(logic);

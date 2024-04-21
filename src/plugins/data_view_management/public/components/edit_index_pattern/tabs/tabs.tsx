@@ -161,7 +161,7 @@ const SCHEMA_ITEMS: FilterItems[] = [
   },
 ];
 
-export const Tabs: React.FC<TabsProps> = ({
+export const Tabs = ({
   indexPattern,
   saveIndexPattern,
   fields,
@@ -172,7 +172,7 @@ export const Tabs: React.FC<TabsProps> = ({
   compositeRuntimeFields,
   refreshIndexPatternClick,
   isRefreshing,
-}) => {
+}: TabsProps) => {
   const {
     uiSettings,
     docLinks,

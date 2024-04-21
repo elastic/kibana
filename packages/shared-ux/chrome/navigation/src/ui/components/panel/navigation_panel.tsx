@@ -14,13 +14,13 @@ import {
   keys,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, type FC } from 'react';
+import React, { useCallback } from 'react';
 import classNames from 'classnames';
 
 import { usePanel } from './context';
 import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
 
-export const NavigationPanel: FC = () => {
+export const NavigationPanel = () => {
   const { euiTheme } = useEuiTheme();
   const { isOpen, close, getContent, selectedNode } = usePanel();
 

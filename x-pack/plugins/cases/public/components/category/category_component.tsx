@@ -18,8 +18,14 @@ export interface CategoryComponentProps {
   isInvalid?: boolean;
 }
 
-export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
-  ({ isLoading, onChange, category, availableCategories, isInvalid = false }) => {
+export const CategoryComponent = React.memo(
+  ({
+    isLoading,
+    onChange,
+    category,
+    availableCategories,
+    isInvalid = false,
+  }: CategoryComponentProps) => {
     const options = useMemo(() => {
       return availableCategories.map((label: string) => ({
         label,

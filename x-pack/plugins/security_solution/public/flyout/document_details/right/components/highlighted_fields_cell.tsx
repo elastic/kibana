@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+
 import React, { useCallback } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -38,7 +38,7 @@ interface LinkFieldCellProps {
 /**
  * // Currently we can use the same component for both host name and username
  */
-const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
+const LinkFieldCell = ({ value }: LinkFieldCellProps) => {
   const { scopeId, eventId, indexName } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -79,11 +79,11 @@ export interface HighlightedFieldsCellProps {
 /**
  * Renders a component in the highlighted fields table cell based on the field name
  */
-export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
+export const HighlightedFieldsCell = ({
   values,
   field,
   originalField,
-}) => (
+}: HighlightedFieldsCellProps) => (
   <>
     {values != null &&
       values.map((value, i) => {

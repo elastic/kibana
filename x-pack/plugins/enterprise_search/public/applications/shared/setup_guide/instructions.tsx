@@ -26,7 +26,7 @@ interface Props {
   productName: string;
 }
 
-export const SetupInstructions: React.FC<Props> = ({ productName }) => (
+export const SetupInstructions = ({ productName }: Props) => (
   <EuiPageSection>
     <EuiSteps
       headingElement="h2"

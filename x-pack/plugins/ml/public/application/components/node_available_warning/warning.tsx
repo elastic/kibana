@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import type { EuiCallOutProps } from '@elastic/eui';
@@ -23,7 +22,7 @@ interface Props {
   deploymentId: string | null;
 }
 
-export const Warning: FC<Props> = ({ size, isCloud, isCloudTrial, deploymentId }) => {
+export const Warning = ({ size, isCloud, isCloudTrial, deploymentId }: Props) => {
   return (
     <>
       <EuiCallOut

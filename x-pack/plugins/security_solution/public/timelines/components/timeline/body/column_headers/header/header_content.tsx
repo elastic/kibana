@@ -26,7 +26,7 @@ interface HeaderContentProps {
   sort: Sort[];
 }
 
-const HeaderContentComponent: React.FC<HeaderContentProps> = ({
+const HeaderContentComponent = ({
   children,
   header,
   isLoading,
@@ -34,7 +34,7 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
   onClick,
   showSortingCapability,
   sort,
-}) => (
+}: HeaderContentProps) => (
   <EventsHeading data-test-subj={`header-${header.id}`} isLoading={isLoading}>
     {header.aggregatable && showSortingCapability ? (
       <EventsHeadingTitleButton
@@ -76,7 +76,6 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
         </TruncatableText>
       </EventsHeadingTitleSpan>
     )}
-
     {children}
   </EventsHeading>
 );

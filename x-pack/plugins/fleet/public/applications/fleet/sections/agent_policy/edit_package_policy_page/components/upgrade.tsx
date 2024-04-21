@@ -149,10 +149,13 @@ const ReadyToUpgradeCallOut = ({
   );
 };
 
-export const UpgradeStatusCallout: React.FunctionComponent<{
+export const UpgradeStatusCallout = ({
+  dryRunData,
+  newSecrets,
+}: {
   dryRunData: UpgradePackagePolicyDryRunResponse;
   newSecrets: RegistryVarsEntry[];
-}> = ({ dryRunData, newSecrets }) => {
+}) => {
   const [isPreviousVersionFlyoutOpen, setIsPreviousVersionFlyoutOpen] = useState<boolean>(false);
 
   if (!dryRunData) {

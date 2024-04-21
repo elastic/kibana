@@ -12,8 +12,8 @@ import { useSavedSearch } from '../../services/discover_state_provider';
 import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
-export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query' | 'filters'>> =
-  React.memo((props) => {
+export const FieldStatisticsTab = React.memo(
+  (props: Omit<FieldStatisticsTableProps, 'query' | 'filters'>) => {
     const services = useDiscoverServices();
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
@@ -28,4 +28,5 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
         filters={querySubscriberResult.filters}
       />
     );
-  });
+  }
+);

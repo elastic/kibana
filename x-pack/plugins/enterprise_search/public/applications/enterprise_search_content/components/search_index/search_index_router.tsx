@@ -25,7 +25,7 @@ import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 import { SearchIndex } from './search_index';
 
-export const SearchIndexRouter: React.FC = () => {
+export const SearchIndexRouter = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const { setIndexName } = useActions(IndexNameLogic);
   const { startFetchIndexPoll, stopFetchIndexPoll, resetFetchIndexApi } =

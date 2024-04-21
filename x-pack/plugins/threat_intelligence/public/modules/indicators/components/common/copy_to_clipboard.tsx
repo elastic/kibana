@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
 import { COPY_TITLE } from './translations';
 
@@ -29,10 +29,10 @@ export interface CopyToClipboardProps {
  *
  * @returns An EuiCopy element
  */
-export const CopyToClipboardButtonEmpty: VFC<CopyToClipboardProps> = ({
+export const CopyToClipboardButtonEmpty = ({
   value,
   'data-test-subj': dataTestSub,
-}) => (
+}: CopyToClipboardProps) => (
   <EuiCopy textToCopy={value}>
     {(copy) => (
       <EuiButtonEmpty
@@ -56,10 +56,10 @@ export const CopyToClipboardButtonEmpty: VFC<CopyToClipboardProps> = ({
  *
  * @returns filter in {@link EuiContextMenuItem} for a context menu
  */
-export const CopyToClipboardContextMenu: VFC<CopyToClipboardProps> = ({
+export const CopyToClipboardContextMenu = ({
   value,
   'data-test-subj': dataTestSub,
-}) => (
+}: CopyToClipboardProps) => (
   <EuiCopy textToCopy={value}>
     {(copy) => (
       <EuiContextMenuItem
@@ -82,10 +82,10 @@ export const CopyToClipboardContextMenu: VFC<CopyToClipboardProps> = ({
  *
  * @returns An EuiCopy element
  */
-export const CopyToClipboardButtonIcon: VFC<CopyToClipboardProps> = ({
+export const CopyToClipboardButtonIcon = ({
   value,
   'data-test-subj': dataTestSub,
-}) => (
+}: CopyToClipboardProps) => (
   <EuiCopy textToCopy={value}>
     {(copy) => (
       <EuiButtonIcon

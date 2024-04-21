@@ -14,12 +14,19 @@ import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm: React.FC<{
+export const MonitorForm = ({
+  children,
+  defaultValues,
+  space,
+  readOnly = false,
+  canUsePublicLocations,
+}: {
+  children: React.ReactNode;
   defaultValues?: SyntheticsMonitor;
   space?: string;
   readOnly?: boolean;
   canUsePublicLocations?: boolean;
-}> = ({ children, defaultValues, space, readOnly = false, canUsePublicLocations }) => {
+}) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',

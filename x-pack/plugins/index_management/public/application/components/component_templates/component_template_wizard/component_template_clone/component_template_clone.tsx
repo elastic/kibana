@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +18,7 @@ export interface Params {
   sourceComponentTemplateName: string;
 }
 
-export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
+export const ComponentTemplateClone = (props: RouteComponentProps<Params>) => {
   const { sourceComponentTemplateName } = props.match.params;
   const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName)!;
 

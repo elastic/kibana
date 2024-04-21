@@ -25,7 +25,7 @@ interface Props {
   onCopy?: () => void;
 }
 
-export const InstallSection: React.FunctionComponent<Props> = ({
+export const InstallSection = ({
   installCommand,
   isK8s,
   cloudSecurityIntegration,
@@ -34,7 +34,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   fullCopyButton = false,
   isManaged = true,
   onCopy,
-}) => {
+}: Props) => {
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />

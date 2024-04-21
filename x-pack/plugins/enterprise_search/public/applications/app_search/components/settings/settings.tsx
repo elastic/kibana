@@ -13,7 +13,7 @@ import { LogRetentionPanel, LogRetentionConfirmationModal } from './log_retentio
 
 import { SETTINGS_TITLE } from '.';
 
-export const Settings: React.FC = () => {
+export const Settings = () => {
   return (
     <AppSearchPageTemplate pageChrome={[SETTINGS_TITLE]} pageHeader={{ pageTitle: SETTINGS_TITLE }}>
       <LogRetentionConfirmationModal />

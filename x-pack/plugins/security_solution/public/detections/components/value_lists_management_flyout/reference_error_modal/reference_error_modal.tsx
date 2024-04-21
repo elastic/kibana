@@ -43,7 +43,7 @@ interface ReferenceErrorModalProps {
   titleText: string;
 }
 
-export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = ({
+export const ReferenceErrorModalComponent = ({
   cancelText,
   confirmText,
   contentText,
@@ -53,7 +53,7 @@ export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = 
   references = [],
   showModal,
   titleText,
-}) => {
+}: ReferenceErrorModalProps) => {
   if (!showModal) {
     return null;
   }

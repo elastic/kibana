@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-const SkeletonComponent: React.FC = () => {
+const SkeletonComponent = () => {
   return (
     <EuiFlexItem css={{ width: 240 }} data-test-subj="tooltip-loading-content">
       <EuiSkeletonTitle size="xxxs" css={{ width: 70, marginBottom: '12px' }} />

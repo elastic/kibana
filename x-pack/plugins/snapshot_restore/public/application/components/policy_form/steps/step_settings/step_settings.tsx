@@ -28,13 +28,13 @@ import {
 } from './fields';
 import { useCore } from '../../../../app_context';
 
-export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
+export const PolicyStepSettings = ({
   policy,
   indices,
   dataStreams,
   updatePolicy,
   errors,
-}) => {
+}: StepProps) => {
   const { docLinks } = useCore();
   const { config = {}, isManagedPolicy } = policy;
 

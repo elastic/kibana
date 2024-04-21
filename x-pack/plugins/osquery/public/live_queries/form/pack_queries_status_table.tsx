@@ -80,7 +80,7 @@ interface DocsColumnResultsProps {
   isLive?: boolean;
 }
 
-const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) => (
+const DocsColumnResults = ({ count, isLive }: DocsColumnResultsProps) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
@@ -99,11 +99,7 @@ interface AgentsColumnResultsProps {
   failed?: number;
 }
 
-const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
-  successful,
-  pending,
-  failed,
-}) => (
+const AgentsColumnResults = ({ successful, pending, failed }: AgentsColumnResultsProps) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiText color="subdued">
@@ -142,7 +138,7 @@ interface PackQueriesStatusTableProps {
   showResultsHeader?: boolean;
 }
 
-const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
+const PackQueriesStatusTableComponent = ({
   actionId,
   queryId,
   agentIds,
@@ -150,7 +146,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   startDate,
   expirationDate,
   showResultsHeader,
-}) => {
+}: PackQueriesStatusTableProps) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;

@@ -12,10 +12,10 @@ import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
 
-const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
+const CreateComponent = ({
   customFieldConfiguration,
   isLoading,
-}) => {
+}: React.ComponentProps<CustomFieldType<CaseCustomFieldText>['Create']>) => {
   const { key, label, required, defaultValue } = customFieldConfiguration;
   const config = getTextFieldConfig({
     required,

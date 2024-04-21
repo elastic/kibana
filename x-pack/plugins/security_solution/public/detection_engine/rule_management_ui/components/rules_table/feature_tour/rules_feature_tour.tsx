@@ -21,7 +21,6 @@ import {
   useEuiTour,
 } from '@elastic/eui';
 import { noop } from 'lodash';
-import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -58,7 +57,7 @@ const stepsConfig: EuiStatelessTourStep[] = [
   },
 ];
 
-export const RuleFeatureTour: FC = () => {
+export const RuleFeatureTour = () => {
   const { storage } = useKibana().services;
 
   const restoredState = useMemo<EuiTourState>(

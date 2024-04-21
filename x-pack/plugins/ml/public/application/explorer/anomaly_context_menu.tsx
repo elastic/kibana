@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ReactEventHandler } from 'react';
+import type { ReactEventHandler } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
@@ -70,13 +70,13 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
   };
 }
 
-export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
+export const AnomalyContextMenu = ({
   selectedJobs,
   selectedCells,
   bounds,
   interval,
   chartsCount,
-}) => {
+}: AnomalyContextMenuProps) => {
   const {
     services: {
       application: { capabilities },

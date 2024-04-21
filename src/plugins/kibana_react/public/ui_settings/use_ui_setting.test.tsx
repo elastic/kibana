@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useGlobalUiSetting$, useUiSetting$ } from './use_ui_setting';
@@ -46,10 +46,7 @@ afterEach(() => {
 });
 
 describe('useUiSetting', () => {
-  const TestConsumer: React.FC<{
-    setting: string;
-    newValue?: string;
-  }> = ({ setting, newValue = '' }) => {
+  const TestConsumer = ({ setting, newValue = '' }: { setting: string; newValue?: string }) => {
     const [value, set] = useUiSetting$(setting, 'DEFAULT');
 
     return (
@@ -108,10 +105,7 @@ describe('useGlobalUiSetting', () => {
     return [core, subject];
   };
 
-  const TestConsumer: React.FC<{
-    setting: string;
-    newValue?: string;
-  }> = ({ setting, newValue = '' }) => {
+  const TestConsumer = ({ setting, newValue = '' }: { setting: string; newValue?: string }) => {
     const [value, set] = useGlobalUiSetting$(setting, 'default');
 
     return (
@@ -157,10 +151,7 @@ describe('useGlobalUiSetting', () => {
 });
 
 describe('useUiSetting$', () => {
-  const TestConsumerX: React.FC<{
-    setting: string;
-    newValue?: string;
-  }> = ({ setting, newValue = '' }) => {
+  const TestConsumerX = ({ setting, newValue = '' }: { setting: string; newValue?: string }) => {
     const [value, set] = useUiSetting$(setting, 'DEFAULT');
 
     return (

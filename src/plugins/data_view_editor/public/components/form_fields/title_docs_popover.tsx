@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const TitleDocsPopover: React.FC = () => {
+export const TitleDocsPopover = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const helpButton = (

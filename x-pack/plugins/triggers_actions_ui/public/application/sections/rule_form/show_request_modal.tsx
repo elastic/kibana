@@ -45,12 +45,12 @@ export interface ShowRequestModalProps {
   edit?: boolean;
 }
 
-export const ShowRequestModal: React.FC<ShowRequestModalProps> = ({
+export const ShowRequestModal = ({
   onClose,
   rule,
   edit = false,
   ruleId,
-}) => {
+}: ShowRequestModalProps) => {
   const formattedRequest = stringify(rule, edit);
 
   return (

@@ -36,14 +36,14 @@ interface AssigneesListProps {
   onAssigneeRemoved: (removedAssigneeUID: string) => void;
 }
 
-const AssigneesList: React.FC<AssigneesListProps> = ({
+const AssigneesList = ({
   assignees,
   currentUserProfile,
   permissions,
   assignSelf,
   togglePopOver,
   onAssigneeRemoved,
-}) => {
+}: AssigneesListProps) => {
   return (
     <>
       {assignees.length === 0 ? (
@@ -94,13 +94,13 @@ export interface AssignUsersProps {
   isLoading: boolean;
 }
 
-const AssignUsersComponent: React.FC<AssignUsersProps> = ({
+const AssignUsersComponent = ({
   caseAssignees,
   userProfiles,
   currentUserProfile,
   onAssigneesChanged,
   isLoading,
-}) => {
+}: AssignUsersProps) => {
   const { assigneesWithProfiles, assigneesWithoutProfiles, allAssignees } = useAssignees({
     caseAssignees,
     userProfiles,

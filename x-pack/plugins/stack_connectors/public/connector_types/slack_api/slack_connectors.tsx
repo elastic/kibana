@@ -81,10 +81,7 @@ const getConfigFormSchemaAfterSecrets = ({
 
 const NO_SCHEMA: ConfigFieldSchema[] = [];
 const SEPARATOR = ' - ';
-export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-}) => {
+export const SlackActionFieldsComponents = ({ readOnly, isEdit }: ActionConnectorFieldsProps) => {
   const { docLinks } = useKibana().services;
 
   const form = useFormContext();
@@ -183,7 +180,7 @@ export const SlackActionFieldsComponents: React.FC<ActionConnectorFieldsProps> =
 
 export const simpleConnectorQueryClient = new QueryClient();
 
-const SlackActionFields: React.FC<ActionConnectorFieldsProps> = (props) => (
+const SlackActionFields = (props: ActionConnectorFieldsProps) => (
   <QueryClientProvider client={simpleConnectorQueryClient}>
     <SlackActionFieldsComponents {...props} />
   </QueryClientProvider>

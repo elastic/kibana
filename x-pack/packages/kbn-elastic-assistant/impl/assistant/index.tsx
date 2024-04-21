@@ -109,7 +109,7 @@ export interface Props {
  * Renders a chat window with a prompt input and a chat history, along with
  * quick prompts for common actions, settings, and prompt context providers.
  */
-const AssistantComponent: React.FC<Props> = ({
+const AssistantComponent = ({
   conversationTitle,
   embeddedLayout = false,
   promptContextId = '',
@@ -121,7 +121,7 @@ const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
   setChatHistoryVisible,
   currentUserAvatar,
-}) => {
+}: Props) => {
   const {
     assistantTelemetry,
     augmentMessageCodeBlocks,

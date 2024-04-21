@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFlexItem, EuiFlexGroup, EuiPageTemplate, EuiEmptyPrompt } from '@elastic/eui';
 
@@ -25,7 +25,7 @@ export const NotAuthorizedSection = ({ title, message }: Props) => (
   <EuiEmptyPrompt iconType="securityApp" title={<h2>{title}</h2>} body={<p>{message}</p>} />
 );
 
-const MissingCapabilities: FC = () => (
+const MissingCapabilities = () => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
       <EuiPageTemplate.EmptyPrompt color="danger">
@@ -48,9 +48,13 @@ const MissingCapabilities: FC = () => (
   </EuiFlexGroup>
 );
 
-export const CapabilitiesWrapper: FC<{
+export const CapabilitiesWrapper = ({
+  children,
+  requiredCapabilities,
+}: {
+  children: React.ReactNode;
   requiredCapabilities: TransformCapability | TransformCapability[];
-}> = ({ children, requiredCapabilities }) => {
+}) => {
   const capabilities = useTransformCapabilities();
 
   const hasCapabilities = toArray(requiredCapabilities).every((c) => capabilities[c]);

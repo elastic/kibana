@@ -32,13 +32,13 @@ export interface CustomFieldFlyoutProps {
   customField: CustomFieldConfiguration | null;
 }
 
-const CustomFieldFlyoutComponent: React.FC<CustomFieldFlyoutProps> = ({
+const CustomFieldFlyoutComponent = ({
   onCloseFlyout,
   onSaveField,
   isLoading,
   disabled,
   customField,
-}) => {
+}: CustomFieldFlyoutProps) => {
   const dataTestSubj = 'custom-field-flyout';
 
   const [formState, setFormState] = useState<CustomFieldFormState>({

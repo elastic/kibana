@@ -13,9 +13,7 @@ import { kafkaAcknowledgeReliabilityLevel } from '../../../../../../../common/co
 
 import type { OutputFormInputsType } from './use_output_form';
 
-export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputFormInputsType }> = (
-  props
-) => {
+export const OutputFormKafkaBroker = (props: { inputs: OutputFormInputsType }) => {
   const { inputs } = props;
 
   const kafkaBrokerTimeoutOptions = useMemo(

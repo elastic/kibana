@@ -51,7 +51,7 @@ const getInitialFilterString = (securityTags: TagReference[] | null | undefined)
   return `tag:(${query})`;
 };
 
-const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
+const Header = ({ canCreateDashboard }: { canCreateDashboard: boolean }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
   const { navigateTo } = useNavigateTo();
   return (

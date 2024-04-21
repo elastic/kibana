@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
@@ -108,11 +107,11 @@ interface DatePickerWrapperProps {
 /**
  * DatePickerWrapper React Component
  *
- * @type {FC<DatePickerWrapperProps>}
+ * @type {React.FC<DatePickerWrapperProps>}
  * @param props - `DatePickerWrapper` component props
  * @returns {React.ReactElement} The DatePickerWrapper component.
  */
-export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
+export const DatePickerWrapper = (props: DatePickerWrapperProps) => {
   const {
     isAutoRefreshOnly,
     isLoading = false,

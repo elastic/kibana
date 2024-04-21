@@ -130,8 +130,7 @@ export interface AppContextTestRender {
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
    * `AppRootContext`
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  AppWrapper: React.FC<any>;
+  AppWrapper: (props: { children: React.ReactElement }) => React.ReactElement | null;
   /**
    * Renders the given UI within the created `AppWrapper` providing the given UI a mocked
    * endpoint runtime context environment
@@ -238,7 +237,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper = ({ children }: { children: React.ReactElement }) => (
     <AppRootProvider
       store={store}
       history={history}

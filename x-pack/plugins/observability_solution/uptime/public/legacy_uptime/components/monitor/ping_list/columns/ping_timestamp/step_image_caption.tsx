@@ -32,7 +32,7 @@ export interface StepImageCaptionProps {
   isLoading: boolean;
 }
 
-export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
+export const StepImageCaption = ({
   captionContent,
   imgRef,
   imgSrc,
@@ -42,7 +42,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   isLoading,
   label,
   onVisible,
-}) => {
+}: StepImageCaptionProps) => {
   const { euiTheme } = useEuiTheme();
   const isSmall = useIsWithinMaxBreakpoint('m');
 

@@ -21,7 +21,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -50,7 +49,7 @@ export type EditUserPageAction =
   | 'deleteUser'
   | 'none';
 
-export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username }) => {
+export const EditUserPage = ({ username }: EditUserPageProps) => {
   const { services } = useKibana();
   const history = useHistory();
   const [{ value: user, error }, getUser] = useAsyncFn(
@@ -99,9 +98,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
           </EuiFlexGroup>
         }
       />
-
       <EuiSpacer size="l" />
-
       {isDeprecatedUser ? (
         <>
           <EuiCallOut
@@ -151,7 +148,6 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
           <EuiSpacer />
         </>
       ) : undefined}
-
       <UserForm
         isReservedUser={isReservedUser}
         defaultValues={user}
@@ -159,7 +155,6 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         onSuccess={backToUsers}
         disabled={readOnly}
       />
-
       {readOnly ? undefined : (
         <>
           {action === 'changePassword' ? (

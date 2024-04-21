@@ -8,7 +8,6 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of } from 'rxjs';
@@ -35,7 +34,7 @@ describe('KibanaThemeProvider', () => {
     });
   };
 
-  const InnerComponent: FC = () => {
+  const InnerComponent = () => {
     const theme = useEuiTheme();
     useEffect(() => {
       euiTheme = theme;

@@ -12,7 +12,7 @@ import { ActionFactoryPicker as ActionFactoryPickerUi } from '../../../../compon
 import { useDrilldownManager } from '../context';
 import { ActionFactoryView } from '../action_factory_view';
 
-export const ActionFactoryPicker: React.FC = ({}) => {
+export const ActionFactoryPicker = ({}) => {
   const drilldowns = useDrilldownManager();
   const factory = drilldowns.useActionFactory();
   const context = React.useMemo(() => drilldowns.getActionFactoryContext(), [drilldowns]);

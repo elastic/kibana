@@ -28,7 +28,7 @@ const AlertsRoute = () => (
   </TrackApplicationView>
 );
 
-const AlertsContainerComponent: React.FC = () => {
+const AlertsContainerComponent = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   return (
     <Routes>

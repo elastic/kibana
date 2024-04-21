@@ -74,7 +74,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   },
 };
 
-const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
+const SessionsViewComponent = ({
   tableId,
   endDate,
   entityType = 'sessions',
@@ -83,7 +83,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   filterQuery,
   columns = sessionsHeaders,
   defaultColumns = sessionsHeaders,
-}) => {
+}: SessionsComponentsProps) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {

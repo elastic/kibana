@@ -6,7 +6,7 @@
  */
 
 import { scaleTime } from 'd3-scale';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';
@@ -27,7 +27,7 @@ const useZonedDate = (timestamp: number) => {
   return new Date(new Date(timestamp).toLocaleString('en-US', options));
 };
 
-export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCount, width }) => {
+export const TimeRuler = ({ end, height, start, tickCount, width }: TimeRulerProps) => {
   const startWithOffset = useZonedDate(start);
   const endWithOffset = useZonedDate(end);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { isValidElement, cloneElement, FunctionComponent, Children, useMemo } from 'react';
+import React, { isValidElement, cloneElement, Children, useMemo } from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { LayoutProps } from '../types';
@@ -15,7 +15,7 @@ type SubSectionProps = LayoutProps & {
   label?: string;
 };
 
-export const SubSection: FunctionComponent<SubSectionProps> = ({
+export const SubSection = ({
   id,
   label,
   children,
@@ -23,7 +23,7 @@ export const SubSection: FunctionComponent<SubSectionProps> = ({
   onChangeRangeTime,
   isLiveStreaming,
   stopLiveStreaming,
-}) => {
+}: SubSectionProps) => {
   const metric = useMemo(() => metrics?.find((m) => m.id === id), [id, metrics]);
 
   if (!children || !metric) {

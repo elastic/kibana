@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
 
@@ -24,7 +24,7 @@ export const crateAlertRuleActionNameText = i18n.translate(
   }
 );
 
-export const CreateAlertRuleActionName: FC<CreateAlertRuleActionProps> = ({ disabled }) => {
+export const CreateAlertRuleActionName = ({ disabled }: CreateAlertRuleActionProps) => {
   if (disabled) {
     return (
       <EuiToolTip

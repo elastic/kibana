@@ -22,7 +22,7 @@ import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
 
-export const CasesMetrics: React.FC = () => {
+export const CasesMetrics = () => {
   const {
     data: { countOpenCases, countInProgressCases, countClosedCases } = {
       countOpenCases: 0,

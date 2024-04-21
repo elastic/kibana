@@ -14,7 +14,7 @@ import {
   STATUS_UP_LABEL,
 } from '../../../../../../common/translations/translations';
 
-export const StatusFilter: React.FC = () => {
+export const StatusFilter = () => {
   return (
     <EuiFilterGroup compressed>
       <FilterStatusButton

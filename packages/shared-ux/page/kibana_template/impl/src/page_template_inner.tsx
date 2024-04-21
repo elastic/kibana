@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { EuiPageTemplate } from '@elastic/eui';
 
@@ -24,7 +24,7 @@ const getClasses = (template?: string, className?: string) => {
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export const KibanaPageTemplateInner: FC<Props> = ({
+export const KibanaPageTemplateInner = ({
   className,
   pageHeader,
   children,
@@ -33,7 +33,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   pageSideBarProps,
   emptyPageBody,
   ...rest
-}) => {
+}: Props) => {
   let header;
 
   if (isEmptyState && pageHeader && !children) {

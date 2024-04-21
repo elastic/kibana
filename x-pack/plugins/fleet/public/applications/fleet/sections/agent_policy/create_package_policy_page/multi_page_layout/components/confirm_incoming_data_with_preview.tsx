@@ -70,7 +70,7 @@ const CompressedPre = styled('pre')`
   }
 `;
 
-const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
+const HitPreview = ({ hit }: { hit: SearchHit }) => {
   const hitForDisplay = omit(
     getFlattenedObject(hit._source as Record<string, unknown>),
     DATA_PREVIEW_OMIT_KEYS
@@ -90,7 +90,7 @@ const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   );
 };
 
-const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
+const HitTimestamp = ({ hit }: { hit: SearchHit }) => {
   const source = (hit?._source as Record<string, any>) || {};
   const timestamp = source?.['@timestamp'] || '-';
   return (
@@ -102,7 +102,7 @@ const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   );
 };
 
-const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview }) => {
+const AgentDataPreview = ({ dataPreview }: { dataPreview: SearchHit[] }) => {
   const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
     <>
@@ -124,13 +124,13 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
   );
 };
 
-export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
+export const ConfirmIncomingDataWithPreview = ({
   agentIds,
   packageInfo,
   agentDataConfirmed,
   setAgentDataConfirmed,
   troubleshootLink,
-}) => {
+}: Props) => {
   const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData(
     agentIds,
     true,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -14,7 +13,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CountCard, HighCountCard, RareCard } from './detector_cards';
 
-export const CategorizationDetector: FC = () => {
+export const CategorizationDetector = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [categorizationDetectorType, setCategorizationDetectorType] = useState(

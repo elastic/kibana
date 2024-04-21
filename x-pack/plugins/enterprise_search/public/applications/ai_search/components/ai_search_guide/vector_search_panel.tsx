@@ -123,7 +123,7 @@ const steps: EuiContainedStepProps[] = [
   },
 ];
 
-export const VectorSearchPanel: React.FC = () => (
+export const VectorSearchPanel = () => (
   <>
     <EuiSpacer />
     <EuiFlexGroup direction="column">

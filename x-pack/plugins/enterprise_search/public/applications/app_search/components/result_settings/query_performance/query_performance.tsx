@@ -76,7 +76,7 @@ const getPerformanceRating = (score: number) => {
   }
 };
 
-export const QueryPerformance: React.FC = () => {
+export const QueryPerformance = () => {
   const { queryPerformanceScore } = useValues(ResultSettingsLogic);
   const performanceRating = getPerformanceRating(queryPerformanceScore);
   return (

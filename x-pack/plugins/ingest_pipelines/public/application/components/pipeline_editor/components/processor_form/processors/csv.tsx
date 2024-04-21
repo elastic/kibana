@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -137,7 +137,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const CSV: FunctionComponent = () => {
+export const CSV = () => {
   return (
     <>
       <FieldNameField

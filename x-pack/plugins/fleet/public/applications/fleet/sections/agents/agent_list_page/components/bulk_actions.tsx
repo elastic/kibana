@@ -46,7 +46,7 @@ export interface Props {
   agentPolicies: AgentPolicy[];
 }
 
-export const AgentBulkActions: React.FunctionComponent<Props> = ({
+export const AgentBulkActions = ({
   nAgentsInTable,
   totalManagedAgentIds,
   selectionMode,
@@ -56,7 +56,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   refreshAgents,
   allTags,
   agentPolicies,
-}) => {
+}: Props) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
 

@@ -18,7 +18,7 @@ import { AddAnalyticsCollection } from '../add_analytics_collections/add_analyti
 
 const ICON_WIDTH = 294;
 
-export const AnalyticsOverviewEmptyPage: React.FC = () => (
+export const AnalyticsOverviewEmptyPage = () => (
   <EuiEmptyPrompt
     icon={<EuiImage size={ICON_WIDTH} src={noMlModelsGraphicDark} alt="icon" />}
     layout="horizontal"

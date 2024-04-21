@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import {
   EuiButton,
@@ -38,12 +38,12 @@ interface PivotFunctionFormProps {
   stepDefineForm: StepDefineFormHook;
 }
 
-export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
+export const PivotFunctionForm = ({
   applyPivotChangesHandler,
   copyToClipboardPivot,
   copyToClipboardPivotDescription,
   stepDefineForm,
-}) => {
+}: PivotFunctionFormProps) => {
   const { esTransformPivot } = useDocumentationLinks();
 
   const { isAdvancedPivotEditorEnabled, isAdvancedPivotEditorApplyButtonEnabled } =

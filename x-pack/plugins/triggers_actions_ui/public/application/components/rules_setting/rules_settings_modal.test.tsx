@@ -84,9 +84,7 @@ const modalProps: RulesSettingsModalProps = {
   onSave: jest.fn(),
 };
 
-const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsModalProps> = (
-  props
-) => (
+const RulesSettingsModalWithProviders = (props: RulesSettingsModalProps) => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <RulesSettingsModal {...props} />

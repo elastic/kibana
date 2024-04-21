@@ -7,10 +7,9 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 
-export const TextTruncate: FunctionComponent = ({ children }) => {
+export const TextTruncate = ({ children }: { children: React.ReactNode }) => {
   const textRef = useRef<HTMLSpanElement>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 

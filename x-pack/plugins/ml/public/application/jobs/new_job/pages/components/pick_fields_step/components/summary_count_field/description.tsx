@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,9 +14,10 @@ import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {
   validation: Validation;
+  children: React.ReactNode;
 }
 
-export const Description: FC<Props> = memo(({ children, validation }) => {
+export const Description = memo(({ children, validation }: Props) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.title', {
     defaultMessage: 'Summary count field',
   });

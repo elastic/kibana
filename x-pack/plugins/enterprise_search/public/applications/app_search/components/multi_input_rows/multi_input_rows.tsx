@@ -35,7 +35,7 @@ interface Props {
   inputPlaceholder?: string;
 }
 
-export const MultiInputRows: React.FC<Props> = ({
+export const MultiInputRows = ({
   id,
   initialValues = [''],
   onChange,
@@ -45,7 +45,7 @@ export const MultiInputRows: React.FC<Props> = ({
   addRowText = ADD_VALUE_BUTTON_LABEL,
   deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
   inputPlaceholder = INPUT_ROW_PLACEHOLDER,
-}) => {
+}: Props) => {
   const logic = MultiInputRowsLogic({ id, values: initialValues });
   const { values, addedNewRow, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);

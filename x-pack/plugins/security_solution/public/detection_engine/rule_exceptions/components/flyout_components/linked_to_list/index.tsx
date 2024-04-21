@@ -25,11 +25,11 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponentProps> = ({
+const ExceptionsLinkedToListsComponent = ({
   isLoadingReferences,
   errorFetchingReferences,
   listAndReferences,
-}): JSX.Element => {
+}: ExceptionsLinkedToListComponentProps): JSX.Element => {
   const [message, setMessage] = useState<JSX.Element | string | undefined>(
     <EuiSkeletonText lines={4} data-test-subj="exceptionItemListsTableLoading" />
   );

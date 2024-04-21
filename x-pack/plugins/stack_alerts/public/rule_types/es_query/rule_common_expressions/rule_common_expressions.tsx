@@ -49,7 +49,7 @@ export interface RuleCommonExpressionsProps extends CommonRuleParams {
   onChangeSourceFields: (selectedSourceFields: SourceField[]) => void;
 }
 
-export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
+export const RuleCommonExpressions = ({
   esFields,
   thresholdComparator,
   threshold,
@@ -80,7 +80,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   onChangeExcludeHitsFromPreviousRun,
   canSelectMultiTerms,
   onChangeSourceFields,
-}) => {
+}: RuleCommonExpressionsProps) => {
   const [isExcludeHitsDisabled, setIsExcludeHitsDisabled] = useState<boolean>(false);
 
   useEffect(() => {

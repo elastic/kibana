@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
@@ -29,7 +29,7 @@ const i18nTexts = {
   },
 };
 
-export const MaxIndexSizeField: FunctionComponent = () => {
+export const MaxIndexSizeField = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 400 }}>

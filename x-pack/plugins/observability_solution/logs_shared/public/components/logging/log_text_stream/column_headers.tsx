@@ -25,10 +25,13 @@ import {
 } from '../../../utils/log_column_render_configuration';
 import LogColumnHeadersWrapper from './column_headers_wrapper';
 
-export const LogColumnHeaders: React.FunctionComponent<{
+export const LogColumnHeaders = ({
+  columnConfigurations,
+  columnWidths,
+}: {
   columnConfigurations: LogColumnRenderConfiguration[];
   columnWidths: LogEntryColumnWidths;
-}> = ({ columnConfigurations, columnWidths }) => {
+}) => {
   const { firstVisiblePosition } = useLogPositionStateContext();
   return (
     <LogColumnHeadersWrapper>
@@ -102,10 +105,15 @@ export const LogColumnHeaders: React.FunctionComponent<{
   );
 };
 
-export const LogColumnHeader: React.FunctionComponent<{
+export const LogColumnHeader = ({
+  children,
+  columnWidth,
+  'data-test-subj': dataTestSubj,
+}: {
+  children: React.ReactNode;
   columnWidth: LogEntryColumnWidth;
   'data-test-subj'?: string;
-}> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
+}) => (
   <LogColumnHeaderWrapper data-test-subj={dataTestSubj} {...columnWidth}>
     <LogColumnHeaderContent>{children}</LogColumnHeaderContent>
   </LogColumnHeaderWrapper>

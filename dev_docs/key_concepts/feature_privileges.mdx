@@ -86,7 +86,7 @@ To do so, we modify the feature registration config above and include the follow
 Once done, you can now access this within the public part kibana plugin code using the Kibana Context Provider as follows:
 
 ```tsx
-export const MyPluginComponent: React.FC = () => {
+export const MyPluginComponent = () => {
   const kibana = useKibana<CoreStart>();
 
   return (

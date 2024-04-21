@@ -25,7 +25,7 @@ export type Props = Omit<PromptContext, 'id'> & {
   color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
 };
 
-const NewChatComponent: React.FC<Props> = ({
+const NewChatComponent = ({
   category,
   color = 'primary',
   children = i18n.NEW_CHAT,
@@ -36,7 +36,7 @@ const NewChatComponent: React.FC<Props> = ({
   promptContextId,
   suggestedUserPrompt,
   tooltip,
-}) => {
+}: Props) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
     conversationId ?? null,

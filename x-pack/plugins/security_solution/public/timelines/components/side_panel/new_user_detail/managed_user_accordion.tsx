@@ -26,13 +26,13 @@ interface ManagedUserAccordionProps {
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
-export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
+export const ManagedUserAccordion = ({
   children,
   title,
   managedUser,
   tableType,
   openDetailsPanel,
-}) => {
+}: ManagedUserAccordionProps) => {
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const timestamp = get('@timestamp[0]', managedUser) as unknown as string | undefined;
 

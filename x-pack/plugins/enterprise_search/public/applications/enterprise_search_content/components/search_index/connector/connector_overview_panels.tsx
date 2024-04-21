@@ -29,7 +29,7 @@ import {
 import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
-const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestionStatus }) => (
+const StatusPanel = ({ ingestionStatus }: { ingestionStatus: IngestionStatus }) => (
   <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
     <EuiStat
       titleSize="s"
@@ -41,7 +41,7 @@ const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestion
   </EuiPanel>
 );
 
-export const ConnectorOverviewPanels: React.FC = () => {
+export const ConnectorOverviewPanels = () => {
   const { ingestionStatus, index } = useValues(IndexViewLogic);
 
   return isConnectorIndex(index) ? (

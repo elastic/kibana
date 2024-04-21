@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -48,7 +48,7 @@ const EmptyMessage = () => (
   </EuiFlexGroup>
 );
 
-export const SearchBar: FC<SearchBarProps> = (opts) => {
+export const SearchBar = (opts: SearchBarProps) => {
   const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
   const isMounted = useMountedState();

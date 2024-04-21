@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -69,7 +68,7 @@ interface OptionLabelWithIconTipProps {
   tooltip: string;
 }
 
-const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
+const OptionLabelWithIconTip = ({ label, tooltip }: OptionLabelWithIconTipProps) => (
   <>
     {label}
     <EuiIconTip
@@ -106,7 +105,7 @@ export interface ScatterplotMatrixProps {
   query?: Query;
 }
 
-export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
+export const ScatterplotMatrix = ({
   fields: allFields,
   index,
   resultsField,
@@ -116,7 +115,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   runtimeMappings,
   dataView,
   query,
-}) => {
+}: ScatterplotMatrixProps) => {
   const { esSearch } = useMlApiContext();
   const kibana = useMlKibana();
   const {

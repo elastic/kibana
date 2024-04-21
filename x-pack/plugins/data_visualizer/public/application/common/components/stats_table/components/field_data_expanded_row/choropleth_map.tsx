@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -99,7 +98,7 @@ interface Props {
   suggestion: EMSTermJoinConfig;
 }
 
-export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
+export const ChoroplethMap = ({ stats, suggestion }: Props) => {
   const {
     services: {
       data: { fieldFormats },

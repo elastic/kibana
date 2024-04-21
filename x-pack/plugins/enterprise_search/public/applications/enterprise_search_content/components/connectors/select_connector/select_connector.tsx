@@ -64,7 +64,7 @@ export const parseConnectorFilter = (filter: string | string[] | null): Connecto
   return null;
 };
 
-export const SelectConnector: React.FC = () => {
+export const SelectConnector = () => {
   const { search } = useLocation();
   const { connectorTypes, isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);

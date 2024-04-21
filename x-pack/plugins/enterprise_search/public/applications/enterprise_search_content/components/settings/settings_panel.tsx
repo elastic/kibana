@@ -26,14 +26,14 @@ interface SettingsPanelProps {
   value: boolean;
 }
 
-export const SettingsPanel: React.FC<SettingsPanelProps> = ({
+export const SettingsPanel = ({
   description,
   label,
   link,
   onChange,
   title,
   value,
-}) => (
+}: SettingsPanelProps) => (
   <EuiSplitPanel.Outer hasBorder grow>
     <EuiSplitPanel.Inner>
       <EuiText size="m">

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 import type { Moment } from 'moment';
 
@@ -61,7 +61,7 @@ export interface LogRateAnalysisContentWrapperProps {
   embeddingOrigin: string;
 }
 
-export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
+export const LogRateAnalysisContentWrapper = ({
   dataView,
   appDependencies,
   initialAnalysisStart,
@@ -73,7 +73,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   onAnalysisCompleted,
   showFrozenDataTierChoice = true,
   embeddingOrigin,
-}) => {
+}: LogRateAnalysisContentWrapperProps) => {
   if (!dataView) return null;
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_rate_analysis');

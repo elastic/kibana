@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
@@ -42,7 +41,7 @@ export const notificationsRouteFactory = (
   'data-test-subj': 'mlPageNotifications',
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,

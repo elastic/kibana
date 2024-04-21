@@ -16,7 +16,7 @@ import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
 
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 
-export const AuthenticationPanelDeleteConfirmationModal: React.FC = () => {
+export const AuthenticationPanelDeleteConfirmationModal = () => {
   const { deleteCredentials, setIsModalVisible } = useActions(AuthenticationPanelLogic);
 
   return (

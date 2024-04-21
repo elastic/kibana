@@ -17,6 +17,7 @@ interface GlobalStateProviderProps {
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartServices['notifications']['toasts'];
   uiSettings: MonitoringStartServices['uiSettings'];
+  children: React.ReactNode;
 }
 
 export interface State {
@@ -36,12 +37,12 @@ const REFRESH_INTERVAL_OVERRIDE = {
   value: 10000,
 };
 
-export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
+export const GlobalStateProvider = ({
   uiSettings,
   query,
   toasts,
   children,
-}) => {
+}: GlobalStateProviderProps) => {
   const localState: State = {};
   const [globalState] = useState(
     () => new GlobalState(query, toasts, localState as { [key: string]: unknown })

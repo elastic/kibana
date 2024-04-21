@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,8 +26,8 @@ interface JobMessagesPaneProps {
   refreshJobList?: () => void;
 }
 
-export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
-  ({ jobId, start, end, actionHandler, refreshJobList, showClearButton }) => {
+export const JobMessagesPane = React.memo(
+  ({ jobId, start, end, actionHandler, refreshJobList, showClearButton }: JobMessagesPaneProps) => {
     const canCreateJob = checkPermission('canCreateJob');
 
     const [messages, setMessages] = useState<JobMessage[]>([]);

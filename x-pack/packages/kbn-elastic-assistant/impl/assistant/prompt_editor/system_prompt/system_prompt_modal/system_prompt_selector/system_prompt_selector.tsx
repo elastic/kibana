@@ -41,14 +41,14 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
 /**
  * Selector for choosing and deleting System Prompts
  */
-export const SystemPromptSelector: React.FC<Props> = React.memo(
+export const SystemPromptSelector = React.memo(
   ({
     autoFocus = false,
     systemPrompts,
     onSystemPromptDeleted,
     onSystemPromptSelectionChange,
     selectedSystemPrompt,
-  }) => {
+  }: Props) => {
     // Form options
     const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
       systemPrompts.map((sp) => ({

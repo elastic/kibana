@@ -28,7 +28,7 @@ export interface ReactExpressionRendererProps
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
-export type ExpressionRendererComponent = React.FC<ReactExpressionRendererProps>;
+export type ExpressionRendererComponent = (props: ReactExpressionRendererProps) => JSX.Element
 
 export function ReactExpressionRenderer({
   className,

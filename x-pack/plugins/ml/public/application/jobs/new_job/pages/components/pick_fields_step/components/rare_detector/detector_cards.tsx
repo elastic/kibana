@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +15,7 @@ interface CardProps {
   isSelected: boolean;
 }
 
-export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
+export const RareCard = ({ onClick, isSelected }: CardProps) => (
   <EuiFlexItem>
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
@@ -39,7 +38,7 @@ export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
   </EuiFlexItem>
 );
 
-export const RareInPopulationCard: FC<CardProps> = ({ onClick, isSelected }) => (
+export const RareInPopulationCard = ({ onClick, isSelected }: CardProps) => (
   <EuiFlexItem>
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}
@@ -62,7 +61,7 @@ export const RareInPopulationCard: FC<CardProps> = ({ onClick, isSelected }) => 
   </EuiFlexItem>
 );
 
-export const FrequentlyRareInPopulationCard: FC<CardProps> = ({ onClick, isSelected }) => (
+export const FrequentlyRareInPopulationCard = ({ onClick, isSelected }: CardProps) => (
   <EuiFlexItem>
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}

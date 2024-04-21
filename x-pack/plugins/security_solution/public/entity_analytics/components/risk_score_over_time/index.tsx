@@ -37,7 +37,7 @@ const CHART_HEIGHT = 180;
 
 export const scoreFormatter = (d: number) => Math.round(d).toString();
 
-const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
+const RiskScoreOverTimeComponent = ({
   from,
   to,
   riskScore,
@@ -47,7 +47,7 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
   title,
   toggleStatus,
   toggleQuery,
-}) => {
+}: RiskScoreOverTimeProps) => {
   const spaceId = useSpaceId();
   const timerange = useMemo(
     () => ({

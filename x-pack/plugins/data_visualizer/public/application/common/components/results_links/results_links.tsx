@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,7 +60,7 @@ interface GlobalState {
 
 const RECHECK_DELAY_MS = 3000;
 
-export const ResultsLinks: FC<Props> = ({
+export const ResultsLinks = ({
   fieldStats,
   index,
   dataViewId,
@@ -70,7 +69,7 @@ export const ResultsLinks: FC<Props> = ({
   showFilebeatFlyout,
   getAdditionalLinks,
   resultLinks,
-}) => {
+}: Props) => {
   const {
     services: {
       fileUpload,

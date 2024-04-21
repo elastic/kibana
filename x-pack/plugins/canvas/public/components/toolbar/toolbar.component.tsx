@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useContext, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useContext, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -52,13 +51,13 @@ export interface Props {
   workpadName: string;
 }
 
-export const Toolbar: FC<Props> = ({
+export const Toolbar = ({
   isWriteable,
   selectedElement,
   selectedPageNumber,
   totalPages,
   workpadName,
-}) => {
+}: Props) => {
   const [activeTray, setActiveTray] = useState<TrayType | null>(null);
   const { getUrl, previousPage } = useContext(WorkpadRoutingContext);
 
@@ -147,12 +146,4 @@ export const Toolbar: FC<Props> = ({
       </div>
     </div>
   );
-};
-
-Toolbar.propTypes = {
-  isWriteable: PropTypes.bool.isRequired,
-  selectedElement: PropTypes.object,
-  selectedPageNumber: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  workpadName: PropTypes.string.isRequired,
 };

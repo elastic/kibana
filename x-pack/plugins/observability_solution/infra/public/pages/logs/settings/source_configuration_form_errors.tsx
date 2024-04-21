@@ -11,9 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { FormValidationError } from './validation_errors';
 
-export const LogSourceConfigurationFormErrors: React.FC<{ errors: FormValidationError[] }> = ({
-  errors,
-}) => (
+export const LogSourceConfigurationFormErrors = ({ errors }: { errors: FormValidationError[] }) => (
   <EuiCallOut
     color="danger"
     iconType="warning"
@@ -29,9 +27,7 @@ export const LogSourceConfigurationFormErrors: React.FC<{ errors: FormValidation
   </EuiCallOut>
 );
 
-export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationError }> = ({
-  error,
-}) => {
+export const LogSourceConfigurationFormError = ({ error }: { error: FormValidationError }) => {
   if (error.type === 'generic') {
     return <>{error.message}</>;
   } else if (error.type === 'empty_field') {

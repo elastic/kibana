@@ -53,7 +53,7 @@ interface Props {
   handleUsernameSelectChange(username: string): void;
 }
 
-export const UserSelector: React.FC<Props> = ({
+export const UserSelector = ({
   isNewUser,
   smtpSettingsPresent,
   userFormUserIsExisting,
@@ -66,7 +66,7 @@ export const UserSelector: React.FC<Props> = ({
   setElasticsearchEmailValue,
   handleRoleChange,
   handleUsernameSelectChange,
-}) => {
+}: Props) => {
   const roleOptions = roleTypes.map((role) => ({ id: role, text: role }));
   const usernameOptions = elasticsearchUsers.map(({ username }) => ({
     id: username,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useCallback, useState } from 'react';
-import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
+import type { ReactNode, ChangeEvent } from 'react';
 import sytled, { useTheme } from 'styled-components';
 
 import {
@@ -83,7 +83,7 @@ function displayErrors(errors?: string[]) {
     : null;
 }
 
-const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
+const SortableTextField = React.memo(
   ({
     id,
     index,
@@ -95,7 +95,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
     autoFocus,
     errors,
     disabled,
-  }) => {
+  }: SortableTextFieldProps) => {
     const onDeleteHandler = useCallback(() => {
       onDelete(index);
     }, [onDelete, index]);
@@ -178,7 +178,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
   }
 );
 
-const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React.memo(
+const NonSortableTextField = React.memo(
   ({
     index,
     deletable,
@@ -190,7 +190,7 @@ const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React
     autoFocus,
     errors,
     disabled,
-  }) => {
+  }: NonSortableTextFieldProps) => {
     const onDeleteHandler = useCallback(() => {
       onDelete(index);
     }, [onDelete, index]);
@@ -245,7 +245,7 @@ const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React
   }
 );
 
-export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
+export const MultiRowInput = ({
   id,
   value: valueFromProps,
   onChange,
@@ -258,7 +258,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
   multiline = false,
   sortable = true,
   isUrl,
-}) => {
+}: MultiRowInputProps) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const value = useMemo(() => {
     return valueFromProps.length ? valueFromProps : [''];

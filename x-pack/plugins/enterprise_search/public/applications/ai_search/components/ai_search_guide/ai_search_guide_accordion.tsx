@@ -26,9 +26,10 @@ export interface AISearchGuideAccordionProps {
   initialIsOpen?: boolean;
   onToggle: (id: string | undefined) => void;
   currentExpandedId: string | undefined;
+  children: React.ReactNode;
 }
 
-export const AISearchGuideAccordion: React.FC<AISearchGuideAccordionProps> = ({
+export const AISearchGuideAccordion = ({
   id,
   icon,
   title,
@@ -37,7 +38,7 @@ export const AISearchGuideAccordion: React.FC<AISearchGuideAccordionProps> = ({
   onToggle,
   currentExpandedId,
   children,
-}) => {
+}: AISearchGuideAccordionProps) => {
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiAccordion

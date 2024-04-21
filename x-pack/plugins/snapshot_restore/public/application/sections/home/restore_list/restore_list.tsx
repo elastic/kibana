@@ -47,7 +47,7 @@ const INTERVAL_OPTIONS: number[] = [
   ONE_MINUTE_MS,
   FIVE_MINUTES_MS,
 ];
-export const RestoreList: React.FunctionComponent = () => {
+export const RestoreList = () => {
   // State for tracking interval picker
   const [isIntervalMenuOpen, setIsIntervalMenuOpen] = useState<boolean>(false);
   const [currentInterval, setCurrentInterval] = useState<number>(INTERVAL_OPTIONS[1]);

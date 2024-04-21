@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
 
@@ -25,7 +25,7 @@ const ingestPipelineLabel = i18n.translate(
   }
 );
 
-export const EditTransformIngestPipeline: FC = () => {
+export const EditTransformIngestPipeline = () => {
   const { euiTheme } = useEuiTheme();
   const { errorMessages, value } = useFormField('destinationIngestPipeline');
   const { setFormField } = useEditTransformFlyoutActions();

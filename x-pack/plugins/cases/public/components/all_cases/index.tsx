@@ -14,7 +14,7 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { AllCasesList } from './all_cases_list';
 import { CasesTableHeader } from './header';
 
-export const AllCases: React.FC = () => {
+export const AllCases = () => {
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
 
   const { data: actionLicense = null } = useGetActionLicense();

@@ -152,7 +152,7 @@ export interface UseAssistantContext {
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
 
-export const AssistantProvider: React.FC<AssistantProviderProps> = ({
+export const AssistantProvider = ({
   actionTypeRegistry,
   alertsIndexPattern,
   assistantAvailability,
@@ -170,7 +170,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
-}) => {
+}: AssistantProviderProps) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
    */

@@ -6,7 +6,6 @@
  */
 
 import { EuiForm, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -74,14 +73,14 @@ const DisplayActionsHeader = () => {
   );
 };
 
-const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
+const StepRuleActionsComponent = ({
   ruleId,
   isUpdateView = false,
   actionMessageParams,
   summaryActionMessageParams,
   ruleType,
   form,
-}) => {
+}: StepRuleActionsProps) => {
   const {
     services: { application },
   } = useKibana();
@@ -150,10 +149,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 
 export const StepRuleActions = memo(StepRuleActionsComponent);
 
-const StepRuleActionsReadOnlyComponent: FC<StepRuleActionsReadOnlyProps> = ({
+const StepRuleActionsReadOnlyComponent = ({
   addPadding,
   defaultValues: ruleActionsData,
-}) => {
+}: StepRuleActionsReadOnlyProps) => {
   const {
     services: { triggersActionsUi },
   } = useKibana();

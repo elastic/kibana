@@ -30,7 +30,7 @@ export interface Props {
   selected: ContextEditorRow[];
 }
 
-const BulkActionsComponent: React.FC<Props> = ({
+const BulkActionsComponent = ({
   appliesTo,
   disabled,
   disableAllow = false,
@@ -39,7 +39,7 @@ const BulkActionsComponent: React.FC<Props> = ({
   disableUnanonymize = false,
   onListUpdated,
   selected,
-}) => {
+}: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const contextMenuPopoverId = useGeneratedHtmlId({

@@ -12,7 +12,7 @@ import { createGenericSystemRowRenderer } from '../../timeline/body/renderers/sy
 import { demoEndgameTerminationEvent } from '../../../../common/demo_data/endgame_ecs/termination';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SystemExampleComponent: React.FC = () => {
+const SystemExampleComponent = () => {
   const systemRowRenderer = createGenericSystemRowRenderer({
     actionName: 'termination_event',
     text: TERMINATED_PROCESS,

@@ -51,7 +51,7 @@ interface Props {
   trailingControlColumns: ControlColumnProps[];
 }
 
-const EventsComponent: React.FC<Props> = ({
+const EventsComponent = ({
   actionsColumnWidth,
   columnHeaders,
   containerRef,
@@ -72,7 +72,7 @@ const EventsComponent: React.FC<Props> = ({
   tabType,
   leadingControlColumns,
   trailingControlColumns,
-}) => (
+}: Props) => (
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
       <StatefulEvent

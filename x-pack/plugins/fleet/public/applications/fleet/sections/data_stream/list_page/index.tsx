@@ -24,7 +24,7 @@ import { PackageIcon } from '../../../components';
 
 import { DataStreamRowActions } from './components/data_stream_row_actions';
 
-export const DataStreamListPage: React.FunctionComponent<{}> = () => {
+export const DataStreamListPage = () => {
   useBreadcrumbs('data_streams');
 
   const { pagination, pageSizeOptions } = usePagination();

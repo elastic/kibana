@@ -32,7 +32,7 @@ import {
 } from './constants';
 import { EnginesLogic } from './engines_logic';
 
-export const EnginesOverview: React.FC = () => {
+export const EnginesOverview = () => {
   const {
     myRole: { canManageEngines, canManageMetaEngines },
   } = useValues(AppLogic);

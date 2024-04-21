@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
@@ -14,7 +13,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { GeoMapExamples } from './geo_map_examples';
 
-export const GeoDetectorsSummary: FC = () => {
+export const GeoDetectorsSummary = () => {
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
 

@@ -33,9 +33,7 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
 
 const defaultOnChangeSampleSize = () => {};
 
-export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
-  UnifiedDataTableAdditionalDisplaySettingsProps
-> = ({
+export const UnifiedDataTableAdditionalDisplaySettings = ({
   rowHeight,
   rowHeightLines,
   onChangeRowHeight,
@@ -47,7 +45,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
-}) => {
+}: UnifiedDataTableAdditionalDisplaySettingsProps) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
     Math.min(RANGE_MIN_SAMPLE_SIZE, sampleSize),

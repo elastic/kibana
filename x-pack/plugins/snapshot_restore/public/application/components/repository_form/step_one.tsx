@@ -42,12 +42,12 @@ interface Props {
   validation: RepositoryValidation;
 }
 
-export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
+export const RepositoryFormStepOne = ({
   repository,
   onNext,
   updateRepository,
   validation,
-}) => {
+}: Props) => {
   // Load repository types
   const {
     error: repositoryTypesError,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
@@ -42,7 +41,7 @@ interface Props {
   showClearFiltersButton: boolean;
 }
 
-export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
+export const CasesTableUtilityBar = React.memo(
   ({
     isSelectorView,
     totalCases,
@@ -53,7 +52,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     onSelectedColumnsChange,
     onClearFilters,
     showClearFiltersButton,
-  }) => {
+  }: Props) => {
     const { euiTheme } = useEuiTheme();
     const refreshCases = useRefreshCases();
     const { permissions } = useCasesContext();

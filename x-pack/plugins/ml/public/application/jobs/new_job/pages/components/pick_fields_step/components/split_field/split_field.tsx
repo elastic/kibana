@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 
 import type { Field } from '@kbn/ml-anomaly-utils';
@@ -17,7 +16,7 @@ import { Description } from './description';
 import type { MultiMetricJobCreator, RareJobCreator } from '../../../../../common/job_creator';
 import { isMultiMetricJobCreator } from '../../../../../common/job_creator';
 
-export const SplitFieldSelector: FC = () => {
+export const SplitFieldSelector = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
 

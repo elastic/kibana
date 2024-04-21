@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -122,7 +121,7 @@ interface LogRateAnalysisResultsProps {
   embeddingOrigin: string;
 }
 
-export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
+export const LogRateAnalysisResults = ({
   dataView,
   analysisType = LOG_RATE_ANALYSIS_TYPE.SPIKE,
   earliest,
@@ -137,7 +136,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barHighlightColorOverride,
   onAnalysisCompleted,
   embeddingOrigin,
-}) => {
+}: LogRateAnalysisResultsProps) => {
   const { analytics, http } = useAiopsAppContext();
 
   // Store the performance metric's start time using a ref

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import styled from 'styled-components';
@@ -30,7 +29,7 @@ interface PanelFooterProps {
 /**
  *
  */
-export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
+export const PanelFooter = ({ isPreview }: PanelFooterProps) => {
   const { closeFlyout, openRightPanel } = useExpandableFlyoutApi();
   const {
     eventId,

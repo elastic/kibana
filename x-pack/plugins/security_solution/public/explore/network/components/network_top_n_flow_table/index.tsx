@@ -49,7 +49,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopNFlowTableId = 'networkTopSourceFlow-top-talkers';
 
-const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
+const NetworkTopNFlowTableComponent = ({
   data,
   flowTargeted,
   id,
@@ -59,7 +59,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   setQuerySkip,
   totalCount,
   type,
-}) => {
+}: NetworkTopNFlowTableProps) => {
   const dispatch = useDispatch();
   const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state) =>

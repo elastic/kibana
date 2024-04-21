@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -80,7 +80,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Append: FunctionComponent = () => {
+export const Append = () => {
   const [{ fields }] = useFormData({ watch: ['fields.value'] });
   return (
     <>

@@ -13,9 +13,10 @@ import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 export interface CoreProvidersProps {
   core: CoreStart;
   theme$: AppMountParameters['theme$'];
+  children?: React.ReactNode;
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({ children, core, theme$ }) => {
+export const CoreProviders = ({ children, core, theme$ }: CoreProvidersProps) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core);
 
   return (

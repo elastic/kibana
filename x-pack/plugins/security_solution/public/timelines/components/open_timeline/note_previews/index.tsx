@@ -44,10 +44,10 @@ interface ToggleEventDetailsButtonProps {
   timelineId: string;
 }
 
-const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps> = ({
+const ToggleEventDetailsButtonComponent = ({
   eventId,
   timelineId,
-}) => {
+}: ToggleEventDetailsButtonProps) => {
   const dispatch = useDispatch();
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 

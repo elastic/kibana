@@ -49,11 +49,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const SaveFieldTypeOrNameChangedModal: React.FC<Props> = ({
-  fieldName,
-  onCancel,
-  onConfirm,
-}) => {
+export const SaveFieldTypeOrNameChangedModal = ({ fieldName, onCancel, onConfirm }: Props) => {
   const i18nTexts = geti18nTexts(fieldName);
   const [confirmContent, setConfirmContent] = useState<string>('');
 

@@ -84,7 +84,7 @@ export const getGroupByFieldsOnClick = (
   };
 };
 
-const StorageTreemapComponent: React.FC<Props> = ({
+const StorageTreemapComponent = ({
   accessor,
   baseTheme,
   flattenedBuckets,

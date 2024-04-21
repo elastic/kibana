@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, FunctionComponent, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 import { Phases as _Phases } from '../../../../../common/types';
 
@@ -53,7 +53,7 @@ const createEmptyErrors = (): Errors => ({
   other: {},
 });
 
-export const FormErrorsProvider: FunctionComponent = ({ children }) => {
+export const FormErrorsProvider = ({ children }: { children: React.ReactNode }) => {
   const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
 

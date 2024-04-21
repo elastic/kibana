@@ -21,7 +21,7 @@ interface Props {
   onChange: ({ minute, hour, date }: { minute?: string; hour?: string; date?: string }) => void;
 }
 
-export const CronMonthly: React.FunctionComponent<Props> = ({
+export const CronMonthly = ({
   minute,
   minuteOptions,
   hour,
@@ -29,7 +29,7 @@ export const CronMonthly: React.FunctionComponent<Props> = ({
   date,
   dateOptions,
   onChange,
-}) => (
+}: Props) => (
   <Fragment>
     <EuiFormRow
       label={
@@ -49,7 +49,6 @@ export const CronMonthly: React.FunctionComponent<Props> = ({
         data-test-subj="cronFrequencyMonthlyDateSelect"
       />
     </EuiFormRow>
-
     <EuiFormRow
       label={
         <FormattedMessage id="esUi.cronEditor.cronMonthly.fieldTimeLabel" defaultMessage="Time" />

@@ -18,11 +18,11 @@ export interface LineCurveOptionProps {
   enabled?: boolean;
 }
 
-export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
+export const LineCurveOption = ({
   onChange,
   value = XYCurveTypes.LINEAR,
   enabled = true,
-}) => {
+}: LineCurveOptionProps) => {
   return enabled ? (
     <EuiFormRow
       display="columnCompressed"

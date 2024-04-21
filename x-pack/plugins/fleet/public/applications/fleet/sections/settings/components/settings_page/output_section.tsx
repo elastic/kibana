@@ -18,10 +18,7 @@ export interface OutputSectionProps {
   deleteOutput: (output: Output) => void;
 }
 
-export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
-  outputs,
-  deleteOutput,
-}) => {
+export const OutputSection = ({ outputs, deleteOutput }: OutputSectionProps) => {
   const authz = useAuthz();
   const { getHref } = useLink();
   const { docLinks } = useStartServices();

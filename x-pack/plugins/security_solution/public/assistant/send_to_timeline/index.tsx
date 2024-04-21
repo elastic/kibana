@@ -39,6 +39,7 @@ import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
+  children: React.ReactNode;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
   timeRange?: TimeRange;
@@ -46,7 +47,7 @@ export interface SendToTimelineButtonProps {
   isDisabled?: boolean;
 }
 
-export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonProps> = ({
+export const SendToTimelineButton = ({
   asEmptyButton,
   children,
   dataProviders,
@@ -54,7 +55,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   timeRange,
   keepDataView,
   ...rest
-}) => {
+}: SendToTimelineButtonProps) => {
   const dispatch = useDispatch();
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();

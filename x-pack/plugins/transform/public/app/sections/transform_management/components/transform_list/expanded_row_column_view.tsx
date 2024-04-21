@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 
 import {
@@ -35,7 +34,7 @@ interface SectionProps {
   section: SectionConfig;
 }
 
-export const Section: FC<SectionProps> = ({ section }) => {
+export const Section = ({ section }: SectionProps) => {
   if (section.items.length === 0) {
     return null;
   }
@@ -56,11 +55,11 @@ interface ExpandedRowDetailsPaneProps {
   dataTestSubj?: string;
 }
 
-export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
+export const ExpandedRowColumnView = ({
   sections,
   showErrorCallout = false,
   dataTestSubj,
-}) => {
+}: ExpandedRowDetailsPaneProps) => {
   return (
     <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
       {showErrorCallout && (

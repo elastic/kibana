@@ -11,13 +11,13 @@ import { EuiLoadingLogo, EuiLoadingSpinner } from '@elastic/eui';
 
 import './loading.scss';
 
-export const Loading: React.FC = () => (
+export const Loading = () => (
   <div className="enterpriseSearchLoading">
     <EuiLoadingLogo size="xl" logo="logoEnterpriseSearch" />
   </div>
 );
 
-export const LoadingOverlay: React.FC = () => (
+export const LoadingOverlay = () => (
   <div className="enterpriseSearchLoadingOverlay">
     <div className="enterpriseSearchLoading">
       <EuiLoadingSpinner size="xl" />

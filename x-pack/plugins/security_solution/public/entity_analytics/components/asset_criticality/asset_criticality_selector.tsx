@@ -44,11 +44,15 @@ import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_a
 interface Props {
   entity: Entity;
 }
-const AssetCriticalitySelectorComponent: React.FC<{
+const AssetCriticalitySelectorComponent = ({
+  criticality,
+  entity,
+  compressed = false,
+}: {
   criticality: State;
   entity: Entity;
   compressed?: boolean;
-}> = ({ criticality, entity, compressed = false }) => {
+}) => {
   const [visible, toggleModal] = useToggle(false);
   const sFontSize = useEuiFontSize('s').fontSize;
 
@@ -130,7 +134,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
 export const AssetCriticalitySelector = React.memo(AssetCriticalitySelectorComponent);
 AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';
 
-const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
+const AssetCriticalityAccordionComponent = ({ entity }: Props) => {
   const { euiTheme } = useEuiTheme();
   const privileges = useAssetCriticalityPrivileges(entity.name);
   const criticality = useAssetCriticalityData({
@@ -196,7 +200,7 @@ interface ModalProps {
   entity: Entity;
 }
 
-const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, toggle }) => {
+const AssetCriticalityModal = ({ criticality, entity, toggle }: ModalProps) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
   const [value, setNewValue] = useState<CriticalityLevelWithUnassigned>(
     criticality.query.data?.criticality_level ?? 'unassigned'

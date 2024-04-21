@@ -12,7 +12,7 @@ import { createEndpointRegistryRowRenderer } from '../../timeline/body/renderers
 import { MODIFIED_REGISTRY_KEY } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const RegistryExampleComponent: React.FC = () => {
+const RegistryExampleComponent = () => {
   const registryRowRenderer = createEndpointRegistryRowRenderer({
     actionName: 'modification',
     text: MODIFIED_REGISTRY_KEY,

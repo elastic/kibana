@@ -65,7 +65,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     hookValueCallback(body(props));
     return null;
   };
-  const TestComponent: React.FunctionComponent<Args> = (args) =>
+  const TestComponent = (args: Args) =>
     WrapperComponent ? (
       <WrapperComponent>
         <HookComponent {...args} />

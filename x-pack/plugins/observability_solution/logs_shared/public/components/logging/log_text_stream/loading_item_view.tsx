@@ -14,7 +14,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
-import * as React from 'react';
+import React from 'react';
 import { Unit } from '@kbn/datemath';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -107,7 +107,7 @@ type ProgressMessageProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'timestamp' | 'position' | 'isStreaming'
 >;
-const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, isStreaming }) => {
+const ProgressMessage = ({ timestamp, position, isStreaming }: ProgressMessageProps) => {
   const formattedTimestamp =
     isStreaming && position === 'end' ? (
       <FormattedRelative units="second" value={timestamp} updateInterval={1} />
@@ -143,7 +143,7 @@ const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, 
   );
 };
 
-const ProgressSpinner: React.FC<{ kind: 'streaming' | 'loading' }> = ({ kind }) => (
+const ProgressSpinner = ({ kind }: { kind: 'streaming' | 'loading' }) => (
   <>
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="l" />
@@ -170,13 +170,13 @@ type ProgressCtaProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'position' | 'startDateExpression' | 'endDateExpression' | 'onExtendRange' | 'onStreamStart'
 >;
-const ProgressCta: React.FC<ProgressCtaProps> = ({
+const ProgressCta = ({
   position,
   startDateExpression,
   endDateExpression,
   onExtendRange,
   onStreamStart,
-}) => {
+}: ProgressCtaProps) => {
   const rangeEdge = position === 'start' ? startDateExpression : endDateExpression;
 
   if (rangeEdge === 'now' && position === 'end') {
@@ -212,7 +212,7 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
   );
 };
 
-const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amount, unit }) => {
+const ProgressExtendMessage = ({ amount, unit }: { amount: number; unit: Unit }) => {
   switch (unit) {
     case 'ms':
       return (

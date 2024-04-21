@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { BannerConfiguration } from '../../common';
 
@@ -15,7 +15,7 @@ interface BannerProps {
   bannerConfig: BannerConfiguration;
 }
 
-export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
+export const Banner = ({ bannerConfig }: BannerProps) => {
   const { textContent, textColor, backgroundColor } = bannerConfig;
   return (
     <div

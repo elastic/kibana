@@ -23,13 +23,21 @@ import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
-export const CommonInfraProviders: React.FC<{
+export const CommonInfraProviders = ({
+  children,
+  triggersActionsUI,
+  setHeaderActionMenu,
+  appName,
+  storage,
+  theme$,
+}: {
+  children: React.ReactNode;
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+}) => {
   const darkMode = useIsDarkMode();
 
   return (
@@ -46,6 +54,7 @@ export const CommonInfraProviders: React.FC<{
 };
 
 export interface CoreProvidersProps {
+  children?: React.ReactNode;
   core: CoreStart;
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
@@ -53,14 +62,14 @@ export interface CoreProvidersProps {
   kibanaEnvironment?: KibanaEnvContext;
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({
+export const CoreProviders = ({
   children,
   core,
   pluginStart,
   plugins,
   theme$,
   kibanaEnvironment,
-}) => {
+}: CoreProvidersProps) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -86,8 +95,12 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   );
 };
 
-const DataUIProviders: React.FC<{ appName: string; storage: Storage }> = ({
+const DataUIProviders = ({
   appName,
   children,
   storage,
+}: {
+  appName: string;
+  children: React.ReactNode;
+  storage: Storage;
 }) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;

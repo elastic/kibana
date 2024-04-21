@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import { TransformMatrix3d } from '../../lib/aeroelastic';
@@ -16,7 +16,7 @@ interface Props {
   width: number;
 }
 
-export const AlignmentGuide: FC<Props> = ({ transformMatrix, width, height }) => (
+export const AlignmentGuide = ({ transformMatrix, width, height }: Props) => (
   <div
     className="canvasAlignmentGuide canvasInteractable canvasLayoutAnnotation"
     style={{

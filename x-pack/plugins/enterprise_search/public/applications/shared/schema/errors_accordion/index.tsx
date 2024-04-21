@@ -39,11 +39,7 @@ interface Props {
   generateViewPath?(id: string): string;
 }
 
-export const SchemaErrorsAccordion: React.FC<Props> = ({
-  fieldCoercionErrors,
-  schema,
-  generateViewPath,
-}) => (
+export const SchemaErrorsAccordion = ({ fieldCoercionErrors, schema, generateViewPath }: Props) => (
   <>
     {Object.keys(fieldCoercionErrors).map((fieldName) => {
       const fieldType = schema[fieldName];

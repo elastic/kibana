@@ -9,7 +9,6 @@
  * React component for rendering a list of Machine Learning influencers.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
@@ -64,7 +63,7 @@ function getTooltipContent(maxScoreLabel: string, totalScoreLabel: string) {
   );
 }
 
-const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter, valueData }) => {
+const Influencer = ({ influencerFieldName, influencerFilter, valueData }: InfluencerProps) => {
   const maxScore = Math.floor(valueData.maxAnomalyScore);
   const maxScoreLabel = getFormattedSeverityScore(valueData.maxAnomalyScore);
   const severity = getSeverity(maxScore);
@@ -117,11 +116,11 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
   );
 };
 
-const InfluencersByName: FC<InfluencersByNameProps> = ({
+const InfluencersByName = ({
   influencerFieldName,
   influencerFilter,
   fieldValues,
-}) => {
+}: InfluencersByNameProps) => {
   const influencerValues = fieldValues.map((valueData) => (
     <Influencer
       key={valueData.influencerFieldValue}
@@ -144,7 +143,7 @@ const InfluencersByName: FC<InfluencersByNameProps> = ({
   );
 };
 
-export const InfluencersList: FC<InfluencersListProps> = ({ influencers, influencerFilter }) => {
+export const InfluencersList = ({ influencers, influencerFilter }: InfluencersListProps) => {
   if (influencers === undefined || Object.keys(influencers).length === 0) {
     return (
       <EuiFlexGroup justifyContent="spaceAround" className="ml-influencers-list">

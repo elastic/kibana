@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 
 import {
@@ -61,7 +60,7 @@ const defaultEval: Eval = {
   error: null,
 };
 
-export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
+export const EvaluatePanel = ({ jobConfig, jobStatus, searchQuery }: Props) => {
   const {
     services: { docLinks },
   } = useMlKibana();

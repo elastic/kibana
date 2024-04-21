@@ -30,12 +30,7 @@ export interface EntryPointsTableProps {
   title?: string | React.ReactNode;
 }
 
-export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
-  domain,
-  indexName,
-  items,
-  title,
-}) => {
+export const EntryPointsTable = ({ domain, indexName, items, title }: EntryPointsTableProps) => {
   const { onAdd, onDelete, onUpdate } = useActions(EntryPointsTableLogic);
   const field = 'value';
 

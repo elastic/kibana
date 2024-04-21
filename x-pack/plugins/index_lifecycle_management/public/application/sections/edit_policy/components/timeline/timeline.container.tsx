@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { useFormData } from '../../../../../shared_imports';
 
@@ -17,7 +17,7 @@ import { FormInternal } from '../../types';
 
 import { Timeline as ViewComponent } from './timeline';
 
-export const Timeline: FunctionComponent = () => {
+export const Timeline = () => {
   const [formData] = useFormData<FormInternal>();
   const timings = formDataToAbsoluteTimings(formData);
   const { isUsingRollover } = useConfiguration();

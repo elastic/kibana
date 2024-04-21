@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,7 +16,7 @@ interface Props {
   modelId: string;
 }
 
-export const PipelineDetailsTitle: FC<Props> = ({ modelId }) => {
+export const PipelineDetailsTitle = ({ modelId }: Props) => {
   const {
     services: {
       docLinks: { links },

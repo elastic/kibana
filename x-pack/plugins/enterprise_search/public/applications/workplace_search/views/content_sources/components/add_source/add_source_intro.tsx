@@ -29,7 +29,7 @@ import { ConfigurationIntro } from './configuration_intro';
 
 import './add_source.scss';
 
-export const AddSourceIntro: React.FC = () => {
+export const AddSourceIntro = () => {
   const { serviceType } = useParams<{ serviceType: string }>();
   const sourceData = getSourceData(serviceType);
 

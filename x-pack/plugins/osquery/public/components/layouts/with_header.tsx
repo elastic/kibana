@@ -21,14 +21,14 @@ export interface WithHeaderLayoutProps extends HeaderProps {
   headerChildren?: React.ReactNode;
 }
 
-export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
+export const WithHeaderLayout = ({
   restrictWidth,
   restrictHeaderWidth,
   children,
   headerChildren,
   'data-test-subj': dataTestSubj,
   ...rest
-}) => (
+}: WithHeaderLayoutProps) => (
   <Fragment>
     <Header
       maxWidth={restrictHeaderWidth}

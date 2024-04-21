@@ -60,14 +60,14 @@ interface Props {
   clearAction: (fieldName: string) => void;
 }
 
-export const FieldNumber: React.FC<Props> = ({
+export const FieldNumber = ({
   fieldSettings,
   fieldName,
   fieldEnabledProperty,
   fieldSizeProperty,
   updateAction,
   clearAction,
-}) => {
+}: Props) => {
   return (
     <EuiFieldNumber
       value={

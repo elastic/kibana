@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useCallback, useState, useMemo } from 'react';
-import type { FunctionComponent, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
 import {
   EuiAccordion,
@@ -80,12 +80,12 @@ export const getDeferredAssetDescription = (
   }
 };
 
-export const DeferredTransformAccordion: FunctionComponent<Props> = ({
+export const DeferredTransformAccordion = ({
   packageInfo,
   type,
   deferredInstallations,
   forceRefreshAssets,
-}) => {
+}: Props) => {
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
   const deferredTransforms = useMemo(

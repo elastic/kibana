@@ -18,7 +18,7 @@ interface Props {
   replacements?: Replacements;
 }
 
-const AlertsComponent: React.FC<Props> = ({ insight, replacements }) => {
+const AlertsComponent = ({ insight, replacements }: Props) => {
   const { triggersActionsUi } = useKibana().services;
 
   const originalAlertIds = useMemo(

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -24,14 +23,15 @@ interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
+  children: React.ReactNode;
 }
 
-export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
+export const TimeSeriesExplorerPage = ({
   children,
   dateFormatTz,
   resizeRef,
   noSingleMetricJobsFound,
-}) => {
+}: TimeSeriesExplorerPageProps) => {
   const {
     services: { docLinks },
   } = useMlKibana();

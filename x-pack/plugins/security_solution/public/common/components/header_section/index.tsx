@@ -90,7 +90,7 @@ export const getHeaderAlignment = ({
   }
 };
 
-const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
+const HeaderSectionComponent = ({
   alignHeader,
   border,
   children,
@@ -113,7 +113,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleStatus = true,
   tooltip,
   tooltipTitle,
-}) => {
+}: HeaderSectionProps) => {
   const toggle = useCallback(() => {
     if (toggleQuery) {
       toggleQuery(!toggleStatus);

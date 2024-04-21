@@ -36,7 +36,7 @@ export const createConnectedSearchSessionIndicator = ({
   usageCollector,
   basePath,
   tourDisabled,
-}: SearchSessionIndicatorDeps): React.FC => {
+}: SearchSessionIndicatorDeps) => {
   const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
 
   const debouncedSessionServiceState$ = sessionService.state$.pipe(

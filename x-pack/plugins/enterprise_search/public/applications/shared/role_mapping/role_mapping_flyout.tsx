@@ -41,14 +41,14 @@ interface Props {
   handleSaveMapping(): void;
 }
 
-export const RoleMappingFlyout: React.FC<Props> = ({
+export const RoleMappingFlyout = ({
   children,
   isNew,
   disabled,
   formLoading,
   closeUsersAndRolesFlyout,
   handleSaveMapping,
-}) => (
+}: Props) => (
   <EuiPortal>
     <EuiFlyout
       ownFocus

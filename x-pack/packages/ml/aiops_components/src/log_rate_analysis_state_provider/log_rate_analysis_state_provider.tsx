@@ -10,7 +10,6 @@ import React, {
   useContext,
   useMemo,
   useState,
-  type FC,
   type Dispatch,
   type SetStateAction,
 } from 'react';
@@ -50,6 +49,7 @@ const LogRateAnalysisStateContext = createContext<LogRateAnalysisState | undefin
 interface LogRateAnalysisStateProviderProps {
   /** The parameters to be used to trigger an analysis. */
   initialAnalysisStart?: InitialAnalysisStart;
+  children: React.ReactNode;
 }
 
 /**
@@ -65,7 +65,7 @@ interface LogRateAnalysisStateProviderProps {
  * including children components to be wrapped by the Provider.
  * @returns A context provider wrapping children with access to log rate analysis state.
  */
-export const LogRateAnalysisStateProvider: FC<LogRateAnalysisStateProviderProps> = (props) => {
+export const LogRateAnalysisStateProvider = (props: LogRateAnalysisStateProviderProps) => {
   const { children, initialAnalysisStart: incomingInitialAnalysisStart } = props;
 
   const [autoRunAnalysis, setAutoRunAnalysis] = useState(true);

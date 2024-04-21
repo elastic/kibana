@@ -68,13 +68,14 @@ function filterTemplates(templates: TemplateListItem[], types: string[]): Templa
   });
 }
 
-export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TemplateList = ({
   match: {
     params: { templateName },
   },
+
   location,
   history,
-}) => {
+}: RouteComponentProps<MatchParams>) => {
   const { uiMetricService } = useServices();
   const {
     core: { executionContext },

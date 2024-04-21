@@ -20,13 +20,13 @@ interface Props {
   showAnonymized: boolean;
 }
 
-const SummaryComponent: React.FC<Props> = ({
+const SummaryComponent = ({
   alertsCount,
   insightsCount,
   lastUpdated,
   onToggleShowAnonymized,
   showAnonymized,
-}) => (
+}: Props) => (
   <EuiFlexGroup data-test-subj="summary" justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>
       <SummaryCount

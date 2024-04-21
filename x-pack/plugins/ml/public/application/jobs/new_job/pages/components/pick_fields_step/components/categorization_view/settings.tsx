@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -15,7 +14,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const CategorizationSettings: FC<Props> = ({ setIsValid }) => {
+export const CategorizationSettings = ({ setIsValid }: Props) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xl">

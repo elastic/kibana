@@ -7,7 +7,6 @@
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { type MlAnomalyResultType, ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 
@@ -17,7 +16,7 @@ export interface ResultTypeSelectorProps {
   onChange: (value: MlAnomalyResultType) => void;
 }
 
-export const ResultTypeSelector: FC<ResultTypeSelectorProps> = React.memo(
+export const ResultTypeSelector = React.memo<ResultTypeSelectorProps>(
   ({ value: selectedResultType = [], onChange, availableOption }) => {
     const resultTypeOptions = useMemo(() => {
       return [

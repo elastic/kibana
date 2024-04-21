@@ -18,13 +18,13 @@ interface NoDataProps {
   testString?: string;
 }
 
-export const NoData: React.FC<NoDataProps> = ({
+export const NoData = ({
   titleText,
   bodyText,
   refetchText,
   onRefetch,
   testString,
-}) => (
+}: NoDataProps) => (
   <CenteredEmptyPrompt
     title={<h2>{titleText}</h2>}
     titleSize="m"

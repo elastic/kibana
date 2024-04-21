@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 
 import { CategorizationFieldSelect } from './categorization_field_select';
@@ -18,7 +17,7 @@ import type {
 import { isCategorizationJobCreator } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const CategorizationField: FC = () => {
+export const CategorizationField = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const { catFields } = newJobCapsService;

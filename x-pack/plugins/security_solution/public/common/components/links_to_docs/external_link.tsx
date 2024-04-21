@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 
@@ -18,7 +17,7 @@ interface ExternalLinkProps {
 /**
  * A link for opening external urls in a new browser tab.
  */
-export const ExternalLink: FC<ExternalLinkProps> = ({ url, children, ariaLabel }) => {
+export const ExternalLink = ({ url, children, ariaLabel }: ExternalLinkProps) => {
   if (!children) {
     return null;
   }

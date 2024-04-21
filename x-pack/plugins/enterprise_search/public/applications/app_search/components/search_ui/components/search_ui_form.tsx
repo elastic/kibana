@@ -29,7 +29,7 @@ import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';
 import { generatePreviewUrl } from '../utils';
 
-export const SearchUIForm: React.FC = () => {
+export const SearchUIForm = () => {
   const { searchKey } = useValues(EngineLogic);
   const {
     dataLoading,

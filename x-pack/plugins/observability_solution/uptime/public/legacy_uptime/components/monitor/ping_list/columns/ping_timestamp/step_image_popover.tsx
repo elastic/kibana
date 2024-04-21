@@ -29,10 +29,12 @@ interface ScreenshotImageProps {
   imageCaption: JSX.Element;
 }
 
-const DefaultImage: React.FC<ScreenshotImageProps & { imageData?: string }> = ({
+const DefaultImage = ({
   captionContent,
   imageCaption,
   imageData,
+}: ScreenshotImageProps & {
+  imageData?: string;
 }) =>
   imageData ? (
     <StepImage
@@ -53,13 +55,17 @@ const DefaultImage: React.FC<ScreenshotImageProps & { imageData?: string }> = ({
  * This component provides an intermediate step for composite images. It causes a loading spinner to appear
  * while the image is being re-assembled, then calls the default image component and provides a data URL for the image.
  */
-const RecomposedScreenshotImage: React.FC<
-  ScreenshotImageProps & {
-    imgRef: ScreenshotRefImageData;
-    setImageData: React.Dispatch<string | undefined>;
-    imageData: string | undefined;
-  }
-> = ({ captionContent, imageCaption, imageData, imgRef, setImageData }) => {
+const RecomposedScreenshotImage = ({
+  captionContent,
+  imageCaption,
+  imageData,
+  imgRef,
+  setImageData,
+}: ScreenshotImageProps & {
+  imgRef: ScreenshotRefImageData;
+  setImageData: React.Dispatch<string | undefined>;
+  imageData: string | undefined;
+}) => {
   // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
   // `useCompositeImage` will call `setImageData` when the image is composited, and the updated `imageData` will display.
   useCompositeImage(imgRef, setImageData, imageData);
@@ -81,12 +87,17 @@ export interface StepImagePopoverProps {
   isImagePopoverOpen: boolean;
 }
 
-const StepImageComponent: React.FC<
-  Omit<StepImagePopoverProps, 'isImagePopoverOpen'> & {
-    setImageData: React.Dispatch<string | undefined>;
-    imageData: string | undefined;
-  }
-> = ({ captionContent, imageCaption, imageData, imgRef, imgSrc, setImageData }) => {
+const StepImageComponent = ({
+  captionContent,
+  imageCaption,
+  imageData,
+  imgRef,
+  imgSrc,
+  setImageData,
+}: Omit<StepImagePopoverProps, 'isImagePopoverOpen'> & {
+  setImageData: React.Dispatch<string | undefined>;
+  imageData: string | undefined;
+}) => {
   if (imgSrc) {
     return (
       <DefaultImage
@@ -109,13 +120,13 @@ const StepImageComponent: React.FC<
   return null;
 };
 
-export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
+export const StepImagePopover = ({
   captionContent,
   imageCaption,
   imgRef,
   imgSrc,
   isImagePopoverOpen,
-}) => {
+}: StepImagePopoverProps) => {
   const [imageData, setImageData] = React.useState<string | undefined>(imgSrc || undefined);
 
   React.useEffect(() => {

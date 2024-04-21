@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { fullHeightContentStyles } from '../../../../page_template.styles';
 import { LogsPageTemplate, LogsPageTemplateProps } from '../../shared/page_template';
 
-export const LogStreamPageTemplate: React.FC<LogsPageTemplateProps> = (props) => {
+export const LogStreamPageTemplate = (props: LogsPageTemplateProps) => {
   const { logView, isInlineLogView, revertToDefaultLogView } = useLogViewContext();
   return (
     <div className={APP_WRAPPER_CLASS}>

@@ -55,7 +55,7 @@ const loadingPrompt = (
   />
 );
 
-export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
+export const RuleTypeModal = ({
   onClose,
   onSelectRuleType,
   onFilterByProducer,
@@ -66,7 +66,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   searchString,
   selectedProducer,
   showCategories,
-}) => {
+}: RuleTypeModalProps & RuleTypeModalState) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
   const isFullscreenPortrait = ['s', 'xs'].includes(currentBreakpoint);

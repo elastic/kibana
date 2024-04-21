@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
@@ -58,12 +58,12 @@ interface Props {
   showHeader?: boolean;
 }
 
-export const Datatable: FC<Props> = ({
+export const Datatable = ({
   datatable,
   paginate = false,
   perPage = 10,
   showHeader = false,
-}) => (
+}: Props) => (
   <Paginate rows={datatable.rows} perPage={perPage}>
     {({ rows, setPage, pageNumber, totalPages }) => (
       <div className="canvasDataTable">

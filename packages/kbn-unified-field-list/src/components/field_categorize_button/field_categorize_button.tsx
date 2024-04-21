@@ -25,8 +25,16 @@ export interface FieldCategorizeButtonProps {
   closePopover?: () => void;
 }
 
-export const FieldCategorizeButton: React.FC<FieldCategorizeButtonProps> = React.memo(
-  ({ field, dataView, trackUiMetric, originatingApp, uiActions, buttonProps, closePopover }) => {
+export const FieldCategorizeButton = React.memo(
+  ({
+    field,
+    dataView,
+    trackUiMetric,
+    originatingApp,
+    uiActions,
+    buttonProps,
+    closePopover,
+  }: FieldCategorizeButtonProps) => {
     const handleVisualizeLinkClick = async (
       event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {

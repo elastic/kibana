@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { getPercentileLabel } from '../ux_metrics/translations';

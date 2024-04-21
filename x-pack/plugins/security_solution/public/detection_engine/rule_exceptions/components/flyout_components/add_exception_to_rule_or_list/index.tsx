@@ -33,14 +33,14 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionsAddToRulesOrListsComponent: React.FC<ExceptionsAddToRulesOrListsComponentProps> = ({
+const ExceptionsAddToRulesOrListsComponent = ({
   rules,
   isBulkAction,
   selectedRadioOption,
   onListSelectionChange,
   onRuleSelectionChange,
   onRadioChange,
-}): JSX.Element => {
+}: ExceptionsAddToRulesOrListsComponentProps): JSX.Element => {
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
 
   /*

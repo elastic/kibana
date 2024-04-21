@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,7 +18,7 @@ interface Props {
   defaultToggleValue: boolean;
 }
 
-export const IgnoreAboveParameter: FunctionComponent<Props> = ({ defaultToggleValue }) => (
+export const IgnoreAboveParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldTitle', {
       defaultMessage: 'Set length limit',

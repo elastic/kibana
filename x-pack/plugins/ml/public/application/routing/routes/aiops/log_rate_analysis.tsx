@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { useLocation, Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -53,7 +52,7 @@ export const explainLogRateSpikesRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const RedirectWithQueryString: FC = () => {
+const RedirectWithQueryString = () => {
   const location = useLocation();
   return (
     <Redirect
@@ -62,7 +61,7 @@ const RedirectWithQueryString: FC = () => {
   );
 };
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canUseAiops']);
 
   return (

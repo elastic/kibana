@@ -26,7 +26,7 @@ export interface LanguageGridProps {
   setSelectedLanguage: (language: LanguageDefinition) => void;
 }
 
-export const LanguageGrid: React.FC<LanguageGridProps> = ({
+export const LanguageGrid = ({
   assetBasePath,
   languages,
   selectedLanguage,

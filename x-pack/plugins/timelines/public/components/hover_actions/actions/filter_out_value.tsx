@@ -20,7 +20,7 @@ export const FILTER_OUT_VALUE = i18n.translate('xpack.timelines.hoverActions.fil
 
 export const FILTER_OUT_VALUE_KEYBOARD_SHORTCUT = 'o';
 
-const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnArgs> = React.memo(
+const FilterOutValueButton = React.memo(
   ({
     Component,
     defaultFocusedButtonRef,
@@ -34,7 +34,7 @@ const FilterOutValueButton: React.FC<HoverActionComponentProps & FilterValueFnAr
     showTooltip = false,
     value,
     dataViewId,
-  }) => {
+  }: HoverActionComponentProps & FilterValueFnArgs) => {
     const filterOutValueFn = useCallback(() => {
       const makeFilter = (currentVal: string | null | undefined) =>
         currentVal == null || currentVal?.length === 0

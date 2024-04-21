@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -16,10 +16,7 @@ interface Props {
   message?: string;
 }
 
-export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
-  deprecationSource,
-  message,
-}) => (
+export const DeprecationsPageLoadingError = ({ deprecationSource, message }: Props) => (
   <EuiPageTemplate.EmptyPrompt
     color="danger"
     iconType="warning"

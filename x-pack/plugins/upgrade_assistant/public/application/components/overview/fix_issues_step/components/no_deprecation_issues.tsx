@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,7 +26,7 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export const NoDeprecationIssues: FunctionComponent<Props> = (props) => {
+export const NoDeprecationIssues = (props: Props) => {
   const { isPartial = false } = props;
 
   return (

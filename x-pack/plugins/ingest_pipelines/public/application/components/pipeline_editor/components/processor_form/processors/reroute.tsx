@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
@@ -135,7 +135,7 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
   };
 };
 
-export const Reroute: FunctionComponent = () => {
+export const Reroute = () => {
   const form = useFormContext();
   const [{ fields }] = useFormData({ watch: ['fields.dataset', 'fields.namespace'] });
   const { services } = useKibana();

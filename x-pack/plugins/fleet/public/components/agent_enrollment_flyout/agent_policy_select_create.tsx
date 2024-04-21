@@ -30,7 +30,7 @@ interface Props {
   refreshAgentPolicies: () => void;
 }
 
-export const SelectCreateAgentPolicy: React.FC<Props> = ({
+export const SelectCreateAgentPolicy = ({
   agentPolicies,
   excludeFleetServer,
   setSelectedPolicyId,
@@ -40,7 +40,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   onKeyChange,
   isFleetServerPolicy,
   refreshAgentPolicies,
-}) => {
+}: Props) => {
   const regularAgentPolicies = useMemo(() => {
     return agentPolicies.filter(
       (policy) =>

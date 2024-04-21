@@ -43,13 +43,13 @@ interface IndicesTableProps {
   onDelete: (indexName: string) => void;
 }
 
-export const IndicesTable: React.FC<IndicesTableProps> = ({
+export const IndicesTable = ({
   indices,
   isLoading,
   meta,
   onChange,
   onDelete,
-}) => {
+}: IndicesTableProps) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ElasticsearchViewIndex>> = [
     {

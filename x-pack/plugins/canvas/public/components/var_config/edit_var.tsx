@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -94,7 +94,7 @@ const checkDupeName = (newName: string, oldName: string | null, variables: Canva
   return !!match;
 };
 
-export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave }) => {
+export const EditVar = ({ variables, selectedVar, onCancel, onSave }: Props) => {
   // If there isn't a selected variable, we're creating a new var
   const isNew = selectedVar === null;
 

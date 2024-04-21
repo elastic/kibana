@@ -35,7 +35,7 @@ const COPIED_LABEL = i18n.translate('xpack.enterpriseSearch.overview.apiKey.copi
   defaultMessage: 'Copied',
 });
 
-export const ApiKeyPanel: React.FC = () => {
+export const ApiKeyPanel = () => {
   const { cloud, esConfig, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);

@@ -28,13 +28,13 @@ interface Props {
   history: ScopedHistory;
 }
 
-export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
+export const LegacyTemplateTable = ({
   templates,
   reload,
   editTemplate,
   cloneTemplate,
   history,
-}) => {
+}: Props) => {
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<

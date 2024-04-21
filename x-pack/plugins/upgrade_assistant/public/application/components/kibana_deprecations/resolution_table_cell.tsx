@@ -70,11 +70,11 @@ interface Props {
   deprecationResolutionState?: DeprecationResolutionState;
 }
 
-export const ResolutionTableCell: React.FunctionComponent<Props> = ({
+export const ResolutionTableCell = ({
   deprecationId,
   isAutomated,
   deprecationResolutionState,
-}) => {
+}: Props) => {
   if (isAutomated) {
     if (deprecationResolutionState?.id === deprecationId) {
       const { resolveDeprecationStatus } = deprecationResolutionState;

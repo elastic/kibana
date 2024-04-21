@@ -36,7 +36,7 @@ import { SaveConfig } from './save_config';
 
 import './add_source.scss';
 
-export const AddSource: React.FC = () => {
+export const AddSource = () => {
   const { serviceType, initialStep } = useParams<{ serviceType: string; initialStep?: string }>();
   const addSourceLogic = AddSourceLogic({ serviceType, initialStep });
   const { getSourceConfigData, setAddSourceStep, saveSourceConfig, resetSourceState } =

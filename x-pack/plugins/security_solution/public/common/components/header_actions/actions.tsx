@@ -46,7 +46,7 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const ActionsComponent: React.FC<ActionProps> = ({
+const ActionsComponent = ({
   ariaRowindex,
   checked,
   columnValues,
@@ -65,7 +65,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   toggleShowNotes,
   refetch,
   setEventsLoading,
-}) => {
+}: ActionProps) => {
   const dispatch = useDispatch();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];

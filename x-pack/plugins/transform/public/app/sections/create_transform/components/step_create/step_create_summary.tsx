@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
-export const StepCreateSummary: FC = React.memo(() => {
+export const StepCreateSummary = React.memo(() => {
   return null;
 });

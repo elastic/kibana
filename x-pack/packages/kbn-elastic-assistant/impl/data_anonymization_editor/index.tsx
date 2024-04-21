@@ -31,12 +31,12 @@ export interface Props {
   isFlyoutMode: boolean;
 }
 
-const DataAnonymizationEditorComponent: React.FC<Props> = ({
+const DataAnonymizationEditorComponent = ({
   selectedPromptContext,
   setSelectedPromptContexts,
   currentReplacements,
   isFlyoutMode,
-}) => {
+}: Props) => {
   const isDataAnonymizable = useMemo<boolean>(
     () => getIsDataAnonymizable(selectedPromptContext.rawData),
     [selectedPromptContext]

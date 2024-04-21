@@ -30,8 +30,8 @@ interface UpcomingEventsPopoverProps {
   maintenanceWindowFindResponse: MaintenanceWindow;
 }
 
-export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React.memo(
-  ({ maintenanceWindowFindResponse }) => {
+export const UpcomingEventsPopover = React.memo(
+  ({ maintenanceWindowFindResponse }: UpcomingEventsPopoverProps) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const onButtonClick = useCallback(() => {

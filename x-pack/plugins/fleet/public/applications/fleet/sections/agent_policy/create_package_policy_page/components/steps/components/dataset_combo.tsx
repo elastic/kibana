@@ -19,13 +19,19 @@ interface SelectedDataset {
   package: string;
 }
 
-export const DatasetComboBox: React.FC<{
+export const DatasetComboBox = ({
+  value,
+  onChange,
+  datastreams,
+  isDisabled,
+  pkgName = '',
+}: {
   value?: SelectedDataset | string;
   onChange: (newValue: SelectedDataset) => void;
   datastreams: DataStream[];
   pkgName?: string;
   isDisabled?: boolean;
-}> = ({ value, onChange, datastreams, isDisabled, pkgName = '' }) => {
+}) => {
   const datasetOptions =
     datastreams.map((datastream: DataStream) => ({
       label: datastream.dataset,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
@@ -24,7 +23,7 @@ interface Props {
   selectedInfluencers: string[];
 }
 
-export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
+export const InfluencersSelect = ({ fields, changeHandler, selectedInfluencers }: Props) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { renderOption, optionCss } = useFieldStatsTrigger();
 

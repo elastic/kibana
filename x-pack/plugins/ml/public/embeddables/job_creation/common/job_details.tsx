@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -67,7 +66,7 @@ enum STATE {
   SAVE_FAILED,
 }
 
-export const JobDetails: FC<Props> = ({
+export const JobDetails = ({
   children,
   createADJobInWizard,
   createADJob,
@@ -76,7 +75,7 @@ export const JobDetails: FC<Props> = ({
   timeRange,
   incomingCreateError,
   outerFormComplete,
-}) => {
+}: Props) => {
   const {
     services: {
       share,

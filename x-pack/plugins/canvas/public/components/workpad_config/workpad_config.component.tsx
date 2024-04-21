@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import {
   EuiFieldText,
   EuiFieldNumber,
@@ -96,7 +95,7 @@ export interface Props {
   setWorkpadVariables: (vars: CanvasVariable[]) => void;
 }
 
-export const WorkpadConfig: FC<Props> = (props) => {
+export const WorkpadConfig = (props: Props) => {
   const [css, setCSS] = useState(props.css);
   const { size, name, setSize, setName, setWorkpadCSS, variables, setWorkpadVariables } = props;
   const rotate = () => setSize({ width: size.height, height: size.width });
@@ -219,15 +218,4 @@ export const WorkpadConfig: FC<Props> = (props) => {
       </div>
     </div>
   );
-};
-
-WorkpadConfig.propTypes = {
-  size: PropTypes.object.isRequired,
-  name: PropTypes.string.isRequired,
-  css: PropTypes.string,
-  variables: PropTypes.array,
-  setSize: PropTypes.func.isRequired,
-  setName: PropTypes.func.isRequired,
-  setWorkpadCSS: PropTypes.func.isRequired,
-  setWorkpadVariables: PropTypes.func.isRequired,
 };

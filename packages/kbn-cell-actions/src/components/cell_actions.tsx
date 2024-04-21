@@ -14,7 +14,7 @@ import { HoverActionsPopover } from './hover_actions_popover';
 import { CellActionsMode } from '../constants';
 import type { CellActionsProps, CellActionExecutionContext } from '../types';
 
-export const CellActions: React.FC<CellActionsProps> = ({
+export const CellActions = ({
   data,
   triggerId,
   children,
@@ -24,7 +24,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
   disabledActionTypes = [],
   metadata,
   className,
-}) => {
+}: CellActionsProps) => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const dataArray = useMemo(() => (isArray(data) ? data : [data]), [data]);

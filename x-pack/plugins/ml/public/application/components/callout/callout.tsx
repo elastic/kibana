@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,19 +39,19 @@ export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   }
 };
 
-const Link: FC<{ url: string }> = ({ url }) => (
+const Link = ({ url }: { url: string }) => (
   <EuiLink href={url} target="_BLANK">
     <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
   </EuiLink>
 );
 
-const Message: FC<Pick<CalloutMessage, 'text' | 'url'>> = ({ text, url }) => (
+const Message = ({ text, url }: Pick<CalloutMessage, 'text' | 'url'>) => (
   <>
     {text} {url && <Link url={url} />}
   </>
 );
 
-export const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => (
+export const Callout = ({ heading, status, text, url }: CalloutMessage) => (
   <>
     <EuiCallOut
       data-test-subj={'mlValidationCallout'}

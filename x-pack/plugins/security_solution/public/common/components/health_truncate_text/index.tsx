@@ -19,6 +19,7 @@ interface HealthTruncateTextProps {
   healthColor?: EuiHealthProps['color'];
   tooltipContent?: React.ReactNode;
   dataTestSubj?: string;
+  children: React.ReactNode;
 }
 
 /**
@@ -26,12 +27,12 @@ interface HealthTruncateTextProps {
  * @param healthColor - color for EuiHealth component
  * @param tooltipContent - tooltip content
  */
-export const HealthTruncateText: React.FC<HealthTruncateTextProps> = ({
+export const HealthTruncateText = ({
   tooltipContent,
   children,
   healthColor,
   dataTestSubj,
-}) => (
+}: HealthTruncateTextProps) => (
   <EuiToolTip content={tooltipContent}>
     <EuiHealth color={healthColor} data-test-subj={dataTestSubj}>
       <StatusTextWrapper>

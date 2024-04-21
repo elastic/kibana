@@ -47,12 +47,12 @@ interface Props {
   addFieldFormErrors?: string[] | null;
 }
 
-export const SchemaAddFieldModal: React.FC<Props> = ({
+export const SchemaAddFieldModal = ({
   addNewField,
   addFieldFormErrors,
   closeAddFieldModal,
   disableForm,
-}) => {
+}: Props) => {
   const [loading, setLoading] = useState(false);
   const [newFieldType, updateNewFieldType] = useState(SchemaType.Text);
   const [formattedFieldName, setFormattedFieldName] = useState('');

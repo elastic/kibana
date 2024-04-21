@@ -30,12 +30,12 @@ export interface PanelsToggleProps {
  * @param isChartAvailable
  * @constructor
  */
-export const PanelsToggle: React.FC<PanelsToggleProps> = ({
+export const PanelsToggle = ({
   stateContainer,
   sidebarToggleState$,
   renderedFor,
   isChartAvailable,
-}) => {
+}: PanelsToggleProps) => {
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onToggleChart = useCallback(() => {

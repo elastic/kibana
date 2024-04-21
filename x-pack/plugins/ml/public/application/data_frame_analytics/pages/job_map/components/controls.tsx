@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import type cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -85,8 +84,8 @@ function getListItemsFactory(showLicenseInfo: boolean) {
   };
 }
 
-export const Controls: FC<Props> = React.memo(
-  ({ details, getNodeData, modelId, refreshJobsCallback, updateElements }) => {
+export const Controls = React.memo(
+  ({ details, getNodeData, modelId, refreshJobsCallback, updateElements }: Props) => {
     const [showFlyout, setShowFlyout] = useState<boolean>(false);
     const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>();
     const [isPopoverOpen, setPopover] = useState<boolean>(false);

@@ -6,7 +6,7 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconRapidBarGraph: React.FC<SVGProps<SVGSVGElement>> = (props) => (
+export const IconRapidBarGraph = (props: SVGProps<SVGSVGElement>) => (
   <svg
     width="32"
     height="32"

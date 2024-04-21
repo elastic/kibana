@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
@@ -29,7 +28,7 @@ import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 
-export const CalendarsSelection: FC = () => {
+export const CalendarsSelection = () => {
   const {
     services: {
       application: { getUrlForApp },

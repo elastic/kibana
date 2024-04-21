@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSecurityContext } from '../../../hooks/use_security_context';
@@ -33,11 +33,11 @@ export interface AddToBlockListProps {
  * When clicking on the ContextMenuItem, the indicator filehash value is saved in context.
  * The flyout is shown by adding a parameter to the url.
  */
-export const AddToBlockListContextMenu: VFC<AddToBlockListProps> = ({
+export const AddToBlockListContextMenu = ({
   data,
   'data-test-subj': dataTestSub,
   onClick,
-}) => {
+}: AddToBlockListProps) => {
   const {
     blockList: { canWriteBlocklist },
   } = useSecurityContext();

@@ -7,7 +7,6 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   EuiButton,
@@ -39,7 +38,7 @@ interface Props {
   disableImport?: boolean;
 }
 
-export const ResultsView: FC<Props> = ({
+export const ResultsView = ({
   data,
   fileName,
   results,
@@ -49,7 +48,7 @@ export const ResultsView: FC<Props> = ({
   onChangeMode,
   onCancel,
   disableImport,
-}) => {
+}: Props) => {
   const semiStructureTextData =
     results.format === FILE_FORMATS.SEMI_STRUCTURED_TEXT
       ? {

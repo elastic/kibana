@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { GroupByExpression } from './group_by_over';
 import { render, screen, fireEvent, configure } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

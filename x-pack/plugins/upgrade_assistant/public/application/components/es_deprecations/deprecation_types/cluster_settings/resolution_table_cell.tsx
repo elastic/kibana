@@ -58,7 +58,7 @@ interface Props {
   };
 }
 
-export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ status }) => {
+export const ClusterSettingsResolutionCell = ({ status }: Props) => {
   const { statusType } = status;
   if (statusType === 'in_progress') {
     return (

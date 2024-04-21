@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,9 +13,10 @@ import type { Validation } from '../../../../../common/job_validator';
 
 interface Props {
   validation: Validation;
+  children: React.ReactNode;
 }
 
-export const Description: FC<Props> = memo(({ children, validation }) => {
+export const Description = memo(({ children, validation }: Props) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.datafeedStep.scrollSize.title', {
     defaultMessage: 'Scroll size',
   });

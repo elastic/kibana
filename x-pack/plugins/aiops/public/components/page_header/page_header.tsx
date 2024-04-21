@@ -6,7 +6,6 @@
  */
 
 import { css } from '@emotion/react';
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
@@ -33,7 +32,7 @@ const dataViewTitleHeader = css({
   minWidth: '300px',
 });
 
-export const PageHeader: FC = () => {
+export const PageHeader = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 

@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../shared/doc_links';
 
-export const SearchIndexEmptyState: React.FC = () => {
+export const SearchIndexEmptyState = () => {
   return (
     <EuiPanel color="subdued">
       <EuiEmptyPrompt

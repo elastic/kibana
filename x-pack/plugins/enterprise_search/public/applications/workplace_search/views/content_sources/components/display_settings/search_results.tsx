@@ -45,7 +45,7 @@ import { DisplaySettingsLogic } from './display_settings_logic';
 import { ExampleSearchResultGroup } from './example_search_result_group';
 import { ExampleStandoutResult } from './example_standout_result';
 
-export const SearchResults: React.FC = () => {
+export const SearchResults = () => {
   const {
     toggleTitleFieldHover,
     toggleSubtitleFieldHover,

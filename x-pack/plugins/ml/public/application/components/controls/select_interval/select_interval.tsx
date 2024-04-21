@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -71,7 +70,7 @@ export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] 
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
-export const SelectInterval: FC = () => {
+export const SelectInterval = () => {
   const [interval, setInterval] = useTableInterval();
 
   return <SelectIntervalUI interval={interval} onChange={setInterval} />;
@@ -81,7 +80,7 @@ interface SelectIntervalUIProps {
   interval: TableInterval;
   onChange: (interval: TableInterval) => void;
 }
-export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange }) => {
+export const SelectIntervalUI = ({ interval, onChange }: SelectIntervalUIProps) => {
   const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(optionValueToInterval(e.target.value));
   };

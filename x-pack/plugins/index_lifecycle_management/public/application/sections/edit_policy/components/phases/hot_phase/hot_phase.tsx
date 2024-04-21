@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -44,7 +44,7 @@ import {
 
 const rolloverFieldPaths = Object.values(ROLLOVER_FORM_PATHS);
 
-export const HotPhase: FunctionComponent = () => {
+export const HotPhase = () => {
   const { license } = useEditPolicyContext();
   const [formData] = useFormData({
     watch: [isUsingDefaultRolloverPath, ...rolloverFieldPaths],

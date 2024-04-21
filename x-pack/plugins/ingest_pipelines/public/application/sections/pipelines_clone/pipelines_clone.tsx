@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,7 +22,7 @@ export interface ParamProps {
  * This section is a wrapper around the create section where we receive a pipeline name
  * to load and set as the source pipeline for the {@link PipelinesCreate} form.
  */
-export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = (props) => {
+export const PipelinesClone = (props: RouteComponentProps<ParamProps>) => {
   const { sourceName } = props.match.params;
   const { services } = useKibana();
 

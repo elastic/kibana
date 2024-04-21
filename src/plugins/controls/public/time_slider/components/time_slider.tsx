@@ -7,7 +7,7 @@
  */
 
 import { EuiInputPopover } from '@elastic/eui';
-import React, { FC } from 'react';
+import React from 'react';
 
 import { TimeSlice } from '../../../common/types';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';
@@ -23,7 +23,7 @@ interface Props {
   onChange: (value?: TimeSlice) => void;
 }
 
-export const TimeSlider: FC<Props> = (props: Props) => {
+export const TimeSlider = (props: Props) => {
   const timeSlider = useTimeSlider();
 
   const stepSize = timeSlider.select((state) => {

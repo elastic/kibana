@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
@@ -33,12 +33,7 @@ interface Props {
   value?: string;
 }
 
-export const ColorPalette: FC<Props> = ({
-  colors = [],
-  colorsPerRow = 6,
-  onChange,
-  value = '',
-}) => {
+export const ColorPalette = ({ colors = [], colorsPerRow = 6, onChange, value = '' }: Props) => {
   if (colors.length === 0) {
     return null;
   }

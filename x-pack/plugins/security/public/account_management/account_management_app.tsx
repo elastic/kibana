@@ -6,7 +6,6 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -76,16 +75,17 @@ export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   securityApiClients: SecurityApiClients;
   onChange?: BreadcrumbsChangeHandler;
+  children: React.ReactNode;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers = ({
   services,
   history,
   authc,
   securityApiClients,
   onChange,
   children,
-}) => (
+}: ProvidersProps) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <AuthenticationProvider authc={authc}>

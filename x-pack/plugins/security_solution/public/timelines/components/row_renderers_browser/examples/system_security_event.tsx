@@ -11,7 +11,7 @@ import { createSecurityEventRowRenderer } from '../../timeline/body/renderers/sy
 import { demoEndgameUserLogon } from '../../../../common/demo_data/endgame_ecs/user_logon';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SystemSecurityEventExampleComponent: React.FC = () => {
+const SystemSecurityEventExampleComponent = () => {
   const systemSecurityEventRowRenderer = createSecurityEventRowRenderer({
     actionName: 'user_logon',
   });

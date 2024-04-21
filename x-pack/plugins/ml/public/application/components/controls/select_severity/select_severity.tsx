@@ -8,7 +8,6 @@
 /*
  * React component for rendering a select element with threshold levels.
  */
-import type { FC } from 'react';
 import React, { Fragment, useMemo } from 'react';
 
 import type { EuiSuperSelectProps } from '@elastic/eui';
@@ -124,19 +123,17 @@ interface Props {
   classNames?: string;
 }
 
-export const SelectSeverity: FC<Props> = ({ classNames } = { classNames: '' }) => {
+export const SelectSeverity = ({ classNames }: Props = { classNames: '' }) => {
   const [severity, setSeverity] = useTableSeverity();
 
   return <SelectSeverityUI severity={severity} onChange={setSeverity} />;
 };
 
-export const SelectSeverityUI: FC<
-  Omit<EuiSuperSelectProps<string>, 'onChange' | 'options'> & {
-    classNames?: string;
-    severity: TableSeverity;
-    onChange: (s: TableSeverity) => void;
-  }
-> = ({ classNames = '', severity, onChange, compressed }) => {
+export const SelectSeverityUI = ({ classNames = '', severity, onChange, compressed }:  Omit<EuiSuperSelectProps<string>, 'onChange' | 'options'> & {
+  classNames?: string;
+  severity: TableSeverity;
+  onChange: (s: TableSeverity) => void;
+}) => {
   const handleOnChange = (valueDisplay: string) => {
     onChange(optionValueToThreshold(optionsMap[valueDisplay]));
   };

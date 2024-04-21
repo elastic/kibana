@@ -11,7 +11,7 @@ import { EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export const TextFieldsHeader: React.FC = () => {
+export const TextFieldsHeader = () => {
   return (
     <>
       <EuiTableRow className="resultSettingsTable__subHeader">

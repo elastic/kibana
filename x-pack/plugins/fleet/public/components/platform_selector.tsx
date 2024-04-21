@@ -46,7 +46,7 @@ interface Props {
   onCopy?: () => void;
 }
 
-export const PlatformSelector: React.FunctionComponent<Props> = ({
+export const PlatformSelector = ({
   linuxCommand,
   macCommand,
   windowsCommand,
@@ -62,7 +62,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   fleetServerHost,
   fullCopyButton,
   onCopy,
-}) => {
+}: Props) => {
   const getInitialPlatform = useCallback(() => {
     if (
       hasK8sIntegration ||

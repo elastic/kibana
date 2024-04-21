@@ -53,8 +53,8 @@ export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps,
   emptyPageBody?: ReactNode;
 };
 
-export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
-  React.memo(({ children, ...rest }) => {
+export const SecuritySolutionTemplateWrapper = React.memo(
+  ({ children, ...rest }: SecuritySolutionTemplateWrapperProps) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -117,6 +117,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
         )}
       </StyledKibanaPageTemplate>
     );
-  });
+  }
+);
 
 SecuritySolutionTemplateWrapper.displayName = 'SecuritySolutionTemplateWrapper';

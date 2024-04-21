@@ -88,7 +88,7 @@ export interface OwnProps {
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
 
-const StatefulTopNComponent: React.FC<Props> = ({
+const StatefulTopNComponent = ({
   activeTimelineEventType,
   activeTimelineFilters,
   activeTimelineFrom,
@@ -106,7 +106,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   showLegend,
   scopeId,
   toggleTopN,
-}) => {
+}: Props) => {
   const { uiSettings } = useKibana().services;
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
 
@@ -173,6 +173,4 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
 StatefulTopNComponent.displayName = 'StatefulTopNComponent';
 
-export const StatefulTopN: React.FunctionComponent<OwnProps> = connector(
-  React.memo(StatefulTopNComponent)
-);
+export const StatefulTopN = connector(React.memo(StatefulTopNComponent));

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { parse } from 'query-string';
@@ -22,7 +21,7 @@ export const fromLensRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location }) => {
+const PageWrapper = ({ location }: PageProps) => {
   const { vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
     location.search,
     {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 // @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';
 
@@ -14,9 +14,10 @@ import './upload_dropzone.scss';
 export interface Props {
   disabled?: boolean;
   onDrop?: (files: FileList) => void;
+  children: React.ReactNode;
 }
 
-export const UploadDropzone: FC<Props> = ({ onDrop = () => {}, disabled, children }) => {
+export const UploadDropzone = ({ onDrop = () => {}, disabled, children }: Props) => {
   return (
     <Dropzone
       {...{ onDrop, disabled }}

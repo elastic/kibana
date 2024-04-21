@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, FC } from 'react';
+import React, { Component } from 'react';
 import { shallow } from 'enzyme';
 import { Route } from './route';
 import { createMemoryHistory } from 'history';
@@ -30,7 +30,7 @@ describe('Route', () => {
   });
 
   test('component prop renders', () => {
-    const sampleComponent: FC<{}> = () => {
+    const sampleComponent = () => {
       return <Component>Test</Component>;
     };
     const example = shallow(<Route component={sampleComponent} />);

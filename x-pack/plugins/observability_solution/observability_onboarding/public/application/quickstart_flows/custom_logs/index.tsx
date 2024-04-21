@@ -77,7 +77,7 @@ const {
 
 export { Provider, useWizard, customLogsRoutes };
 
-export const CustomLogsPanel: React.FC = () => {
+export const CustomLogsPanel = () => {
   return (
     <Provider>
       <EuiPanel hasBorder>

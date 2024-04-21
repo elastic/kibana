@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -19,7 +18,7 @@ interface Props {
   hideEstimateButton?: boolean;
 }
 
-export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }) => {
+export const BucketSpan = ({ setIsValid, hideEstimateButton = false }: Props) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { SearchFilterConfig, EuiSearchBarProps, Query } from '@elastic/eui';
@@ -20,7 +19,7 @@ interface JobFilterBarProps {
   queryText?: string;
 }
 
-export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) => {
+export const JobFilterBar = ({ queryText, setFilters }: JobFilterBarProps) => {
   const [error, setError] = useState<Error | null>(null);
   const {
     services: {

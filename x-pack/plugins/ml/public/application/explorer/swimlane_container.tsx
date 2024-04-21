@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -175,7 +174,7 @@ export interface SwimlaneProps {
  * Anomaly swim lane container responsible for handling resizing, pagination and
  * providing swim lane vis with required props.
  */
-export const SwimlaneContainer: FC<SwimlaneProps> = ({
+export const SwimlaneContainer = ({
   id,
   onResize,
   perPage,
@@ -197,7 +196,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   'data-test-subj': dataTestSubj,
   yAxisWidth,
   onRenderComplete,
-}) => {
+}: SwimlaneProps) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const {

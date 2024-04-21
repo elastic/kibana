@@ -43,7 +43,7 @@ import { IndexViewLogic } from './index_view_logic';
 
 import './index_mappings.scss';
 
-export const SearchIndexIndexMappings: React.FC = () => {
+export const SearchIndexIndexMappings = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { hasDocumentLevelSecurityFeature, isHiddenIndex } = useValues(IndexViewLogic);
   const { indexMappingComponent: IndexMappingComponent, productFeatures } = useValues(KibanaLogic);

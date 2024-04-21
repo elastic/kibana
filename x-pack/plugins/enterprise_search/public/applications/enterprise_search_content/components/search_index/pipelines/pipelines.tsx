@@ -49,7 +49,7 @@ import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_proce
 import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
 import { PipelinesLogic } from './pipelines_logic';
 
-export const SearchIndexPipelines: React.FC = () => {
+export const SearchIndexPipelines = () => {
   const {
     showMissingPipelineCallout,
     showAddMlInferencePipelineModal,

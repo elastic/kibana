@@ -23,14 +23,14 @@ interface PinEventActionProps {
   timelineType: TimelineType;
 }
 
-const PinEventActionComponent: React.FC<PinEventActionProps> = ({
+const PinEventActionComponent = ({
   ariaLabel,
   isAlert,
   noteIds,
   onPinClicked,
   eventIsPinned,
   timelineType,
-}) => {
+}: PinEventActionProps) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const tooltipContent = useMemo(
     () =>

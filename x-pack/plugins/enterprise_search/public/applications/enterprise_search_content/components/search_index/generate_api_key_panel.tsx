@@ -19,7 +19,7 @@ import { APIGettingStarted } from './components/getting_started/getting_started'
 import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 
-export const GenerateApiKeyPanel: React.FC = () => {
+export const GenerateApiKeyPanel = () => {
   const { isGenerateModalOpen } = useValues(OverviewLogic);
   const { indexName, isHiddenIndex } = useValues(IndexViewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);

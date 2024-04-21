@@ -26,7 +26,7 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'detectionEngineMultiSelectAutocompleteField';
 
-export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteProps> = ({
+export const MultiSelectAutocompleteComponent = ({
   browserFields,
   disabledText,
   isDisabled,

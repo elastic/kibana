@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -19,7 +18,7 @@ interface Props {
   jobId: string;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId }) => (
+export const RegressionExploration = ({ jobId }: Props) => (
   <ExplorationPageWrapper
     jobId={jobId}
     title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {

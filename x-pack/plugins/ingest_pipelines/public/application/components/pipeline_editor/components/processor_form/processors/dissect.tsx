@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -91,7 +91,7 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
   };
 };
 
-export const Dissect: FunctionComponent = () => {
+export const Dissect = () => {
   const { services } = useKibana();
   const fieldsConfig = getFieldsConfig(services.documentation.getDissectKeyModifiersUrl());
 

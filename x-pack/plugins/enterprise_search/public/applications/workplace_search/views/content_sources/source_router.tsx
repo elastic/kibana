@@ -38,7 +38,7 @@ import { SourceSettings } from './components/source_settings';
 import { SynchronizationRouter } from './components/synchronization';
 import { SourceLogic } from './source_logic';
 
-export const SourceRouter: React.FC = () => {
+export const SourceRouter = () => {
   const { sourceId } = useParams() as { sourceId: string };
   const { pathname } = useLocation();
   const { initializeSource, resetSourceState } = useActions(SourceLogic);

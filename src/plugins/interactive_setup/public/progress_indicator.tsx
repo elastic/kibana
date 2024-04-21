@@ -8,7 +8,6 @@
 
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiPanel, EuiSteps } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
@@ -30,7 +29,7 @@ function isKibanaPastPreboot(response?: Response, body?: StatusResponse) {
   return body?.status?.overall?.level === 'available';
 }
 
-export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ onSuccess }) => {
+export const ProgressIndicator = ({ onSuccess }: ProgressIndicatorProps) => {
   const { http } = useKibana();
   const [status, checkStatus] = useAsyncFn(async () => {
     let isAvailable: boolean | undefined = false;
@@ -102,7 +101,7 @@ export interface LoadingStepsProps {
   steps: Array<Optional<EuiStepProps, 'status' | 'children'>>;
 }
 
-export const LoadingSteps: FunctionComponent<LoadingStepsProps> = ({ currentStepId, steps }) => {
+export const LoadingSteps = ({ currentStepId, steps }: LoadingStepsProps) => {
   const [stepIndex, setStepIndex] = useState(0);
   const currentStepIndex = steps.findIndex((step) => step.id === currentStepId);
 

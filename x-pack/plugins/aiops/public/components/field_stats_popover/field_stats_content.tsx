@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
 import type {
   FieldStatsProps,
@@ -54,7 +53,7 @@ interface FieldStatsContentProps {
   dslQuery?: FieldStatsProps['dslQuery'];
 }
 
-export const FieldStatsContent: FC<FieldStatsContentProps> = ({
+export const FieldStatsContent = ({
   dataView: currentDataView,
   field,
   fieldName,
@@ -62,7 +61,7 @@ export const FieldStatsContent: FC<FieldStatsContentProps> = ({
   fieldStatsServices,
   timeRangeMs,
   dslQuery,
-}) => {
+}: FieldStatsContentProps) => {
   const [fieldStatsState, setFieldStatsState] = useState<FieldStatsState | undefined>();
 
   // Format timestamp to ISO formatted date strings

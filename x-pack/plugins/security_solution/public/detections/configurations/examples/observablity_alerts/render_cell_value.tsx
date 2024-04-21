@@ -27,9 +27,7 @@ const reason =
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps
-> = ({
+export const RenderCellValue = ({
   columnId,
   data,
   eventId,
@@ -44,7 +42,7 @@ export const RenderCellValue: React.FC<
   setCellProps,
   scopeId,
   key,
-}) => {
+}: EuiDataGridCellValueElementProps & CellValueElementProps) => {
   const value =
     useGetMappedNonEcsValue({
       data,

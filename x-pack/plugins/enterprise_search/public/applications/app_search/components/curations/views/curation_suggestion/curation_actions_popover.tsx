@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
 
-export const CurationActionsPopover: React.FC = () => {
+export const CurationActionsPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const {
     acceptSuggestion,

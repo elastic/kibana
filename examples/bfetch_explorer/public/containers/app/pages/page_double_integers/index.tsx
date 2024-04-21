@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { DoubleIntegers } from '../../../../components/double_integers';
 import { Page } from '../../../../components/page';
@@ -16,7 +16,7 @@ import { Sidebar } from '../../sidebar';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
 
-export const PageDoubleIntegers: React.FC<Props> = () => {
+export const PageDoubleIntegers = () => {
   const { explorer } = useDeps();
 
   return (

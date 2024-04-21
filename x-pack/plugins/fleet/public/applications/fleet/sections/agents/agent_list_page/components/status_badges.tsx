@@ -15,29 +15,34 @@ import {
 } from '../../services/agent_status';
 import type { SimplifiedAgentStatus } from '../../../../types';
 
-export const AgentStatusBadges: React.FC<{
-  showInactive?: boolean;
-  agentStatus: { [k in SimplifiedAgentStatus]: number };
-}> = memo(({ agentStatus, showInactive }) => {
-  const agentStatuses = useMemo(() => {
-    return AGENT_STATUSES.filter((status) =>
-      showInactive ? true : status !== 'inactive' && status !== 'unenrolled'
+export const AgentStatusBadges = memo(
+  ({
+    agentStatus,
+    showInactive,
+  }: {
+    showInactive?: boolean;
+    agentStatus: { [k in SimplifiedAgentStatus]: number };
+  }) => {
+    const agentStatuses = useMemo(() => {
+      return AGENT_STATUSES.filter((status) =>
+        showInactive ? true : status !== 'inactive' && status !== 'unenrolled'
+      );
+    }, [showInactive]);
+
+    return (
+      <EuiFlexGroup gutterSize="m">
+        {agentStatuses.map((status) => (
+          <EuiFlexItem key={status} grow={false}>
+            <AgentStatusBadge status={status} count={agentStatus[status] || 0} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     );
-  }, [showInactive]);
+  }
+);
 
-  return (
-    <EuiFlexGroup gutterSize="m">
-      {agentStatuses.map((status) => (
-        <EuiFlexItem key={status} grow={false}>
-          <AgentStatusBadge status={status} count={agentStatus[status] || 0} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
-});
-
-const AgentStatusBadge: React.FC<{ status: SimplifiedAgentStatus; count: number }> = memo(
-  ({ status, count }) => {
+const AgentStatusBadge = memo(
+  ({ status, count }: { status: SimplifiedAgentStatus; count: number }) => {
     return (
       <>
         <EuiHealth color={getColorForAgentStatus(status)}>

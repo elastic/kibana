@@ -9,11 +9,15 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const StreamLiveButton: React.FC<{
+export const StreamLiveButton = ({
+  isStreaming,
+  onStartStreaming,
+  onStopStreaming,
+}: {
   isStreaming: boolean;
   onStartStreaming: () => void;
   onStopStreaming: () => void;
-}> = ({ isStreaming, onStartStreaming, onStopStreaming }) =>
+}) =>
   isStreaming ? (
     <EuiButtonEmpty
       data-test-subj="infraStreamLiveButtonStopStreamingButton"

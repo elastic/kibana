@@ -7,13 +7,13 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React from 'react';
 
 interface Props {
   checkGroup?: string;
 }
 
-export const EmptyJourney: FC<Props> = ({ checkGroup }) => (
+export const EmptyJourney = ({ checkGroup }: Props) => (
   <EuiEmptyPrompt
     iconType="cross"
     title={

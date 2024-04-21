@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -23,7 +22,7 @@ interface Props {
   xJsonMode: XJsonModeType;
 }
 
-export const RuntimeMappingsEditor: FC<Props> = memo(
+export const RuntimeMappingsEditor = memo(
   ({
     convertToJson,
     xJsonMode,
@@ -31,7 +30,7 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
     setIsRuntimeMappingsEditorApplyButtonEnabled,
     advancedEditorRuntimeMappingsLastApplied,
     advancedRuntimeMappingsConfig,
-  }) => {
+  }: Props) => {
     return (
       <div data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor">
         <CodeEditor

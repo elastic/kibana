@@ -64,7 +64,7 @@ interface OwnProps {
 
 export type AlertsTableComponentProps = OwnProps;
 
-export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
+export const GroupedSubLevelComponent = ({
   currentAlertStatusFilterValue,
   defaultFilters = [],
   from,
@@ -87,7 +87,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
   tableId,
   to,
-}) => {
+}: AlertsTableComponentProps) => {
   const {
     services: { uiSettings },
   } = useKibana();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -67,8 +67,15 @@ export interface StepCreateFormProps {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
-  ({ createDataView, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
+export const StepCreateForm = React.memo(
+  ({
+    createDataView,
+    transformConfig,
+    transformId,
+    onChange,
+    overrides,
+    timeFieldName,
+  }: StepCreateFormProps) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
     const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);

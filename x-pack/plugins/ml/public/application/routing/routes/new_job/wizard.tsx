@@ -6,7 +6,6 @@
  */
 
 import { parse } from 'query-string';
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
@@ -195,7 +194,7 @@ export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string
   breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
+const PageWrapper = ({ location, jobType }: WizardPageProps) => {
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );

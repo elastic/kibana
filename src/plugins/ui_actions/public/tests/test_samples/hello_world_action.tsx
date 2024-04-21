@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ActionDefinition } from '../../actions';
 
-const MenuItem: React.FC = () => {
+const MenuItem = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>Hello world!</EuiFlexItem>

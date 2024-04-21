@@ -23,7 +23,7 @@ import { SEARCH_UI_TITLE } from './i18n';
 import { SearchUILogic } from './search_ui_logic';
 import './search_ui.scss';
 
-export const SearchUI: React.FC = () => {
+export const SearchUI = () => {
   const { loadFieldData } = useActions(SearchUILogic);
   const { hasEmptySchema } = useValues(EngineLogic);
 

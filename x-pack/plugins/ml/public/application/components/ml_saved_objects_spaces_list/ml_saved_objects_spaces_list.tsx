@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -33,13 +32,13 @@ const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.model
   defaultMessage: 'trained model',
 });
 
-export const MLSavedObjectsSpacesList: FC<Props> = ({
+export const MLSavedObjectsSpacesList = ({
   spacesApi,
   spaceIds,
   id,
   mlSavedObjectType,
   refresh,
-}) => {
+}: Props) => {
   const {
     savedObjects: { updateJobsSpaces, updateModelsSpaces },
   } = useMlApiContext();

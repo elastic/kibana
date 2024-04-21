@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ElementType, FC, memo } from 'react';
+import React, { ElementType, memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -26,8 +26,14 @@ interface EntryContentProps {
   showValueListModal: ElementType;
 }
 
-export const EntryContent: FC<EntryContentProps> = memo(
-  ({ entry, index, isNestedEntry = false, dataTestSubj, showValueListModal }) => {
+export const EntryContent = memo(
+  ({
+    entry,
+    index,
+    isNestedEntry = false,
+    dataTestSubj,
+    showValueListModal,
+  }: EntryContentProps) => {
     const { field, type } = entry;
     const value = getValue(entry);
     const operator = 'operator' in entry ? entry.operator : '';

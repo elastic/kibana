@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useState } from 'react';
 
 import {
@@ -40,7 +39,7 @@ interface Props {
   taskType?: SupportedPytorchTasksType;
 }
 
-export const PipelineDetails: FC<Props> = memo(
+export const PipelineDetails = memo(
   ({
     handlePipelineConfigUpdate,
     modelId,
@@ -50,7 +49,7 @@ export const PipelineDetails: FC<Props> = memo(
     initialPipelineConfig,
     setHasUnsavedChanges,
     taskType,
-  }) => {
+  }: Props) => {
     const [isProcessorConfigValid, setIsProcessorConfigValid] = useState<boolean>(true);
     const [processorConfigError, setProcessorConfigError] = useState<string | undefined>();
 

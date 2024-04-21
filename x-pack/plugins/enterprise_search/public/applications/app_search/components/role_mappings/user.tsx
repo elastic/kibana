@@ -27,7 +27,7 @@ import { RoleMappingsLogic } from './role_mappings_logic';
 const standardRoles = ['owner', 'admin'] as unknown as RoleTypes[];
 const advancedRoles = ['dev', 'editor', 'analyst'] as unknown as RoleTypes[];
 
-export const User: React.FC = () => {
+export const User = () => {
   const {
     handleSaveUser,
     closeUsersAndRolesFlyout,

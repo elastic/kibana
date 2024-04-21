@@ -14,7 +14,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSearch, AnalyticsTable } from '../components';
 import { TOP_QUERIES_NO_CLICKS } from '../constants';
 
-export const TopQueriesNoClicks: React.FC = () => {
+export const TopQueriesNoClicks = () => {
   const { topQueriesNoClicks } = useValues(AnalyticsLogic);
 
   return (

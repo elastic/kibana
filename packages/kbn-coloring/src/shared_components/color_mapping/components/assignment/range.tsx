@@ -10,10 +10,13 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFieldNumber, EuiFlexItem } from '@elastic/eui';
 import { ColorMapping } from '../../config';
 
-export const Range: React.FC<{
+export const Range = ({
+  rule,
+  updateValue,
+}: {
   rule: ColorMapping.RuleRange;
   updateValue: (min: number, max: number, minInclusive: boolean, maxInclusive: boolean) => void;
-}> = ({ rule, updateValue }) => {
+}) => {
   const minValid = rule.min <= rule.max;
   const maxValid = rule.max >= rule.min;
 

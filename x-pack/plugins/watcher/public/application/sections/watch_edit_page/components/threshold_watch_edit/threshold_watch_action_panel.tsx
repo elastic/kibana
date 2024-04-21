@@ -21,7 +21,7 @@ interface Props {
   };
 }
 
-export const WatchActionsPanel: React.FunctionComponent<Props> = ({ actionErrors }) => {
+export const WatchActionsPanel = ({ actionErrors }: Props) => {
   const { watch } = useContext(WatchContext);
 
   const { data: settings, isLoading } = useLoadSettings();

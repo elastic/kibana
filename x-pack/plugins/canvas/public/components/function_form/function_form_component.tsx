@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { RenderArgData } from '../../expression_types/types';
 
 type FunctionFormComponentProps = RenderArgData;
 
-export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps> = (props) => {
+export const FunctionFormComponent = (props: FunctionFormComponentProps) => {
   const passedProps = {
     name: props.name,
     removable: props.removable,

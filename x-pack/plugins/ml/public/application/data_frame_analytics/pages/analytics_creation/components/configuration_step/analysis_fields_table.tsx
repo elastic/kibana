@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
 import {
   EuiCallOut,
@@ -16,7 +15,6 @@ import {
   LEFT_ALIGNMENT,
   SortableProperties,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -37,17 +35,7 @@ const minimumFieldsMessage = i18n.translate(
 const checkboxDisabledCheck = (item: FieldSelectionItem) =>
   item.is_required === true || (item.reason && item.reason.includes('unsupported type'));
 
-export const AnalysisFieldsTable: FC<{
-  dependentVariable?: string;
-  includes: string[];
-  isJobTypeWithDepVar: boolean;
-  setFormState: React.Dispatch<React.SetStateAction<any>>;
-  minimumFieldsRequiredMessage?: string;
-  setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
-  tableItems: FieldSelectionItem[];
-  unsupportedFieldsError?: string;
-  setUnsupportedFieldsError: React.Dispatch<React.SetStateAction<any>>;
-}> = React.memo(
+export const AnalysisFieldsTable = React.memo(
   ({
     dependentVariable,
     includes,
@@ -58,6 +46,16 @@ export const AnalysisFieldsTable: FC<{
     tableItems,
     unsupportedFieldsError,
     setUnsupportedFieldsError,
+  }: {
+    dependentVariable?: string;
+    includes: string[];
+    isJobTypeWithDepVar: boolean;
+    setFormState: React.Dispatch<React.SetStateAction<any>>;
+    minimumFieldsRequiredMessage?: string;
+    setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
+    tableItems: FieldSelectionItem[];
+    unsupportedFieldsError?: string;
+    setUnsupportedFieldsError: React.Dispatch<React.SetStateAction<any>>;
   }) => {
     const [sortableProperties, setSortableProperties] = useState<SortableProperties<any>>();
     const [currentPaginationData, setCurrentPaginationData] = useState<{
@@ -301,14 +299,6 @@ export const AnalysisFieldsTable: FC<{
         )}
         <EuiSpacer />
       </Fragment>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.dependentVariable === nextProps.dependentVariable &&
-      isEqual(prevProps.includes, nextProps.includes) &&
-      isEqual(prevProps.tableItems, nextProps.tableItems) &&
-      prevProps.unsupportedFieldsError === nextProps.unsupportedFieldsError
     );
   }
 );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import { of, BehaviorSubject } from 'rxjs';
@@ -41,7 +41,7 @@ describe('KibanaRootContextProvider', () => {
     });
   };
 
-  const InnerComponent: FC = () => {
+  const InnerComponent = () => {
     const theme = useEuiTheme();
     useEffect(() => {
       euiTheme = theme;

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRefreshAnalyticsList } from '../../../../common';
 
-export const RefreshAnalyticsListButton: FC = () => {
+export const RefreshAnalyticsListButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   return (

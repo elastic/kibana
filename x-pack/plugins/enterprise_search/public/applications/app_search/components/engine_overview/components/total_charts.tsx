@@ -21,7 +21,7 @@ import { generateEnginePath } from '../../engine';
 
 import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
 
-export const TotalCharts: React.FC = () => {
+export const TotalCharts = () => {
   const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);
 
   return (

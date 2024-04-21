@@ -52,7 +52,7 @@ interface NavigationProps {
   activeTab?: TimelineTabs;
 }
 
-const NavigationComponent: React.FC<NavigationProps> = ({
+const NavigationComponent = ({
   fullScreen,
   globalFullScreen,
   onCloseOverlay,
@@ -61,7 +61,7 @@ const NavigationComponent: React.FC<NavigationProps> = ({
   toggleFullScreen,
   graphEventId,
   activeTab,
-}) => {
+}: NavigationProps) => {
   const title = () => {
     if (isActiveTimelines) {
       return activeTab === TimelineTabs.graph ? i18n.CLOSE_ANALYZER : i18n.CLOSE_SESSION;

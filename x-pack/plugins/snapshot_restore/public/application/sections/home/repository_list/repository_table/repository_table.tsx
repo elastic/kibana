@@ -34,13 +34,13 @@ interface Props {
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-export const RepositoryTable: React.FunctionComponent<Props> = ({
+export const RepositoryTable = ({
   repositories,
   managedRepository,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
-}) => {
+}: Props) => {
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 

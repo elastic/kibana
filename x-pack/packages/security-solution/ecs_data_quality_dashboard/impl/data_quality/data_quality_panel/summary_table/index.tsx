@@ -45,7 +45,7 @@ export interface Props {
   toggleExpanded: (indexName: string) => void;
 }
 
-const SummaryTableComponent: React.FC<Props> = ({
+const SummaryTableComponent = ({
   formatBytes,
   formatNumber,
   getTableColumns,
@@ -59,7 +59,7 @@ const SummaryTableComponent: React.FC<Props> = ({
   setSorting,
   sorting,
   toggleExpanded,
-}) => {
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const columns = useMemo(
     () =>

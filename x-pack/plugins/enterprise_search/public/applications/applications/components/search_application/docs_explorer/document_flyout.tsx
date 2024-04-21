@@ -35,7 +35,7 @@ import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';
 
-export const DocumentFlyout: React.FC = () => {
+export const DocumentFlyout = () => {
   const { fieldTypesByIndex } = useValues(SearchApplicationDocsExplorerLogic);
   const { selectedDocument, setSelectedDocument } = useSelectedDocument();
 

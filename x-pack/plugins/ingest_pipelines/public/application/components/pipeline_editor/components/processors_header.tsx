@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,10 +19,10 @@ export interface Props {
   hasProcessors: boolean;
 }
 
-export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson, hasProcessors }) => {
+export const ProcessorsHeader = ({ onLoadJson, hasProcessors }: Props) => {
   const { services } = useKibana();
 
-  const ProcessorTitle: FunctionComponent = () => (
+  const ProcessorTitle = () => (
     <EuiTitle size="s">
       <h3>
         {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {

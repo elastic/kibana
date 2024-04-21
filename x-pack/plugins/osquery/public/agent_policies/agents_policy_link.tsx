@@ -23,7 +23,7 @@ interface AgentsPolicyLinkProps {
   policyId: string;
 }
 
-const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }) => {
+const AgentsPolicyLinkComponent = ({ policyId }: AgentsPolicyLinkProps) => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;

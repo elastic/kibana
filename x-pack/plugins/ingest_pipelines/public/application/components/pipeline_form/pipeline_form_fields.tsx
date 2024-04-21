@@ -36,7 +36,7 @@ interface Props {
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
-export const PipelineFormFields: React.FunctionComponent<Props> = ({
+export const PipelineFormFields = ({
   processors,
   onFailure,
   onLoadJson,
@@ -46,7 +46,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   hasMeta,
   onEditorFlyoutOpen,
   canEditName,
-}) => {
+}: Props) => {
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
   const [isMetaVisible, setIsMetaVisible] = useState<boolean>(hasMeta);

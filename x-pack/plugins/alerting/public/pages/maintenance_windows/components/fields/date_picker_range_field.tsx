@@ -23,8 +23,8 @@ interface DatePickerRangeFieldProps {
   'data-test-subj'?: string;
 }
 
-export const DatePickerRangeField: React.FC<DatePickerRangeFieldProps> = React.memo(
-  ({ fields, timezone, showTimeSelect = true, ...rest }) => {
+export const DatePickerRangeField = React.memo(
+  ({ fields, timezone, showTimeSelect = true, ...rest }: DatePickerRangeFieldProps) => {
     const [today] = useState<Moment>(moment());
 
     const { setFieldValue } = useFormContext();

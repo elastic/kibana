@@ -28,7 +28,7 @@ interface BulkAlertTagsPanelComponentProps {
   onSubmit: SetAlertTagsFunc;
 }
 
-const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = ({
+const BulkAlertTagsPanelComponent = ({
   alertItems,
   refresh,
   refetchQuery,
@@ -36,7 +36,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
   clearSelection,
   closePopoverMenu,
   onSubmit,
-}) => {
+}: BulkAlertTagsPanelComponentProps) => {
   const [defaultAlertTagOptions] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
 
   const existingTags = useMemo(

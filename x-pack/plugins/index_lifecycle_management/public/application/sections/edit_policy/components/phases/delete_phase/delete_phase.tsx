@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { Phase } from '../phase';
 import { SnapshotPoliciesField } from '../shared_fields';
 
-export const DeletePhase: FunctionComponent = () => {
+export const DeletePhase = () => {
   return <Phase phase="delete" topLevelSettings={<SnapshotPoliciesField />} />;
 };

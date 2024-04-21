@@ -14,7 +14,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { DocumentCreationLogic } from '..';
 import { DOCUMENT_CREATION_ERRORS, DOCUMENT_CREATION_WARNINGS } from '../constants';
 
-export const Errors: React.FC = () => {
+export const Errors = () => {
   const { errors, warnings } = useValues(DocumentCreationLogic);
 
   return (

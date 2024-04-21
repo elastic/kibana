@@ -22,14 +22,14 @@ interface Props {
   textWidth?: number;
 }
 
-const ChartLegendItemComponent: React.FC<Props> = ({
+const ChartLegendItemComponent = ({
   color,
   count,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   onClick,
   text,
   textWidth,
-}) => (
+}: Props) => (
   <ChartLegendLink
     color="text"
     data-test-subj={dataTestSubj}

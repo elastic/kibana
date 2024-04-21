@@ -42,6 +42,7 @@ export interface SyntheticsAppProps {
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
+  children?: React.ReactNode;
 }
 
 export interface SyntheticsSettingsContextValues {
@@ -78,10 +79,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
-export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = ({
-  children,
-  ...props
-}) => {
+export const SyntheticsSettingsContextProvider = ({ children, ...props }: SyntheticsAppProps) => {
   const {
     basePath,
     isApmAvailable,

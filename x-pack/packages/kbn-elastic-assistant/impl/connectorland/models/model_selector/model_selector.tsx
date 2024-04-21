@@ -25,8 +25,12 @@ interface Props {
  *
  * TODO: Pull from API once connector supports it `GET https://api.openai.com/v1/models` as models are added/deprecated
  */
-export const ModelSelector: React.FC<Props> = React.memo(
-  ({ models = DEFAULT_MODELS, onModelSelectionChange, selectedModel = DEFAULT_MODELS[0] }) => {
+export const ModelSelector = React.memo(
+  ({
+    models = DEFAULT_MODELS,
+    onModelSelectionChange,
+    selectedModel = DEFAULT_MODELS[0],
+  }: Props) => {
     // Form options
     const [options, setOptions] = useState<EuiComboBoxOptionOption[]>(
       models.map((model) => ({ 'data-test-subj': model, label: model }))

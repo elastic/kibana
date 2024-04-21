@@ -36,7 +36,7 @@ jest.mock('../../lib/kibana', () => {
 });
 
 describe('useSignalHelpers', () => {
-  const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+  const wrapperContainer = ({ children }: { children?: React.ReactNode }) => (
     <TestProviders>{children}</TestProviders>
   );
 

@@ -27,7 +27,7 @@ import { CrawlEvent, readableCrawlerStatuses } from '../types';
 import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
-export const CrawlRequestsTable: React.FC = () => {
+export const CrawlRequestsTable = () => {
   const { events } = useValues(CrawlerLogic);
   const { fetchCrawlRequest, openFlyout } = useActions(CrawlDetailLogic);
 

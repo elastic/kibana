@@ -45,7 +45,7 @@ interface Props {
   selectedAgentPolicyId?: string;
 }
 
-export const StepSelectHosts: React.FunctionComponent<Props> = ({
+export const StepSelectHosts = ({
   agentPolicy,
   updateAgentPolicy,
   newAgentPolicy,
@@ -57,7 +57,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   setHasAgentPolicyError,
   updateSelectedTab,
   selectedAgentPolicyId,
-}) => {
+}: Props) => {
   let agentPolicies: AgentPolicy[] = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
     page: 1,

@@ -53,7 +53,7 @@ interface DatasourceWrapperProps {
   datasourceProps: DatasourceRenderProps;
 }
 
-const DatasourceWrapperComponent: React.FunctionComponent<DatasourceWrapperProps> = (props) => {
+const DatasourceWrapperComponent = (props: DatasourceWrapperProps) => {
   const domNodeRef = useRef<HTMLDivElement>(null);
   const datasourceRef = useRef<UpdatePropsRef<DatasourceRenderProps>>();
   const [argument, setArgument] = useState<ReactPortal>();

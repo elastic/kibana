@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
@@ -18,7 +17,7 @@ interface JobStatusBadgeProps {
   job: MlSummaryJob;
 }
 
-const MlJobStatusBadgeComponent: FC<JobStatusBadgeProps> = ({ job }) => {
+const MlJobStatusBadgeComponent = ({ job }: JobStatusBadgeProps) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
   const color = isStarted ? 'success' : 'danger';
   const text = isStarted ? i18n.ML_JOB_STARTED : i18n.ML_JOB_STOPPED;

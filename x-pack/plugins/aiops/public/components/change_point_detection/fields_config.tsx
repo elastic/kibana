@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -64,7 +64,7 @@ const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashb
 /**
  * Contains panels with controls and change point results.
  */
-export const FieldsConfig: FC = () => {
+export const FieldsConfig = () => {
   const {
     requestParams: { fieldConfigs },
     updateRequestParams,
@@ -162,7 +162,7 @@ export interface FieldPanelProps {
  * @param removeDisabled
  * @constructor
  */
-const FieldPanel: FC<FieldPanelProps> = ({
+const FieldPanel = ({
   panelIndex,
   fieldConfig,
   onChange,
@@ -170,7 +170,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
   removeDisabled,
   onSelectionChange,
   'data-test-subj': dataTestSubj,
-}) => {
+}: FieldPanelProps) => {
   const {
     embeddable,
     application: { capabilities },
@@ -626,12 +626,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
 interface FieldsControlsProps {
   fieldConfig: FieldConfig;
   onChange: (update: FieldConfig) => void;
+  children: React.ReactNode;
 }
 
 /**
  * Renders controls for fields selection and emits updates on change.
  */
-export const FieldsControls: FC<FieldsControlsProps> = ({ fieldConfig, onChange, children }) => {
+export const FieldsControls = ({ fieldConfig, onChange, children }: FieldsControlsProps) => {
   const { splitFieldsOptions, combinedQuery } = useChangePointDetectionContext();
   const { dataView } = useDataSource();
   const { data, uiSettings, fieldFormats, charts, fieldStats } = useAiopsAppContext();
@@ -710,13 +711,13 @@ interface ChangePointResultsProps {
 /**
  * Handles request and rendering results of the change point  with provided config.
  */
-export const ChangePointResults: FC<ChangePointResultsProps> = ({
+export const ChangePointResults = ({
   fieldConfig,
   splitFieldCardinality,
   isLoading,
   annotations,
   onSelectionChange,
-}) => {
+}: ChangePointResultsProps) => {
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -27,7 +26,7 @@ interface Props {
   results: FindFileStructureResponse;
   closeFlyout(): void;
 }
-export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
+export const ExplanationFlyout = ({ results, closeFlyout }: Props) => {
   const explanation = results.explanation!;
   return (
     <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'}>
@@ -60,7 +59,7 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
   );
 };
 
-const Content: FC<{ explanation: string[] }> = ({ explanation }) => (
+const Content = ({ explanation }: { explanation: string[] }) => (
   <>
     <EuiText size={'s'}>
       <FormattedMessage

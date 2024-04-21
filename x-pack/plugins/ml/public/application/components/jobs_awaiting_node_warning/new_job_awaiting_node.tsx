@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JobType } from '../../../../common/types/saved_objects';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 import { useEnabledFeatures } from '../../contexts/ml';
 
-interface Props {
-  jobType: JobType;
-}
-
-export const NewJobAwaitingNodeWarning: FC<Props> = () => {
+export const NewJobAwaitingNodeWarning = () => {
   const { showNodeInfo } = useEnabledFeatures();
   if (lazyMlNodesAvailable() === false) {
     return null;

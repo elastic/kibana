@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../../hooks/use_documentation_links';
-export const EditTransformFlyoutCallout: FC = () => {
+export const EditTransformFlyoutCallout = () => {
   const { esTransformUpdate } = useDocumentationLinks();
 
   return (

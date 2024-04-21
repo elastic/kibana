@@ -64,7 +64,7 @@ interface Props {
   filterSeriesByGroupName?: string;
 }
 
-export const CriterionPreview: React.FC<Props> = ({
+export const CriterionPreview = ({
   ruleParams,
   chartCriterion,
   logViewReference,
@@ -72,7 +72,7 @@ export const CriterionPreview: React.FC<Props> = ({
   executionTimeRange,
   annotations,
   filterSeriesByGroupName,
-}) => {
+}: Props) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
     const criteria = field && comparator && value ? [{ field, comparator, value }] : [];
@@ -135,7 +135,7 @@ interface ChartProps {
   filterSeriesByGroupName?: string;
 }
 
-const CriterionPreviewChart: React.FC<ChartProps> = ({
+const CriterionPreviewChart = ({
   buckets,
   logViewReference,
   threshold,
@@ -144,7 +144,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   executionTimeRange,
   annotations,
   filterSeriesByGroupName,
-}) => {
+}: ChartProps) => {
   const chartTheme = useTimelineChartTheme();
   const timezone = useKibanaTimeZoneSetting();
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -36,7 +35,7 @@ interface Props {
   id?: string;
 }
 
-export const SamplingMenu: FC<Props> = ({ randomSampler, reload, id }) => {
+export const SamplingMenu = ({ randomSampler, reload, id }: Props) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
   const samplingProbability = useObservable(

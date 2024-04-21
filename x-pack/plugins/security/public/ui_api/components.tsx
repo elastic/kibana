@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren, PropsWithRef } from 'react';
+import type { PropsWithChildren, PropsWithRef } from 'react';
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -30,7 +30,7 @@ export const getComponents = ({ core }: GetComponentsOptions) => {
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
-  function wrapLazy<T>(fn: () => Promise<FC<T>>) {
+  function wrapLazy<T>(fn: () => Promise<(props: T) => JSX.Element>) {
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
       <LazyWrapper fn={fn} core={core} props={props} />
     );

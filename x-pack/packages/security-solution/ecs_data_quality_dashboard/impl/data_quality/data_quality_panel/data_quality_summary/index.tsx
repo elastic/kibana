@@ -49,7 +49,7 @@ export interface Props {
   onCheckCompleted: OnCheckCompleted;
 }
 
-const DataQualitySummaryComponent: React.FC<Props> = ({
+const DataQualitySummaryComponent = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   formatBytes,
@@ -67,7 +67,7 @@ const DataQualitySummaryComponent: React.FC<Props> = ({
   totalIndicesChecked,
   totalSizeInBytes,
   onCheckCompleted,
-}) => {
+}: Props) => {
   const errorSummary = useMemo(() => getErrorSummaries(patternRollups), [patternRollups]);
 
   return (

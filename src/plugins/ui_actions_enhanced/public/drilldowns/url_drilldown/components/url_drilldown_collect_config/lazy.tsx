@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { UrlDrilldownOptionsProps } from './url_drilldown_options';
 import type { UrlDrilldownCollectConfigProps } from './url_drilldown_collect_config';
 
@@ -18,7 +18,7 @@ const UrlDrilldownCollectConfigLazy = React.lazy(() =>
 
 export type { UrlDrilldownCollectConfigProps };
 
-export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps> = (props) => {
+export const UrlDrilldownCollectConfig = (props: UrlDrilldownCollectConfigProps) => {
   return (
     <React.Suspense fallback={null}>
       <UrlDrilldownCollectConfigLazy {...props} />
@@ -32,7 +32,7 @@ const UrlDrilldownOptionsComponentLazy = React.lazy(() =>
   }))
 );
 
-export const UrlDrilldownOptionsComponent: React.FC<UrlDrilldownOptionsProps> = (props) => {
+export const UrlDrilldownOptionsComponent = (props: UrlDrilldownOptionsProps) => {
   return (
     <React.Suspense fallback={null}>
       <UrlDrilldownOptionsComponentLazy {...props} />

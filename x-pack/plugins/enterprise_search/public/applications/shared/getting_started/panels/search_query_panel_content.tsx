@@ -27,12 +27,12 @@ interface SearchQueryPanelContentProps {
   setSelectedLanguage: (selectedLanguage: LanguageDefinition) => void;
 }
 
-export const SearchQueryPanelContent: React.FC<SearchQueryPanelContentProps> = ({
+export const SearchQueryPanelContent = ({
   assetBasePath,
   codeArgs,
   selectedLanguage,
   setSelectedLanguage,
-}) => {
+}: SearchQueryPanelContentProps) => {
   const { services } = useKibana<KibanaDeps>();
   return (
     <CodeBox

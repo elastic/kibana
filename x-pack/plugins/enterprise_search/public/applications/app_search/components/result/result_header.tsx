@@ -27,7 +27,7 @@ interface Props {
   showClick: boolean;
 }
 
-export const ResultHeader: React.FC<Props> = ({
+export const ResultHeader = ({
   showScore,
   resultMeta,
   isMetaEngine,
@@ -35,7 +35,7 @@ export const ResultHeader: React.FC<Props> = ({
   documentLink,
   resultPosition,
   showClick,
-}) => {
+}: Props) => {
   return (
     <header className="appSearchResultHeader">
       <EuiFlexGroup

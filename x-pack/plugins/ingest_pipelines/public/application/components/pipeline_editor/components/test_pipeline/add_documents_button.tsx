@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
@@ -20,7 +20,7 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const AddDocumentsButton: FunctionComponent<Props> = ({ openFlyout }) => {
+export const AddDocumentsButton = ({ openFlyout }: Props) => {
   return (
     <EuiButtonEmpty
       size="s"

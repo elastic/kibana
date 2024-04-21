@@ -39,7 +39,7 @@ import { Upgrade } from './upgrade';
 import { useInsights } from '../use_insights';
 import type { AlertsInsight } from '../types';
 
-const AiInsightsComponent: React.FC = () => {
+const AiInsightsComponent = () => {
   const {
     assistantAvailability: { isAssistantEnabled },
     knowledgeBase,

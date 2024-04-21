@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, createContext, useEffect, useState, useContext, useMemo } from 'react';
+import React, { createContext, useEffect, useState, useContext, useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { type AggregateQuery } from '@kbn/es-query';
@@ -49,9 +49,12 @@ export const FilterQueryContext = createContext<{
  * @param children
  * @constructor
  */
-export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
+export const FilterQueryContextProvider = ({
   children,
   timeRange,
+}: {
+  timeRange?: TimeRange;
+  children: React.ReactNode;
 }) => {
   const {
     data: {

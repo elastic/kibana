@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiIcon, EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
@@ -14,7 +14,7 @@ import { CodeEditor } from '@kbn/code-editor';
 
 import { useAppContext } from '../../context';
 
-export const ParametersTab: FunctionComponent = () => {
+export const ParametersTab = () => {
   const {
     store: { payload },
     updatePayload,

@@ -36,12 +36,12 @@ interface CasesAppWithContextProps {
   getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
-const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
+const CasesAppWithContext = React.memo(
   ({
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     getFilesClient,
-  }) => {
+  }: CasesAppWithContextProps) => {
     return (
       <CasesApp
         externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
@@ -54,7 +54,7 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
 
 CasesAppWithContext.displayName = 'CasesAppWithContext';
 
-export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
+export const App = ({ deps }: { deps: RenderAppProps }) => {
   const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
   const { history } = mountParams;
 

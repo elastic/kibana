@@ -8,7 +8,6 @@
 
 import React, { ElementType } from 'react';
 import { css } from '@emotion/react';
-import type { FC } from 'react';
 import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type {
@@ -59,7 +58,7 @@ interface ExceptionItemsProps {
   showValueListModal: ElementType;
 }
 
-const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
+const ExceptionItemsComponent = ({
   lastUpdated,
   viewerStatus,
   isReadOnly,
@@ -82,7 +81,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   onEditExceptionItem,
   onCreateExceptionListItem,
   showValueListModal,
-}) => {
+}: ExceptionItemsProps) => {
   const ExceptionsUtility = exceptionsUtilityComponent;
   if (!exceptions.length || viewerStatus)
     return (

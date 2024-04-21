@@ -32,7 +32,7 @@ interface Props {
   detailsItemId: string | null;
 }
 
-export const Map: React.FC<Props> = ({
+export const Map = ({
   nodes,
   options,
   currentTime,
@@ -43,7 +43,7 @@ export const Map: React.FC<Props> = ({
   bottomMargin,
   staticHeight,
   detailsItemId,
-}) => {
+}: Props) => {
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
   return (

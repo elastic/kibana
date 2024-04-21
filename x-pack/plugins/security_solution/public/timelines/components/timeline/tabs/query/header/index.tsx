@@ -49,13 +49,13 @@ const DataProvidersContainer = styled.div<{ $shouldShowQueryBuilder: boolean }>`
   }
 `;
 
-const QueryTabHeaderComponent: React.FC<Props> = ({
+const QueryTabHeaderComponent = ({
   filterManager,
   show,
   showCallOutUnauthorizedMsg,
   status,
   timelineId,
-}) => {
+}: Props) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const getIsDataProviderVisible = useMemo(

@@ -43,13 +43,13 @@ export interface CreateConnectorFlyoutProps {
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
-const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
+const CreateConnectorFlyoutComponent = ({
   actionTypeRegistry,
   featureId,
   onClose,
   onConnectorCreated,
   onTestConnector,
-}) => {
+}: CreateConnectorFlyoutProps) => {
   const {
     application: { capabilities },
   } = useKibana().services;

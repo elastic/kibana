@@ -32,20 +32,7 @@ const AgentPolicyName = styled(EuiDescriptionListDescription)`
   overflow: hidden;
 `;
 
-export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
-  from: EditPackagePolicyFrom;
-  cancelUrl: string;
-  onCancel?: React.ReactEventHandler;
-  agentPolicy?: AgentPolicy;
-  packageInfo?: PackageInfo;
-  integrationInfo?: RegistryPolicyTemplate;
-  'data-test-subj'?: string;
-  tabs?: Array<{
-    title: string;
-    isSelected: boolean;
-    onClick: React.ReactEventHandler;
-  }>;
-}> = memo(
+export const CreatePackagePolicySinglePageLayout = memo(
   ({
     from,
     cancelUrl,
@@ -56,6 +43,20 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     children,
     'data-test-subj': dataTestSubj,
     tabs = [],
+  }: {
+    children: React.ReactNode;
+    from: EditPackagePolicyFrom;
+    cancelUrl: string;
+    onCancel?: React.ReactEventHandler;
+    agentPolicy?: AgentPolicy;
+    packageInfo?: PackageInfo;
+    integrationInfo?: RegistryPolicyTemplate;
+    'data-test-subj'?: string;
+    tabs?: Array<{
+      title: string;
+      isSelected: boolean;
+      onClick: React.ReactEventHandler;
+    }>;
   }) => {
     const isAdd = useMemo(() => ['package', 'policy'].includes(from), [from]);
     const isEdit = useMemo(() => ['edit', 'package-edit'].includes(from), [from]);

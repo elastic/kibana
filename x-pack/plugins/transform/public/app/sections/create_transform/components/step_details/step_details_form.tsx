@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -74,7 +73,7 @@ interface StepDetailsFormProps {
   stepDefineState: StepDefineExposedState;
 }
 
-export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
+export const StepDetailsForm = React.memo<StepDetailsFormProps>(
   ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
     const { application, i18n: i18nStart, theme } = useAppDependencies();
     const { capabilities } = application;

@@ -7,7 +7,7 @@
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import React, { FC } from 'react';
+import React from 'react';
 import { FormattedFilterViewInstance } from '../../../../types';
 import { Filter } from '../filter.component';
 
@@ -30,7 +30,7 @@ const filter: FormattedFilterViewInstance = {
   },
 };
 
-const component: FC<any> = ({ value }) => (
+const component = ({ value }: any) => (
   <EuiText>
     <EuiTextColor color="success">
       <h3>{value}</h3>

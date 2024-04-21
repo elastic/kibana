@@ -32,7 +32,7 @@ interface Props {
   onClick(): void;
 }
 
-export const RoleMappingsHeading: React.FC<Props> = ({ productName, docsLink, onClick }) => (
+export const RoleMappingsHeading = ({ productName, docsLink, onClick }: Props) => (
   <header>
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem>

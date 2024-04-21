@@ -45,8 +45,8 @@ interface Props {
 /**
  * Knowledge Base Settings -- enable and disable LangChain integration, Knowledge Base, and ESQL KB Documents
  */
-export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
-  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
+export const KnowledgeBaseSettings = React.memo(
+  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }: Props) => {
     const { http } = useAssistantContext();
     const {
       data: kbStatus,

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { TableListView } from '@kbn/content-management-table-list-view';
@@ -30,7 +29,7 @@ function naivelyFuzzify(query: string): string {
   return query.includes('*') ? query : `*${query}*`;
 }
 
-export const App: FunctionComponent = () => {
+export const App = () => {
   const { filesClient, getFileKindDefinition, getAllFindKindDefinitions } =
     useFilesManagementContext();
   const [showDiagnosticsFlyout, setShowDiagnosticsFlyout] = useState<boolean>(false);

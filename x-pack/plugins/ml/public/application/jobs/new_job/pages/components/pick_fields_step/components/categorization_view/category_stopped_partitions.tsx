@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +17,7 @@ import type { CategorizationJobCreator } from '../../../../../common/job_creator
 import { ml } from '../../../../../../../services/ml_api_service';
 
 const NUMBER_OF_PREVIEW = 5;
-export const CategoryStoppedPartitions: FC = () => {
+export const CategoryStoppedPartitions = () => {
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [tableRow, setTableRow] = useState<Array<{ partitionName: string }>>([]);

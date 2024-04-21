@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSwitch } from '@elastic/eui';
@@ -13,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
-export const AnnotationsSwitch: FC = () => {
+export const AnnotationsSwitch = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [annotationsEnabled, setAnnotationsEnabled] = useState(jobCreator.modelChangeAnnotations);
   const [showCallOut, setShowCallout] = useState(

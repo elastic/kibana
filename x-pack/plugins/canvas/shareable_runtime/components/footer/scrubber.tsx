@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import classnames from 'classnames';
 import { PagePreview } from './page_preview';
 import { useCanvasShareableState } from '../../context';
@@ -32,7 +32,7 @@ const THUMBNAIL_HEIGHT = 100;
  * The panel of previews of the pages in the workpad, allowing one to select and
  * navigate to a specific page.
  */
-export const ScrubberComponent: FC<Props> = ({ isScrubberVisible, pages }) => {
+export const ScrubberComponent = ({ isScrubberVisible, pages }: Props) => {
   const className = isScrubberVisible ? classnames(css.root, css.visible) : css.root;
 
   const slides = pages.map((page, index) => (
@@ -49,7 +49,7 @@ export const ScrubberComponent: FC<Props> = ({ isScrubberVisible, pages }) => {
 /**
  * A store-connected container for the `Scrubber` component.
  */
-export const Scrubber: FC<{}> = () => {
+export const Scrubber = () => {
   const [{ workpad, footer }] = useCanvasShareableState();
 
   if (!workpad) {

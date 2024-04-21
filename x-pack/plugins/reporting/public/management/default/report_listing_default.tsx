@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,7 +17,7 @@ import { ReportListingTable } from '../report_listing_table';
  * Used in non-stateful (Serverless)
  * Does not render controls for features only applicable in Stateful
  */
-export const ReportListingDefault: FC<ListingPropsInternal> = (props) => {
+export const ReportListingDefault = (props: ListingPropsInternal) => {
   const { apiClient, capabilities, config, navigateToUrl, toasts, urlService, ...listingProps } =
     props;
   return (

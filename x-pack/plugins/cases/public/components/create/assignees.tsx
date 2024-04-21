@@ -75,7 +75,7 @@ const userProfileToComboBoxOption = (userProfile: UserProfileWithAvatar) => ({
 
 const comboBoxOptionToAssignee = (option: EuiComboBoxOptionOption) => ({ uid: option.value });
 
-const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
+const AssigneesFieldComponent = React.memo(
   ({
     field,
     isLoading,
@@ -85,7 +85,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
     selectedOptions,
     setSelectedOptions,
     onSearchComboChange,
-  }) => {
+  }: FieldProps) => {
     const { setValue } = field;
     const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -200,7 +200,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
 
 AssigneesFieldComponent.displayName = 'AssigneesFieldComponent';
 
-const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
+const AssigneesComponent = ({ isLoading: isLoadingForm }: Props) => {
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');

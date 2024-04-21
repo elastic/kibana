@@ -32,7 +32,7 @@ interface OperatorState {
   'aria-label'?: string;
 }
 
-export const OperatorComponent: React.FC<OperatorState> = ({
+export const OperatorComponent = ({
   isClearable = false,
   isDisabled = false,
   isLoading = false,
@@ -43,7 +43,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
   placeholder,
   selectedField,
   'aria-label': ariaLabel,
-}): JSX.Element => {
+}: OperatorState): JSX.Element => {
   const getLabel = useCallback(({ message }): string => message, []);
   const optionsMemo = useMemo(
     (): OperatorOption[] =>

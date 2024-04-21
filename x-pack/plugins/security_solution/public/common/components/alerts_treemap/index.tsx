@@ -52,7 +52,7 @@ const ChartFlexItem = styled(EuiFlexItem)<{ $minChartHeight: number }>`
   min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
 `;
 
-const AlertsTreemapComponent: React.FC<Props> = ({
+const AlertsTreemapComponent = ({
   addFilter,
   data,
   maxBuckets,

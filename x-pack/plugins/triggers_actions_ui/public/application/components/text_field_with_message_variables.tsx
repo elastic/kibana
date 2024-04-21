@@ -58,7 +58,7 @@ const Wrapper = ({
     <>{children}</>
   );
 
-export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
+export const TextFieldWithMessageVariables = ({
   buttonTitle,
   messageVariables,
   paramsProperty,
@@ -70,7 +70,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   defaultValue,
   wrapField = false,
   showButtonTitle,
-}) => {
+}: Props) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
 
   const onSelectMessageVariable = useCallback(

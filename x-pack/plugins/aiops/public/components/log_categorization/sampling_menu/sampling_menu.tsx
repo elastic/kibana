@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
@@ -30,7 +29,7 @@ interface Props {
   reload: () => void;
 }
 
-export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
+export const SamplingMenu = ({ randomSampler, reload }: Props) => {
   const [showSamplingOptionsPopover, setShowSamplingOptionsPopover] = useState(false);
 
   const samplingProbability = useObservable(
@@ -166,8 +165,10 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
   );
 };
 
-const ProbabilityUsedMessage: FC<{ samplingProbability: number | null }> = ({
+const ProbabilityUsedMessage = ({
   samplingProbability,
+}: {
+  samplingProbability: number | null;
 }) => {
   return samplingProbability !== null ? (
     <div data-test-subj="aiopsRandomSamplerProbabilityUsedMsg">

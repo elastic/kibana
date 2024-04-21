@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { buildContextMenuForActions, Action } from '@kbn/ui-actions-plugin/public';
 import { sampleAction } from './util';
 
-export const PanelViewWithSharing: React.FC = () => {
+export const PanelViewWithSharing = () => {
   const [open, setOpen] = React.useState(false);
 
   const context = {};

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +17,7 @@ interface Props {
   autoExpand?: boolean;
 }
 
-export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false }) => {
+export const CannotImportJobsCallout = ({ jobs, autoExpand = false }: Props) => {
   if (jobs.length === 0) {
     return null;
   }
@@ -62,7 +61,7 @@ export const CannotImportJobsCallout: FC<Props> = ({ jobs, autoExpand = false })
   );
 };
 
-const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
+const SkippedJobList = ({ jobs }: { jobs: SkippedJobs[] }) => (
   <>
     {jobs.length > 0 && (
       <>

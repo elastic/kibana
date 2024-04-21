@@ -35,7 +35,7 @@ interface Props {
   title: TitleProp;
 }
 
-const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
+const TitleComponent = ({ title, badgeOptions }: Props) => (
   <EuiTitle size="l">
     <Header data-test-subj="header-page-title">
       <TitleWrapper>

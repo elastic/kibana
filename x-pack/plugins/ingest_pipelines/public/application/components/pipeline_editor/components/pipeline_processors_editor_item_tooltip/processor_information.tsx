@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo } from 'react';
+import React, { memo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 import { getProcessorDescriptor } from '../shared';
@@ -14,7 +14,7 @@ interface Props {
   processor: ProcessorInternal;
 }
 
-export const ProcessorInformation: FunctionComponent<Props> = memo(({ processor }) => {
+export const ProcessorInformation = memo(({ processor }: Props) => {
   const processorDescriptor = getProcessorDescriptor(processor.type);
   const label = processorDescriptor?.label ?? processor.type;
   const description =

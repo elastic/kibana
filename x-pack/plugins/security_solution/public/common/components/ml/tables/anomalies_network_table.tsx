@@ -36,14 +36,14 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
+const AnomaliesNetworkTableComponent = ({
   startDate,
   endDate,
   skip,
   ip,
   type,
   flowTarget,
-}) => {
+}: AnomaliesNetworkTableProps) => {
   const capabilities = useMlCapabilities();
   const dispatch = useDispatch();
   const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesNetwork-${flowTarget}`);

@@ -27,9 +27,10 @@ export interface SavedSearchEmbeddableBaseProps {
   append?: React.ReactElement;
   dataTestSubj?: string;
   interceptedWarnings?: SearchResponseWarning[];
+  children: React.ReactNode;
 }
 
-export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps> = ({
+export const SavedSearchEmbeddableBase = ({
   isLoading,
   totalHitCount,
   prepend,
@@ -37,7 +38,7 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
   dataTestSubj,
   interceptedWarnings,
   children,
-}) => {
+}: SavedSearchEmbeddableBaseProps) => {
   return (
     <EuiFlexGroup
       css={containerStyles}

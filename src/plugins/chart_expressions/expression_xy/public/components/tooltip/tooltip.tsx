@@ -9,7 +9,7 @@
 import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import React, { FC } from 'react';
+import React from 'react';
 import { CommonXYDataLayerConfig } from '../../../common';
 import {
   DatatablesWithFormatInfo,
@@ -37,7 +37,7 @@ type Props = TooltipInfo & {
   layers: CommonXYDataLayerConfig[];
 };
 
-export const Tooltip: FC<Props> = ({
+export const Tooltip = ({
   header,
   values,
   fieldFormats,
@@ -47,7 +47,7 @@ export const Tooltip: FC<Props> = ({
   splitAccessors,
   xDomain,
   layers,
-}) => {
+}: Props) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
 
   if (!pickedValue) {

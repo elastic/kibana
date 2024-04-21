@@ -16,12 +16,12 @@ import {
 } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-export const EnterpriseSearchVectorSearchPageTemplate: React.FC<PageTemplateProps> = ({
+export const EnterpriseSearchVectorSearchPageTemplate = ({
   children,
   pageChrome,
   pageViewTelemetry,
   ...pageTemplateProps
-}) => (
+}: PageTemplateProps) => (
   <EnterpriseSearchPageTemplateWrapper
     {...pageTemplateProps}
     solutionNav={{

@@ -36,7 +36,7 @@ interface Props {
   selected?: ButtonGroupOption;
 }
 
-export const ButtonGroup: React.FC<Props> = ({ onChange, options, selected }) => (
+export const ButtonGroup = ({ onChange, options, selected }: Props) => (
   <EuiFlexGroup className="buttonGroup" direction="column" gutterSize="m" role="radiogroup">
     {options.map((option, index) => {
       const isSelected = option === selected;

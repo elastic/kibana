@@ -24,7 +24,7 @@ interface Props {
   patternSizeInBytes: number | undefined;
 }
 
-const PatternSummaryComponent: React.FC<Props> = ({
+const PatternSummaryComponent = ({
   formatBytes,
   formatNumber,
   ilmExplainPhaseCounts,
@@ -34,7 +34,7 @@ const PatternSummaryComponent: React.FC<Props> = ({
   pattern,
   patternDocsCount,
   patternSizeInBytes,
-}) => (
+}: Props) => (
   <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>
       <PatternLabel
@@ -45,7 +45,6 @@ const PatternSummaryComponent: React.FC<Props> = ({
         pattern={pattern}
       />
     </EuiFlexItem>
-
     <EuiFlexItem grow={false}>
       <StatsRollup
         docsCount={patternDocsCount}

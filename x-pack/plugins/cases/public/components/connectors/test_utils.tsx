@@ -10,13 +10,14 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { EuiButton } from '@elastic/eui';
 
 interface MockFormWrapperComponentProps {
+  children: React.ReactNode;
   fields?: Record<string, unknown>;
 }
 
-export const MockFormWrapperComponent: React.FC<MockFormWrapperComponentProps> = ({
+export const MockFormWrapperComponent = ({
   children,
   fields = {},
-}) => {
+}: MockFormWrapperComponentProps) => {
   const { form } = useForm({
     defaultValue: { fields },
   });

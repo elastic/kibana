@@ -54,7 +54,7 @@ interface Props {
   baseTheme: Theme;
 }
 
-const SummaryTabComponent: React.FC<Props> = ({
+const SummaryTabComponent = ({
   addSuccessToast,
   addToNewCaseDisabled,
   formatBytes,
@@ -72,7 +72,7 @@ const SummaryTabComponent: React.FC<Props> = ({
   sizeInBytes,
   theme,
   baseTheme,
-}) => (
+}: Props) => (
   <>
     <CalloutSummary
       addSuccessToast={addSuccessToast}
@@ -89,7 +89,6 @@ const SummaryTabComponent: React.FC<Props> = ({
       patternDocsCount={patternDocsCount}
       sizeInBytes={sizeInBytes}
     />
-
     <EcsSummaryDonutChart
       defaultTabId={ALL_TAB_ID}
       getGroupByFieldsOnClick={getGroupByFieldsOnClick}

@@ -9,10 +9,13 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const CreateMLJobsButton: React.FunctionComponent<{
+export const CreateMLJobsButton = ({
+  isDisabled,
+  onClick,
+}: {
   isDisabled?: boolean;
   onClick: () => void;
-}> = ({ isDisabled, onClick }) => {
+}) => {
   return (
     <EuiButton
       data-test-subj="infraCreateMLJobsButtonCreateMlJobButton"

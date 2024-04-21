@@ -8,7 +8,7 @@
 
 /* eslint-disable no-console */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiFlyout, EuiButton } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutFrame } from '.';

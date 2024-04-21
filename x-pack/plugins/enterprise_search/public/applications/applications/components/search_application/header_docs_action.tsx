@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../shared/doc_links';
 import { EndpointsHeaderAction } from '../../../shared/layout/endpoints_header_action';
 
-export const SearchApplicationHeaderDocsAction: React.FC = () => (
+export const SearchApplicationHeaderDocsAction = () => (
   <EndpointsHeaderAction>
     <EuiButtonEmpty
       data-telemetry-id="entSearchApplications-searchApplicationHeader-documentationLink"

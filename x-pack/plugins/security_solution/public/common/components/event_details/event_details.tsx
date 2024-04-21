@@ -150,7 +150,7 @@ const ThreatTacticDescription = styled.div`
   padding-left: ${(props) => props.theme.eui.euiSizeL};
 `;
 
-const EventDetailsComponent: React.FC<Props> = ({
+const EventDetailsComponent = ({
   browserFields,
   data,
   detailsEcsData,
@@ -162,7 +162,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   timelineTabType,
   handleOnEventClosed,
   isReadOnly,
-}) => {
+}: Props) => {
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),

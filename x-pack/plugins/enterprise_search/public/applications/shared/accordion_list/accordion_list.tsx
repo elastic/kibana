@@ -31,14 +31,14 @@ interface Props {
   title: string;
 }
 
-export const AccordionList: React.FC<Props> = ({
+export const AccordionList = ({
   hasBorder,
   iconType,
   initialIsOpen,
   items,
   rowCount = 10,
   title,
-}) => {
+}: Props) => {
   const accordionId = useGeneratedHtmlId({
     prefix: 'accordionList',
   });

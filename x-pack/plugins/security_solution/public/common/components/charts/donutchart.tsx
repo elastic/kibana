@@ -94,7 +94,7 @@ export const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
 `;
 
-const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
+const DonutChartWrapperComponent = ({
   children,
   dataExists,
   donutTextWrapperClassName,
@@ -102,7 +102,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   isChartEmbeddablesEnabled,
   label,
   title,
-}) => {
+}: DonutChartWrapperProps) => {
   const { euiTheme } = useEuiTheme();
   const emptyLabelStyle = useMemo(
     () => ({

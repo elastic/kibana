@@ -8,7 +8,6 @@
 
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { AlertFilterControlsProps, AlertFilterControls } from '../alert_filter_controls';
 import { TEST_IDS } from '../constants';
@@ -63,7 +62,7 @@ import { getControlGroupMock } from './control_group';
  *
  */
 export const mockAlertFilterControls = (outputFilters?: Filter[]) => {
-  const Component: FC<AlertFilterControlsProps> = ({ onInit, onFiltersChange }) => {
+  const Component = ({ onInit, onFiltersChange }: AlertFilterControlsProps) => {
     useEffect(() => {
       if (onInit) {
         onInit(getControlGroupMock() as unknown as ControlGroupContainer);

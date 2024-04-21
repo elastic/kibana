@@ -48,7 +48,7 @@ export interface ConnectorStatsProps {
   isCrawler: boolean;
 }
 
-export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => {
+export const ConnectorStats = ({ isCrawler }: ConnectorStatsProps) => {
   const { euiTheme } = useEuiTheme();
 
   const tooltipAncherProps = {

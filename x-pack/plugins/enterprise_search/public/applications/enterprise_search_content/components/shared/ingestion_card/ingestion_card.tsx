@@ -31,7 +31,7 @@ interface IngestionCardProps {
   title: string;
 }
 
-export const IngestionCard: React.FC<IngestionCardProps> = ({
+export const IngestionCard = ({
   buttonIcon,
   buttonLabel,
   description,
@@ -40,7 +40,7 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
   logo,
   onClick,
   title,
-}) => {
+}: IngestionCardProps) => {
   return (
     <EuiCard
       hasBorder

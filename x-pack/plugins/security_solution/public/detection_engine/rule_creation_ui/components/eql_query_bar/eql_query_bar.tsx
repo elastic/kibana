@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
@@ -73,7 +73,7 @@ export interface EqlQueryBarProps {
   onValiditingChange?: (arg: boolean) => void;
 }
 
-export const EqlQueryBar: FC<EqlQueryBarProps> = ({
+export const EqlQueryBar = ({
   dataTestSubj,
   field,
   isLoading = false,
@@ -86,7 +86,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   onOptionsChange,
   onValidityChange,
   onValiditingChange,
-}) => {
+}: EqlQueryBarProps) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const { isValidating, value: fieldValue, setValue: setFieldValue } = field;

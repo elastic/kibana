@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '..';
 
-export const DisabledFieldsBody: React.FC = () => {
+export const DisabledFieldsBody = () => {
   const { schemaConflicts } = useValues(ResultSettingsLogic);
   return (
     <>

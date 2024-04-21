@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -48,12 +48,17 @@ const healthToBadgeMapping: Record<
   },
 };
 
-export const StatusDetails: FunctionComponent<{
+export const StatusDetails = ({
+  documents,
+  documentsDeleted,
+  status,
+  health,
+}: {
   documents: Index['documents'];
   documentsDeleted: Index['documents_deleted'];
   status: Index['status'];
   health: Index['health'];
-}> = ({ documents, documentsDeleted, status, health }) => {
+}) => {
   const { config } = useAppContext();
   if (!config.enableIndexStats || !health) {
     return null;

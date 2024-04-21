@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -49,11 +49,11 @@ export interface FilterInCellActionProps extends FilterInProps {
  *
  * @returns filter in button icon
  */
-export const FilterInButtonIcon: VFC<FilterInProps> = ({
+export const FilterInButtonIcon = ({
   data,
   field,
   'data-test-subj': dataTestSub,
-}) => {
+}: FilterInProps) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
     return null;
@@ -81,11 +81,11 @@ export const FilterInButtonIcon: VFC<FilterInProps> = ({
  *
  * @returns filter in button empty
  */
-export const FilterInButtonEmpty: VFC<FilterInProps> = ({
+export const FilterInButtonEmpty = ({
   data,
   field,
   'data-test-subj': dataTestSub,
-}) => {
+}: FilterInProps) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
     return null;
@@ -114,11 +114,11 @@ export const FilterInButtonEmpty: VFC<FilterInProps> = ({
  *
  * @returns filter in {@link EuiContextMenuItem} for a context menu
  */
-export const FilterInContextMenu: VFC<FilterInProps> = ({
+export const FilterInContextMenu = ({
   data,
   field,
   'data-test-subj': dataTestSub,
-}) => {
+}: FilterInProps) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
     return null;
@@ -144,12 +144,12 @@ export const FilterInContextMenu: VFC<FilterInProps> = ({
  *
  * @returns filter in button for data grid
  */
-export const FilterInCellAction: VFC<FilterInCellActionProps> = ({
+export const FilterInCellAction = ({
   data,
   field,
   Component,
   'data-test-subj': dataTestSub,
-}) => {
+}: FilterInCellActionProps) => {
   const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterIn });
   if (!filterFn) {
     return null;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useState, useEffect } from 'react';
 import type { Subscription } from 'rxjs';
 import {
@@ -42,7 +41,7 @@ import {
 } from '../../../common/job_creator/util/general';
 import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
-export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+export const SummaryStep = ({ setCurrentStep, isCurrentStep }: StepProps) => {
   const {
     services: {
       notifications,
@@ -176,7 +175,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
           )}
 
           <EuiHorizontalRule />
-          {showJobAssignWarning && <NewJobAwaitingNodeWarning jobType="anomaly-detector" />}
+          {showJobAssignWarning && <NewJobAwaitingNodeWarning />}
           <EuiFlexGroup>
             {progress < 100 && (
               <Fragment>

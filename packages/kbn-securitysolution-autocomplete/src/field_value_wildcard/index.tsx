@@ -49,7 +49,7 @@ interface AutocompleteFieldWildcardProps {
   'aria-label'?: string;
 }
 
-export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildcardProps> = memo(
+export const AutocompleteFieldWildcardComponent = memo(
   ({
     autocompleteService,
     placeholder,
@@ -67,7 +67,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
     onWarning,
     warning,
     'aria-label': ariaLabel,
-  }): JSX.Element => {
+  }: AutocompleteFieldWildcardProps): JSX.Element => {
     const [searchQuery, setSearchQuery] = useState('');
     const [touched, setIsTouched] = useState(false);
     const [error, setError] = useState<string | undefined>(undefined);

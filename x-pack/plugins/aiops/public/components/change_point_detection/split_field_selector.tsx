@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
@@ -18,8 +17,8 @@ interface SplitFieldSelectorProps {
   inline?: boolean;
 }
 
-export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(
-  ({ value, onChange, inline = true }) => {
+export const SplitFieldSelector = React.memo(
+  ({ value, onChange, inline = true }: SplitFieldSelectorProps) => {
     const { fieldStats } = useAiopsAppContext();
     const { renderOption, closeFlyout } = fieldStats?.useFieldStatsTrigger() ?? {};
 

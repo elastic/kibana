@@ -74,7 +74,7 @@ interface Props {
  * Modal for overall Assistant Settings, including conversation settings, quick prompts, system prompts,
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
-export const AssistantSettings: React.FC<Props> = React.memo(
+export const AssistantSettings = React.memo(
   ({
     defaultConnector,
     onClose,
@@ -83,15 +83,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     isFlyoutMode,
-  }) => {
-    const {
-      actionTypeRegistry,
-      modelEvaluatorEnabled,
-      http,
-      toasts,
-      selectedSettingsTab,
-      setSelectedSettingsTab,
-    } = useAssistantContext();
+  }: Props) => {
+    const { modelEvaluatorEnabled, http, toasts, selectedSettingsTab, setSelectedSettingsTab } =
+      useAssistantContext();
 
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();
@@ -312,7 +306,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 {selectedSettingsTab === CONVERSATIONS_TAB && (
                   <ConversationSettings
-                    actionTypeRegistry={actionTypeRegistry}
                     defaultConnector={defaultConnector}
                     conversationSettings={conversationSettings}
                     setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}

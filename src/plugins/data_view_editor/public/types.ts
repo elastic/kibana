@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { FC } from 'react';
 import {
   ApplicationStart,
   IUiSettingsClient,
@@ -78,7 +77,7 @@ export interface PluginSetup {}
 export type { DataViewEditorService };
 export interface PluginStart {
   openEditor(options: DataViewEditorProps): () => void;
-  IndexPatternEditorComponent: FC<DataViewEditorProps>;
+  IndexPatternEditorComponent: (props: DataViewEditorProps) => JSX.Element;
   userPermissions: {
     editDataView: () => boolean;
   };

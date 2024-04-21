@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 
-export const ProgressBar: FC<{ progress: number }> = ({ progress }) => (
+export const ProgressBar = ({ progress }: { progress: number }) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs">
     <EuiFlexItem style={{ width: '100px' }} grow={false}>
       <EuiProgress value={progress} max={100} color="primary" size="m">

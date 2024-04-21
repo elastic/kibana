@@ -30,9 +30,9 @@ interface TimelineProcessingPluginRendererProps {
 export interface CasesTimelineIntegration {
   editor_plugins: {
     parsingPlugin: Plugin;
-    processingPluginRenderer: React.FC<
-      TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }
-    >;
+    processingPluginRenderer: (
+      props: TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }
+    ) => JSX.Element;
     uiPlugin: EuiMarkdownEditorUiPlugin;
   };
   hooks: {
@@ -51,17 +51,20 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
   null
 );
 
-export const CasesTimelineIntegrationProvider: React.FC<{
+export const CasesTimelineIntegrationProvider = ({
+  children,
+  timelineIntegration,
+}: {
+  children: React.ReactNode;
   timelineIntegration?: CasesTimelineIntegration;
-}> =
-  // TODO: Fix this manually. Issue #123375
-  // eslint-disable-next-line react/display-name
-  ({ children, timelineIntegration }) => {
-    const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
+}) => {
+  const [activeTimelineIntegration] = useState(timelineIntegration ?? null);
 
-    return (
-      <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
-        {children}
-      </CasesTimelineIntegrationContext.Provider>
-    );
-  };
+  return (
+    <CasesTimelineIntegrationContext.Provider value={activeTimelineIntegration}>
+      {children}
+    </CasesTimelineIntegrationContext.Provider>
+  );
+};
+
+CasesTimelineIntegrationProvider.displayName = 'CasesTimelineIntegrationProvider';

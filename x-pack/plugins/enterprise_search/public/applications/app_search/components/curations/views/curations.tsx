@@ -25,7 +25,7 @@ import { CurationsHistory } from './curations_history/curations_history';
 import { CurationsOverview } from './curations_overview';
 import { CurationsSettings } from './curations_settings';
 
-export const Curations: React.FC = () => {
+export const Curations = () => {
   const { dataLoading, meta, selectedPageTab } = useValues(CurationsLogic);
   const { loadCurations, onSelectPageTab } = useActions(CurationsLogic);
   const {

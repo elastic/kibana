@@ -67,7 +67,7 @@ export interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const IndicesDetailsComponent: React.FC<Props> = ({
+const IndicesDetailsComponent = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   endDate,
@@ -87,7 +87,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
-}) => (
+}: Props) => (
   <div data-test-subj="indicesDetails">
     {patterns.map((pattern, i) => (
       <EuiFlexItem grow={false} key={pattern}>

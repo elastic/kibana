@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 
@@ -31,7 +30,7 @@ const mockStorage: Storage = {
   clear: jest.fn(),
 };
 
-const Provider: FC = ({ children }) => {
+const Provider = ({ children }: { children: React.ReactNode }) => {
   return (
     <StorageContextProvider storage={mockStorage} storageKeys={ML_STORAGE_KEYS}>
       {children}

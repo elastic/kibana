@@ -28,7 +28,7 @@ interface BuilderLogicButtonsProps {
   onOrClicked: () => void;
 }
 
-export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
+export const BuilderLogicButtons = ({
   isAndDisabled = false,
   isNested,
   isNestedDisabled = true,
@@ -39,7 +39,7 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
   onAndClicked,
   onNestedClicked,
   onOrClicked,
-}) => (
+}: BuilderLogicButtonsProps): React.ReactElement => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <MyEuiButton

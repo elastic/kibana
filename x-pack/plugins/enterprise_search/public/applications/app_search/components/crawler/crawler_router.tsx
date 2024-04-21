@@ -18,7 +18,7 @@ import { CrawlerLogic } from './crawler_logic';
 import { CrawlerOverview } from './crawler_overview';
 import { CrawlerSingleDomain } from './crawler_single_domain';
 
-export const CrawlerRouter: React.FC = () => {
+export const CrawlerRouter = () => {
   const { fetchCrawlerData } = useActions(CrawlerLogic);
 
   useEffect(() => {

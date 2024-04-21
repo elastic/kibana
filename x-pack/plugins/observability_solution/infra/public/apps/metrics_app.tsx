@@ -58,17 +58,7 @@ export const renderApp = (
   };
 };
 
-const MetricsApp: React.FC<{
-  core: CoreStart;
-  history: History<unknown>;
-  pluginStart: InfraClientStartExports;
-  pluginConfig: InfraPublicConfig;
-  plugins: InfraClientStartDeps;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  storage: Storage;
-  theme$: AppMountParameters['theme$'];
-  kibanaEnvironment: KibanaEnvContext;
-}> = ({
+const MetricsApp = ({
   core,
   history,
   pluginStart,
@@ -78,6 +68,16 @@ const MetricsApp: React.FC<{
   storage,
   theme$,
   kibanaEnvironment,
+}: {
+  core: CoreStart;
+  history: History<unknown>;
+  pluginStart: InfraClientStartExports;
+  pluginConfig: InfraPublicConfig;
+  plugins: InfraClientStartDeps;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  storage: Storage;
+  theme$: AppMountParameters['theme$'];
+  kibanaEnvironment: KibanaEnvContext;
 }) => {
   const uiCapabilities = core.application.capabilities;
 

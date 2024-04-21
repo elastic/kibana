@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,7 +27,7 @@ interface Props {
   state: State;
 }
 
-export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) => {
+export const ConfigurationStepDetails = ({ setCurrentStep, state }: Props) => {
   const { selectedDataView } = useDataSource();
   const { form, isJobCreated } = state;
   const { dependentVariable, includes, jobConfigQueryString, jobType, trainingPercent } = form;

@@ -39,7 +39,7 @@ interface LiveQueryProps {
   agentSelection?: AgentSelection;
 }
 
-const LiveQueryComponent: React.FC<LiveQueryProps> = ({
+const LiveQueryComponent = ({
   agentId,
   agentIds,
   alertIds,
@@ -47,8 +47,10 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   onSuccess,
   query,
   savedQueryId,
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
+
   queryField,
   ecsMappingField,
   formType,
@@ -57,7 +59,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   packId,
   agentSelection,
   timeout,
-}) => {
+}: LiveQueryProps) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
   const initialAgentSelection = useMemo(() => {

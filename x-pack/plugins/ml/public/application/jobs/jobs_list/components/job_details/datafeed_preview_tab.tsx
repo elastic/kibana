@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,7 +18,7 @@ interface Props {
   job: CombinedJob;
 }
 
-export const DatafeedPreviewPane: FC<Props> = ({ job }) => {
+export const DatafeedPreviewPane = ({ job }: Props) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApiContext();
@@ -62,7 +61,7 @@ export const DatafeedPreviewPane: FC<Props> = ({ job }) => {
   );
 };
 
-const InsufficientPermissions: FC = () => (
+const InsufficientPermissions = () => (
   <EuiCallOut
     title={
       <FormattedMessage
@@ -82,7 +81,7 @@ const InsufficientPermissions: FC = () => (
   </EuiCallOut>
 );
 
-const EmptyResults: FC = () => (
+const EmptyResults = () => (
   <EuiCallOut
     title={
       <FormattedMessage

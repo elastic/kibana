@@ -26,7 +26,7 @@ export interface Props {
   baseTheme: Theme;
 }
 
-const StorageDetailsComponent: React.FC<Props> = ({
+const StorageDetailsComponent = ({
   formatBytes,
   formatNumber,
   ilmPhases,
@@ -35,7 +35,7 @@ const StorageDetailsComponent: React.FC<Props> = ({
   patterns,
   theme,
   baseTheme,
-}) => {
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
 
   const flattenedBuckets = useMemo(

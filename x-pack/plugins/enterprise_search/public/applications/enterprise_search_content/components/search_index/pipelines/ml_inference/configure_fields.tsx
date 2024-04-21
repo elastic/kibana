@@ -17,7 +17,7 @@ import { InferenceConfiguration } from './inference_config';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
 
-export const ConfigureFields: React.FC = () => {
+export const ConfigureFields = () => {
   const {
     addInferencePipelineModal: { configuration },
   } = useValues(MLInferenceLogic);

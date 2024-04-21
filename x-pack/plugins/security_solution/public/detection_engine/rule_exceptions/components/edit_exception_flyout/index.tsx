@@ -95,7 +95,7 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
+const EditExceptionFlyoutComponent = ({
   list,
   itemToEdit,
   rule,
@@ -103,7 +103,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   openedFromListDetailPage,
   onCancel,
   onConfirm,
-}): JSX.Element => {
+}: EditExceptionFlyoutProps): JSX.Element => {
   const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);

@@ -33,7 +33,7 @@ import { AddResultButton, CurationResult, convertToResultFormat } from '../resul
 
 import './promoted_documents.scss';
 
-export const PromotedDocuments: React.FC = () => {
+export const PromotedDocuments = () => {
   const { curation, isAutomated, promotedIds, promotedDocumentsLoading } = useValues(CurationLogic);
   const documents = curation.promoted;
   const hasDocuments = documents.length > 0;
@@ -46,7 +46,7 @@ export const PromotedDocuments: React.FC = () => {
     }
   };
 
-  const CountBadge: React.FC = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+  const CountBadge = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
 
   return (
     <DataPanel

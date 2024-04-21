@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import moment, { unitOfTime } from 'moment';
 
 import {
@@ -35,7 +35,7 @@ interface EndzonesProps {
   isFullBin?: boolean;
 }
 
-export const Endzones: FC<EndzonesProps> = ({
+export const Endzones = ({
   isDarkMode,
   domainStart,
   domainEnd,
@@ -44,7 +44,7 @@ export const Endzones: FC<EndzonesProps> = ({
   domainMax,
   hideTooltips = true,
   isFullBin = false,
-}) => {
+}: EndzonesProps) => {
   const rectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
     strokeWidth: 0,

@@ -143,7 +143,7 @@ interface UnifiedFieldListSidebarInternalProps {
 export type UnifiedFieldListSidebarProps = UnifiedFieldListSidebarCustomizableProps &
   UnifiedFieldListSidebarInternalProps;
 
-export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarProps> = ({
+export const UnifiedFieldListSidebarComponent = ({
   stateService,
   searchMode,
   services,
@@ -168,7 +168,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onDeleteField,
   onToggleSidebar,
   additionalFieldGroups,
-}) => {
+}: UnifiedFieldListSidebarProps) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
     () => !core.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),

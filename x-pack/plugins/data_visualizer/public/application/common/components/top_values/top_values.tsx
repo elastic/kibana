@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
@@ -48,12 +47,13 @@ function getPercentLabel(percent: number): string {
   }
 }
 
-export const TopValues: FC<Props> = ({
+export const TopValues = ({
   stats,
   fieldFormat,
   barColor,
   compressed,
   onAddFilter,
+
   /** Top values by default show % of time a value exist in sampled records/rows (i.e. value A exists in 10% of sampled records)
    * showSampledValues: true shows % of times a value exist in all arrays of values that have been flattened
    * Example for 4 records: ["a", "a", "b"], ["b", "b", "c"], "d", "e"
@@ -61,7 +61,7 @@ export const TopValues: FC<Props> = ({
    * "a" exists in 2/8 sampled values (25% - showSampledValues: true).
    */
   showSampledValues = false,
-}) => {
+}: Props) => {
   const {
     services: {
       data: { fieldFormats },

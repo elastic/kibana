@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, VFC } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingLogo, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
@@ -34,7 +34,7 @@ export interface CommentChildrenProps {
  * Renders some basic values (indicator name, type and feed name) in the comment section
  * of the case attachment. Also renders a flyout for more details about the indicator.
  */
-export const CommentChildren: VFC<CommentChildrenProps> = ({ id, metadata }) => {
+export const CommentChildren = ({ id, metadata }: CommentChildrenProps) => {
   const styles = useStyles();
   const [expanded, setExpanded] = useState<boolean>(false);
 

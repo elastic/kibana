@@ -18,13 +18,13 @@ import {
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { SettingsFormProps } from '../../pages/settings';
 
-export const IndicesForm: React.FC<SettingsFormProps> = ({
+export const IndicesForm = ({
   onChange,
   loading,
   formFields,
   fieldErrors,
   isDisabled,
-}) => (
+}: SettingsFormProps) => (
   <>
     <EuiTitle size="s">
       <h3>

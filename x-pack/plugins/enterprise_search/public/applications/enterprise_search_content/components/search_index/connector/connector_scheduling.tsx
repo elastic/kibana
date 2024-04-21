@@ -31,8 +31,9 @@ import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic'
 interface SchedulePanelProps {
   description: string;
   title: string;
+  children: React.ReactNode;
 }
-export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description, children }) => {
+export const SchedulePanel = ({ title, description, children }: SchedulePanelProps) => {
   return (
     <>
       <EuiSplitPanel.Outer>
@@ -53,7 +54,7 @@ export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description
   );
 };
 
-export const ConnectorScheduling: React.FC = () => {
+export const ConnectorScheduling = () => {
   const { productFeatures, navigateToUrl } = useValues(KibanaLogic);
   const { connector, hasDocumentLevelSecurityFeature, hasIncrementalSyncFeature } =
     useValues(ConnectorViewLogic);

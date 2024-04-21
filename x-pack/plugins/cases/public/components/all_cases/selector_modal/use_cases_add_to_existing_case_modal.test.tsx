@@ -40,9 +40,7 @@ const useCasesToastMock = useCasesToast as jest.Mock;
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
-const TestComponent: React.FC<AddToExistingCaseModalProps> = (
-  props: AddToExistingCaseModalProps = {}
-) => {
+const TestComponent = (props: AddToExistingCaseModalProps = {}) => {
   const hook = useCasesAddToExistingCaseModal({ onSuccess, ...props });
 
   const onClick = () => {
@@ -64,7 +62,7 @@ describe('use cases add to existing case modal hook', () => {
 
   const dispatch = jest.fn();
   let appMockRender: AppMockRenderer;
-  const wrapper: React.FC = ({ children }) => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <CasesContext.Provider
         value={{

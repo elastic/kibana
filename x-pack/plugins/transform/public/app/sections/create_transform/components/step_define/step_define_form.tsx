@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { merge } from 'rxjs';
 
@@ -82,7 +81,7 @@ const advancedEditorsSidebarWidth = '220px';
 type PopulatedFields = Set<string>;
 const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
 
-export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
+export const ConfigSectionTitle = ({ title }: { title: string }) => (
   <>
     <EuiSpacer size="m" />
     <EuiTitle size="xs">
@@ -98,7 +97,7 @@ export interface StepDefineFormProps {
   searchItems: SearchItems;
 }
 
-export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
+export const StepDefineForm = React.memo((props: StepDefineFormProps) => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = props;
   const { dataView } = searchItems;

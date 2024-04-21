@@ -100,7 +100,7 @@ const useVariation = <Data>(
   }, [cloudExperiments, featureFlagName, defaultValue, setter]);
 };
 
-export const MyReactComponent: React.FC<Props> = ({ cloudExperiments }: Props) => {
+export const MyReactComponent = ({ cloudExperiments }: Props) => {
   const [myConfig, setMyConfig] = useState('default config');
   useVariation(
     cloudExperiments,

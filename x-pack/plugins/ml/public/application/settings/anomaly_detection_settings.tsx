@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import {
@@ -28,7 +27,7 @@ import { useToastNotificationService } from '../services/toast_notification_serv
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 
-export const AnomalyDetectionSettings: FC = () => {
+export const AnomalyDetectionSettings = () => {
   const [calendarsCount, setCalendarsCount] = useState(0);
   const [filterListsCount, setFilterListsCount] = useState(0);
 

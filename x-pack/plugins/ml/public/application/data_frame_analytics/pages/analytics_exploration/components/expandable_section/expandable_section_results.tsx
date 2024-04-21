@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -125,7 +124,7 @@ interface ExpandableSectionResultsProps {
   searchQuery: estypes.QueryDslQueryContainer;
 }
 
-export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
+export const ExpandableSectionResults = ({
   colorRange,
   indexData,
   dataView,
@@ -133,7 +132,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   needsDestDataView,
   resultsField,
   searchQuery,
-}) => {
+}: ExpandableSectionResultsProps) => {
   const {
     services: {
       application,

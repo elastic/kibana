@@ -34,7 +34,7 @@ const styles = {
   `,
 };
 
-export const CustomRecurringSchedule: React.FC = React.memo(() => {
+export const CustomRecurringSchedule = React.memo(() => {
   const [{ startDate, recurringSchedule }] = useFormData<FormProps>({
     watch: [
       'startDate',

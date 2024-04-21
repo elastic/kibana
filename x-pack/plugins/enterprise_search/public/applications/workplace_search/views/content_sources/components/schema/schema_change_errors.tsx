@@ -18,7 +18,7 @@ import { SourceLayout } from '../source_layout';
 import { SCHEMA_ERRORS_HEADING } from './constants';
 import { SchemaLogic } from './schema_logic';
 
-export const SchemaChangeErrors: React.FC = () => {
+export const SchemaChangeErrors = () => {
   const { activeReindexJobId, sourceId } = useParams() as {
     activeReindexJobId: string;
     sourceId: string;

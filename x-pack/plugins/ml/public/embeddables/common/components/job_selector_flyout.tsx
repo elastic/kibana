@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import type { JobSelectorFlyoutProps } from '../../../application/components/job_selector/job_selector_flyout';
 import { JobSelectorFlyoutContent } from '../../../application/components/job_selector/job_selector_flyout';
 
-export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
+export const JobSelectorFlyout = ({
   selectedIds,
   withTimeRangeSelector,
   dateFormatTz,
@@ -19,7 +18,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
   onFlyoutClose,
   onSelectionConfirmed,
   maps,
-}) => {
+}: JobSelectorFlyoutProps) => {
   const [applyTimeRangeState, setApplyTimeRangeState] = useState<boolean>(true);
 
   return (

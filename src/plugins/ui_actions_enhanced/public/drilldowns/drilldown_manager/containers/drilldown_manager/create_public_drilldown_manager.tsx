@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
 
-export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownManagerProps>;
+export type PublicDrilldownManagerComponent = (props: PublicDrilldownManagerProps) => JSX.Element;
 
 const LazyDrilldownManager = React.lazy(() =>
   import('./drilldown_manager_with_provider').then((m) => ({

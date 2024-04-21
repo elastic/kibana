@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiDescriptionList, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedFilterViewInstance } from '../../../types';
 
@@ -17,15 +17,17 @@ interface Props {
 type CustomComponentProps = Omit<Props, 'filter'> & { value: string };
 
 const renderElement = (
-  Component: FC<
-    Omit<CustomComponentProps, 'updateFilter'> & { onChange?: CustomComponentProps['updateFilter'] }
-  >,
+  Component: (
+    props: Omit<CustomComponentProps, 'updateFilter'> & {
+      onChange?: CustomComponentProps['updateFilter'];
+    }
+  ) => JSX.Element | null,
   { updateFilter, ...props }: CustomComponentProps
 ) => {
   return <Component {...props} onChange={updateFilter} />;
 };
 
-export const Filter: FC<Props> = ({ filter, ...restProps }) => {
+export const Filter = ({ filter, ...restProps }: Props) => {
   const filterView = Object.values(filter).map((filterValue) => {
     const description = filterValue.component
       ? renderElement(filterValue.component, { value: filterValue.formattedValue, ...restProps })

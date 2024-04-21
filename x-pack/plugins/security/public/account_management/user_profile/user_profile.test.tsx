@@ -7,7 +7,6 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -25,7 +24,7 @@ const coreStart = coreMock.createStart();
 let history = scopedHistoryMock.create();
 const authc = securityMock.createSetup().authc;
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <Providers
     services={coreStart}
     history={history}

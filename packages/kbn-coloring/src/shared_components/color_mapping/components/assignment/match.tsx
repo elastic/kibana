@@ -13,7 +13,14 @@ import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { ColorMapping } from '../../config';
 
-export const Match: React.FC<{
+export const Match = ({
+  index,
+  rule,
+  updateValue,
+  options,
+  specialTokens,
+  assignmentValuesCounter,
+}: {
   index: number;
   rule:
     | ColorMapping.RuleAuto
@@ -24,7 +31,7 @@ export const Match: React.FC<{
   options: Array<string | string[]>;
   specialTokens: Map<unknown, string>;
   assignmentValuesCounter: Map<string | string[], number>;
-}> = ({ index, rule, updateValue, options, specialTokens, assignmentValuesCounter }) => {
+}) => {
   const duplicateWarning = i18n.translate(
     'coloring.colorMapping.assignments.duplicateCategoryWarning',
     {

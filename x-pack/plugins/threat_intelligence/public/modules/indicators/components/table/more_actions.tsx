@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, VFC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -37,7 +37,7 @@ export interface TakeActionProps {
  * Component rendered in the action column.
  * Renders a ... icon button, with a dropdown.
  */
-export const MoreActions: VFC<TakeActionProps> = ({ indicator }) => {
+export const MoreActions = ({ indicator }: TakeActionProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const smallContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'smallContextMenuPopover',

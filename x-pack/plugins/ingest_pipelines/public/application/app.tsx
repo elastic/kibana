@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../shared_imports';
@@ -42,7 +42,7 @@ export const AppWithoutRouter = () => (
   </Routes>
 );
 
-export const App: FunctionComponent = () => {
+export const App = () => {
   const { apiError } = useAuthorizationContext();
   const { history } = useKibana().services;
 

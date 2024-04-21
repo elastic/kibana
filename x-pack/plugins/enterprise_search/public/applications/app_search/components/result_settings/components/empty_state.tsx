@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { RESULT_SETTINGS_DOCS_URL } from '../../../routes';
 
-export const EmptyState: React.FC = () => (
+export const EmptyState = () => (
   <EuiEmptyPrompt
     iconType="gear"
     title={

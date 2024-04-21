@@ -71,7 +71,7 @@ interface Props {
   runtimeMappings?: MappingRuntimeFields;
 }
 
-export const ChartCollapse: React.FC<Props> = ({
+export const ChartCollapse = ({
   groupBySelection,
   filters,
   query,

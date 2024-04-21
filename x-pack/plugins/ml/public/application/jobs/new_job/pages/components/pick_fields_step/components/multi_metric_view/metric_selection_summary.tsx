@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -16,7 +15,7 @@ import { getChartSettings, defaultChartSettings } from '../../../charts/common/s
 import { ChartGrid } from './chart_grid';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
-export const MultiMetricDetectorsSummary: FC = () => {
+export const MultiMetricDetectorsSummary = () => {
   const {
     jobCreator: jc,
     chartLoader,

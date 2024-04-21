@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
@@ -94,10 +93,10 @@ const calculateTotalMeanImportance = (featureClass: ClassificationTotalFeatureIm
   );
 };
 
-export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps> = ({
+export const FeatureImportanceSummaryPanel = ({
   totalFeatureImportance,
   jobConfig,
-}) => {
+}: FeatureImportanceSummaryPanelProps) => {
   const {
     services: { docLinks },
   } = useMlKibana();

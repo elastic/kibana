@@ -30,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { EngineCreationLogic, EngineCreationSteps } from './engine_creation_logic';
 import { IndexStatusDetails } from './search_index_selectable';
 
-export const ReviewElasticsearchEngine: React.FC = () => {
+export const ReviewElasticsearchEngine = () => {
   const { aliasName, name, selectedIndex, selectedIndexFormatted } = useValues(EngineCreationLogic);
   const { setCreationStep, submitEngine } = useActions(EngineCreationLogic);
 

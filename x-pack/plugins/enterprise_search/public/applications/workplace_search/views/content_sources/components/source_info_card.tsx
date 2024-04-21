@@ -27,9 +27,9 @@ interface SourceInfoCardProps {
   contentSource: ContentSourceFullData;
 }
 
-export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
+export const SourceInfoCard = ({
   contentSource: { createdAt, name, serviceType, isFederatedSource, mainIcon },
-}) => (
+}: SourceInfoCardProps) => (
   <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem>
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
@@ -53,7 +53,6 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
         </EuiFlexGroup>
       )}
     </EuiFlexItem>
-
     <EuiFlexItem>
       <EuiText textAlign="right" size="s">
         <strong>{CREATED_LABEL}</strong>

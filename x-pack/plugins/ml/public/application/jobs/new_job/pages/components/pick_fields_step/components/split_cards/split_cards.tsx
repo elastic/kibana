@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
@@ -19,6 +18,7 @@ interface Props {
   numberOfDetectors: number;
   jobType: JOB_TYPE;
   animate?: boolean;
+  children: React.ReactNode;
 }
 
 interface Panel {
@@ -26,8 +26,8 @@ interface Panel {
   marginBottom: number;
 }
 
-export const SplitCards: FC<Props> = memo(
-  ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
+export const SplitCards = memo(
+  ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }: Props) => {
     const panels: Panel[] = [];
 
     function storePanels(panel: HTMLDivElement | null, marginBottom: number) {

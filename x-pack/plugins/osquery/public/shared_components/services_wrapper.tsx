@@ -20,7 +20,7 @@ export interface ServicesWrapperProps {
   children: React.ReactNode;
 }
 
-const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
+const ServicesWrapperComponent = ({ services, children }: ServicesWrapperProps) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>

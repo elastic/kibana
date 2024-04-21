@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   EuiComboBox,
   EuiHealth,
@@ -100,7 +100,7 @@ const renderOption = (option: TagComboBoxOption, searchValue: string, contentCla
   }
 };
 
-export const TagSelector: FC<TagSelectorProps> = ({
+export const TagSelector = ({
   tags,
   selected,
   onTagsSelected,
@@ -108,7 +108,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
   openCreateModal,
   fullWidth = true,
   ...otherProps
-}) => {
+}: TagSelectorProps) => {
   const [currentSearch, setCurrentSearch] = useState('');
 
   // We are forcing the 'create tag' option to always appear by having its

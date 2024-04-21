@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
@@ -75,7 +74,7 @@ export const editCalendarRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode }) => {
+const PageWrapper = ({ location, mode }: NewCalendarPageProps) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);

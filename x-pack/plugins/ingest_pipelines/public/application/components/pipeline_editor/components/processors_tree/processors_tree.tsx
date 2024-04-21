@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
+import React, { memo, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import List from 'react-virtualized/dist/commonjs/List';
 import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
@@ -46,7 +46,7 @@ export interface Props {
  * This component is the public interface to our optimised tree rendering private components and
  * also contains top-level state concerns for an instance of the component
  */
-export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
+export const ProcessorsTree = memo((props: Props) => {
   const { processors, baseSelector, onAction, movingProcessor } = props;
   // These refs are created here so they can be shared with all
   // recursively rendered trees. Their values should come from react-virtualized

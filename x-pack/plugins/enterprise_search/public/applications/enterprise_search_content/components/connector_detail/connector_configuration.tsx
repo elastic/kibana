@@ -51,7 +51,7 @@ import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { NativeConnectorConfiguration } from './native_connector_configuration';
 
-export const ConnectorConfiguration: React.FC = () => {
+export const ConnectorConfiguration = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
   const {
     index,

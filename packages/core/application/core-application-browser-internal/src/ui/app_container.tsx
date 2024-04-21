@@ -9,7 +9,7 @@
 import './app_container.scss';
 
 import { Observable } from 'rxjs';
-import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
+import React, { Fragment, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -40,7 +40,7 @@ interface Props {
   showPlainSpinner?: boolean;
 }
 
-export const AppContainer: FC<Props> = ({
+export const AppContainer = ({
   mounter,
   appId,
   appPath,
@@ -127,7 +127,7 @@ export const AppContainer: FC<Props> = ({
   );
 };
 
-const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+const AppLoadingPlaceholder = ({ showPlainSpinner }: { showPlainSpinner: boolean }) => {
   if (showPlainSpinner) {
     return (
       <EuiLoadingSpinner

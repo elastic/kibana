@@ -48,7 +48,7 @@ interface Props {
 
 const DELAY_AFTER_EVERY_CHECK_COMPLETES = 3000; // ms
 
-const CheckAllComponent: React.FC<Props> = ({
+const CheckAllComponent = ({
   formatBytes,
   formatNumber,
   ilmPhases,
@@ -59,7 +59,7 @@ const CheckAllComponent: React.FC<Props> = ({
   setCheckAllIndiciesChecked,
   setCheckAllTotalIndiciesToCheck,
   setIndexToCheck,
-}) => {
+}: Props) => {
   const { httpFetch, isILMAvailable } = useDataQualityContext();
   const abortController = useRef(new AbortController());
   const [isRunning, setIsRunning] = useState<boolean>(false);

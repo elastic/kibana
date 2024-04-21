@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
@@ -40,7 +40,7 @@ import { mountLicensingLogic } from './shared/licensing';
  */
 
 export const renderApp = (
-  App: React.FC<InitialAppData>,
+  App: (props: InitialAppData) => React.ReactElement,
   {
     params,
     core,
@@ -92,7 +92,7 @@ export const renderApp = (
   const productAccess = access || noProductAccess;
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext = ({ children }: { children: React.ReactNode }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
@@ -201,7 +201,7 @@ export const renderApp = (
  */
 
 export const renderHeaderActions = (
-  HeaderActions: React.FC,
+  HeaderActions: () => JSX.Element,
   store: Store,
   params: AppMountParameters,
   kibanaHeaderEl: HTMLElement

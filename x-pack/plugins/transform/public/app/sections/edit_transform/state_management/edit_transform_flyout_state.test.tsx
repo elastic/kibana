@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { getTransformConfigMock } from './__mocks__/transform_config';
@@ -21,7 +21,7 @@ import { useIsFormValid } from './selectors/is_form_valid';
 describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
   it('field updates should trigger form validation', () => {
     const transformConfigMock = getTransformConfigMock();
-    const wrapper: FC = ({ children }) => (
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
       <EditTransformFlyoutProvider config={transformConfigMock} dataViewId={'the-data-view-id'}>
         {children}
       </EditTransformFlyoutProvider>

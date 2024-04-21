@@ -7,7 +7,6 @@
  */
 
 import React, { useMemo } from 'react';
-import type { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
@@ -25,7 +24,7 @@ interface Props {
   file: FileJSON;
 }
 
-export const FileCard: FunctionComponent<Props> = ({ file }) => {
+export const FileCard = ({ file }: Props) => {
   const { kind, state, client, shouldAllowDelete } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });

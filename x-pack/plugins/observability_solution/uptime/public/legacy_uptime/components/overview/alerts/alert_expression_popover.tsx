@@ -29,7 +29,7 @@ const getColor = (
   return isOpen ? 'primary' : 'success';
 };
 
-export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
+export const AlertExpressionPopover = ({
   'aria-label': ariaLabel,
   content,
   'data-test-subj': dataTestSubj,
@@ -38,7 +38,7 @@ export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   isInvalid,
   id,
   value,
-}) => {
+}: AlertExpressionPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <EuiPopover

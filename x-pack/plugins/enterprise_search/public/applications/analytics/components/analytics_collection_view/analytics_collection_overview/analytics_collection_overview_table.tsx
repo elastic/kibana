@@ -285,9 +285,9 @@ interface AnalyticsCollectionOverviewTableProps {
   filterBy: FilterBy;
 }
 
-export const AnalyticsCollectionOverviewTable: React.FC<AnalyticsCollectionOverviewTableProps> = ({
+export const AnalyticsCollectionOverviewTable = ({
   filterBy,
-}) => {
+}: AnalyticsCollectionOverviewTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useValues(KibanaLogic);
   const { analyticsCollection } = useValues(FetchAnalyticsCollectionLogic);

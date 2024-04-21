@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Chart, Bullet, BulletProps, Settings } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -166,7 +166,7 @@ function getTicks(ticksPosition: GaugeTicksPosition, colorBands?: number[]) {
   }
 }
 
-export const GaugeComponent: FC<GaugeRenderProps> = ({
+export const GaugeComponent = ({
   data,
   args,
   uiState,
@@ -176,7 +176,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   renderComplete,
   overrides,
   setChartSize,
-}) => {
+}: GaugeRenderProps) => {
   const {
     shape: gaugeType,
     palette,

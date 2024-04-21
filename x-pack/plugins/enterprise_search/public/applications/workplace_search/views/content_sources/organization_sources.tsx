@@ -25,7 +25,7 @@ import {
 import { SourcesLogic } from './sources_logic';
 import { SourcesView } from './sources_view';
 
-export const OrganizationSources: React.FC = () => {
+export const OrganizationSources = () => {
   const { initializeSources, setSourceSearchability, resetSourcesState } = useActions(SourcesLogic);
 
   useEffect(() => {

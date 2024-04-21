@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
-export const VectorLineIcon: FunctionComponent = (props) => (
+export const VectorLineIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"

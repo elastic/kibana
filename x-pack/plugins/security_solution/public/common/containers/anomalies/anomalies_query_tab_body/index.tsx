@@ -17,7 +17,7 @@ import { histogramConfigs } from './histogram_configs';
 
 const ID = 'anomaliesHistogramQuery';
 
-const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
+const AnomaliesQueryTabBodyComponent = ({
   deleteQuery,
   endDate,
   setQuery,
@@ -32,7 +32,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   hostName,
   userName,
   indexNames,
-}) => {
+}: AnomaliesQueryTabBodyProps) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 

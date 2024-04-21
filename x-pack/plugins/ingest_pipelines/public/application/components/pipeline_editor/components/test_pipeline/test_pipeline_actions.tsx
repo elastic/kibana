@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
@@ -25,7 +25,7 @@ const i18nTexts = {
   ),
 };
 
-export const TestPipelineActions: FunctionComponent = () => {
+export const TestPipelineActions = () => {
   const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
 
   const {

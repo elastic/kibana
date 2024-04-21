@@ -25,7 +25,7 @@ import { OauthApplication } from './components/oauth_application';
 import { SourceConfig } from './components/source_config';
 import { SettingsLogic } from './settings_logic';
 
-export const SettingsRouter: React.FC = () => {
+export const SettingsRouter = () => {
   const { initializeSettings } = useActions(SettingsLogic);
 
   useEffect(() => {

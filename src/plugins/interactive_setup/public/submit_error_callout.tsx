@@ -7,7 +7,6 @@
  */
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -29,7 +28,7 @@ export interface SubmitErrorCalloutProps {
   defaultTitle: React.ReactNode;
 }
 
-export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (props) => {
+export const SubmitErrorCallout = (props: SubmitErrorCalloutProps) => {
   const error = props.error as IHttpFetchError<ResponseErrorBody>;
 
   if (

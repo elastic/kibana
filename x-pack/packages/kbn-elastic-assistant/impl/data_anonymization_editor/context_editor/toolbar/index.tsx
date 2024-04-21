@@ -19,19 +19,13 @@ export interface Props {
   totalFields: number;
 }
 
-const ToolbarComponent: React.FC<Props> = ({
-  onListUpdated,
-  onSelectAll,
-  selected,
-  totalFields,
-}) => (
+const ToolbarComponent = ({ onListUpdated, onSelectAll, selected, totalFields }: Props) => (
   <EuiFlexGroup alignItems="center" data-test-subj="toolbar" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
         {i18n.SELECTED_FIELDS(selected.length)}
       </EuiText>
     </EuiFlexItem>
-
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
         data-test-subj="selectAllFields"
@@ -42,7 +36,6 @@ const ToolbarComponent: React.FC<Props> = ({
         {i18n.SELECT_ALL_FIELDS(totalFields)}
       </EuiButtonEmpty>
     </EuiFlexItem>
-
     <EuiFlexItem grow={false}>
       <BulkActions
         appliesTo="multipleRows"

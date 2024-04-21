@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiCheckbox, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,7 +14,7 @@ import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_co
 /*
  * React component for a checkbox element to toggle charts display.
  */
-export const CheckboxShowCharts: FC = () => {
+export const CheckboxShowCharts = () => {
   const { chartsStateService } = useAnomalyExplorerContext();
 
   const showCharts = useObservable(

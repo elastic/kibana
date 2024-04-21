@@ -19,7 +19,7 @@ import { ADVANCED_ROLE_TYPES, STANDARD_ROLE_TYPES } from './constants';
 import { EngineAssignmentSelector } from './engine_assignment_selector';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
-export const RoleMapping: React.FC = () => {
+export const RoleMapping = () => {
   const { myRole } = useValues(AppLogic);
 
   const {

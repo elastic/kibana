@@ -29,7 +29,7 @@ import { ConvertConnectorModal } from '../../../shared/convert_connector_modal/c
 
 import { ConvertConnectorLogic } from './convert_connector_logic';
 
-export const ConvertConnector: React.FC = () => {
+export const ConvertConnector = () => {
   const { showModal } = useActions(ConvertConnectorLogic);
   const { isModalVisible } = useValues(ConvertConnectorLogic);
 

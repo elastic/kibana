@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
@@ -33,7 +33,7 @@ type Props = {
   workpad: CanvasWorkpad;
 } & ResolvedArgProps<ResolvedLabels>;
 
-export const SimpleTemplate: FunctionComponent<Props> = (props) => {
+export const SimpleTemplate = (props: Props) => {
   const {
     typeInstance,
     argValue,

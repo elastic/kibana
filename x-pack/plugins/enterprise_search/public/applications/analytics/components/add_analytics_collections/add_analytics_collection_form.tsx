@@ -20,10 +20,12 @@ interface AddAnalyticsCollectionForm {
   formId: string;
 }
 
-export const AddAnalyticsCollectionForm: React.FC<AddAnalyticsCollectionForm> = ({
+// TODO: Update @typescript-eslint
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const AddAnalyticsCollectionForm = ({
   formId,
   collectionNameField,
-}) => {
+}: AddAnalyticsCollectionForm) => {
   const { createAnalyticsCollection, setNameValue } = useActions(AddAnalyticsCollectionLogic);
   const { name, isLoading, canSubmit, inputError } = useValues(AddAnalyticsCollectionLogic);
 

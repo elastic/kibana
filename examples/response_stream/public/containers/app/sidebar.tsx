@@ -11,7 +11,7 @@ import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { routes } from '../../routes';
 
-export const Sidebar: React.FC = () => {
+export const Sidebar = () => {
   const history = useHistory();
 
   return (

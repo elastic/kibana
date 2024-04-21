@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import {
   EuiDescriptionList,
@@ -36,7 +35,7 @@ enum TAB {
   MEMORY_USAGE,
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+export const ExpandedRow = ({ item }: ExpandedRowProps) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.DETAILS);
 

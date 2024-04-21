@@ -19,7 +19,7 @@ interface Props {
   interval: GenerationInterval;
 }
 
-const GenerationTimingComponent: React.FC<Props> = ({ interval }) => {
+const GenerationTimingComponent = ({ interval }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { theme } = useKibana().services;
   const isDarkMode = useMemo(() => theme.getTheme().darkMode === true, [theme]);

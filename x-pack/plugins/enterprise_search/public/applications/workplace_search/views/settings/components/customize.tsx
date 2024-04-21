@@ -32,7 +32,7 @@ import { SettingsLogic } from '../settings_logic';
 
 import { BrandingSection } from './branding_section';
 
-export const Customize: React.FC = () => {
+export const Customize = () => {
   const {
     onOrgNameInputChange,
     updateOrgName,

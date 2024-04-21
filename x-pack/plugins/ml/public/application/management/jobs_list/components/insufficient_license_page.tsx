@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +23,7 @@ interface Props {
   basePath: CoreStart['http']['basePath'];
 }
 
-export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
+export const InsufficientLicensePage = ({ basePath }: Props) => (
   <>
     <EuiPageTemplate.EmptyPrompt
       title={

@@ -13,7 +13,7 @@ import {
   LabelOverflowConstraint,
   LineSeries,
 } from '@elastic/charts';
-import React, { FC } from 'react';
+import React from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
@@ -62,7 +62,7 @@ interface Props {
   isDarkMode: boolean;
 }
 
-export const DataLayers: FC<Props> = ({
+export const DataLayers = ({
   titles = {},
   layers,
   endValue,
@@ -85,7 +85,7 @@ export const DataLayers: FC<Props> = ({
   uiState,
   singleTable,
   isDarkMode,
-}) => {
+}: Props) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
   const allColumnsToLabel = layers.reduce((acc, layer) => {

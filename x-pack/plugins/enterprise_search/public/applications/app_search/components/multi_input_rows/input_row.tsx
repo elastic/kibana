@@ -21,7 +21,7 @@ interface Props {
 
 import './input_row.scss';
 
-export const InputRow: React.FC<Props> = ({
+export const InputRow = ({
   value,
   placeholder,
   autoFocus,
@@ -29,7 +29,7 @@ export const InputRow: React.FC<Props> = ({
   onDelete,
   disableDelete,
   deleteLabel,
-}) => (
+}: Props) => (
   <EuiFlexGroup className="inputRow" alignItems="center" responsive={false} gutterSize="s">
     <EuiFlexItem>
       <EuiFieldText

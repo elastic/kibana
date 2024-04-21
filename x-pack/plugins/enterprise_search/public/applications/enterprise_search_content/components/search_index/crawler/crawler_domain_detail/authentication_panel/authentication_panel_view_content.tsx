@@ -17,7 +17,7 @@ import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 import './authentication_panel.scss';
 
-export const AuthenticationPanelViewContent: React.FC = () => {
+export const AuthenticationPanelViewContent = () => {
   const { domain } = useValues(CrawlerDomainDetailLogic);
 
   return domain?.auth ? (

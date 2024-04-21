@@ -44,7 +44,7 @@ import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic'
 
 import { ManageCrawlsPopoverLogic } from './manage_crawls_popover_logic';
 
-export const AutomaticCrawlScheduler: React.FC = () => {
+export const AutomaticCrawlScheduler = () => {
   const {
     fetchCrawlSchedule,
     setCrawlFrequency,

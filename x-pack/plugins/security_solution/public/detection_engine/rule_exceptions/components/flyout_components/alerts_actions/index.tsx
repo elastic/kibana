@@ -48,9 +48,7 @@ interface ExceptionsFlyoutAlertsActionsComponentProps {
   onDisableBulkClose: (arg: boolean) => void;
 }
 
-const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
-  ExceptionsFlyoutAlertsActionsComponentProps
-> = ({
+const ExceptionItemsFlyoutAlertsActionsComponent = ({
   isAlertDataLoading,
   exceptionListItems,
   exceptionListType,
@@ -63,7 +61,7 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   onUpdateBulkCloseIndex,
   onBulkCloseCheckboxChange,
   onSingleAlertCloseCheckboxChange,
-}): JSX.Element => {
+}: ExceptionsFlyoutAlertsActionsComponentProps): JSX.Element => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const memoSignalIndexName = useMemo(
     () => (signalIndexName !== null ? [signalIndexName] : []),

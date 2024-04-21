@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, FC, useMemo, useState, useCallback, useRef } from 'react';
+import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
 import {
   Chart,
   ElementClickListener,
@@ -134,7 +134,7 @@ function computeColorRanges(
   return { colors, ranges };
 }
 
-export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
+export const HeatmapComponent = memo(
   ({
     data: table,
     args,
@@ -153,7 +153,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     syncCursor,
     renderComplete,
     overrides,
-  }) => {
+  }: HeatmapRenderProps) => {
     const chartRef = useRef<Chart>(null);
     const isDarkTheme = chartsThemeService.useDarkMode();
     // legacy heatmap legend is handled by the uiState

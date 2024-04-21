@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -21,7 +20,7 @@ import {
 import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { useEnabledFeatures } from '../../contexts/ml';
 
-export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
+export const SyncList = ({ syncItems }: { syncItems: SyncSavedObjectResponse | null }) => {
   const { isADEnabled } = useEnabledFeatures();
 
   if (syncItems === null) {
@@ -53,7 +52,7 @@ export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ sy
   );
 };
 
-const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+const SavedObjectsCreated = ({ syncItems }: { syncItems: SyncSavedObjectResponse }) => {
   const count = getTotalItemsCount(syncItems.savedObjectsCreated);
 
   const title = (
@@ -86,7 +85,7 @@ const SavedObjectsCreated: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
   );
 };
 
-const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+const SavedObjectsDeleted = ({ syncItems }: { syncItems: SyncSavedObjectResponse }) => {
   const count = getTotalItemsCount(syncItems.savedObjectsDeleted);
 
   const title = (
@@ -119,7 +118,7 @@ const SavedObjectsDeleted: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncI
   );
 };
 
-const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+const DatafeedsAdded = ({ syncItems }: { syncItems: SyncSavedObjectResponse }) => {
   const count = getTotalItemsCount(syncItems.datafeedsAdded);
 
   const title = (
@@ -150,7 +149,7 @@ const DatafeedsAdded: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems 
   return <SyncItem id="datafeedsAdded" title={title} results={syncItems.datafeedsAdded} />;
 };
 
-const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItems }) => {
+const DatafeedsRemoved = ({ syncItems }: { syncItems: SyncSavedObjectResponse }) => {
   const count = getTotalItemsCount(syncItems.datafeedsRemoved);
 
   const title = (
@@ -181,10 +180,14 @@ const DatafeedsRemoved: FC<{ syncItems: SyncSavedObjectResponse }> = ({ syncItem
   return <SyncItem id="datafeedsRemoved" title={title} results={syncItems.datafeedsRemoved} />;
 };
 
-const SyncItem: FC<{ id: string; title: JSX.Element; results: SyncResult }> = ({
+const SyncItem = ({
   id,
   title,
   results,
+}: {
+  id: string;
+  title: JSX.Element;
+  results: SyncResult;
 }) => {
   return (
     <EuiAccordion id={id} buttonContent={title} paddingSize="l">

@@ -17,7 +17,7 @@ interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
 }
 
-const SameFamilyCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => {
+const SameFamilyCalloutComponent = ({ children, enrichedFieldMetadata }: Props) => {
   const title = useMemo(
     () => (
       <span data-test-subj="title">

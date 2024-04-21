@@ -27,12 +27,12 @@ import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
 import { StepProps } from '.';
 
-export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
+export const RestoreSnapshotStepSettings = ({
   restoreSettings,
   updateRestoreSettings,
   snapshotDetails,
   errors,
-}) => {
+}: StepProps) => {
   const { i18n } = useServices();
   const { docLinks } = useCore();
   const { indexSettings, ignoreIndexSettings } = restoreSettings;

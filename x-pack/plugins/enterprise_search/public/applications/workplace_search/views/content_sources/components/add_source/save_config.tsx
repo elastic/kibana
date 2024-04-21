@@ -86,14 +86,14 @@ interface SaveConfigProps {
   onDeleteConfig?(): void;
 }
 
-export const SaveConfig: React.FC<SaveConfigProps> = ({
+export const SaveConfig = ({
   name,
   configuration,
   advanceStep,
   goBackStep,
   onDeleteConfig,
   header,
-}) => {
+}: SaveConfigProps) => {
   const { documentationUrl, applicationPortalUrl, applicationLinkTitle } = configuration;
 
   const { hasPlatinumLicense } = useValues(LicensingLogic);

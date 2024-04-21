@@ -28,7 +28,7 @@ import {
 
 import { ApiKey } from './api_key';
 
-export const ApiKeysList: React.FC = () => {
+export const ApiKeysList = () => {
   const { deleteApiKey, onPaginate, stageTokenNameForDeletion, hideDeleteModal } =
     useActions(ApiKeysLogic);
   const { apiTokens, meta, dataLoading, deleteModalVisible } = useValues(ApiKeysLogic);

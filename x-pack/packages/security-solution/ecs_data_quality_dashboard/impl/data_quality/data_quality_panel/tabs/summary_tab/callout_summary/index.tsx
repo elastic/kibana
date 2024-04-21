@@ -42,7 +42,7 @@ interface Props {
   sizeInBytes: number | undefined;
 }
 
-const CalloutSummaryComponent: React.FC<Props> = ({
+const CalloutSummaryComponent = ({
   addSuccessToast,
   addToNewCaseDisabled,
   docsCount,
@@ -56,7 +56,7 @@ const CalloutSummaryComponent: React.FC<Props> = ({
   pattern,
   patternDocsCount,
   sizeInBytes,
-}) => {
+}: Props) => {
   const { isILMAvailable } = useDataQualityContext();
   const markdownComments: string[] = useMemo(
     () =>

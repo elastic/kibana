@@ -18,12 +18,17 @@ import { getDynamicSettings } from '../../../../state/actions/dynamic_settings';
 import { AlertQueryBar } from '../alert_query_bar/query_bar';
 import { AlertMonitorCount } from '../monitor_status_alert/alert_monitor_status';
 
-export const AlertTls: React.FC<{
+export const AlertTls = ({
+  id,
+  stackVersion,
+  ruleParams,
+  setRuleParams,
+}: {
   id?: string;
   stackVersion?: string;
   ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
   setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
-}> = ({ id, stackVersion, ruleParams, setRuleParams }) => {
+}) => {
   const dispatch = useDispatch();
 
   const { settings } = useSelector(selectDynamicSettings);

@@ -25,7 +25,7 @@ export interface Props extends Omit<UseChatSend, 'abortStream'> {
  * Renders the user input prompt text area.
  * Allows the user to clear the chat and switch between different system prompts.
  */
-export const ChatSend: React.FC<Props> = ({
+export const ChatSend = ({
   handleButtonSendMessage,
   handleOnChatCleared,
   handlePromptChange,
@@ -35,7 +35,7 @@ export const ChatSend: React.FC<Props> = ({
   isFlyoutMode,
   shouldRefocusPrompt,
   userPrompt,
-}) => {
+}: Props) => {
   // For auto-focusing prompt within timeline
   const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {

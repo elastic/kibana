@@ -60,7 +60,7 @@ const visualizationResponseHasData = (response: VisualizationResponse[]): boolea
   ).some(({ buckets }) => buckets.length > 0);
 };
 
-export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
+export const MatrixHistogramComponent = ({
   chartHeight,
   defaultStackByOption,
   endDate,
@@ -83,7 +83,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   titleSize,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters = true,
-}) => {
+}: MatrixHistogramComponentProps) => {
   const visualizationId = `${id}-embeddable`;
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);

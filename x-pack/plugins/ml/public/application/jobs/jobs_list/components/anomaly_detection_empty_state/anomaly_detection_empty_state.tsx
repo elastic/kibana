@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
@@ -15,7 +14,7 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contex
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
-export const AnomalyDetectionEmptyState: FC = () => {
+export const AnomalyDetectionEmptyState = () => {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 

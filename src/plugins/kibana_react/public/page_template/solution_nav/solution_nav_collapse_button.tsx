@@ -7,7 +7,7 @@
  */
 import './solution_nav_collapse_button.scss';
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
 import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
@@ -24,9 +24,11 @@ export type KibanaPageTemplateSolutionNavCollapseButtonProps =
 /**
  * Creates the styled icon button for showing/hiding solution nav
  */
-export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<
-  KibanaPageTemplateSolutionNavCollapseButtonProps
-> = ({ className, isCollapsed, ...rest }) => {
+export const KibanaPageTemplateSolutionNavCollapseButton = ({
+  className,
+  isCollapsed,
+  ...rest
+}: KibanaPageTemplateSolutionNavCollapseButtonProps) => {
   const classes = classNames(
     'kbnPageTemplateSolutionNavCollapseButton',
     {

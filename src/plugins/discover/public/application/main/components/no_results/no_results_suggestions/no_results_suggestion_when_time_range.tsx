@@ -10,7 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 
-export const NoResultsSuggestionWhenTimeRange: React.FC = () => {
+export const NoResultsSuggestionWhenTimeRange = () => {
   return (
     <EuiText data-test-subj="discoverNoResultsTimefilter">
       <FormattedMessage

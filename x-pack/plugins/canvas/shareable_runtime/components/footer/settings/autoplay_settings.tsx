@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiHorizontalRule, EuiSwitch } from '@elastic/eui';
 import {
   useCanvasShareableState,
@@ -45,7 +45,7 @@ export interface Props {
 /**
  * The panel used to configure Autolay in Shareable Canvas Workpads.
  */
-export const AutoplaySettingsComponent: FC<Props> = ({
+export const AutoplaySettingsComponent = ({
   isEnabled,
   interval,
   onSetAutoplay,

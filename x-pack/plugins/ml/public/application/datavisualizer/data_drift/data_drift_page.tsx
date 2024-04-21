@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,7 +14,7 @@ import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 
-export const DataDriftPage: FC = () => {
+export const DataDriftPage = () => {
   const {
     services: { dataVisualizer },
   } = useMlKibana();

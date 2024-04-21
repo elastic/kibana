@@ -13,7 +13,7 @@ import { SearchUILogic } from '../search_ui_logic';
 
 import './search_ui_graphic.scss';
 
-export const SearchUIGraphic: React.FC = () => {
+export const SearchUIGraphic = () => {
   const { activeField } = useValues(SearchUILogic);
   const svgClass = 'searchUIGraphic';
 

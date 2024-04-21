@@ -65,7 +65,7 @@ const getCss = (
   `;
 };
 
-export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
+export const ConnectorCheckable = ({
   isDisabled,
   documentationUrl,
   iconType,
@@ -77,7 +77,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   showNativeBadge,
   showLicensePopover = false,
   showNativePopover = false,
-}) => {
+}: ConnectorCheckableProps) => {
   const { euiTheme } = useEuiTheme();
   const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
   const [isNativeInfoPopoverOpen, setIsNativeInfoPopoverOpen] = useState(false);

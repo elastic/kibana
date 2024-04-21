@@ -25,7 +25,7 @@ interface Props {
   errorSummary: ErrorSummary[];
 }
 
-const ErrorsViewerComponent: React.FC<Props> = ({ errorSummary }) => {
+const ErrorsViewerComponent = ({ errorSummary }: Props) => {
   const columns = useMemo(() => getErrorsViewerTableColumns(), []);
 
   return (

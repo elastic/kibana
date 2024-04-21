@@ -19,12 +19,12 @@ export type JsonEditorProps = Pick<
   'editAction' | 'index' | 'messageVariables' | 'subActionParams'
 >;
 
-const JsonEditorComponent: React.FC<JsonEditorProps> = ({
+const JsonEditorComponent = ({
   editAction,
   index,
   messageVariables,
   subActionParams,
-}) => {
+}: JsonEditorProps) => {
   const [jsonEditorErrors, setJsonEditorErrors] = useState<string[]>([]);
 
   const jsonEditorValue = useMemo(() => getJsonEditorValue(subActionParams), [subActionParams]);

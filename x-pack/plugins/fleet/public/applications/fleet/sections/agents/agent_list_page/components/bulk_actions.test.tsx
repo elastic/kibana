@@ -52,7 +52,7 @@ describe('AgentBulkActions', () => {
       hasAtLeast: () => false,
     } as unknown as LicenseService);
     jest.mocked(AgentReassignAgentPolicyModal).mockReset();
-    jest.mocked(AgentReassignAgentPolicyModal).mockReturnValue(null);
+    jest.mocked(AgentReassignAgentPolicyModal).mockReturnValue(<></>);
   });
 
   function render(props: any) {

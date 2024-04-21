@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import {
@@ -19,6 +18,7 @@ import {
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
+  children: React.ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
@@ -28,7 +28,7 @@ interface AdministrationListPageProps {
   headerBackComponent?: React.ReactNode;
 }
 
-export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
+export const AdministrationListPage = memo(
   ({
     title,
     subtitle,
@@ -39,7 +39,7 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     hideHeader = false,
     headerBackComponent,
     ...otherProps
-  }) => {
+  }: AdministrationListPageProps & CommonProps) => {
     const header = useMemo(() => {
       return (
         <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">

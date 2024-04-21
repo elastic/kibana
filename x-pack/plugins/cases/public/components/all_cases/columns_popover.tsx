@@ -44,10 +44,7 @@ interface ToggleColumnsParams {
   field?: string;
 }
 
-export const ColumnsPopover: React.FC<Props> = ({
-  selectedColumns,
-  onSelectedColumnsChange,
-}: Props) => {
+export const ColumnsPopover = ({ selectedColumns, onSelectedColumnsChange }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

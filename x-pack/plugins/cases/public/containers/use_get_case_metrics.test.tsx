@@ -18,7 +18,9 @@ import { CaseMetricsFeature } from '../../common/types/api';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <TestProviders>{children}</TestProviders>
+);
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();

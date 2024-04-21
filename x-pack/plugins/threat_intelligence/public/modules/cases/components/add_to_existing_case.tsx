@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -42,11 +42,11 @@ export interface AddToExistingCaseProps {
  *
  * @returns add to existing case for a context menu
  */
-export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
+export const AddToExistingCase = ({
   indicator,
   onClick,
   'data-test-subj': dataTestSubj,
-}) => {
+}: AddToExistingCaseProps) => {
   const { cases } = useKibana().services;
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import '../_index.scss';
-import type { FC } from 'react';
 import React from 'react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ResultLinks } from '../../../common/app';
@@ -22,7 +21,7 @@ export interface Props {
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 
-export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks }) => {
+export const FileDataVisualizer = ({ getAdditionalLinks, resultLinks }: Props) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, discover, share, security, fileUpload, cloud, fieldFormats } =
     getPluginsStart();
@@ -38,7 +37,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks, resultLinks 
     fieldFormats,
   };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext = ({ children }: { children: React.ReactNode }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (

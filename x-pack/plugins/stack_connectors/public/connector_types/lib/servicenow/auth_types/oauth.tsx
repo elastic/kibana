@@ -23,7 +23,7 @@ interface Props {
 
 const { emptyField } = fieldValidators;
 
-const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
+const OAuthComponent = ({ isLoading, readOnly, pathPrefix = '' }: Props) => {
   return (
     <>
       <UseField

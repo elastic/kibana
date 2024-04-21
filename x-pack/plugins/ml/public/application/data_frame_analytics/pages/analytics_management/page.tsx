@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
@@ -37,7 +36,7 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
 });
 
-export const Page: FC = () => {
+export const Page = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
 

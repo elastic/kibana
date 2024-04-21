@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -45,7 +45,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
+export const DeleteVar = ({ selectedVar, onCancel, onDelete }: Props) => {
   return (
     <React.Fragment>
       <div className="canvasVarHeader__triggerWrapper">

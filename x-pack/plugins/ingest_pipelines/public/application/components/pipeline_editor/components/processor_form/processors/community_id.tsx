@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -191,7 +191,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const CommunityId: FunctionComponent = () => {
+export const CommunityId = () => {
   const [{ fields }] = useFormData({ watch: ['fields.iana_number', 'fields.transport'] });
 
   return (

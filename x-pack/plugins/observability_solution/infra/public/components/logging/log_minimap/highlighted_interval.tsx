@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
@@ -19,7 +19,7 @@ interface HighlightedIntervalProps {
   target: number | null;
 }
 
-export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
+export const HighlightedInterval = ({
   className,
   end,
   getPositionOfTime,
@@ -27,7 +27,7 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
   targetWidth,
   width,
   target,
-}) => {
+}: HighlightedIntervalProps) => {
   const yStart = getPositionOfTime(start);
   const yEnd = getPositionOfTime(end);
   const yTarget = target && getPositionOfTime(target);

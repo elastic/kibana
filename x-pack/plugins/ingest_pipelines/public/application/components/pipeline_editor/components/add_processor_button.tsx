@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { usePipelineProcessorsContext } from '../context';
@@ -22,7 +22,7 @@ const addProcessorButtonLabel = i18n.translate(
   }
 );
 
-export const AddProcessorButton: FunctionComponent<Props> = (props) => {
+export const AddProcessorButton = (props: Props) => {
   const { onClick, renderButtonAsLink } = props;
   const {
     state: { editor },

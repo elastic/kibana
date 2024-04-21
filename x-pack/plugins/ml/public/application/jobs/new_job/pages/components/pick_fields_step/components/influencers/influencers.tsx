@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 
 import { InfluencersSelect } from './influencers_select';
@@ -18,7 +17,7 @@ import type {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const Influencers: FC = () => {
+export const Influencers = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = newJobCapsService;

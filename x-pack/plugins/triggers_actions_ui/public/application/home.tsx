@@ -31,12 +31,13 @@ export interface MatchParams {
   section: Section;
 }
 
-export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const TriggersActionsUIHome = ({
   match: {
     params: { section },
   },
+
   history,
-}) => {
+}: RouteComponentProps<MatchParams>) => {
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const { chrome, setBreadcrumbs } = useKibana().services;
   const { authorizedToReadAnyRules } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });

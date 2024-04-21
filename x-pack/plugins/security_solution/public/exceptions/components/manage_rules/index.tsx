@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButton,
@@ -33,7 +32,7 @@ interface ManageRulesProps {
   onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 
-export const ManageRules: FC<ManageRulesProps> = memo(
+export const ManageRules = memo(
   ({
     linkedRules,
     showButtonLoader,
@@ -41,7 +40,7 @@ export const ManageRules: FC<ManageRulesProps> = memo(
     onSave,
     onCancel,
     onRuleSelectionChange,
-  }) => {
+  }: ManageRulesProps) => {
     const complicatedFlyoutTitleId = useGeneratedHtmlId({
       prefix: 'complicatedFlyoutTitle',
     });

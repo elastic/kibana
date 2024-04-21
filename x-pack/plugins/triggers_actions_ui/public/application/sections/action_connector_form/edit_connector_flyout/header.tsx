@@ -27,16 +27,7 @@ import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 
-const FlyoutHeaderComponent: React.FC<{
-  isExperimental?: boolean;
-  isPreconfigured: boolean;
-  connectorName: string;
-  connectorTypeId: string;
-  connectorTypeDesc: string;
-  selectedTab: EditConnectorTabs;
-  setTab: (nextPage: EditConnectorTabs) => void;
-  icon?: IconType | null;
-}> = ({
+const FlyoutHeaderComponent = ({
   icon,
   isExperimental = false,
   isPreconfigured,
@@ -45,6 +36,15 @@ const FlyoutHeaderComponent: React.FC<{
   connectorTypeDesc,
   selectedTab,
   setTab,
+}: {
+  isExperimental?: boolean;
+  isPreconfigured: boolean;
+  connectorName: string;
+  connectorTypeId: string;
+  connectorTypeDesc: string;
+  selectedTab: EditConnectorTabs;
+  setTab: (nextPage: EditConnectorTabs) => void;
+  icon?: IconType | null;
 }) => {
   const {
     application: { capabilities },

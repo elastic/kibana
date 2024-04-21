@@ -23,14 +23,14 @@ interface ExceptionsAddToRulesOptionsComponentProps {
   onRadioChange: (option: AddToRuleListsRadioOptions) => void;
 }
 
-const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptionsComponentProps> = ({
+const ExceptionsAddToRulesOptionsComponent = ({
   possibleRules,
   isSingleRule,
   isBulkAction,
   selectedRadioOption,
   onRuleSelectionChange,
   onRadioChange,
-}): JSX.Element => {
+}: ExceptionsAddToRulesOptionsComponentProps): JSX.Element => {
   const ruleRadioOptionProps = useMemo(() => {
     if (isBulkAction && possibleRules != null) {
       return {

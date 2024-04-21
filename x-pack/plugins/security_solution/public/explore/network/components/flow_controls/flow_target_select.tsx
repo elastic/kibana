@@ -50,14 +50,14 @@ interface OwnProps {
 
 export type FlowTargetSelectProps = OwnProps;
 
-const FlowTargetSelectComponent: React.FC<FlowTargetSelectProps> = ({
+const FlowTargetSelectComponent = ({
   id,
   isLoading = false,
   selectedDirection,
   selectedTarget,
   displayTextOverride = [],
   updateFlowTargetAction,
-}) => (
+}: FlowTargetSelectProps) => (
   <EuiSuperSelect
     options={
       selectedDirection

@@ -17,7 +17,7 @@ import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time'
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
-export const LicensePage: React.FC<{}> = () => {
+export const LicensePage = () => {
   const title = i18n.translate('xpack.monitoring.license.licenseRouteTitle', {
     defaultMessage: 'License',
   });

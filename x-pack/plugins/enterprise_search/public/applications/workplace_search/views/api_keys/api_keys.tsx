@@ -38,7 +38,7 @@ import {
   COPY_API_ENDPOINT_BUTTON_LABEL,
 } from './constants';
 
-export const ApiKeys: React.FC = () => {
+export const ApiKeys = () => {
   const { fetchApiKeys, resetApiKeys, showApiKeyForm } = useActions(ApiKeysLogic);
 
   const { meta, dataLoading, apiKeyFormVisible, apiTokens } = useValues(ApiKeysLogic);

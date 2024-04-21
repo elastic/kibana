@@ -52,7 +52,7 @@ interface Props {
 }
 
 const parseRegex = /(\d+)([smhd]{1})/;
-export const AlertParamDuration: React.FC<Props> = (props: Props) => {
+export const AlertParamDuration = (props: Props) => {
   const { name, label, setRuleParams, errors } = props;
   const parsed = parseRegex.exec(props.duration);
   const defaultValue = parsed && parsed[1] ? parseInt(parsed[1], 10) : 1;

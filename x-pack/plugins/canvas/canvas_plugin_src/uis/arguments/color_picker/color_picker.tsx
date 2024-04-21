@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiColorPicker,
@@ -25,7 +25,7 @@ interface Props {
   argValue: string;
 }
 
-const ColorPicker: FC<Props> = ({ onValueChange, argValue }) => {
+const ColorPicker = ({ onValueChange, argValue }: Props) => {
   const [color, setColor, errors] = useColorPickerState(argValue);
 
   const pickColor: EuiSetColorMethod = (value, meta) => {

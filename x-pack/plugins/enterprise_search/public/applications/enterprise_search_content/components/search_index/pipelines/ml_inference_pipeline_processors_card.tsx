@@ -21,7 +21,7 @@ import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_bu
 import { TextExpansionCallOut } from './ml_inference/text_expansion_callout/text_expansion_callout';
 import { PipelinesLogic } from './pipelines_logic';
 
-export const MlInferencePipelineProcessorsCard: React.FC = () => {
+export const MlInferencePipelineProcessorsCard = () => {
   const { capabilities, isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { indexName } = useValues(IndexNameLogic);

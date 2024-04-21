@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 
 import { EuiSpacer, EuiCallOut, EuiTitle } from '@elastic/eui';
 
@@ -29,11 +28,11 @@ interface Props {
   forceRefreshAssets?: () => void;
 }
 
-export const DeferredAssetsSection: FunctionComponent<Props> = ({
+export const DeferredAssetsSection = ({
   deferredInstallations,
   packageInfo,
   forceRefreshAssets,
-}) => {
+}: Props) => {
   const authz = useAuthz();
 
   const deferredTransforms = deferredInstallations.filter(

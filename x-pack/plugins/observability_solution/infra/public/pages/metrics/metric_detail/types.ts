@@ -12,6 +12,7 @@ import { MetricsTimeInput } from './hooks/use_metrics_time';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 
 export interface LayoutProps {
+  children?: React.ReactNode;
   metrics?: NodeDetailsMetricData[];
   onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;

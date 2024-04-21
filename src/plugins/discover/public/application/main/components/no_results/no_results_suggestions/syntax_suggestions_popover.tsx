@@ -35,7 +35,7 @@ export interface SyntaxSuggestionsPopoverProps {
   meta: SyntaxExamples;
 }
 
-export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> = ({ meta }) => {
+export const SyntaxSuggestionsPopover = ({ meta }: SyntaxSuggestionsPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { title, items, footer } = meta;
 

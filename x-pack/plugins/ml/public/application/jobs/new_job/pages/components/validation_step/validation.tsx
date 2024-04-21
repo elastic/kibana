@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
@@ -23,7 +22,7 @@ const idFilterList = [
   'success_bucket_span',
 ];
 
-export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+export const ValidationStep = ({ setCurrentStep, isCurrentStep }: StepProps) => {
   const { jobCreator, jobCreatorUpdate, jobValidator } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 

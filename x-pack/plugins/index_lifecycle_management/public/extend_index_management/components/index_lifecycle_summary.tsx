@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -59,7 +59,7 @@ interface Props {
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+export const IndexLifecycleSummary = ({ index, getUrlForApp }: Props) => {
   const { ilm: ilmData } = index;
   // only ILM managed indices render the ILM tab
   const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;

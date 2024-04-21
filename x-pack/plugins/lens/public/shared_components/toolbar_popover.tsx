@@ -39,9 +39,10 @@ export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   buttonDataTestSubj?: string;
   panelClassName?: string;
   handleClose?: () => void;
+  children: React.ReactNode;
 };
 
-export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
+export const ToolbarPopover = ({
   children,
   title,
   type,
@@ -51,7 +52,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   handleClose,
   panelClassName = 'lnsVisToolbar__popover',
   ...euiPopoverProps
-}) => {
+}: ToolbarPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const iconType: string | IconType = typeof type === 'string' ? typeToIconMap[type] : type;

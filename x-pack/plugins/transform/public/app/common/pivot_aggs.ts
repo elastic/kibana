@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
@@ -220,12 +218,12 @@ export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
 export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
   extends PivotAggsConfigWithUiBase {
   /** Form component */
-  AggFormComponent: FC<{
+  AggFormComponent: (props:{
     aggConfig: Partial<T>;
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
     isValid?: boolean;
-  }>;
+  }) => JSX.Element;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
   /** Set UI configuration from ES aggregation definition */

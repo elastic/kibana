@@ -14,7 +14,7 @@ interface Props {
   text?: ReactNode;
 }
 
-export const LearnMoreLink: React.FunctionComponent<Props> = ({ docPath, text }) => {
+export const LearnMoreLink = ({ docPath, text }: Props) => {
   const content = text ? (
     text
   ) : (

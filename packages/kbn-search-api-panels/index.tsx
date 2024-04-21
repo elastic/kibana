@@ -33,12 +33,12 @@ export interface WelcomeBannerProps {
   showDescription?: boolean;
 }
 
-export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({
+export const WelcomeBanner = ({
   user,
   assetBasePath,
   image,
   showDescription = true,
-}) => (
+}: WelcomeBannerProps) => (
   <>
     <EuiSpacer size="xxl" />
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

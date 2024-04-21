@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CrawlerLogic } from '../../search_index/crawler/crawler_logic';
 
-export const StopCrawlPopoverContextMenu: React.FC = () => {
+export const StopCrawlPopoverContextMenu = () => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const togglePopover = () => setPopover(!isPopoverOpen);

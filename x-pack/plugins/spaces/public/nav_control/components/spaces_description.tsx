@@ -8,7 +8,6 @@
 import './spaces_description.scss';
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -25,7 +24,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export const SpacesDescription: FC<Props> = (props: Props) => {
+export const SpacesDescription = (props: Props) => {
   const panelProps = {
     id: props.id,
     className: 'spcDescription',

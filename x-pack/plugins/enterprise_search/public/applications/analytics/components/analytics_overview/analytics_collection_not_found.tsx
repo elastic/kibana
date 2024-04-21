@@ -19,9 +19,7 @@ interface AnalyticsCollectionNotFoundProps {
   query: string;
 }
 
-export const AnalyticsCollectionNotFound: React.FC<AnalyticsCollectionNotFoundProps> = ({
-  query,
-}) => (
+export const AnalyticsCollectionNotFound = ({ query }: AnalyticsCollectionNotFoundProps) => (
   <EuiEmptyPrompt
     icon={<EuiImage size={ICON_WIDTH} src={noMlModelsGraphicDark} alt="icon" />}
     title={

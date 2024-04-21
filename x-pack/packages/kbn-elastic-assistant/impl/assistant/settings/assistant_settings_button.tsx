@@ -29,7 +29,7 @@ interface Props {
 /**
  * Gear button that opens the assistant settings modal
  */
-export const AssistantSettingsButton: React.FC<Props> = React.memo(
+export const AssistantSettingsButton = React.memo(
   ({
     defaultConnector,
     isDisabled = false,
@@ -40,7 +40,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     refetchConversationsState,
-  }) => {
+  }: Props) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
     // Modal control functions

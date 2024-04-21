@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -26,7 +25,7 @@ const DEFAULT_TO = 'now';
  * Prevalence section under Insights section, overview tab.
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
-export const PrevalenceOverview: FC = () => {
+export const PrevalenceOverview = () => {
   const { eventId, indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
     useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();

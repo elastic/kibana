@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { Form as LibForm, FormHook } from '../../../../../shared_imports';
 
@@ -16,9 +16,10 @@ import { GlobalFieldsProvider } from '../global_fields_context';
 
 interface Props {
   form: FormHook;
+  children: React.ReactNode;
 }
 
-export const Form: FunctionComponent<Props> = ({ form, children }) => {
+export const Form = ({ form, children }: Props) => {
   return (
     <LibForm form={form}>
       <ConfigurationProvider>

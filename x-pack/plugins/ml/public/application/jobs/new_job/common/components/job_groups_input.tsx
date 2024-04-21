@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -21,8 +20,8 @@ export interface JobGroupsInputProps {
   validation: Validation;
 }
 
-export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
-  ({ existingGroups, selectedGroups, onChange, validation }) => {
+export const JobGroupsInput = memo(
+  ({ existingGroups, selectedGroups, onChange, validation }: JobGroupsInputProps) => {
     const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
       color: tabColor(g),

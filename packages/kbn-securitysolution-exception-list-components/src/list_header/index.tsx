@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import { EuiIcon, EuiPageHeader, EuiText } from '@elastic/eui';
 import * as i18n from '../translations';
 import { textCss, descriptionContainerCss, backTextCss } from './list_header.styles';
@@ -41,7 +40,7 @@ export interface BackOptions {
   dataTestSubj?: string;
   onNavigate: (path: string) => void;
 }
-const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
+const ExceptionListHeaderComponent = ({
   name,
   description,
   listId,
@@ -56,7 +55,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   onManageRules,
   onExportList,
   onDuplicateList,
-}) => {
+}: ExceptionListHeaderComponentProps) => {
   const { isModalVisible, listDetails, onEdit, onSave, onCancel } = useExceptionListHeader({
     name,
     description,

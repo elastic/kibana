@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import type {
@@ -150,7 +150,7 @@ export interface SingleBrushWindowParameters {
  * @param props DocumentCountChart component props
  * @returns The DocumentCountChart component.
  */
-export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) => {
+export const DocumentCountChartWithBrush = (props: DocumentCountChartProps) => {
   const {
     id,
     dataTestSubj,

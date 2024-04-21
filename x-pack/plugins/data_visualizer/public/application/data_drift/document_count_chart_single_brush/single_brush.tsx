@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, type FC } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
@@ -158,7 +158,7 @@ interface SingleBrushProps {
  * @param props SingleBrushProps component props
  * @returns The SingleBrush component.
  */
-export const SingleBrush: FC<SingleBrushProps> = (props) => {
+export const SingleBrush = (props: SingleBrushProps) => {
   const {
     id: brushId = '',
     windowParameters,

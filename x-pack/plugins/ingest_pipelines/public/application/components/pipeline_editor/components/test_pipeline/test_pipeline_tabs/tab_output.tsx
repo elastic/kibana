@@ -32,13 +32,13 @@ interface Props {
   testOutput?: any;
 }
 
-export const OutputTab: React.FunctionComponent<Props> = ({
+export const OutputTab = ({
   handleTestPipeline,
   isRunningTest,
   cachedVerbose,
   cachedDocuments,
   testOutput,
-}) => {
+}: Props) => {
   const [isVerboseEnabled, setIsVerboseEnabled] = useState(Boolean(cachedVerbose));
 
   let content: React.ReactNode | undefined;

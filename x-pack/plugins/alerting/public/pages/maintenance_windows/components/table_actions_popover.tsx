@@ -29,8 +29,8 @@ interface TableActionsPopoverProps {
 type ModalType = 'cancel' | 'cancelAndArchive' | 'archive' | 'unarchive';
 type ActionType = ModalType | 'edit';
 
-export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.memo(
-  ({ id, status, onEdit, onCancel, onArchive, onCancelAndArchive }) => {
+export const TableActionsPopover = React.memo(
+  ({ id, status, onEdit, onCancel, onArchive, onCancelAndArchive }: TableActionsPopoverProps) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalType, setModalType] = useState<ModalType>();

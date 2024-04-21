@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
@@ -15,7 +15,7 @@ import { SwitchModal } from '../switch_modal';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const AdvancedPivotEditorSwitch: FC<StepDefineFormHook> = ({
+export const AdvancedPivotEditorSwitch = ({
   advancedPivotEditor: {
     actions: { setAdvancedEditorSwitchModalVisible, toggleAdvancedEditor },
     state: {
@@ -26,7 +26,7 @@ export const AdvancedPivotEditorSwitch: FC<StepDefineFormHook> = ({
       isAdvancedPivotEditorApplyButtonEnabled,
     },
   },
-}) => {
+}: StepDefineFormHook) => {
   return (
     <EuiFormRow>
       <EuiFlexGroup gutterSize="none">

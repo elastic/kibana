@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -55,7 +54,7 @@ export interface ConsolePluginStart {
   /**
    * EmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana
    */
-  EmbeddableConsole?: FC<EmbeddableConsoleProps>;
+  EmbeddableConsole?: (props: EmbeddableConsoleProps) => JSX.Element;
   /**
    * Register an alternate view for the Embedded Console
    *

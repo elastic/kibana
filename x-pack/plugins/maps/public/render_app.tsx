@@ -69,7 +69,7 @@ export async function renderApp(
   }: {
     coreStart: CoreStart;
     savedObjectsTagging?: SavedObjectTaggingPluginStart;
-    AppUsageTracker: React.FC;
+    AppUsageTracker: (props: { children?: React.ReactNode }) => React.ReactElement | null;
   }
 ) {
   const stateTransfer = getEmbeddableService().getStateTransfer();

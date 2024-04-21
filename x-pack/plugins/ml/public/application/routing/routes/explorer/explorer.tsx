@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -16,7 +15,7 @@ import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
 
-import type { MlRoute, PageProps } from '../../router';
+import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { mlJobService } from '../../../services/job_service';
@@ -39,7 +38,7 @@ export const explorerRouteFactory = (
   title: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorer.docTitle', {
     defaultMessage: 'Anomaly Explorer',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
@@ -53,7 +52,7 @@ export const explorerRouteFactory = (
   'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
-const PageWrapper: FC<PageProps> = () => {
+const PageWrapper = () => {
   const {
     services: {
       mlServices: { mlApiServices },

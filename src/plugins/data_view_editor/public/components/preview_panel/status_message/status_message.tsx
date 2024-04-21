@@ -54,12 +54,12 @@ const NoMatchNoIndicesStatusMessage = () => (
   </span>
 );
 
-export const StatusMessage: React.FC<StatusMessageProps> = ({
+export const StatusMessage = ({
   matchedIndices: { allIndices = [], exactMatchedIndices = [], partialMatchedIndices = [] },
   isIncludingSystemIndices,
   query,
   showSystemIndices,
-}) => {
+}: StatusMessageProps) => {
   let statusIcon: EuiIconType | undefined;
   let statusMessage;
   let statusColor: 'primary' | 'success' | 'warning' | undefined;

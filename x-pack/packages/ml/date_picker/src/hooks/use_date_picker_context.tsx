@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, type FC } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { createContext, useContext } from 'react';
 
 import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -73,12 +74,12 @@ export const useDatePickerContext = (): DatePickerDependencies => {
 /**
  * React Component that acts as a wrapper for DatePickerContext.
  *
- * @type {FC<DatePickerDependencies>}
+ * @type {React.FC<DatePickerDependencies>}
  * @param props - The component props
  * @returns {React.ReactElement} The DatePickerContextProvider component.
  */
 
-export const DatePickerContextProvider: FC<DatePickerDependencies> = (props) => {
+export const DatePickerContextProvider = (props: PropsWithChildren<DatePickerDependencies>) => {
   const { children, ...deps } = props;
   return <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>;
 };

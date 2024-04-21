@@ -19,7 +19,7 @@ import { MonitoringStartServices } from '../types';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 import { WatcherMigrationStep } from './enable_alerts_modal';
 
-export const AlertsDropdown: React.FC<{}> = () => {
+export const AlertsDropdown = () => {
   const [shouldShowModal, setShouldShowModal] = useState(false);
   const alertsEnableModalProvider = useAlertsModal();
   const { navigateToApp } = useKibana<MonitoringStartServices>().services.application;

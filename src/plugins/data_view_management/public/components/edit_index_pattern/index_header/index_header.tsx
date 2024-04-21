@@ -20,6 +20,7 @@ interface IndexHeaderProps {
   refreshIndexPatternClick?: () => void;
   canSave: boolean;
   isRefreshing?: boolean;
+  children?: React.ReactNode;
 }
 
 const setDefaultAriaLabel = i18n.translate('indexPatternManagement.editDataView.setDefaultAria', {
@@ -46,7 +47,7 @@ const removeTooltip = i18n.translate('indexPatternManagement.editDataView.remove
   defaultMessage: 'Delete',
 });
 
-export const IndexHeader: React.FC<IndexHeaderProps> = ({
+export const IndexHeader = ({
   defaultIndex,
   indexPattern,
   setDefault,
@@ -54,7 +55,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
   deleteIndexPatternClick,
   children,
   canSave,
-}) => {
+}: IndexHeaderProps) => {
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}

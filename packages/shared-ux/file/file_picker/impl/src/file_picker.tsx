@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiModal,
@@ -73,7 +72,7 @@ export interface Props<Kind extends string = string> {
 
 type InnerProps = Required<Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'multiple'>>;
 
-const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, multiple }) => {
+const Component = ({ onClose, onDone, onUpload, multiple }: InnerProps) => {
   const { state, kind } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
 
@@ -150,7 +149,7 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
   );
 };
 
-export const FilePicker: FunctionComponent<Props> = ({
+export const FilePicker = ({
   pageSize = 20,
   kind,
   shouldAllowDelete,
@@ -158,7 +157,7 @@ export const FilePicker: FunctionComponent<Props> = ({
   uploadMeta,
   onUpload = () => {},
   ...rest
-}) => (
+}: Props) => (
   <FilePickerContext
     pageSize={pageSize}
     kind={kind}

@@ -6,7 +6,6 @@
  */
 
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
@@ -19,7 +18,7 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 /**
  * Document details expandable right section header for the isolate host panel
  */
-export const PanelHeader: FC = () => {
+export const PanelHeader = () => {
   const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
   const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(

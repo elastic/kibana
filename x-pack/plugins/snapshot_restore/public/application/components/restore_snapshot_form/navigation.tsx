@@ -15,11 +15,11 @@ interface Props {
   updateCurrentStep: (step: number) => void;
 }
 
-export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
+export const RestoreSnapshotNavigation = ({
   currentStep,
   maxCompletedStep,
   updateCurrentStep,
-}) => {
+}: Props) => {
   const { i18n } = useServices();
 
   const steps = [

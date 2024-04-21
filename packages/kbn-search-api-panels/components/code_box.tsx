@@ -44,7 +44,7 @@ interface CodeBoxProps {
   consoleRequest?: string;
 }
 
-export const CodeBox: React.FC<CodeBoxProps> = ({
+export const CodeBox = ({
   application,
   codeSnippet,
   consolePlugin,
@@ -55,7 +55,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   setSelectedLanguage,
   sharePlugin,
   consoleRequest,
-}) => {
+}: CodeBoxProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const items = languages.map((language) => (

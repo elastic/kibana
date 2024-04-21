@@ -29,7 +29,7 @@ interface ResultTabsProps {
   error?: string;
 }
 
-const ResultTabsComponent: React.FC<ResultTabsProps> = ({
+const ResultTabsComponent = ({
   actionId,
   agentIds,
   ecsMapping,
@@ -38,7 +38,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   startDate,
   liveQueryActionId,
   error,
-}) => {
+}: ResultTabsProps) => {
   const tabs = useMemo(
     () => [
       {

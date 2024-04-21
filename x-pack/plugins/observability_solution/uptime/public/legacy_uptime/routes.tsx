@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,7 +45,7 @@ import { SettingsBottomBar } from './components/settings/settings_bottom_bar';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
-  component: React.FC;
+  component: (props: React.PropsWithChildren<{}>) => React.ReactElement;
   dataTestSubj: string;
   title: string;
 };
@@ -158,14 +158,14 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
+const RouteInit = ({ path, title }: Pick<RouteProps, 'path' | 'title'>) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);
   return null;
 };
 
-export const PageRouter: FC = () => {
+export const PageRouter = () => {
   const routes = getRoutes();
   const { addInspectorRequest } = useInspectorContext();
 

@@ -24,11 +24,11 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
+const ExceptionItemExpireTime = ({
   expireTime,
   setExpireTime,
   setExpireError,
-}): JSX.Element => {
+}: ExceptionItmeExpireTimeProps): JSX.Element => {
   const [dateTime, setDateTime] = useState<Moment | undefined>(expireTime);
   const [isInvalid, setIsInvalid] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);

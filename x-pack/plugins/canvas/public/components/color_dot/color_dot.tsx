@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import tinycolor from 'tinycolor2';
 
@@ -16,7 +16,7 @@ interface Props {
   value?: string;
 }
 
-export const ColorDot: FC<Props> = ({ value, children }) => {
+export const ColorDot = ({ value, children }: Props) => {
   const tc = tinycolor(value);
   let style = {};
 

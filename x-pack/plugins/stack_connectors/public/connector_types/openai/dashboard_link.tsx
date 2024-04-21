@@ -17,11 +17,11 @@ interface Props {
   selectedProvider?: string;
 }
 // tested from ./connector.test.tsx
-export const DashboardLink: React.FC<Props> = ({
+export const DashboardLink = ({
   connectorId,
   connectorName,
   selectedProvider = 'OpenAI',
-}) => {
+}: Props) => {
   const { dashboardUrl } = useGetDashboard({ connectorId, selectedProvider });
   const {
     services: {

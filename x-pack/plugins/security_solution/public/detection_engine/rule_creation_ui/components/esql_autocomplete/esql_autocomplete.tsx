@@ -30,7 +30,7 @@ interface AutocompleteFieldProps {
  * it receives query as one of the parameters, fetches available fields and convert them to
  * options, that populate autocomplete component
  */
-export const EsqlAutocomplete: React.FC<AutocompleteFieldProps> = ({
+export const EsqlAutocomplete = ({
   dataTestSubj,
   field,
   idAria,
@@ -38,7 +38,7 @@ export const EsqlAutocomplete: React.FC<AutocompleteFieldProps> = ({
   fieldType,
   placeholder,
   esqlQuery,
-}): JSX.Element => {
+}: AutocompleteFieldProps): JSX.Element => {
   const handleValuesChange = useCallback(
     ([newOption]: EuiComboBoxOptionOption[]): void => {
       field.setValue(newOption?.label ?? '');

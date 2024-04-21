@@ -270,11 +270,15 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
   }
 }
 
-export const AgentUpgradeStatus: React.FC<{
+export const AgentUpgradeStatus = ({
+  isAgentUpgradable,
+  agent,
+  latestAgentVersion,
+}: {
   isAgentUpgradable: boolean;
   agent: Agent;
   latestAgentVersion?: string;
-}> = ({ isAgentUpgradable, agent, latestAgentVersion }) => {
+}) => {
   const isAgentUpgrading = useMemo(
     () => agent.upgrade_started_at && !agent.upgraded_at,
     [agent.upgrade_started_at, agent.upgraded_at]

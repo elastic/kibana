@@ -27,7 +27,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
+export const WithoutHeaderLayout = ({ restrictWidth, children }: Props) => (
   <Fragment>
     <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
       <EuiPageBody>

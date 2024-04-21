@@ -12,7 +12,7 @@ import { createFimRowRenderer } from '../../timeline/body/renderers/system/gener
 import { CREATED_FILE } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const SystemFimExampleComponent: React.FC = () => {
+const SystemFimExampleComponent = () => {
   const systemFimRowRenderer = createFimRowRenderer({
     actionName: 'file_create_event',
     text: CREATED_FILE,

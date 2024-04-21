@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, FunctionComponent, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
 import { FormInternal } from '../types';
 import { useGlobalFields } from '.';
@@ -47,7 +47,7 @@ export interface PhaseTimings {
 
 const PhaseTimingsContext = createContext<PhaseTimings>(null as any);
 
-export const PhaseTimingsProvider: FunctionComponent = ({ children }) => {
+export const PhaseTimingsProvider = ({ children }: { children: React.ReactNode }) => {
   const { deleteEnabled } = useGlobalFields();
   const [formData] = useFormData<FormInternal>({
     watch: [

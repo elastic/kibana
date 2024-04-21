@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
@@ -40,7 +39,7 @@ interface Props {
   removeOptions: AggFieldPair[];
 }
 
-export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, removeOptions }) => {
+export const AggSelect = ({ fields, changeHandler, selectedOptions, removeOptions }: Props) => {
   const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
   // create list of labels based on already selected detectors

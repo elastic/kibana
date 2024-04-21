@@ -181,7 +181,7 @@ const PANEL_STYLE = {
   width: '500px',
 };
 
-export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
+export const LegendSettingsPopover = ({
   legendOptions,
   mode,
   onDisplayChange,
@@ -208,7 +208,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   legendSize,
   onLegendSizeChange,
   showAutoLegendSizeOption,
-}) => {
+}: LegendSettingsPopoverProps) => {
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.legendLabel', {

@@ -13,12 +13,17 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 
-export const CustomPipelineItem: React.FC<{
+export const CustomPipelineItem = ({
+  indexName,
+  ingestionMethod,
+  pipelineSuffix,
+  processorsCount,
+}: {
   indexName: string;
   ingestionMethod: string;
   pipelineSuffix: string;
   processorsCount: number;
-}> = ({ indexName, ingestionMethod, pipelineSuffix, processorsCount }) => {
+}) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>

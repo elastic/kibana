@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 const MLJobsAwaitingNodeWarningComponent = React.lazy(
@@ -16,7 +15,7 @@ interface Props {
   jobIds: string[];
 }
 
-export const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
+export const MLJobsAwaitingNodeWarning = ({ jobIds }: Props) => {
   return (
     <React.Suspense fallback={<div />}>
       <MLJobsAwaitingNodeWarningComponent jobIds={jobIds} />

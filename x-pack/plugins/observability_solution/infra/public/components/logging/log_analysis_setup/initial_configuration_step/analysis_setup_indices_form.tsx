@@ -14,20 +14,20 @@ import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { IndexSetupRow } from './index_setup_row';
 import { AvailableIndex, ValidationIndicesError } from './validation';
 
-export const AnalysisSetupIndicesForm: React.FunctionComponent<{
-  disabled?: boolean;
-  indices: AvailableIndex[];
-  isValidating: boolean;
-  onChangeSelectedIndices: (selectedIndices: AvailableIndex[]) => void;
-  previousQualityWarnings?: QualityWarning[];
-  validationErrors?: ValidationIndicesError[];
-}> = ({
+export const AnalysisSetupIndicesForm = ({
   disabled = false,
   indices,
   isValidating,
   onChangeSelectedIndices,
   previousQualityWarnings = [],
   validationErrors = [],
+}: {
+  disabled?: boolean;
+  indices: AvailableIndex[];
+  isValidating: boolean;
+  onChangeSelectedIndices: (selectedIndices: AvailableIndex[]) => void;
+  previousQualityWarnings?: QualityWarning[];
+  validationErrors?: ValidationIndicesError[];
 }) => {
   const changeIsIndexSelected = useCallback(
     (indexName: string, isSelected: boolean) => {

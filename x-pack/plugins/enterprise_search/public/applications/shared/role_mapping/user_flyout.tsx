@@ -45,7 +45,7 @@ import {
   UPDATE_USER_DESCRIPTION,
 } from './constants';
 
-export const UserFlyout: React.FC<Props> = ({
+export const UserFlyout = ({
   children,
   isNew,
   isComplete,
@@ -53,7 +53,7 @@ export const UserFlyout: React.FC<Props> = ({
   formLoading,
   closeUserFlyout,
   handleSaveUser,
-}) => {
+}: Props) => {
   const savedIcon = (
     <EuiIcon
       color="success"

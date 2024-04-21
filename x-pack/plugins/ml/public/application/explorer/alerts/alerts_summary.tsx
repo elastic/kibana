@@ -26,7 +26,7 @@ import { getAlertsSummary } from './get_alerts_summary';
 
 const PAGE_SIZE = 3;
 
-export const AlertsSummary: React.FC = () => {
+export const AlertsSummary = () => {
   const {
     services: { fieldFormats },
   } = useMlKibana();

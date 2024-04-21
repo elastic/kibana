@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { monaco } from '@kbn/monaco';
 import { CodeEditor, HandlebarsLang, type CodeEditorProps } from '@kbn/code-editor';
 
@@ -30,7 +30,7 @@ export interface UrlTemplateEditorProps {
   Editor?: React.ComponentType<CodeEditorProps>;
 }
 
-export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
+export const UrlTemplateEditor = ({
   height = 105,
   fitToContent,
   value,
@@ -39,7 +39,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   placeholder,
   onEditor,
   Editor = CodeEditor,
-}) => {
+}: UrlTemplateEditorProps) => {
   const refEditor = React.useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const handleEditor = React.useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     refEditor.current = editor;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiRangeProps } from '@elastic/eui';
@@ -19,7 +18,7 @@ export interface SeveritySelectorProps {
 
 const MAX_ANOMALY_SCORE = 100;
 
-export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, onChange }) => {
+export const SeverityControl = React.memo(({ value, onChange }: SeveritySelectorProps) => {
   const levels: EuiRangeProps['levels'] = [
     {
       min: ML_ANOMALY_THRESHOLD.LOW,

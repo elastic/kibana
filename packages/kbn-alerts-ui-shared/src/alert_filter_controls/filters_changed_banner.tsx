@@ -7,7 +7,6 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
 import { TEST_IDS } from './constants';
 import {
@@ -22,10 +21,10 @@ interface FiltersChangesBanner {
   discardChangesHandler: () => void;
 }
 
-export const FiltersChangedBanner: FC<FiltersChangesBanner> = ({
+export const FiltersChangedBanner = ({
   saveChangesHandler,
   discardChangesHandler,
-}) => {
+}: FiltersChangesBanner) => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
       <EuiFlexItem grow={true}>

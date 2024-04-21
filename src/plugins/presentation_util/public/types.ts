@@ -16,7 +16,7 @@ import { PresentationLabsService } from './services/labs/types';
 export interface PresentationUtilPluginSetup {}
 
 export interface PresentationUtilPluginStart {
-  ContextProvider: React.FC;
+  ContextProvider: ({ children }: { children?: React.ReactNode }) => JSX.Element;
   labsService: PresentationLabsService;
   registerExpressionsLanguage: typeof registerExpressionsLanguage;
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +49,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   enableDatePicker: true,
 });
 
-const PageWrapper: FC = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
 
   const timefilter = useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });

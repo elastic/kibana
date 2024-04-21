@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import moment from 'moment';
@@ -28,13 +27,13 @@ interface Props {
   latest: number | undefined;
 }
 
-export const CreateCategorizationJobButton: FC<Props> = ({
+export const CreateCategorizationJobButton = ({
   dataView,
   field,
   query,
   earliest,
   latest,
-}) => {
+}: Props) => {
   const {
     uiActions,
     application: { capabilities },

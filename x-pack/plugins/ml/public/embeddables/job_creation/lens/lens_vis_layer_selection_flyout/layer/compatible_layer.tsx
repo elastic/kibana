@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react'; // useCallback
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
@@ -26,7 +25,7 @@ interface Props {
   embeddable: LensApi;
 }
 
-export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
+export const CompatibleLayer = ({ layer, layerIndex, embeddable }: Props) => {
   const {
     services: {
       data,

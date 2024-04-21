@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState } from 'react';
 import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,7 +42,7 @@ export interface ExtendedFeatureImportance extends FeatureImportance {
   absImportance: number;
 }
 
-export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
+export const DecisionPathPopover = ({
   baseline,
   featureImportance,
   predictedValue,
@@ -51,7 +50,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   analysisType,
   predictionFieldName,
   predictedProbability,
-}) => {
+}: DecisionPathPopoverProps) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
   const {
     services: { docLinks },

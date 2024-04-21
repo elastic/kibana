@@ -9,9 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const LogEntryExampleMessagesEmptyIndicator: React.FunctionComponent<{
-  onReload: () => void;
-}> = ({ onReload }) => (
+export const LogEntryExampleMessagesEmptyIndicator = ({ onReload }: { onReload: () => void }) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={false} className="eui-textNoWrap">
       <FormattedMessage

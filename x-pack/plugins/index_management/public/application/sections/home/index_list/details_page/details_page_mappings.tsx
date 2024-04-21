@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,10 +16,13 @@ import { DetailsPageMappingsContent } from './details_page_mappings_content';
 
 import { useLoadIndexMappings } from '../../../../services';
 
-export const DetailsPageMappings: FunctionComponent<{
+export const DetailsPageMappings = ({
+  index,
+  showAboutMappings = true,
+}: {
   index?: Index;
   showAboutMappings?: boolean;
-}> = ({ index, showAboutMappings = true }) => {
+}) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexMappings(index?.name || '');
   const [jsonError, setJsonError] = useState<boolean>(false);
 

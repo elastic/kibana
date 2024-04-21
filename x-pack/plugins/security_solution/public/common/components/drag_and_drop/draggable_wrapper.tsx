@@ -131,7 +131,7 @@ export const getStyle = (
   };
 };
 
-const DraggableOnWrapperComponent: React.FC<Props> = ({
+const DraggableOnWrapperComponent = ({
   dataProvider,
   hideTopN = false,
   onFilterAdded,
@@ -140,7 +140,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   isAggregatable = false,
   scopeId,
   truncate,
-}) => {
+}: Props) => {
   const [providerRegistered, setProviderRegistered] = useState(false);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
   const dispatch = useDispatch();
@@ -315,7 +315,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 };
 
-const DraggableWrapperComponent: React.FC<Props> = ({
+const DraggableWrapperComponent = ({
   dataProvider,
   hideTopN = false,
   isDraggable = false,
@@ -325,7 +325,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   fieldType = '',
   scopeId,
   truncate,
-}) => {
+}: Props) => {
   const {
     closePopOverTrigger,
     hoverActionsOwnFocus,

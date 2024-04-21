@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -26,7 +25,7 @@ interface AdvancedSettingsProps {
   onChange: (update: Partial<MlAnomalyDetectionAlertAdvancedSettings>) => void;
 }
 
-export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, onChange }) => {
+export const AdvancedSettings = React.memo(({ value, onChange }: AdvancedSettingsProps) => {
   return (
     <EuiAccordion
       id="mlAnomalyAlertAdvancedSettings"

@@ -39,7 +39,7 @@ const ExceptionsListDetailRoute = () => (
   </PluginTemplateWrapper>
 );
 
-const ExceptionsContainerComponent: React.FC = () => {
+const ExceptionsContainerComponent = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (

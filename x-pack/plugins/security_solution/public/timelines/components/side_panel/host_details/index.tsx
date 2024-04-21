@@ -66,8 +66,15 @@ interface HostDetailsProps {
 }
 
 // eslint-disable-next-line react/display-name
-export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
-  ({ contextID, scopeId, expandedHost, handleOnHostClosed, isDraggable, isFlyoutView }) => {
+export const HostDetailsPanel = React.memo(
+  ({
+    contextID,
+    scopeId,
+    expandedHost,
+    handleOnHostClosed,
+    isDraggable,
+    isFlyoutView,
+  }: HostDetailsProps) => {
     const { hostName } = expandedHost;
     const entity = useMemo(() => ({ name: hostName, type: 'host' as const }), [hostName]);
     if (!hostName) {

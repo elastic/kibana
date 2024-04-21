@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { useSecurityContext } from '../hooks/use_security_context';
 
 /**
  * Security solution page wrapper, with some extra styling etc.
  */
-export const SecuritySolutionPageWrapper: FC = ({ children }) => {
+export const SecuritySolutionPageWrapper = ({ children }: { children: React.ReactNode }) => {
   const contextValue = useSecurityContext();
 
   const Component = contextValue.getPageWrapper();

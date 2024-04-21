@@ -7,10 +7,9 @@
 
 import type { EuiButtonProps, PropsForButton } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
-import type { FC } from 'react';
 import React, { memo, useEffect, useRef } from 'react';
 
-export const AutoFocusButton: FC<PropsForButton<EuiButtonProps>> = memo((props) => {
+export const AutoFocusButton = memo((props: PropsForButton<EuiButtonProps>) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const button = <EuiButton buttonRef={buttonRef} {...props} />;
 

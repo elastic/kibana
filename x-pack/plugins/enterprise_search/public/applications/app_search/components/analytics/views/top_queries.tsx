@@ -14,7 +14,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSearch, AnalyticsTable } from '../components';
 import { TOP_QUERIES } from '../constants';
 
-export const TopQueries: React.FC = () => {
+export const TopQueries = () => {
   const { topQueries } = useValues(AnalyticsLogic);
 
   return (

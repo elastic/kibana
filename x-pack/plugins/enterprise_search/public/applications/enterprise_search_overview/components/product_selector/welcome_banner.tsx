@@ -17,7 +17,7 @@ export interface WelcomeBannerProps {
   user?: AuthenticatedUser;
 }
 
-export const WelcomeBanner: React.FC<WelcomeBannerProps> = ({ user, image }) => (
+export const WelcomeBanner = ({ user, image }: WelcomeBannerProps) => (
   <>
     <EuiSpacer size="xxl" />
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

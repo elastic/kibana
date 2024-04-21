@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,9 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { useHasRequiredIndicesPermissions } from '../hooks';
 
-export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' | 'create' }> = ({
+export const IndexPermissionsCallout = ({
   indexName,
   docsType,
+}: {
+  indexName: string;
+  docsType: 'start' | 'create';
 }) => {
   const {
     services: {

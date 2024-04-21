@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import type { FC } from 'react';
 import React, { memo, useEffect, useRef } from 'react';
 
 import type {
@@ -36,6 +34,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import { isEqual } from 'lodash';
 import { euiDataGridStyle, euiDataGridToolbarSettings, INDEX_STATUS } from '../lib/common';
 import type { UseIndexDataReturnType } from '../lib/types';
 
@@ -83,7 +82,7 @@ const cssOverride = ({ euiTheme }: UseEuiTheme) =>
     },
   } as const);
 
-export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
+export const DataGridTitle = ({ title }: { title: string }) => (
   <EuiTitle size="xs">
     <span>{title}</span>
   </EuiTitle>
@@ -111,7 +110,7 @@ type Props = PropsWithHeader | PropsWithoutHeader;
 /**
  * Custom data grid component with support for mini histograms.
  */
-export const DataGrid: FC<Props> = memo(
+export const DataGrid = memo<Props>(
   (props) => {
     const {
       chartsVisible,

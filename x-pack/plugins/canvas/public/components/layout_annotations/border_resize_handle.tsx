@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import { TransformMatrix3d } from '../../lib/aeroelastic';
@@ -15,7 +15,7 @@ interface Props {
   zoomScale?: number;
 }
 
-export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
+export const BorderResizeHandle = ({ transformMatrix, zoomScale = 1 }: Props) => (
   <div
     className="canvasBorderResizeHandle canvasLayoutAnnotation"
     style={{

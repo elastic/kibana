@@ -53,7 +53,7 @@ interface Props {
   resetImage(): void;
 }
 
-export const BrandingSection: React.FC<Props> = ({
+export const BrandingSection = ({
   imageType,
   description,
   helpText,
@@ -63,7 +63,7 @@ export const BrandingSection: React.FC<Props> = ({
   stageImage,
   saveImage,
   resetImage,
-}) => {
+}: Props) => {
   const [resetConfirmModalVisible, setVisible] = useState(false);
   const [imageUploadKey, setKey] = useState(1);
   const showDeleteModal = () => setVisible(true);

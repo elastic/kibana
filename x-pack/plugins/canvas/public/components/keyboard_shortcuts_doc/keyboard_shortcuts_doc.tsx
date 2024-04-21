@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlyout,
@@ -79,7 +79,7 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
     };
   });
 
-export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
+export const KeyboardShortcutsDoc = ({ onClose }: Props) => (
   <EuiFlyout
     closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
     size="s"

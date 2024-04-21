@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -28,7 +28,7 @@ const strings = {
     }),
 };
 
-export const WorkpadStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) => (
+export const WorkpadStep = ({ onDownload }: { onDownload: OnDownloadFn }) => (
   <EuiText size="s">
     <p>{strings.getStepDescription()}</p>
     <EuiSpacer size="s" />

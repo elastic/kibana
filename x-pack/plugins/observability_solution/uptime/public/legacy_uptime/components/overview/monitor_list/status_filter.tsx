@@ -15,7 +15,7 @@ import {
   STATUS_UP_LABEL,
 } from '../../../../../common/translations/translations';
 
-export const StatusFilter: React.FC = () => {
+export const StatusFilter = () => {
   const { statusFilter } = useGetUrlParams();
 
   // Empty string for all filter button value, since we dont store it in url, so keeping it in sync

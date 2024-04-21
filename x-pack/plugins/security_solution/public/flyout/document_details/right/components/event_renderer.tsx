@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiTitle } from '@elastic/eui';
 import styled from '@emotion/styled';
@@ -25,7 +24,7 @@ const ReasonPreviewContainer = styled.div``;
 /**
  * Event renderer of an event document
  */
-export const EventRenderer: FC = () => {
+export const EventRenderer = () => {
   const { dataAsNestedObject, scopeId } = useRightPanelContext();
 
   const renderer = useMemo(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, VFC } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -66,12 +66,12 @@ export interface IndicatorsFlyoutProps {
 /**
  * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
  */
-export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
+export const IndicatorsFlyout = ({
   indicator,
   closeFlyout,
   kqlBarIntegration = false,
   indicatorName,
-}) => {
+}: IndicatorsFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
   const tabs = useMemo(

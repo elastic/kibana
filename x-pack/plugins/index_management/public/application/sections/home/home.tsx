@@ -33,12 +33,13 @@ interface MatchParams {
   section: Section;
 }
 
-export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const IndexManagementHome = ({
   match: {
     params: { section },
   },
+
   history,
-}) => {
+}: RouteComponentProps<MatchParams>) => {
   const {
     plugins: { console: consolePlugin },
   } = useAppContext();

@@ -207,7 +207,7 @@ const axisOrientationOptions: Array<{
   },
 ];
 
-export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
+export const AxisSettingsPopover = ({
   layers,
   axis,
   axisTitle,
@@ -232,7 +232,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   useMultilayerTimeAxis,
   scale,
   setScale,
-}) => {
+}: AxisSettingsPopoverProps) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
 

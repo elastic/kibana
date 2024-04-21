@@ -34,14 +34,14 @@ export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boo
 /**
  * Selector for choosing and deleting Quick Prompts
  */
-export const QuickPromptSelector: React.FC<Props> = React.memo(
+export const QuickPromptSelector = React.memo(
   ({
     isDisabled = false,
     quickPrompts,
     onQuickPromptDeleted,
     onQuickPromptSelectionChange,
     selectedQuickPrompt,
-  }) => {
+  }: Props) => {
     // Form options
     const [options, setOptions] = useState<QuickPromptSelectorOption[]>(
       quickPrompts.map((qp) => ({

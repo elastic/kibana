@@ -34,8 +34,8 @@ export interface AssetCriticalityValidationStepProps {
 const CODE_BLOCK_HEIGHT = 250;
 const INVALID_FILE_NAME = `invalid_asset_criticality.csv`;
 
-export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidationStepProps> =
-  React.memo(({ validatedFile, isLoading, onConfirm, onReturn }) => {
+export const AssetCriticalityValidationStep = React.memo(
+  ({ validatedFile, isLoading, onConfirm, onReturn }: AssetCriticalityValidationStepProps) => {
     const { validLines, invalidLines, size: fileSize, name: fileName } = validatedFile;
     const { euiTheme } = useEuiTheme();
     const { telemetry } = useKibana().services;
@@ -198,6 +198,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
         </EuiFlexGroup>
       </>
     );
-  });
+  }
+);
 
 AssetCriticalityValidationStep.displayName = 'AssetCriticalityValidationStep';

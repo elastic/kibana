@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useState, useEffect } from 'react';
-import type { FunctionComponent, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 
 import {
   EuiFlexGroup,
@@ -41,7 +41,7 @@ interface RowProps {
   isMultiRow?: boolean;
 }
 
-const Row: FunctionComponent<RowProps> = ({
+const Row = ({
   index,
   value,
   fieldLabel,
@@ -51,7 +51,7 @@ const Row: FunctionComponent<RowProps> = ({
   autoFocus,
   isDisabled,
   isMultiRow,
-}) => {
+}: RowProps) => {
   const onDeleteHandler = useCallback(() => {
     onDelete(index);
   }, [onDelete, index]);
@@ -112,7 +112,7 @@ function defaultValue(value: string[]) {
   return value.length > 0 ? value : [''];
 }
 
-export const MultiTextInput: FunctionComponent<Props> = ({
+export const MultiTextInput = ({
   fieldLabel,
   value,
   onChange,
@@ -121,7 +121,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
   isDisabled,
   errors,
   'data-test-subj': dataTestSubj,
-}) => {
+}: Props) => {
   const [autoFocus, setAutoFocus] = useState(false);
   const [rows, setRows] = useState(() => defaultValue(value));
   const [previousRows, setPreviousRows] = useState(rows);

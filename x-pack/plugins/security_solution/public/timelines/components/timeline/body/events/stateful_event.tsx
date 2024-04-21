@@ -82,7 +82,7 @@ const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
 
 EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWrapper';
 
-const StatefulEventComponent: React.FC<Props> = ({
+const StatefulEventComponent = ({
   actionsColumnWidth,
   containerRef,
   columnHeaders,
@@ -104,7 +104,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   timelineId,
   leadingControlColumns,
   trailingControlColumns,
-}) => {
+}: Props) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 

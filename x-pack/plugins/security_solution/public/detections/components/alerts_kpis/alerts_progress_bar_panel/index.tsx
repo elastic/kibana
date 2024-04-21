@@ -34,7 +34,7 @@ interface Props {
   setGroupBySelection: (groupBySelection: GroupBySelection) => void;
   addFilter?: ({ field, value, negate }: AddFilterProps) => void;
 }
-export const AlertsProgressBarPanel: React.FC<Props> = ({
+export const AlertsProgressBarPanel = ({
   filters,
   query,
   signalIndexName,
@@ -43,7 +43,7 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
   groupBySelection,
   setGroupBySelection,
   addFilter,
-}) => {
+}: Props) => {
   const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid()}`, []);
   const dropDownOptions = DEFAULT_OPTIONS.map((field) => {
     return { value: field, label: field };

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -18,7 +17,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const MultiMetricSettings: FC<Props> = ({ setIsValid }) => {
+export const MultiMetricSettings = ({ setIsValid }: Props) => {
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xl">

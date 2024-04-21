@@ -29,7 +29,7 @@ import { IndexNameLogic } from '../../index_name_logic';
 import { DeleteDomainModalLogic } from './delete_domain_modal_logic';
 import { DomainManagementLogic } from './domain_management_logic';
 
-export const DomainsTable: React.FC = () => {
+export const DomainsTable = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { domains, meta, isLoading } = useValues(DomainManagementLogic);
   const { onPaginate } = useActions(DomainManagementLogic);

@@ -74,7 +74,7 @@ type InputComponentProps = InputFieldProps & {
   fieldTestSelector: string;
 };
 
-export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps> = memo(
+export const PackagePolicyInputVarField = memo(
   ({
     varDef,
     value,
@@ -86,7 +86,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     packageName,
     datastreams = [],
     isEditPage = false,
-  }) => {
+  }: InputFieldProps) => {
     const fleetStatus = useFleetStatus();
 
     const [isDirty, setIsDirty] = useState<boolean>(false);

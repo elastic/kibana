@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, VFC } from 'react';
+import React, { useEffect } from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 
@@ -18,7 +18,7 @@ interface QueryBarProps {
   sourcererDataView: DataViewSpec | undefined;
 }
 
-export const QueryBar: VFC<QueryBarProps> = ({ queries, sourcererDataView }) => {
+export const QueryBar = ({ queries, sourcererDataView }: QueryBarProps) => {
   const { SiemSearchBar, registerQuery, deregisterQuery } = useSecurityContext();
 
   useEffect(() => {

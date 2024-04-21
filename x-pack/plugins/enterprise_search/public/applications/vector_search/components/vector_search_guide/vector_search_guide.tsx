@@ -76,7 +76,7 @@ const QUERY_SNIPPET = `POST /image-index/_search
   "fields": [ "title", "file-type" ]
 }`;
 
-export const VectorSearchGuide: React.FC = () => {
+export const VectorSearchGuide = () => {
   const { application } = useValues(KibanaLogic);
 
   return (

@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash';
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -16,7 +15,7 @@ import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import type { StepDefineFormHook } from '../step_define';
 
-export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappingsEditor']> = memo(
+export const AdvancedRuntimeMappingsEditor = memo<StepDefineFormHook['runtimeMappingsEditor']>(
   ({
     actions: {
       convertToJson,

@@ -22,7 +22,7 @@ const styles = {
   `,
 };
 
-const TruncatedTextComponent: React.FC<{ text: string }> = ({ text }) => (
+const TruncatedTextComponent = ({ text }: { text: string }) => (
   <EuiText size="xs" color="subdued" css={styles.truncatedText}>
     {text}
   </EuiText>

@@ -25,7 +25,7 @@ interface Props {
   value: string | number | null | undefined;
 }
 
-const AlertFieldBadgeComponent: React.FC<Props> = ({
+const AlertFieldBadgeComponent = ({
   contextId,
   eventId,
   field,
@@ -35,7 +35,7 @@ const AlertFieldBadgeComponent: React.FC<Props> = ({
   showSeparator,
   scopeId,
   value,
-}) => (
+}: Props) => (
   <AlertFieldFlexGroup
     alignItems="center"
     data-test-subj="alertFieldBadge"
@@ -54,7 +54,6 @@ const AlertFieldBadgeComponent: React.FC<Props> = ({
         value={value}
       />
     </EuiFlexItem>
-
     {showSeparator && (
       <EuiFlexItem grow={false}>
         <span data-test-subj="separator">{', '}</span>

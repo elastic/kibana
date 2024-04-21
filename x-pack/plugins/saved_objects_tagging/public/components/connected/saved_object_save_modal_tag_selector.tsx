@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiFormRow, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +25,9 @@ export const getConnectedSavedObjectModalTagSelectorComponent = ({
   cache,
   capabilities,
   openCreateModal,
-}: GetConnectedTagSelectorOptions): FC<SavedObjectSaveModalTagSelectorComponentProps> => {
+}: GetConnectedTagSelectorOptions): ((
+  props: SavedObjectSaveModalTagSelectorComponentProps
+) => JSX.Element) => {
   return ({
     initialSelection,
     onTagsSelected: notifySelectionChange,

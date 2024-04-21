@@ -14,10 +14,7 @@ interface IncludeCitationsFieldProps {
   onChange: (value: boolean) => void;
 }
 
-export const IncludeCitationsField: React.FC<IncludeCitationsFieldProps> = ({
-  checked,
-  onChange,
-}) => (
+export const IncludeCitationsField = ({ checked, onChange }: IncludeCitationsFieldProps) => (
   <EuiFormRow>
     <EuiSwitch
       label={i18n.translate('xpack.searchPlayground.sidebar.citationsField.label', {

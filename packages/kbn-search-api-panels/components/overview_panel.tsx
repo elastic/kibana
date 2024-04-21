@@ -27,9 +27,10 @@ interface OverviewPanelProps {
   rightPanelContent?: React.ReactNode;
   title: string;
   overviewPanelProps?: Partial<EuiPanelProps>;
+  children?: React.ReactNode;
 }
 
-export const OverviewPanel: React.FC<OverviewPanelProps> = ({
+export const OverviewPanel = ({
   children,
   description,
   leftPanelContent,
@@ -37,7 +38,7 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
   rightPanelContent,
   title,
   overviewPanelProps,
-}) => {
+}: OverviewPanelProps) => {
   return (
     <>
       <EuiSpacer size="xxl" />

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useMemo } from 'react';
 import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -25,7 +24,7 @@ interface Props {
 
 const DTR_IDX = 0;
 
-export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
+export const SingleMetricDetectors = ({ setIsValid }: Props) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

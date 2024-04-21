@@ -71,7 +71,7 @@ const i18nTexts = {
   ),
 };
 
-export const MlSnapshotsResolutionCell: React.FunctionComponent = () => {
+export const MlSnapshotsResolutionCell = () => {
   const { snapshotState } = useMlSnapshotContext();
 
   if (snapshotState.status === 'in_progress') {

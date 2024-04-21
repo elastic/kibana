@@ -18,11 +18,7 @@ export interface CreateCaseModalProps {
   onSuccess: (theCase: CaseUI) => Promise<void>;
 }
 
-const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
-  isModalOpen,
-  onCloseCaseModal,
-  onSuccess,
-}) =>
+const CreateModalComponent = ({ isModalOpen, onCloseCaseModal, onSuccess }: CreateCaseModalProps) =>
   isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="create-case-modal">
       <EuiModalHeader>

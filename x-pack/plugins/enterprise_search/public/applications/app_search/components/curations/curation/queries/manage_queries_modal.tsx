@@ -26,7 +26,7 @@ import { MultiInputRows } from '../../../multi_input_rows';
 import { QUERY_INPUTS_BUTTON, QUERY_INPUTS_PLACEHOLDER } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 
-export const ManageQueriesModal: React.FC = () => {
+export const ManageQueriesModal = () => {
   const { queries, queriesLoading } = useValues(CurationLogic);
   const { updateQueries } = useActions(CurationLogic);
 

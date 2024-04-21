@@ -14,7 +14,7 @@ import { InstructionsField } from './instructions_field';
 import { ChatForm, ChatFormFields } from '../../types';
 import { SummarizationModel } from './summarization_model';
 
-export const SummarizationPanel: React.FC = () => {
+export const SummarizationPanel = () => {
   const { control } = useFormContext<ChatForm>();
   const models = useLLMsModels();
   const defaultModel = models.find((model) => !model.disabled);

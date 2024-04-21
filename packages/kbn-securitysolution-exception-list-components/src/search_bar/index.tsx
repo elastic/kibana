@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback } from 'react';
-import type { FC } from 'react';
 
 import type { IconType, SearchFilterConfig } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
@@ -60,7 +59,7 @@ interface SearchBarProps {
   onSearch: (arg: GetExceptionItemProps) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
-const SearchBarComponent: FC<SearchBarProps> = ({
+const SearchBarComponent = ({
   addExceptionButtonText,
   placeholdertext,
   canAddException,
@@ -72,7 +71,7 @@ const SearchBarComponent: FC<SearchBarProps> = ({
   buttonIconType,
   onSearch,
   onAddExceptionClick,
-}) => {
+}: SearchBarProps) => {
   const handleOnSearch = useCallback(
     ({ queryText }): void => {
       onSearch({ search: queryText });

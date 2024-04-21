@@ -30,9 +30,12 @@ interface InstallClientProps {
   overviewPanelProps?: Partial<EuiPanelProps>;
 }
 
-const Link: React.FC<{ language: LanguageDefinition; assetBasePath: string }> = ({
+const Link = ({
   language,
   assetBasePath,
+}: {
+  language: LanguageDefinition;
+  assetBasePath: string;
 }) => {
   if (language.github) {
     return (
@@ -46,7 +49,7 @@ const Link: React.FC<{ language: LanguageDefinition; assetBasePath: string }> = 
   return null;
 };
 
-export const InstallClientPanel: React.FC<InstallClientProps> = ({
+export const InstallClientPanel = ({
   codeSnippet,
   consoleRequest,
   language,
@@ -57,7 +60,7 @@ export const InstallClientPanel: React.FC<InstallClientProps> = ({
   sharePlugin,
   isPanelLeft = true,
   overviewPanelProps,
-}) => {
+}: InstallClientProps) => {
   const panelContent = (
     <>
       <CodeBox

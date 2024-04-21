@@ -59,7 +59,7 @@ export type ConversationSelectorSettingsOption = EuiComboBoxOptionOption<{
  * the keyboard shortcuts. Could be merged w/ ConversationSelector if refactored
  * as a connected wrapper.
  */
-export const ConversationSelectorSettings: React.FC<Props> = React.memo(
+export const ConversationSelectorSettings = React.memo(
   ({
     conversations,
     onConversationDeleted,
@@ -67,7 +67,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
     selectedConversationTitle,
     isDisabled,
     shouldDisableKeyboardShortcut = () => false,
-  }) => {
+  }: Props) => {
     const conversationTitles = useMemo(
       () => Object.values(conversations).map((c) => c.title),
       [conversations]

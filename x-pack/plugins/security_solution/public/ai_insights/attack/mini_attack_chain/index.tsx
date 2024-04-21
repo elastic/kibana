@@ -17,7 +17,7 @@ interface Props {
   insight: AlertsInsight;
 }
 
-const MiniAttackChainComponent: React.FC<Props> = ({ insight }) => {
+const MiniAttackChainComponent = ({ insight }: Props) => {
   const { euiTheme } = useEuiTheme();
   const tactics = useMemo(() => getTacticMetadata(insight), [insight]);
   const detectedTactics = useMemo(() => tactics.filter((tactic) => tactic.detected), [tactics]);

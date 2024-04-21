@@ -19,7 +19,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { throttle } from 'lodash';
-import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
@@ -68,14 +67,14 @@ const defaultDefaultValues: UserFormValues = {
   roles: [],
 };
 
-export const UserForm: FunctionComponent<UserFormProps> = ({
+export const UserForm = ({
   isNewUser = false,
   isReservedUser = false,
   defaultValues = defaultDefaultValues,
   onSuccess,
   onCancel,
   disabled = false,
-}) => {
+}: UserFormProps) => {
   const { services } = useKibana();
 
   const [rolesState, getRoles] = useAsyncFn(
@@ -316,7 +315,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </>
         ) : undefined}
       </EuiDescribedFormGroup>
-
       {isNewUser ? (
         <EuiDescribedFormGroup
           title={
@@ -377,7 +375,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           </EuiFormRow>
         </EuiDescribedFormGroup>
       ) : null}
-
       <EuiDescribedFormGroup
         title={
           <h2>

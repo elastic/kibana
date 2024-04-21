@@ -23,13 +23,13 @@ interface Props {
   onQuote: () => void;
 }
 
-const UserCommentPropertyActionsComponent: React.FC<Props> = ({
+const UserCommentPropertyActionsComponent = ({
   isLoading,
   commentContent,
   onEdit,
   onDelete,
   onQuote,
-}) => {
+}: Props) => {
   const { permissions } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,

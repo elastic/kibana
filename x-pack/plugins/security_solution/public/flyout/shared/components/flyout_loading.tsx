@@ -20,9 +20,9 @@ export interface FlyoutLoadingProps {
 /**
  * Use this when you need to show a loading state in the flyout
  */
-export const FlyoutLoading: React.FC<FlyoutLoadingProps> = ({
+export const FlyoutLoading = ({
   'data-test-subj': dataTestSubj = FLYOUT_LOADING_TEST_ID,
-}) => (
+}: FlyoutLoadingProps) => (
   <EuiFlexItem
     css={css`
       align-items: center;

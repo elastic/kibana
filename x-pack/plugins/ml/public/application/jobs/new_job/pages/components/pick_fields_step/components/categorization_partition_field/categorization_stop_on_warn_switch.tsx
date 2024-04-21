@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitch } from '@elastic/eui';
@@ -15,7 +14,7 @@ import type {
   CategorizationJobCreator,
 } from '../../../../../common/job_creator';
 
-export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
+export const CategorizationPerPartitionStopOnWarnSwitch = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const [stopOnWarn, setStopOnWarn] = useState(jobCreator.perPartitionStopOnWarn);

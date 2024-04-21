@@ -24,10 +24,13 @@ const sparklineSize = {
   width: 100,
 };
 
-export const SingleMetricSparkline: React.FunctionComponent<{
+export const SingleMetricSparkline = ({
+  metric,
+  timeRange,
+}: {
   metric: TimeSeriesPoint[];
   timeRange: TimeRange;
-}> = ({ metric, timeRange }) => {
+}) => {
   const timeZone = useKibanaTimeZoneSetting();
   const { baseTheme, sparklineTheme } = useChartThemes();
 

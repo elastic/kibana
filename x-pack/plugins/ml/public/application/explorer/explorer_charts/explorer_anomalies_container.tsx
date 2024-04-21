@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -47,7 +46,7 @@ const tooManyBucketsCalloutMsg = i18n.translate(
   }
 );
 
-export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
+export const ExplorerAnomaliesContainer = ({
   id,
   chartsData,
   showCharts,
@@ -60,7 +59,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   showSelectedInterval,
   chartsService,
   timeRange,
-}) => {
+}: ExplorerAnomaliesContainerProps) => {
   return (
     <>
       <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>

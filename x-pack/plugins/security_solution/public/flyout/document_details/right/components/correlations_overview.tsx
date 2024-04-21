@@ -30,7 +30,7 @@ import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details'
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */
-export const CorrelationsOverview: React.FC = () => {
+export const CorrelationsOverview = () => {
   const {
     dataAsNestedObject,
     dataFormattedForFieldBrowser,

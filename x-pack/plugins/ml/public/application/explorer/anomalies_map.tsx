@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -140,7 +139,7 @@ interface MLEMSTermJoinConfig extends EMSTermJoinConfig {
   jobId: string;
 }
 
-export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
+export const AnomaliesMap = ({ anomalies, jobIds }: Props) => {
   const [EMSSuggestions, setEMSSuggestions] = useState<MLEMSTermJoinConfig[] | undefined>();
   const {
     services: { maps: mapsPlugin },

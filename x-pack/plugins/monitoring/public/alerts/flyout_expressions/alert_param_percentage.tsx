@@ -15,7 +15,7 @@ interface Props {
   errors: string[];
   setRuleParams: (property: string, value: any) => void;
 }
-export const AlertParamPercentage: React.FC<Props> = (props: Props) => {
+export const AlertParamPercentage = (props: Props) => {
   const { name, label, setRuleParams, errors } = props;
   const [value, setValue] = React.useState(props.percentage);
 

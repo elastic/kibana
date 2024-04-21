@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useContext, useState, useEffect } from 'react';
 import { combineLatest, timer } from 'rxjs';
 import { switchMap, map, tap, retry } from 'rxjs';
@@ -39,7 +38,7 @@ export const MlNotificationsContext = React.createContext<{
   setLastCheckedAt: () => {},
 });
 
-export const MlNotificationsContextProvider: FC = ({ children }) => {
+export const MlNotificationsContextProvider = ({ children }: { children: React.ReactNode }) => {
   const {
     services: {
       mlServices: { mlApiServices },

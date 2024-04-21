@@ -55,7 +55,7 @@ export type ConversationSelectorOption = EuiComboBoxOptionOption<{
   isDefault: boolean;
 }>;
 
-export const ConversationSelector: React.FC<Props> = React.memo(
+export const ConversationSelector = React.memo(
   ({
     selectedConversationId = DEFAULT_CONVERSATION_TITLE,
     defaultConnector,
@@ -64,7 +64,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
     conversations,
-  }) => {
+  }: Props) => {
     const { allSystemPrompts } = useAssistantContext();
 
     const { createConversation } = useConversation();

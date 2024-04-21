@@ -59,7 +59,7 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
 });
 const dataViewId = 'security-solution-default';
 
-export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
+export const TestCellRenderer = ({ columnId, data }: DeprecatedCellValueElementProps) => (
   <>
     {getMappedNonEcsValue({
       data,

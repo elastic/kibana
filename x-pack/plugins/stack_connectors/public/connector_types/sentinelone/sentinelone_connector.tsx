@@ -31,10 +31,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-const SentinelOneActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  readOnly,
-  isEdit,
-}) => (
+const SentinelOneActionConnectorFields = ({ readOnly, isEdit }: ActionConnectorFieldsProps) => (
   <SimpleConnectorForm
     isEdit={isEdit}
     readOnly={readOnly}

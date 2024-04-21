@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +24,7 @@ interface Props {
   features: FeatureCatalogueEntry[];
 }
 
-export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
+export const ManageData = ({ addBasePath, application, features }: Props) => {
   const { share, trackUiMetric } = getServices();
   const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators

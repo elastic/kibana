@@ -16,7 +16,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { ENGINE_ANALYTICS_QUERY_DETAIL_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
 
-export const AnalyticsSearch: React.FC = () => {
+export const AnalyticsSearch = () => {
   const [searchValue, setSearchValue] = useState('');
 
   const { navigateToUrl } = useValues(KibanaLogic);

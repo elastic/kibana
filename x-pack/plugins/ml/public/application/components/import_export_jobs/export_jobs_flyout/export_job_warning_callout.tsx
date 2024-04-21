@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +16,7 @@ interface Props {
   jobs: JobDependencies;
 }
 
-export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }) => {
+export const ExportJobDependenciesWarningCallout = ({ jobs: allJobs }: Props) => {
   const [jobs, jobsWithCalendars, jobsWithFilters] = filterJobs(allJobs);
   const usingCalendars = jobsWithCalendars.length > 0;
   const usingFilters = jobsWithFilters.length > 0;
@@ -86,7 +85,7 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
   );
 };
 
-const CalendarJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
+const CalendarJobList = ({ jobs }: { jobs: JobDependencies }) => (
   <>
     {jobs.length > 0 && (
       <>
@@ -110,7 +109,7 @@ const CalendarJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
   </>
 );
 
-const FilterJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
+const FilterJobList = ({ jobs }: { jobs: JobDependencies }) => (
   <>
     {jobs.length > 0 && (
       <>

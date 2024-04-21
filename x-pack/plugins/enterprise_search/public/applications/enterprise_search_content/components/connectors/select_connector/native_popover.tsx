@@ -29,11 +29,7 @@ interface NativePopoverProps {
   isPopoverOpen: boolean;
 }
 
-export const NativePopover: React.FC<NativePopoverProps> = ({
-  button,
-  isPopoverOpen,
-  closePopover,
-}) => {
+export const NativePopover = ({ button, isPopoverOpen, closePopover }: NativePopoverProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPopover

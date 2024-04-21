@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,7 +19,7 @@ import type { DeleteAction } from './use_delete_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-export const DeleteActionModal: FC<DeleteAction> = ({
+export const DeleteActionModal = ({
   closeModal,
   deleteAndCloseModal,
   deleteDestIndex,
@@ -32,7 +31,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   toggleDeleteDataView,
   userCanDeleteIndex,
   userCanDeleteDataView,
-}) => {
+}: DeleteAction) => {
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
   const isBulkAction = items.length > 1;
 

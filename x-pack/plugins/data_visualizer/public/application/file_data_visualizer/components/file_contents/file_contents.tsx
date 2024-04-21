@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -51,7 +50,7 @@ function semiStructureTextDataGuard(
   );
 }
 
-export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStructureTextData }) => {
+export const FileContents = ({ data, format, numberOfLines, semiStructureTextData }: Props) => {
   let mode = EDITOR_MODE.TEXT;
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;

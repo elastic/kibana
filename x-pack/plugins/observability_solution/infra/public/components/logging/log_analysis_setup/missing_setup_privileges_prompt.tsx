@@ -14,7 +14,7 @@ import {
 } from './missing_privileges_messages';
 import { UserManagementLink } from './user_management_link';
 
-export const MissingSetupPrivilegesPrompt: React.FunctionComponent = () => (
+export const MissingSetupPrivilegesPrompt = () => (
   <EmptyPrompt
     title={<h2>{missingMlPrivilegesTitle}</h2>}
     body={<p>{missingMlSetupPrivilegesDescription}</p>}

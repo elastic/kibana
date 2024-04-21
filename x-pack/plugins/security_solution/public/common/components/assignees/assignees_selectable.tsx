@@ -6,7 +6,6 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
@@ -46,8 +45,13 @@ export interface AssigneesSelectableProps {
 /**
  * Renders a selectable component given a list of assignees ids
  */
-export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
-  ({ searchInputId, assignedUserIds, showUnassignedOption, onSelectionChange }) => {
+export const AssigneesSelectable = memo(
+  ({
+    searchInputId,
+    assignedUserIds,
+    showUnassignedOption,
+    onSelectionChange,
+  }: AssigneesSelectableProps) => {
     const { data: currentUserProfile } = useGetCurrentUserProfile();
     const existingIds = useMemo(
       () => new Set(removeNoAssigneesSelection(assignedUserIds)),

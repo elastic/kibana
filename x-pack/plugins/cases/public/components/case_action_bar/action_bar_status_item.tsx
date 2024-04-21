@@ -13,7 +13,7 @@ interface ActionBarStatusItemProps {
   children?: ReactNode;
 }
 
-const ActionBarStatusItemComponent: React.FC<ActionBarStatusItemProps> = ({ title, children }) => (
+const ActionBarStatusItemComponent = ({ title, children }: ActionBarStatusItemProps) => (
   <>
     <EuiTitle size="xxs">
       <strong>{title}</strong>

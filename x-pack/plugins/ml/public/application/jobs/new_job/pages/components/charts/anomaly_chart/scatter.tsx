@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { LineSeries, ScaleType, CurveType } from '@elastic/charts';
 import { seriesStyle, useChartColors } from '../common/settings';
@@ -28,7 +27,7 @@ const scatterSeriesStyle = {
   },
 };
 
-export const Scatter: FC<Props> = ({ chartData }) => {
+export const Scatter = ({ chartData }: Props) => {
   const { LINE_COLOR } = useChartColors();
   return (
     <LineSeries

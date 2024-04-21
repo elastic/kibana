@@ -46,7 +46,7 @@ describe('open in discover drilldown', () => {
   });
 
   it('provides UI to edit config', () => {
-    const Component = (drilldown as unknown as { ReactCollectConfig: React.FC<CollectConfigProps> })
+    const Component = (drilldown as unknown as { ReactCollectConfig: (props: CollectConfigProps) => JSX.Element })
       .ReactCollectConfig;
     const setConfig = jest.fn();
     const instance = mount(

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -31,7 +30,7 @@ interface Props {
   hasProcessorStep: boolean;
 }
 
-export const AddInferencePipelineFooter: FC<Props> = ({
+export const AddInferencePipelineFooter = ({
   isDetailsStepValid,
   isConfigureProcessorStepValid,
   creatingPipeline,
@@ -41,7 +40,7 @@ export const AddInferencePipelineFooter: FC<Props> = ({
   step,
   setStep,
   hasProcessorStep,
-}) => {
+}: Props) => {
   const { nextStep, previousStep, isContinueButtonEnabled } = useMemo(
     () => getSteps(step, isDetailsStepValid, isConfigureProcessorStepValid, hasProcessorStep),
     [isDetailsStepValid, isConfigureProcessorStepValid, step, hasProcessorStep]

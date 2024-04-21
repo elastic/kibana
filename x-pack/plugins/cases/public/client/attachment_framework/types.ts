@@ -43,7 +43,7 @@ export interface AttachmentViewObject<Props = {}> {
   timelineAvatar?: EuiCommentProps['timelineAvatar'];
   getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
-  children?: React.LazyExoticComponent<React.FC<Props>>;
+  children?: React.LazyExoticComponent<(props: Props) => JSX.Element | null>;
   hideDefaultActions?: boolean;
 }
 

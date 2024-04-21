@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import type { CallOutMessage } from './callout_types';
@@ -16,10 +15,10 @@ export interface CallOutPersistentSwitcherProps {
   message: CallOutMessage;
 }
 
-const CallOutPersistentSwitcherComponent: FC<CallOutPersistentSwitcherProps> = ({
+const CallOutPersistentSwitcherComponent = ({
   condition,
   message,
-}): JSX.Element | null =>
+}: CallOutPersistentSwitcherProps): JSX.Element | null =>
   condition ? <CallOut message={message} showDismissButton={false} /> : null;
 
 export const CallOutPersistentSwitcher = memo(CallOutPersistentSwitcherComponent);

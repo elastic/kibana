@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, ComponentType } from 'react';
+import React, { ComponentType } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiEmptyPrompt, EuiForm, IconType } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
 
@@ -212,7 +212,9 @@ function RootComponent(props: RootComponentProps) {
   );
 }
 
-const Template: ComponentStory<FC<RootComponentProps>> = (args) => <RootComponent {...args} />;
+const Template: ComponentStory<(props: RootComponentProps) => JSX.Element> = (args) => (
+  <RootComponent {...args} />
+);
 
 export const Default = Template.bind({});
 

@@ -12,11 +12,11 @@ import type { ExceptionListRuleReferencesSchema } from '../../../../../../common
 import type { ExceptionsAddToListsComponentProps } from './use_add_to_lists_table';
 import { useAddToSharedListTable } from './use_add_to_lists_table';
 
-const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps> = ({
+const ExceptionsAddToListsComponent = ({
   showAllSharedLists,
   sharedExceptionLists,
   onListSelectionChange,
-}) => {
+}: ExceptionsAddToListsComponentProps) => {
   const {
     error,
     isLoading,

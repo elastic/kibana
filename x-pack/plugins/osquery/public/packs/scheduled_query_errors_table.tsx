@@ -29,11 +29,11 @@ interface ViewErrorsInLogsActionProps {
   timestamp?: string;
 }
 
-const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = ({
+const ViewErrorsInLogsActionComponent = ({
   actionId,
   agentId,
   timestamp,
-}) => {
+}: ViewErrorsInLogsActionProps) => {
   const navigateToApp = useKibana().services.application.navigateToApp;
 
   const handleClick = useCallback(
@@ -81,10 +81,10 @@ const renderErrorMessage = (error: string) => (
   </EuiCodeBlock>
 );
 
-const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProps> = ({
+const ScheduledQueryErrorsTableComponent = ({
   actionId,
   interval,
-}) => {
+}: ScheduledQueryErrorsTableProps) => {
   const { data: lastErrorsData } = usePackQueryErrors({
     actionId,
     interval,

@@ -24,7 +24,7 @@ interface IngestPipelinesCardProps {
   extractionDisabled: boolean;
 }
 
-export const IngestPipelinesCard: React.FC<IngestPipelinesCardProps> = ({ extractionDisabled }) => {
+export const IngestPipelinesCard = ({ extractionDisabled }: IngestPipelinesCardProps) => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
 
   const { canSetPipeline, index, pipelineName, pipelineState, showPipelineSettings } =

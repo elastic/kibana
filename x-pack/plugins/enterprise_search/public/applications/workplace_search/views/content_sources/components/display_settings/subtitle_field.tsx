@@ -19,11 +19,11 @@ interface SubtitleFieldProps {
   subtitleFieldHover: boolean;
 }
 
-export const SubtitleField: React.FC<SubtitleFieldProps> = ({
+export const SubtitleField = ({
   result,
   subtitleField,
   subtitleFieldHover,
-}) => (
+}: SubtitleFieldProps) => (
   <div
     data-test-subj="SubtitleField"
     className={classNames('example-result-content__subtitle', {

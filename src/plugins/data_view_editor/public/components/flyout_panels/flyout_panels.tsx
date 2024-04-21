@@ -46,9 +46,10 @@ export interface Props {
   flyoutClassName: string;
   /** The size between the panels. Corresponds to EuiFlexGroup gutterSize */
   gutterSize?: EuiFlexGroupProps['gutterSize'];
+  children: React.ReactNode;
 }
 
-export const Panels: React.FC<Props> = ({ maxWidth, flyoutClassName, ...props }) => {
+export const Panels = ({ maxWidth, flyoutClassName, ...props }: Props) => {
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 

@@ -65,7 +65,7 @@ export class OpenInDiscoverDrilldown
     return [APPLY_FILTER_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => {
+  private readonly ReactCollectConfig = ({ config, onConfig }: CollectConfigProps) => {
     return (
       <EuiFormRow hasChildLabel={false}>
         <EuiSwitch

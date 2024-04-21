@@ -53,7 +53,7 @@ export interface BaseSnoozePanelProps {
   inPopover?: boolean;
 }
 
-export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
+export const BaseSnoozePanel = ({
   isLoading,
   interval = '3d',
   snoozeRule,
@@ -66,7 +66,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   onRemoveAllSchedules,
   hasTitle,
   inPopover = false,
-}) => {
+}: BaseSnoozePanelProps) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
 

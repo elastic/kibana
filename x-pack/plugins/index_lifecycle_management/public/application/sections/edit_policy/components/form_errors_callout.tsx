@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
@@ -22,7 +22,7 @@ const i18nTexts = {
   },
 };
 
-export const FormErrorsCallout: FunctionComponent = () => {
+export const FormErrorsCallout = () => {
   const {
     errors: { hasErrors },
     isFormSubmitted,

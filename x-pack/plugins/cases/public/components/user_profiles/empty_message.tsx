@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-const EmptyMessageComponent: React.FC = () => null;
+const EmptyMessageComponent = () => null;
 EmptyMessageComponent.displayName = 'EmptyMessage';
 
 export const EmptyMessage = React.memo(EmptyMessageComponent);

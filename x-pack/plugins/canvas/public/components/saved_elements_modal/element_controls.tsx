@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,7 +40,7 @@ interface Props {
   onEdit: (event: MouseEvent) => void;
 }
 
-export const ElementControls: FunctionComponent<Props> = ({ onDelete, onEdit }) => (
+export const ElementControls = ({ onDelete, onEdit }: Props) => (
   <EuiFlexGroup
     className="canvasElementCard__controls"
     gutterSize="xs"

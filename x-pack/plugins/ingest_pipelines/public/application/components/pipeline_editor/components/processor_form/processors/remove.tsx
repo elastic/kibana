@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -44,7 +44,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Remove: FunctionComponent = () => {
+export const Remove = () => {
   return (
     <>
       <UseField config={fieldsConfig.field} component={ComboBoxField} path="fields.field" />

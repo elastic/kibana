@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 
 import * as i18n from './translations';
 
-const UpgradeComponent: React.FC = () => {
+const UpgradeComponent = () => {
   const { http } = useAssistantContext();
 
   const title = useMemo(

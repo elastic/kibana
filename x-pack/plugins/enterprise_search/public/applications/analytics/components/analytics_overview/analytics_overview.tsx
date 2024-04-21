@@ -27,7 +27,7 @@ import { AnalyticsCollectionTable } from './analytics_collection_table';
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
 import { AnalyticsOverviewEmptyPage } from './analytics_overview_empty_page';
 
-export const AnalyticsOverview: React.FC = () => {
+export const AnalyticsOverview = () => {
   const { fetchAnalyticsCollections, searchAnalyticsCollections } =
     useActions(AnalyticsCollectionsLogic);
   const { analyticsCollections, hasNoAnalyticsCollections, isFetching, isSearching } =

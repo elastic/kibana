@@ -48,7 +48,7 @@ interface IngestPipelineFlyoutProps {
   setPipeline: (pipeline: IngestPipelineParams) => void;
 }
 
-export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
+export const IngestPipelineFlyout = ({
   closeFlyout,
   displayOnly,
   extractionDisabled,
@@ -58,7 +58,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
   pipeline,
   savePipeline,
   setPipeline,
-}) => {
+}: IngestPipelineFlyoutProps) => {
   const { name } = pipeline;
 
   return (

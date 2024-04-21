@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC } from 'react';
+import React from 'react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 
@@ -28,9 +28,10 @@ export const submitForm = async (form: FormHook) => {
 
 export interface FormWrapperProps {
   formConfig?: FormConfig<any>;
+  children: React.ReactNode;
 }
 
-export const FormWrapper: FC<FormWrapperProps> = ({ formConfig, children }) => {
+export const FormWrapper = ({ formConfig, children }: FormWrapperProps) => {
   const { form } = useForm(formConfig);
 
   return (

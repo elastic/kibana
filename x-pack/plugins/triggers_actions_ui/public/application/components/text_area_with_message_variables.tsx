@@ -25,7 +25,7 @@ interface Props {
   errors?: string[];
 }
 
-const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
+const TextAreaWithMessageVariablesLegacy = ({
   messageVariables,
   paramsProperty,
   index,
@@ -35,7 +35,7 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
   label,
   errors,
   helpText,
-}) => {
+}: Props) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {

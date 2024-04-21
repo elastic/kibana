@@ -22,7 +22,7 @@ import { NO_USERS_TITLE, NO_USERS_DESCRIPTION, ENABLE_USERS_LINK } from './const
 
 const USERS_DOCS_URL = `${docLinks.enterpriseSearchUsersAccess}`;
 
-export const UsersEmptyPrompt: React.FC = () => (
+export const UsersEmptyPrompt = () => (
   <EuiFlexGroup alignItems="center" justifyContent="center">
     <EuiFlexItem>
       <EuiSpacer />

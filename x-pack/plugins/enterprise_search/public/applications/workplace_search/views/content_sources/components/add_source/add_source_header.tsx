@@ -28,11 +28,7 @@ interface AddSourceHeaderProps {
   categories?: string[];
 }
 
-export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
-  name,
-  serviceType,
-  categories = [],
-}) => {
+export const AddSourceHeader = ({ name, serviceType, categories = [] }: AddSourceHeaderProps) => {
   return (
     <>
       <EuiSpacer size="s" />

@@ -43,7 +43,7 @@ const noResultsCallout = (
   />
 );
 
-export const RelevanceTuningPreview: React.FC = () => {
+export const RelevanceTuningPreview = () => {
   const { setSearchQuery } = useActions(RelevanceTuningLogic);
   const { searchResults, schema } = useValues(RelevanceTuningLogic);
   const { engineName, isMetaEngine } = useValues(EngineLogic);

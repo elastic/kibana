@@ -22,12 +22,12 @@ interface LogicButtonsProps {
   onOrClicked: () => void;
 }
 
-export const LogicButtons: React.FC<LogicButtonsProps> = ({
+export const LogicButtons = ({
   isOrDisabled = false,
   isAndDisabled = false,
   onAndClicked,
   onOrClicked,
-}) => (
+}: LogicButtonsProps) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <MyEuiButton

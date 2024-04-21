@@ -16,7 +16,7 @@ import { AppLogic } from '../../../../app_logic';
 import { TOKEN_TYPE_DESCRIPTION, TOKEN_TYPE_INFO, DOCS_HREF } from '../../constants';
 import { CredentialsLogic } from '../../credentials_logic';
 
-export const FormKeyType: React.FC = () => {
+export const FormKeyType = () => {
   const { myRole } = useValues(AppLogic);
   const { setTokenType } = useActions(CredentialsLogic);
   const { activeApiToken, activeApiTokenExists } = useValues(CredentialsLogic);

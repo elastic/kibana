@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -79,11 +78,11 @@ export interface FullTimeRangeSelectorProps {
  * Component for rendering a button which automatically sets the range of the time filter
  * to the time range of data in the index(es) mapped to the supplied Kibana data view or query.
  *
- * @type {FC<FullTimeRangeSelectorProps>}
+ * @type {React.FC<FullTimeRangeSelectorProps>}
  * @param props - `FullTimeRangeSelectorProps` component props
  * @returns {React.ReactElement} The FullTimeRangeSelector component.
  */
-export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => {
+export const FullTimeRangeSelector = (props: FullTimeRangeSelectorProps) => {
   const {
     frozenDataPreference,
     setFrozenDataPreference,

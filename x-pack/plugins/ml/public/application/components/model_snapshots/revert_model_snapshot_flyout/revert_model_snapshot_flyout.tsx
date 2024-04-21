@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 import {
@@ -57,13 +56,13 @@ interface Props {
   refresh(): void;
 }
 
-export const RevertModelSnapshotFlyout: FC<Props> = ({
+export const RevertModelSnapshotFlyout = ({
   snapshot,
   snapshots,
   job,
   closeFlyout,
   refresh,
-}) => {
+}: Props) => {
   const { toasts } = useNotifications();
   const { loadAnomalyDataForJob, loadEventRateForJob } = useMemo(
     () => chartLoaderProvider(mlResultsService),
@@ -192,7 +191,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
           {false && ( // disabled for now
             <>
               <EuiSpacer size="s" />
-
               <EuiFormRow
                 fullWidth
                 label={i18n.translate(
@@ -377,7 +375,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
-
       {revertModalVisible && (
         <EuiConfirmModal
           title={i18n.translate('xpack.ml.newJob.wizard.revertModelSnapshotFlyout.deleteTitle', {

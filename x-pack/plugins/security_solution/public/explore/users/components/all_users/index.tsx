@@ -141,7 +141,7 @@ const getUsersColumns = (
   return columns;
 };
 
-const UsersTableComponent: React.FC<UsersTableProps> = ({
+const UsersTableComponent = ({
   users,
   totalCount,
   type,
@@ -152,7 +152,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   showMorePagesIndicator,
   sort,
   setQuerySkip,
-}) => {
+}: UsersTableProps) => {
   const dispatch = useDispatch();
   const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
   const { activePage, limit } = useDeepEqualSelector((state) => getUsersSelector(state));

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
@@ -99,7 +98,7 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider: FC = ({ children }) => {
+export const ChangePointDetectionControlsContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { dataView } = useDataSource();
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
@@ -127,7 +126,7 @@ export const ChangePointDetectionControlsContextProvider: FC = ({ children }) =>
   );
 };
 
-export const ChangePointDetectionContextProvider: FC = ({ children }) => {
+export const ChangePointDetectionContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,

@@ -27,7 +27,7 @@ export interface ScreenshotImageProps {
   onClick?: MouseEventHandler<HTMLImageElement>;
 }
 
-export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string }> = ({
+export const ScreenshotImage = ({
   label,
   imgSrc,
   isLoading,
@@ -40,6 +40,8 @@ export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string 
   onMouseEnter,
   onMouseLeave,
   onClick,
+}: ScreenshotImageProps & {
+  imgSrc?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [naturalSize, setNaturalSize] = useState<[number, number]>(DEFAULT_SIZE);

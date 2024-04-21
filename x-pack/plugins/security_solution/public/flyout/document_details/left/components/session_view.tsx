@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import {
   ANCESTOR_INDEX,
@@ -22,7 +21,7 @@ export const SESSION_VIEW_ID = 'session-view';
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
  */
-export const SessionView: FC = () => {
+export const SessionView = () => {
   const { sessionView } = useKibana().services;
   const { getFieldsData, indexName } = useLeftPanelContext();
 

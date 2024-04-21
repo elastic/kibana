@@ -7,7 +7,7 @@
 
 import type { MouseEvent } from 'react';
 
-import * as React from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';

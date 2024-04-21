@@ -45,9 +45,12 @@ import { getCustomBranding } from './custom_branding';
 // mock later, (or, ideally, Fleet starts to use a service abstraction).
 //
 // Expect this to grow as components that are given Stories need access to mocked services.
-export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>[1] }> = ({
+export const StorybookContext = ({
   storyContext,
   children: storyChildren,
+}: {
+  storyContext?: Parameters<DecoratorFn>[1];
+  children: React.ReactNode;
 }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();

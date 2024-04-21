@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { Chart, Settings, TooltipType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +33,7 @@ interface Props {
   loading?: boolean;
 }
 
-export const AnomalyChart: FC<Props> = ({
+export const AnomalyChart = ({
   chartType,
   chartData = [],
   modelData,
@@ -42,7 +41,7 @@ export const AnomalyChart: FC<Props> = ({
   height,
   width,
   loading = false,
-}) => {
+}: Props) => {
   const data = chartType === CHART_TYPE.SCATTER ? flattenData(chartData) : chartData;
   const xDomain = getXRange(data);
   return (

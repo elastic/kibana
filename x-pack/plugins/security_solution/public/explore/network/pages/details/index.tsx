@@ -60,7 +60,7 @@ import {
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
-const NetworkDetailsComponent: React.FC = () => {
+const NetworkDetailsComponent = () => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
   const { to, from, setQuery, isInitializing } = useGlobalTime();

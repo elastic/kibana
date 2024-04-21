@@ -37,7 +37,7 @@ export interface ToolbarSelectorProps {
   onChange?: (chosenOption: SelectableEntry | undefined) => void;
 }
 
-export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
+export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
   'data-selected-value': dataSelectedValue,
   buttonLabel,
@@ -45,7 +45,7 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   options,
   searchable,
   onChange,
-}) => {
+}: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>();

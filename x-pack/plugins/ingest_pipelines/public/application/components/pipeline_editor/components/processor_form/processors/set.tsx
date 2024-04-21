@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
@@ -204,7 +204,7 @@ const getValueConfig: (toggleCustom: () => void) => Record<
 /**
  * Disambiguate name from the Set data structure
  */
-export const SetProcessor: FunctionComponent = () => {
+export const SetProcessor = () => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ fields }] = useFormData({ watch: ['fields.value', 'fields.copy_from'] });
 

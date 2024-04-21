@@ -33,7 +33,7 @@ import { ConnectorFilteringLogic } from './connector_filtering_logic';
 import { EditSyncRulesFlyout } from './edit_sync_rules_flyout';
 import { SyncRulesStateCallouts } from './sync_rules_callouts';
 
-export const ConnectorSyncRules: React.FC = () => {
+export const ConnectorSyncRules = () => {
   const { indexName, hasAdvancedFilteringFeature, hasBasicFilteringFeature } =
     useValues(ConnectorViewLogic);
   const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =

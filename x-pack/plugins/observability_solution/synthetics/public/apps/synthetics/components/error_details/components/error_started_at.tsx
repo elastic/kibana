@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useErrorFailedTests } from '../hooks/use_error_failed_tests';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 
-export const ErrorStartedAt: React.FC = () => {
+export const ErrorStartedAt = () => {
   const { failedTests } = useErrorFailedTests();
 
   const state = failedTests?.[0]?.state;

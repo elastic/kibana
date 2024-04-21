@@ -36,7 +36,7 @@ interface Props {
   title?: string;
 }
 
-const UserNameComponent: React.FC<Props> = ({
+const UserNameComponent = ({
   fieldName,
   Component,
   contextId,
@@ -48,7 +48,7 @@ const UserNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
-}) => {
+}: Props) => {
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
   const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');

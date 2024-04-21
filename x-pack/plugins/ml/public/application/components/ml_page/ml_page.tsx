@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
 import { Redirect } from 'react-router-dom';
@@ -49,7 +48,7 @@ export const MlPageControlsContext = createContext<{
  * Main page component of the ML App
  * @constructor
  */
-export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps }) => {
+export const MlPage = React.memo(({ pageDeps }: { pageDeps: PageDependencies }) => {
   const navigateToPath = useNavigateToPath();
   const {
     services: {
@@ -163,7 +162,7 @@ interface CommonPageWrapperProps {
   headerPortal: HtmlPortalNode;
 }
 
-const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, routeList }) => {
+const CommonPageWrapper = React.memo(({ pageDeps, routeList }: CommonPageWrapperProps) => {
   const {
     services: { application },
   } = useMlKibana();

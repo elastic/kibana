@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -32,7 +31,7 @@ import { GeoIcon } from './geo_job_icon';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 
-export const Page: FC = () => {
+export const Page = () => {
   const {
     services: {
       share,

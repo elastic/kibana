@@ -19,11 +19,11 @@ import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
 
-const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
+const OsqueryActionResultsComponent = ({
   ruleName,
   actionItems,
   ecsData,
-}) => {
+}: OsqueryActionResultsProps) => {
   const { read } = useKibana().services.application.capabilities.osquery;
 
   return !read ? (
@@ -57,10 +57,10 @@ type OsqueryActionResultsWrapperProps = {
   services: CoreStart & StartPlugins;
 } & OsqueryActionResultsProps;
 
-const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
+const OsqueryActionResultsWrapperComponent = ({
   services,
   ...restProps
-}) => (
+}: OsqueryActionResultsWrapperProps) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>

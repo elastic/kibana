@@ -25,6 +25,7 @@ import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeli
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 
 export interface InvestigateInTimelineButtonProps {
+  children?: React.ReactNode;
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
@@ -34,9 +35,7 @@ export interface InvestigateInTimelineButtonProps {
   iconType?: IconType;
 }
 
-export const InvestigateInTimelineButton: React.FunctionComponent<
-  InvestigateInTimelineButtonProps
-> = ({
+export const InvestigateInTimelineButton = ({
   asEmptyButton,
   children,
   dataProviders,
@@ -45,7 +44,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
   keepDataView,
   iconType,
   ...rest
-}) => {
+}: InvestigateInTimelineButtonProps) => {
   const dispatch = useDispatch();
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);

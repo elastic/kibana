@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 import { EuiText, EuiSpacer, EuiSuperSelectOption } from '@elastic/eui';
 
@@ -154,7 +154,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
     },
   ].filter(Boolean) as SelectOptions[];
 
-export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
+export const DataTierAllocation = (props: SharedProps) => {
   const { phase, hasNodeAttributes, isCloudEnabled, isUsingDeprecatedDataRoleConfig, isLoading } =
     props;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
@@ -47,13 +47,13 @@ export interface Props {
   value?: string;
 }
 
-export const ColorManager: FC<Props> = ({
+export const ColorManager = ({
   hasButtons = false,
   onAddColor,
   onChange,
   onRemoveColor,
   value = '',
-}) => {
+}: Props) => {
   const tc = tinycolor(value);
   const validColor = tc.isValid();
 

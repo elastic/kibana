@@ -9,14 +9,21 @@ import React from 'react';
 
 import { EuiCheckableCard, EuiText, EuiTitle } from '@elastic/eui';
 
-export const SettingsCheckableCard: React.FC<{
+export const SettingsCheckableCard = ({
+  checked,
+  description,
+  disabled,
+  id,
+  label,
+  onChange,
+}: {
   checked: boolean;
   description: string;
   disabled?: boolean;
   id: string;
   label: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
-}> = ({ checked, description, disabled, id, label, onChange }) => (
+}) => (
   <EuiCheckableCard
     label={
       <EuiTitle size="xs">

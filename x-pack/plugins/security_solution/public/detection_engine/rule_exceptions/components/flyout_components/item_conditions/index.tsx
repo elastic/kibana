@@ -90,7 +90,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   getExtendedFields?: (fields: string[]) => Promise<DataViewField[]>;
 }
 
-const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({
+const ExceptionsConditionsComponent = ({
   exceptionItemName,
   allowLargeValueLists,
   exceptionListItems,
@@ -104,7 +104,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onExceptionItemAdd,
   onSetErrorExists,
   getExtendedFields,
-}): JSX.Element => {
+}: ExceptionsFlyoutConditionsComponentProps): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
   const isEndpointException = useMemo(
     (): boolean => exceptionListType === ExceptionListTypeEnum.ENDPOINT,

@@ -7,7 +7,6 @@
 
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
 import React from 'react';
 import { fnOperationTypeMapping } from './constants';
 
@@ -16,7 +15,7 @@ interface FunctionPickerProps {
   onChange: (value: string) => void;
 }
 
-export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onChange }) => {
+export const FunctionPicker = React.memo(({ value, onChange }: FunctionPickerProps) => {
   const options = Object.keys(fnOperationTypeMapping).map((v) => {
     return {
       id: v,

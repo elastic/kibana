@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { useDrilldownManager } from '../context';
 import { TemplateList } from './template_list';
 
-export const TemplatePicker: React.FC = () => {
+export const TemplatePicker = () => {
   const drilldowns = useDrilldownManager();
 
   const { templates } = drilldowns.deps;

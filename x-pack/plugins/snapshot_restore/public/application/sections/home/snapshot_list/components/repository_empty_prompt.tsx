@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToAddRepository } from '../../../../services/navigation';
 
-export const RepositoryEmptyPrompt: React.FunctionComponent = () => {
+export const RepositoryEmptyPrompt = () => {
   const history = useHistory();
   return (
     <EuiPageTemplate.EmptyPrompt

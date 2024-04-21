@@ -24,10 +24,10 @@ interface MatchParams {
   name: string;
 }
 
-export const PolicyEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const PolicyEdit = ({
   history,
   location: { pathname },
-}) => {
+}: RouteComponentProps<MatchParams>) => {
   const { name } = useDecodedParams<MatchParams>();
   const { i18n } = useServices();
 

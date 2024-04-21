@@ -16,7 +16,7 @@ import { EmptyEngineOverview } from './engine_overview_empty';
 
 import { EngineOverviewMetrics } from './engine_overview_metrics';
 
-export const EngineOverview: React.FC = () => {
+export const EngineOverview = () => {
   const {
     myRole: { canManageEngineDocuments, canViewEngineCredentials },
   } = useValues(AppLogic);

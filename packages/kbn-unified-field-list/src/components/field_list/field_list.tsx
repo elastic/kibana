@@ -26,6 +26,7 @@ export interface FieldListProps {
   prepend?: React.ReactNode;
   append?: React.ReactNode;
   className?: string;
+  children?: React.ReactNode;
 }
 
 /**
@@ -39,14 +40,14 @@ export interface FieldListProps {
  * @public
  * @constructor
  */
-export const FieldList: React.FC<FieldListProps> = ({
+export const FieldList = ({
   'data-test-subj': dataTestSubject = 'fieldList',
   isProcessing,
   prepend,
   append,
   className,
   children,
-}) => {
+}: FieldListProps) => {
   return (
     <EuiFlexGroup
       gutterSize="none"

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import classNames from 'classnames';
-import React, { FC, ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 
 import {
   panelHoverTrigger,
@@ -30,14 +30,14 @@ export interface FloatingActionsProps {
   disabledActions?: EmbeddableInput['disabledActions'];
 }
 
-export const FloatingActions: FC<FloatingActionsProps> = ({
+export const FloatingActions = ({
   children,
   viewMode,
   isEnabled,
   embeddable,
   className = '',
   disabledActions,
-}) => {
+}: FloatingActionsProps) => {
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
@@ -53,7 +53,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         trigger: panelHoverTrigger,
       };
       const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
-        .filter((action): action is Action & { MenuItem: React.FC } => {
+        .filter((action): action is Action & { MenuItem: () => React.ReactElement } => {
           return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
         })
         .sort((a, b) => (a.order || 0) - (b.order || 0));

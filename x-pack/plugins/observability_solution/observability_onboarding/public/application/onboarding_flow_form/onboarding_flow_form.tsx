@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
   EuiCheckableCard,
@@ -33,7 +32,7 @@ interface UseCaseOption {
   description: React.ReactNode;
 }
 
-export const OnboardingFlowForm: FunctionComponent = () => {
+export const OnboardingFlowForm = () => {
   const options: UseCaseOption[] = [
     {
       id: 'logs',
@@ -176,7 +175,7 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
+const TitleWithIcon = ({ title, iconType }: TitleWithIconProps) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />

@@ -28,9 +28,10 @@ interface CspAppDeps {
   core: CoreStart;
   deps: Partial<CspClientPluginStartDeps>;
   params: AppMountParameters;
+  children: React.ReactNode;
 }
 
-export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
+export const TestProvider = ({
   core = coreMock.createStart(),
   deps = {
     data: dataPluginMock.createStartContract(),
@@ -44,7 +45,7 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   },
   params = coreMock.createAppMountParameters(),
   children,
-} = {}) => {
+}: Partial<CspAppDeps> = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);
 
   return (

@@ -78,11 +78,11 @@ interface AnalyticsCollectionTableProps {
   onSearch: (query: string) => void;
 }
 
-export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> = ({
+export const AnalyticsCollectionTable = ({
   collections,
   isSearching,
   onSearch,
-}) => {
+}: AnalyticsCollectionTableProps) => {
   const { euiTheme } = useEuiTheme();
   const analyticsCollectionTableStyles = AnalyticsCollectionTableStyles(euiTheme);
   const filterOptions = useMemo<Array<{ id: FilterBy; label: string }>>(

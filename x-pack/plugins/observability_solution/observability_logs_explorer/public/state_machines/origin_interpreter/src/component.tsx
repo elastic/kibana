@@ -12,10 +12,10 @@ import {
   OriginInterpreterStateMachineDependencies,
 } from './state_machine';
 
-export const OriginInterpreter: React.FC<OriginInterpreterStateMachineDependencies> = ({
+export const OriginInterpreter = ({
   history,
   toasts,
-}) => {
+}: OriginInterpreterStateMachineDependencies) => {
   useInterpret(
     () =>
       createOriginInterpreterStateMachine({

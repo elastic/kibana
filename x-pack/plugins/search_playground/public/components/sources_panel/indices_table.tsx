@@ -14,7 +14,7 @@ interface IndicesTableProps {
   onRemoveClick: (index: string) => void;
 }
 
-export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveClick }) => (
+export const IndicesTable = ({ indices, onRemoveClick }: IndicesTableProps) => (
   <EuiBasicTable
     items={indices.map((index) => ({ index }))}
     columns={[

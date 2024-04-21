@@ -62,7 +62,27 @@ const dataGridToolTipOffset = css`
   }
 `;
 
-const FormattedFieldValueComponent: React.FC<{
+const FormattedFieldValueComponent = ({
+  asPlainText,
+  Component,
+  contextId,
+  eventId,
+  fieldFormat,
+  isAggregatable = false,
+  isUnifiedDataTable,
+  fieldName,
+  fieldType = '',
+  fieldFromBrowserField,
+  isButton,
+  isObjectArray = false,
+  isDraggable = true,
+  onClick,
+  onClickAriaLabel,
+  title,
+  truncate = true,
+  value,
+  linkValue,
+}: {
   asPlainText?: boolean;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -83,26 +103,6 @@ const FormattedFieldValueComponent: React.FC<{
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
-}> = ({
-  asPlainText,
-  Component,
-  contextId,
-  eventId,
-  fieldFormat,
-  isAggregatable = false,
-  isUnifiedDataTable,
-  fieldName,
-  fieldType = '',
-  fieldFromBrowserField,
-  isButton,
-  isObjectArray = false,
-  isDraggable = true,
-  onClick,
-  onClickAriaLabel,
-  title,
-  truncate = true,
-  value,
-  linkValue,
 }) => {
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;

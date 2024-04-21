@@ -76,8 +76,14 @@ interface MultiFieldsProps {
   size: FieldItemButtonProps<DataViewField>['size'];
 }
 
-const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ stateService, multiFields, toggleDisplay, alwaysShowActionButton, size }) => (
+const MultiFields = memo(
+  ({
+    stateService,
+    multiFields,
+    toggleDisplay,
+    alwaysShowActionButton,
+    size,
+  }: MultiFieldsProps) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>

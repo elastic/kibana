@@ -43,12 +43,17 @@ const DraggableLegendContainer = styled.div<{ height: number; $minWidth: number 
   }
 `;
 
-const DraggableLegendComponent: React.FC<{
+const DraggableLegendComponent = ({
+  className,
+  height = 0,
+  legendItems,
+  minWidth = DEFAULT_WIDTH,
+}: {
   className?: string;
   height: number | undefined;
   legendItems: LegendItem[];
   minWidth?: number;
-}> = ({ className, height = 0, legendItems, minWidth = DEFAULT_WIDTH }) => {
+}) => {
   if (legendItems.length === 0) {
     return null;
   }

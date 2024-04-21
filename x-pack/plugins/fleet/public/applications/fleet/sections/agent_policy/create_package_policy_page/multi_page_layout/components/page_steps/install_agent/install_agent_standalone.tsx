@@ -36,7 +36,7 @@ import { StandaloneInstructions } from '../../../../../../../../../components/en
 
 import type { InstallAgentPageProps } from './types';
 
-export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
+export const InstallElasticAgentStandalonePageStep = (props: InstallAgentPageProps) => {
   const { setIsManaged, agentPolicy, cancelUrl, onNext, cancelClickHandler } = props;
   const core = useStartServices();
   const kibanaVersion = useKibanaVersion();

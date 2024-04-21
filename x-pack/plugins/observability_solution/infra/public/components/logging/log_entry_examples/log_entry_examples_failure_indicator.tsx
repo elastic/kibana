@@ -9,9 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const LogEntryExampleMessagesFailureIndicator: React.FunctionComponent<{
-  onRetry: () => void;
-}> = ({ onRetry }) => (
+export const LogEntryExampleMessagesFailureIndicator = ({ onRetry }: { onRetry: () => void }) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={false} className="eui-textNoWrap">
       <EuiTextColor color="danger">

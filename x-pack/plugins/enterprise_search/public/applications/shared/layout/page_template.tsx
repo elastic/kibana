@@ -50,7 +50,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   hideEmbeddedConsole?: boolean;
 };
 
-export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
+export const EnterpriseSearchPageTemplateWrapper = ({
   children,
   className,
   customPageSections,
@@ -64,7 +64,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   useEndpointHeaderActions = true,
   hideEmbeddedConsole = false,
   ...pageTemplateProps
-}) => {
+}: PageTemplateProps) => {
   const { readOnlyMode } = useValues(HttpLogic);
   const { renderHeaderActions, consolePlugin } = useValues(KibanaLogic);
 

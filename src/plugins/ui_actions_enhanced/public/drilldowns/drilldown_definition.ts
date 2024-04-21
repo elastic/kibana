@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
@@ -81,7 +80,7 @@ export interface DrilldownDefinition<
    *
    * type Props = CollectConfigProps<Config>;
    *
-   * export const CollectConfig: React.FC<Props> = () => {
+   * export const CollectConfig = (props: Props) => {
    *   return <div>Collecting config...'</div>;
    * };
    * ```
@@ -114,10 +113,10 @@ export interface DrilldownDefinition<
    * Name of the drilldown instance displayed to the user at the moment of
    * drilldown execution. Should be internationalized.
    */
-  readonly actionMenuItem?: FC<{
+  readonly actionMenuItem?: (props: {
     config: Omit<SerializedAction<Config>, 'factoryId'>;
     context: ExecutionContext | ActionExecutionContext<ExecutionContext>;
-  }>;
+  }) => JSX.Element;
 
   /**
    * isCompatible during execution

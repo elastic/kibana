@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiCallOut, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEditPolicyContext } from '../edit_policy_context';
@@ -13,7 +13,7 @@ import { getIndicesListPath } from '../../../services/navigation';
 import { useKibana } from '../../../../shared_imports';
 import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
 
-export const EditWarning: FunctionComponent = () => {
+export const EditWarning = () => {
   const { isNewPolicy, indices, indexTemplates, policyName, policy } = useEditPolicyContext();
   const {
     services: { getUrlForApp },

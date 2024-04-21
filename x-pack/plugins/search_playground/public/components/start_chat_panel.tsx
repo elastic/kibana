@@ -21,14 +21,10 @@ interface StartChatPanelProps {
   title: string;
   description: string | React.ReactNode;
   isValid?: boolean;
+  children: React.ReactNode;
 }
 
-export const StartChatPanel: React.FC<StartChatPanelProps> = ({
-  title,
-  description,
-  children,
-  isValid,
-}) => (
+export const StartChatPanel = ({ title, description, children, isValid }: StartChatPanelProps) => (
   <EuiPanel hasBorder paddingSize="l">
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
       <EuiTitle size="xs">
@@ -52,9 +48,7 @@ export const StartChatPanel: React.FC<StartChatPanelProps> = ({
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-
     <EuiSpacer size="s" />
-
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiText size="s">
         <p>{description}</p>

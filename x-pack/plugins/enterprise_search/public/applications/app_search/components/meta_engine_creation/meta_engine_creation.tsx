@@ -50,7 +50,7 @@ const engineNameToComboBoxOption = (engineName: string): EuiComboBoxOptionOption
 const comboBoxOptionToEngineName = (option: EuiComboBoxOptionOption<string>): string =>
   option.label;
 
-export const MetaEngineCreation: React.FC = () => {
+export const MetaEngineCreation = () => {
   const {
     configuredLimits: {
       engine: { maxEnginesPerMetaEngine },

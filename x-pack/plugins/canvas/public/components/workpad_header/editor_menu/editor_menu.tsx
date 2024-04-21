@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import {
@@ -41,7 +41,7 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu: FC<Props> = ({ addElement }) => {
+export const EditorMenu = ({ addElement }: Props) => {
   const embeddablesService = useEmbeddablesService();
   const { pathname, search, hash } = useLocation();
   const stateTransferService = embeddablesService.getStateTransfer();

@@ -45,5 +45,5 @@ export interface ReactEmbeddableFactory<
     ) => ApiType,
     uuid: string,
     parentApi?: unknown
-  ) => Promise<{ Component: React.FC<{}>; api: ApiType }>;
+  ) => Promise<{ Component: (props: {}) => JSX.Element; api: ApiType }>;
 }

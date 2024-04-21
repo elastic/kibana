@@ -21,7 +21,6 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
@@ -49,13 +48,14 @@ export interface EnrollmentTokenFormProps {
   onSuccess?(): void;
 }
 
-export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = ({
+export const EnrollmentTokenForm = ({
   defaultValues = {
     token: '',
   },
+
   onCancel,
   onSuccess,
-}) => {
+}: EnrollmentTokenFormProps) => {
   const { http } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
@@ -174,7 +174,7 @@ interface EnrollmentTokenDetailsProps {
   token: EnrollmentToken;
 }
 
-const EnrollmentTokenDetails: FunctionComponent<EnrollmentTokenDetailsProps> = ({ token }) => (
+const EnrollmentTokenDetails = ({ token }: EnrollmentTokenDetailsProps) => (
   <EuiText size="xs">
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false} className="eui-textNoWrap">

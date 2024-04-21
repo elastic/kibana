@@ -61,7 +61,7 @@ const mockedServices = {
   },
 };
 
-const InnerFieldItemWrapper: React.FC<FieldItemIndexPatternFieldProps> = (props) => {
+const InnerFieldItemWrapper = (props: FieldItemIndexPatternFieldProps) => {
   return (
     <KibanaContextProvider services={mockedServices}>
       <InnerFieldItem {...props} />

@@ -42,7 +42,7 @@ const DEFAULT_PAGINATION = {
   totalItemCount: INDEX_DOCUMENTS_META_DEFAULT.totalItemCount,
 };
 
-export const SearchIndexDocuments: React.FC = () => {
+export const SearchIndexDocuments = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod, hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
   const { productFeatures } = useValues(KibanaLogic);

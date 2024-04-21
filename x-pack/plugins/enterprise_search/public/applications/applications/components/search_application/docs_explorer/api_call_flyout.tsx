@@ -36,11 +36,11 @@ export interface APICallFlyoutProps {
   searchApplicationName: string;
 }
 
-export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
+export const APICallFlyout = ({
   onClose,
   lastAPICall,
   searchApplicationName,
-}) => {
+}: APICallFlyoutProps) => {
   const [tab, setTab] = useState<'request' | 'response'>('request');
 
   const contents = JSON.stringify(lastAPICall[tab], null, 2);

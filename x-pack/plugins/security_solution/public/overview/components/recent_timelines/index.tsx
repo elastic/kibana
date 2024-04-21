@@ -32,7 +32,7 @@ interface Props {
 
 const PAGE_SIZE = 3;
 
-const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
+const StatefulRecentTimelinesComponent = ({ filterBy }: Props) => {
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );

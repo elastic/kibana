@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 
 import { EuiBetaBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-export const TechnicalPreviewBadge: FC = () => {
+export const TechnicalPreviewBadge = () => {
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.aiops.techPreviewBadge.label', {

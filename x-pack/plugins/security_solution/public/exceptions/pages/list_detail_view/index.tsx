@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import type { FC } from 'react';
 
 import {
   EmptyViewerState,
@@ -28,7 +27,7 @@ import * as i18n from '../../translations';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
 import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_items_modal';
 
-export const ListsDetailViewComponent: FC = () => {
+export const ListsDetailViewComponent = () => {
   const { detailName: exceptionListId } = useParams<{
     detailName: string;
   }>();

@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  Fragment,
-  ChangeEvent,
-  FunctionComponent,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
+import React, { Fragment, ChangeEvent, useState, useEffect, useRef } from 'react';
 import {
   EuiModal,
   EuiModalBody,
@@ -109,7 +102,7 @@ export interface Props {
   initialSearch?: string;
 }
 
-export const SavedElementsModal: FunctionComponent<Props> = ({
+export const SavedElementsModal = ({
   customElements,
   onAddCustomElement,
   onClose,
@@ -117,7 +110,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   onUpdateCustomElement,
   onSearch,
   initialSearch = '',
-}) => {
+}: Props) => {
   const hasLoadedElements = useRef<boolean>(false);
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);

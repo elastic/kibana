@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, FunctionComponent, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -71,11 +71,7 @@ interface Props {
   reloadIndexSettings: () => void;
 }
 
-export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
-  data,
-  indexName,
-  reloadIndexSettings,
-}) => {
+export const DetailsPageSettingsContent = ({ data, indexName, reloadIndexSettings }: Props) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const {
     config: { editableIndexSettings },

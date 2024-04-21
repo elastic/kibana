@@ -7,18 +7,17 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import { EuiTablePagination } from '@elastic/eui';
 
 import type { PaginationProps } from '../types';
 import { usePagination } from './use_pagination';
 
-const PaginationComponent: FC<PaginationProps> = ({
+const PaginationComponent = ({
   dataTestSubj,
   ariaLabel,
   pagination,
   onPaginationChange,
-}) => {
+}: PaginationProps) => {
   const {
     pageIndex,
     pageCount,

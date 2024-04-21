@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import type { FC } from 'react';
 import React, { Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
 import { ML_PAGES } from '../../../locator';
@@ -16,7 +15,7 @@ import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import type { MlRoute, PageProps } from '../router';
+import type { MlRoute } from '../router';
 import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 
@@ -32,7 +31,7 @@ export const overviewRouteFactory = (
     defaultMessage: 'Overview',
   }),
   enableDatePicker: true,
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     {
@@ -44,7 +43,7 @@ export const overviewRouteFactory = (
   'data-test-subj': 'mlPageOverview',
 });
 
-const PageWrapper: FC<PageProps> = () => {
+const PageWrapper = () => {
   const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,
@@ -69,7 +68,7 @@ export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   breadcrumbs: [],
 });
 
-const Page: FC = () => {
+const Page = () => {
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
   if (isADEnabled === false && isDFAEnabled === false && isNLPEnabled === true) {
     // if only NLP is enabled, redirect to the trained models page.

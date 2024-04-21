@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { get } from 'lodash';
 
 import {
@@ -32,7 +32,7 @@ interface Props {
   phase: Phase;
 }
 
-export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
+export const PhaseTitle = ({ phase }: Props) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],

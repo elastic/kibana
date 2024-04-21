@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useCallback, useState } from 'react';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
@@ -66,7 +65,7 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const WorkpadHeader: FC<Props> = ({
+export const WorkpadHeader = ({
   isWriteable,
   canUserWrite,
   commit,
@@ -74,7 +73,7 @@ export const WorkpadHeader: FC<Props> = ({
   renderEmbedPanel,
   elements,
   addElement,
-}) => {
+}: Props) => {
   const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const hideEmbedPanel = () => setEmbedPanelVisible(false);
   const showEmbedPanel = () => setEmbedPanelVisible(true);
@@ -236,14 +235,4 @@ export const WorkpadHeader: FC<Props> = ({
       {isEmbedPanelVisible ? renderEmbedPanel(hideEmbedPanel) : null}
     </>
   );
-};
-
-WorkpadHeader.propTypes = {
-  isWriteable: PropTypes.bool,
-  commit: PropTypes.func.isRequired,
-  onSetWriteable: PropTypes.func,
-  canUserWrite: PropTypes.bool,
-  renderEmbedPanel: PropTypes.func.isRequired,
-  elements: PropTypes.object.isRequired,
-  addElement: PropTypes.func.isRequired,
 };

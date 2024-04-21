@@ -40,16 +40,17 @@ export interface PageTemplateProps {
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
   product?: string;
+  children?: React.ReactNode;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({
+export const PageTemplate = ({
   title,
   pageTitle,
   tabs,
   getPageData,
   product,
   children,
-}) => {
+}: PageTemplateProps) => {
   useTitle('', title);
 
   const { currentTimerange } = useMonitoringTimeContainerContext();

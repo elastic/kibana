@@ -377,14 +377,18 @@ export default ScrollableLogTextStreamView;
  * If the above component wasn't a class component, this wouldn't be necessary
  * since the `useColumnWidths` hook could have been used directly.
  */
-const WithColumnWidths: React.FunctionComponent<{
+const WithColumnWidths = ({
+  children,
+  columnConfigurations,
+  scale,
+}: {
   children: (params: {
     columnWidths: LogEntryColumnWidths;
     CharacterDimensionsProbe: React.ComponentType;
   }) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnRenderConfiguration[];
   scale: TextScale;
-}> = ({ children, columnConfigurations, scale }) => {
+}) => {
   const childParams = useColumnWidths({ columnConfigurations, scale });
 
   return children(childParams);

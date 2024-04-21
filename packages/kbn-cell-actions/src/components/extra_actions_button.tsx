@@ -15,7 +15,7 @@ interface ExtraActionsButtonProps {
   showTooltip: boolean;
 }
 
-export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick, showTooltip }) =>
+export const ExtraActionsButton = ({ onClick, showTooltip }: ExtraActionsButtonProps) =>
   showTooltip ? (
     <EuiToolTip content={SHOW_MORE_ACTIONS}>
       <EuiButtonIcon

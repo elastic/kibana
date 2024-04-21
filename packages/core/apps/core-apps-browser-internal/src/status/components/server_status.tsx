@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StatusState } from '../lib';
@@ -17,7 +17,7 @@ interface ServerStateProps {
   serverState: StatusState;
 }
 
-export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, serverState }) => (
+export const ServerStatus = ({ name, serverState }: ServerStateProps) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" style={{ flexGrow: 0 }}>
     <EuiFlexItem grow={false}>
       <EuiTitle>

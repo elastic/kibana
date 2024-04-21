@@ -18,7 +18,7 @@ import { AgentPolicyDetailsPage } from './details_page';
 import { EditPackagePolicyPage } from './edit_package_policy_page';
 import { UpgradePackagePolicyPage } from './upgrade_package_policy_page';
 
-export const AgentPolicyApp: React.FunctionComponent = () => {
+export const AgentPolicyApp = () => {
   useBreadcrumbs('policies');
 
   return (

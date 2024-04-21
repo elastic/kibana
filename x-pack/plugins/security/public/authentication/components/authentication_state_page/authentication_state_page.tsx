@@ -14,9 +14,10 @@ interface Props {
   className?: string;
   title: React.ReactNode;
   logo?: string;
+  children: React.ReactNode;
 }
 
-export const AuthenticationStatePage: React.FC<Props> = (props) => (
+export const AuthenticationStatePage = (props: Props) => (
   <div className={`secAuthenticationStatePage ${props.className || ''}`}>
     <header className="secAuthenticationStatePage__header">
       <div className="secAuthenticationStatePage__content eui-textCenter">

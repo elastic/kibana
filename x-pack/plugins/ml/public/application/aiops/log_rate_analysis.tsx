@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
@@ -17,7 +16,7 @@ import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml';
 
-export const LogRateAnalysisPage: FC = () => {
+export const LogRateAnalysisPage = () => {
   const { services } = useMlKibana();
   const { showNodeInfo } = useEnabledFeatures();
 

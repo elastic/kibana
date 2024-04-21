@@ -40,12 +40,12 @@ window.scrollTo = jest.fn();
 const createStore = (state: any) => createReduxStore(() => {}, state);
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProvidersComponent: React.FC<Props> = ({
+export const TestProvidersComponent = ({
   children,
   store = createStore(mockGlobalState),
   onDragEnd = jest.fn(),
   cellActions = [],
-}) => {
+}: Props) => {
   const queryClient = new QueryClient();
   return (
     <I18nProvider>
@@ -66,12 +66,12 @@ export const TestProvidersComponent: React.FC<Props> = ({
  * A utility for wrapping children in the providers required to run most tests
  * WITH user privileges provider.
  */
-const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
+const TestProvidersWithPrivilegesComponent = ({
   children,
   store = createStore(mockGlobalState),
   onDragEnd = jest.fn(),
   cellActions = [],
-}) => (
+}: Props) => (
   <I18nProvider>
     <ReduxStoreProvider store={store}>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>

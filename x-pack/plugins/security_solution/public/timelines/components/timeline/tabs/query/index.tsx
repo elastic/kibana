@@ -85,7 +85,7 @@ export type Props = TimelineTabCommonProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
-export const QueryTabContentComponent: React.FC<Props> = ({
+export const QueryTabContentComponent = ({
   activeTab,
   columns,
   dataProviders,
@@ -109,7 +109,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   sort,
   timerangeKind,
   expandedDetail,
-}) => {
+}: Props) => {
   const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();

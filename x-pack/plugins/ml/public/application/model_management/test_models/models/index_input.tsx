@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -37,11 +36,11 @@ interface Props {
   disableIndexSelection: boolean;
 }
 
-export const InferenceInputFormIndexControls: FC<Props> = ({
+export const InferenceInputFormIndexControls = ({
   inferrer,
   data,
   disableIndexSelection,
-}) => {
+}: Props) => {
   const {
     dataViewListItems,
     fieldNames,

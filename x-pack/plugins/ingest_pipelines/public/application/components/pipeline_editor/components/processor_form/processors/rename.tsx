@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { fieldValidators } from '../../../../../../shared_imports';
@@ -16,7 +16,7 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 
 const { emptyField } = fieldValidators;
 
-export const Rename: FunctionComponent = () => {
+export const Rename = () => {
   return (
     <>
       <FieldNameField

@@ -56,7 +56,7 @@ export interface Props {
   title: React.ReactNode;
 }
 
-const AlertsTreemapPanelComponent: React.FC<Props> = ({
+const AlertsTreemapPanelComponent = ({
   addFilter,
   alignHeader,
   chartOptionsContextMenu,

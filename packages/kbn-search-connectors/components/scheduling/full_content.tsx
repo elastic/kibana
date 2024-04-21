@@ -81,11 +81,15 @@ const getDescriptionText = (type: ConnectorContentSchedulingProps['type']) => {
   }
 };
 
-const EnableSwitch: React.FC<{
+const EnableSwitch = ({
+  disabled,
+  checked,
+  onChange,
+}: {
   checked: boolean;
   disabled: boolean;
   onChange: EuiSwitchProps['onChange'];
-}> = ({ disabled, checked, onChange }) => (
+}) => (
   <EuiSwitch
     disabled={disabled}
     checked={checked}
@@ -96,7 +100,7 @@ const EnableSwitch: React.FC<{
   />
 );
 
-export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProps> = ({
+export const ConnectorContentScheduling = ({
   connector,
   dataTelemetryIdPrefix,
   setHasSyncTypeChanges,
@@ -105,7 +109,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
   type,
   updateConnectorStatus,
   updateScheduling,
-}) => {
+}: ConnectorContentSchedulingProps) => {
   const schedulingInput = connector.scheduling;
   const [scheduling, setScheduling] = useState(schedulingInput);
   const [isAccordionOpen, setIsAccordionOpen] = useState<'open' | 'closed'>(

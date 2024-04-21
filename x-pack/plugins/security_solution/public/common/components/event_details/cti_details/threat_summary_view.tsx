@@ -27,7 +27,7 @@ const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
 `;
 
-const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
+const ThreatSummaryPanelTitle = ({ children }: { children: React.ReactNode }) => (
   <UppercaseEuiTitle size="xxxs">
     <h5>{children}</h5>
   </UppercaseEuiTitle>
@@ -37,9 +37,7 @@ const StyledEnrichmentFieldTitle = styled(EuiTitle)`
   width: 220px;
 `;
 
-const EnrichmentFieldTitle: React.FC<{
-  title: string | React.ReactNode | undefined;
-}> = ({ title }) => (
+const EnrichmentFieldTitle = ({ title }: { title: string | React.ReactNode | undefined }) => (
   <StyledEnrichmentFieldTitle size="xxxs">
     <h6>{title}</h6>
   </StyledEnrichmentFieldTitle>
@@ -50,10 +48,13 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EnrichedDataRow: React.FC<{
+export const EnrichedDataRow = ({
+  field,
+  value,
+}: {
   field: string | React.ReactNode | undefined;
   value: React.ReactNode;
-}> = ({ field, value }) => (
+}) => (
   <StyledEuiFlexGroup
     direction="row"
     gutterSize="none"
@@ -68,11 +69,15 @@ export const EnrichedDataRow: React.FC<{
   </StyledEuiFlexGroup>
 );
 
-export const ThreatSummaryPanelHeader: React.FC<{
+export const ThreatSummaryPanelHeader = ({
+  title,
+  toolTipContent,
+  toolTipTitle,
+}: {
   title: string | React.ReactNode;
   toolTipContent: React.ReactNode;
   toolTipTitle?: React.ReactNode;
-}> = ({ title, toolTipContent, toolTipTitle }) => {
+}) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
       <EuiFlexItem>
@@ -88,17 +93,7 @@ export const ThreatSummaryPanelHeader: React.FC<{
   );
 };
 
-const ThreatSummaryViewComponent: React.FC<{
-  browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
-  enrichments: CtiEnrichment[];
-  eventId: string;
-  scopeId: string;
-  hostRisk: HostRisk;
-  userRisk: UserRisk;
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
-}> = ({
+const ThreatSummaryViewComponent = ({
   browserFields,
   data,
   enrichments,
@@ -108,6 +103,16 @@ const ThreatSummaryViewComponent: React.FC<{
   userRisk,
   isDraggable,
   isReadOnly,
+}: {
+  browserFields: BrowserFields;
+  data: TimelineEventsDetailsItem[];
+  enrichments: CtiEnrichment[];
+  eventId: string;
+  scopeId: string;
+  hostRisk: HostRisk;
+  userRisk: UserRisk;
+  isDraggable?: boolean;
+  isReadOnly?: boolean;
 }) => {
   const originalHostRisk = data?.find(
     (eventDetail) => eventDetail?.field === 'host.risk.calculated_level'

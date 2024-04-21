@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import {
   EuiBadge,
@@ -33,8 +32,8 @@ interface JobItemProps {
   onEditRequest: (job: ModuleJobUI) => void;
 }
 
-export const JobItem: FC<JobItemProps> = memo(
-  ({ job, jobOverride, isSaving, jobPrefix, onEditRequest }) => {
+export const JobItem = memo(
+  ({ job, jobOverride, isSaving, jobPrefix, onEditRequest }: JobItemProps) => {
     const {
       id,
       config: { description, groups },

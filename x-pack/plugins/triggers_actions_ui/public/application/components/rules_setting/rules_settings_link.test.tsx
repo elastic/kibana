@@ -62,7 +62,7 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
   updatedAt: new Date().toISOString(),
 };
 
-const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
+const RulesSettingsLinkWithProviders = () => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <RulesSettingsLink />

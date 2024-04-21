@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiFilterSelectItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';
 
@@ -19,7 +19,7 @@ interface Props {
   }>;
 }
 
-export const UnitField: FunctionComponent<Props> = ({ path, disabled, options, euiFieldProps }) => {
+export const UnitField = ({ path, disabled, options, euiFieldProps }: Props) => {
   const [open, setOpen] = useState(false);
 
   return (

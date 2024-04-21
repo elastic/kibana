@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiDescribedFormGroup, EuiForm, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,8 +26,8 @@ const disabledChecks = new Set<keyof Exclude<TransformHealthRuleTestsConfig, nul
   'errorMessages',
 ]);
 
-export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
-  ({ config, onChange, errors }) => {
+export const TestsSelectionControl = React.memo(
+  ({ config, onChange, errors }: TestsSelectionControlProps) => {
     const uiConfig = getResultTestConfig(config);
 
     const initConfig = useMemo(() => {

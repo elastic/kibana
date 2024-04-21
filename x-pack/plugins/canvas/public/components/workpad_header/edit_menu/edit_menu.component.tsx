@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -209,7 +209,7 @@ export interface Props {
   hasPasteData: boolean;
 }
 
-export const EditMenu: FunctionComponent<Props> = ({
+export const EditMenu = ({
   cutNodes,
   copyNodes,
   pasteNodes,
@@ -235,7 +235,7 @@ export const EditMenu: FunctionComponent<Props> = ({
   undoHistory,
   redoHistory,
   hasPasteData,
-}) => {
+}: Props) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const showModal = () => setModalVisible(true);
   const hideModal = () => setModalVisible(false);

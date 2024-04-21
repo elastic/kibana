@@ -82,7 +82,7 @@ interface PreviewSectionProps {
  * Preview section of the expanded flyout rendering one or multiple panels.
  * Will display a back and close button in the header for the previous and close feature respectively.
  */
-export const PreviewSection: React.FC<PreviewSectionProps> = ({
+export const PreviewSection = ({
   component,
   showBackButton,
   leftPosition,

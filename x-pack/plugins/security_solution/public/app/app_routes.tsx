@@ -19,7 +19,7 @@ export interface AppRoutesProps {
   subPluginRoutes: RouteProps[];
 }
 
-export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPluginRoutes }) => (
+export const AppRoutes = React.memo(({ services, subPluginRoutes }: AppRoutesProps) => (
   <Routes>
     {subPluginRoutes.map((route, index) => {
       return <Route key={`route-${index}`} {...route} />;

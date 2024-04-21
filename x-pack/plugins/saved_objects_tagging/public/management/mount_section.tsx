@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -24,15 +24,19 @@ interface MountSectionParams {
   title: string;
 }
 
-const RedirectToHomeIfUnauthorized: FC<{
+const RedirectToHomeIfUnauthorized = ({
+  applications,
+  children,
+}: {
   applications: ApplicationStart;
-}> = ({ applications, children }) => {
+  children: React.ReactElement;
+}) => {
   const allowed = applications.capabilities?.management?.kibana?.tags ?? false;
   if (!allowed) {
     applications.navigateToApp('home');
     return null;
   }
-  return children! as React.ReactElement;
+  return children;
 };
 
 export const mountSection = async ({

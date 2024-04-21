@@ -63,14 +63,14 @@ interface BarPoint {
   type: string;
 }
 
-export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
+export const PingHistogramComponent = ({
   absoluteStartDate,
   absoluteEndDate,
   data,
   loading = false,
   height,
   timeZone,
-}) => {
+}: PingHistogramComponentProps) => {
   const {
     colors: { danger, gray },
     chartTheme,

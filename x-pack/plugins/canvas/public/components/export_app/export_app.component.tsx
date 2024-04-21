@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 // @ts-expect-error untyped local
 import { WorkpadPage } from '../workpad_page';
@@ -19,7 +18,7 @@ export interface Props {
   initializeWorkpad: () => void;
 }
 
-export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWorkpad }) => {
+export const ExportApp = ({ workpad, selectedPageIndex, initializeWorkpad }: Props) => {
   const { id, pages, height, width } = workpad;
   const activePage = pages[selectedPageIndex];
   const pageElementCount = activePage.elements.length;
@@ -52,13 +51,4 @@ export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWor
       </div>
     </div>
   );
-};
-
-ExportApp.propTypes = {
-  workpad: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    pages: PropTypes.array.isRequired,
-  }).isRequired,
-  selectedPageIndex: PropTypes.number.isRequired,
-  initializeWorkpad: PropTypes.func.isRequired,
 };

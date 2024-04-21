@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const NonTextFieldsHeader: React.FC = () => {
+export const NonTextFieldsHeader = () => {
   return (
     <EuiTableRow>
       <EuiTableHeaderCell align="left">

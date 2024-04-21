@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFormRow, EuiText } from '@elastic/eui';
 
@@ -24,7 +24,7 @@ interface CreateDataViewFormProps {
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export const CreateDataViewForm: FC<CreateDataViewFormProps> = ({
+export const CreateDataViewForm = ({
   canCreateDataView,
   createDataView,
   dataViewTitleExists,
@@ -32,7 +32,7 @@ export const CreateDataViewForm: FC<CreateDataViewFormProps> = ({
   dataViewAvailableTimeFields,
   dataViewTimeField,
   onTimeFieldChanged,
-}) => (
+}: CreateDataViewFormProps) => (
   <>
     <EuiFormRow
       isInvalid={(createDataView && dataViewTitleExists) || canCreateDataView === false}

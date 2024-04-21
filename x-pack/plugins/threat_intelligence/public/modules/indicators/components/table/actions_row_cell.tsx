@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useIndicatorsTableContext } from '../../hooks/use_table_context';
 import { MoreActions } from './more_actions';
@@ -14,7 +14,7 @@ import { Indicator } from '../../../../../common/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { INVESTIGATE_IN_TIMELINE_TEST_ID } from './test_ids';
 
-export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => {
+export const ActionsRowCell = ({ indicator }: { indicator: Indicator }) => {
   const indicatorTableContext = useIndicatorsTableContext();
 
   const { setExpanded, expanded } = indicatorTableContext;

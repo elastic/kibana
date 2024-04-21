@@ -6,7 +6,7 @@
  */
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -51,7 +51,7 @@ import { CertificatesPage } from './components/certificates/certificates';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
-  component: React.FC;
+  component: (props: React.PropsWithChildren<{}>) => React.ReactElement | null;
   dataTestSubj: string;
   title: string;
 };
@@ -165,14 +165,14 @@ const getRoutes = (
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
+const RouteInit = ({ path, title }: Pick<RouteProps, 'path' | 'title'>) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);
   return null;
 };
 
-export const PageRouter: FC = () => {
+export const PageRouter = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();

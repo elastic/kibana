@@ -29,7 +29,8 @@ interface ApiKeyPanelContent {
   openApiKeyModal: () => void;
 }
 
-export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, openApiKeyModal }) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const ApiKeyPanelContent = ({ apiKeys, openApiKeyModal }: ApiKeyPanelContent) => {
   return (
     <EuiPanel>
       <EuiFlexGroup direction="column">

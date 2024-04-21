@@ -31,7 +31,7 @@ interface Props {
   results: SearchResult[];
 }
 
-export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {
+export const CurationResultPanel = ({ variant, results }: Props) => {
   const { isMetaEngine, engine } = useValues(EngineLogic);
   const count = results.length;
 

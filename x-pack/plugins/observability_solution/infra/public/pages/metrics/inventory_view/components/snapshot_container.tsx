@@ -21,7 +21,7 @@ interface RenderProps {
 }
 
 interface Props {
-  render: React.FC<RenderProps>;
+  render: (props: RenderProps) => React.ReactElement;
 }
 export const SnapshotContainer = ({ render }: Props) => {
   const { sourceId } = useSourceContext();

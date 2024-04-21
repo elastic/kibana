@@ -43,6 +43,7 @@ const limitWidthToWindow = (width: number, { innerWidth }: Window): number =>
   Math.min(width, innerWidth * 0.8);
 
 export interface Props {
+  children: React.ReactNode;
   /**
    * The total max width with all the panels in the DOM
    * Corresponds to the "maxWidth" prop passed to the EuiFlyout
@@ -56,12 +57,12 @@ export interface Props {
   fixedPanelWidths?: boolean;
 }
 
-export const Panels: React.FC<Props> = ({
+export const Panels = ({
   maxWidth,
   flyoutClassName,
   fixedPanelWidths = false,
   ...props
-}) => {
+}: Props) => {
   const flyoutDOMelement = useMemo(() => {
     const el = document.getElementsByClassName(flyoutClassName);
 

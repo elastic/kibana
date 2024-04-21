@@ -22,7 +22,7 @@ const CRAWLER_TAB_PREFIX = i18n.translate(
   }
 );
 
-export const CrawlCustomSettingsFlyoutMultipleCrawlTabs: React.FC = () => {
+export const CrawlCustomSettingsFlyoutMultipleCrawlTabs = () => {
   const { crawlerConfigActiveTab, crawlerConfigurations } = useValues(
     CrawlCustomSettingsFlyoutMultiCrawlLogic
   );

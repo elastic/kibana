@@ -75,7 +75,7 @@ export interface ResultsTableComponentProps {
   error?: string;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
+const ResultsTableComponent = ({
   actionId,
   agentIds,
   ecsMapping,
@@ -83,7 +83,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   endDate,
   liveQueryActionId,
   error,
-}) => {
+}: ResultsTableComponentProps) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
 

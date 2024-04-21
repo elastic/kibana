@@ -45,7 +45,7 @@ export enum ConfigurePipelineTabId {
   USE_EXISTING = 'use_existing',
 }
 
-export const ConfigurePipeline: React.FC = () => {
+export const ConfigurePipeline = () => {
   const {
     addInferencePipelineModal: { configuration },
     formErrors,

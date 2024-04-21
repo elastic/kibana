@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
@@ -37,8 +36,8 @@ export interface UsersAvatarsPanelProps {
 /**
  * Displays users avatars
  */
-export const UsersAvatarsPanel: FC<UsersAvatarsPanelProps> = memo(
-  ({ userProfiles, maxVisibleAvatars }) => {
+export const UsersAvatarsPanel = memo(
+  ({ userProfiles, maxVisibleAvatars }: UsersAvatarsPanelProps) => {
     if (maxVisibleAvatars && userProfiles.length > maxVisibleAvatars) {
       return (
         <EuiToolTip

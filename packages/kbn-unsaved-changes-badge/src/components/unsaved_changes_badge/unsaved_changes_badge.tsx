@@ -41,12 +41,12 @@ export interface UnsavedChangesBadgeProps {
  * @param onSaveAs
  * @constructor
  */
-export const UnsavedChangesBadge: React.FC<UnsavedChangesBadgeProps> = ({
+export const UnsavedChangesBadge = ({
   badgeText,
   onRevert,
   onSave,
   onSaveAs,
-}) => {
+}: UnsavedChangesBadgeProps) => {
   const isMounted = useMountedState();
   const [processingType, setProcessingType] = useState<ProcessingType | null>(null);
   const [isPopoverOpen, setPopover] = useState(false);

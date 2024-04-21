@@ -13,10 +13,10 @@ export interface CategoriesBadgesProps {
   selectedCategoryIds: string[];
 }
 
-const CategoriesBadgesComponent: React.FC<CategoriesBadgesProps> = ({
+const CategoriesBadgesComponent = ({
   setSelectedCategoryIds,
   selectedCategoryIds,
-}) => {
+}: CategoriesBadgesProps) => {
   const { euiTheme } = useEuiTheme();
   const onUnselectCategory = useCallback(
     (categoryId: string) => {

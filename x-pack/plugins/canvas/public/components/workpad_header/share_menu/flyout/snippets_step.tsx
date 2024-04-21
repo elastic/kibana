@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -113,7 +113,7 @@ const HTML = `<!-- ${strings.getIncludeRuntimeLabel()} -->
   KbnCanvas.share();
 </script>`;
 
-export const SnippetsStep: FC<{ onCopy: OnCopyFn }> = ({ onCopy }) => (
+export const SnippetsStep = ({ onCopy }: { onCopy: OnCopyFn }) => (
   <div>
     <EuiText size="s">
       <p>{strings.getSnippetsStepDescription()}</p>

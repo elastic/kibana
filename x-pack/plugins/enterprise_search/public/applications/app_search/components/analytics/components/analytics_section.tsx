@@ -22,8 +22,9 @@ interface Props {
   iconType?: IconType;
   subtitle: string;
   title: string;
+  children?: React.ReactNode;
 }
-export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, children }) => (
+export const AnalyticsSection = ({ title, subtitle, iconType, children }: Props) => (
   <section>
     <header>
       <EuiFlexGroup

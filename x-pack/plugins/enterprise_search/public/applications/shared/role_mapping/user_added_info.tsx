@@ -38,12 +38,7 @@ const kibanaAccessWarning = (
 
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
 
-export const UserAddedInfo: React.FC<Props> = ({
-  username,
-  email,
-  roleType,
-  showKibanaAccessWarning,
-}) => (
+export const UserAddedInfo = ({ username, email, roleType, showKibanaAccessWarning }: Props) => (
   <>
     {showKibanaAccessWarning && kibanaAccessWarning}
     <EuiText size="s">

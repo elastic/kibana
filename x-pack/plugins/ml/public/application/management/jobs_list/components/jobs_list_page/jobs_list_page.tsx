@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +42,7 @@ import type { MlSavedObjectType } from '../../../../../../common/types/saved_obj
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent = ({ children }: SpacesContextProps) => <>{children}</>;
 
 interface Props {
   coreStart: CoreStart;
@@ -57,7 +56,7 @@ interface Props {
   mlFeatures: MlFeatures;
 }
 
-export const JobsListPage: FC<Props> = ({
+export const JobsListPage = ({
   coreStart,
   share,
   history,
@@ -67,7 +66,7 @@ export const JobsListPage: FC<Props> = ({
   fieldFormats,
   isServerless,
   mlFeatures,
-}) => {
+}: Props) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);

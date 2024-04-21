@@ -94,6 +94,6 @@ export const createWithKibanaMock = () => {
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
-  return ({ children }: { children: React.ReactNode }) =>
+  return ({ children }: { children?: React.ReactNode }) =>
     React.createElement(KibanaContextProvider, { services }, children);
 };

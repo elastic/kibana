@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import { FC, lazy, Suspense } from 'react';
+import React from 'react';
+import { lazy, Suspense } from 'react';
 import { PanelSpinner } from './panel_spinner';
 import type { Props } from './reporting_panel_content';
 
@@ -17,7 +17,7 @@ const LazyComponent = lazy(() =>
   }))
 );
 
-export const ReportingPanelContent: FC<Omit<Props, 'intl'>> = (props) => {
+export const ReportingPanelContent = (props: Omit<Props, 'intl'>) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />

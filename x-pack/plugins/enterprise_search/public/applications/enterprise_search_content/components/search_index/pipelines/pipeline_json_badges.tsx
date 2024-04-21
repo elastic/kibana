@@ -20,7 +20,7 @@ import { isManagedPipeline } from '../../../../shared/pipelines/is_managed';
 
 import { IndexPipelinesConfigurationsLogic } from './pipelines_json_configurations_logic';
 
-const ManagedPipelineBadge: React.FC = () => (
+const ManagedPipelineBadge = () => (
   <EuiToolTip
     position="top"
     content={i18n.translate(
@@ -37,7 +37,7 @@ const ManagedPipelineBadge: React.FC = () => (
   </EuiToolTip>
 );
 
-const UnmanagedPipelineBadge: React.FC = () => (
+const UnmanagedPipelineBadge = () => (
   <EuiToolTip
     position="top"
     content={
@@ -66,7 +66,7 @@ const UnmanagedPipelineBadge: React.FC = () => (
   </EuiToolTip>
 );
 
-const SharedPipelineBadge: React.FC = () => (
+const SharedPipelineBadge = () => (
   <EuiToolTip
     position="top"
     content={i18n.translate(
@@ -83,7 +83,7 @@ const SharedPipelineBadge: React.FC = () => (
   </EuiToolTip>
 );
 
-const IndexPipelineBadge: React.FC = () => (
+const IndexPipelineBadge = () => (
   <EuiToolTip
     position="top"
     content={i18n.translate(
@@ -100,7 +100,7 @@ const IndexPipelineBadge: React.FC = () => (
   </EuiToolTip>
 );
 
-const MlInferenceBadge: React.FC = () => (
+const MlInferenceBadge = () => (
   <EuiToolTip
     position="top"
     content={i18n.translate(
@@ -120,7 +120,7 @@ const MlInferenceBadge: React.FC = () => (
   </EuiToolTip>
 );
 
-export const PipelineJSONBadges: React.FC = () => {
+export const PipelineJSONBadges = () => {
   const {
     indexName,
     selectedPipeline: pipeline,

@@ -10,7 +10,9 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 const centerSpinnerStyle = { display: 'flex', margin: 'auto' };
 
-type WithSuspense = <T extends object = {}>(Component: React.ComponentType<T>) => React.FC<T>;
+type WithSuspense = <T extends object = {}>(
+  Component: React.ComponentType<T>
+) => (props: T) => JSX.Element;
 const withSuspense: WithSuspense = (Component) =>
   function LazyPageWithSuspense(props) {
     return (

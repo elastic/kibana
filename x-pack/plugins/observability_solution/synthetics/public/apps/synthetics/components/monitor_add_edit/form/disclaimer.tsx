@@ -11,7 +11,7 @@ import { EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { ConfigKey, MonitorServiceLocation } from '../types';
 
-export const Disclaimer: React.FC = () => {
+export const Disclaimer = () => {
   const { watch } = useFormContext();
   const [locations]: [locations: MonitorServiceLocation[]] = watch([ConfigKey.LOCATIONS]);
 

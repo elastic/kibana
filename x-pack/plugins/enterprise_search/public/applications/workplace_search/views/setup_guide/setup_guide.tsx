@@ -21,7 +21,7 @@ import GettingStarted from './assets/getting_started.png';
 
 const GETTING_STARTED_LINK_URL = docLinks.workplaceSearchGettingStarted;
 
-export const SetupGuide: React.FC = () => {
+export const SetupGuide = () => {
   return (
     <SetupGuideLayout
       productName={WORKPLACE_SEARCH_PLUGIN.NAME}

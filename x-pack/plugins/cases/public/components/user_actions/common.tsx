@@ -29,7 +29,7 @@ const showMoveToReference = (
   commentId: string | null
 ): commentId is string => action === UserActionActions.update && commentId != null;
 
-const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutlineComment }) => (
+const CommentListActions = React.memo(({ userAction, handleOutlineComment }: Props) => (
   <EuiFlexGroup responsive={false}>
     <EuiFlexItem grow={false}>
       <UserActionCopyLink id={userAction.id} />

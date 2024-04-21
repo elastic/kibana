@@ -28,11 +28,14 @@ export interface ReputationLinkSetting {
   name: string;
   url_template: string;
 }
-export const LinkButton: React.FC<
-  PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
-> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+export const LinkButton = ({
+  children,
+  ...props
+}: PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>) => (
+  <EuiButton {...props}>{children}</EuiButton>
+);
 
-export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
+export const LinkAnchor = ({ children, ...props }: EuiLinkProps) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
 
@@ -46,7 +49,15 @@ export const Comma = styled('span')`
 
 Comma.displayName = 'Comma';
 
-const GenericLinkButtonComponent: React.FC<{
+const GenericLinkButtonComponent = ({
+  children,
+  Component,
+  dataTestSubj,
+  href,
+  onClick,
+  title,
+  iconType = 'expand',
+}: {
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -55,7 +66,7 @@ const GenericLinkButtonComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   title?: string;
   iconType?: string;
-}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'expand' }) => {
+}) => {
   return Component ? (
     <Component
       data-test-subj={dataTestSubj}

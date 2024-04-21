@@ -19,7 +19,7 @@ export interface EncryptedFieldsCalloutProps {
   isMissingSecrets?: boolean | undefined;
 }
 
-const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dataTestSubj }) => {
+const Callout = ({ title, dataTestSubj }: { title: string; dataTestSubj: string }) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -60,10 +60,10 @@ const getCommaSeparatedLabel = (labels: string[]) => {
   return `${commaSeparatedLabelsWithoutLastItem}, and ${lastLabel}`;
 };
 
-const EncryptedFieldsCalloutComponent: React.FC<EncryptedFieldsCalloutProps> = ({
+const EncryptedFieldsCalloutComponent = ({
   isEdit,
   isMissingSecrets,
-}) => {
+}: EncryptedFieldsCalloutProps) => {
   /**
    * This is needed to rerender on any form change
    * and listen to any form field changes.

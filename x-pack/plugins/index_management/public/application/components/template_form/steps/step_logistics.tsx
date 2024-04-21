@@ -182,8 +182,8 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
   };
 }
 
-export const StepLogistics: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, isEditing = false, onChange, isLegacy = false }) => {
+export const StepLogistics = React.memo(
+  ({ defaultValue, isEditing = false, onChange, isLegacy = false }: Props) => {
     const { form } = useForm({
       schema: schemas.logistics,
       defaultValue,
@@ -312,9 +312,9 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           )}
 
           {/*
-            Since data stream and data retention are settings that are only allowed for non legacy,
-            we only need to check if data stream is set to true to show the data retention.
-          */}
+          Since data stream and data retention are settings that are only allowed for non legacy,
+          we only need to check if data stream is set to true to show the data retention.
+        */}
           {doCreateDataStream && (
             <FormRow
               title={dataRetention.title}

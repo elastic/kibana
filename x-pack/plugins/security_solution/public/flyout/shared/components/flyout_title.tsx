@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
 import {
@@ -42,8 +41,8 @@ export interface FlyoutTitleProps {
 /**
  * Title component with optional icon to indicate the type of document, can be used for text or a link
  */
-export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
-  ({ title, iconType, isLink = false, 'data-test-subj': dataTestSubj }) => {
+export const FlyoutTitle = memo(
+  ({ title, iconType, isLink = false, 'data-test-subj': dataTestSubj }: FlyoutTitleProps) => {
     const { euiTheme } = useEuiTheme();
 
     const titleIcon = useMemo(() => {

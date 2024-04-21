@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,12 +18,12 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav: FC<StepsNavProps> = ({
+export const WizardNav = ({
   previous,
   previousActive = true,
   next,
   nextActive = true,
-}) => (
+}: StepsNavProps) => (
   <EuiFlexGroup>
     <EuiFlexItem />
     {previous && (

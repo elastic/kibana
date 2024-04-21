@@ -24,7 +24,7 @@ interface ContentSectionProps {
   testSubj?: string;
 }
 
-export const ContentSection: React.FC<ContentSectionProps> = ({
+export const ContentSection = ({
   children,
   isOrganization = true,
   className = '',
@@ -33,7 +33,7 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
   action,
   headerChildren,
   testSubj,
-}) => (
+}: ContentSectionProps) => (
   <div className={className} data-test-subj={testSubj}>
     {title && (
       <>

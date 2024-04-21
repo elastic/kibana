@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const NoOverallData: FC = () => {
+export const NoOverallData = () => {
   return (
     <FormattedMessage
       id="xpack.ml.anomalySwimLane.noOverallDataMessage"

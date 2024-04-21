@@ -46,11 +46,11 @@ interface ConfigInputFieldProps {
   isLoading: boolean;
   validateAndSetConfigValue: (value: string) => void;
 }
-export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
+export const ConfigInputField = ({
   configEntry,
   isLoading,
   validateAndSetConfigValue,
-}) => {
+}: ConfigInputFieldProps) => {
   const { isValid, required, placeholder, value } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
@@ -68,11 +68,11 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   );
 };
 
-export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
+export const ConfigInputTextArea = ({
   isLoading,
   configEntry,
   validateAndSetConfigValue,
-}) => {
+}: ConfigInputFieldProps) => {
   const { isValid, required, placeholder, value } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
@@ -91,11 +91,11 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   );
 };
 
-export const ConfigSensitiveTextArea: React.FC<ConfigInputFieldProps> = ({
+export const ConfigSensitiveTextArea = ({
   isLoading,
   configEntry,
   validateAndSetConfigValue,
-}) => {
+}: ConfigInputFieldProps) => {
   const { key, label, tooltip } = configEntry;
   return (
     <EuiAccordion
@@ -123,11 +123,11 @@ export const ConfigSensitiveTextArea: React.FC<ConfigInputFieldProps> = ({
     </EuiAccordion>
   );
 };
-export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
+export const ConfigInputPassword = ({
   isLoading,
   configEntry,
   validateAndSetConfigValue,
-}) => {
+}: ConfigInputFieldProps) => {
   const { required, value } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
@@ -144,11 +144,11 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   );
 };
 
-export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
+export const ConnectorConfigurationField = ({
   configEntry,
   isLoading,
   setConfigValue,
-}) => {
+}: ConnectorConfigurationFieldProps) => {
   const { hasPlatinumLicense, stackManagementLink, subscriptionLink } = useContext(LicenseContext);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

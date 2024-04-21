@@ -23,7 +23,7 @@ interface TablePaginationBarProps {
 
 const MAX_PAGES = 100;
 
-export const TablePaginationBar: React.FC<TablePaginationBarProps> = ({
+export const TablePaginationBar = ({
   itemLabel = 'Items',
   itemsPerPage = 10,
   totalPages,
@@ -33,7 +33,7 @@ export const TablePaginationBar: React.FC<TablePaginationBarProps> = ({
   hideLabelCount = false,
   onChangePage,
   clearFiltersLink,
-}) => {
+}: TablePaginationBarProps) => {
   // EUI component starts page at 0. API starts at 1.
   const currentPage = activePage - 1;
   const showAllPages = totalPages < MAX_PAGES;

@@ -56,7 +56,7 @@ interface SourceRowProps extends ISourceRow {
   source: ContentSourceDetails;
 }
 
-export const SourceRow: React.FC<SourceRowProps> = ({
+export const SourceRow = ({
   source: {
     id,
     serviceType,
@@ -72,10 +72,11 @@ export const SourceRow: React.FC<SourceRowProps> = ({
     activities,
     mainIcon,
   },
+
   onSearchableToggle,
   isOrganization,
   showDetails,
-}) => {
+}: SourceRowProps) => {
   const isIndexing = status === statuses.INDEXING;
   const hasError = status === statuses.ERROR || status === statuses.DISCONNECTED;
   const showReauthenticate =

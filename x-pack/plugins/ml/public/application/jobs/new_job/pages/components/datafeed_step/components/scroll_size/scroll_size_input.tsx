@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
-export const ScrollSizeInput: FC = () => {
+export const ScrollSizeInput = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.scrollSize);

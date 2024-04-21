@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
@@ -23,7 +22,7 @@ import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
-export const Page: FC = () => {
+export const Page = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const jobId = globalState?.ml?.jobId;
   const modelId = globalState?.ml?.modelId;

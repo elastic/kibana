@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
 import { EuiTitle } from '@elastic/eui';
 import { i18nTexts } from '../i18n_texts';
 
@@ -15,7 +14,7 @@ interface Props {
   multiple: boolean;
 }
 
-export const Title: FunctionComponent<Props> = ({ multiple }) => (
+export const Title = ({ multiple }: Props) => (
   <EuiTitle>
     <h2>{multiple ? i18nTexts.titleMultiple : i18nTexts.title}</h2>
   </EuiTitle>

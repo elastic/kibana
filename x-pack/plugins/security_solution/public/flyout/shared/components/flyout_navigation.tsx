@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, SyntheticEvent } from 'react';
+import type { SyntheticEvent } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutHeader,
@@ -44,8 +44,8 @@ export interface FlyoutNavigationProps {
  * Navigation menu on the right panel only, with expand/collapse button and option to
  * pass in a list of actions to be displayed on top.
  */
-export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
-  ({ flyoutIsExpandable = false, expandDetails, actions }) => {
+export const FlyoutNavigation = memo(
+  ({ flyoutIsExpandable = false, expandDetails, actions }: FlyoutNavigationProps) => {
     const { euiTheme } = useEuiTheme();
     const { closeLeftPanel } = useExpandableFlyoutApi();
     const panels = useExpandableFlyoutState();

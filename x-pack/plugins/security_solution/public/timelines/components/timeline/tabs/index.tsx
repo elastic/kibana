@@ -247,7 +247,7 @@ const StyledEuiTabs = styled(EuiTabs)`
   padding-inline: ${(props) => props.theme.eui.euiSizeM};
 `;
 
-const TabsContentComponent: React.FC<BasicTimelineTab> = ({
+const TabsContentComponent = ({
   renderCellValue,
   rowRenderers,
   timelineId,
@@ -256,7 +256,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   graphEventId,
   sessionViewConfig,
   timelineDescription,
-}) => {
+}: BasicTimelineTab) => {
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
   const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
   const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;

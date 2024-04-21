@@ -10,7 +10,7 @@ import { EuiPage } from '@elastic/eui';
 import { Page } from '../../components/page';
 import { DrilldownsManager } from '../drilldowns_manager';
 
-export const App: React.FC = () => {
+export const App = () => {
   return (
     <EuiPage>
       <Page title={'UI Actions Enhanced'}>

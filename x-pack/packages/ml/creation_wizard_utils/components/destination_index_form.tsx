@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 
@@ -28,7 +28,7 @@ interface DestinationIndexFormProps {
   switchLabel: string;
 }
 
-export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
+export const DestinationIndexForm = ({
   createIndexLink,
   destinationIndex,
   destinationIndexNameEmpty,
@@ -41,7 +41,7 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
   onDestinationIndexChange,
   setDestIndexSameAsId,
   switchLabel,
-}) => (
+}: DestinationIndexFormProps) => (
   <>
     <EuiFormRow
       fullWidth={fullWidth}

@@ -17,7 +17,7 @@ import { AISearchGuide } from './components/ai_search_guide/ai_search_guide';
 
 import { ROOT_PATH } from './routes';
 
-export const EnterpriseSearchAISearch: React.FC<InitialAppData> = (props) => {
+export const EnterpriseSearchAISearch = (props: InitialAppData) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 

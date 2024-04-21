@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, Dispatch, FC, SetStateAction, useState } from 'react';
+import React, { createContext, Dispatch, SetStateAction, useState } from 'react';
 
 export interface BlockListContextValue {
   blockListIndicatorValue: string;
@@ -14,7 +14,7 @@ export interface BlockListContextValue {
 
 export const BlockListContext = createContext<BlockListContextValue | undefined>(undefined);
 
-export const BlockListProvider: FC = ({ children }) => {
+export const BlockListProvider = ({ children }: { children: React.ReactNode }) => {
   const [blockListIndicatorValue, setBlockListIndicatorValue] = useState('');
 
   const context: BlockListContextValue = {

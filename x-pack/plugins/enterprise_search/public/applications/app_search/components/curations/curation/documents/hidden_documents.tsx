@@ -19,14 +19,14 @@ import { HIDDEN_DOCUMENTS_TITLE } from '../constants';
 import { CurationLogic } from '../curation_logic';
 import { AddResultButton, CurationResult, convertToResultFormat } from '../results';
 
-export const HiddenDocuments: React.FC = () => {
+export const HiddenDocuments = () => {
   const { clearHiddenIds, removeHiddenId } = useActions(CurationLogic);
   const { curation, hiddenDocumentsLoading } = useValues(CurationLogic);
 
   const documents = curation.hidden;
   const hasDocuments = documents.length > 0;
 
-  const CountBadge: React.FC = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
+  const CountBadge = () => <EuiBadge color="accent">{documents.length}</EuiBadge>;
 
   return (
     <DataPanel

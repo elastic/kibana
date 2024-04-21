@@ -37,7 +37,7 @@ import { EngineDetails } from '../../engine/types';
 
 import { DOCUMENTS_API_JSON_EXAMPLE, FLYOUT_ARIA_LABEL_ID } from '../constants';
 
-export const ApiCodeExample: React.FC = () => (
+export const ApiCodeExample = () => (
   <>
     <FlyoutHeader />
     <FlyoutBody />
@@ -45,7 +45,7 @@ export const ApiCodeExample: React.FC = () => (
   </>
 );
 
-export const FlyoutHeader: React.FC = () => {
+export const FlyoutHeader = () => {
   return (
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
@@ -59,7 +59,7 @@ export const FlyoutHeader: React.FC = () => {
   );
 };
 
-export const FlyoutBody: React.FC = () => {
+export const FlyoutBody = () => {
   const { engineName, engine } = useValues(EngineLogic);
   const { apiKey } = engine as EngineDetails;
 
@@ -126,7 +126,7 @@ curl -X POST '${documentsApiUrl}' \\
   );
 };
 
-export const FlyoutFooter: React.FC = () => {
+export const FlyoutFooter = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (

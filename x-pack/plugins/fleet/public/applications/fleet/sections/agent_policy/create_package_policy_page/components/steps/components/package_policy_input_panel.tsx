@@ -70,18 +70,7 @@ export const shouldShowStreamsByDefault = (
   );
 };
 
-export const PackagePolicyInputPanel: React.FunctionComponent<{
-  packageInput: RegistryInput;
-  packageInfo: PackageInfo;
-  packagePolicy: NewPackagePolicy;
-  packageInputStreams: RegistryStreamWithDataStream[];
-  packagePolicyInput: NewPackagePolicyInput;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
-  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
-  inputValidationResults: PackagePolicyInputValidationResults;
-  forceShowErrors?: boolean;
-  isEditPage?: boolean;
-}> = memo(
+export const PackagePolicyInputPanel = memo(
   ({
     packageInput,
     packageInfo,
@@ -93,6 +82,17 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+  }: {
+    packageInput: RegistryInput;
+    packageInfo: PackageInfo;
+    packagePolicy: NewPackagePolicy;
+    packageInputStreams: RegistryStreamWithDataStream[];
+    packagePolicyInput: NewPackagePolicyInput;
+    updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
+    updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
+    inputValidationResults: PackagePolicyInputValidationResults;
+    forceShowErrors?: boolean;
+    isEditPage?: boolean;
   }) => {
     const defaultDataStreamId = useDataStreamId();
     // Showing streams toggle state

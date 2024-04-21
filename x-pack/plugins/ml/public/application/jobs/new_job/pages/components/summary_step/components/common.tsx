@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +27,7 @@ export const defaultLabel = i18n.translate('xpack.ml.newJob.wizard.summaryStep.d
   defaultMessage: 'default',
 });
 
-export const JobSectionTitle: FC = () => (
+export const JobSectionTitle = () => (
   <EuiTitle size="s">
     <h3>
       <FormattedMessage
@@ -39,7 +38,7 @@ export const JobSectionTitle: FC = () => (
   </EuiTitle>
 );
 
-export const DatafeedSectionTitle: FC = () => (
+export const DatafeedSectionTitle = () => (
   <EuiTitle size="s">
     <h3>
       <FormattedMessage
@@ -50,4 +49,6 @@ export const DatafeedSectionTitle: FC = () => (
   </EuiTitle>
 );
 
-export const Italic: FC = ({ children }) => <span style={{ fontStyle: 'italic' }}>{children}</span>;
+export const Italic = ({ children }: { children: React.ReactNode }) => (
+  <span style={{ fontStyle: 'italic' }}>{children}</span>
+);

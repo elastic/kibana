@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIconTip, EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const ColumnHeaders: React.FC = () => {
+export const ColumnHeaders = () => {
   return (
     <EuiTableHeader className="resultSettingsTable__columnLabels">
       <EuiTableHeaderCell align="left" />

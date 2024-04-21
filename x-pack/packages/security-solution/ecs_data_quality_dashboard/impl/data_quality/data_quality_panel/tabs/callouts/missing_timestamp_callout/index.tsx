@@ -15,7 +15,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const MissingTimestampCalloutComponent: React.FC<Props> = ({ children }) => (
+const MissingTimestampCalloutComponent = ({ children }: Props) => (
   <EuiCallOut color="danger" size="s" title={i18n.MISSING_TIMESTAMP_CALLOUT_TITLE}>
     <div>{i18n.MISSING_TIMESTAMP_CALLOUT}</div>
     <EuiSpacer size="s" />

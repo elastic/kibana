@@ -101,7 +101,7 @@ interface Props {
   errors: IErrorObject;
 }
 
-export const Criterion: React.FC<Props> = ({
+export const Criterion = ({
   idx,
   fields,
   criterion,
@@ -109,7 +109,7 @@ export const Criterion: React.FC<Props> = ({
   removeCriterion,
   canDelete,
   errors,
-}) => {
+}: Props) => {
   const [isFieldPopoverOpen, setIsFieldPopoverOpen] = useState(false);
   const [isComparatorPopoverOpen, setIsComparatorPopoverOpen] = useState(false);
 

@@ -26,7 +26,7 @@ const timelineId = 'timeline-1';
 /**
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
-export const AnalyzerPreviewContainer: React.FC = () => {
+export const AnalyzerPreviewContainer = () => {
   const { dataAsNestedObject, isPreview } = useRightPanelContext();
 
   // decide whether to show the analyzer preview or not

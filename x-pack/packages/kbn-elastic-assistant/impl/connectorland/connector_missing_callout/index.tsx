@@ -30,8 +30,13 @@ interface Props {
  * TODO: Add 'quick fix' button to just pick a connector
  * TODO: Add setting for 'default connector' so we can auto-resolve and not even show this
  */
-export const ConnectorMissingCallout: React.FC<Props> = React.memo(
-  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible, isFlyoutMode }) => {
+export const ConnectorMissingCallout = React.memo(
+  ({
+    isConnectorConfigured,
+    isSettingsModalVisible,
+    setIsSettingsModalVisible,
+    isFlyoutMode,
+  }: Props) => {
     const { assistantAvailability, setSelectedSettingsTab } = useAssistantContext();
 
     const onConversationSettingsClicked = useCallback(() => {

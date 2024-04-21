@@ -48,13 +48,13 @@ import { FieldValueCell } from './field_value_cell';
 interface InputProps {
   additionalInputProps: JSX.Element;
 }
-export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
+export const ResultsView = ({ children }: ResultsViewProps) => {
   return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
 };
 
 const RESULT_FIELDS_TRUNCATE_AT = 4;
 
-export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
+export const ResultView = ({ result }: ResultViewProps) => {
   const { searchApplicationData } = useValues(SearchApplicationViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
@@ -148,7 +148,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     </button>
   );
 };
-export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
+export const SearchBar = ({ additionalInputProps }: InputProps) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFieldSearch fullWidth {...additionalInputProps} />
     <EuiButton type="submit" color="primary" fill>
@@ -161,7 +161,7 @@ export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
     </EuiButton>
   </EuiFlexGroup>
 );
-export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, totalResults }) => (
+export const PagingInfoView = ({ start, end, totalResults }: PagingInfoViewProps) => (
   <EuiText size="s">
     <FormattedHTMLMessage
       tagName="p"
@@ -174,11 +174,7 @@ export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, tota
 
 export const RESULTS_PER_PAGE_OPTIONS = [10, 20, 50];
 
-export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
-  onChange,
-  options,
-  value,
-}) => (
+export const ResultsPerPageView = ({ onChange, options, value }: ResultsPerPageViewProps) => (
   <EuiFlexItem grow={false}>
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiTitle size="xxxs">

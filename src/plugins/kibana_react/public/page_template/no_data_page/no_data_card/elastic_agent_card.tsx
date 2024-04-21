@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -21,7 +21,7 @@ export type ElasticAgentCardProps = NoDataPageActions & {
 /**
  * Applies extra styling to a typical EuiAvatar
  */
-export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
+export const ElasticAgentCard = ({
   solution,
   recommended,
   title,
@@ -30,7 +30,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   layout,
   category,
   ...cardRest
-}) => {
+}: ElasticAgentCardProps) => {
   const {
     services: { http, application },
   } = useKibana<CoreStart>();

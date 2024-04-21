@@ -26,7 +26,7 @@ export interface DiscoverDrilldownConfigProps {
   onCarryTimeRangeToggle?: () => void;
 }
 
-export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = ({
+export const DiscoverDrilldownConfig = ({
   activeIndexPatternId,
   indexPatterns,
   onIndexPatternSelect,
@@ -34,7 +34,7 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
   onCustomIndexPatternToggle,
   onCarryFiltersAndQueryToggle,
   onCarryTimeRangeToggle,
-}) => {
+}: DiscoverDrilldownConfigProps) => {
   return (
     <>
       <EuiCallOut title="Example warning!" color="warning" iconType="help">

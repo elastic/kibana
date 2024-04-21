@@ -18,12 +18,7 @@ interface Props {
   onChange: ({ minute }: { minute?: string }) => void;
 }
 
-export const CronMinutely: React.FunctionComponent<Props> = ({
-  disabled,
-  minute,
-  minuteOptions,
-  onChange,
-}) => (
+export const CronMinutely = ({ disabled, minute, minuteOptions, onChange }: Props) => (
   <Fragment>
     <EuiFormRow
       label={

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { EuiPageBody, EuiPageSection, EuiButton, EuiPanel } from '@elastic/eui';
 import { parse } from 'query-string';
@@ -20,7 +19,7 @@ import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor
 
 import { MlPageHeader } from '../../components/page_header';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
-export const DataDriftIndexOrSearchRedirect: FC = () => {
+export const DataDriftIndexOrSearchRedirect = () => {
   const navigateToPath = useNavigateToPath();
   const { contentManagement, uiSettings } = useMlKibana().services;
   const {
@@ -103,7 +102,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
   );
 };
 
-export const DataDriftIndexPatternsPicker: FC = () => {
+export const DataDriftIndexPatternsPicker = () => {
   const { reference, comparison } = parse(location.search, {
     sort: false,
   }) as { reference: string; comparison: string };

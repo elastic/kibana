@@ -14,10 +14,9 @@ interface Props {
   title: string;
 }
 
-const ErrorEmptyPromptComponent: React.FC<Props> = ({ title }) => (
+const ErrorEmptyPromptComponent = ({ title }: Props) => (
   <EuiCallOut color="danger" size="s" data-test-subj="errorEmptyPrompt" title={title}>
     <p>{i18n.ERRORS_MAY_OCCUR}</p>
-
     <span>{i18n.THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}</span>
     <ul>
       <li>

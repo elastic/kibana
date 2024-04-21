@@ -26,11 +26,7 @@ interface ConfirmDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
-  output,
-  agentCount,
-  agentPolicyCount,
-}) => (
+const ConfirmDescription = ({ output, agentCount, agentPolicyCount }: ConfirmDescriptionProps) => (
   <>
     <FormattedMessage
       data-test-subj="settings.outputModal"
@@ -62,7 +58,6 @@ const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
         ),
       }}
     />
-
     {output.type === 'logstash' ? (
       <>
         <EuiSpacer size="s" />

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +21,7 @@ const text = i18n.translate('share.urlService.redirect.components.Spinner.label'
   description: 'Redirect endpoint spinner label.',
 });
 
-export const Spinner: React.FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+export const Spinner = ({ showPlainSpinner }: { showPlainSpinner: boolean }) => {
   return (
     <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
       <EuiFlexItem grow={false}>

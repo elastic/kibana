@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
   title?: React.ReactNode;
+  children: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+export const Page = ({ title = 'Untitled', children }: PageProps) => {
   return (
     <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
       <EuiPageSection>

@@ -62,7 +62,7 @@ export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
+const EnrichmentDescription = ({
   browserField,
   data,
   eventId,
@@ -72,7 +72,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   value,
   isDraggable,
   isReadOnly,
-}) => {
+}: ThreatSummaryDescription) => {
   const metadata = useMemo(() => ({ scopeId }), [scopeId]);
 
   if (!data || !value) return null;
@@ -120,7 +120,15 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   );
 };
 
-const EnrichmentSummaryComponent: React.FC<{
+const EnrichmentSummaryComponent = ({
+  browserFields,
+  data,
+  enrichments,
+  scopeId,
+  eventId,
+  isDraggable,
+  isReadOnly,
+}: {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
@@ -128,7 +136,7 @@ const EnrichmentSummaryComponent: React.FC<{
   eventId: string;
   isDraggable?: boolean;
   isReadOnly?: boolean;
-}> = ({ browserFields, data, enrichments, scopeId, eventId, isDraggable, isReadOnly }) => {
+}) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
     const { field, type, feedName, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);

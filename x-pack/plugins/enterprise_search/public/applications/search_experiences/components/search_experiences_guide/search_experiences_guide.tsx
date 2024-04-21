@@ -32,7 +32,7 @@ import searchExperiencesIllustration from '../../../../assets/images/search_expe
 import { SetSearchExperiencesChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchSearchExperiencesPageTemplate } from '../layout';
 
-export const SearchExperiencesGuide: React.FC = () => {
+export const SearchExperiencesGuide = () => {
   return (
     <EnterpriseSearchSearchExperiencesPageTemplate
       restrictWidth

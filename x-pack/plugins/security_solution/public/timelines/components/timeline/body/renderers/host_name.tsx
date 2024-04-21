@@ -36,7 +36,7 @@ interface Props {
   title?: string;
 }
 
-const HostNameComponent: React.FC<Props> = ({
+const HostNameComponent = ({
   fieldName,
   fieldType,
   isAggregatable,
@@ -48,7 +48,7 @@ const HostNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
-}) => {
+}: Props) => {
   const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
   const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
     'expandableTimelineFlyoutEnabled'

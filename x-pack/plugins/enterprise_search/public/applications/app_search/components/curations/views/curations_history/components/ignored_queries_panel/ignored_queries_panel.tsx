@@ -28,7 +28,7 @@ import { DataPanel } from '../../../../../data_panel';
 
 import { IgnoredQueriesLogic } from './ignored_queries_logic';
 
-export const IgnoredQueriesPanel: React.FC = () => {
+export const IgnoredQueriesPanel = () => {
   const { dataLoading, ignoredQueries, meta } = useValues(IgnoredQueriesLogic);
   const { allowIgnoredQuery, loadIgnoredQueries, onPaginate } = useActions(IgnoredQueriesLogic);
 

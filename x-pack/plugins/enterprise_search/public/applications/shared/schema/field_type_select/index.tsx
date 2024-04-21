@@ -18,13 +18,13 @@ interface Props {
   disabled?: boolean;
 }
 
-export const SchemaFieldTypeSelect: React.FC<Props> = ({
+export const SchemaFieldTypeSelect = ({
   fieldName,
   fieldType,
   updateExistingFieldType,
   disabled,
   ...rest
-}) => {
+}: Props) => {
   const fieldTypeOptions = Object.values(SchemaType)
     .filter((type) => !IgnoreSchemaTypes.includes(type))
     .map((type) => ({ value: type, text: type }));

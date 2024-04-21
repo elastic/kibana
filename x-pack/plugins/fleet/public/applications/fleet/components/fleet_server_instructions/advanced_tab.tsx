@@ -24,10 +24,7 @@ interface AdvancedTabProps {
   selectedPolicyId?: string;
 }
 
-export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({
-  selectedPolicyId,
-  onClose,
-}) => {
+export const AdvancedTab = ({ selectedPolicyId, onClose }: AdvancedTabProps) => {
   const {
     isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,

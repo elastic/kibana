@@ -16,12 +16,12 @@ interface Props {
   'aria-label': string;
 }
 
-export const PagingView: React.FC<Props> = ({
+export const PagingView = ({
   current = 1,
   onChange,
   totalPages,
   'aria-label': ariaLabel,
-}) => (
+}: Props) => (
   <EuiPagination
     pageCount={totalPages}
     activePage={current - 1} // EuiPagination is 0-indexed, Search UI is 1-indexed

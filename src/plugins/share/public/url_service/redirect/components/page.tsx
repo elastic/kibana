@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { EuiPageTemplate } from '@elastic/eui';
@@ -26,13 +26,7 @@ export interface PageProps {
   theme: ThemeServiceSetup;
 }
 
-export const Page: React.FC<PageProps> = ({
-  manager,
-  homeHref,
-  customBranding,
-  docTitle,
-  theme,
-}) => {
+export const Page = ({ manager, homeHref, customBranding, docTitle, theme }: PageProps) => {
   const error = useObservable(manager.error$);
   const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 

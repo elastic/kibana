@@ -137,7 +137,7 @@ const locationAlignmentButtonsIcons: Array<{
   },
 ];
 
-export const LegendLocationSettings: React.FunctionComponent<LegendLocationSettingsProps> = ({
+export const LegendLocationSettings = ({
   location,
   onLocationChange = () => {},
   position,
@@ -146,7 +146,7 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
   horizontalAlignment,
   onAlignmentChange = () => {},
   isDisabled = false,
-}) => {
+}: LegendLocationSettingsProps) => {
   const alignment = `${verticalAlignment || VerticalAlignment.Top}_${
     horizontalAlignment || HorizontalAlignment.Right
   }`;

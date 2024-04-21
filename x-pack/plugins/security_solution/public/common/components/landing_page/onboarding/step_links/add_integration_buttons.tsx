@@ -43,7 +43,7 @@ const ADD_ALL_INTEGRATIONS_DESCRIPTION = i18n.translate(
   { defaultMessage: 'The full set of security integrations' }
 );
 
-const CloudIntegrationsIcon: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+const CloudIntegrationsIcon = ({ ...props }: SVGProps<SVGSVGElement>) => (
   <svg
     width="32"
     height="32"
@@ -77,7 +77,7 @@ const CloudIntegrationsIcon: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) 
   </svg>
 );
 
-const EdrXdrIntegrationsIcon: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+const EdrXdrIntegrationsIcon = ({ ...props }: SVGProps<SVGSVGElement>) => (
   <svg
     width="32"
     height="32"
@@ -114,44 +114,51 @@ const EdrXdrIntegrationsIcon: React.FC<SVGProps<SVGSVGElement>> = ({ ...props })
   </svg>
 );
 
-const AddIntegrationPanel: React.FC<{
-  icon: IconType;
-  title: string;
-  description: string;
-  buttonId: IntegrationsPageName;
-}> = React.memo(({ title, description, buttonId, icon }) => {
-  const { onStepLinkClicked } = useStepContext();
-  const onClick = useCallback(() => {
-    onStepLinkClicked({
-      originStepId: AddIntegrationsSteps.connectToDataSources,
-      stepLinkId: buttonId,
-    });
-  }, [onStepLinkClicked, buttonId]);
+const AddIntegrationPanel = React.memo(
+  ({
+    title,
+    description,
+    buttonId,
+    icon,
+  }: {
+    icon: IconType;
+    title: string;
+    description: string;
+    buttonId: IntegrationsPageName;
+  }) => {
+    const { onStepLinkClicked } = useStepContext();
+    const onClick = useCallback(() => {
+      onStepLinkClicked({
+        originStepId: AddIntegrationsSteps.connectToDataSources,
+        stepLinkId: buttonId,
+      });
+    }, [onStepLinkClicked, buttonId]);
 
-  return (
-    <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} size="xl" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <h4>{title}</h4>
-          <EuiText color="subdued" size="xs">
-            {description}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <LinkButton id={buttonId} onClick={onClick}>
-            {SEE_INTEGRATIONS}
-          </LinkButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-});
+    return (
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={icon} size="xl" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <h4>{title}</h4>
+            <EuiText color="subdued" size="xs">
+              {description}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LinkButton id={buttonId} onClick={onClick}>
+              {SEE_INTEGRATIONS}
+            </LinkButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+);
 AddIntegrationPanel.displayName = 'AddIntegrationPanel';
 
-export const AddIntegrationButtons: React.FC = React.memo(() => (
+export const AddIntegrationButtons = React.memo(() => (
   <EuiFlexGroup direction="column" className="step-paragraph" gutterSize="m">
     <EuiFlexItem grow={false}>
       <AddIntegrationPanel

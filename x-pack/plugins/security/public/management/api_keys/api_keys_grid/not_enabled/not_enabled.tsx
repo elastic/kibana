@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-export const NotEnabled: React.FunctionComponent = () => {
+export const NotEnabled = () => {
   const docLinks = useKibana().services.docLinks!;
   return (
     <KibanaPageTemplate.EmptyPrompt

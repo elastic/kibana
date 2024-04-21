@@ -26,7 +26,7 @@ export const CORRELATIONS_TAB_ID = 'correlations';
 /**
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
-export const CorrelationsDetails: React.FC = () => {
+export const CorrelationsDetails = () => {
   const {
     dataAsNestedObject,
     dataFormattedForFieldBrowser,

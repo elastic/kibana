@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import moment from 'moment-timezone';
 
@@ -35,7 +34,7 @@ interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-export const ExpandedRow: FC<Props> = ({ item }) => {
+export const ExpandedRow = ({ item }: Props) => {
   const analysisType = getAnalysisType(item.config.analysis);
   const stateValues: any = { ...item.stats };
 

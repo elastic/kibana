@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -17,7 +16,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 
-export const LogCategorizationPage: FC = () => {
+export const LogCategorizationPage = () => {
   const { services } = useMlKibana();
   const { showNodeInfo } = useEnabledFeatures();
 

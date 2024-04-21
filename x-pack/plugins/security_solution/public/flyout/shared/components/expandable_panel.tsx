@@ -25,6 +25,7 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface ExpandablePanelPanelProps {
+  children?: React.ReactNode;
   header: {
     /**
      * String value of the title to be displayed in the header of panel
@@ -81,16 +82,18 @@ export interface ExpandablePanelPanelProps {
  * The content section can display a loading spinner, an error message, or any other content.
  * The component can be expanded or collapsed by clicking on the chevron icon on the left of the title.
  */
-export const ExpandablePanel: React.FC<ExpandablePanelPanelProps> = ({
+export const ExpandablePanel = ({
   header: { title, link, iconType, headerContent },
   content: { loading, error } = { loading: false, error: false },
+
   expand: { expandable, expandedOnFirstRender } = {
     expandable: false,
     expandedOnFirstRender: false,
   },
+
   'data-test-subj': dataTestSubj,
   children,
-}) => {
+}: ExpandablePanelPanelProps) => {
   const [toggleStatus, setToggleStatus] = useState(expandedOnFirstRender);
   const toggleQuery = useCallback(() => {
     setToggleStatus(!toggleStatus);

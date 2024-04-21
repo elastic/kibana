@@ -19,7 +19,7 @@ interface Props {
   inline?: boolean;
 }
 
-const AllowedStatComponent: React.FC<Props> = ({ allowed, total, inline }) => {
+const AllowedStatComponent = ({ allowed, total, inline }: Props) => {
   const tooltipContent = useMemo(() => i18n.ALLOWED_TOOLTIP({ allowed, total }), [allowed, total]);
 
   return (

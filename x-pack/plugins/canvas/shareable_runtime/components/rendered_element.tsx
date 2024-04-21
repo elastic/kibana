@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import { css as emotionCss } from '@emotion/css';
 import { AnyExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Positionable } from '../../public/components/positionable/positionable';
@@ -96,7 +96,7 @@ export class RenderedElementComponent extends PureComponent<Props> {
 /**
  * A store-connected container for the `RenderedElement` component.
  */
-export const RenderedElement: FC<Pick<Props, 'element' | 'index'>> = ({ index, element }) => {
+export const RenderedElement = ({ index, element }: Pick<Props, 'element' | 'index'>) => {
   const [{ renderers }] = useCanvasShareableState();
 
   const { expressionRenderable } = element;

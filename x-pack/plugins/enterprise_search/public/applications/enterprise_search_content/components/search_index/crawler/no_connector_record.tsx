@@ -22,7 +22,7 @@ import { IndexViewLogic } from '../index_view_logic';
 
 import { NoConnectorRecordLogic } from './no_connector_record_logic';
 
-export const NoConnectorRecord: React.FC = () => {
+export const NoConnectorRecord = () => {
   const { indexName } = useValues(IndexViewLogic);
   const { isDeleteLoading } = useValues(IndicesLogic);
   const { openDeleteModal } = useActions(IndicesLogic);

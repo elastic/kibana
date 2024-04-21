@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -24,7 +24,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { painlessContextOptions } from '../../constants';
 import { useAppContext } from '../../context';
 
-export const ContextTab: FunctionComponent = () => {
+export const ContextTab = () => {
   const {
     store: { payload, validation },
     updatePayload,

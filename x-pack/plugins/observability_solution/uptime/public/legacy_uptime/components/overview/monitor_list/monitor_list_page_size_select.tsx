@@ -15,7 +15,7 @@ interface PopoverButtonProps {
   size: number;
 }
 
-const PopoverButton: React.FC<PopoverButtonProps> = ({ setIsOpen, size }) => (
+const PopoverButton = ({ setIsOpen, size }: PopoverButtonProps) => (
   <EuiButtonEmpty
     color="text"
     data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
@@ -71,10 +71,7 @@ interface MonitorListPageSizeSelectProps {
  * This component wraps the underlying UI functionality to make the component more testable.
  * The features leveraged in this function are tested elsewhere, and are not novel to this component.
  */
-export const MonitorListPageSizeSelect: React.FC<MonitorListPageSizeSelectProps> = ({
-  size,
-  setSize,
-}) => {
+export const MonitorListPageSizeSelect = ({ size, setSize }: MonitorListPageSizeSelectProps) => {
   const [, setUrlParams] = useUrlParams();
 
   useEffect(() => {
@@ -94,11 +91,11 @@ interface ComponentProps extends MonitorListPageSizeSelectProps {
  * This function contains the UI functionality for the page select feature. It's agnostic to any
  * external services/features, and focuses only on providing the UI and handling user interaction.
  */
-export const MonitorListPageSizeSelectComponent: React.FC<ComponentProps> = ({
+export const MonitorListPageSizeSelectComponent = ({
   size,
   setSize,
   setUrlParams,
-}) => {
+}: ComponentProps) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover

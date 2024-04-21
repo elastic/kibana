@@ -49,13 +49,13 @@ export * from './agent_policy_select_create';
 export * from './instructions';
 export * from './steps';
 
-export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
+export const AgentEnrollmentFlyout = ({
   onClose,
   agentPolicy,
   defaultMode = 'managed',
   isIntegrationFlow,
   installedPackagePolicy,
-}) => {
+}: FlyOutProps) => {
   const findPolicyById = (policies: AgentPolicy[], id: string | undefined) => {
     if (!id) return undefined;
     return policies.find((p) => p.id === id);

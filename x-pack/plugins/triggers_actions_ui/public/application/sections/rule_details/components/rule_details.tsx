@@ -87,7 +87,7 @@ const ruleDetailStyle = {
   minWidth: 0,
 };
 
-export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
+export const RuleDetails = ({
   rule,
   ruleType,
   bulkDisableRules,
@@ -95,7 +95,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   bulkDeleteRules,
   requestRefresh,
   refreshToken,
-}) => {
+}: RuleDetailsProps) => {
   const history = useHistory();
   const {
     application: { capabilities },

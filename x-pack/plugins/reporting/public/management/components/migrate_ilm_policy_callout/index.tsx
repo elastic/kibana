@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
@@ -19,7 +18,7 @@ interface Props {
   toasts: NotificationsSetup['toasts'];
 }
 
-export const MigrateIlmPolicyCallOut: FunctionComponent<Props> = ({ toasts }) => {
+export const MigrateIlmPolicyCallOut = ({ toasts }: Props) => {
   const { isLoading, recheckStatus, status } = useIlmPolicyStatus();
 
   if (isLoading || !status || status === 'ok') {

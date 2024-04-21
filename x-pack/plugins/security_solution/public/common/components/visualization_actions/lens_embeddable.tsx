@@ -61,7 +61,7 @@ const LensComponentWrapper = styled.div<{
   }
 `;
 
-const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
+const LensEmbeddableComponent = ({
   applyGlobalQueriesAndFilters = true,
   applyPageAndTabsFilters = true,
   extraActions,
@@ -81,7 +81,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
   casesAttachmentMetadata,
-}) => {
+}: LensEmbeddableComponentProps) => {
   const style = useMemo(
     () => ({
       height: wrapperHeight ?? '100%',

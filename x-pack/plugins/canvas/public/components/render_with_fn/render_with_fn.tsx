@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { isEqual } from 'lodash';
 
@@ -33,7 +33,7 @@ interface Props {
 
 const style = { height: '100%', width: '100%' };
 
-export const RenderWithFn: FC<Props> = ({
+export const RenderWithFn = ({
   name: functionName,
   renderFn,
   reuseNode = false,
@@ -41,7 +41,7 @@ export const RenderWithFn: FC<Props> = ({
   config,
   width,
   height,
-}) => {
+}: Props) => {
   const canvasApi = useCanvasApi();
   const { error: onError } = useNotifyService();
 

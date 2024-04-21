@@ -40,7 +40,7 @@ interface Props {
   onSave: (policy: SlmPolicyPayload) => void;
 }
 
-export const PolicyForm: React.FunctionComponent<Props> = ({
+export const PolicyForm = ({
   policy: originalPolicy,
   dataStreams,
   indices,
@@ -51,7 +51,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   clearSaveError,
   onCancel,
   onSave,
-}) => {
+}: Props) => {
   // Step state
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 
 import { UseField } from '../../form';
 
@@ -19,10 +19,7 @@ type Props = Omit<DescribedFormRowProps, 'switchProps'> & {
   switchProps: Omit<SwitchProps, 'label'> & { path: string };
 };
 
-export const ToggleFieldWithDescribedFormRow: FunctionComponent<Props> = ({
-  switchProps,
-  ...passThroughProps
-}) => (
+export const ToggleFieldWithDescribedFormRow = ({ switchProps, ...passThroughProps }: Props) => (
   <UseField<boolean> path={switchProps.path}>
     {(field) => {
       return (

@@ -20,11 +20,15 @@ const OverflowContainer = styled.div`
   font-weight: bold;
 `;
 
-export const EnrichmentButtonContent: React.FC<{
+export const EnrichmentButtonContent = ({
+  field = '',
+  feedName = '',
+  value = '',
+}: {
   field?: string;
   feedName?: string;
   value?: string;
-}> = ({ field = '', feedName = '', value = '' }) => {
+}) => {
   const title = `${field} ${value}${feedName ? ` ${i18n.FEED_NAME_PREPOSITION} ${feedName}` : ''}`;
   return (
     <EuiToolTip content={value}>

@@ -31,13 +31,12 @@ import { DisplayMoreOptions } from '../display_more_options';
 import { AdditionalOptions } from './additional_options';
 import { Tags } from './tags';
 import { Priority } from './priority';
-import type { JsonEditorProps } from './json_editor';
 
-const JsonEditorLazy: React.FC<JsonEditorProps> = lazy(() => import('./json_editor'));
+const JsonEditorLazy = lazy(() => import('./json_editor'));
 
 type FormViewProps = Omit<CreateAlertProps, 'editAction'>;
 
-const FormView: React.FC<FormViewProps> = ({
+const FormView = ({
   editSubAction,
   editOptionalSubAction,
   errors,
@@ -46,7 +45,7 @@ const FormView: React.FC<FormViewProps> = ({
   subActionParams,
   showSaveError,
   executionMode,
-}) => {
+}: FormViewProps) => {
   const isMessageInvalid =
     (errors['subActionParams.message'] !== undefined &&
       errors['subActionParams.message'].length > 0 &&
@@ -128,7 +127,7 @@ export type CreateAlertProps = Pick<
   showSaveError: boolean;
 };
 
-const CreateAlertComponent: React.FC<CreateAlertProps> = ({
+const CreateAlertComponent = ({
   editSubAction,
   editAction,
   editOptionalSubAction,
@@ -138,7 +137,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
   subActionParams,
   showSaveError,
   executionMode,
-}) => {
+}: CreateAlertProps) => {
   const [showingMoreOptions, setShowingMoreOptions] = useState<boolean>(false);
   const [showJsonEditor, setShowJsonEditor] = useState<boolean>(false);
 

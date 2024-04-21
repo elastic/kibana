@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,13 +34,13 @@ export interface ErrorProps {
   error: Error;
 }
 
-export const RedirectEmptyPrompt: React.FC<ErrorProps> = ({
+export const RedirectEmptyPrompt = ({
   title = defaultTitle,
   body = defaultBody,
   homeHref,
   docTitle,
   error,
-}) => {
+}: ErrorProps) => {
   // eslint-disable-next-line no-console
   console.error('Short URL redirect error', error);
 

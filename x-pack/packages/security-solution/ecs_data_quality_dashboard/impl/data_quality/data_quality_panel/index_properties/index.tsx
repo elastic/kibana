@@ -85,7 +85,7 @@ export interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const IndexPropertiesComponent: React.FC<Props> = ({
+const IndexPropertiesComponent = ({
   addSuccessToast,
   baseTheme,
   canUserCreateAndReadCases,
@@ -102,7 +102,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   patternRollup,
   theme,
   updatePatternRollup,
-}) => {
+}: Props) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
   const { telemetryEvents, isILMAvailable, httpFetch, toasts } = useDataQualityContext();
 

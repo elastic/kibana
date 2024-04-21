@@ -27,7 +27,7 @@ interface QueryDetailsFlyoutProps {
   onClose: () => void;
 }
 
-const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => (
+const QueryDetailsFlyoutComponent = ({ action, onClose }: QueryDetailsFlyoutProps) => (
   <EuiPortal>
     <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
       <EuiFlyoutHeader hasBorder>

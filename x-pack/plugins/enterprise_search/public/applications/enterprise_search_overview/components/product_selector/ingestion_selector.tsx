@@ -39,7 +39,7 @@ import { ConnectorIcon } from '../../../shared/icons/connector';
 import { CrawlerIcon } from '../../../shared/icons/crawler';
 import { KibanaLogic } from '../../../shared/kibana';
 
-export const IngestionSelector: React.FC = () => {
+export const IngestionSelector = () => {
   const {
     application: { navigateToApp },
     config,

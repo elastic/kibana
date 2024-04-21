@@ -28,7 +28,7 @@ import { getDecryptedMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 
-export const MonitorEditPage: React.FC = () => {
+export const MonitorEditPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();

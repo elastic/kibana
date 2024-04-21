@@ -44,14 +44,14 @@ interface Props {
   disabledActionTypes: string[];
 }
 
-export const HoverActionsPopover: React.FC<Props> = ({
+export const HoverActionsPopover = ({
   anchorPosition,
   children,
   visibleCellActions,
   actionContext,
   showActionTooltips,
   disabledActionTypes,
-}) => {
+}: Props) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);

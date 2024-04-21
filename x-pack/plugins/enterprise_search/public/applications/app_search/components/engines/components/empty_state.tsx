@@ -20,7 +20,7 @@ import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
 
-export const EmptyState: React.FC = () => {
+export const EmptyState = () => {
   const {
     myRole: { canManageEngines },
   } = useValues(AppLogic);

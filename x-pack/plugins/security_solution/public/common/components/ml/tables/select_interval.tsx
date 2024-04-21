@@ -27,10 +27,13 @@ const OPTIONS = [
   },
 ];
 
-export const SelectInterval: React.FC<{
+export const SelectInterval = ({
+  interval,
+  onChange,
+}: {
   interval: string;
   onChange: (interval: string) => void;
-}> = ({ interval, onChange }) => {
+}) => {
   const onChangeCb = useCallback(
     (e) => {
       onChange(e.target.value);

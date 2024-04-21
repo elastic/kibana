@@ -23,7 +23,7 @@ const FILTER_GROUPS_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const TableFilters: React.FC = () => {
+export const TableFilters = () => {
   const { setFilterValue } = useActions(GroupsLogic);
   const { filterValue } = useValues(GroupsLogic);
 

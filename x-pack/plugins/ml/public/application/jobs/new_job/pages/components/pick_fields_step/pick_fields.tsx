@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { useFieldStatsFlyoutContext } from '../../../../../components/field_stats_flyout';
@@ -31,7 +30,7 @@ import {
   isGeoJobCreator,
 } from '../../../common/job_creator';
 
-export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+export const PickFieldsStep = ({ setCurrentStep, isCurrentStep }: StepProps) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [selectionValid, setSelectionValid] = useState(false);

@@ -66,10 +66,10 @@ const useTimeFormat = () => {
   return PT1M;
 };
 
-export const ActionAlertsFilterTimeframe: React.FC<ActionAlertsFilterTimeframeProps> = ({
+export const ActionAlertsFilterTimeframe = ({
   state,
   onChange,
-}) => {
+}: ActionAlertsFilterTimeframeProps) => {
   const timeFormat = useTimeFormat();
   const [timeframe, setTimeframe] = useTimeframe(state);
   const [selectedTimezone, setSelectedTimezone] = useState([{ label: timeframe.timezone }]);
