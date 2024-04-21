@@ -30,6 +30,7 @@ import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
+import { initializeEditApi } from './initialize_edit_api';
 
 export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
@@ -107,6 +108,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
         ...title.titlesApi,
         ...reduxSync.api,
+        ...initializeEditApi(state.savedObjectId),
         ...initializeLibraryTransforms(savedMap, serializeState),
         ...initializeDataViews(savedMap.getStore()),
         serializeState,

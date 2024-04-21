@@ -9,6 +9,7 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
+  HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
@@ -56,6 +57,7 @@ export type MapSerializeState = SerializedTitles &
 
 export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
   HasDynamicActions &
+  HasEditCapabilities &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
