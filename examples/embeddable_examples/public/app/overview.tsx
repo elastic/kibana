@@ -13,7 +13,6 @@ import { EuiText } from '@elastic/eui';
 export const Overview = () => {
   return (
     <EuiText>
-      <h1>Overview</h1>
       <p>
         Embeddables are stateful components that provide an API.
       </p>

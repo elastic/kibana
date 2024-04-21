@@ -6,26 +6,50 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
 import { AppMountParameters } from "@kbn/core-application-browser";
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { Overview } from './overview';
 
+const OVERVIEW_TAB_ID = 'overview';
+const RENDER_TAB_ID = 'render';
+
 const App = () => {
+  const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
+
+  function onSelectedTabChanged(tabId: string) {
+    setSelectedTabId(tabId);
+  }
+
+  function renderTabContent() {
+    return <Overview/>
+  }
+  
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiPageSection>
-          <EuiPageHeader pageTitle="Render embeddables" />
+          <EuiPageHeader pageTitle="Embeddables" />
+          <EuiTabs>
+            <EuiTab
+              onClick={() => onSelectedTabChanged(OVERVIEW_TAB_ID)}
+              isSelected={OVERVIEW_TAB_ID === selectedTabId}
+            >
+              Overview
+            </EuiTab>
+            <EuiTab
+              onClick={() => onSelectedTabChanged(RENDER_TAB_ID)}
+              isSelected={RENDER_TAB_ID === selectedTabId}
+            >
+              Render
+            </EuiTab>
+          </EuiTabs>
         </EuiPageSection>
         <EuiPageTemplate.Section>
           <EuiPageSection>
-            <Overview />
-
-            <EuiSpacer />
-
+            {renderTabContent()}
           </EuiPageSection>
         </EuiPageTemplate.Section>
       </EuiPageBody>
