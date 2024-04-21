@@ -8,7 +8,8 @@
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { initializeTimeRange, initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
@@ -102,6 +103,9 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializeState, Map
         serializeState,
         setRenderTooltipContent: (nextValue: RenderToolTipContent) => {
           renderTooltipContent = nextValue;
+        },
+        supportedTriggers: () => {
+          return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
         },
       },
       {

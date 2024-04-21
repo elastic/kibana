@@ -10,6 +10,7 @@ import { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   HasLibraryTransforms,
+  HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesUnifiedSearch,
@@ -52,6 +53,7 @@ export interface MapSerializeState extends SerializedTitles {
 
 export type MapApi = DefaultEmbeddableApi<MapSerializeState> &
   HasInspectorAdapters &
+  HasSupportedTriggers &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesUnifiedSearch &

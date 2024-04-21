@@ -9,10 +9,8 @@ import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
-  VALUE_CLICK_TRIGGER,
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { APP_ID, getEditPath, getFullPath, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getHttp } from '../kibana_services';
 import { SavedMap } from '../routes/map_page';
@@ -30,7 +28,6 @@ export class MapEmbeddable
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
-  deferEmbeddableLoad = true;
 
   private _savedMap: SavedMap;
 
@@ -46,29 +43,6 @@ export class MapEmbeddable
     );
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
-    this._initializeSaveMap();
-  }
-
-  public reportsEmbeddableLoad() {
-    return true;
-  }
-
-  private async _initializeSaveMap() {
-    try {
-      await this._savedMap.whenReady();
-    } catch (e) {
-      this.onFatalError(e);
-      return;
-    }
-    try {
-      await this._initializeOutput();
-    } catch (e) {
-      this.onFatalError(e);
-      return;
-    }
-
-    // deferred loading of this embeddable is complete
-    this.setInitializationFinished();
   }
 
   private async _initializeOutput() {
@@ -84,9 +58,5 @@ export class MapEmbeddable
       editPath: getEditPath(savedObjectId),
       editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
     });
-  }
-
-  public supportedTriggers(): string[] {
-    return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
 }
