@@ -273,11 +273,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const closeModal = async () => {
           await find.clickByCssSelector('[data-test-subj="all-cases-modal"] > button');
+          await testSubjects.missingOrFail('all-cases-modal');
         };
 
         before(async () => {
-          await browser.refresh();
-
           for (const owner of TOTAL_OWNERS) {
             const theCase = await cases.api.createCase({ owner });
             createdCases.set(owner, theCase.id);
@@ -304,20 +303,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await closeModal();
         });
 
-        it('filters correctly', async () => {
+        it('filters correctly with owner cases', async () => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
-
             await cases.casesTable.filterByOwner(owner);
-            await cases.casesTable.waitForTableToFinishLoading();
-
             await cases.casesTable.getCaseById(currentCaseId);
             /**
              * The select button matched the query of the
              * [data-test-subj*="cases-table-row-" query
              */
             await cases.casesTable.validateCasesTableHasNthRows(2);
-
             await closeModal();
           }
         });
@@ -325,14 +320,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('filters with multiple selection', async () => {
           await openModal();
 
-          let popupAlreadyOpen = false;
-
           for (const [owner] of createdCases.entries()) {
-            await cases.casesTable.filterByOwner(owner, { popupAlreadyOpen });
-            popupAlreadyOpen = true;
+            await cases.casesTable.filterByOwner(owner);
           }
 
           await cases.casesTable.waitForTableToFinishLoading();
+
+          /**
+           * The select button matched the query of the
+           * [data-test-subj*="cases-table-row-" query
+           */
+          await cases.casesTable.validateCasesTableHasNthRows(6);
 
           for (const caseId of createdCases.values()) {
             await cases.casesTable.getCaseById(caseId);
