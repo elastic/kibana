@@ -21,6 +21,7 @@ interface SummarySectionAccordionProps {
   id: string;
   status: 'success' | 'error' | 'info';
   title: string;
+  children?: React.ReactNode;
 }
 export const SummarySectionAccordion: React.FC<SummarySectionAccordionProps> = ({
   id,

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-export const Description: FC = memo(({ children }) => {
+export const Description = memo(({ children }: { children?: React.ReactNode }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.influencers.title', {
     defaultMessage: 'Influencers',
   });

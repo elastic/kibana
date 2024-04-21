@@ -25,6 +25,7 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface ExpandablePanelPanelProps {
+  children?: React.ReactNode;
   header: {
     /**
      * String value of the title to be displayed in the header of panel

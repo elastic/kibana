@@ -177,7 +177,7 @@ const getMountWithProviderParams = (
     restOptions = rest;
 
     if (_wrappingComponent) {
-      wrappingComponent = ({ children }) => {
+      wrappingComponent = ({ children }: { children?: React.ReactNode }) => {
         return _wrappingComponent({
           ...wrappingComponentProps,
           children: <Provider store={lensStore}>{children}</Provider>,

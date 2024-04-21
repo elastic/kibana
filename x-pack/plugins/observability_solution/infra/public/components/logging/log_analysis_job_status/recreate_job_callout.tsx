@@ -13,6 +13,7 @@ export const RecreateJobCallout: React.FC<{
   hasSetupCapabilities?: boolean;
   onRecreateMlJob: () => void;
   title?: React.ReactNode;
+  children: React.ReactNode;
 }> = ({ children, hasSetupCapabilities, onRecreateMlJob, title }) => (
   <EuiCallOut color="warning" iconType="warning" title={title}>
     {children}

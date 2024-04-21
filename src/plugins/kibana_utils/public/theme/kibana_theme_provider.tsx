@@ -16,6 +16,7 @@ import { KibanaThemeProvider as KbnThemeProvider } from '@kbn/react-kibana-conte
 export interface KibanaThemeProviderProps {
   theme$: Observable<CoreTheme>;
   modify?: EuiProviderProps<{}>['modify'];
+  children: React.ReactNode;
 }
 
 /** @deprecated use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme */

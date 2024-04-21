@@ -124,7 +124,7 @@ export const ApiLogFlyout: React.FC = () => {
   );
 };
 
-export const ApiLogHeading: React.FC = ({ children }) => (
+export const ApiLogHeading: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <EuiTitle size="xs">
     <h3>{children}</h3>
   </EuiTitle>

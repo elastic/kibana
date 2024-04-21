@@ -9,4 +9,4 @@ import React from 'react';
 
 export const ProductSwitch = jest
   .fn()
-  .mockImplementation(({ children }) => <div data-test-subj="product-switch">{children}</div>);
+  .mockImplementation(({ children }: { children?: React.ReactNode }) => <div data-test-subj="product-switch">{children}</div>);

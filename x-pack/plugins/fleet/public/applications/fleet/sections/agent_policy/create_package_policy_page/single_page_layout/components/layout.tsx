@@ -45,6 +45,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     isSelected: boolean;
     onClick: React.ReactEventHandler;
   }>;
+  children: React.ReactNode;
 }> = memo(
   ({
     from,

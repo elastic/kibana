@@ -19,6 +19,7 @@ export const MonitorForm: React.FC<{
   space?: string;
   readOnly?: boolean;
   canUsePublicLocations?: boolean;
+  children: React.ReactNode;
 }> = ({ children, defaultValues, space, readOnly = false, canUsePublicLocations }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',

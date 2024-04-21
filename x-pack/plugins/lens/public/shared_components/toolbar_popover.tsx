@@ -39,6 +39,7 @@ export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   buttonDataTestSubj?: string;
   panelClassName?: string;
   handleClose?: () => void;
+  children: React.ReactNode;
 };
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({

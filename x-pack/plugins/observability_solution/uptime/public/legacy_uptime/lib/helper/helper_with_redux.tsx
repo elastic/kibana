@@ -27,6 +27,7 @@ export const MountWithReduxProvider: React.FC<{
   state?: AppState;
   useRealStore?: boolean;
   store?: Store;
+  children: React.ReactNode;
 }> = ({ children, state, store, useRealStore }) => {
   const newStore = useRealStore
     ? createRealStore()

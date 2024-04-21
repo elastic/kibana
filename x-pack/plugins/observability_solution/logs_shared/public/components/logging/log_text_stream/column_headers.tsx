@@ -103,6 +103,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
 };
 
 export const LogColumnHeader: React.FunctionComponent<{
+  children: React.ReactNode;
   columnWidth: LogEntryColumnWidth;
   'data-test-subj'?: string;
 }> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (

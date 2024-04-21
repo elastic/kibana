@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,7 +12,7 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
-export const Description: FC = memo(({ children }) => {
+export const Description = memo(({ children }: { children?: React.ReactNode }) => {
   const {
     services: { docLinks },
   } = useMlKibana();

@@ -48,6 +48,7 @@ const customComparators = {
 };
 
 interface ExpressionRowProps {
+  children?: React.ReactNode;
   fields: DerivedIndexPattern['fields'];
   expressionId: number;
   expression: MetricExpression;

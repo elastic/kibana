@@ -24,7 +24,7 @@ jest.mock('../../../timeseriesexplorer', () => ({
 }));
 
 jest.mock('../../../timeseriesexplorer/timeseriesexplorer_page', () => ({
-  TimeSeriesExplorerPage: jest.fn(({ children }) => {
+  TimeSeriesExplorerPage: jest.fn(({ children }: { children?: React.ReactNode }) => {
     return <>{children}</>;
   }),
 }));

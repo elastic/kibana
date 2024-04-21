@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
@@ -13,7 +12,7 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseService } from '../../hooks/use_license';
 import type { AppAction } from '../../store/actions';
 
-export const CurrentLicense: FC = memo(({ children }) => {
+export const CurrentLicense = memo(({ children }: { children?: React.ReactNode }) => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
   useEffect(() => {
     const subscription = licenseService

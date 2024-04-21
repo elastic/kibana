@@ -62,7 +62,11 @@ export interface CasesContextProps
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
-export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: QueryClient }> = ({
+export const CasesProvider: React.FC<{
+  children: React.ReactNode;
+  value: CasesContextProps;
+  queryClient?: QueryClient;
+}> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,

@@ -21,7 +21,7 @@ import { useIsFormValid } from './selectors/is_form_valid';
 describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
   it('field updates should trigger form validation', () => {
     const transformConfigMock = getTransformConfigMock();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<{ children?: React.ReactNode }> = ({ children }) => (
       <EditTransformFlyoutProvider config={transformConfigMock} dataViewId={'the-data-view-id'}>
         {children}
       </EditTransformFlyoutProvider>

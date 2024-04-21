@@ -20,6 +20,7 @@ const InternalApiClientContext = createContext<undefined | ContextValue>(undefin
 export const InternalApiClientProvider: FunctionComponent<{
   apiClient: ReportingAPIClient;
   http: HttpSetup;
+  children: React.ReactNode;
 }> = ({ apiClient, http, children }) => {
   return (
     <InternalApiClientContext.Provider value={{ http, apiClient }}>

@@ -38,7 +38,7 @@ export const InferenceConfiguration: React.FC = () => {
   }
 };
 
-const InferenceConfigurationWrapper: React.FC = ({ children }) => {
+const InferenceConfigurationWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <>
       <EuiSpacer />

@@ -87,6 +87,7 @@ const ModuleSetupView: React.FC<{
 };
 
 const LogAnalysisSetupFlyoutSubPage: React.FC<{
+  children: React.ReactNode;
   onViewModuleList?: () => void;
 }> = ({ children, onViewModuleList }) => (
   <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">

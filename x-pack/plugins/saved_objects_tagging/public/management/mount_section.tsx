@@ -26,6 +26,7 @@ interface MountSectionParams {
 
 const RedirectToHomeIfUnauthorized: FC<{
   applications: ApplicationStart;
+  children: React.ReactNode;
 }> = ({ applications, children }) => {
   const allowed = applications.capabilities?.management?.kibana?.tags ?? false;
   if (!allowed) {

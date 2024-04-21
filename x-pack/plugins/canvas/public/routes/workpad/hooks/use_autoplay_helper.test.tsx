@@ -19,7 +19,9 @@ const getMockedContext = (context: any) =>
     ...context,
   } as WorkpadRoutingContextType);
 
-const getContextWrapper: (context: WorkpadRoutingContextType) => FC =
+const getContextWrapper: (
+  context: WorkpadRoutingContextType
+) => FC<{ children?: React.ReactNode }> =
   (context) =>
   ({ children }) =>
     <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;

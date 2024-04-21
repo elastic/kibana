@@ -76,6 +76,7 @@ export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   securityApiClients: SecurityApiClients;
   onChange?: BreadcrumbsChangeHandler;
+  children: React.ReactNode;
 }
 
 export const Providers: FunctionComponent<ProvidersProps> = ({

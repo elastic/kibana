@@ -22,10 +22,10 @@ export const useKibanaEnvironmentContextProvider = ({
     [kibanaVersion, isCloudEnv, isServerlessEnv]
   );
 
-  const Provider: React.FC<{ kibanaEnvironment?: KibanaEnvContext }> = ({
-    kibanaEnvironment = {},
-    children,
-  }) => {
+  const Provider: React.FC<{
+    children: React.ReactNode;
+    kibanaEnvironment?: KibanaEnvContext;
+  }> = ({ kibanaEnvironment = {}, children }) => {
     const newProvider = createElement(KibanaEnvironmentContext.Provider, {
       value: { ...kibanaEnvironment, ...value },
       children,

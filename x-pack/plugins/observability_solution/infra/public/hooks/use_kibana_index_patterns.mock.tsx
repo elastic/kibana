@@ -25,6 +25,7 @@ export type MockIndexPatternSpec = Pick<DataView, 'id' | 'title' | 'type' | 'tim
 
 export const MockIndexPatternsKibanaContextProvider: React.FC<{
   asyncDelay: number;
+  children: React.ReactNode;
   mockIndexPatterns: MockIndexPatternSpec[];
 }> = ({ asyncDelay, children, mockIndexPatterns }) => {
   const indexPatterns = useMemo(

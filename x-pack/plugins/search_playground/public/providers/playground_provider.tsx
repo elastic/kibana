@@ -13,6 +13,7 @@ import { ChatForm, ChatFormFields } from '../types';
 const queryClient = new QueryClient({});
 
 export interface PlaygroundProviderProps {
+  children: React.ReactNode;
   defaultValues?: Partial<Pick<ChatForm, ChatFormFields.indices>>;
 }
 

@@ -19,6 +19,7 @@ import { useHtmlId } from '../../../components/use_html_id';
 export interface ApiKeysEmptyPromptProps {
   error?: Error;
   readOnly?: boolean;
+  children: React.ReactNode;
 }
 
 export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({

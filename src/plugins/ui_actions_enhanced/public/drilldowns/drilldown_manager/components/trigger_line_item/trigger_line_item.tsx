@@ -20,6 +20,7 @@ export const txtIncompatibleTooltip = i18n.translate(
 export interface TriggerLineItemProps {
   tooltip?: React.ReactNode;
   incompatible?: boolean;
+  children: React.ReactNode;
 }
 
 export const TriggerLineItem: React.FC<TriggerLineItemProps> = ({

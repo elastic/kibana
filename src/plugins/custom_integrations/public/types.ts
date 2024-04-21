@@ -14,7 +14,7 @@ export interface CustomIntegrationsSetup {
 }
 
 export interface CustomIntegrationsStart {
-  ContextProvider: React.FC;
+  ContextProvider: React.FC<{ children?: React.ReactNode }>;
   languageClientsUiComponents: Record<string, React.FC>;
 }
 

@@ -369,6 +369,7 @@ const enableShowDiffTooltip = i18n.translate('unifiedDataTable.enableShowDiff', 
 
 const DiffModeEntry: FC<
   Pick<ComparisonControlsProps, 'diffMode' | 'setDiffMode'> & {
+    children: React.ReactNode;
     entryDiffMode: DocumentDiffMode;
     disabled?: boolean;
   }

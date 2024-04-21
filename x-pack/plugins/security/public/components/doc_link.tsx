@@ -51,6 +51,7 @@ export function useDocLinks(): [DocLinks, GetDocLinkFunction] {
 export interface DocLinkProps {
   app: string;
   doc: string;
+  children: React.ReactNode;
 }
 
 export const DocLink: FunctionComponent<DocLinkProps> = ({ app, doc, children }) => {

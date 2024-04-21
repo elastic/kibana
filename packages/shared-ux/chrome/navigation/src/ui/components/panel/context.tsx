@@ -26,6 +26,7 @@ export interface PanelContext {
 const Context = React.createContext<PanelContext | null>(null);
 
 interface Props {
+  children: React.ReactNode;
   contentProvider?: ContentProvider;
   activeNodes: ChromeProjectNavigationNode[][];
 }

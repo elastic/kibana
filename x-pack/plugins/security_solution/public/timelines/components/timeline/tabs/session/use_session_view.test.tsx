@@ -84,7 +84,7 @@ describe('useSessionView with active timeline and a session id and graph event i
   let setTimelineFullScreen: jest.Mock;
   let setGlobalFullScreen: jest.Mock;
   let kibana: ReturnType<typeof useKibana>;
-  const Wrapper = memo(({ children }) => {
+  const Wrapper = memo(({ children }: { children?: React.ReactNode }) => {
     kibana = useKibana();
     return <TestProviders>{children}</TestProviders>;
   });

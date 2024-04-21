@@ -85,7 +85,7 @@ describe('useConversation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = ({ children }) => (
+    wrapper = ({ children }: { children?: React.ReactNode }) => (
       <KibanaContextProvider services={useKibanaMockServices}>
         <ObservabilityAIAssistantAppServiceProvider value={mockService}>
           {children}

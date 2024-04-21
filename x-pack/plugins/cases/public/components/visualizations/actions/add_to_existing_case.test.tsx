@@ -44,7 +44,9 @@ jest.mock('../../../client/helpers/can_use_cases', () => {
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  KibanaThemeProvider: jest.fn().mockImplementation(({ children }) => <>{children}</>),
+  KibanaThemeProvider: jest
+    .fn()
+    .mockImplementation(({ children }: { children?: React.ReactNode }) => <>{children}</>),
 }));
 
 jest.mock('@kbn/react-kibana-mount', () => ({

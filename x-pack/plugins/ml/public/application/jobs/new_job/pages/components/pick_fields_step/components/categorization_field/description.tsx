@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 interface Props {
+  children: React.ReactNode;
   isOptional: boolean;
 }
 export const Description: FC<Props> = memo(({ children, isOptional }) => {

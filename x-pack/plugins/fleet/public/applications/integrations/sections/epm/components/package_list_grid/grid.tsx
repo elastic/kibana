@@ -28,6 +28,7 @@ const VirtualizedRow: React.FC<{
   index: number;
   onHeightChange: (index: number, size: number) => void;
   style: any;
+  children: React.ReactNode;
 }> = ({ index, children, style, onHeightChange }) => {
   const ref = useRef<HTMLDivElement>(null);
 

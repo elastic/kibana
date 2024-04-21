@@ -19,7 +19,7 @@ const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}

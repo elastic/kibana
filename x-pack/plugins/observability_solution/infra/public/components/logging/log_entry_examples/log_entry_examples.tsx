@@ -18,6 +18,7 @@ interface Props {
   hasResults: boolean;
   exampleCount: number;
   onReload: () => void;
+  children: React.ReactNode;
 }
 export const LogEntryExampleMessages: React.FunctionComponent<Props> = ({
   isLoading,

@@ -28,7 +28,7 @@ export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext)
   };
 };
 
-export const GlobalStorybookThemeProviders: React.FC<{ storyContext: StoryContext }> = ({
+export const GlobalStorybookThemeProviders: React.FC<{ children: React.ReactNode; storyContext: StoryContext }> = ({
   children,
   storyContext,
 }) => {

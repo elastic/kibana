@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { AppMountParameters } from '@kbn/core/public';
 
 interface ContextProps {
@@ -15,7 +15,7 @@ interface ContextProps {
 
 export const HeaderActionMenuContext = React.createContext<ContextProps>({});
 
-export const HeaderActionMenuProvider: React.FC<Required<ContextProps>> = ({
+export const HeaderActionMenuProvider: React.FC<PropsWithChildren<Required<ContextProps>>> = ({
   setHeaderActionMenu,
   theme$,
   children,

@@ -78,7 +78,7 @@ const useTokens = (
     highlight: false,
     enhancers: [
       /*
-        This custom "markEdits" function is a slightly modified version of "markEdits" 
+        This custom "markEdits" function is a slightly modified version of "markEdits"
         enhancer from react-diff-view with added support for word-level highlighting.
       */
       markEdits(hunks, diffMethod),
@@ -145,7 +145,7 @@ const convertToDiffFile = (oldSource: string, newSource: string) => {
   return diffFile;
 };
 
-const CustomStyles: React.FC = ({ children }) => {
+const CustomStyles: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
 
   const customCss = css`

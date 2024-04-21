@@ -49,10 +49,10 @@ export const FilterQueryContext = createContext<{
  * @param children
  * @constructor
  */
-export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
-  children,
-  timeRange,
-}) => {
+export const FilterQueryContextProvider: FC<{
+  children: React.ReactNode;
+  timeRange?: TimeRange;
+}> = ({ children, timeRange }) => {
   const {
     data: {
       query: { filterManager, queryString, timefilter },

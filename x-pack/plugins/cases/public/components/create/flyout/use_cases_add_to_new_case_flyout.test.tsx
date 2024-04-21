@@ -25,7 +25,7 @@ describe('use cases add to new case flyout hook', () => {
   let wrapper: React.FC;
   beforeEach(() => {
     dispatch.mockReset();
-    wrapper = ({ children }) => {
+    wrapper = ({ children }: { children?: React.ReactNode }) => {
       return (
         <CasesContext.Provider
           value={{

@@ -21,7 +21,7 @@ export interface SpacesReactContextValue<Services extends Partial<CoreStart>> {
 
 export interface SpacesReactContext<Services extends Partial<CoreStart>> {
   value: SpacesReactContextValue<Services>;
-  Provider: React.FC;
+  Provider: React.FC<{ children: React.ReactNode }>;
   Consumer: React.Consumer<SpacesReactContextValue<Services>>;
 }
 
@@ -38,4 +38,5 @@ export interface SpacesContextProps {
    * If a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space.
    */
   feature?: string;
+  children?: React.ReactNode;
 }

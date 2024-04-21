@@ -34,6 +34,7 @@ export interface SelectClientPanelProps {
   application?: ApplicationStart;
   consolePlugin?: ConsolePluginStart;
   sharePlugin: SharePluginStart;
+  children: React.ReactNode
 }
 
 export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({

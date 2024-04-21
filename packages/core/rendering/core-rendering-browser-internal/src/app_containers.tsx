@@ -14,6 +14,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
 export const AppWrapper: React.FunctionComponent<{
   chromeVisible$: Observable<boolean>;
+  children: React.ReactNode;
 }> = ({ chromeVisible$, children }) => {
   const visible = useObservable(chromeVisible$);
   return (

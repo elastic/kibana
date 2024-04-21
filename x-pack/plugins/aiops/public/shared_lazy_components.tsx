@@ -20,7 +20,7 @@ const LogRateAnalysisContentWrapperLazy = React.lazy(
   () => import('./components/log_rate_analysis/log_rate_analysis_content')
 );
 
-const LazyWrapper: FC = ({ children }) => (
+const LazyWrapper: FC<{ children?: React.ReactNode }> = ({ children }) => (
   <EuiErrorBoundary>
     <Suspense fallback={<EuiSkeletonText lines={3} />}>{children}</Suspense>
   </EuiErrorBoundary>

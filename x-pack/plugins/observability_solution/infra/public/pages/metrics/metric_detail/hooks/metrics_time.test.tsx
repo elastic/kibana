@@ -70,7 +70,7 @@ const createProviderWrapper = () => {
   history.push(INITIAL_URL);
   const scopedHistory = new CoreScopedHistory(history, INITIAL_URL);
 
-  const ProviderWrapper: React.FC = ({ children }) => {
+  const ProviderWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     return <Router history={scopedHistory}>{children}</Router>;
   };
 

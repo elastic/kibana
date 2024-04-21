@@ -14,6 +14,7 @@ import { Legacy } from '../../legacy_shims';
 import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
 
 interface GlobalStateProviderProps {
+  children: React.ReactNode;
   query: MonitoringStartPluginDependencies['data']['query'];
   toasts: MonitoringStartServices['notifications']['toasts'];
   uiSettings: MonitoringStartServices['uiSettings'];

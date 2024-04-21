@@ -32,6 +32,7 @@ export interface InvestigateInTimelineButtonProps {
   keepDataView?: boolean;
   isDisabled?: boolean;
   iconType?: IconType;
+  children?: React.ReactNode;
 }
 
 export const InvestigateInTimelineButton: React.FunctionComponent<

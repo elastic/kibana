@@ -10,6 +10,7 @@ import React from 'react';
 
 export interface TestComponentProps {
   customProp?: boolean;
+  children?: React.ReactNode 
 }
 
 export const TestComponent: React.FunctionComponent<TestComponentProps> = ({ children }) => {

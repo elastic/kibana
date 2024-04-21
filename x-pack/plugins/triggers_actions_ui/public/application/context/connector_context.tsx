@@ -14,10 +14,10 @@ export interface ConnectorContextValue {
 
 export const ConnectorContext = React.createContext<ConnectorContextValue | undefined>(undefined);
 
-export const ConnectorProvider: React.FC<{ value: ConnectorContextValue }> = ({
-  children,
-  value,
-}) => {
+export const ConnectorProvider: React.FC<{
+  value: ConnectorContextValue;
+  children: React.ReactNode;
+}> = ({ children, value }) => {
   return <ConnectorContext.Provider value={value}>{children}</ConnectorContext.Provider>;
 };
 

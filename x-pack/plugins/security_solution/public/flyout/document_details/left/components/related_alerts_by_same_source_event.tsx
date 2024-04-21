@@ -29,7 +29,7 @@ export interface RelatedAlertsBySameSourceEventProps {
 /**
  * Show related alerts by same source event in an expandable panel with a table
  */
-export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSourceEventProps> = ({
+export const RelatedAlertsBySameSourceEvent: React.FC<RelatedAlertsBySameSourceEventProps> = ({
   originalEventId,
   scopeId,
   eventId,

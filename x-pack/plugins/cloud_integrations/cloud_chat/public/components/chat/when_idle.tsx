@@ -21,7 +21,7 @@ export function whenIdle(doWork: () => void) {
 /**
  * Postpone rendering of children until the page is loaded and browser is idle.
  */
-export const WhenIdle: React.FC = ({ children }) => {
+export const WhenIdle: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [idleFired, setIdleFired] = React.useState(false);
 
   React.useEffect(() => {

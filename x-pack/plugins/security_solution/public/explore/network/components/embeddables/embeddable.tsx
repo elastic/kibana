@@ -18,7 +18,7 @@ export interface EmbeddableProps {
   children: React.ReactNode;
 }
 
-export const Embeddable = React.memo<EmbeddableProps>(({ children }) => (
+export const Embeddable = React.memo<EmbeddableProps>(({ children }: { children?: React.ReactNode }) => (
   <section className="siemEmbeddable" data-test-subj="siemEmbeddable">
     <Panel paddingSize="none" hasBorder>
       {children}

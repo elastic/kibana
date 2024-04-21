@@ -18,9 +18,10 @@ interface Props {
     to: string;
     from: string;
   };
+  children: React.ReactNode;
 }
 
-export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Props) => {
+export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Omit<Props, 'children'>) => {
   const query = {
     ml: { jobIds: [getMLJobId(monitorId)] },
     refreshInterval: { pause: true, value: 0 },

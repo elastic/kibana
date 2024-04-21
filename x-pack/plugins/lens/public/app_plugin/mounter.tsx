@@ -154,7 +154,7 @@ export async function mountApp(
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
     attributeService: LensAttributeService;
-    getPresentationUtilContext: () => FC;
+    getPresentationUtilContext: () => FC<{ children: React.ReactNode }>;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
     locator?: LensAppLocator;
   }

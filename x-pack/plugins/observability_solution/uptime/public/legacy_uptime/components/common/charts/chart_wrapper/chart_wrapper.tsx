@@ -21,6 +21,7 @@ interface Props {
    * aria-label for accessibility
    */
   'aria-label'?: string;
+  children: React.ReactNode;
 }
 
 export const ChartWrapper: FC<Props> = ({

@@ -61,7 +61,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ category, displayExamples = 
   );
 };
 
-const Section: FC<{ title: string }> = ({ title, children }) => {
+const Section: FC<{ children: React.ReactNode; title: string }> = ({ title, children }) => {
   return (
     <>
       <EuiText size="s">

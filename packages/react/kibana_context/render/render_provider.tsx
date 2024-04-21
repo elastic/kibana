@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import {
   KibanaRootContextProvider,
@@ -21,10 +21,9 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
  * The `KibanaRenderContextProvider` provides the necessary context for an out-of-current
  * React render, such as using `ReactDOM.render()`.
  */
-export const KibanaRenderContextProvider: FC<KibanaRenderContextProviderProps> = ({
-  children,
-  ...props
-}) => {
+export const KibanaRenderContextProvider: FC<
+  PropsWithChildren<KibanaRenderContextProviderProps>
+> = ({ children, ...props }) => {
   return (
     <KibanaRootContextProvider globalStyles={false} {...props}>
       <KibanaErrorBoundaryProvider analytics={props.analytics}>

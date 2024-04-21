@@ -17,7 +17,7 @@ jest.mock('../../../../app_dependencies');
 describe('Transform: Job List Columns', () => {
   test('useColumns()', async () => {
     const queryClient = new QueryClient();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<{ children?: React.ReactNode }> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, [], false), {

@@ -61,7 +61,7 @@ export interface RelatedCasesProps {
 /**
  *
  */
-export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
+export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, data, dataCount } = useFetchRelatedCases({ eventId });
 
   if (error) {

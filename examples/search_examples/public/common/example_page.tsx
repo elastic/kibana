@@ -49,11 +49,11 @@ interface Props {
   basePath: IBasePath;
 }
 
-export const SearchExamplePage: React.FC<Props> = ({
+export const SearchExamplePage: React.FC<PropsWithChildren<Props>> = ({
   children,
   exampleLinks,
   basePath,
-}: PropsWithChildren<Props>) => {
+}) => {
   return (
     <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Sidebar>

@@ -45,7 +45,7 @@ export const createKibanaReactContext = <Services extends KibanaServices>(
     notifications: createNotifications(services),
   };
 
-  const Provider: React.FC<{ services?: Services }> = ({
+  const Provider: React.FC<{ services?: Services; children?: React.ReactNode }> = ({
     services: newServices = {},
     children,
   }) => {

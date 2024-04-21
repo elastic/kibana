@@ -82,7 +82,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
     additionalMiddleware: [mockedContext.middlewareSpy.actionSpyMiddleware],
   });
 
-  const Wrapper: RenderOptions['wrapper'] = ({ children }) => {
+  const Wrapper: RenderOptions['wrapper'] = ({ children }: { children?: React.ReactNode }) => {
     useEffect(() => {
       return () => {
         // When the component un-mounts, reset the Experimental features since

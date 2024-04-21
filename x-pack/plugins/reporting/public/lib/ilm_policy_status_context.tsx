@@ -20,7 +20,7 @@ interface ContextValue {
 
 const IlmPolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
-export const IlmPolicyStatusContextProvider: FunctionComponent = ({ children }) => {
+export const IlmPolicyStatusContextProvider: FunctionComponent<{ children?: React.ReactNode }> = ({ children }) => {
   const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
   return (

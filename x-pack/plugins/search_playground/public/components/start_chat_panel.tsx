@@ -18,6 +18,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface StartChatPanelProps {
+  children: React.ReactNode;
   title: string;
   description: string | React.ReactNode;
   isValid?: boolean;

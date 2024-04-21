@@ -14,7 +14,7 @@ const EventDetailsWidthContext = createContext(DEFAULT_WIDTH);
 
 export const useEventDetailsWidthContext = () => useContext(EventDetailsWidthContext);
 
-export const EventDetailsWidthProvider = React.memo(({ children }) => {
+export const EventDetailsWidthProvider = React.memo(({ children }: { children?: React.ReactNode }) => {
   const { ref, width } = useThrottledResizeObserver();
 
   return (

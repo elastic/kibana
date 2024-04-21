@@ -35,7 +35,7 @@ describe('useInstalledIntegrations', () => {
         },
       },
     });
-    const wrapper: React.FC = ({ children }) => (
+    const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;

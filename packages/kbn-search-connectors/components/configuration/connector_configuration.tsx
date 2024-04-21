@@ -46,6 +46,7 @@ interface ConnectorConfigurationProps {
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
+  children?: React.ReactNode;
 }
 
 interface ConfigEntry extends ConnectorConfigProperties {

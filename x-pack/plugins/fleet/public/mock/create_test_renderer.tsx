@@ -72,7 +72,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
 
   ExperimentalFeaturesService.init(allowedExperimentalValues);
 
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
       <startServices.i18n.Context>
         <Router history={mountHistory}>
@@ -94,7 +94,7 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),
-    AppWrapper: memo(({ children }) => {
+    AppWrapper: memo(({ children }: { children?: React.ReactNode }) => {
       return (
         <FleetAppContext
           startServices={testRendererMocks.startServices}
@@ -139,7 +139,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
   const extensions: UIExtensionsStorage = {};
   const startServices = createStartServices(basePath);
-  const HookWrapper = memo(({ children }) => {
+  const HookWrapper = memo(({ children }: { children?: React.ReactNode }) => {
     return (
       <startServices.i18n.Context>
         <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
@@ -157,7 +157,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
     startInterface: createStartMock(extensions),
     kibanaVersion: '8.0.0',
     setHeaderActionMenu: jest.fn(),
-    AppWrapper: memo(({ children }) => {
+    AppWrapper: memo(({ children }: { children?: React.ReactNode }) => {
       return (
         <IntegrationsAppContext
           basepath={basePath}

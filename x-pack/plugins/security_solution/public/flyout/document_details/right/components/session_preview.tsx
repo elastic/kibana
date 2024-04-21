@@ -20,7 +20,10 @@ import { RenderRuleName } from '../../../../timelines/components/timeline/body/r
 /**
  * One-off helper to make sure that inline values are rendered consistently
  */
-const ValueContainer: FC<{ text?: ReactElement }> = ({ text, children }) => (
+const ValueContainer: FC<{ children: React.ReactNode; text?: ReactElement }> = ({
+  text,
+  children,
+}) => (
   <>
     {text && (
       <>

@@ -25,6 +25,7 @@ export interface FlyoutFrameProps {
   banner?: React.ReactNode;
   onClose?: () => void;
   onBack?: () => void;
+  children?: React.ReactNode;
 }
 
 /**

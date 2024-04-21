@@ -31,7 +31,7 @@ export interface SuppressedAlertsProps {
 /**
  * Displays number of suppressed alerts and investigate in timeline icon
  */
-export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
+export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
   dataAsNestedObject,
   alertSuppressionCount,
 }) => {

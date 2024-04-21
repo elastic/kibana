@@ -408,6 +408,7 @@ export const Expressions: React.FC<Props> = (props) => {
 export default withSourceProvider<Props>(Expressions)('default');
 
 interface ExpressionRowProps {
+  children?: React.ReactNode;
   nodeType: InventoryItemType;
   expressionId: number;
   expression: Omit<InventoryMetricConditions, 'metric'> & {

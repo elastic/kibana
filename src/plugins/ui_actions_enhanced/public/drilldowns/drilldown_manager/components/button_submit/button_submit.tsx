@@ -12,6 +12,7 @@ import { EuiButton } from '@elastic/eui';
 export interface ButtonSubmitProps {
   disabled?: boolean;
   onClick: () => void;
+  children: React.ReactNode;
 }
 
 export const ButtonSubmit: React.FC<ButtonSubmitProps> = ({ disabled, onClick, children }) => {

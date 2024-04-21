@@ -62,7 +62,7 @@ export class PluginServiceProvider<
   private _requiredServices?: RequiredServices;
   private context = createContext<Service | null>(null);
   private pluginService: Service | null = null;
-  public readonly Provider: React.FC = ({ children }) => {
+  public readonly Provider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     return <this.context.Provider value={this.getService()}>{children}</this.context.Provider>;
   };
 

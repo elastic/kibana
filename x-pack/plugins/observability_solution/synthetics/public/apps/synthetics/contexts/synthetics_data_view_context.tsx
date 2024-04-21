@@ -13,6 +13,7 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 export const SyntheticsDataViewContext = createContext({} as DataView);
 
 export const SyntheticsDataViewContextProvider: React.FC<{
+  children: React.ReactNode;
   dataViews: DataViewsPublicPluginStart;
 }> = ({ children, dataViews }) => {
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {

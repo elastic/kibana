@@ -11,7 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockServices } from './services.mock';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 
-export const ServicesProvider: React.FC = ({ children }) => (
+export const ServicesProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <I18nProvider>
     <KibanaContextProvider services={mockServices}>
       <NavigationProvider core={mockServices}>{children}</NavigationProvider>

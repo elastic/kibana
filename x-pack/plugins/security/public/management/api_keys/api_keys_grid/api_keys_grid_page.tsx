@@ -703,6 +703,7 @@ export const UsernameWithIcon: FunctionComponent<UsernameWithIconProps> = ({ use
 
 export interface TimeToolTipProps {
   timestamp: number;
+  children?: React.ReactNode;
 }
 
 export const TimeToolTip: FunctionComponent<TimeToolTipProps> = ({ timestamp, children }) => {

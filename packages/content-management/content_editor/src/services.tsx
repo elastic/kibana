@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback, useMemo, PropsWithChildren } from 'react';
 import type { FC, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { EuiComboBoxProps } from '@elastic/eui';
@@ -45,7 +45,10 @@ const ContentEditorContext = React.createContext<Services | null>(null);
 /**
  * Abstract external service Provider.
  */
-export const ContentEditorProvider: FC<Services> = ({ children, ...services }) => {
+export const ContentEditorProvider: FC<PropsWithChildren<Services>> = ({
+  children,
+  ...services
+}) => {
   return <ContentEditorContext.Provider value={services}>{children}</ContentEditorContext.Provider>;
 };
 
@@ -109,10 +112,9 @@ export interface ContentEditorKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = ({
-  children,
-  ...services
-}) => {
+export const ContentEditorKibanaProvider: FC<
+  PropsWithChildren<ContentEditorKibanaDependencies>
+> = ({ children, ...services }) => {
   const { core, toMountPoint, savedObjectsTagging } = services;
   const { openFlyout: coreOpenFlyout } = core.overlays;
   const { theme$ } = core.theme;

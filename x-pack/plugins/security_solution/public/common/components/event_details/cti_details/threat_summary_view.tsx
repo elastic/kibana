@@ -27,7 +27,7 @@ const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
 `;
 
-const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
+const ThreatSummaryPanelTitle: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <UppercaseEuiTitle size="xxxs">
     <h5>{children}</h5>
   </UppercaseEuiTitle>

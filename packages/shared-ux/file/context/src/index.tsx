@@ -31,6 +31,7 @@ interface ContextProps {
    * A files client that will be used process uploads.
    */
   client: FilesClient<any>;
+  children: React.ReactNode;
 }
 export const FilesContext: FunctionComponent<ContextProps> = ({ client, children }) => {
   return (

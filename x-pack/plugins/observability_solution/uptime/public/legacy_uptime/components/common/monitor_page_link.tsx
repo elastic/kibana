@@ -17,6 +17,7 @@ interface DetailPageLinkProps {
    * Link parameters usually filter states
    */
   linkParameters: string | undefined;
+  children?: React.ReactNode;
 }
 
 export const MonitorPageLink: FC<DetailPageLinkProps> = ({

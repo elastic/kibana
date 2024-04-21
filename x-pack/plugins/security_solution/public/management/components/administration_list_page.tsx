@@ -26,6 +26,7 @@ interface AdministrationListPageProps {
   hasBottomBorder?: boolean;
   hideHeader?: boolean;
   headerBackComponent?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(

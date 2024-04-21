@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -21,7 +20,7 @@ const FLYOUT_FOOTER_HEIGHT = 72;
 /**
  * Json view displayed in the document details expandable flyout right section
  */
-export const JsonTab: FC = memo(() => {
+export const JsonTab = memo(() => {
   const { searchHit, isPreview } = useRightPanelContext();
   const jsonValue = JSON.stringify(searchHit, null, 2);
 

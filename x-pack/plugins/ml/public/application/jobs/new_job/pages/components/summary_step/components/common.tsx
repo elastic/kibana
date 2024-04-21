@@ -50,4 +50,6 @@ export const DatafeedSectionTitle: FC = () => (
   </EuiTitle>
 );
 
-export const Italic: FC = ({ children }) => <span style={{ fontStyle: 'italic' }}>{children}</span>;
+export const Italic: FC<{ children: React.ReactNode }> = ({ children }) => (
+  <span style={{ fontStyle: 'italic' }}>{children}</span>
+);

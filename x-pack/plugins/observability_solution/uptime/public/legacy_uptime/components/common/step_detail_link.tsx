@@ -17,6 +17,7 @@ interface StepDetailLinkProps {
    * The index of the step
    */
   stepIndex: number;
+  children: React.ReactNode;
 }
 
 export const StepDetailLink: FC<StepDetailLinkProps> = ({ children, checkGroupId, stepIndex }) => {

@@ -14,6 +14,7 @@ interface Props {
   language: 'html' | 'javascript';
   overflowHeight: number;
   initialIsOpen?: boolean;
+  children?: React.ReactNode;
 }
 
 /**

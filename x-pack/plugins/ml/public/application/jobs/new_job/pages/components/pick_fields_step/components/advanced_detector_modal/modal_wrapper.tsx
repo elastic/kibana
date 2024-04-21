@@ -21,6 +21,7 @@ import {
 const MAX_MODAL_WIDTH = 1200;
 
 interface Props {
+  children: React.ReactNode;
   onCreateClick(): void;
   closeModal(): void;
   saveEnabled: boolean;

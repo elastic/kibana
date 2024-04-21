@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import {
   FormProvider,
@@ -65,7 +65,7 @@ const SettingsApplicationContext = React.createContext<Services | null>(null);
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
-export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
+export const SettingsApplicationProvider: FC<PropsWithChildren<SettingsApplicationServices>> = ({
   children,
   ...services
 }) => {
@@ -114,10 +114,9 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDependencies> = ({
-  children,
-  ...dependencies
-}) => {
+export const SettingsApplicationKibanaProvider: FC<
+  PropsWithChildren<SettingsApplicationKibanaDependencies>
+> = ({ children, ...dependencies }) => {
   const {
     docLinks,
     notifications,

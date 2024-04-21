@@ -27,6 +27,7 @@ export interface SavedSearchEmbeddableBaseProps {
   append?: React.ReactElement;
   dataTestSubj?: string;
   interceptedWarnings?: SearchResponseWarning[];
+  children: React.ReactNode;
 }
 
 export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps> = ({

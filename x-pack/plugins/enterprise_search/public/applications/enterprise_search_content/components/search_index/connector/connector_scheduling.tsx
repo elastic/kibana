@@ -29,6 +29,7 @@ import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 
 interface SchedulePanelProps {
+  children: React.ReactNode;
   description: string;
   title: string;
 }

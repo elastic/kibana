@@ -13,6 +13,7 @@ import { EmptyLocations } from './empty_locations';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const ManageEmptyState: FC<{
+  children: React.ReactNode;
   privateLocations: PrivateLocation[];
   setIsAddingNew?: (val: boolean) => void;
   showNeedAgentPolicy?: boolean;

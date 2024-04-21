@@ -13,6 +13,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import type { Validation } from '../../../../common/job_validator';
 
 interface Props {
+  children: React.ReactNode;
   validation: Validation;
 }
 

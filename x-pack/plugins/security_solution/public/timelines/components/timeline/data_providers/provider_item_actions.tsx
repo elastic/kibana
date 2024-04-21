@@ -56,6 +56,7 @@ interface OwnProps {
 const MyEuiPopover = styled(EuiPopover as unknown as FunctionComponent)<
   EuiPopoverProps & {
     id?: string;
+    children: React.ReactNode;
   }
 >`
   height: 100%;

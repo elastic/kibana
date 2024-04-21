@@ -14,6 +14,7 @@ import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { Services } from './types';
 
 export const ServicesProvider: React.FC<{
+  children: React.ReactNode;
   services: Services;
 }> = ({ services, children }) => {
   return (

@@ -26,10 +26,10 @@ jest.mock('@elastic/eui', () => {
   const EuiSuperDatePickerMock = jest.fn(() => {
     return null;
   });
-  const EuiFlexGroupMock = jest.fn(({ children }) => {
+  const EuiFlexGroupMock = jest.fn(({ children }: { children?: React.ReactNode }) => {
     return <>{children}</>;
   });
-  const EuiFlexItemMock = jest.fn(({ children }) => {
+  const EuiFlexItemMock = jest.fn(({ children }: { children?: React.ReactNode }) => {
     return <>{children}</>;
   });
   return {

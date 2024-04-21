@@ -21,6 +21,6 @@ export interface KibanaReactContextValue<Services extends KibanaServices> {
 
 export interface KibanaReactContext<T extends KibanaServices> {
   value: KibanaReactContextValue<T>;
-  Provider: React.FC<{ services?: T }>;
+  Provider: React.FC<{ services?: T; children?: React.ReactNode }>;
   Consumer: React.Consumer<KibanaReactContextValue<T>>;
 }

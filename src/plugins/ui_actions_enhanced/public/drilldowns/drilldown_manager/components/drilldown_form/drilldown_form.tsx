@@ -41,6 +41,8 @@ export interface FormDrilldownWizardProps {
 
   /** Whether the form elements should be disabled. */
   disabled?: boolean;
+
+  children: React.ReactNode;
 }
 
 export const DrilldownForm: React.FC<FormDrilldownWizardProps> = ({

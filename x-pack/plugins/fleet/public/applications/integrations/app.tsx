@@ -63,6 +63,7 @@ export const IntegrationsAppContext: React.FC<{
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
   fleetStatus?: FleetStatusProviderProps;
+  children: React.ReactNode;
 }> = memo(
   ({
     children,

@@ -16,6 +16,7 @@ export interface DropOverlayWrapperProps {
   isVisible: boolean;
   className?: string;
   overlayProps?: object;
+  children: React.ReactNode;
 }
 
 /**

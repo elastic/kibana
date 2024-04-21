@@ -27,7 +27,7 @@ describe('Fleet event filters card', () => {
   const renderComponent: (
     stats: GetExceptionSummaryResponse
   ) => reactTestingLibrary.RenderResult = (stats) => {
-    const Wrapper: React.FC = ({ children }) => (
+    const Wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
       <I18nProvider>
         <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
       </I18nProvider>

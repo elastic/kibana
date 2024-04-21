@@ -29,6 +29,7 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export interface IndexManagementAppContextProps {
   core: CoreStart;
+  children: React.ReactNode;
   dependencies: AppDependencies;
 }
 

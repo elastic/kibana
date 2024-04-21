@@ -49,6 +49,7 @@ const MissingCapabilities: FC = () => (
 );
 
 export const CapabilitiesWrapper: FC<{
+  children: React.ReactNode;
   requiredCapabilities: TransformCapability | TransformCapability[];
 }> = ({ children, requiredCapabilities }) => {
   const capabilities = useTransformCapabilities();

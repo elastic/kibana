@@ -52,6 +52,7 @@ export const SyntheticsThemeContext = createContext(defaultContext);
 
 interface ThemeContextProps {
   darkMode: boolean;
+  children: React.ReactNode;
 }
 
 export const SyntheticsThemeContextProvider: React.FC<ThemeContextProps> = ({

@@ -72,6 +72,7 @@ const getDefaultFieldConfig = (
 };
 
 interface SeriesControlsProps {
+  children?: React.ReactNode;
   appStateHandler: Function;
   bounds: any;
   functionDescription?: string;

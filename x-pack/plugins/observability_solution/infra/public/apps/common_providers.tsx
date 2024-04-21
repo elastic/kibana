@@ -25,6 +25,7 @@ import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
 export const CommonInfraProviders: React.FC<{
   appName: string;
+  children: React.ReactNode;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -46,6 +47,7 @@ export const CommonInfraProviders: React.FC<{
 };
 
 export interface CoreProvidersProps {
+  children: React.ReactNode;
   core: CoreStart;
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
@@ -86,8 +88,10 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   );
 };
 
-const DataUIProviders: React.FC<{ appName: string; storage: Storage }> = ({
-  appName,
-  children,
-  storage,
-}) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;
+const DataUIProviders: React.FC<{
+  appName: string;
+  children: React.ReactNode;
+  storage: Storage;
+}> = ({ appName, children, storage }) => (
+  <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>
+);

@@ -52,6 +52,7 @@ export const CasesTimelineIntegrationContext = React.createContext<CasesTimeline
 );
 
 export const CasesTimelineIntegrationProvider: React.FC<{
+  children: React.ReactNode;
   timelineIntegration?: CasesTimelineIntegration;
 }> =
   // TODO: Fix this manually. Issue #123375

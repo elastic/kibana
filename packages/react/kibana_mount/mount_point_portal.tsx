@@ -14,6 +14,7 @@ import { useIfMounted } from './utils';
 
 export interface MountPointPortalProps {
   setMountPoint: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
+  children: React.ReactNode;
 }
 
 /**

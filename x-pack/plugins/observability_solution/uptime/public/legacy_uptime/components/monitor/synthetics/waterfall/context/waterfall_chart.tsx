@@ -59,6 +59,7 @@ interface ProviderProps {
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
   markerItems?: MarkerItems;
   activeStep?: JourneyStep;
+  children: React.ReactNode;
 }
 
 export const WaterfallProvider: React.FC<ProviderProps> = ({

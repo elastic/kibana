@@ -10,6 +10,7 @@ import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface DetailPageLinkProps {
+  children: React.ReactNode;
   configId: string;
 }
 

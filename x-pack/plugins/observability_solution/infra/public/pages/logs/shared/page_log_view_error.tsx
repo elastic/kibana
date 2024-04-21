@@ -161,7 +161,10 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
   }
 };
 
-const LogSourceErrorCallout: React.FC<{ title: React.ReactNode }> = ({ title, children }) => (
+const LogSourceErrorCallout: React.FC<{ title: React.ReactNode; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
   <EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
     <p>{children}</p>
   </EuiCallOut>

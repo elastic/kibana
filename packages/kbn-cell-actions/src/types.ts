@@ -20,6 +20,7 @@ export interface CellActionsProviderProps {
    * This function should return a list of actions for a triggerId that are compatible with the provided context.
    */
   getTriggerCompatibleActions: UiActionsService['getTriggerCompatibleActions'];
+  children: React.ReactNode;
 }
 
 type Metadata = Record<string, unknown>;
@@ -82,6 +83,8 @@ export interface CellActionsProps {
   metadata?: Metadata;
 
   className?: string;
+
+  children?: React.ReactNode;
 }
 
 export interface CellActionExecutionContext extends ActionExecutionContext {

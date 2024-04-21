@@ -48,6 +48,7 @@ interface FormTestComponentProps {
   formDefaultValue?: Record<string, unknown>;
   onSubmit?: jest.Mock;
   schema?: FormSchema<Record<string, unknown>>;
+  children: React.ReactNode;
 }
 
 // eslint-disable-next-line react/display-name

@@ -115,7 +115,7 @@ export const ExpressionEditor: React.FC<
   );
 };
 
-export const SourceStatusWrapper: React.FC = ({ children }) => {
+export const SourceStatusWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { load, isLoading, hasFailedLoading, isUninitialized } = useLogViewContext();
 
   return (

@@ -27,6 +27,7 @@ interface Props {
   breadcrumbs?: BreadcrumbTrail;
   isQueryView?: boolean;
   isAnalyticsView?: boolean;
+  children?: React.ReactNode;
 }
 export const AnalyticsLayout: React.FC<Props> = ({
   title,

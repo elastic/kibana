@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiText, EuiPageTemplate } from '@elastic/eui';
 
-export const PageLoading: React.FunctionComponent = ({ children }) => {
+export const PageLoading: React.FunctionComponent<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <EuiPageTemplate.EmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 const emptyMessages = {};
 
-export const I18nProviderMock: React.FC = ({ children }) => {
+export const I18nProviderMock: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (
     <IntlProvider
       locale={i18n.getLocale()}

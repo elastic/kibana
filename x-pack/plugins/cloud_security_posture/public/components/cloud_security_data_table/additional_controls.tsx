@@ -13,7 +13,7 @@ import { useStyles } from './use_styles';
 import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
 import { CSP_FIELDS_SELECTOR_OPEN_BUTTON } from '../test_subjects';
 
-const GroupSelectorWrapper: React.FC = ({ children }) => {
+const GroupSelectorWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const styles = useStyles();
 
   return (

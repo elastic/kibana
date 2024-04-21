@@ -18,6 +18,7 @@ import { VerificationCodeForm } from './verification_code_form';
 
 export interface VerificationProps {
   defaultCode?: string;
+  children: React.ReactNode;
 }
 
 const [OuterVerificationProvider, useVerification] = constate(
@@ -38,7 +39,7 @@ const [OuterVerificationProvider, useVerification] = constate(
   }
 );
 
-const InnerVerificationProvider: FunctionComponent = ({ children }) => {
+const InnerVerificationProvider: FunctionComponent<{ children?: React.ReactNode }> = ({ children }) => {
   const { http } = useKibana();
   const { status, setStatus, setCode } = useVerification();
 

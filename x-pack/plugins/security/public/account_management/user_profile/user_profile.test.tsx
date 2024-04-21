@@ -25,7 +25,7 @@ const coreStart = coreMock.createStart();
 let history = scopedHistoryMock.create();
 const authc = securityMock.createSetup().authc;
 
-const wrapper: FunctionComponent = ({ children }) => (
+const wrapper: FunctionComponent<{ children?: React.ReactNode }> = ({ children }) => (
   <Providers
     services={coreStart}
     history={history}

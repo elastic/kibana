@@ -80,6 +80,7 @@ export interface ProvidersProps {
   history: History;
   authc: AuthenticationServiceSetup;
   onChange?: BreadcrumbsChangeHandler;
+  children: React.ReactNode;
 }
 
 export const Providers: FunctionComponent<ProvidersProps> = ({

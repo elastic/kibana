@@ -15,7 +15,7 @@ jest.mock('../../common/components/landing_page');
 jest.mock('../../common/components/page_wrapper', () => ({
   SecuritySolutionPageWrapper: jest
     .fn()
-    .mockImplementation(({ children }) => <div>{children}</div>),
+    .mockImplementation(({ children }: { children?: React.ReactNode }) => <div>{children}</div>),
 }));
 const history = createBrowserHistory();
 describe('LandingPage', () => {

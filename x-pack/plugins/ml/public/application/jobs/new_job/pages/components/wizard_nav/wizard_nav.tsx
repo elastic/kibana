@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 interface StepsNavProps {
+  children?: React.ReactNode;
   previousActive?: boolean;
   nextActive?: boolean;
   previous?(): void;

@@ -19,7 +19,7 @@ coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
   return `/test-basepath/s/test-space/app/${app}${options?.path}`;
 });
 
-const ProviderWrapper: React.FC = ({ children }) => {
+const ProviderWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
 };
 

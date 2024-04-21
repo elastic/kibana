@@ -74,7 +74,7 @@ export interface UsageCollectionSetup {
      * }
      * ```
      */
-    ApplicationUsageTrackingProvider: React.FC;
+    ApplicationUsageTrackingProvider: React.FC<{ children: React.ReactNode }>;
   };
 
   /** Report whenever a UI event occurs for UI counters to report it **/

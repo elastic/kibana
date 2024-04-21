@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SourceFields } from './source_fields_select';
 import { SourceField } from '../es_query/types';
 
-const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+const AppWrapper = React.memo(({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 ));
 

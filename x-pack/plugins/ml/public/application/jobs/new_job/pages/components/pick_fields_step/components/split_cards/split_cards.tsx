@@ -14,6 +14,7 @@ import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import './style.scss';
 
 interface Props {
+  children: React.ReactNode;
   fieldValues: string[];
   splitField: SplitField;
   numberOfDetectors: number;

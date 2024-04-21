@@ -8,7 +8,7 @@
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 
@@ -34,7 +34,7 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
  * - Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.
  *
  */
-export const KibanaRootContextProvider: FC<KibanaRootContextProviderProps> = ({
+export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextProviderProps>> = ({
   children,
   i18n,
   ...props

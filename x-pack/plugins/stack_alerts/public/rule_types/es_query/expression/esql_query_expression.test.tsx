@@ -27,7 +27,7 @@ jest.mock('@kbn/text-based-editor', () => ({
 const { fetchFieldsFromESQL } = jest.requireMock('@kbn/text-based-editor');
 const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
-const AppWrapper: React.FC<{ children: React.ReactElement }> = React.memo(({ children }) => (
+const AppWrapper = React.memo(({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 ));
 

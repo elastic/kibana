@@ -56,7 +56,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
-  private readonly contextProviders: FC[] = [];
+  private readonly contextProviders: Array<FC<{ children?: React.ReactNode }>> = [];
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -112,7 +112,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
-    const CloudContextProvider: FC = ({ children }) => {
+    const CloudContextProvider: FC<{ children?: React.ReactNode }> = ({ children }) => {
       return (
         <>
           {this.contextProviders.reduce(

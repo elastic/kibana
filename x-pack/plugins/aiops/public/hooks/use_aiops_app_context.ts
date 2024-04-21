@@ -120,6 +120,7 @@ export interface AiopsAppDependencies {
       closeFlyout: () => void;
     };
     FieldStatsFlyoutProvider: FC<{
+      children: React.ReactNode;
       dataView: DataView;
       fieldStatsServices: FieldStatsServices;
       timeRangeMs?: TimeRangeMs;

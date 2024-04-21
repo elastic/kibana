@@ -41,6 +41,7 @@ const defaultContext: UptimeThemeContextValues = {
 export const UptimeThemeContext = createContext(defaultContext);
 
 interface ThemeContextProps {
+  children: React.ReactNode;
   darkMode: boolean;
 }
 

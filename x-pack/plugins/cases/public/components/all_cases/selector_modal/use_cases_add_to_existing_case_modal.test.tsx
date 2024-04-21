@@ -64,7 +64,7 @@ describe('use cases add to existing case modal hook', () => {
 
   const dispatch = jest.fn();
   let appMockRender: AppMockRenderer;
-  const wrapper: React.FC = ({ children }) => {
+  const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     return (
       <CasesContext.Provider
         value={{

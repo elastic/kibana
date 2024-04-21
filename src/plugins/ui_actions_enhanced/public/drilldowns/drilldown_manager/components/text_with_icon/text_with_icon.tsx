@@ -22,6 +22,7 @@ export interface TextWithIconProps {
   icon?: string;
   iconColor?: string;
   iconTooltip?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const TextWithIcon: React.FC<TextWithIconProps> = ({

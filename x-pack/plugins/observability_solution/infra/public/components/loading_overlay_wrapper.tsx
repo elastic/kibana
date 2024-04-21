@@ -25,7 +25,7 @@ export const LoadingOverlayWrapper: React.FC<
   );
 };
 
-const Overlay: React.FC = ({ children }) => (
+const Overlay: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <OverlayDiv>{children ? children : <EuiLoadingSpinner size="xl" />}</OverlayDiv>
 );
 

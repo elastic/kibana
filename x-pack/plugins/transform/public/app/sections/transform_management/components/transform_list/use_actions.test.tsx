@@ -17,7 +17,7 @@ import { useActions } from './use_actions';
 describe('Transform: Transform List Actions', () => {
   test('useActions()', async () => {
     const queryClient = new QueryClient();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<{ children?: React.ReactNode }> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     const { result, waitForNextUpdate } = renderHook(

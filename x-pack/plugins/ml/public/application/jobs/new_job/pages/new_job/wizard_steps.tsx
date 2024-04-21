@@ -188,7 +188,10 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   );
 };
 
-const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
+const Title: FC<{ children: React.ReactNode; 'data-test-subj': string }> = ({
+  'data-test-subj': dataTestSubj,
+  children,
+}) => {
   return (
     <Fragment>
       <EuiTitle size="s">

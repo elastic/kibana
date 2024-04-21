@@ -12,6 +12,7 @@ import Dropzone from 'react-dropzone';
 import './upload_dropzone.scss';
 
 export interface Props {
+  children: React.ReactNode;
   disabled?: boolean;
   onDrop?: (files: FileList) => void;
 }

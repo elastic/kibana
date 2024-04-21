@@ -28,6 +28,7 @@ interface FilePickerContextProps
   pageSize: number;
   multiple: boolean;
   uploadMeta?: unknown;
+  children: React.ReactNode;
 }
 
 export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({

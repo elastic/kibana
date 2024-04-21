@@ -154,7 +154,7 @@ export const GridItemsByGroup = ({
   );
 };
 
-const WrappedPanel: React.FC<{ isFullScreen: boolean }> = ({ isFullScreen, children }) => {
+const WrappedPanel: React.FC<{ isFullScreen: boolean; children: React.ReactNode; }> = ({ isFullScreen, children }) => {
   const ref = useRef(null);
 
   if (!isFullScreen) {

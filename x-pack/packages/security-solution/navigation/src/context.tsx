@@ -9,9 +9,10 @@ import type { CoreStart } from '@kbn/core/public';
 
 const navigationContext = createContext<CoreStart | null>(null);
 
-export const NavigationProvider: React.FC<{ core: CoreStart }> = ({ core, children }) => (
-  <navigationContext.Provider value={core}>{children}</navigationContext.Provider>
-);
+export const NavigationProvider: React.FC<{ core: CoreStart; children?: React.ReactNode }> = ({
+  core,
+  children,
+}) => <navigationContext.Provider value={core}>{children}</navigationContext.Provider>;
 
 export const useNavigationContext = (): CoreStart => {
   const services = useContext(navigationContext);
