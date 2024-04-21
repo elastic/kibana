@@ -24,8 +24,7 @@ export async function getRandomSampler({
 
   if (security) {
     const securityPluginStart = await security.start();
-    const username =
-      securityPluginStart.authc.getCurrentUser(request)?.username;
+    const username = securityPluginStart.authc.getCurrentUser(request)?.username;
 
     if (username) {
       seed = Math.abs(seedrandom(username).int32());

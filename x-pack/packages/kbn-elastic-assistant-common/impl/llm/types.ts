@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import {
   ChatCompletionContentPart,
   ChatCompletionCreateParamsNonStreaming,
@@ -37,4 +38,13 @@ export interface InvokeAIActionParamsSchema {
   temperature?: ChatCompletionCreateParamsNonStreaming['temperature'];
   functions?: ChatCompletionCreateParamsNonStreaming['functions'];
   signal?: AbortSignal;
+}
+
+export interface TraceOptions {
+  evaluationId?: string;
+  exampleId?: string;
+  projectName?: string;
+  runName?: string;
+  tags?: string[];
+  tracers?: LangChainTracer[];
 }

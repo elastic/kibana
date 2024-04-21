@@ -9,7 +9,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { decodeEnrollmentToken, EnrollmentTokenForm } from './enrollment_token_form';
 import { Providers } from './plugin';
@@ -29,8 +29,6 @@ const token: EnrollmentToken = {
 describe('EnrollmentTokenForm', () => {
   jest.setTimeout(20_000);
 
-  const theme$ = themeServiceMock.createTheme$();
-
   it('calls enrollment API when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
@@ -38,7 +36,7 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );
@@ -64,7 +62,7 @@ describe('EnrollmentTokenForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers services={coreStart} theme$={theme$}>
+      <Providers services={coreStart}>
         <EnrollmentTokenForm onSuccess={onSuccess} />
       </Providers>
     );

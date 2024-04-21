@@ -33,29 +33,20 @@ export function ExternalsListContents({ elementData }: ContentsProps) {
     <EuiFlexItem>
       <ExternalResourcesList>
         <EuiDescriptionList>
-          {nodeData.groupedConnections.map(
-            (resource: ExternalConnectionNode) => {
-              const title =
-                resource.label || resource[SPAN_DESTINATION_SERVICE_RESOURCE];
-              const desc = `${resource[SPAN_TYPE]} (${resource[SPAN_SUBTYPE]})`;
-              return (
-                <Fragment key={resource.id}>
-                  <EuiDescriptionListTitle
-                    className="eui-textTruncate"
-                    title={title}
-                  >
-                    {title}
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription
-                    className="eui-textTruncate"
-                    title={desc}
-                  >
-                    {desc}
-                  </EuiDescriptionListDescription>
-                </Fragment>
-              );
-            }
-          )}
+          {nodeData.groupedConnections.map((resource: ExternalConnectionNode) => {
+            const title = resource.label || resource[SPAN_DESTINATION_SERVICE_RESOURCE];
+            const desc = `${resource[SPAN_TYPE]} (${resource[SPAN_SUBTYPE]})`;
+            return (
+              <Fragment key={resource.id}>
+                <EuiDescriptionListTitle className="eui-textTruncate" title={title}>
+                  {title}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription className="eui-textTruncate" title={desc}>
+                  {desc}
+                </EuiDescriptionListDescription>
+              </Fragment>
+            );
+          })}
         </EuiDescriptionList>
       </ExternalResourcesList>
     </EuiFlexItem>
