@@ -4548,10 +4548,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/embeddable-explorer-plugin@link:examples/embeddable_explorer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/embeddable-plugin@link:src/plugins/embeddable":
   version "0.0.0"
   uid ""

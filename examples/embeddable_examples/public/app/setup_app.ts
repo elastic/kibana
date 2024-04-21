@@ -10,10 +10,10 @@ import { AppMountParameters, CoreSetup } from '@kbn/core/public';
 import type { StartDeps } from '../plugin';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
-const APP_ID = 'embeddableRenderer';
-const title = 'Render embeddables';
+const APP_ID = 'embeddablesApp';
+const title = 'Embeddables';
 
-export function setupRenderEmbeddablesApp(core: CoreSetup<StartDeps>, developerExamples: DeveloperExamplesSetup) {
+export function setupApp(core: CoreSetup<StartDeps>, developerExamples: DeveloperExamplesSetup) {
   core.application.register({
     id: APP_ID,
     title,
@@ -29,6 +29,6 @@ export function setupRenderEmbeddablesApp(core: CoreSetup<StartDeps>, developerE
   developerExamples.register({
     appId: APP_ID,
     title,
-    description: `Learn how to render embeddables, like Lens visualizations, in your application.`,
+    description: `Learn how to create a new embeddable type and use embeddables in your application.`,
   });
 }

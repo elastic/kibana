@@ -426,7 +426,6 @@
     "@kbn/elasticsearch-client-xpack-plugin": "link:x-pack/test/plugin_api_integration/plugins/elasticsearch_client",
     "@kbn/embeddable-enhanced-plugin": "link:x-pack/plugins/embeddable_enhanced",
     "@kbn/embeddable-examples-plugin": "link:examples/embeddable_examples",
-    "@kbn/embeddable-explorer-plugin": "link:examples/embeddable_explorer",
     "@kbn/embeddable-plugin": "link:src/plugins/embeddable",
     "@kbn/embedded-lens-example-plugin": "link:x-pack/examples/embedded_lens_example",
     "@kbn/encrypted-saved-objects-plugin": "link:x-pack/plugins/encrypted_saved_objects",

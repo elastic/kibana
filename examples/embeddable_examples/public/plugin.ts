@@ -46,7 +46,7 @@ import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { SEARCH_EMBEDDABLE_ID } from './react_embeddables/search/constants';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { setupRenderEmbeddablesApp } from './render_embeddables_app/setup';
+import { setupApp } from './app/setup_app';
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -90,7 +90,7 @@ export class EmbeddableExamplesPlugin
     core: CoreSetup<StartDeps>,
     { embeddable, developerExamples }: SetupDeps
   ) {
-    setupRenderEmbeddablesApp(core, developerExamples);
+    setupApp(core, developerExamples);
     
     this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
       embeddable.registerEmbeddableFactory(
