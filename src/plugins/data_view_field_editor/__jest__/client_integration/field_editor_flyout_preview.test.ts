@@ -528,14 +528,17 @@ describe('Field editor Preview panel', () => {
   });
 
   describe('Cluster document load and navigation', () => {
+    const docContent = {
+      title: 'loaded doc - title',
+      subTitle: 'loaded doc - subTitle',
+      description: 'loaded doc - description',
+    };
+
     const customLoadedDoc: EsDoc = {
       _id: '123456',
       _index: 'otherIndex',
-      fields: {
-        title: 'loaded doc - title',
-        subTitle: 'loaded doc - subTitle',
-        description: 'loaded doc - description',
-      },
+      fields: docContent,
+      _source: docContent,
     };
 
     test('should update the field list when the document changes', async () => {

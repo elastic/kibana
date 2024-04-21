@@ -132,17 +132,9 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
     const previewScript = (parentName && dataView.getRuntimeField(parentName)?.script) || script!;
 
-    const doc = document?.fields
-      ? Object.keys(document?._source).reduce((acc, key) => {
-          const fld = document?.fields[key];
-          acc[key] = fld?.length === 1 ? fld[0] : fld;
-          return acc;
-        }, {} as Record<string, unknown>)
-      : {};
-
     const response = await getFieldPreview({
       index: currentDocIndex,
-      document: doc,
+      document: document?._source!,
       context: (parentName ? 'composite_field' : `${type!}_field`) as PainlessExecuteContext,
       script: previewScript,
     });
