@@ -15,22 +15,16 @@ export function PermissionDenied() {
       iconType="securityApp"
       title={
         <h2>
-          {i18n.translate(
-            'xpack.apm.storageExplorer.noPermissionToViewIndicesStatsTitle',
-            {
-              defaultMessage: 'You need permission to view index statistics',
-            }
-          )}
+          {i18n.translate('xpack.apm.storageExplorer.noPermissionToViewIndicesStatsTitle', {
+            defaultMessage: 'You need permission to view index statistics',
+          })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate(
-            'xpack.apm.storageExplorer.noPermissionToViewIndicesStatsDescription',
-            {
-              defaultMessage: 'Contact your system administrator',
-            }
-          )}
+          {i18n.translate('xpack.apm.storageExplorer.noPermissionToViewIndicesStatsDescription', {
+            defaultMessage: 'Contact your system administrator',
+          })}
         </p>
       }
     />

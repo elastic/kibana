@@ -7,7 +7,7 @@
 
 import {
   EuiAccordion,
-  EuiBasicTable,
+  EuiSelectable,
   EuiButton,
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -19,14 +19,14 @@ import {
   EuiFlyoutHeader,
   EuiPanel,
   EuiSpacer,
-  EuiSwitch,
+  EuiSelectableOption,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useController, useFormContext } from 'react-hook-form';
+import React, { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { ChatForm, ChatFormFields } from '../../types';
 import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
@@ -36,46 +36,43 @@ interface ViewQueryFlyoutProps {
 }
 
 export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => {
-  const { watch } = useFormContext<ChatForm>();
-  const selectedIndices: string[] = watch(ChatFormFields.indices);
-  const { fields } = useIndicesFields(selectedIndices || []);
-  const defaultFields = useMemo(() => getDefaultQueryFields(fields), [fields]);
-  const [queryFields, setQueryFields] = useState(defaultFields);
+  const { getValues } = useFormContext<ChatForm>();
+  const selectedIndices: string[] = getValues(ChatFormFields.indices);
+  const { fields } = useIndicesFields(selectedIndices);
+  const defaultFields = getDefaultQueryFields(fields);
 
   const {
-    field: { onChange },
+    field: { onChange: queryFieldsOnChange, value: queryFields },
   } = useController({
-    name: ChatFormFields.elasticsearchQuery,
-    defaultValue: {},
+    name: ChatFormFields.queryFields,
+    defaultValue: defaultFields,
   });
 
-  useEffect(() => {
-    if (selectedIndices?.length > 0) {
-      setQueryFields(defaultFields);
-    }
-  }, [selectedIndices, defaultFields]);
+  const [tempQueryFields, setTempQueryFields] = useState(queryFields);
+
+  const {
+    field: { onChange: elasticsearchQueryChange },
+  } = useController({
+    name: ChatFormFields.elasticsearchQuery,
+  });
 
   const isQueryFieldSelected = (index: string, field: string) => {
-    return queryFields[index].includes(field);
+    return tempQueryFields[index].includes(field);
   };
 
-  const toggleQueryField = (index: string, field: string) => {
-    if (isQueryFieldSelected(index, field)) {
-      setQueryFields({
-        ...queryFields,
-        [index]: queryFields[index].filter((x: string) => x !== field),
-      });
-    } else {
-      setQueryFields({
-        ...queryFields,
-        [index]: [...queryFields[index], field],
-      });
-    }
+  const updateFields = (index: string, options: EuiSelectableOption[]) => {
+    const newFields = options
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+    setTempQueryFields({
+      ...tempQueryFields,
+      [index]: newFields,
+    });
   };
 
   const saveQuery = () => {
-    onChange(createQuery(queryFields, fields));
-
+    queryFieldsOnChange(tempQueryFields);
+    elasticsearchQueryChange(createQuery(tempQueryFields, fields));
     onClose();
   };
 
@@ -104,8 +101,14 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem grow={6}>
-            <EuiCodeBlock language="json" fontSize="m" paddingSize="m" lineNumbers>
-              {JSON.stringify(createQuery(queryFields, fields), null, 2)}
+            <EuiCodeBlock
+              language="json"
+              fontSize="m"
+              paddingSize="m"
+              lineNumbers
+              data-test-subj="ViewElasticsearchQueryResult"
+            >
+              {JSON.stringify(createQuery(tempQueryFields, fields), null, 2)}
             </EuiCodeBlock>
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
@@ -118,11 +121,12 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                   />
                 </h5>
               </EuiText>
-              {Object.entries(fields).map(([index, group]) => (
+              {Object.entries(fields).map(([index, group], i) => (
                 <EuiFlexItem grow={false} key={index}>
                   <EuiPanel grow={false} hasShadow={false} hasBorder>
                     <EuiAccordion
                       id={index}
+                      initialIsOpen={i === 0}
                       buttonContent={
                         <EuiText>
                           <h5>{index}</h5>
@@ -130,48 +134,26 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                       }
                     >
                       <EuiSpacer size="s" />
-                      <EuiBasicTable
-                        items={[
+                      <EuiSelectable
+                        aria-label="Select query fields"
+                        options={[
                           ...group.elser_query_fields,
                           ...group.dense_vector_query_fields,
                           ...group.bm25_query_fields,
                         ].map((field) => ({
-                          field: typeof field === 'string' ? field : field.field,
+                          label: typeof field === 'string' ? field : field.field,
+                          checked: isQueryFieldSelected(
+                            index,
+                            typeof field === 'string' ? field : field.field
+                          )
+                            ? 'on'
+                            : undefined,
                         }))}
-                        columns={[
-                          {
-                            field: 'field',
-                            name: i18n.translate(
-                              'xpack.searchPlayground.viewQuery.flyout.table.field',
-                              { defaultMessage: 'Field' }
-                            ),
-                            truncateText: false,
-                            render: (field: string) => field,
-                          },
-                          {
-                            actions: [
-                              {
-                                name: 'toggle',
-                                description: i18n.translate(
-                                  'xpack.searchPlayground.viewQuery.flyout.table.toggle',
-                                  { defaultMessage: 'Toggle field' }
-                                ),
-                                isPrimary: true,
-                                render: ({ field }: { field: string }) => (
-                                  <EuiSwitch
-                                    showLabel={false}
-                                    label="toggle"
-                                    checked={isQueryFieldSelected(index, field)}
-                                    onChange={(e) => toggleQueryField(index, field)}
-                                    compressed
-                                  />
-                                ),
-                              },
-                            ],
-                          },
-                        ]}
-                        hasActions
-                      />
+                        onChange={(newOptions) => updateFields(index, newOptions)}
+                        listProps={{ bordered: false }}
+                      >
+                        {(list) => list}
+                      </EuiSelectable>
                     </EuiAccordion>
                   </EuiPanel>
                 </EuiFlexItem>

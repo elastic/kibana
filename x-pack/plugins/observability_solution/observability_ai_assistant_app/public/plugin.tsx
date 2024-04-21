@@ -47,7 +47,7 @@ export class ObservabilityAIAssistantAppPlugin
   }
   setup(
     coreSetup: CoreSetup,
-    pluginsSetup: ObservabilityAIAssistantAppPluginSetupDependencies
+    _: ObservabilityAIAssistantAppPluginSetupDependencies
   ): ObservabilityAIAssistantAppPublicSetup {
     coreSetup.application.register({
       id: AI_ASSISTANT_APP_ID,

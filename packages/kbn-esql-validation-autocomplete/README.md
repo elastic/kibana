@@ -116,6 +116,7 @@ const {title, edits} = await getActions(
   queryString,
   errors,
   getAstAndSyntaxErrors,
+  undefined,
   myCallbacks
 );
 
@@ -123,6 +124,33 @@ const {title, edits} = await getActions(
 // in this example it should suggest to change from "index2" to "index"
 console.log({ title, edits });
 ```
+
+Like with validation also `getActions` can 'relax' its internal checks when no callbacks, either all or specific ones, are passed.
+
+```js
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
+
+const queryString = "from index2 | keep unquoted-field"
+
+const myCallbacks = {
+  getSources: async () => [{name: 'index', hidden: false}],
+  ...
+};
+const { errors, warnings } = await validateQuery(queryString, getAstAndSyntaxErrors, undefined, myCallbacks);
+
+const {title, edits} = await getActions(
+  queryString,
+  errors,
+  getAstAndSyntaxErrors,
+  { relaxOnMissingCallbacks: true },
+  myCallbacks
+);
+
+console.log(edits[0].text); // => `unquoted-field`
+```
+
+**Note**: this behaviour is still experimental, and applied for few error types, like the unquoted fields case.
 
 ### getAstContext
 

@@ -1612,6 +1612,21 @@
           },
           {
             "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.visContext",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visContext",
+            "description": [],
+            "signature": [
+              "VisContextUnmapped",
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
             "id": "def-common.SavedSearch.managed",
             "type": "boolean",
             "tags": [],

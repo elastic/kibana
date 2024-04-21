@@ -50,6 +50,15 @@ export const diskUsage: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskUsage', {
     defaultMessage: 'Disk Usage',
   }),
+  value: 'max(system.filesystem.used.pct)',
+  format: 'percent',
+  decimals: 0,
+};
+
+export const diskUsageAverage: LensBaseLayer = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskUsageAverage', {
+    defaultMessage: 'Disk Usage Average',
+  }),
   value: 'average(system.filesystem.used.pct)',
   format: 'percent',
   decimals: 0,

@@ -8,6 +8,7 @@
 
 import type {
   ApplicationStart,
+  I18nStart,
   IUiSettingsClient,
   ThemeServiceSetup,
   ToastsSetup,
@@ -15,6 +16,16 @@ import type {
 import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../../reporting_api_client';
+
+export interface ExportModalShareOpts {
+  apiClient: ReportingAPIClient;
+  uiSettings: IUiSettingsClient;
+  usesUiCapabilities: boolean;
+  license: ILicense;
+  application: ApplicationStart;
+  theme: ThemeServiceSetup;
+  i18n: I18nStart;
+}
 
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;

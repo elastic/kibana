@@ -41,18 +41,16 @@ export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   TEndpoint
 >;
 
-export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> =
-  ClientRequestParamsOf<
-    ObservabilityOnboardingServerRouteRepository,
-    TEndpoint
-  >;
+export type APIClientRequestParamsOf<TEndpoint extends APIEndpoint> = ClientRequestParamsOf<
+  ObservabilityOnboardingServerRouteRepository,
+  TEndpoint
+>;
 
-export let callObservabilityOnboardingApi: ObservabilityOnboardingClient =
-  () => {
-    throw new Error(
-      'callObservabilityOnboardingApi has to be initialized before used. Call createCallApi first.'
-    );
-  };
+export let callObservabilityOnboardingApi: ObservabilityOnboardingClient = () => {
+  throw new Error(
+    'callObservabilityOnboardingApi has to be initialized before used. Call createCallApi first.'
+  );
+};
 
 export function createCallApi(core: CoreStart | CoreSetup) {
   callObservabilityOnboardingApi = ((endpoint, options) => {

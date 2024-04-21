@@ -783,7 +783,7 @@
               },
               {
                 "plugin": "imageEmbeddable",
-                "path": "src/plugins/image_embeddable/public/image_embeddable/image_embeddable_factory.tsx"
+                "path": "src/plugins/image_embeddable/public/components/image_embeddable.tsx"
               },
               {
                 "plugin": "embeddable",
