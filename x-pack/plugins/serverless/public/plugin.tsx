@@ -8,7 +8,6 @@
 import { EuiButton } from '@elastic/eui';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
