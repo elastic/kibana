@@ -33,7 +33,7 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
 {
   constructor(
     params: ServiceParams<Config, Secrets>,
-    pushToServiceIncidentParamsSchema: Record<string, Type<unknown> | null>
+    pushToServiceIncidentParamsSchema: Record<string, Type<unknown>>
   ) {
     super(params);
 
@@ -42,8 +42,8 @@ export abstract class CaseConnector<Config, Secrets, Incident, GetIncidentRespon
       method: 'pushToService',
       schema: schema.object({
         incident: schema
-          .object({ externalId: schema.nullable(schema.string()) })
-          .extends(pushToServiceIncidentParamsSchema),
+          .object(pushToServiceIncidentParamsSchema)
+          .extends({ externalId: schema.nullable(schema.string()) }),
         comments: schema.nullable(
           schema.arrayOf(
             schema.object({

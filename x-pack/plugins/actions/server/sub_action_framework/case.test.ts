@@ -83,6 +83,22 @@ describe('CaseConnector', () => {
       });
     });
 
+    it('does not override externalId', async () => {
+      const subActions = service.getSubActions();
+      const subAction = subActions.get('pushToService');
+
+      const newIncidentSchemaMock = { ...incidentSchemaMock, externalId: 'Overridden' };
+      expect(
+        subAction?.schema?.validate({
+          incident: { ...newIncidentSchemaMock, externalId: 'test' },
+          comments: [],
+        })
+      ).toEqual({
+        incident: { ...newIncidentSchemaMock, externalId: 'test' },
+        comments: [],
+      });
+    });
+
     it('should accept null for externalId', async () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
