@@ -11,10 +11,7 @@ import {
   PROCESSOR_EVENT,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  TRANSACTION_PAGE_EXIT,
-  TRANSACTION_PAGE_LOAD,
-} from '../../../common/transaction_types';
+import { TRANSACTION_PAGE_EXIT, TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';
 import { rangeQuery } from './range_query';
