@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useRef, Suspense, useState } from 'react';
+import React, { useRef, Suspense } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
@@ -29,7 +29,7 @@ interface Props {
    */
   selectedCategory?: string;
   showSearchBar?: boolean;
-  searchBarRef?: React.Ref<HTMLInputElement>;
+  packageListRef?: React.Ref<HTMLDivElement>;
   searchQuery?: string;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
   /**
@@ -48,13 +48,12 @@ const PackageListGridWrapper = ({
   selectedCategory = 'observability',
   useAvailablePackages,
   showSearchBar = false,
-  searchBarRef,
+  packageListRef,
   searchQuery,
   setSearchQuery,
   customCards,
   joinCardLists = false,
 }: WrapperProps) => {
-  const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
@@ -67,19 +66,13 @@ const PackageListGridWrapper = ({
     joinCardLists
   );
 
-  React.useEffect(() => {
-    if (isInitialHidden && searchQuery) {
-      setIsInitialHidden(false);
-    }
-  }, [searchQuery, isInitialHidden]);
+  if (isLoading) return <Loading />;
 
-  if (!isInitialHidden && isLoading) return <Loading />;
-
-  const showPackageList = (showSearchBar && !isInitialHidden) || showSearchBar === false;
+  const showPackageList = (showSearchBar && !!searchQuery) || showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
-      <div css={customMargin}>
+      <div css={customMargin} ref={packageListRef}>
         {showSearchBar && (
           <div
             css={css`
@@ -89,17 +82,11 @@ const PackageListGridWrapper = ({
             <EuiSearchBar
               box={{
                 incremental: true,
-                inputRef: (ref: any) => {
-                  (searchBarRef as React.MutableRefObject<HTMLInputElement>).current = ref;
-                },
               }}
               onChange={(arg) => {
-                if (setSearchQuery) {
-                  setSearchQuery(arg.queryText);
-                }
-                setIsInitialHidden(false);
+                setSearchQuery?.(arg.queryText);
               }}
-              query={searchQuery}
+              query={searchQuery ?? ''}
             />
           </div>
         )}
@@ -125,7 +112,7 @@ const PackageListGridWrapper = ({
 };
 
 const WithAvailablePackages = React.forwardRef(
-  (props: Props, searchBarRef?: React.Ref<HTMLInputElement>) => {
+  (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
 
     const {
@@ -173,7 +160,7 @@ const WithAvailablePackages = React.forwardRef(
       <PackageListGridWrapper
         {...props}
         useAvailablePackages={ref.current}
-        searchBarRef={searchBarRef}
+        packageListRef={packageListRef}
       />
     );
   }
