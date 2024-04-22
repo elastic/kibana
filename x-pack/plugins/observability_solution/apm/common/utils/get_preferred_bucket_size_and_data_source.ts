@@ -56,9 +56,7 @@ export function getPreferredBucketSizeAndDataSource({
 
     preferred =
       sourcesFromPreferredDocumentType.find((source) => {
-        const rollupIntervalInSeconds = intervalToSeconds(
-          source.rollupInterval
-        );
+        const rollupIntervalInSeconds = intervalToSeconds(source.rollupInterval);
 
         return rollupIntervalInSeconds <= bucketSizeInSeconds;
       }) ||
@@ -77,9 +75,6 @@ export function getPreferredBucketSizeAndDataSource({
 
   return {
     source: preferred,
-    bucketSizeInSeconds: Math.max(
-      bucketSizeInSeconds,
-      intervalToSeconds(preferred.rollupInterval)
-    ),
+    bucketSizeInSeconds: Math.max(bucketSizeInSeconds, intervalToSeconds(preferred.rollupInterval)),
   };
 }

@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import type {
-  AvailablePackagesHookType,
-  IntegrationCardItem,
-} from '@kbn/fleet-plugin/public';
+import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiSearchBar,
-  EuiSkeletonText,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useRef, Suspense, useState } from 'react';
+import React, { useRef, Suspense } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
@@ -57,7 +49,6 @@ const PackageListGridWrapper = ({
   setSearchQuery,
   customCards,
 }: WrapperProps) => {
-  const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
@@ -69,17 +60,9 @@ const PackageListGridWrapper = ({
     customCards
   );
 
-  React.useEffect(() => {
-    if (isInitialHidden && searchQuery) {
-      setIsInitialHidden(false);
-    }
-  }, [searchQuery, isInitialHidden]);
+  if (isLoading) return <Loading />;
 
-  if (!isInitialHidden && isLoading) return <Loading />;
-
-  const showPackageList =
-    (showSearchBar && !isInitialHidden && !!searchQuery) ||
-    showSearchBar === false;
+  const showPackageList = (showSearchBar && !!searchQuery) || showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
@@ -94,36 +77,32 @@ const PackageListGridWrapper = ({
               box={{
                 incremental: true,
                 inputRef: (ref: any) => {
-                  (
-                    searchBarRef as React.MutableRefObject<HTMLInputElement>
-                  ).current = ref;
+                  (searchBarRef as React.MutableRefObject<HTMLInputElement>).current = ref;
                 },
               }}
               onChange={(arg) => {
                 setSearchQuery?.(arg.queryText);
-                if (isInitialHidden) setIsInitialHidden(false);
               }}
               query={searchQuery ?? ''}
             />
           </div>
         )}
-        {showPackageList &&
-          ((showSearchBar && !!searchQuery) || !showSearchBar) && (
-            <PackageList
-              list={list}
-              searchTerm={searchQuery ?? ''}
-              showControls={false}
-              showSearchTools={false}
-              // we either don't need these properties (yet) or handle them upstream, but
-              // they are marked as required in the original API.
-              selectedCategory={selectedCategory}
-              setSearchTerm={() => {}}
-              setCategory={() => {}}
-              categories={[]}
-              setUrlandReplaceHistory={() => {}}
-              setUrlandPushHistory={() => {}}
-            />
-          )}
+        {showPackageList && (
+          <PackageList
+            list={list}
+            searchTerm={searchQuery ?? ''}
+            showControls={false}
+            showSearchTools={false}
+            // we either don't need these properties (yet) or handle them upstream, but
+            // they are marked as required in the original API.
+            selectedCategory={selectedCategory}
+            setSearchTerm={() => {}}
+            setCategory={() => {}}
+            categories={[]}
+            setUrlandReplaceHistory={() => {}}
+            setUrlandPushHistory={() => {}}
+          />
+        )}
       </div>
     </Suspense>
   );
@@ -144,12 +123,9 @@ const WithAvailablePackages = React.forwardRef(
     if (errorLoading)
       return (
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.observability_onboarding.asyncLoadFailureCallout.title',
-            {
-              defaultMessage: 'Loading failure',
-            }
-          )}
+          title={i18n.translate('xpack.observability_onboarding.asyncLoadFailureCallout.title', {
+            defaultMessage: 'Loading failure',
+          })}
           color="warning"
           iconType="cross"
           size="m"
