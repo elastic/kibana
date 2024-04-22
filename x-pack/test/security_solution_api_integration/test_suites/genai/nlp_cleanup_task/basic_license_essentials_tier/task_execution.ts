@@ -10,6 +10,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { MlGetTrainedModelsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { waitFor } from '../../../../../common/utils/security_solution';
+import { SUPPORTED_TRAINED_MODELS } from '../../../../../functional/services/ml/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esSupertest = getService('esSupertest');
@@ -32,7 +33,10 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('Model Loading', () => {
         before(async () => {
           // Create a light-weight model that has a `model_type` of `pytorch`
-          await ml.api.importTrainedModel('pt_tiny_fill_mask', 'pt_tiny_fill_mask');
+          await ml.api.importTrainedModel(
+            SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
+            SUPPORTED_TRAINED_MODELS.TINY_ELSER.name
+          );
           // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
           await ml.api.assureMlStatsIndexExists();
         });
