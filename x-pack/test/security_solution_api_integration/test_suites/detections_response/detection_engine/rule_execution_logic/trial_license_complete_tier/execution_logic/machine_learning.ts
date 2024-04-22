@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__mlRule']).toEqual(1);
     });
 
-    it('@skipInServerless generates max alerts warning when circuit breaker is exceeded', async () => {
+    it('@skipInServerlessMKI generates max alerts warning when circuit breaker is exceeded', async () => {
       const { logs } = await previewRule({
         supertest,
         rule: { ...rule, anomaly_threshold: 1, max_signals: 5 }, // This threshold generates 10 alerts with the current esArchive
@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(logs[0].warnings).not.toContain(getMaxAlertsWarning());
     });
 
-    it('@skipInServerless should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
+    it('@skipInServerlessMKI should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
       const { previewId } = await previewRule({
         supertest,
         rule: { ...rule, anomaly_threshold: 20 },
@@ -309,7 +309,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
-      it('@skipInServerless should be enriched with host risk score', async () => {
+      it('@skipInServerlessMKI should be enriched with host risk score', async () => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts.length).toBe(1);

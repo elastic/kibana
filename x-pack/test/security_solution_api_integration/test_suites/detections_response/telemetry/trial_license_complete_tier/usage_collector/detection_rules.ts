@@ -1092,7 +1092,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInServerless should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
+      it('@skipInServerlessMKI should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
         await installMockPrebuiltRules(supertest, es);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -1123,7 +1123,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInServerless should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInServerlessMKI should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);
@@ -1176,7 +1176,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInServerless should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInServerlessMKI should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         const hookAction = await createWebHookRuleAction(supertest);

@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  describe('@ess @serverless @skipInServerless update_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI update_rules', () => {
     describe('update rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

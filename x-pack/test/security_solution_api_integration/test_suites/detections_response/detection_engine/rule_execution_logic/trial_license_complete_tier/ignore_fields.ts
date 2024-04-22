@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('@skipInServerless should ignore the field of "testing_ignored"', async () => {
+    it('@skipInServerlessMKI should ignore the field of "testing_ignored"', async () => {
       const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(hits).to.eql([undefined, undefined, undefined, undefined]);
     });
 
-    it('@skipInServerless should ignore the field of "testing_regex"', async () => {
+    it('@skipInServerlessMKI should ignore the field of "testing_regex"', async () => {
       const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
