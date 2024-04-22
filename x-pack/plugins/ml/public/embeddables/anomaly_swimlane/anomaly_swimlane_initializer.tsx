@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableUserInput } from '..';
+import type { AnomalySwimlaneEmbeddableUserInput, AnomalySwimLaneEmbeddableState } from '..';
 
 export type ExplicitInput = Omit<AnomalySwimlaneEmbeddableUserInput, 'jobIds'>;
 
@@ -33,7 +33,7 @@ export interface AnomalySwimlaneInitializerProps {
   defaultTitle: string;
   influencers: string[];
   initialInput?: Partial<
-    Pick<AnomalySwimlaneEmbeddableInput, 'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'>
+    Pick<AnomalySwimLaneEmbeddableState, 'jobIds' | 'swimlaneType' | 'viewBy' | 'perPage'>
   >;
   onCreate: (swimlaneProps: ExplicitInput) => void;
   onCancel: () => void;

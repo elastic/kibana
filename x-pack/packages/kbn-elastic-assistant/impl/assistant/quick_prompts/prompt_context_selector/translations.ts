@@ -14,6 +14,13 @@ export const PROMPT_CONTEXT_SELECTOR = i18n.translate(
   }
 );
 
+export const PROMPT_CONTEXT_SELECTOR_PREFIX = i18n.translate(
+  'xpack.elasticAssistant.assistant.quickPrompts.promptContextSelector.prefixLabel',
+  {
+    defaultMessage: 'Select Prompt',
+  }
+);
+
 export const PROMPT_CONTEXT_SELECTOR_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPrompts.promptContextSelector.placeholderLabel',
   {

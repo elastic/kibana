@@ -23,10 +23,7 @@ export function TabStatus({
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem
-              grow={false}
-              data-test-subj={`${props['data-test-subj']}_Badge`}
-            >
+            <EuiFlexItem grow={false} data-test-subj={`${props['data-test-subj']}_Badge`}>
               {isLoading ? (
                 <EuiBadge color="default">-</EuiBadge>
               ) : isOk ? (
@@ -37,10 +34,7 @@ export function TabStatus({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={10}
-          data-test-subj={`${props['data-test-subj']}_Content`}
-        >
+        <EuiFlexItem grow={10} data-test-subj={`${props['data-test-subj']}_Content`}>
           {children}
         </EuiFlexItem>
       </EuiFlexGroup>

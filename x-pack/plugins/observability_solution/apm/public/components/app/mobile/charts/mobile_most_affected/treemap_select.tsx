@@ -6,13 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 
 export enum TreemapTypes {
@@ -24,12 +18,9 @@ export enum TreemapTypes {
 const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
   {
     value: TreemapTypes.Devices,
-    label: i18n.translate(
-      'xpack.apm.mobile.errorOverview.treemap.dropdown.devices',
-      {
-        defaultMessage: 'Devices',
-      }
-    ),
+    label: i18n.translate('xpack.apm.mobile.errorOverview.treemap.dropdown.devices', {
+      defaultMessage: 'Devices',
+    }),
     description: i18n.translate(
       'xpack.apm.mobile.errorOverview.treemap.dropdown.devices.subtitle',
       {
@@ -39,28 +30,21 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
   },
   {
     value: TreemapTypes.AppVersions,
-    label: i18n.translate(
-      'xpack.apm.mobile.errorOverview.treemap.versions.devices',
-      {
-        defaultMessage: 'App versions',
-      }
-    ),
+    label: i18n.translate('xpack.apm.mobile.errorOverview.treemap.versions.devices', {
+      defaultMessage: 'App versions',
+    }),
     description: i18n.translate(
       'xpack.apm.mobile.errorOverview.treemap.dropdown.versions.subtitle',
       {
-        defaultMessage:
-          'Treemap displaying the most affected application versions.',
+        defaultMessage: 'Treemap displaying the most affected application versions.',
       }
     ),
   },
   {
     value: TreemapTypes.OsVersions,
-    label: i18n.translate(
-      'xpack.apm.mobile.errorOverview.treemap.dropdown.osVersions',
-      {
-        defaultMessage: 'OS versions',
-      }
-    ),
+    label: i18n.translate('xpack.apm.mobile.errorOverview.treemap.dropdown.osVersions', {
+      defaultMessage: 'OS versions',
+    }),
     description: i18n.translate(
       'xpack.apm.mobile.errorOverview.treemap.dropdown.osVersions.subtitle',
       {
@@ -88,8 +72,7 @@ export function TreemapSelect({
   selectedTreemap: TreemapTypes;
   onChange: (value: TreemapTypes) => void;
 }) {
-  const currentTreemap =
-    options.find(({ value }) => value === selectedTreemap) ?? options[0];
+  const currentTreemap = options.find(({ value }) => value === selectedTreemap) ?? options[0];
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">

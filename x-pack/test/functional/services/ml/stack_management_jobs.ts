@@ -446,7 +446,7 @@ export function MachineLearningStackManagementJobsProvider({
 
       const ids: string[] = [];
       for (const row of rows) {
-        const cols = await row.findAllByClassName('euiTableRowCell euiTableRowCell--middle');
+        const cols = await row.findAllByClassName('euiTableRowCell');
         if (cols.length) {
           ids.push(await cols[0].getVisibleText());
         }
@@ -477,7 +477,7 @@ export function MachineLearningStackManagementJobsProvider({
       ).findAllByClassName('euiAvatar--space');
 
       for (const el of spacesEl) {
-        spaces.push((await el.getAttribute('data-test-subj')).replace('space-avatar-', ''));
+        spaces.push(((await el.getAttribute('data-test-subj')) ?? '').replace('space-avatar-', ''));
       }
 
       return spaces;
