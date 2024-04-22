@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type {
   AfterKey,
   AfterKeys,
@@ -16,8 +17,16 @@ import type {
   RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
 import type { ConfigType } from '../../config';
+import type { StartPlugins } from '../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../types';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
 
+export interface EntityAnalyticsRoutesDeps {
+  router: SecuritySolutionPluginRouter;
+  logger: Logger;
+  config: ConfigType;
+  getStartServices: StartServicesAccessor<StartPlugins>;
+}
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;
   debug?: boolean;

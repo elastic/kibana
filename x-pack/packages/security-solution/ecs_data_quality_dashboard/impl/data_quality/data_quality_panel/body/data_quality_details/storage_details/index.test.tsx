@@ -22,6 +22,10 @@ const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
   value != null ? numeral(value).format(defaultBytesFormat) : EMPTY_STAT;
 
+const defaultNumberFormat = '0,0.[000]';
+const formatNumber = (value: number | undefined) =>
+  value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT;
+
 const ilmPhases = ['hot', 'warm', 'unmanaged'];
 const patterns = ['.alerts-security.alerts-default', 'auditbeat-*', 'packetbeat-*'];
 
@@ -35,6 +39,7 @@ const onIndexSelected = jest.fn();
 
 const defaultProps: Props = {
   formatBytes,
+  formatNumber,
   ilmPhases,
   onIndexSelected,
   patternRollups,

@@ -31,7 +31,7 @@ yargs(process.argv.slice(2))
     (argv) => {
       run(
         async ({ log }) => {
-          const builtDocsDir = Path.join(__dirname, '../../../../../../built-docs');
+          const builtDocsDir = Path.join(__dirname, '../../../../../../../built-docs');
 
           log.debug(`Looking in ${builtDocsDir} for built-docs repository`);
 
@@ -146,6 +146,30 @@ yargs(process.argv.slice(2))
                       },
                     ];
 
+                  case 'esql-cross-clusters.html':
+                    return [
+                      {
+                        title: 'CROSS_CLUSTER',
+                        content: getSimpleText(),
+                      },
+                    ];
+
+                  case 'esql-query-api.html':
+                    return [
+                      {
+                        title: 'API',
+                        content: getSimpleText(),
+                      },
+                    ];
+
+                  case 'esql-kibana.html':
+                    return [
+                      {
+                        title: 'Kibana',
+                        content: getSimpleText(),
+                      },
+                    ];
+
                   case 'esql-functions-operators.html':
                     const sections = extractSections($element);
 
@@ -194,6 +218,7 @@ yargs(process.argv.slice(2))
                     });
 
                   default:
+                    log.debug('Dropping file', file);
                     break;
                 }
                 return [];
@@ -202,10 +227,19 @@ yargs(process.argv.slice(2))
           );
 
           const flattened = documents.flat().filter((doc) => {
-            return !doc.title.startsWith('ES|QL');
+            // ES|QL aggregate functions, ES|QL mathematical functions, ES|QL string functions etc
+            const isOverviewArticle = doc.title.startsWith('ES|QL');
+
+            if (isOverviewArticle) {
+              log.debug('Dropping overview article', doc.title);
+            }
+            return !isOverviewArticle;
           });
 
-          const outDir = Path.join(__dirname, '../../server/functions/esql/docs');
+          const outDir = Path.join(
+            __dirname,
+            '../../../observability_ai_assistant_app/server/functions/query/esql_docs'
+          );
 
           log.info(`Writing ${flattened.length} documents to disk to ${outDir}`);
 

@@ -544,7 +544,7 @@ async function getExpressionSuggestionsByType(
         prevArg &&
         (prevArg.type === 'function' || (!Array.isArray(nodeArg) && prevArg.type !== nodeArg.type))
       ) {
-        if (!isLiteralItem(nodeArg) || !prevArg.literalOnly) {
+        if (!isLiteralItem(nodeArg) || !prevArg.constantOnly) {
           argDef = prevArg;
         }
       }
@@ -595,8 +595,9 @@ async function getExpressionSuggestionsByType(
             getFieldsByType,
             {
               functions: canHaveAssignments,
-              fields: true,
+              fields: !argDef.constantOnly,
               variables: anyVariables,
+              literals: argDef.constantOnly,
             },
             {
               ignoreFields: isNewExpression
@@ -646,6 +647,7 @@ async function getExpressionSuggestionsByType(
               functions: true,
               fields: false,
               variables: nodeArg ? undefined : anyVariables,
+              literals: argDef.constantOnly,
             }
           ))
         );
@@ -737,7 +739,7 @@ async function getExpressionSuggestionsByType(
     // If the type is specified try to dig deeper in the definition to suggest the best candidate
     if (['string', 'number', 'boolean'].includes(argDef.type) && !argDef.values) {
       // it can be just literal values (i.e. "string")
-      if (argDef.literalOnly) {
+      if (argDef.constantOnly) {
         // ... | <COMMAND> ... <suggest>
         suggestions.push(...getCompatibleLiterals(command.name, [argDef.type], [argDef.name]));
       } else {
@@ -980,10 +982,12 @@ async function getFieldsOrFunctionsSuggestions(
     functions,
     fields,
     variables,
+    literals = false,
   }: {
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
+    literals?: boolean;
   },
   {
     ignoreFn = [],
@@ -1033,7 +1037,7 @@ async function getFieldsOrFunctionsSuggestions(
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
-    getCompatibleLiterals(commandName, types)
+    literals ? getCompatibleLiterals(commandName, types) : []
   );
 
   return suggestions;
@@ -1073,15 +1077,6 @@ async function getFunctionArgsSuggestions(
   if (!shouldGetNextArgument && argIndex) {
     argIndex -= 1;
   }
-  const types = fnDefinition.signatures.flatMap((signature) => {
-    if (signature.params.length > argIndex) {
-      return signature.params[argIndex].type;
-    }
-    if (signature.minParams) {
-      return signature.params[signature.params.length - 1].type;
-    }
-    return [];
-  });
 
   const literalOptions = fnDefinition.signatures.reduce<string[]>((acc, signature) => {
     const literalOptionsForThisParameter = signature.params[argIndex]?.literalOptions;
@@ -1096,13 +1091,6 @@ async function getFunctionArgsSuggestions(
 
   // the first signature is used as reference
   const refSignature = fnDefinition.signatures[0];
-
-  const hasMoreMandatoryArgs =
-    refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
-      argIndex ||
-    ('minParams' in refSignature && refSignature.minParams
-      ? refSignature.minParams - 1 > argIndex
-      : false);
 
   const suggestions = [];
   const noArgDefined = !arg;
@@ -1137,18 +1125,54 @@ async function getFunctionArgsSuggestions(
       );
     }
 
+    const existingTypes = node.args
+      .map((nodeArg) =>
+        extractFinalTypeFromArg(nodeArg, {
+          fields: fieldsMap,
+          variables: variablesExcludingCurrentCommandOnes,
+        })
+      )
+      .filter(nonNullable);
+
+    const validSignatures = fnDefinition.signatures
+      // if existing arguments are preset already, use them to filter out incompatible signatures
+      .filter((signature) => {
+        if (existingTypes.length) {
+          return existingTypes.every((type, index) => signature.params[index].type === type);
+        }
+        return true;
+      });
+
+    const supportedFieldTypes = validSignatures
+      .flatMap((signature) => {
+        if (signature.params.length > argIndex) {
+          return signature.params[argIndex].type;
+        }
+        if (signature.minParams) {
+          return signature.params[signature.params.length - 1].type;
+        }
+        return [];
+      })
+      .filter(nonNullable);
+
+    const shouldBeConstant = validSignatures.some(
+      ({ params }) => params[argIndex]?.constantOnly || /_literal$/.test(params[argIndex]?.type)
+    );
+
     // ... | EVAL fn( <suggest>)
     // ... | EVAL fn( field, <suggest>)
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
-        types,
+        supportedFieldTypes,
         command.name,
         option?.name,
         getFieldsByType,
         {
-          functions: true,
-          fields: true,
+          // @TODO: improve this to inherit the constant flag from the outer function
+          functions: !shouldBeConstant,
+          fields: !shouldBeConstant,
           variables: variablesExcludingCurrentCommandOnes,
+          literals: shouldBeConstant,
         },
         // do not repropose the same function as arg
         // i.e. avoid cases like abs(abs(abs(...))) with suggestions
@@ -1158,6 +1182,14 @@ async function getFunctionArgsSuggestions(
       ))
     );
   }
+
+  const hasMoreMandatoryArgs =
+    (refSignature.params.length >= argIndex &&
+      refSignature.params.filter(({ optional }, index) => !optional && index > argIndex).length >
+        0) ||
+    ('minParams' in refSignature && refSignature.minParams
+      ? refSignature.minParams - 1 > argIndex
+      : false);
 
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
@@ -1174,11 +1206,13 @@ async function getFunctionArgsSuggestions(
               functions: false,
               fields: false,
               variables: variablesExcludingCurrentCommandOnes,
+              literals: true,
             }
           ))
         );
       }
     }
+
     if (hasMoreMandatoryArgs) {
       // suggest a comma if there's another argument for the function
       suggestions.push(commaCompleteItem);

@@ -59,7 +59,7 @@ export const AlertDescription: FC = () => {
       },
     });
     telemetry.reportDetailsFlyoutOpened({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'preview',
     });
   }, [eventId, openPreviewPanel, indexName, scopeId, ruleId, telemetry]);

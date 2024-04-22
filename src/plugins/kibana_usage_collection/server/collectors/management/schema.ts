@@ -484,6 +484,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:aiAssistantSimulatedFunctionCalling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:logsExplorer:allowedDataViews': {
     type: 'array',
     items: {
@@ -665,6 +669,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'aiAssistant:preferredAIAssistantType': {
     type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingFetchTopNFunctionsFromStacktraces': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

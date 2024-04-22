@@ -17,10 +17,7 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  BottomBarActions,
-  useUiTracker,
-} from '@kbn/observability-shared-plugin/public';
+import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
@@ -37,9 +34,7 @@ import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
 
 function removeEmpty(obj: { [key: string]: any }) {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([_, v]) => v != null && v !== '')
-  );
+  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v !== ''));
 }
 
 export function SettingsPage({
@@ -102,18 +97,16 @@ export function SettingsPage({
   if (status === FETCH_STATUS.FAILURE) {
     return (
       <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.agentConfig.settingsPage.notFound.title',
-          { defaultMessage: 'Sorry, there was an error' }
-        )}
+        title={i18n.translate('xpack.apm.agentConfig.settingsPage.notFound.title', {
+          defaultMessage: 'Sorry, there was an error',
+        })}
         color="danger"
         iconType="warning"
       >
         <p>
-          {i18n.translate(
-            'xpack.apm.agentConfig.settingsPage.notFound.message',
-            { defaultMessage: 'The requested configuration does not exist' }
-          )}
+          {i18n.translate('xpack.apm.agentConfig.settingsPage.notFound.message', {
+            defaultMessage: 'The requested configuration does not exist',
+          })}
         </p>
       </EuiCallOut>
     );
@@ -149,11 +142,7 @@ export function SettingsPage({
             <EuiFlexItem>
               <EuiStat
                 titleSize="xs"
-                title={
-                  isLoading
-                    ? '-'
-                    : getOptionLabel(newConfig.service.environment)
-                }
+                title={isLoading ? '-' : getOptionLabel(newConfig.service.environment)}
                 description={i18n.translate(
                   'xpack.apm.agentConfig.chooseService.service.environment.label',
                   { defaultMessage: 'Environment' }
@@ -167,10 +156,9 @@ export function SettingsPage({
                   onClick={onClickEdit}
                   iconType="pencil"
                 >
-                  {i18n.translate(
-                    'xpack.apm.agentConfig.chooseService.editButton',
-                    { defaultMessage: 'Edit' }
-                  )}
+                  {i18n.translate('xpack.apm.agentConfig.chooseService.editButton', {
+                    defaultMessage: 'Edit',
+                  })}
                 </EuiButton>
               )}
             </EuiFlexItem>
@@ -197,10 +185,9 @@ export function SettingsPage({
           isLoading={isSaving}
           onDiscardChanges={resetSettings}
           onSave={handleSubmitEvent}
-          saveLabel={i18n.translate(
-            'xpack.apm.agentConfig.settingsPage.saveButton',
-            { defaultMessage: 'Save configuration' }
-          )}
+          saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
+            defaultMessage: 'Save configuration',
+          })}
           unsavedChangesCount={unsavedChangesCount}
           appTestSubj="apm"
         />
