@@ -261,7 +261,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                 </div>
                 <EuiBasicTable
                   data-test-subj="risk-summary-table"
-                  responsive={false}
+                  responsiveBreakpoint={false}
                   columns={columns}
                   items={rows}
                   compressed

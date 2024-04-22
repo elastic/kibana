@@ -16,10 +16,7 @@ const toCustomCard = (card: IntegrationCardItem) => ({
   isQuickstart: QUICKSTART_FLOWS.includes(card.name),
 });
 
-function extractFeaturedCards(
-  filteredCards: IntegrationCardItem[],
-  featuredCardNames?: string[]
-) {
+function extractFeaturedCards(filteredCards: IntegrationCardItem[], featuredCardNames?: string[]) {
   const featuredCards: Record<string, IntegrationCardItem | undefined> = {};
   filteredCards.forEach((card) => {
     if (featuredCardNames?.includes(card.name)) {
@@ -46,9 +43,7 @@ export function useIntegrationCardList(
     return customCards
       .map((c) => {
         if (c.type === 'featured') {
-          return !!featuredCards[c.name]
-            ? toCustomCard(featuredCards[c.name]!)
-            : null;
+          return !!featuredCards[c.name] ? toCustomCard(featuredCards[c.name]!) : null;
         }
         return toCustomCard(c);
       })

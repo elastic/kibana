@@ -359,7 +359,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; }"
+              ") => void; isNewVersion: () => boolean; }"
             ],
             "path": "src/plugins/console/public/types/plugin_dependencies.ts",
             "deprecated": false,

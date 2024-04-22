@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type {
-  AvailablePackagesHookType,
-  IntegrationCardItem,
-} from '@kbn/fleet-plugin/public';
+import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiSearchBar,
-  EuiSkeletonText,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useRef, Suspense, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
@@ -77,8 +69,7 @@ const PackageListGridWrapper = ({
 
   if (!isInitialHidden && isLoading) return <Loading />;
 
-  const showPackageList =
-    (showSearchBar && !isInitialHidden) || showSearchBar === false;
+  const showPackageList = (showSearchBar && !isInitialHidden) || showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
@@ -93,9 +84,7 @@ const PackageListGridWrapper = ({
               box={{
                 incremental: true,
                 inputRef: (ref: any) => {
-                  (
-                    searchBarRef as React.MutableRefObject<HTMLInputElement>
-                  ).current = ref;
+                  (searchBarRef as React.MutableRefObject<HTMLInputElement>).current = ref;
                 },
               }}
               onChange={(arg) => {
@@ -144,12 +133,9 @@ const WithAvailablePackages = React.forwardRef(
     if (errorLoading)
       return (
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.observability_onboarding.asyncLoadFailureCallout.title',
-            {
-              defaultMessage: 'Loading failure',
-            }
-          )}
+          title={i18n.translate('xpack.observability_onboarding.asyncLoadFailureCallout.title', {
+            defaultMessage: 'Loading failure',
+          })}
           color="warning"
           iconType="cross"
           size="m"

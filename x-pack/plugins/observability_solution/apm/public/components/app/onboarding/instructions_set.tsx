@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiSplitPanel,
-  EuiTabs,
-  EuiTab,
-  EuiTitle,
-  EuiSteps,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSplitPanel, EuiTabs, EuiTab, EuiTitle, EuiSteps, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useEuiTheme } from '@elastic/eui';
@@ -37,11 +30,7 @@ function getTabs(variants: InstructionVariant[]): AgentTab[] {
   }));
 }
 
-export function InstructionsSet({
-  instructions,
-}: {
-  instructions: InstructionSet;
-}) {
+export function InstructionsSet({ instructions }: { instructions: InstructionSet }) {
   const tabs = getTabs(instructions.instructionVariants);
 
   const {
@@ -85,9 +74,7 @@ export function InstructionsSet({
       return <></>;
     }
 
-    return (
-      <EuiSteps titleSize="xs" steps={selectInstructionSteps.instructions} />
-    );
+    return <EuiSteps titleSize="xs" steps={selectInstructionSteps.instructions} />;
   }
 
   return (
