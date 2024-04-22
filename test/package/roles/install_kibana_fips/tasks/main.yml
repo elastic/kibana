@@ -20,14 +20,16 @@
     chdir: "$HOME"
     cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | bash
 
-- name: sleep
-  shell:
-    cmd: sleep 1h
+# - name: sleep
+#   shell:
+#     cmd: sleep 1h
 
 - name: install kibana node version
   shell:
     chdir: "$HOME/.nvm"
     cmd: "source nvm.sh && nvm install {{ node_version }}"
+  args:
+    executable: /bin/bash
 
 - name: install yarn
   npm:
