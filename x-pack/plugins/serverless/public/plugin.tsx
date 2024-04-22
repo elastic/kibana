@@ -84,17 +84,20 @@ export class ServerlessPlugin
     core.chrome.navControls.registerRight({
       order: 1,
       mount: toMountPoint(
-        <EuiButton
-          href="https://ela.st/serverless-feedback"
-          size={'s'}
-          color={'warning'}
-          iconType={'popout'}
-          iconSide={'right'}
-        >
-          {i18n.translate('serverless.header.giveFeedbackBtn.label', {
-            defaultMessage: 'Give feedback',
-          })}
-        </EuiButton>,
+        <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+          <EuiButton
+            href="https://ela.st/serverless-feedback"
+            size={'s'}
+            color={'warning'}
+            iconType={'popout'}
+            iconSide={'right'}
+            target={'_blank'}
+          >
+            {i18n.translate('serverless.header.giveFeedbackBtn.label', {
+              defaultMessage: 'Give feedback',
+            })}
+          </EuiButton>
+        </KibanaRenderContextProvider>,
         { ...core }
       ),
     });
