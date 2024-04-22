@@ -55,8 +55,7 @@ export async function getDiagnosticsBundle({
       })
     )) ?? [];
 
-  const dataStreams =
-    (await handleExceptions(getDataStreams({ esClient, apmIndices }))) ?? [];
+  const dataStreams = (await handleExceptions(getDataStreams({ esClient, apmIndices }))) ?? [];
 
   const nonDataStreamIndices =
     (await handleExceptions(
@@ -86,8 +85,7 @@ export async function getDiagnosticsBundle({
     )) ?? [];
 
   const elasticsearchVersion =
-    (await handleExceptions(getElasticsearchVersion(esClient))) ??
-    NOT_AVAILABLE_LABEL;
+    (await handleExceptions(getElasticsearchVersion(esClient))) ?? NOT_AVAILABLE_LABEL;
 
   return {
     created_at: new Date().toISOString(),

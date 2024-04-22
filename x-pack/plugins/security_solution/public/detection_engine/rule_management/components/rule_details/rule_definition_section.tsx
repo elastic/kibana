@@ -382,7 +382,7 @@ const MissingFieldsStrategy = ({ missingFieldsStrategy }: MissingFieldsStrategyP
       : descriptionStepI18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
   return (
-    <EuiText size="s" data-test-subj="alertSuppressionSuppressionFieldPropertyValue">
+    <EuiText size="s" data-test-subj="alertSuppressionMissingFieldsPropertyValue">
       {missingFieldsDescription}
     </EuiText>
   );
@@ -691,7 +691,7 @@ const prepareDefinitionSectionListItems = (
     if ('missing_fields_strategy' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
-          <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
+          <span data-test-subj="alertSuppressionMissingFieldPropertyTitle">
             <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
           </span>
         ),

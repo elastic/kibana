@@ -21,11 +21,7 @@ const linkedParentsRoute = createApmServerRoute({
       traceId: t.string,
       spanId: t.string,
     }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      t.type({ processorEvent: processorEventRt }),
-    ]),
+    query: t.intersection([kueryRt, rangeRt, t.type({ processorEvent: processorEventRt })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (

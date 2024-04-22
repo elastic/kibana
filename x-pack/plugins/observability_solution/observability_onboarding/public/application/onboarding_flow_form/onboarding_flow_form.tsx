@@ -44,8 +44,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
-          defaultMessage:
-            'Detect patterns, troubleshoot in real time, gain insights from logs.',
+          defaultMessage: 'Detect patterns, troubleshoot in real time, gain insights from logs.',
         }
       ),
     },
@@ -58,8 +57,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
         {
-          defaultMessage:
-            'Collect distributed traces and catch application performance problems.',
+          defaultMessage: 'Collect distributed traces and catch application performance problems.',
         }
       ),
     },
@@ -83,18 +81,20 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
+  const packageListRef = React.useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState('');
 
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
       setIntegrationSearch(query);
-      if (packageListSearchBarRef.current) {
-        packageListSearchBarRef.current.focus();
-        packageListSearchBarRef.current.scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-        });
+      if (packageListRef.current) {
+        // adding a slight delay causes the search bar to be rendered
+        new Promise((r) => setTimeout(r, 10)).then(() =>
+          packageListRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        );
       }
     },
     [setIntegrationSearch]
@@ -134,9 +134,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
-              onChange={() =>
-                setSearchParams({ category: option.id }, { replace: true })
-              }
+              onChange={() => setSearchParams({ category: option.id }, { replace: true })}
             />
           </EuiFlexItem>
         ))}
@@ -155,9 +153,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          {Array.isArray(customCards) && (
-            <OnboardingFlowPackageList customCards={customCards} />
-          )}
+          {Array.isArray(customCards) && <OnboardingFlowPackageList customCards={customCards} />}
 
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
@@ -169,7 +165,9 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             showSearchBar={true}
             searchQuery={integrationSearch}
             setSearchQuery={setIntegrationSearch}
-            ref={packageListSearchBarRef}
+            ref={packageListRef}
+            customCards={customCards?.filter(({ name, type }) => type === 'generated')}
+            joinCardLists
           />
         </>
       )}
@@ -182,10 +180,7 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({
-  title,
-  iconType,
-}) => (
+const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
