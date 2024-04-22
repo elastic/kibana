@@ -6,8 +6,9 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -438,5 +439,12 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'put',
     body: JSON.stringify({ ...newFields }),
+  });
+}
+
+export function useLoadInferenceModels() {
+  return useRequest<InferenceAPIConfigResponse[]>({
+    path: `${API_BASE_PATH}/inference/all`,
+    method: 'get',
   });
 }
