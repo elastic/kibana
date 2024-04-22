@@ -6,7 +6,6 @@
  */
 
 import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
-import { EuiSkeletonText } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
@@ -79,7 +78,10 @@ const CustomGridRow = styled.div.attrs<{
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
   min-height: '40px';
-  width: 100%;
+`;
+
+const CustomLazyRowPlaceholder = styled.div`
+  height: 80px;
 `;
 
 /**
@@ -136,8 +138,6 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     };
   }, []);
 
-  console.log({ rowIndex, intersectionEntry });
-
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -164,33 +164,37 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
       key={rowIndex}
       ref={intersectionRef}
     >
-      <EuiSkeletonText lines={3} isLoading={isRowLoading}>
-        <CustomGridRowCellWrapper>
-          {visibleColumns.map((column, colIndex) => {
-            // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
-            if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
-              return (
-                <>
-                  <Cell
-                    style={cellCustomStyle}
-                    colIndex={colIndex}
-                    visibleRowIndex={rowIndex}
-                    key={`${rowIndex},${colIndex}`}
-                  />
-                </>
-              );
-            }
-            return null;
-          })}
-        </CustomGridRowCellWrapper>
-        {/* Timeline Expanded Row */}
-        {canShowRowRenderer ? (
-          <Cell
-            colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
-            visibleRowIndex={rowIndex}
-          />
-        ) : null}
-      </EuiSkeletonText>
+      {isRowLoading ? (
+        <CustomLazyRowPlaceholder />
+      ) : (
+        <>
+          <CustomGridRowCellWrapper>
+            {visibleColumns.map((column, colIndex) => {
+              // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
+              if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
+                return (
+                  <>
+                    <Cell
+                      style={cellCustomStyle}
+                      colIndex={colIndex}
+                      visibleRowIndex={rowIndex}
+                      key={`${rowIndex},${colIndex}`}
+                    />
+                  </>
+                );
+              }
+              return null;
+            })}
+          </CustomGridRowCellWrapper>
+          {/* Timeline Expanded Row */}
+          {canShowRowRenderer ? (
+            <Cell
+              colIndex={visibleColumns.length - 1} // If the row is being shown, it should always be the last index
+              visibleRowIndex={rowIndex}
+            />
+          ) : null}
+        </>
+      )}
     </CustomGridRow>
   );
 });
