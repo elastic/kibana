@@ -17,12 +17,12 @@ interface FormattedMetric {
   fieldFormat: SerializedFieldFormat;
 }
 
-export type GroupsConfiguration = Array<{
+export interface AxisGroupConfiguration {
   groupId: string;
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Array<{ layer: string; accessor: string }>;
-}>;
+}
 
 export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
@@ -118,10 +118,10 @@ export function getAxesConfiguration(
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory
-): GroupsConfiguration {
+): AxisGroupConfiguration[] {
   const series = groupAxesByType(layers, tables);
 
-  const axisGroups: GroupsConfiguration = [];
+  const axisGroups: AxisGroupConfiguration[] = [];
 
   if (series.left.length > 0) {
     axisGroups.push({

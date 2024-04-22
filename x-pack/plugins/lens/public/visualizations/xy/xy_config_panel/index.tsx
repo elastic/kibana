@@ -18,7 +18,7 @@ import { State, XYState, AxesSettingsConfig } from '../types';
 import { isHorizontalChart } from '../state_helpers';
 import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { getAxesConfiguration, getXDomain, GroupsConfiguration } from '../axes_configuration';
+import { getAxesConfiguration, getXDomain, AxisGroupConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
@@ -68,7 +68,7 @@ const legendOptions: Array<{
 
 const getDataBounds = function (
   activeData: FramePublicAPI['activeData'],
-  axes: GroupsConfiguration
+  axes: AxisGroupConfiguration[]
 ) {
   const groups: Partial<Record<string, { min: number; max: number }>> = {};
   axes.forEach((axis) => {
@@ -99,7 +99,7 @@ const getDataBounds = function (
   return groups;
 };
 
-function hasPercentageAxis(axisGroups: GroupsConfiguration, groupId: string, state: XYState) {
+function hasPercentageAxis(axisGroups: AxisGroupConfiguration[], groupId: string, state: XYState) {
   return Boolean(
     axisGroups
       .find((group) => group.groupId === groupId)
@@ -122,7 +122,6 @@ export const XyToolbar = memo(function XyToolbar(
   props: VisualizationToolbarProps<State> & { useLegacyTimeAxis?: boolean }
 ) {
   const { state, setState, frame, useLegacyTimeAxis } = props;
-
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);

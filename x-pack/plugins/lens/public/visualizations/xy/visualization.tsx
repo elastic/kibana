@@ -111,7 +111,7 @@ import {
   validateLayersForDimension,
   isTimeChart,
 } from './visualization_helpers';
-import { groupAxesByType } from './axes_configuration';
+import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
 import type { XYByValueAnnotationLayerConfig, XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
@@ -942,6 +942,93 @@ export const getXyVisualization = ({
           ),
         })
       );
+    }
+
+    const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
+    const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
+    const logAxisGroups = axisGroups.filter(
+      ({ groupId }) =>
+        (groupId === 'left' && state.yLeftScale === 'log') ||
+        (groupId === 'right' && state.yRightScale === 'log')
+    );
+
+    if (logAxisGroups.length > 0) {
+      logAxisGroups
+        .map((axis) => {
+          const mixedDomainSeries = axis.series.filter((series) => {
+            let hasNegValues = false;
+            let hasPosValues = false;
+            const arr = activeData?.[series.layer]?.rows ?? [];
+            for (let index = 0; index < arr.length; index++) {
+              const value = arr[index][series.accessor];
+
+              if (value < 0) {
+                hasNegValues = true;
+              } else {
+                hasPosValues = true;
+              }
+
+              if (hasNegValues && hasPosValues) {
+                return true;
+              }
+            }
+
+            return false;
+          });
+          return {
+            ...axis,
+            mixedDomainSeries,
+          };
+        })
+        .forEach((axisGroup) => {
+          if (axisGroup.mixedDomainSeries.length === 0) return;
+          const { groupId } = axisGroup;
+
+          warnings.push({
+            uniqueId: `mixedLogScale-${groupId}`,
+            severity: 'warning',
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.xyVisualization.mixedLogScaleWarning"
+                defaultMessage="The {axisName} axis is set to a logarithmic scale but {n} of the datasets contains positive and negative data."
+                values={{
+                  axisName:
+                    groupId === 'left' ? (
+                      <FormattedMessage
+                        id="xpack.lens.xyVisualization.mixedLogScaleWarningLeft"
+                        defaultMessage="left"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.lens.xyVisualization.mixedLogScaleWarningRight"
+                        defaultMessage="right"
+                      />
+                    ),
+                  n: axisGroup.mixedDomainSeries.length,
+                }}
+              />
+            ),
+            displayLocations: [{ id: 'toolbar' }],
+            fixableInEditor: true,
+          });
+
+          axisGroup.mixedDomainSeries.forEach(({ accessor }) => {
+            warnings.push({
+              uniqueId: `mixedLogScale-dimension-${accessor}`,
+              severity: 'warning',
+              shortMessage: '',
+              longMessage: (
+                <FormattedMessage
+                  id="xpack.lens.xyVisualization.mixedLogScaleWarning"
+                  defaultMessage="This metric is used on logarithmic scale and contains positive and negative data."
+                />
+              ),
+              displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],
+              fixableInEditor: true,
+            });
+          });
+        });
     }
 
     const info = getNotifiableFeatures(state, frame, paletteService, fieldFormats);
