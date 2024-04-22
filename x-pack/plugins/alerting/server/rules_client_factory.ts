@@ -52,7 +52,6 @@ export interface RulesClientFactoryOpts {
   alertsService: AlertsService | null;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
-  maxAlertsPerRun: AlertingRulesConfig['run']['alerts']['max'];
 }
 
 export class RulesClientFactory {
@@ -77,7 +76,6 @@ export class RulesClientFactory {
   private alertsService!: AlertsService | null;
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
-  private maxAlertsPerRun!: AlertingRulesConfig['run']['alerts']['max'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -104,7 +102,6 @@ export class RulesClientFactory {
     this.alertsService = options.alertsService;
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
-    this.maxAlertsPerRun = options.maxAlertsPerRun;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -137,7 +134,6 @@ export class RulesClientFactory {
       alertsService: this.alertsService,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
-      maxAlertsPerRun: this.maxAlertsPerRun,
 
       async getUserName() {
         if (!securityPluginStart) {

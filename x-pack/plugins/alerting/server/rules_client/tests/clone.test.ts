@@ -24,7 +24,6 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { getBeforeSetup } from './lib';
 import { RuleDomain } from '../../application/rule/types';
 import { ConstructorOptions, RulesClient } from '../rules_client';
-import { DEFAULT_MAX_ALERTS } from '../../config';
 
 describe('clone', () => {
   const taskManager = taskManagerMock.createStart();
@@ -67,7 +66,6 @@ describe('clone', () => {
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    maxAlertsPerRun: DEFAULT_MAX_ALERTS,
   };
 
   let rulesClient: RulesClient;

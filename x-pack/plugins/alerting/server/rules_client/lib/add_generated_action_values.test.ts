@@ -22,7 +22,6 @@ import { alertingAuthorizationMock } from '../../authorization/alerting_authoriz
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ConstructorOptions } from '../rules_client';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { DEFAULT_MAX_ALERTS } from '../../config';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',
@@ -66,7 +65,6 @@ describe('addGeneratedActionValues()', () => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
     isSystemAction: jest.fn(),
-    maxAlertsPerRun: DEFAULT_MAX_ALERTS,
   };
 
   const mockAction: RuleAction = {

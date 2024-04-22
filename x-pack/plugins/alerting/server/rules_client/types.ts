@@ -84,7 +84,6 @@ export interface RulesClientContext {
   readonly alertsService: AlertsService | null;
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
-  readonly maxAlertsPerRun: AlertingRulesConfig['run']['alerts']['max'];
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

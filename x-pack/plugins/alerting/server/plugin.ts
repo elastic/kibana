@@ -526,7 +526,6 @@ export class AlertingPlugin {
       alertsService: this.alertsService,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
-      maxAlertsPerRun: this.config.rules.run.alerts.max,
     });
 
     rulesSettingsClientFactory.initialize({

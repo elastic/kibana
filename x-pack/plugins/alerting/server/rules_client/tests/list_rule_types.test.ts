@@ -26,7 +26,6 @@ import { getBeforeSetup } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { DEFAULT_MAX_ALERTS } from '../../config';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -63,7 +62,6 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
-  maxAlertsPerRun: DEFAULT_MAX_ALERTS,
 };
 
 beforeEach(() => {
