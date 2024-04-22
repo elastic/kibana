@@ -54,6 +54,7 @@ export const PresentationPanelInternal = <
     hidePanelTitle,
     panelDescription,
     defaultPanelTitle,
+    defaultPanelDescription,
     rawViewMode,
     parentHidePanelTitle,
   ] = useBatchedPublishingSubjects(
@@ -63,6 +64,7 @@ export const PresentationPanelInternal = <
     api?.hidePanelTitle,
     api?.panelDescription,
     api?.defaultPanelTitle,
+    api?.defaultPanelDescription,
     viewModeSubject,
     api?.parentApi?.hidePanelTitle
   );
@@ -117,9 +119,9 @@ export const PresentationPanelInternal = <
           showBadges={showBadges}
           getActions={getActions}
           actionPredicate={actionPredicate}
-          panelDescription={panelDescription}
           showNotifications={showNotifications}
           panelTitle={panelTitle ?? defaultPanelTitle}
+          panelDescription={panelDescription ?? defaultPanelDescription}
         />
       )}
       {blockingError && api && (
