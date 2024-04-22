@@ -26,7 +26,6 @@ import {
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-  StreamActionParams,
   RunApiLatestResponse,
 } from '../../../common/bedrock/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
@@ -204,7 +203,11 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
+  public async runApi({
+    body,
+    model: reqModel,
+    signal,
+  }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
     const currentModel = reqModel ?? this.model;
     const path = `/model/${currentModel}/invoke`;
@@ -214,6 +217,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       url: `${this.url}${path}`,
       method: 'post' as Method,
       data: body,
+      signal,
       // give up to 2 minutes for response
       timeout: 120000,
     };
@@ -235,7 +239,8 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
   private async streamApi({
     body,
     model: reqModel,
-  }: StreamActionParams): Promise<StreamingResponse> {
+    signal,
+  }: RunActionParams): Promise<StreamingResponse> {
     // set model on per request basis
     const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
     const signed = this.signRequest(body, path, true);
@@ -247,6 +252,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       responseSchema: StreamingResponseSchema,
       data: body,
       responseType: 'stream',
+      signal,
     });
 
     return response.data.pipe(new PassThrough());
@@ -266,10 +272,12 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     system,
     temperature,
+    signal,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
+      signal,
     })) as unknown as IncomingMessage;
     return res;
   }
@@ -288,10 +296,12 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     system,
     temperature,
+    signal,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
       body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
       model,
+      signal,
     });
     return { message: res.completion.trim() };
   }

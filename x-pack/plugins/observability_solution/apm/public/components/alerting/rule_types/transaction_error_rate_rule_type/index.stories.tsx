@@ -38,10 +38,7 @@ export default {
   ],
 };
 
-export const CreatingInApmServiceOverview: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
+export const CreatingInApmServiceOverview: Story<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -74,10 +71,7 @@ CreatingInApmServiceOverview.args = {
   },
 };
 
-export const CreatingInStackManagement: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
+export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
   const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
