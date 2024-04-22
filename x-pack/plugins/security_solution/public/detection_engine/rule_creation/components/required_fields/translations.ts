@@ -48,3 +48,21 @@ export const ADD_REQUIRED_FIELD = i18n.translate(
     defaultMessage: 'Add required field',
   }
 );
+
+export const FIELD_NAME_NOT_FOUND_WARNING = (name: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldNameNotFoundWarning',
+    {
+      values: { name },
+      defaultMessage: `Field "{name}" is not found within specified index patterns`,
+    }
+  );
+
+export const FIELD_TYPE_NOT_FOUND_WARNING = (name: string, type: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldTypeNotFoundWarning',
+    {
+      values: { name, type },
+      defaultMessage: `Field "{name}" with type "{type}" is not found within specified index patterns`,
+    }
+  );

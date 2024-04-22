@@ -1118,7 +1118,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           {!isMlRule(ruleType) && (
             <>
-              <RequiredFields path="requiredFields" indexPatternFields={indexPattern.fields} />
+              <RequiredFields
+                path="requiredFields"
+                indexPatternFields={indexPattern.fields}
+                isIndexPatternLoading={isIndexPatternLoading}
+              />
               <EuiSpacer size="xl" />
             </>
           )}

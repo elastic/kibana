@@ -19,16 +19,20 @@ import type { RequiredFieldWithOptionalEcs } from './types';
 interface RequiredFieldsProps {
   path: string;
   indexPatternFields?: DataViewFieldBase[];
+  isIndexPatternLoading?: boolean;
 }
 
-export const RequiredFields = ({ path, indexPatternFields = [] }: RequiredFieldsProps) => {
+export const RequiredFields = ({
+  path,
+  indexPatternFields = [],
+  isIndexPatternLoading = false,
+}: RequiredFieldsProps) => {
   const useFormDataResult = useFormData();
-  const [_formData] = useFormDataResult;
 
   return (
     <UseArray path={path} initialNumberOfItems={0}>
-      {({ items, addItem, removeItem, form }) => {
-        const formData = form.getFormData();
+      {({ items, addItem, removeItem }) => {
+        const [formData] = useFormDataResult;
         const fieldValue: RequiredFieldWithOptionalEcs[] = formData[path] ?? [];
 
         const selectedFieldNames = fieldValue.map(({ name }) => name);
@@ -59,30 +63,26 @@ export const RequiredFields = ({ path, indexPatternFields = [] }: RequiredFields
 
         const isEmptyRowDisplayed = !!fieldValue.find(({ name }) => name === '');
 
-        const areIndexPatternFieldsAvailable = indexPatternFields.length > 0;
+        const isAddNewFieldButtonDisabled =
+          isIndexPatternLoading || isEmptyRowDisplayed || availableNameOptions.length === 0;
 
-        const nameWarnings = fieldValue.reduce<Record<string, string>>((warnings, { name }) => {
-          if (areIndexPatternFieldsAvailable && name !== '' && !allFieldNames.includes(name)) {
-            warnings[name] = `Field "${name}" is not found within specified index patterns`;
-          }
-          return warnings;
-        }, {});
-
-        const typeWarnings = fieldValue.reduce<Record<string, string>>(
-          (warnings, { name, type }) => {
-            if (
-              areIndexPatternFieldsAvailable &&
-              name !== '' &&
-              !typesByFieldName[name]?.includes(type)
-            ) {
-              warnings[
-                name
-              ] = `Field "${name}" with type "${type}" is not found within specified index patterns`;
+        const nameWarnings = fieldValue
+          .filter(({ name }) => name !== '')
+          .reduce<Record<string, string>>((warnings, { name }) => {
+            if (!isIndexPatternLoading && !allFieldNames.includes(name)) {
+              warnings[name] = i18n.FIELD_NAME_NOT_FOUND_WARNING(name);
             }
             return warnings;
-          },
-          {}
-        );
+          }, {});
+
+        const typeWarnings = fieldValue
+          .filter(({ name }) => name !== '')
+          .reduce<Record<string, string>>((warnings, { name, type }) => {
+            if (!isIndexPatternLoading && !typesByFieldName[name]?.includes(type)) {
+              warnings[name] = i18n.FIELD_TYPE_NOT_FOUND_WARNING(name, type);
+            }
+            return warnings;
+          }, {});
 
         const getWarnings = (name: string) => ({
           nameWarning: nameWarnings[name] || '',
@@ -133,7 +133,8 @@ export const RequiredFields = ({ path, indexPatternFields = [] }: RequiredFields
                   size="xs"
                   iconType="plusInCircle"
                   onClick={addItem}
-                  isDisabled={availableNameOptions.length === 0 || isEmptyRowDisplayed}
+                  isDisabled={isAddNewFieldButtonDisabled}
+                  data-test-subj="addRequiredFieldButton"
                 >
                   {i18n.ADD_REQUIRED_FIELD}
                 </EuiButtonEmpty>
