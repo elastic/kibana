@@ -6,7 +6,6 @@
  */
 
 import {
-  copyToClipboard,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
