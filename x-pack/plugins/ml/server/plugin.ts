@@ -75,6 +75,7 @@ import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
+import { inferenceModelRoutes } from './routes/inference_models';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -258,6 +259,7 @@ export class MlServerPlugin
     }
 
     // Register Miscellaneous routes
+    inferenceModelRoutes(routeInit, plugins.cloud);
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
