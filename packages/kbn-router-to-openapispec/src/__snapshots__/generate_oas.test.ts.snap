@@ -30,6 +30,7 @@ Object {
   "openapi": "3.0.0",
   "paths": Object {
     "/foo/{id}": Object {
+      "description": "",
       "get": Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
@@ -88,7 +89,6 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
       },
@@ -133,6 +133,7 @@ Object {
   "openapi": "3.0.0",
   "paths": Object {
     "/bar": Object {
+      "description": "versioned route",
       "get": Object {
         "operationId": "/bar#0",
         "parameters": Array [
@@ -154,6 +155,7 @@ Object {
             "application/json; Elastic-Api-Version=oas-test-version-1": Object {
               "schema": Object {
                 "additionalProperties": false,
+                "description": "foo",
                 "properties": Object {
                   "foo": Object {
                     "type": "string",
@@ -187,6 +189,7 @@ Object {
               "application/json; Elastic-Api-Version=oas-test-version-1": Object {
                 "schema": Object {
                   "additionalProperties": false,
+                  "description": "fooResponse",
                   "properties": Object {
                     "fooResponse": Object {
                       "type": "string",
@@ -213,12 +216,13 @@ Object {
                 },
               },
             },
-            "description": "No description",
+            "description": "",
           },
         },
       },
     },
     "/foo/{id}": Object {
+      "description": "route",
       "get": Object {
         "operationId": "/foo/{id}#0",
         "parameters": Array [
@@ -234,7 +238,7 @@ Object {
             },
           },
           Object {
-            "description": undefined,
+            "description": "id",
             "in": "path",
             "name": "id",
             "required": true,
@@ -244,7 +248,7 @@ Object {
             },
           },
           Object {
-            "description": undefined,
+            "description": "page",
             "in": "query",
             "name": "page",
             "required": false,
@@ -343,7 +347,6 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
       },

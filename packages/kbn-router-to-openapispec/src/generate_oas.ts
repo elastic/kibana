@@ -118,7 +118,7 @@ const extractVersionedResponses = (
       const schema = converter.convert(maybeSchema);
       acc[statusCode] = {
         ...acc[statusCode],
-        description: route.options.description ?? 'No description',
+        description: '',
         content: {
           ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
           [getVersionedContentString(handler.options.version)]: {
@@ -184,6 +184,7 @@ const processVersionedRouter = (
         handler && extractValidationSchemaFromVersionedHandler(handler)?.request?.body
       );
       const path: OpenAPIV3.PathItemObject = {
+        description: route.options.description ?? '',
         [route.method]: {
           requestBody: hasBody
             ? {
@@ -219,7 +220,6 @@ const extractResponses = (route: InternalRouterRoute, converter: OasConverter) =
           const oasSchema = converter.convert(schema.body);
           acc[statusCode] = {
             ...acc[statusCode],
-            description: route.options.description ?? 'No description',
             content: {
               ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
               [getVersionedContentString(LATEST_SERVERLESS_VERSION)]: {
@@ -271,6 +271,7 @@ const processRouter = (
       }
 
       const path: OpenAPIV3.PathItemObject = {
+        description: route.options.description ?? '',
         [route.method]: {
           requestBody: !!validationSchemas?.body
             ? {

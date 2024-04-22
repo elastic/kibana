@@ -52,10 +52,18 @@ const getRouterDefaults = () => ({
   isVersioned: false,
   path: '/foo/{id}',
   method: 'get',
+  options: {
+    tags: ['foo'],
+    description: 'route',
+  },
   validationSchemas: {
     request: {
-      params: schema.object({ id: schema.string({ maxLength: 36 }) }),
-      query: schema.object({ page: schema.number({ max: 999, min: 1, defaultValue: 1 }) }),
+      params: schema.object({
+        id: schema.string({ maxLength: 36, meta: { description: 'id' } }),
+      }),
+      query: schema.object({
+        page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
+      }),
       body: testSchema,
     },
     response: {
@@ -64,7 +72,6 @@ const getRouterDefaults = () => ({
       },
     },
   },
-  options: { tags: ['foo'] },
   handler: jest.fn(),
 });
 
@@ -72,6 +79,7 @@ const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
+    description: 'versioned route',
     access: 'public',
   },
   handlers: [
@@ -79,9 +87,16 @@ const getVersionedRouterDefaults = () => ({
       fn: jest.fn(),
       options: {
         validate: {
-          request: { body: schema.object({ foo: schema.string() }) },
+          request: {
+            body: schema.object({ foo: schema.string() }, { meta: { description: 'foo' } }),
+          },
           response: {
-            [200]: { body: schema.object({ fooResponse: schema.string() }) },
+            [200]: {
+              body: schema.object(
+                { fooResponse: schema.string() },
+                { meta: { description: 'fooResponse' } }
+              ),
+            },
           },
         },
         version: 'oas-test-version-1',
