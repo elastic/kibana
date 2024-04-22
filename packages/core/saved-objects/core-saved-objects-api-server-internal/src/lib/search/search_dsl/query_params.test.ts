@@ -69,9 +69,18 @@ const registerTypes = (registry: SavedObjectTypeRegistry) => {
       defaultSearchField: 'name',
     },
   });
+
+  registry.registerType({
+    name: 'nested',
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      properties: { name: { type: 'nested' } },
+    },
+  });
 };
 
-const ALL_TYPES = ['pending', 'saved', 'shared', 'global'];
+const ALL_TYPES = ['pending', 'saved', 'shared', 'global', 'nested'];
 // get all possible subsets (combination) of all types
 const ALL_TYPE_SUBSETS = ALL_TYPES.reduce(
   (subsets, value) => subsets.concat(subsets.map((set) => [...set, value])),
@@ -595,12 +604,12 @@ describe('#getQueryParams', () => {
         });
         const shouldClauses = result.query.bool.should;
 
-        expect(shouldClauses.length).toBe(5);
+        expect(shouldClauses.length).toBe(6);
 
         const mppClauses = shouldClauses.slice(1);
 
         expect(mppClauses.map((clause: any) => Object.keys(clause.match_phrase_prefix)[0])).toEqual(
-          ['pending.title', 'saved.title', 'shared.title', 'global.title']
+          ['pending.title', 'saved.title', 'shared.title', 'global.title', 'nested.title']
         );
       });
 
