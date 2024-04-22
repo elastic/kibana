@@ -49,10 +49,13 @@ export const initializeSingleMetricViewerControls = (
   };
 
   const singleMetricViewerComparators: StateComparators<AnomalySwimLaneControlsState> = {
-    jobIds: [jobIds, jobIds.next, fastIsEqual],
-    selectedDetectorIndex: [selectedDetectorIndex, selectedDetectorIndex.next],
-    selectedEntities: [selectedEntities, selectedEntities.next, fastIsEqual],
-    functionDescription: [functionDescription, functionDescription.next],
+    jobIds: [jobIds, (ids) => jobIds.next(ids), fastIsEqual],
+    selectedDetectorIndex: [selectedDetectorIndex, (index) => selectedDetectorIndex.next(index)],
+    selectedEntities: [selectedEntities, (items) => selectedEntities.next(items), fastIsEqual],
+    functionDescription: [
+      functionDescription,
+      (description) => functionDescription.next(description),
+    ],
   };
 
   return {
