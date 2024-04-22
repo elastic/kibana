@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  reactRouterNavigate,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { CustomCard, FeaturedCard } from '../packages_list/types';
@@ -30,14 +27,8 @@ export function useCustomCardsForCategory(
   const getUrlForApp = application?.getUrlForApp;
   const basePath = http?.basePath;
 
-  const { href: systemLogsUrl } = reactRouterNavigate(
-    history,
-    `/systemLogs/${location.search}`
-  );
-  const { href: customLogsUrl } = reactRouterNavigate(
-    history,
-    `/customLogs/${location.search}`
-  );
+  const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
+  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
 
   switch (category) {
     case 'apm':
@@ -46,8 +37,7 @@ export function useCustomCardsForCategory(
           id: 'apm-virtual',
           type: 'virtual',
           title: 'Elastic APM',
-          description:
-            'Collect distributed traces from your applications with Elastic APM',
+          description: 'Collect distributed traces from your applications with Elastic APM',
           name: 'apm',
           categories: ['observability'],
           icons: [
@@ -71,9 +61,8 @@ export function useCustomCardsForCategory(
             {
               type: 'svg',
               src:
-                basePath?.prepend(
-                  '/plugins/observabilityOnboarding/assets/opentelemetry.svg'
-                ) ?? '',
+                basePath?.prepend('/plugins/observabilityOnboarding/assets/opentelemetry.svg') ??
+                '',
             },
           ],
           url: `${getUrlForApp?.('apm')}/onboarding?agent=openTelemetry` ?? '',
@@ -121,8 +110,7 @@ export function useCustomCardsForCategory(
           id: 'aws-virtual',
           type: 'virtual',
           title: 'AWS',
-          description:
-            'Collect logs and metrics from Amazon Web Services (AWS)',
+          description: 'Collect logs and metrics from Amazon Web Services (AWS)',
           name: 'aws',
           categories: ['observability'],
           icons: [],
@@ -153,16 +141,13 @@ export function useCustomCardsForCategory(
           id: 'system-logs',
           type: 'virtual',
           title: 'Stream host system logs',
-          description:
-            'The quickest path to onboard log data from your own machine or server',
+          description: 'The quickest path to onboard log data from your own machine or server',
           name: 'system-logs-virtual',
           categories: ['observability'],
           icons: [
             {
               type: 'svg',
-              src:
-                basePath?.prepend('/plugins/home/assets/logos/system.svg') ??
-                '',
+              src: basePath?.prepend('/plugins/home/assets/logos/system.svg') ?? '',
             },
           ],
           url: systemLogsUrl,
@@ -173,8 +158,7 @@ export function useCustomCardsForCategory(
           id: 'logs-logs',
           type: 'virtual',
           title: 'Stream log files',
-          description:
-            'Stream any logs into Elastic in a simple way and explore their data',
+          description: 'Stream any logs into Elastic in a simple way and explore their data',
           name: 'logs-logs-virtual',
           categories: ['observability'],
           icons: [
