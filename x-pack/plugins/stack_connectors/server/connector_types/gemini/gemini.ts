@@ -6,16 +6,17 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import aws from 'aws4';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+// import aws from 'aws4';
 import { AxiosError, Method } from 'axios';
-import { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
+// import { IncomingMessage } from 'http';
+// import { PassThrough } from 'stream';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   InvokeAIActionParamsSchema,
-  StreamingResponseSchema,
+  // StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
 } from '../../../common/gemini/schema';
@@ -26,23 +27,33 @@ import {
   RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-  StreamActionParams,
+  // StreamActionParams,
   RunApiLatestResponse,
 } from '../../../common/gemini/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/gemini/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
-  StreamingResponse,
+  // StreamingResponse,
 } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
-interface SignedRequest {
-  host: string;
-  headers: Record<string, string>;
-  body: string;
-  path: string;
+
+interface GeminiRequestBody {
+  contents: {
+    parts: {
+      text: string;
+    }[];
+  }[];
 }
+
+
+// interface SignedRequest {
+//   host: string;
+//   headers: Record<string, string>;
+//   body: string;
+//   path: string;
+// }
 
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -116,32 +127,32 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
    * @param body The request body to be signed.
    * @param path The path of the request URL.
    */
-  private signRequest(body: string, path: string, stream: boolean) {
-    const { host } = new URL(this.url);
-    return aws.sign(
-      {
-        host,
-        headers: stream
-          ? {
-              accept: 'application/vnd.amazon.eventstream',
-              'Content-Type': 'application/json',
-              'x-amzn-gemini-accept': '*/*',
-            }
-          : {
-              'Content-Type': 'application/json',
-              Accept: '*/*',
-            },
-        body,
-        path,
-        // Despite AWS docs, this value does not always get inferred. We need to always send it
-        service: 'gemini',
-      },
-      {
-        secretAccessKey: this.secrets.secret,
-        accessKeyId: this.secrets.accessKey,
-      }
-    ) as SignedRequest;
-  }
+  // private signRequest(body: string, path: string, stream: boolean) {
+  //   const { host } = new URL(this.url);
+  //   return aws.sign(
+  //     {
+  //       host,
+  //       headers: stream
+  //         ? {
+  //             accept: 'application/vnd.amazon.eventstream',
+  //             'Content-Type': 'application/json',
+  //             'x-amzn-gemini-accept': '*/*',
+  //           }
+  //         : {
+  //             'Content-Type': 'application/json',
+  //             Accept: '*/*',
+  //           },
+  //       body,
+  //       path,
+  //       // Despite AWS docs, this value does not always get inferred. We need to always send it
+  //       service: 'gemini',
+  //     },
+  //     {
+  //       secretAccessKey: this.secrets.secret,
+  //       accessKeyId: this.secrets.accessKey,
+  //     }
+  //   ) as SignedRequest;
+  // }
 
   /**
    *  retrieves a dashboard from the Kibana server and checks if the
@@ -190,13 +201,18 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
     params: SubActionRequestParams<RunApiLatestResponse> // : SubActionRequestParams<RunApiLatestResponseSchema>
   ): Promise<RunActionResponse> {
     const response = await this.request(params);
+    console.log('RESPONSE', response);
     // keeping the response the same as claude 2 for our APIs
     // adding the usage object for better token tracking
     return {
-      completion: parseContent(response.data.content),
-      stop_reason: response.data.stop_reason,
-      usage: response.data.usage,
+      completion: parseContent(response.data.content)
+      
     };
+    // return {
+    //   completion: parseContent(response.data.content),
+    //   stop_reason: response.data.stop_reason,
+    //   usage: response.data.usage,
+    // };
   }
 
   /**
@@ -206,21 +222,57 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
    */
   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
-    const currentModel = reqModel ?? this.model;
-    const path = `/model/${currentModel}/invoke`;
-    const signed = this.signRequest(body, path, false);
+    // const currentModel = reqModel ?? this.model;
+    const apiKey = this.apiKey
+//     const generationConfig = {
+//       stopSequences: ["red"],
+//       maxOutputTokens: 200,
+//       temperature: 0,
+//       topP: 0.1,
+//       topK: 16,
+//     };
+
+//     // Access your API key as an environment variable (see "Set up your API key" above)
+//     const genAI = new GoogleGenerativeAI(apiKey);
+//     // For text-only input, use the gemini-pro model
+//     const model = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig});
+
+//     const prompt = "Write a story about a magic backpack."
+// // 
+//     const result = await model.generateContent(prompt);
+//     const response = await result.response;
+//     const text = response.text();
+//     return {
+//       completion: text
+//     };
+    
+  const requestBody: GeminiRequestBody = {
+    contents: [
+      {
+        parts: [
+          {
+            text: "Write a story about a magic backpack"
+          }
+        ]
+      }
+    ]
+  };
+
+    const path = `/v1beta/models/gemini-pro:generateContent?key=${apiKey}`
+    // const path = `/model/${currentModel}/invoke`;
+    // const signed = this.signRequest(body, path, false);
     const requestArgs = {
-      ...signed,
+      // ...signed,
       url: `${this.url}${path}`,
       method: 'post' as Method,
-      data: body,
+      data: requestBody,
       // give up to 2 minutes for response
       timeout: 120000,
     };
     // possible api received deprecated arguments, which will still work with the deprecated Claude 2 models
-    if (usesDeprecatedArguments(body)) {
-      return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
-    }
+    // if (usesDeprecatedArguments(body)) {
+    //   return this.runApiDeprecated({ ...requestArgs, responseSchema: RunActionResponseSchema });
+    // }
     return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
   }
 
@@ -232,25 +284,25 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
    * @param body The stringified request body to be sent in the POST request.
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  private async streamApi({
-    body,
-    model: reqModel,
-  }: StreamActionParams): Promise<StreamingResponse> {
-    // set model on per request basis
-    const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
-    const signed = this.signRequest(body, path, true);
+  // private async streamApi({
+  //   body,
+  //   model: reqModel,
+  // }: StreamActionParams): Promise<StreamingResponse> {
+  //   // set model on per request basis
+  //   const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
+  //   const signed = this.signRequest(body, path, true);
 
-    const response = await this.request({
-      ...signed,
-      url: `${this.url}${path}`,
-      method: 'post',
-      responseSchema: StreamingResponseSchema,
-      data: body,
-      responseType: 'stream',
-    });
+  //   const response = await this.request({
+  //     ...signed,
+  //     url: `${this.url}${path}`,
+  //     method: 'post',
+  //     responseSchema: StreamingResponseSchema,
+  //     data: body,
+  //     responseType: 'stream',
+  //   });
 
-    return response.data.pipe(new PassThrough());
-  }
+  //   return response.data.pipe(new PassThrough());
+  // }
 
   /**
    *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
@@ -260,19 +312,19 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({
-    messages,
-    model,
-    stopSequences,
-    system,
-    temperature,
-  }: InvokeAIActionParams): Promise<IncomingMessage> {
-    const res = (await this.streamApi({
-      body: JSON.stringify(formatGeminiBody({ messages, stopSequences, system, temperature })),
-      model,
-    })) as unknown as IncomingMessage;
-    return res;
-  }
+  // public async invokeStream({
+  //   messages,
+  //   model,
+  //   stopSequences,
+  //   system,
+  //   temperature,
+  // }: InvokeAIActionParams): Promise<IncomingMessage> {
+  //   const res = (await this.streamApi({
+  //     body: JSON.stringify(formatGeminiBody({ messages, stopSequences, system, temperature })),
+  //     model,
+  //   })) as unknown as IncomingMessage;
+  //   return res;
+  // }
 
   /**
    * Deprecated. Use invokeStream instead.
@@ -294,6 +346,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon G
   }
 }
 
+
+
+
 const formatGeminiBody = ({
   messages,
   stopSequences,
@@ -306,7 +361,7 @@ const formatGeminiBody = ({
   // optional system message to be sent to the API
   system?: string;
 }) => ({
-  anthropic_version: 'Gemini-2023-05-31',
+  gemini_version: 'Gemini-2023-05-31',
   ...ensureMessageFormat(messages, system),
   max_tokens: DEFAULT_TOKEN_LIMIT,
   stop_sequences: stopSequences,

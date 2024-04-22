@@ -17,6 +17,7 @@ export const ConfigSchema = schema.object({
 export const SecretsSchema = schema.object({
   accessKey: schema.string(),
   secret: schema.string(),
+  apiKey: schema.string(),
 });
 
 export const RunActionParamsSchema = schema.object({

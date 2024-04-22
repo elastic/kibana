@@ -19,7 +19,7 @@ import * as i18n from './translations';
 const human = '\n\nHuman:';
 
 export const DEFAULT_BODY = JSON.stringify({
-  anthropic_version: 'gemini-1.0-pro-001',
+  gemini_version: 'gemini-1.0-pro-001',
   messages: [{ content: 'Hello world', role: 'user' }],
   max_tokens: DEFAULT_TOKEN_LIMIT,
   stop_sequences: [human],
@@ -97,26 +97,50 @@ export const geminiSecrets: SecretsFieldSchema[] = [
       />
     ),
   },
-  // {
-  //   id: 'secret',
-  //   label: i18n.SECRET,
-  //   isPasswordField: true,
-  //   helpText: (
-  //     <FormattedMessage
-  //       defaultMessage="The AWS secret for HTTP Basic authentication. For more details about generating AWS security credentials, refer to the {geminiAPIKeyDocs}."
-  //       id="xpack.stackConnectors.components.gemini.geminiSecretDocumentation"
-  //       values={{
-  //         geminiAPIKeyDocs: (
-  //           <EuiLink
-  //             data-test-subj="aws-api-keys-doc"
-  //             href="https://docs.aws.amazon.com/IAM/latest/UserGuide/security-creds.html"
-  //             target="_blank"
-  //           >
-  //             {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
-  //           </EuiLink>
-  //         ),
-  //       }}
-  //     />
-  //   ),
-  // },
+  {
+    id: 'secret',
+    label: i18n.SECRET,
+    isPasswordField: true,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="To use the Gemini API, you'll need an API key. If you don't already have one, create a key in Google AI Studio.
+        {geminiAPIKeyDocs}.."
+        id="xpack.stackConnectors.components.gemini.geminiSecretDocumentation"
+        values={{
+          geminiAPIKeyDocs: (
+            <EuiLink
+              data-test-subj="aws-api-keys-doc"
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+            >
+              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+  {
+    id: 'apiKey',
+    label: i18n.API_KEY,
+    isPasswordField: true,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="To use the Gemini API, you'll need an API key. If you don't already have one, create a key in Google AI Studio.
+        {geminiAPIKeyDocs}.."
+        id="xpack.stackConnectors.components.gemini.geminiSecretDocumentation"
+        values={{
+          geminiAPIKeyDocs: (
+            <EuiLink
+              data-test-subj="aws-api-keys-doc"
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+            >
+              {`${i18n.gemini} ${i18n.DOCUMENTATION}`}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
 ];

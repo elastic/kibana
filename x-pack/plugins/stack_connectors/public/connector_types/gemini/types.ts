@@ -22,6 +22,7 @@ export interface Config {
 export interface Secrets {
   accessKey: string;
   secret: string;
+  apiKey: string;
 }
 
 export type GeminiConnector = ConnectorTypeModel<Config, Secrets, GeminiActionParams>;

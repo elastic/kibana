@@ -1350,7 +1350,8 @@
         "type": "object",
         "required": [
           "accessKey",
-          "secret"
+          "secret",
+          "apiKey"
         ],
         "properties": {
           "accessKey": {
@@ -1360,6 +1361,10 @@
           "secret": {
             "type": "string",
             "description": "The Google secret for authentication."
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "API Key to authenticate to Google Gemini."
           }
         }
       },

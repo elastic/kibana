@@ -31,6 +31,10 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.gemini.se
   defaultMessage: 'Secret',
 });
 
+export const API_KEY = i18n.translate('xpack.stackConnectors.components.gemini.apiKey', {
+  defaultMessage: 'API Key',
+});
+
 export const gemini = i18n.translate('xpack.stackConnectors.components.gemini.title', {
   defaultMessage: 'Google Gemini',
 });
