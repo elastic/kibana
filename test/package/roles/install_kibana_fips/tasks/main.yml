@@ -35,7 +35,7 @@
 - name: bootstrap kibana
   shell:
     chdir: "{{ kibana_src_path }}"
-    cmd: "yarn kbn bootstrap"
+    cmd: "yarn kbn reset && yarn kbn bootstrap"
 
 # /var/log/kibana
 # es temp dir
