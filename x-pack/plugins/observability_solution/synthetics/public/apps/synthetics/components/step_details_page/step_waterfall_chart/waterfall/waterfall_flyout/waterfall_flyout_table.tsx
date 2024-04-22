@@ -67,9 +67,9 @@ export const Table = (props: Props) => {
       </EuiText>
       <EuiSpacer size="s" />
       <TableWithoutHeader
-        tableLayout={'fixed'}
+        tableLayout="fixed"
         compressed
-        responsive={false}
+        responsiveBreakpoint={false}
         columns={columns}
         items={rows}
       />
