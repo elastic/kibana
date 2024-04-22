@@ -229,9 +229,9 @@ export class DashboardPageObject extends FtrService {
     await this.expectExistsDashboardLandingPage();
   }
 
-  public async clickClone() {
-    this.log.debug('Clicking clone');
-    await this.testSubjects.click('dashboardClone');
+  public async clickDuplicate() {
+    this.log.debug('Clicking duplicate');
+    await this.testSubjects.click('dashboardDuplication');
   }
 
   /**
@@ -457,6 +457,32 @@ export class DashboardPageObject extends FtrService {
     this.log.debug(`Naming dashboard ` + dashboardName);
     await this.testSubjects.click('dashboardRenameButton');
     await this.testSubjects.setValue('savedObjectTitle', dashboardName);
+  }
+
+  public async modifyExistingDashboardDetails(
+    dashboard: string,
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
+  ) {
+    await this.openSettingsFlyout();
+
+    await this.retry.try(async () => {
+      this.log.debug('entering new title');
+      await this.testSubjects.setValue('dashboardTitleInput', dashboard);
+
+      if (saveOptions.storeTimeWithDashboard !== undefined) {
+        await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      }
+
+      if (saveOptions.tags) {
+        await this.selectDashboardTags(saveOptions.tags);
+      }
+
+      this.log.debug('DashboardPage.applyCustomization');
+      await this.testSubjects.click('applyCustomizeDashboardButton');
+
+      this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
+      return await this.testSubjects.exists('dashboardUnsavedChangesBadge', { timeout: 1500 });
+    });
   }
 
   /**
