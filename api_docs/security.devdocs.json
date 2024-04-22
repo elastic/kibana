@@ -1070,6 +1070,45 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-public.StartServices",
+        "type": "Type",
+        "tags": [],
+        "label": "StartServices",
+        "description": [],
+        "signature": [
+          "{ i18n: ",
+          {
+            "pluginId": "@kbn/core-i18n-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreI18nBrowserPluginApi",
+            "section": "def-common.I18nStart",
+            "text": "I18nStart"
+          },
+          "; analytics: ",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-common.AnalyticsServiceStart",
+            "text": "AnalyticsServiceStart"
+          },
+          "; theme: ",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
+          },
+          "; }"
+        ],
+        "path": "x-pack/plugins/security/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],

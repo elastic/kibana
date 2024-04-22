@@ -169,6 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hasTimeField: true,
         changeTimestampField: `--- I don't want to use the time filter ---`,
       });
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await checkNoVis(defaultTotalCount);
 
       await dataViews.editFromSearchBar({ newName: 'logs', newTimeField: '@timestamp' });

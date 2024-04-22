@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -126,12 +127,14 @@ export const getDatasetQualityTableColumns = ({
   fieldFormats,
   selectedDataset,
   openFlyout,
+  loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
   isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
   selectedDataset?: FlyoutDataset;
+  loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
@@ -197,7 +200,16 @@ export const getDatasetQualityTableColumns = ({
       name: sizeColumnName,
       field: 'sizeBytes',
       sortable: true,
-      render: (_, dataStreamStat: DataStreamStat) => formatBytes(dataStreamStat.sizeBytes || 0),
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <EuiSkeletonRectangle
+          width="60px"
+          height="20px"
+          borderRadius="m"
+          isLoading={loadingDataStreamStats}
+        >
+          {formatBytes(dataStreamStat.sizeBytes || 0)}
+        </EuiSkeletonRectangle>
+      ),
       width: '100px',
     },
     {
@@ -222,22 +234,27 @@ export const getDatasetQualityTableColumns = ({
     {
       name: lastActivityColumnName,
       field: 'lastActivity',
-      render: (timestamp: number) => {
-        if (!isActiveDataset(timestamp)) {
-          return (
+      render: (timestamp: number) => (
+        <EuiSkeletonRectangle
+          width="200px"
+          height="20px"
+          borderRadius="m"
+          isLoading={loadingDataStreamStats}
+        >
+          {!isActiveDataset(timestamp) ? (
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
               <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
                 <EuiIcon tabIndex={0} type="iInCircle" size="s" />
               </EuiToolTip>
             </EuiFlexGroup>
-          );
-        }
-
-        return fieldFormats
-          .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-          .convert(timestamp);
-      },
+          ) : (
+            fieldFormats
+              .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+              .convert(timestamp)
+          )}
+        </EuiSkeletonRectangle>
+      ),
       width: '300px',
       sortable: true,
     },
