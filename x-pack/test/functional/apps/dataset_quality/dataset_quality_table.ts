@@ -222,6 +222,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     it('hides inactive datasets', async () => {
+      await PageObjects.datasetQuality.waitUntilTableLoaded();
+
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];

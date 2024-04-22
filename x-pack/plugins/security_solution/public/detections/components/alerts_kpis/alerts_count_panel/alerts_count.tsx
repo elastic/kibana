@@ -88,13 +88,7 @@ export const AlertsCountComponent: React.FC<AlertsCountProps> = ({
 
   return (
     <Wrapper data-test-subj="alertsCountTable" className="eui-yScroll">
-      <EuiInMemoryTable
-        isSelectable={false}
-        columns={tableColumns}
-        items={items}
-        loading={loading}
-        sorting={true}
-      />
+      <EuiInMemoryTable columns={tableColumns} items={items} loading={loading} sorting={true} />
     </Wrapper>
   );
 };

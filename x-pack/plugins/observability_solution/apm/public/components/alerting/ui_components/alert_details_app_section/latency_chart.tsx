@@ -10,10 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
-import {
-  ALERT_RULE_TYPE_ID,
-  ALERT_EVALUATION_THRESHOLD,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import {
   AlertActiveTimeRangeAnnotation,
@@ -81,37 +78,27 @@ function LatencyChart({
   } = useKibana();
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (
-        serviceName &&
-        start &&
-        end &&
-        transactionType &&
-        latencyAggregationType &&
-        preferred
-      ) {
-        return callApmApi(
-          `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery: '',
-                start,
-                end,
-                transactionType,
-                transactionName,
-                latencyAggregationType,
-                documentType: preferred.source.documentType,
-                rollupInterval: preferred.source.rollupInterval,
-                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
-                useDurationSummary:
-                  preferred.source.hasDurationSummaryField &&
-                  latencyAggregationType === LatencyAggregationType.avg,
-              },
+      if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
+        return callApmApi(`GET /internal/apm/services/{serviceName}/transactions/charts/latency`, {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery: '',
+              start,
+              end,
+              transactionType,
+              transactionName,
+              latencyAggregationType,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
+              bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+              useDurationSummary:
+                preferred.source.hasDurationSummaryField &&
+                latencyAggregationType === LatencyAggregationType.avg,
             },
-          }
-        );
+          },
+        });
       }
     },
     [
@@ -160,8 +147,7 @@ function LatencyChart({
           alertStart={alert.start}
           color={euiTheme.colors.danger}
           dateFormat={
-            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) ||
-            DEFAULT_DATE_FORMAT
+            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
           }
         />,
         ...alertEvalThresholdChartData,
