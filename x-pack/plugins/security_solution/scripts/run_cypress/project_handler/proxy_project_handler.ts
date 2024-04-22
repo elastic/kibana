@@ -13,9 +13,10 @@ const DEFAULT_REGION = 'aws-eu-west-1';
 export class ProxyHandler extends ProjectHandler {
   proxyAuth: string;
 
-  constructor(baseEnvUrl: string, proxyAuth: string) {
+  constructor(baseEnvUrl: string, proxyClientId: string, proxySecret: string) {
     super(baseEnvUrl);
-    this.proxyAuth = proxyAuth;
+    this.proxyAuth = btoa(`${proxyClientId}:${proxySecret}`);
+
   }
 
   // Method to invoke the create project API for serverless.

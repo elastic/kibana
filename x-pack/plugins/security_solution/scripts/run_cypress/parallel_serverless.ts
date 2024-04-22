@@ -221,15 +221,16 @@ export const cli = () => {
       }
 
       const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
-      const PROXY_AUTH = process.env.PROXY_AUTH ? process.env.PROXY_AUTH : undefined;
+      const PROXY_SECRET = process.env.PROXY_SECRET ? process.env.PROXY_SECRET : undefined;
+      const PROXY_CLIENT_ID = process.env.PROXY_CLIENT_ID ? process.env.PROXY_CLIENT_ID : undefined;
 
       const API_KEY = process.env.CLOUD_QA_API_KEY
         ? process.env.CLOUD_QA_API_KEY
         : getApiKeyFromElasticCloudJsonFile();
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL && PROXY_AUTH) {
-        cloudHandler = new ProxyHandler(PROXY_URL, PROXY_AUTH);
+      if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET) {
+        cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
