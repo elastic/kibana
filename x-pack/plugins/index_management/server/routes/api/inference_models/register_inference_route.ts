@@ -8,9 +8,7 @@
 import { RouteDependencies } from '../../../types';
 
 import { registerGetAllRoute } from './register_get_route';
-import { registerCreateElasticsearchInferenceRoute } from './register_create_elasticsearch_inference_route';
 
 export function registerInferenceModelRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
-  registerCreateElasticsearchInferenceRoute(dependencies);
 }

@@ -80,7 +80,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   jsonData,
   refetchMapping,
   showAboutMappings,
-  isSemanticTextEnabled = false,
+  isSemanticTextEnabled = true,
 }) => {
   const {
     services: { extensionsService },

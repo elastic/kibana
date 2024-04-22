@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-import { createTextEmbeddingInference } from '../../../../../../services/api';
 import { useComponentTemplatesContext } from '../../../../../component_templates/component_templates_context';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
@@ -163,7 +162,19 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { trainedModelId, defaultInferenceEndpoint, isDeployed, isDeployable } = inferenceData;
 
     if (trainedModelId && defaultInferenceEndpoint) {
-      createTextEmbeddingInference(data.inferenceId, trainedModelId);
+      const modelConfig = {
+        service: 'elasticsearch',
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: trainedModelId,
+        },
+      };
+      ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
+        data.inferenceId,
+        'text_embedding',
+        modelConfig
+      );
     }
 
     if (isDeployable && trainedModelId && !isDeployed) {
