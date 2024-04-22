@@ -7,7 +7,7 @@
  */
 import { appendToESQLQuery } from './append_to_query';
 
-describe('getESQLWithSafeLimit()', () => {
+describe('appendToESQLQuery', () => {
   it('append the text on a new line after the query', () => {
     expect(appendToESQLQuery('from logstash-* // meow', '| stats var = avg(woof)')).toBe(
       `from logstash-* // meow
