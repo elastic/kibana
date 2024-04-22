@@ -19,8 +19,7 @@ import { ErrorWithStatusCode } from './error_with_status_code';
 const MISSING_CONFIGURATION = i18n.translate(
   'xpack.apm.agent_explorer.error.missing_configuration',
   {
-    defaultMessage:
-      'To use latest agent versions you must set xpack.apm.latestAgentVersionsUrl.',
+    defaultMessage: 'To use latest agent versions you must set xpack.apm.latestAgentVersionsUrl.',
   }
 );
 
@@ -29,10 +28,7 @@ export interface AgentLatestVersionsResponse {
   error?: { message: string; type?: string; statusCode?: string };
 }
 
-type AgentLatestVersions = Record<
-  AgentName,
-  ElasticApmAgentLatestVersion | OtelAgentLatestVersion
->;
+type AgentLatestVersions = Record<AgentName, ElasticApmAgentLatestVersion | OtelAgentLatestVersion>;
 
 export const fetchAgentsLatestVersion = async (
   logger: Logger,

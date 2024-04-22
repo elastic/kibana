@@ -130,7 +130,6 @@ export function isTailBasedSamplingValid(
 ) {
   // only validates TBS when its flag is enabled
   return (
-    !newVars[TAIL_SAMPLING_ENABLED_KEY].value ||
-    isSettingsFormValid(tailSamplingSettings, newVars)
+    !newVars[TAIL_SAMPLING_ENABLED_KEY].value || isSettingsFormValid(tailSamplingSettings, newVars)
   );
 }

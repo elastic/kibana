@@ -15,7 +15,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/telemetry-collection-manager-plugin",
@@ -36,6 +35,8 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-server",
     "@kbn/analytics-collection-utils",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-node-server",
   ],
   "exclude": [
     "target/**/*",

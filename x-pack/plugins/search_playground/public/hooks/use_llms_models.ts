@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
+import { BedrockLogo, OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
 import { ComponentType, useMemo } from 'react';
 import { LLMs } from '../../common/types';
 import { LLMModel } from '../types';
@@ -40,6 +40,19 @@ const mapLlmToModels: Record<
         label: `${model} ${includeName ? `(${connectorName})` : ''}`,
         value: model,
       })),
+  },
+  [LLMs.bedrock]: {
+    icon: BedrockLogo,
+    getModels: () => [
+      {
+        label: 'Claude 3 Haiku',
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
+      },
+      {
+        label: 'Claude 3 Sonnet',
+        value: 'anthropic.claude-3-haiku-20240307-v1:0',
+      },
+    ],
   },
 };
 
