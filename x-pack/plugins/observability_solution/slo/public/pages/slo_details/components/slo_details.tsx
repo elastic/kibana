@@ -18,6 +18,7 @@ import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
+import { SloHealthCallout } from './slo_health_callout';
 import { SloRemoteCallout } from './slo_remote_callout';
 
 export const TAB_ID_URL_PARAM = 'tabId';
@@ -126,6 +127,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   return selectedTabId === OVERVIEW_TAB_ID ? (
     <EuiFlexGroup direction="column" gutterSize="xl">
       <SloRemoteCallout slo={slo} />
+      <SloHealthCallout slo={slo} />
       <EuiFlexItem>
         <Overview slo={slo} />
       </EuiFlexItem>
