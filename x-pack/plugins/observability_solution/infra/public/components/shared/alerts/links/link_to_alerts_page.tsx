@@ -9,46 +9,46 @@ import { encode } from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { ALERTS_PATH } from '../../shared/alerts/constants';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { ALERTS_PATH } from '../constants';
 
 export interface LinkToAlertsPageProps {
-  assetId: string;
   dateRange: TimeRange;
-  queryField: string;
+  kuery?: string;
+  ['data-test-subj']: string;
 }
 
-export const LinkToAlertsPage = ({ assetId, queryField, dateRange }: LinkToAlertsPageProps) => {
+export const LinkToAlertsPage = ({
+  kuery,
+  dateRange,
+  ['data-test-subj']: dataTestSubj,
+}: LinkToAlertsPageProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const linkToAlertsPage = http.basePath.prepend(
     `${ALERTS_PATH}?_a=${encode({
-      kuery: `${queryField}:"${assetId}"`,
+      kuery,
       rangeFrom: dateRange.from,
       rangeTo: dateRange.to,
       status: 'all',
     })}`
   );
-
   return (
     <EuiButtonEmpty
-      data-test-subj="infraAssetDetailsAlertsShowAllButton"
+      data-test-subj={dataTestSubj}
       size="xs"
       iconSide="right"
       iconType="sortRight"
       flush="both"
       href={linkToAlertsPage}
     >
-      <FormattedMessage
-        id="xpack.infra.assetDetails.flyout.AlertsPageLinkLabel"
-        defaultMessage="Show all"
-      />
+      <FormattedMessage id="xpack.infra.AlertsPageLinkLabel" defaultMessage="Show all" />
     </EuiButtonEmpty>
   );
 };
 
-export const LinkToAlertsHomePage = () => {
+export const LinkToAlertsHomePage = ({ dataTestSubj }: { dataTestSubj?: string }) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
@@ -57,7 +57,7 @@ export const LinkToAlertsHomePage = () => {
   return (
     <EuiLink
       style={{ display: 'inline-block' }}
-      data-test-subj="assetDetailsTooltipDocumentationLink"
+      data-test-subj={dataTestSubj}
       href={linkToAlertsPage}
     >
       <FormattedMessage
