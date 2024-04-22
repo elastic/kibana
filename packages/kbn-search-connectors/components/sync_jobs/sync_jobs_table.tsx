@@ -144,7 +144,7 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
                 content={
                   <FormattedMessage
                     id="searchConnectors.index.syncJobs.documents.deleted.tooltip"
-                    defaultMessage="Number of {delete} operations the connector sent to the Elasticsearch _bulk API. May include documents dropped by Sync Rules. Does not include documents dropped by ingest processors. Documents are deleted if the connector determines they are no longer present in the third-party source."
+                    defaultMessage="Number of {delete} operations the connector sent to the Elasticsearch _bulk API. May include documents dropped by Sync Rules. Does not include documents dropped by ingest processors. Documents are deleted when the connector determines they are no longer present in the third-party source."
                     values={{ delete: <EuiCode>delete</EuiCode> }}
                   />
                 }
