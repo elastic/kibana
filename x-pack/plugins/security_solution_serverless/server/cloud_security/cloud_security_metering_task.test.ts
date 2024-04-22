@@ -8,7 +8,10 @@ import Chance from 'chance';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { getCloudProductTier } from './cloud_security_metering';
-import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
+import {
+  getCloudSecurityUsageRecord,
+  getSearchQueryByCloudSecuritySolution,
+} from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
 import type { CloudSecuritySolutions } from './types';
@@ -153,6 +156,127 @@ describe('getCloudSecurityUsageRecord', () => {
     });
 
     expect(result).toBeUndefined();
+  });
+});
+
+describe('getSearchQueryByCloudSecuritySolution', () => {
+  it('should return the correct search query for CLOUD_DEFEND', () => {
+    const searchFrom = new Date('2023-07-30T15:11:41.738Z');
+
+    const result = getSearchQueryByCloudSecuritySolution('cloud_defend', searchFrom);
+
+    expect(result).toEqual({
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gt: '2023-07-30T15:11:41.738Z',
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should return the correct search query for CSPM', () => {
+    const searchFrom = new Date('2023-07-30T15:11:41.738Z');
+
+    const result = getSearchQueryByCloudSecuritySolution('cspm', searchFrom);
+
+    expect(result).toEqual({
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+              },
+            },
+          },
+          {
+            term: {
+              'rule.benchmark.posture_type': 'cspm',
+            },
+          },
+          {
+            terms: {
+              'resource.sub_type': [
+                'aws-ebs',
+                'aws-ec2',
+                'aws-s3',
+                'aws-rds',
+                'azure-disk',
+                'azure-document-db-database-account',
+                'azure-flexible-mysql-server-db',
+                'azure-flexible-postgresql-server-db',
+                'azure-mysql-server-db',
+                'azure-postgresql-server-db',
+                'azure-sql-server',
+                'azure-vm',
+                'gcp-bigquery-dataset',
+                'gcp-bigquery-table',
+                'gcp-compute-disk',
+                'gcp-compute-instance',
+                'gcp-sqladmin-instance',
+                'gcp-storage-bucket',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should return the correct search query for KSPM', () => {
+    const searchFrom = new Date('2023-07-30T15:11:41.738Z');
+
+    const result = getSearchQueryByCloudSecuritySolution('kspm', searchFrom);
+
+    expect(result).toEqual({
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+              },
+            },
+          },
+          {
+            term: {
+              'rule.benchmark.posture_type': 'kspm',
+            },
+          },
+          {
+            terms: {
+              'resource.sub_type': ['Node', 'node'],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should return the correct search query for CNVM', () => {
+    const searchFrom = new Date('2023-07-30T15:11:41.738Z');
+
+    const result = getSearchQueryByCloudSecuritySolution(CNVM, searchFrom);
+
+    expect(result).toEqual({
+      bool: {
+        must: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-24h',
+              },
+            },
+          },
+        ],
+      },
+    });
   });
 });
 

@@ -62,6 +62,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const lens = getPageObject('lens');
   const listingTable = getService('listingTable');
   const toasts = getService('toasts');
+  const browser = getService('browser');
 
   const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
@@ -262,8 +263,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/178690
-      describe.skip('Modal', () => {
+      describe('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -273,6 +273,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const closeModal = async () => {
           await find.clickByCssSelector('[data-test-subj="all-cases-modal"] > button');
+          await testSubjects.missingOrFail('all-cases-modal');
         };
 
         before(async () => {
@@ -280,6 +281,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             const theCase = await cases.api.createCase({ owner });
             createdCases.set(owner, theCase.id);
           }
+        });
+
+        beforeEach(async () => {
+          await browser.refresh();
         });
 
         after(async () => {
@@ -292,29 +297,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('options-filter-popover-button-owner');
 
           for (const [, currentCaseId] of createdCases.entries()) {
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+            await cases.casesTable.getCaseById(currentCaseId);
           }
 
           await closeModal();
         });
 
-        it('filters correctly', async () => {
+        it('filters correctly with owner cases', async () => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
-
             await cases.casesTable.filterByOwner(owner);
-            await cases.casesTable.waitForTableToFinishLoading();
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
-
+            await cases.casesTable.getCaseById(currentCaseId);
             /**
-             * We ensure that the other cases are not shown
+             * The select button matched the query of the
+             * [data-test-subj*="cases-table-row-" query
              */
-            for (const otherCaseId of createdCases.values()) {
-              if (otherCaseId !== currentCaseId) {
-                await testSubjects.missingOrFail(`cases-table-row-${otherCaseId}`);
-              }
-            }
-
+            await cases.casesTable.validateCasesTableHasNthRows(2);
             await closeModal();
           }
         });
@@ -322,16 +320,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('filters with multiple selection', async () => {
           await openModal();
 
-          let popupAlreadyOpen = false;
           for (const [owner] of createdCases.entries()) {
-            await cases.casesTable.filterByOwner(owner, { popupAlreadyOpen });
-            popupAlreadyOpen = true;
+            await cases.casesTable.filterByOwner(owner);
           }
+
           await cases.casesTable.waitForTableToFinishLoading();
 
+          /**
+           * The select button matched the query of the
+           * [data-test-subj*="cases-table-row-" query
+           */
+          await cases.casesTable.validateCasesTableHasNthRows(6);
+
           for (const caseId of createdCases.values()) {
-            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+            await cases.casesTable.getCaseById(caseId);
           }
+
           await closeModal();
         });
 
@@ -340,7 +344,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
 
             await cases.casesTable.waitForTableToFinishLoading();
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+            await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
             await cases.common.expectToasterToContain('has been updated');
