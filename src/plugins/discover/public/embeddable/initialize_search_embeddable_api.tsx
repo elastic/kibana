@@ -41,11 +41,14 @@ export const initializeSearchEmbeddableApi = async (
     ? await attributeService.unwrapMethod(initialState.savedObjectId)
     : initialState;
   const { attributes: initialAttributes } = unwrapResult;
+  // console.log('initialAttributes', initialState, initialAttributes, unwrapResult);
 
+  // console.log('toSavedSearch');
   const savedSearch = await toSavedSearch(
     initialState?.savedObjectId,
     unwrapResult as SavedSearchUnwrapResult
   );
+  // console.log('saved search', savedSearch);
   const parentSearchSource = await discoverServices.data.search.searchSource.create();
   savedSearch.searchSource.setParent(parentSearchSource);
 
@@ -63,18 +66,20 @@ export const initializeSearchEmbeddableApi = async (
       } as SavedSearchByValueAttributes)
   );
 
-  const savedSearchToAttributes = savedSearch$.pipe(skip(1)).subscribe((newSavedSearch) => {
-    const { searchSourceJSON, references: originalReferences } =
-      savedSearch.searchSource.serialize();
-
-    attributes$.next({
-      ...toSavedSearchAttributes(newSavedSearch, searchSourceJSON),
-      references: originalReferences,
+  const savedSearchToAttributesSubscription = savedSearch$
+    .pipe(skip(1))
+    .subscribe((newSavedSearch) => {
+      // console.log('savedSearchToAttributes', newSavedSearch);
+      const { searchSourceJSON, references: originalReferences } =
+        savedSearch.searchSource.serialize();
+      attributes$.next({
+        ...toSavedSearchAttributes(newSavedSearch, searchSourceJSON),
+        references: originalReferences,
+      });
     });
-  });
 
   const cleanup = () => {
-    savedSearchToAttributes.unsubscribe();
+    savedSearchToAttributesSubscription.unsubscribe();
   };
 
   // savedSearchToAttributes - unsubscribe
@@ -103,19 +108,22 @@ export const initializeSearchEmbeddableApi = async (
   return {
     onUnmount: cleanup,
     searchEmbeddableApi: {
-      savedObjectId$,
+      savedObjectId: savedObjectId$,
       attributes$,
       savedSearch$,
       rows$,
+      getSavedSearch: () => savedSearch$.getValue(),
     },
     searchEmbeddableComparators: getSearchEmbeddableComparators(),
     serializeSearchEmbeddable: () => {
+      // console.log('serializeSearchEmbeddable');
       const savedObjectId = savedObjectId$.getValue();
       if (savedObjectId) {
         return {
           savedObjectId,
         };
       }
+      // console.log('---> attributes', attributes$.getValue())
       return {
         attributes: attributes$.getValue(),
       };

@@ -31,6 +31,7 @@ export const inject = (
       },
     } as EmbeddableStateWithType;
   }
+
   return state;
 };
 
@@ -38,7 +39,6 @@ export const extract = (
   state: EmbeddableStateWithType
 ): { state: EmbeddableStateWithType; references: SavedObjectReference[] } => {
   let references: SavedObjectReference[] = [];
-
   if (hasAttributes(state)) {
     references = state.attributes.references;
   }

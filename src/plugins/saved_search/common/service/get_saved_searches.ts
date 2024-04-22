@@ -74,15 +74,17 @@ export const convertToSavedSearch = async (
   },
   { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies
 ) => {
+  // console.log('atttributes', attributes);
   const parsedSearchSourceJSON = parseSearchSourceJSON(
     attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
-
+  // console.log('before');
+  // console.log('after', references, parsedSearchSourceJSON);
   const searchSourceValues = injectReferences(
     parsedSearchSourceJSON as Parameters<typeof injectReferences>[0],
     references
   );
-
+  // console.log('here', searchSourceValues);
   // front end only
   const tags = savedObjectsTagging
     ? savedObjectsTagging.ui.getTagIdsFromReferences(references)

@@ -16,9 +16,11 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableApiContext,
+  HasEditCapabilities,
   HasLibraryTransforms,
   PublishesBlockingError,
   PublishesDataLoading,
+  PublishesSavedObjectId,
   PublishingSubject,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -50,9 +52,11 @@ interface PublishesRows {
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   HasSavedSearch &
   HasLibraryTransforms &
+  HasEditCapabilities &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesRows;
+  PublishesRows &
+  Partial<PublishesSavedObjectId>;
 
 // TODO: Delete
 export interface SearchOutput extends EmbeddableOutput {
