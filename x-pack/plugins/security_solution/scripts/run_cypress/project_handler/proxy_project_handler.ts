@@ -1,14 +1,21 @@
-import { ProductType, Project, CreateProjectRequestBody, Credentials, ProjectHandler } from './project_handler';
+import {
+  ProductType,
+  Project,
+  CreateProjectRequestBody,
+  Credentials,
+  ProjectHandler,
+} from './project_handler';
 import axios, { AxiosError } from 'axios';
 import pRetry from 'p-retry';
-
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 
 export class ProxyHandler extends ProjectHandler {
+  proxyAuth: string;
 
-  constructor(baseEnvUrl: string) {
+  constructor(baseEnvUrl: string, proxyAuth: string) {
     super(baseEnvUrl);
+    this.proxyAuth = proxyAuth;
   }
 
   // Method to invoke the create project API for serverless.
@@ -23,8 +30,10 @@ export class ProxyHandler extends ProjectHandler {
       product_types: productTypes,
     };
 
-    this.log.info(`Kibana Latest Qualified Image - Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
-    if ((process.env.KIBANA_MKI_IMAGE_COMMIT) || commit) {
+    this.log.info(
+      `Kibana Latest Qualified Image - Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`
+    );
+    if (process.env.KIBANA_MKI_IMAGE_COMMIT || commit) {
       const override = commit ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
       this.log.info(
@@ -38,15 +47,11 @@ export class ProxyHandler extends ProjectHandler {
     }
 
     try {
-      const response = await axios.post(
-        `${this.baseEnvUrl}/projects`,
-        body
-        // {
-        //   headers: {
-        //     Authorization: `ApiKey ${this.apiKey}`,
-        //   },
-        // }
-      );
+      const response = await axios.post(`${this.baseEnvUrl}/projects`, body, {
+        headers: {
+          Authorization: `Basic ${this.proxyAuth}`,
+        },
+      });
       return {
         name: response.data.name,
         id: response.data.project_id,
@@ -72,9 +77,9 @@ export class ProxyHandler extends ProjectHandler {
   async deleteSecurityProject(projectId: string, projectName: string): Promise<void> {
     try {
       await axios.delete(`${this.baseEnvUrl}/projects/${projectId}`, {
-        // headers: {
-        //   Authorization: `ApiKey ${this.apiKey}`,
-        // },
+        headers: {
+          Authorization: `Basic ${this.proxyAuth}`,
+        },
       });
       this.log.info(`Project ${projectName} was successfully deleted!`);
     } catch (error) {
@@ -95,9 +100,9 @@ export class ProxyHandler extends ProjectHandler {
         `${this.baseEnvUrl}/projects/${projectId}/_reset-internal-credentials`,
         {},
         {
-        //   headers: {
-            // Authorization: `ApiKey ${this.apiKey}`,
-        //   },
+          headers: {
+            Authorization: `Basic ${this.proxyAuth}`,
+          },
         }
       );
       this.log.info('Credentials have ben reset');
@@ -127,14 +132,11 @@ export class ProxyHandler extends ProjectHandler {
   waitForProjectInitialized(projectId: string): Promise<void> {
     const fetchProjectStatusAttempt = async (attemptNum: number) => {
       this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
-      const response = await axios.get(
-        `${this.baseEnvUrl}/projects/${projectId}/status`,
-        {
-        //   headers: {
-            // Authorization: `ApiKey ${this.apiKey}`,
-        //   },
-        }
-      );
+      const response = await axios.get(`${this.baseEnvUrl}/projects/${projectId}/status`, {
+        headers: {
+          Authorization: `Basic ${this.proxyAuth}`,
+        },
+      });
       if (response.data.phase !== 'initialized') {
         this.log.info(response.data);
         throw new Error('Project is not initialized. A retry will be triggered soon...');

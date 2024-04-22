@@ -27,8 +27,12 @@ set +e
 
 QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
 QA_CONSOLE_URL=$(vault_get security-solution-quality-gate qa_console_url)
-PROXY_URL=$(vault_get security-solution-quality-gate-temp proxy_url)
+PROXY_URL=$(vault_get security-solution-quality-gate-proxy proxy_url_test)
+PROXY_CLIENT_ID=$(vault_get security-solution-quality-gate-proxy client_id)
+PROXY_SECRET=$(vault_get security-solution-quality-gate-proxy secret)
 BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate $BK_TEST_SUITE_KEY)
 
+PROXY_AUTH=$(echo "$PROXY_CLIENT_ID:$PROXY_SECRET" | base64)
+
 echo "--- Triggering Kibana tests for $1"
-PROXY_URL=$PROXY_URL QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_IMAGE_COMMIT=$KIBANA_MKI_IMAGE_COMMIT BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+PROXY_URL=$PROXY_URL PROXY_AUTH=$PROXY_AUTH QA_CONSOLE_URL=$QA_CONSOLE_URL KIBANA_MKI_IMAGE_COMMIT=$KIBANA_MKI_IMAGE_COMMIT BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status

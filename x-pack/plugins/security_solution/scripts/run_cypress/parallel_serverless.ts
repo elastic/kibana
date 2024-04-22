@@ -221,14 +221,15 @@ export const cli = () => {
       }
 
       const PROXY_URL = process.env.PROXY_URL ? process.env.PROXY_URL : undefined;
+      const PROXY_AUTH = process.env.PROXY_AUTH ? process.env.PROXY_AUTH : undefined;
 
       const API_KEY = process.env.CLOUD_QA_API_KEY
         ? process.env.CLOUD_QA_API_KEY
         : getApiKeyFromElasticCloudJsonFile();
 
       let cloudHandler: ProjectHandler;
-      if (PROXY_URL) {
-        cloudHandler = new ProxyHandler(PROXY_URL);
+      if (PROXY_URL && PROXY_AUTH) {
+        cloudHandler = new ProxyHandler(PROXY_URL, PROXY_AUTH);
       } else if (API_KEY) {
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
@@ -403,7 +404,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               context.addCleanupTask(() => {
                 let command: string;
                 if (cloudHandler instanceof ProxyHandler) {
-                  command = `curl DELETE ${PROXY_URL}/projects/${project.id}`;
+                  // command = `curl DELETE ${PROXY_URL}/projects/${project.id}`;
+                  command = "echo 'Delete env'";
                 } else {
                   command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
                 }
