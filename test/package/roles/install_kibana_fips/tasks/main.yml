@@ -21,8 +21,9 @@
     cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | bash
 
 - name: install kibana node version
-  become: true
-  command: "source /home/vagrant/.nvm/nvm.sh && nvm install {{ node_version }}"
+  shell:
+    cmd: "source nvm.sh && nvm install {{ node_version }}"
+    chdir: "$HOME/.nvm"
 
 - name: install yarn
   npm:
