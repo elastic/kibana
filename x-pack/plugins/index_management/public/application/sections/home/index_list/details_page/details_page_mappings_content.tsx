@@ -83,7 +83,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     services: { extensionsService },
     core: { getUrlForApp },
   } = useAppContext();
-
   const state = useMappingsState();
   const dispatch = useDispatch();
 
@@ -453,7 +452,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           {errorSavingMappings}
           {isAddingFields && (
             <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder>
+              <EuiPanel hasBorder paddingSize="s">
                 <EuiAccordion
                   id={pendingFieldListId}
                   initialIsOpen
@@ -484,7 +483,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                     </EuiPanel>
                   }
                 >
-                  <EuiPanel hasShadow={false}>
+                  <EuiPanel hasShadow={false} paddingSize="s">
                     {newFieldsLength <= 0 ? (
                       <DocumentFields
                         onCancelAddingNewFields={onCancelAddingNewFields}

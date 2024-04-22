@@ -321,7 +321,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
       loading={isLoading}
-      hasActions={true}
       noItemsMessage={noItemsMessage}
       items={
         totalAgents
@@ -338,7 +337,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         totalItemCount: totalAgents,
         pageSizeOptions,
       }}
-      isSelectable={true}
       selection={
         !authz.fleet.allAgents
           ? undefined

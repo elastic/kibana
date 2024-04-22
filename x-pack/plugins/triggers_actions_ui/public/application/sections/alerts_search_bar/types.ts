@@ -32,10 +32,13 @@ export interface AlertsSearchBarProps
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
   }) => void;
-  onQuerySubmit: (query: {
-    dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
-    query?: string;
-  }) => void;
+  onQuerySubmit: (
+    query: {
+      dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+      query?: string;
+    },
+    isUpdate?: boolean
+  ) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
   filtersForSuggestions?: Filter[];
 }

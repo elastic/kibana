@@ -23,7 +23,6 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
-import { Playground } from './components/playground/playground';
 import { SearchIndicesRouter } from './components/search_indices';
 import {
   CONNECTORS_PATH,
@@ -32,7 +31,6 @@ import {
   ROOT_PATH,
   SEARCH_INDICES_PATH,
   SETUP_GUIDE_PATH,
-  PLAYGROUND_PATH,
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -83,9 +81,6 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       </Route>
       <Route path={CRAWLERS_PATH}>
         <CrawlersRouter />
-      </Route>
-      <Route path={PLAYGROUND_PATH}>
-        <Playground />
       </Route>
       <Route>
         <NotFound />
