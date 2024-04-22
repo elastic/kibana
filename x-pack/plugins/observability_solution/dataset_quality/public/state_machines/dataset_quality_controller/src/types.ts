@@ -18,7 +18,6 @@ import {
   DataStreamStatServiceResponse,
   IntegrationsResponse,
   DataStreamStat,
-  IntegrationsResponse,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -119,8 +118,8 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-    value: 'flyout.initializing.dataStreamSettings.fetching';
-    context: DefaultDatasetQualityStateContext;
+      value: 'flyout.initializing.dataStreamSettings.fetching';
+      context: DefaultDatasetQualityStateContext;
     }
   | {
       value: 'flyout.initializing.dataStreamDetails.fetching';
