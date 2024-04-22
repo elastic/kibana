@@ -81,7 +81,12 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
         <ManageKeysLink />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill type="submit" data-test-subj="connectionDetailsApiKeySubmitBtn">
+        <EuiButton
+          fill
+          type="submit"
+          isLoading={loading}
+          data-test-subj="connectionDetailsApiKeySubmitBtn"
+        >
           {i18n.translate('cloud.connectionDetails.tab.apiKeys.nameField.createButton.label', {
             defaultMessage: 'Create API key',
           })}
