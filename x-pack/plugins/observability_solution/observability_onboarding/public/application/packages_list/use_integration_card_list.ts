@@ -10,10 +10,7 @@ import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { CustomCard } from './types';
 import { toCustomCard } from './utils';
 
-function extractFeaturedCards(
-  filteredCards: IntegrationCardItem[],
-  featuredCardNames?: string[]
-) {
+function extractFeaturedCards(filteredCards: IntegrationCardItem[], featuredCardNames?: string[]) {
   const featuredCards: Record<string, IntegrationCardItem | undefined> = {};
   filteredCards.forEach((card) => {
     if (featuredCardNames?.includes(card.name)) {
@@ -85,10 +82,7 @@ export function useIntegrationCardList(
   if (customCards && customCards.length > 0) {
     const formattedCustomCards = formatCustomCards(customCards, featuredCards);
     if (fullList) {
-      return [
-        ...formattedCustomCards,
-        ...integrationCards,
-      ] as IntegrationCardItem[];
+      return [...formattedCustomCards, ...integrationCards] as IntegrationCardItem[];
     }
     return formattedCustomCards;
   }
