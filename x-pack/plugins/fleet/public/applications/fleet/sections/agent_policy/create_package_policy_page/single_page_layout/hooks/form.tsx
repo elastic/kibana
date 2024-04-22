@@ -301,19 +301,29 @@ export function useOnSubmit({
   const navigateAddAgentHelp = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
 
+  const isCurrentAgentPolicyAgentless =
+    selectedSetupTechnology === SetupTechnology.AGENTLESS && isAgentlessPolicyId(agentPolicy?.id);
+  const isAgentlessSetup =
+    selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+    selectedPolicyTab === SelectedPolicyTab.EXISTING;
+
+  const currentAgentPolicyCount =
+    (agentCount > 0 && isCurrentAgentPolicyAgentless) ||
+    (agentCount > 0 && !isCurrentAgentPolicyAgentless)
+      ? agentCount
+      : 0;
+
   const onSubmit = useCallback(
     async ({
       force,
       overrideCreatedAgentPolicy,
     }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
-      const isAgentless = selectedSetupTechnology === SetupTechnology.AGENTLESS;
-
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
       }
 
-      if (agentCount !== 0 && !isAgentless && formState !== 'CONFIRM') {
+      if (agentCount !== 0 && !isAgentlessSetup && formState !== 'CONFIRM') {
         setFormState('CONFIRM');
         return;
       }
@@ -377,46 +387,44 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (!isAgentless) {
-        if (hasAzureArmTemplate) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-        if (hasCloudFormation) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
-        if (hasGoogleCloudShell) {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
-        } else {
-          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-        }
+      if (hasAzureArmTemplate) {
+        setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+      } else {
+        setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
+      if (hasCloudFormation) {
+        setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+      } else {
+        setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
+      if (hasGoogleCloudShell) {
+        setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+      } else {
+        setFormState(currentAgentPolicyCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
       }
 
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
-        const hasAgentsAssigned = agentCount && agentPolicy;
-        if (!isAgentless) {
-          if (!hasAgentsAssigned && hasAzureArmTemplate) {
-            setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-            return;
-          }
-          if (!hasAgentsAssigned && hasCloudFormation) {
-            setFormState('SUBMITTED_CLOUD_FORMATION');
-            return;
-          }
-          if (!hasAgentsAssigned && hasGoogleCloudShell) {
-            setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
-            return;
-          }
-          if (!hasAgentsAssigned) {
-            setFormState('SUBMITTED_NO_AGENTS');
-            return;
-          }
+        const hasAgentsAssigned = currentAgentPolicyCount && agentPolicy;
+
+        if (!hasAgentsAssigned && hasAzureArmTemplate) {
+          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+          return;
         }
+        if (!hasAgentsAssigned && hasCloudFormation) {
+          setFormState('SUBMITTED_CLOUD_FORMATION');
+          return;
+        }
+        if (!hasAgentsAssigned && hasGoogleCloudShell) {
+          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+          return;
+        }
+        if (!hasAgentsAssigned) {
+          setFormState('SUBMITTED_NO_AGENTS');
+          return;
+        }
+
         onSaveNavigate(data!.item);
 
         notifications.toasts.addSuccess({
