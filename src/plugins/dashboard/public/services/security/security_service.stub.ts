@@ -6,4 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { DashboardStorage } from './dashboard_storage';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DashboardSecurityService } from './types';
+
+export type SecurityServiceFactory = PluginServiceFactory<DashboardSecurityService>;
+
+export const securityServiceFactory: SecurityServiceFactory = () => {
+  return {};
+};

@@ -37,7 +37,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-  | 'suggestUsers'
+  | 'bulkGetUserProfiles'
 > & {
   title: string;
   description?: string;
@@ -74,7 +74,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
-  suggestUsers,
+  bulkGetUserProfiles,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -123,7 +123,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
           onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}
-          suggestUsers={suggestUsers}
+          bulkGetUserProfiles={bulkGetUserProfiles}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

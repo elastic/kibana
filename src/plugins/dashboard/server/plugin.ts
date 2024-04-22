@@ -14,7 +14,6 @@ import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 import {
   initializeDashboardTelemetryTask,
@@ -22,7 +21,7 @@ import {
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import { DashboardStorage, registerSuggestUsersRoute } from './content_management';
+import { DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
@@ -35,12 +34,10 @@ interface SetupDeps {
   usageCollection: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
-  security?: SecurityPluginSetup;
 }
 
 interface StartDeps {
   taskManager: TaskManagerStartContract;
-  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -91,16 +88,6 @@ export class DashboardPlugin
     );
 
     core.uiSettings.register(getUISettings());
-
-    if (plugins.security) {
-      // else should never happen, but just to keep types happy
-      const router = core.http.createRouter();
-      registerSuggestUsersRoute({
-        router,
-        logger: this.logger.get('suggest-users'),
-        core,
-      });
-    }
 
     return {};
   }

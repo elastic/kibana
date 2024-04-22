@@ -68,7 +68,8 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   onFilterChange: (filter: Partial<State<T>['tableFilter']>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
-  suggestUsers?: () => Promise<UserProfile[]>;
+  /** resolve user profiles for the user filter and creator functionality */
+  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -96,7 +97,7 @@ export function Table<T extends UserContentCommonSchema>({
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
-  suggestUsers,
+  bulkGetUserProfiles,
 }: Props<T>) {
   const { getTagList } = useServices();
 
@@ -212,13 +213,13 @@ export function Table<T extends UserContentCommonSchema>({
   ]);
 
   const userFilterPanel = useMemo<SearchFilterConfig | null>(() => {
-    return suggestUsers
+    return bulkGetUserProfiles
       ? {
           type: 'custom_component',
           component: UserFilterPanel,
         }
       : null;
-  }, [suggestUsers]);
+  }, [bulkGetUserProfiles]);
 
   const searchFilters = useMemo(() => {
     return [tableSortSelectFilter, tagFilterPanel, userFilterPanel].filter(
@@ -259,9 +260,20 @@ export function Table<T extends UserContentCommonSchema>({
     return items;
   }, [items, tableFilter]);
 
+  const allUsers = useMemo(() => {
+    if (!bulkGetUserProfiles) return []; /* no user profiles, no users */
+
+    const users = new Set<string>();
+    items.forEach((item) => {
+      if (item.createdBy) users.add(item.createdBy);
+    });
+    return Array.from(users);
+  }, [bulkGetUserProfiles, items]);
+
   return (
     <UserFilterContextProvider
-      suggestUsers={suggestUsers}
+      bulkGetUserProfiles={bulkGetUserProfiles}
+      allUsers={allUsers}
       onSelectedUsersChange={(selectedUsers) => {
         onFilterChange({ createdBy: selectedUsers });
       }}

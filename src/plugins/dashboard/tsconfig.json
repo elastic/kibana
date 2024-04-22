@@ -77,8 +77,7 @@
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-analytics",
     "@kbn/user-profile-components",
-    "@kbn/security-plugin-types-server",
-    "@kbn/saved-objects-settings",
+    "@kbn/security-plugin-types-public",
   ],
   "exclude": ["target/**/*"]
 }

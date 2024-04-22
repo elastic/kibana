@@ -99,7 +99,7 @@ export const useDashboardListingTable = ({
       checkForDuplicateDashboardTitle,
     },
     notifications: { toasts },
-    http,
+    security,
   } = pluginServices.getServices();
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
@@ -265,10 +265,14 @@ export const useDashboardListingTable = ({
     [goToDashboard]
   );
 
-  const suggestUsers = useCallback<() => Promise<UserProfile[]>>(async () => {
-    const response = await http.get<{ users: UserProfile[] }>(`/internal/dashboard/suggest_users`);
-    return response.users;
-  }, [http]);
+  const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
+    async (userProfileIds: string[]) => {
+      return (
+        security.userProfiles?.bulkGet({ uids: new Set(userProfileIds), dataPath: 'avatar' }) ?? []
+      );
+    },
+    [security.userProfiles]
+  );
 
   const onFetchSuccess = useCallback(() => {
     if (!hasInitialFetchReturned) {
@@ -305,7 +309,7 @@ export const useDashboardListingTable = ({
       setPageDataTestSubject,
       title,
       urlStateEnabled,
-      suggestUsers,
+      bulkGetUserProfiles,
     }),
     [
       contentEditorValidators,
@@ -328,7 +332,7 @@ export const useDashboardListingTable = ({
       title,
       updateItemMeta,
       urlStateEnabled,
-      suggestUsers,
+      bulkGetUserProfiles,
     ]
   );
 

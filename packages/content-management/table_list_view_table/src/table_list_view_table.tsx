@@ -115,8 +115,8 @@ export interface TableListViewTableProps<
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
 
-  /** Function to suggest users when filtering by user */
-  suggestUsers?: () => Promise<UserProfile[]>;
+  /** resolve user profiles for the user filter and creator functionality */
+  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -290,7 +290,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
-  suggestUsers,
+  bulkGetUserProfiles,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -1075,7 +1075,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
-          suggestUsers={suggestUsers}
+          bulkGetUserProfiles={bulkGetUserProfiles}
         />
 
         {/* Delete modal */}

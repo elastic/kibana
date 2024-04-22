@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { DashboardStorage } from './dashboard_storage';
+import { SecurityPluginStart } from '@kbn/security-plugin-types-public';
+
+export interface DashboardSecurityService {
+  userProfiles?: {
+    bulkGet: SecurityPluginStart['userProfiles']['bulkGet'];
+  };
+}

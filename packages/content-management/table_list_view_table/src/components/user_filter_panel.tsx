@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 interface Context {
   onSelectedUsersChange: (users: string[]) => void;
   selectedUsers: string[];
-  suggestUsers?: () => Promise<UserProfile[]>;
+  allUsers: string[];
+  bulkGetUserProfiles?: (uids: string[]) => Promise<UserProfile[]>;
 }
 
 const UserFilterContext = React.createContext<Context | null>(null);
@@ -26,6 +27,10 @@ const queryClient = new QueryClient({
 });
 
 export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) => {
+  if (!props.bulkGetUserProfiles) {
+    return <>{children}</>;
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <UserFilterContext.Provider value={props}>{children}</UserFilterContext.Provider>
@@ -40,6 +45,8 @@ export const UserFilterPanel: FC<{}> = () => {
   const componentContext = React.useContext(UserFilterContext);
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
+  if (!componentContext.bulkGetUserProfiles)
+    throw new Error('UserFilterPanel must be used with a bulkGetUserProfiles function');
 
   const { onSelectedUsersChange, selectedUsers } = componentContext;
 
@@ -47,8 +54,8 @@ export const UserFilterPanel: FC<{}> = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const query = useQuery({
-    queryKey: ['user-filter-suggestions'],
-    queryFn: componentContext.suggestUsers,
+    queryKey: ['user-filter-suggestions', componentContext.allUsers],
+    queryFn: () => componentContext.bulkGetUserProfiles!(componentContext.allUsers),
     enabled: isPopoverOpen,
   });
 
@@ -62,7 +69,7 @@ export const UserFilterPanel: FC<{}> = () => {
 
   const visibleOptions = React.useMemo(() => {
     if (!query.data || query.data.length === 0) return [];
-    // attach null to the end of the list to represent the "no owner" option
+    // attach null to the end of the list to represent the "no creator" option
     const users = [...query.data, null];
 
     if (!searchTerm) {
@@ -70,7 +77,7 @@ export const UserFilterPanel: FC<{}> = () => {
     }
 
     return users.filter((user) => {
-      // keep the "no owner" option if it's selected
+      // keep the "no creator" option if it's selected
       if (!user) {
         return selectedUsers.includes(NULL_USER);
       }
@@ -96,10 +103,11 @@ export const UserFilterPanel: FC<{}> = () => {
       type="questionInCircle"
       color="inherit"
       iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
+      css={{ textWrap: 'balance' }}
       content={
         <FormattedMessage
           id="contentManagement.tableList.listing.userFilter.emptyMessageTooltip"
-          defaultMessage="Owner is assigned when dashboards are created, (for all dashboards created after version 8.14)."
+          defaultMessage="Creators are assigned when dashboards are created, (for all dashboards created after version 8.14)."
         />
       }
     />
@@ -140,15 +148,15 @@ export const UserFilterPanel: FC<{}> = () => {
             <p>
               <FormattedMessage
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
-                defaultMessage="None of the dashboards have an owner"
+                defaultMessage="None of the dashboards have creators"
               />
               {noUsersTip}
             </p>
           ),
           nullOptionLabel: i18n.translate(
-            'contentManagement.tableList.listing.userFilter.noOwner',
+            'contentManagement.tableList.listing.userFilter.noCreators',
             {
-              defaultMessage: 'No owner',
+              defaultMessage: 'No creators',
             }
           ),
           nullOptionProps: {
