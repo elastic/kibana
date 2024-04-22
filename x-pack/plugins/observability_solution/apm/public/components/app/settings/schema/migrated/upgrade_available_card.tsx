@@ -17,18 +17,14 @@ export function UpgradeAvailableCard({
 }: {
   apmPackagePolicyId: string | undefined;
 }) {
-  const upgradeApmPackagePolicyHref =
-    useUpgradeApmPackagePolicyHref(apmPackagePolicyId);
+  const upgradeApmPackagePolicyHref = useUpgradeApmPackagePolicyHref(apmPackagePolicyId);
 
   return (
     <EuiCard
       icon={<EuiIcon size="xxl" type="warning" color="warning" />}
-      title={i18n.translate(
-        'xpack.apm.settings.schema.upgradeAvailable.title',
-        {
-          defaultMessage: 'APM integration upgrade available!',
-        }
-      )}
+      title={i18n.translate('xpack.apm.settings.schema.upgradeAvailable.title', {
+        defaultMessage: 'APM integration upgrade available!',
+      })}
       description={
         <FormattedMessage
           id="xpack.apm.settings.upgradeAvailable.description"

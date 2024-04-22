@@ -29,14 +29,10 @@ import {
   getMobileErrorsTermsByField,
   MobileErrorTermsByFieldResponse,
 } from './get_mobile_errors_terms_by_field';
-import {
-  MobileHttpErrorsTimeseries,
-  getMobileHttpErrors,
-} from './get_mobile_http_errors';
+import { MobileHttpErrorsTimeseries, getMobileHttpErrors } from './get_mobile_http_errors';
 
 const mobileMobileHttpRatesRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/mobile-services/{serviceName}/error/http_error_rate',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/error/http_error_rate',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -64,8 +60,7 @@ const mobileMobileHttpRatesRoute = createApmServerRoute({
 });
 
 const mobileErrorsDetailedStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'POST /internal/apm/mobile-services/{serviceName}/errors/groups/detailed_statistics',
+  endpoint: 'POST /internal/apm/mobile-services/{serviceName}/errors/groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -148,8 +143,7 @@ const mobileErrorTermsByFieldRoute = createApmServerRoute({
 });
 
 const mobileErrorsMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -165,14 +159,11 @@ const mobileErrorsMainStatisticsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ errorGroups: MobileErrorGroupMainStatisticsResponse }> => {
+  handler: async (resources): Promise<{ errorGroups: MobileErrorGroupMainStatisticsResponse }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
-    const { environment, kuery, sortField, sortDirection, start, end } =
-      params.query;
+    const { environment, kuery, sortField, sortDirection, start, end } = params.query;
 
     const errorGroups = await getMobileErrorGroupMainStatistics({
       environment,

@@ -69,7 +69,7 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
       },
     });
     telemetry.reportDetailsFlyoutTabClicked({
-      tableId: scopeId,
+      location: scopeId,
       panel: 'left',
       tabId,
     });
