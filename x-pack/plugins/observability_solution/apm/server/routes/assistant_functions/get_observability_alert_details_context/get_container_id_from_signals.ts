@@ -8,11 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  rangeQuery,
-  termQuery,
-  typedSearch,
-} from '@kbn/observability-plugin/server/utils/queries';
+import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -59,9 +55,7 @@ async function getContainerIdFromLogs({
   coreContext: CoreRequestHandlerContext;
 }) {
   const index =
-    (await coreContext.uiSettings.client.get<string>(
-      aiAssistantLogsIndexPattern
-    )) ?? 'logs-*';
+    (await coreContext.uiSettings.client.get<string>(aiAssistantLogsIndexPattern)) ?? 'logs-*';
 
   const start = moment(query.alert_started_at).subtract(30, 'minutes').unix();
   const end = moment(query.alert_started_at).unix();
