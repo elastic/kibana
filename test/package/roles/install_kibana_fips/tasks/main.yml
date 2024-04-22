@@ -23,15 +23,15 @@
     chdir: "$HOME"
     cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | bash
 
-- name: setup nvm for vagrant user
-  lineinfile:
-    path: "$HOME/.profile"
-    line: "source $HOME/.nvm/nvm.sh"
-    create: yes
-  become_flags: -i
+# - name: setup nvm for vagrant user
+#   lineinfile:
+#     path: "$HOME/.profile"
+#     line: "source $HOME/.nvm/nvm.sh"
+#     create: yes
+#   become_flags: -i
 
 - name: install kibana node version
-  command: nvm install {{ node_version }}
+  command: "$HOME/nvm install {{ node_version }}"
   args:
     chdir: "$HOME"
 
