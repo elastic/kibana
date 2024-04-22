@@ -77,7 +77,7 @@ export function registerVisualizeESQLFunction({
         },
         content: {
           message,
-          errorMessages: queryHasActualErrors ? errorMessages : [],
+          ...(queryHasActualErrors ? { errorMessages } : {}),
         },
       };
     }
