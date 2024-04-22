@@ -46,11 +46,12 @@ describe('ExplorerChart', () => {
   const originalGetBBox = SVGElement.prototype.getBBox;
   beforeEach(() => (SVGElement.prototype.getBBox = () => mockedGetBBox));
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
+
   // Returning undefined here just for the sake of consistent test results.
   // jsdom doesn't have a layout engine so this is hard to test.
   // If we pass some real px value here for yet unknown reasons we get different
   // results on different environments.
-  jest.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(() => undefined);
+  jest.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(undefined);
 
   test('Initialize', () => {
     const mockTooltipService = {
