@@ -170,11 +170,23 @@ export const CreateField = React.memo(function CreateFieldComponent({
           model_id: trainedModelId,
         },
       };
-      ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-        data.inferenceId,
-        'text_embedding',
-        modelConfig
-      );
+      try {
+        ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
+          data.inferenceId,
+          'text_embedding',
+          modelConfig
+        );
+      } catch (error) {
+        setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
+        toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+          title: i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.createField.inferenceEndpointCreationErrorTitle',
+            {
+              defaultMessage: 'Inference endpoint creation failed',
+            }
+          ),
+        });
+      }
     }
 
     if (isDeployable && trainedModelId && !isDeployed) {
