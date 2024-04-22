@@ -6188,34 +6188,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where max(numberField)",
-      "error": [
-        "WHERE does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where max(numberField) > 0",
-      "error": [
-        "WHERE does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where min(numberField)",
-      "error": [
-        "WHERE does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where min(numberField) > 0",
-      "error": [
-        "WHERE does not support function min"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where sum(numberField)",
       "error": [
         "WHERE does not support function sum"
@@ -6268,6 +6240,62 @@
       "query": "from a_index | where percentile(numberField, 5) > 0",
       "error": [
         "WHERE does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(numberField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(numberField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(dateField)",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where max(dateField) > 0",
+      "error": [
+        "WHERE does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(numberField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(numberField) > 0",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(dateField)",
+      "error": [
+        "WHERE does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where min(dateField) > 0",
+      "error": [
+        "WHERE does not support function min"
       ],
       "warning": []
     },
@@ -7734,62 +7762,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval var = max(numberField)",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = max(numberField) > 0",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval max(numberField)",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval max(numberField) > 0",
-      "error": [
-        "EVAL does not support function max"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = min(numberField)",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = min(numberField) > 0",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval min(numberField)",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval min(numberField) > 0",
-      "error": [
-        "EVAL does not support function min"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = sum(numberField)",
       "error": [
         "EVAL does not support function sum"
@@ -7898,6 +7870,118 @@
       "query": "from a_index | eval percentile(numberField, 5) > 0",
       "error": [
         "EVAL does not support function percentile"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(numberField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(numberField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(numberField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(numberField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(dateField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = max(dateField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(dateField)",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval max(dateField) > 0",
+      "error": [
+        "EVAL does not support function max"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(numberField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(numberField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(numberField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(numberField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(dateField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = min(dateField) > 0",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(dateField)",
+      "error": [
+        "EVAL does not support function min"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval min(dateField) > 0",
+      "error": [
+        "EVAL does not support function min"
       ],
       "warning": []
     },
@@ -13713,262 +13797,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(max(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(max(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(max(numberField)) + max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(max(numberField)) + max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(numberField) by round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = max(numberField) by var1 = round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = max(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats max(stringField)",
-      "error": [
-        "Argument of [max] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = max(*)",
-      "error": [
-        "Using wildcards (*) in max is not allowed"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(min(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(min(numberField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(min(numberField)) + min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(min(numberField)) + min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(numberField) by round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = min(numberField) by var1 = round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = min(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats min(stringField)",
-      "error": [
-        "Argument of [min] must be [number], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = min(*)",
-      "error": [
-        "Using wildcards (*) in min is not allowed"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | stats var = sum(numberField)",
       "error": [],
       "warning": []
@@ -14477,6 +14305,378 @@
       "query": "from a_index | stats percentile(stringField, 5)",
       "error": [
         "Argument of [percentile] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(numberField)) + max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(numberField)) + max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(numberField) by round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = max(numberField) by var1 = round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), max(numberField) by round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = max(numberField) by var1 = round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(stringField)",
+      "error": [
+        "Argument of [max] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(*)",
+      "error": [
+        "Using wildcards (*) in max is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(max(dateField)) + max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(max(dateField)) + max(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats max(stringField)",
+      "error": [
+        "Argument of [max] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = max(*)",
+      "error": [
+        "Using wildcards (*) in max is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(numberField)) + min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(numberField)) + min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(numberField) by round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = min(numberField) by var1 = round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), min(numberField) by round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = min(numberField) by var1 = round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(stringField)",
+      "error": [
+        "Argument of [min] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(*)",
+      "error": [
+        "Using wildcards (*) in min is not allowed"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(dateField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(min(dateField)) + min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(min(dateField)) + min(dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats min(stringField)",
+      "error": [
+        "Argument of [min] must be [number], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = min(*)",
+      "error": [
+        "Using wildcards (*) in min is not allowed"
       ],
       "warning": []
     },
