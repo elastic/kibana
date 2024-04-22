@@ -75,7 +75,7 @@ export const AvailabilityReporting: React.FC<Props> = ({ allLocations }) => {
     <>
       <EuiSpacer size="s" />
       <EuiBasicTable
-        responsive={false}
+        responsiveBreakpoint={false}
         compressed={true}
         columns={cols}
         items={allLocations.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)}

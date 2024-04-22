@@ -56,7 +56,6 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         ],
       }
     }
-    responsive={true}
     rowProps={[Function]}
     searchFormat="eql"
     sorting={
@@ -128,7 +127,6 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         ],
       }
     }
-    responsive={true}
     rowProps={[Function]}
     search={
       Object {
