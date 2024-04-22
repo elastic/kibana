@@ -549,29 +549,29 @@ export const registerCollector: RegisterCollector = ({
                     'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
                 },
               },
-            },
-            suppression_enabled: {
-              type: 'long',
-              _meta: { description: 'Number of custom rules with suppression enabled' },
-            },
-            suppression_enabled_missing_fields_suppress: {
-              type: 'long',
-              _meta: {
-                description:
-                  'Number of custom rules with suppression enabled and missing field strategy set to suppress',
+              suppression_enabled: {
+                type: 'long',
+                _meta: { description: 'Number of custom rules with suppression enabled' },
               },
-            },
-            suppression_enabled_per_rule_execution: {
-              type: 'long',
-              _meta: {
-                description: 'Number of custom rules with suppression enabled per rule execution',
+              suppression_enabled_missing_fields_suppress: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of custom rules with suppression enabled and missing field strategy set to suppress',
+                },
               },
-            },
-            suppression_enabled_per_timeperiod: {
-              type: 'long',
-              _meta: {
-                description:
-                  'Number of custom rules with suppression enabled during a selected time period',
+              suppression_enabled_per_rule_execution: {
+                type: 'long',
+                _meta: {
+                  description: 'Number of custom rules with suppression enabled per rule execution',
+                },
+              },
+              suppression_enabled_per_timeperiod: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of custom rules with suppression enabled during a selected time period',
+                },
               },
             },
           },
