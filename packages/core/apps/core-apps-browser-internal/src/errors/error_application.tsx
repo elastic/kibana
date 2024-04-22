@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { EuiPageTemplate } from '@elastic/eui';
-import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { UrlOverflowUi } from './url_overflow_ui';
@@ -77,9 +77,9 @@ interface Deps {
 export const renderApp = ({ element, history, theme$ }: AppMountParameters, { basePath }: Deps) => {
   ReactDOM.render(
     <I18nProvider>
-      <CoreThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={{ theme$ }}>
         <ErrorApp history={history} basePath={basePath} />
-      </CoreThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     element
   );

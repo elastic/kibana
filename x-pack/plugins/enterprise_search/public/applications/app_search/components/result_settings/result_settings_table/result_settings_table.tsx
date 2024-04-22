@@ -28,7 +28,7 @@ export const ResultSettingsTable: React.FC = () => {
   // TODO This table currently has mutiple theads, which is invalid html. We could change these subheaders to be EuiTableRow instead of EuiTableHeader
   // to alleviate the issue.
   return (
-    <EuiTable className="resultSettingsTable" responsive={false}>
+    <EuiTable className="resultSettingsTable" responsiveBreakpoint={false}>
       <ColumnHeaders />
       {!!Object.keys(textResultFields).length && (
         <EuiTableBody>
