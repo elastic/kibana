@@ -29,11 +29,11 @@ if (type !== 'server') {
       break;
 
     case 'qaPeriodicEnv':
-      grepArgs = ['--grep', '/^(?!.*@skipInServerless).*@serverless.*/'];
+      grepArgs = ['--grep', '/^(?!.*@skipInServerless|.*@skipInServerlessMKI).*@serverless.*/'];
       break;
 
     case 'qaEnv':
-      grepArgs = ['--grep', '/^(?!.*@skipInServerless).*@serverlessQA.*/'];
+      grepArgs = ['--grep', '/^(?!.*@skipInServerless|.*@skipInServerlessMKI).*@serverlessQA.*/'];
       break;
 
     default:
