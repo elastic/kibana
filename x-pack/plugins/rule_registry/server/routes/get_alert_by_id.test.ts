@@ -26,12 +26,15 @@ import {
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
+import { BasicFields } from '../../common/search_strategy';
 import { getAlertByIdRoute } from './get_alert_by_id';
 import { requestContextMock } from './__mocks__/request_context';
 import { getReadRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
-const getMockAlert = (): ParsedTechnicalFields & ParsedExperimentalFields => ({
+const getMockAlert = (): ParsedTechnicalFields &
+  ParsedExperimentalFields &
+  Omit<BasicFields, '_id'> => ({
   [ALERT_INSTANCE_ID]: 'fake-alert-id',
   [ALERT_RULE_CATEGORY]: 'apm.error_rate',
   [ALERT_RULE_CONSUMER]: 'apm',
@@ -47,6 +50,7 @@ const getMockAlert = (): ParsedTechnicalFields & ParsedExperimentalFields => ({
   [SPACE_IDS]: ['fake-space-id'],
   [TIMESTAMP]: '2021-06-21T21:33:05.713Z',
   [VERSION]: '7.13.0',
+  ['_index']: 'fake-alert-index',
 });
 
 describe('getAlertByIdRoute', () => {
