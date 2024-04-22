@@ -132,7 +132,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const {
     uiSettings,
     data: {
-      query: { filterManager },
+      query: { filterManager, queryString },
     },
   } = useAiopsAppContext();
 
@@ -241,11 +241,14 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       if (requestParamsFromUrl.filters) {
         filterManager.setFilters(requestParamsFromUrl.filters);
       }
+      if (requestParamsFromUrl.query) {
+        queryString.setQuery(requestParamsFromUrl.query);
+      }
       if (globalFilters) {
         filterManager?.addFilters(globalFilters);
       }
     },
-    [requestParamsFromUrl.filters, filterManager]
+    [requestParamsFromUrl.filters, requestParamsFromUrl.query, filterManager, queryString]
   );
 
   const combinedQuery = useMemo(() => {
