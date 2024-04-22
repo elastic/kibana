@@ -34,7 +34,7 @@ import {
   LinkOptions,
 } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
-import { LinkInfo } from '../../embeddable/types';
+import { LinkInfo } from './constants';
 import { LinkOptionsComponent } from './link_options';
 import { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';

@@ -18,8 +18,8 @@ import userEvent from '@testing-library/user-event';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { getMockLinksApi } from '../../react_embeddable/mocks';
-import { ResolvedLink } from '../../react_embeddable/types';
+import { getMockLinksApi } from '../../embeddable/mocks';
+import { ResolvedLink } from '../../embeddable/types';
 
 jest.mock('@kbn/dashboard-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/dashboard-plugin/public');

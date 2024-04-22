@@ -18,9 +18,8 @@ import {
 import { extractReferences } from '../../common/persistable_state';
 import { CONTENT_ID } from '../../common';
 import { LinksAttributes } from '../../common/content_management';
-import { LinksByReferenceInput } from '../embeddable/types';
 import { checkForDuplicateTitle } from './duplicate_title_check';
-import { LinksSerializedState } from '../react_embeddable/types';
+import { LinksSerializedState } from '../embeddable/types';
 import { linksClient } from './links_content_management_client';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
@@ -30,11 +29,32 @@ const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   },
 });
 
-export const runSaveToLibrary = async (
+export const runQuickSave = async (
   newAttributes: LinksAttributes,
-  initialState?: LinksSerializedState
-): Promise<LinksByReferenceInput | undefined> => {
-  return new Promise<LinksByReferenceInput | undefined>((resolve, reject) => {
+  savedObjectId: string
+): Promise<LinksSerializedState | undefined> => {
+  const { attributes, references } = extractReferences({
+    attributes: newAttributes,
+  });
+
+  try {
+    const {
+      item: { id },
+    } = await linksClient.update({
+      id: savedObjectId,
+      data: attributes,
+      options: { references },
+    });
+    return { savedObjectId: id };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const runSaveToLibrary = async (
+  newAttributes: LinksAttributes
+): Promise<LinksSerializedState | undefined> => {
+  return new Promise<LinksSerializedState | undefined>((resolve, reject) => {
     const onSave = async ({
       newTitle,
       newDescription,
@@ -63,8 +83,6 @@ export const runSaveToLibrary = async (
         ...stateFromSaveModal,
       };
 
-      const savedObjectId = initialState?.savedObjectId;
-
       const { attributes, references } = extractReferences({
         attributes: stateToSave,
       });
@@ -72,28 +90,13 @@ export const runSaveToLibrary = async (
       try {
         const {
           item: { id },
-        } = await (savedObjectId
-          ? linksClient.update({
-              id: savedObjectId,
-              data: attributes,
-              options: { references },
-            })
-          : linksClient.create({ data: attributes, options: { references } }));
-        resolve({ ...initialState, savedObjectId: id });
+        } = await linksClient.create({ data: attributes, options: { references } });
+        resolve({ savedObjectId: id });
         return { id };
       } catch (error) {
         reject(error);
         return { error };
       }
-
-      // const updatedInput = (await getLinksAttributeService().wrapAttributes(
-      //   stateToSave,
-      //   true,
-      //   initialInput
-      // )) as unknown as LinksByReferenceInput;
-
-      // resolve(updatedInput);
-      // return { id: updatedInput.savedObjectId };
     };
 
     const saveModal = (

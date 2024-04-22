@@ -36,7 +36,6 @@ import {
 } from '../../../common/content_management';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
-import { LinksLayoutInfo } from '../../embeddable/types';
 import { coreServices } from '../../services/kibana_services';
 import { LinksStrings } from '../links_strings';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
@@ -45,18 +44,18 @@ import { LinksEditorSingleLink } from './links_editor_single_link';
 import { TooltipWrapper } from '../tooltip_wrapper';
 
 import './links_editor.scss';
-import { ResolvedLink } from '../../react_embeddable/types';
-import { getOrderedLinkList } from '../../react_embeddable/utils';
+import { ResolvedLink } from '../../embeddable/types';
+import { getOrderedLinkList } from '../../embeddable/utils';
 
 const layoutOptions: EuiButtonGroupOptionProps[] = [
   {
     id: LINKS_VERTICAL_LAYOUT,
-    label: LinksLayoutInfo[LINKS_VERTICAL_LAYOUT].displayName,
+    label: LinksStrings.editor.panelEditor.getVerticalLayoutLabel(),
     'data-test-subj': `links--panelEditor--${LINKS_VERTICAL_LAYOUT}LayoutBtn`,
   },
   {
     id: LINKS_HORIZONTAL_LAYOUT,
-    label: LinksLayoutInfo[LINKS_HORIZONTAL_LAYOUT].displayName,
+    label: LinksStrings.editor.panelEditor.getHorizontalLayoutLabel(),
     'data-test-subj': `links--panelEditor--${LINKS_HORIZONTAL_LAYOUT}LayoutBtn`,
   },
 ];

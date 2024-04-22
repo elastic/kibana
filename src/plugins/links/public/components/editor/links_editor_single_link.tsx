@@ -20,11 +20,11 @@ import {
   DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
 
-import { LinkInfo } from '../../embeddable/types';
+import { LinkInfo } from './constants';
 import { LinksStrings } from '../links_strings';
 import { DashboardLinkStrings } from '../dashboard_link/dashboard_link_strings';
 import { DASHBOARD_LINK_TYPE } from '../../../common/content_management';
-import { ResolvedLink } from '../../react_embeddable/types';
+import { ResolvedLink } from '../../embeddable/types';
 
 export const LinksEditorSingleLink = ({
   link,

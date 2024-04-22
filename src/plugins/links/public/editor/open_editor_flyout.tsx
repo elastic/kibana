@@ -19,11 +19,10 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { LinksAttributes, LinksLayoutType } from '../../common/content_management';
-import { runSaveToLibrary } from '../content_management/save_to_library';
-import { LinksEditorFlyoutReturn } from '../embeddable/types';
+import { runQuickSave, runSaveToLibrary } from '../content_management/save_to_library';
 import { coreServices } from '../services/kibana_services';
-import { LinksSerializedState, ResolvedLink } from '../react_embeddable/types';
-import { resolveLinks } from '../react_embeddable/utils';
+import { LinksSerializedState, ResolvedLink } from '../embeddable/types';
+import { resolveLinks } from '../embeddable/utils';
 import { loadFromLibrary } from '../content_management/load_from_library';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
@@ -41,16 +40,10 @@ const LinksEditor = withSuspense(
 export async function openEditorFlyout({
   initialState,
   parentDashboard,
-  resolvedLinks$,
-  attributes$,
-  savedObjectId$,
 }: {
   initialState?: LinksSerializedState;
   parentDashboard?: unknown;
-  resolvedLinks$?: BehaviorSubject<ResolvedLink[]>;
-  attributes$?: BehaviorSubject<LinksAttributes | undefined>;
-  savedObjectId$?: BehaviorSubject<string | undefined>;
-}): Promise<LinksEditorFlyoutReturn> {
+}): Promise<LinksSerializedState | undefined> {
   if (!initialState) {
     /**
      * When creating a new links panel, the tooltip from the "Add panel" popover interacts badly with the flyout
@@ -73,10 +66,8 @@ export async function openEditorFlyout({
   const state = initialState?.savedObjectId
     ? await loadFromLibrary(initialState.savedObjectId)
     : initialState;
-  const isByReference = Boolean(initialState?.savedObjectId);
 
-  const resolvedLinks =
-    resolvedLinks$?.getValue() ?? (await resolveLinks(state?.attributes?.links));
+  const resolvedLinks = await resolveLinks(state?.attributes?.links);
 
   return new Promise((resolve, reject) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
@@ -99,17 +90,16 @@ export async function openEditorFlyout({
 
     const onSaveToLibrary = async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
       // remove the title and description state from the resolved links before saving
-      const links = newLinks.map(({ title, description, ...linkToSave }) => linkToSave);
+      const links = newLinks.map(({ title, description, error, ...linkToSave }) => linkToSave);
       const newAttributes = {
         ...state?.attributes,
         links,
         layout: newLayout,
       };
-      const savedAttributes = await runSaveToLibrary(newAttributes, initialState);
-      savedObjectId$?.next(savedAttributes?.savedObjectId);
-      resolvedLinks$?.next(newLinks);
-      attributes$?.next(newAttributes);
-      resolve(savedAttributes);
+      const newState = initialState?.savedObjectId
+        ? await runQuickSave(newAttributes, initialState?.savedObjectId)
+        : await runSaveToLibrary(newAttributes);
+      resolve(newState);
       closeEditorFlyout(editorFlyout);
     };
 
@@ -117,19 +107,14 @@ export async function openEditorFlyout({
       // remove the title and description state from the resolved links before saving
       const links = newLinks.map(({ title, description, ...linkToSave }) => linkToSave);
       const newAttributes = {
-        ...attributes,
+        ...initialState?.attributes,
         links,
         layout: newLayout,
       };
-      const newState = {
+      const newState: LinksSerializedState = {
         ...initialState,
-        attributes: {
-          ...initialState?.attributes,
-          ...newAttributes,
-        },
+        attributes: newAttributes,
       };
-      resolvedLinks$?.next(newLinks);
-      attributes$?.next(newAttributes);
       resolve(newState);
       closeEditorFlyout(editorFlyout);
     };
@@ -149,7 +134,7 @@ export async function openEditorFlyout({
           onSaveToLibrary={onSaveToLibrary}
           onAddToDashboard={onAddToDashboard}
           parentDashboardId={parentDashboardId}
-          isByReference={isByReference}
+          isByReference={Boolean(initialState?.savedObjectId)}
         />,
         { theme: coreServices.theme, i18n: coreServices.i18n }
       ),

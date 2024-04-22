@@ -29,7 +29,7 @@ import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
-import { LinksSerializedState } from './react_embeddable/types';
+import { LinksSerializedState } from './embeddable/types';
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -111,9 +111,7 @@ export class LinksPlugin
         return { width, height, strategy: 'placeAtTop' };
       });
       registerReactEmbeddableFactory(CONTENT_ID, async () => {
-        const { getLinksEmbeddableFactory } = await import(
-          './react_embeddable/links_react_embeddable'
-        );
+        const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
         return getLinksEmbeddableFactory();
       });
     });

@@ -7,45 +7,66 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject, distinctUntilKeyChanged, filter, switchMap } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import { i18n } from '@kbn/i18n';
 import { LinksDocument } from '../services/attribute_service';
 import { LinksSerializedState, ResolvedLink } from './types';
 import { resolveLinks } from './utils';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
 import { loadFromLibrary } from '../content_management/load_from_library';
+import { CONTENT_ID } from '../../common';
 
-export async function initializeLinks(state: LinksSerializedState, parentApi: unknown) {
-  const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
+const isParentApiCompatible = (parentApi: unknown): parentApi is PresentationContainer =>
+  apiIsPresentationContainer(parentApi);
 
+export async function initializeLinks(
+  state: LinksSerializedState,
+  uuid: string,
+  parentApi: unknown
+) {
+  if (!isParentApiCompatible(parentApi)) {
+    throw new Error(
+      i18n.translate('links.errors.incompatibleAction', {
+        defaultMessage: 'Parent is incompatible',
+      })
+    );
+  }
   const { attributes } = state.savedObjectId ? await loadFromLibrary(state.savedObjectId) : state;
 
-  const resolvedLinks$ = new BehaviorSubject<ResolvedLink[]>(await resolveLinks(attributes.links));
   const error$ = new BehaviorSubject<Error | undefined>(undefined);
+  const resolvedLinks$ = new BehaviorSubject<ResolvedLink[]>([]);
 
   const attributes$ = new BehaviorSubject(attributes);
+  const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
 
-  // whenever resolvedLinks$ changes, update links$ with the persistable state
-  // title and description are not persisted
-  resolvedLinks$.pipe(skip(1)).subscribe({
-    next: (resolvedLinks) => {
-      return {
-        ...attributes$.value,
-        links: resolvedLinks.map(({ title, description, ...link }) => link),
-      };
-    },
-    error: (error) => error$.next(error),
-  });
+  const defaultPanelTitle = new BehaviorSubject<string | undefined>(attributes?.title);
+  const defaultPanelDescription = new BehaviorSubject<string | undefined>(attributes?.description);
+
+  attributes$
+    .pipe(
+      filter(Boolean),
+      distinctUntilKeyChanged('links'),
+      switchMap(({ links }) => resolveLinks(links))
+    )
+    .subscribe({
+      next: (resolvedLinks) => resolvedLinks$.next(resolvedLinks),
+      error: (error) => error$.next(error),
+    });
 
   const onEdit = async () => {
     try {
-      await openEditorFlyout({
+      const newState = await openEditorFlyout({
         initialState: state,
         parentDashboard: parentApi,
-        resolvedLinks$,
-        attributes$,
-        savedObjectId$,
       });
+      if (parentApi) {
+        parentApi.replacePanel(uuid, {
+          panelType: CONTENT_ID,
+          initialState: newState,
+        });
+      }
     } catch {
       // do nothing, user cancelled
     }
@@ -71,11 +92,14 @@ export async function initializeLinks(state: LinksSerializedState, parentApi: un
 
   return {
     linksApi: {
+      defaultPanelTitle,
+      defaultPanelDescription,
       blockingError: error$,
       onEdit,
       resolvedLinks$,
       attributes$,
       savedObjectId$,
+      parentApi,
     },
     linksComparators: getLinksComparators(),
     serializeLinks: () => {

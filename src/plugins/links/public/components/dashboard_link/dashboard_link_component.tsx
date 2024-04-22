@@ -29,7 +29,7 @@ import {
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { LinksApi, ResolvedLink } from '../../react_embeddable/types';
+import { LinksApi, ResolvedLink } from '../../embeddable/types';
 
 export const DashboardLinkComponent = ({
   link,

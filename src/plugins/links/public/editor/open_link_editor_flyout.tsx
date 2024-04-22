@@ -14,7 +14,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { coreServices } from '../services/kibana_services';
 import { LinkEditor } from '../components/editor/link_editor';
 import { focusMainFlyout } from './links_editor_tools';
-import { ResolvedLink } from '../react_embeddable/types';
+import { ResolvedLink } from '../embeddable/types';
 
 export interface LinksEditorProps {
   link?: ResolvedLink;
