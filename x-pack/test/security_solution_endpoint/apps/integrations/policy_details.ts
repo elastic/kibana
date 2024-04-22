@@ -400,8 +400,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
-      it.skip('should not show host isolation exceptions card because no entries', async () => {
-        await testSubjects.missingOrFail('hostIsolationExceptions-fleet-integration-card');
+      it('should show host isolation exceptions card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('hostIsolationExceptions-fleet-integration-card');
+        const hostIsolationExceptionsCard = await testSubjects.find(
+          'hostIsolationExceptions-fleet-integration-card'
+        );
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
+          hostIsolationExceptionsCard
+        );
+        await (await testSubjects.find('hostIsolationExceptions-link-to-exceptions')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
       });
     });
   });
