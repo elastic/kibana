@@ -35,16 +35,6 @@ describe(
   'Detection Rule Creation - EQL Rules - With Alert Suppression - Basic License',
   {
     tags: ['@ess'],
-    // alertSuppressionForNonSequenceEqlRuleEnabled feature flag is also enabled in a global config
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForNonSequenceEqlRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     beforeEach(() => {

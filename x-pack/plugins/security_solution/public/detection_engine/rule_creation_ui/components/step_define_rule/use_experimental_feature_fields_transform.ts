@@ -7,8 +7,6 @@
 
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isEqlRule, isNewTermsRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -16,34 +14,9 @@ import { isEqlRule, isNewTermsRule } from '../../../../../common/detection_engin
 export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineStepRule>>(): ((
   fields: T
 ) => T) => {
-  const isAlertSuppressionForNonSequenceEqlRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForNonSequenceEqlRuleEnabled'
-  );
-  const isAlertSuppressionForNewTermsRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForNewTermsRuleEnabled'
-  );
-
-  const transformer = useCallback(
-    (fields: T) => {
-      const isSuppressionDisabled =
-        (isNewTermsRule(fields.ruleType) && !isAlertSuppressionForNewTermsRuleEnabled) ||
-        (isEqlRule(fields.ruleType) && !isAlertSuppressionForNonSequenceEqlRuleEnabled);
-
-      // reset any alert suppression values hidden behind feature flag
-      if (isSuppressionDisabled) {
-        return {
-          ...fields,
-          groupByFields: [],
-          groupByRadioSelection: undefined,
-          groupByDuration: undefined,
-          suppressionMissingFields: undefined,
-        };
-      }
-
-      return fields;
-    },
-    [isAlertSuppressionForNewTermsRuleEnabled, isAlertSuppressionForNonSequenceEqlRuleEnabled]
-  );
+  const transformer = useCallback((fields: T) => {
+    return fields;
+  }, []);
 
   return transformer;
 };
