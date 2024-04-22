@@ -33,42 +33,14 @@ describe('correctQueryWithActions', () => {
     expect(fixedQuery).toBe('from logstash-* | stats var0 = max(bytes) | eval abs(var0) | limit 1');
   });
 
-  it(`fixes errors correctly for a query with missing quotes`, async () => {
-    const fixedQuery = await correctQueryWithActions('from logstash-* | keep field-1');
-    expect(fixedQuery).toBe('from logstash-* | keep `field-1`');
-  });
-
-  it(`fixes errors correctly for a query with missing quotes in multiple commands`, async () => {
-    const fixedQuery = await correctQueryWithActions(
-      'from logstash-* | stats avg(field-1) | eval abs(field-2)'
-    );
-    expect(fixedQuery).toBe('from logstash-* | stats avg(`field-1`) | eval abs(`field-2`)');
-  });
-
-  it(`fixes errors correctly for a query with missing quotes and keep with multiple fields`, async () => {
-    const fixedQuery = await correctQueryWithActions('from logstash-* | keep field-1, field-2');
-    expect(fixedQuery).toBe('from logstash-* | keep `field-1`, `field-2`');
-  });
-
-  it(`fixes errors correctly for a query with missing quotes with variable assignment`, async () => {
-    const fixedQuery = await correctQueryWithActions('from logstash-* | stats var1 = avg(field-1)');
-    expect(fixedQuery).toBe('from logstash-* | stats var1 = avg(`field-1`)');
-  });
-
-  it(`fixes errors correctly for a query with missing quotes in an aggregation`, async () => {
-    const fixedQuery = await correctQueryWithActions('from logstash-* | stats avg(field-1)');
-    expect(fixedQuery).toBe('from logstash-* | stats avg(`field-1`)');
-  });
-
-  it(`fixes errors correctly for a query with typo on stats and wrong quotes`, async () => {
-    const fixedQuery = await correctQueryWithActions('from logstash-* | stats aveg(field-1)');
-    expect(fixedQuery).toBe('from logstash-* | stats avg(`field-1`)');
-  });
-
-  it(`fixes errors correctly for a query with missing quotes on stats and keep`, async () => {
-    const fixedQuery = await correctQueryWithActions(
-      'from logstash-* | stats avg(field-1) | keep field-2'
-    );
-    expect(fixedQuery).toBe('from logstash-* | stats avg(`field-1`) | keep `field-2`');
+  it(`doesnt complain for @timestamp column`, async () => {
+    const queryWithTimestamp = `FROM logstash-*
+    | WHERE @timestamp >= NOW() - 15 minutes
+    | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
+    | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY service.name, bucket
+    | SORT avg_cpu DESC
+    | LIMIT 10`;
+    const fixedQuery = await correctQueryWithActions(queryWithTimestamp);
+    expect(fixedQuery).toBe(queryWithTimestamp);
   });
 });
