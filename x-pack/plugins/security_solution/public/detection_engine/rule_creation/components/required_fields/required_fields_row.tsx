@@ -13,11 +13,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiSelect,
   EuiTextColor,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { FIELD_TYPES, UseField } from '../../../../shared_imports';
 import * as i18n from './translations';
 
@@ -85,30 +84,42 @@ const RequiredFieldRowInner = ({
 
   const selectedNameOption = selectableNameOptions.find(
     (option) => option.label === field.value.name
-  ) || { label: '' };
+  );
+
+  const selectedNameOptions = selectedNameOption ? [selectedNameOption] : [];
 
   const typesAvailableForSelectedName = typesByFieldName[field.value.name];
 
-  let selectableTypeOptions: EuiSelectOption[] = [];
+  let selectableTypeOptions: Array<EuiComboBoxOptionOption<string>> = [];
   if (typesAvailableForSelectedName) {
     const isSelectedTypeAvailable = typesAvailableForSelectedName.includes(field.value.type);
 
     selectableTypeOptions = typesAvailableForSelectedName.map((type) => ({
-      text: type,
+      label: type,
+      value: type,
     }));
 
     if (!isSelectedTypeAvailable) {
       // case: field name exists, but such type is not among the list of field types
-      selectableTypeOptions.push({ text: field.value.type });
+      selectableTypeOptions.push({ label: field.value.type, value: field.value.type });
     }
   } else {
-    // case: no such field name in index patterns
-    selectableTypeOptions = [
-      {
-        text: field.value.type,
-      },
-    ];
+    if (field.value.type) {
+      // case: no such field name in index patterns
+      selectableTypeOptions = [
+        {
+          label: field.value.type,
+          value: field.value.type,
+        },
+      ];
+    }
   }
+
+  const selectedTypeOption = selectableTypeOptions.find(
+    (option) => option.value === field.value.type
+  );
+
+  const selectedTypeOptions = selectedTypeOption ? [selectedTypeOption] : [];
 
   const { nameWarning, typeWarning } = getWarnings(field.value.name);
 
@@ -116,11 +127,7 @@ const RequiredFieldRowInner = ({
 
   const handleNameChange = useCallback(
     ([newlySelectedOption]: Array<EuiComboBoxOptionOption<string>>) => {
-      const updatedName = newlySelectedOption.value;
-      if (!updatedName) {
-        // TODO: Check if it's a legit case
-        return;
-      }
+      const updatedName = newlySelectedOption.value || '';
 
       const isCurrentTypeAvailableForNewName = typesByFieldName[updatedName]?.includes(
         field.value.type
@@ -141,8 +148,8 @@ const RequiredFieldRowInner = ({
   );
 
   const handleTypeChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const updatedType = event.target.value;
+    ([newlySelectedOption]: Array<EuiComboBoxOptionOption<string>>) => {
+      const updatedType = newlySelectedOption.value || '';
 
       const updatedFieldValue: RequiredFieldWithOptionalEcs = {
         name: field.value.name,
@@ -171,11 +178,11 @@ const RequiredFieldRowInner = ({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow>
           <EuiComboBox
-            aria-label="Accessible screen reader label"
-            placeholder="Select a single option"
+            aria-label="Field name"
+            placeholder="Field name"
             singleSelection={{ asPlainText: true }}
             options={selectableNameOptions}
-            selectedOptions={[selectedNameOption]}
+            selectedOptions={selectedNameOptions}
             onChange={handleNameChange}
             isClearable={false}
             prepend={
@@ -191,11 +198,19 @@ const RequiredFieldRowInner = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiSelect
+          <EuiComboBox
+            isDisabled={
+              !selectedTypeOption ||
+              selectedTypeOption.label === '' ||
+              selectableTypeOptions.length <= 1
+            }
+            aria-label="Field type"
+            placeholder="Field type"
+            singleSelection={{ asPlainText: true }}
             options={selectableTypeOptions}
-            disabled={selectedNameOption.label === '' || selectableTypeOptions.length <= 1}
-            value={field.value.type}
+            selectedOptions={selectedTypeOptions}
             onChange={handleTypeChange}
+            isClearable={false}
             prepend={
               typeWarning ? (
                 <EuiIcon
