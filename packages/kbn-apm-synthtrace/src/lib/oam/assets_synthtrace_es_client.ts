@@ -7,14 +7,20 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ESDocumentWithOperation, OAMAssetDocument } from '@kbn/apm-synthtrace-client';
+import {
+  ApmFields,
+  ESDocumentWithOperation,
+  LogDocument,
+  OAMAssetDocument,
+} from '@kbn/apm-synthtrace-client';
 import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
 import { fork } from '../utils/stream_utils';
-import { createAssetsAggregator } from './aggregators/create_assets_aggregator';
+import { createLogsAssetsAggregator } from './aggregators/create_logs_assets_aggregator';
+import { createTracesAssetsAggregator } from './aggregators/create_traces_assets_aggregator';
 
 export type AssetsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -30,12 +36,13 @@ export class AssetsSynthtraceEsClient extends SynthtraceEsClient<OAMAssetDocumen
 
 function assetsPipeline() {
   return (base: Readable) => {
-    const aggregators = [createAssetsAggregator()];
+    const aggregators = [createTracesAssetsAggregator(), createLogsAssetsAggregator()];
     return pipeline(
       base,
       getSerializeTransform(),
       fork(new PassThrough({ objectMode: true }), ...aggregators),
-      assetsFilterTransform(),
+      getAssetsFilterTransform(),
+      getMergeAssetsTransform(),
       getRoutingTransform(),
       getDedotTransform(),
       (err: unknown) => {
@@ -47,10 +54,34 @@ function assetsPipeline() {
   };
 }
 
-function assetsFilterTransform() {
+function getMergeAssetsTransform() {
+  const mergedDocuments: Record<string, OAMAssetDocument> = {};
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<OAMAssetDocument>, encoding, callback) {
+      const assetId = document['asset.id'];
+      if (!mergedDocuments[assetId]) {
+        mergedDocuments[assetId] = { ...document };
+      } else {
+        mergedDocuments[assetId]['asset.signalTypes'].push(...document['asset.signalTypes']);
+      }
+      callback();
+    },
+    flush(callback) {
+      Object.values(mergedDocuments).forEach((item) => this.push(item));
+      callback();
+    },
+  });
+}
+
+function getAssetsFilterTransform() {
+  return new Transform({
+    objectMode: true,
+    transform(
+      document: ESDocumentWithOperation<OAMAssetDocument | ApmFields | LogDocument>,
+      encoding,
+      callback
+    ) {
       if ('asset.id' in document) {
         callback(null, document);
       } else {
