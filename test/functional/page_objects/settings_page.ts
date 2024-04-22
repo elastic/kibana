@@ -787,12 +787,7 @@ export class SettingsPageObject extends FtrService {
   ) {
     await this.clickAddField();
     await this.setFieldName(name);
-
-    await this.retry.try(async () => {
-      await this.setFieldType('Composite');
-      const comboBox = await this.testSubjects.find('typeField');
-      expect(await this.comboBox.isOptionSelected(comboBox, 'Composite')).to.be(true);
-    });
+    await this.setFieldType('Composite');
     await this.setCompositeScript(script);
     if (subfieldCount > 0) {
       await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
@@ -879,8 +874,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldType(type: string) {
+    const typeFieldDataTestSubj = 'typeField';
     this.log.debug('set type = ' + type);
-    await this.comboBox.set('typeField', type);
+    await this.retry.try(async () => {
+      await this.comboBox.set(typeFieldDataTestSubj, type);
+      const comboBox = await this.testSubjects.find(typeFieldDataTestSubj);
+      expect(await this.comboBox.isOptionSelected(comboBox, type)).to.be(true);
+    });
   }
 
   async setFieldScript(script: string) {
