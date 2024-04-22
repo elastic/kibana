@@ -40,11 +40,7 @@ export function FormRowSuggestionsSelect({
   error,
 }: Props) {
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h3>{title}</h3>}
-      description={description}
-    >
+    <EuiDescribedFormGroup fullWidth title={<h3>{title}</h3>} description={description}>
       <EuiFormRow label={fieldLabel} isInvalid={isInvalid} error={error}>
         <SuggestionsSelect
           customOptions={allowAll ? [ALL_OPTION] : undefined}
@@ -52,10 +48,9 @@ export function FormRowSuggestionsSelect({
           fieldName={fieldName}
           onChange={onChange}
           isClearable={false}
-          placeholder={i18n.translate(
-            'xpack.apm.agentConfig.servicePage.service.placeholder',
-            { defaultMessage: 'Select Option' }
-          )}
+          placeholder={i18n.translate('xpack.apm.agentConfig.servicePage.service.placeholder', {
+            defaultMessage: 'Select Option',
+          })}
           dataTestSubj={dataTestSubj}
           start={moment().subtract(24, 'h').toISOString()}
           end={moment().toISOString()}

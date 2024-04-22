@@ -10,6 +10,12 @@
  * Mock kbn/monaco to provide the console parser code directly without a web worker
  */
 const mockGetParsedRequests = jest.fn();
+
+/*
+ * Mock the function "populateContext" that accesses the autocomplete definitions
+ */
+const mockPopulateContext = jest.fn();
+
 jest.mock('@kbn/monaco', () => {
   const original = jest.requireActual('@kbn/monaco');
   return {
@@ -29,6 +35,14 @@ jest.mock('../../../../services', () => {
     }),
     StorageKeys: {
       VARIABLES: 'test',
+    },
+  };
+});
+
+jest.mock('../../../../lib/autocomplete/engine', () => {
+  return {
+    populateContext: (...args: any) => {
+      mockPopulateContext(args);
     },
   };
 });
@@ -99,6 +113,38 @@ describe('Editor actions provider', () => {
     it('returns the correct string if there is a request in the selection range', async () => {
       const curl = await editorActionsProvider.getCurl('http://localhost');
       expect(curl).toBe('curl -XGET "http://localhost/_search" -H "kbn-xsrf: reporting"');
+    });
+  });
+
+  describe('getDocumentationLink', () => {
+    const docLinkVersion = '8.13';
+    const docsLink = 'http://elastic.co/_search';
+    // mock the populateContext function that finds the correct autocomplete endpoint object and puts it into the context object
+    mockPopulateContext.mockImplementation((...args) => {
+      const context = args[0][1];
+      context.endpoint = {
+        documentation: docsLink,
+      };
+    });
+    it('returns null if no requests', async () => {
+      mockGetParsedRequests.mockResolvedValue([]);
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(null);
+    });
+
+    it('returns null if there is a request but not in the selection range', async () => {
+      editor.getSelection.mockReturnValue({
+        // the request is on line 1, the user selected line 2
+        startLineNumber: 2,
+        endLineNumber: 2,
+      } as unknown as monaco.Selection);
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(null);
+    });
+
+    it('returns the correct link if there is a request in the selection range', async () => {
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(docsLink);
     });
   });
 });

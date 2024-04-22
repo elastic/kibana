@@ -17,10 +17,7 @@ function getAPMGeneratedStacktrace() {
     .instance('instance a');
 
   return Array.from(
-    timerange(
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T00:01:00.000Z')
-    )
+    timerange(new Date('2022-01-01T00:00:00.000Z'), new Date('2022-01-01T00:01:00.000Z'))
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -67,10 +64,7 @@ function getOtelGeneratedStacktrace() {
     .instance('instance a');
 
   return Array.from(
-    timerange(
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T00:01:00.000Z')
-    )
+    timerange(new Date('2022-01-01T00:00:00.000Z'), new Date('2022-01-01T00:01:00.000Z'))
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
