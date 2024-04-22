@@ -518,7 +518,6 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
         pageSizeOptions: [10, 25, 50],
       }}
       loading={loading}
-      isSelectable={canManageOwnApiKeys}
     />
   );
 };
