@@ -495,6 +495,24 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               }
             }
             break;
+
+          case 'get-file':
+            {
+              const responseDocsForGetFile = await this.checkPendingGetFileActions(
+                typePendingActions as Array<
+                  LogsEndpointAction<
+                    ResponseActionGetFileParameters,
+                    ResponseActionGetFileOutputContent,
+                    SentinelOneGetFileRequestMeta
+                  >
+                >,
+                actionType as 'get-file'
+              );
+              if (responseDocsForGetFile.length) {
+                addToQueue(...responseDocsForGetFile);
+              }
+            }
+            break;
         }
       }
     }
@@ -690,5 +708,64 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     return completedResponses;
+  }
+
+  private async checkPendingGetFileActions(
+    actionRequests: Array<
+      LogsEndpointAction<
+        ResponseActionGetFileParameters,
+        ResponseActionGetFileOutputContent,
+        SentinelOneGetFileRequestMeta
+      >
+    >,
+    command: ResponseActionsApiCommandNames & 'get-file'
+  ): Promise<LogsEndpointActionResponse[]> {
+    // implement
+    // todo:pt cleanup
+    // S1 record:
+    // {
+    //             "accountId": "1392053568574369781",
+    //             "accountName": "Elastic",
+    //             "activityType": 80,
+    //             "activityUuid": "1f3bba11-714b-46c3-98a0-7705f91fddba",
+    //             "agentId": "1913920934584665209",
+    //             "agentUpdatedVersion": null,
+    //             "comments": null,
+    //             "createdAt": "2024-04-18T14:15:07.949973Z",
+    //             "data": {
+    //                 "accountName": "Elastic",
+    //                 "commandBatchUuid": "991cc0b6-e8fd-4818-afc3-d0c837f7e08d",
+    //                 "commandId": 1931232896149877374,
+    //                 "computerName": "ptavares-sentinelone-1371",
+    //                 "downloadUrl": "/agents/1913920934584665209/uploads/1931232950197678729",
+    //                 "externalIp": "108.77.84.191",
+    //                 "externalServiceId": null,
+    //                 "filePath": "/agents/1913920934584665209/uploads/1931232950197678729",
+    //                 "filename": "ptavares_sentinelone_1371_2024-04-18_14_15_07.928.zip",
+    //                 "fullScopeDetails": "Group Default Group in Site Default site of Account Elastic",
+    //                 "fullScopeDetailsPath": "Global / Elastic / Default site / Default Group",
+    //                 "groupName": "Default Group",
+    //                 "ipAddress": "108.77.84.191",
+    //                 "realUser": null,
+    //                 "scopeLevel": "Group",
+    //                 "scopeName": "Default Group",
+    //                 "siteName": "Default site",
+    //                 "sourceType": "API",
+    //                 "uploadedFilename": "file_fetch_18-04-24_10_15_07.zip"
+    //             },
+    //             "description": null,
+    //             "groupId": "1392053568591146999",
+    //             "groupName": "Default Group",
+    //             "hash": null,
+    //             "id": "1931232950197678729",
+    //             "osFamily": null,
+    //             "primaryDescription": "Agent ptavares-sentinelone-1371 (108.77.84.191) successfully uploaded ptavares_sentinelone_1371_2024-04-18_14_15_07.928.zip.",
+    //             "secondaryDescription": "IP address: 108.77.84.191",
+    //             "siteId": "1392053568582758390",
+    //             "siteName": "Default site",
+    //             "threatId": null,
+    //             "updatedAt": "2024-04-18T14:15:07.949319Z",
+    //             "userId": null
+    //         },
   }
 }
