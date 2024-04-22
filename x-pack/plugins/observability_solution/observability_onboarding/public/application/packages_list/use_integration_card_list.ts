@@ -12,8 +12,6 @@ import { CustomCard } from './types';
 import { EXPERIMENTAL_ONBOARDING_APP_ROUTE } from '../../common';
 import { toCustomCard } from './utils';
 
-const QUICKSTART_FLOWS = ['kubernetes', 'nginx', 'system-logs-generated'];
-
 export function toOnboardingPath({
   basePath,
   category,
