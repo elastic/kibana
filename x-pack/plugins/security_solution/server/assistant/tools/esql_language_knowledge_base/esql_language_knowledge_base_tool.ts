@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicTool } from 'langchain/tools';
+import { DynamicTool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { getEsqlPrompt } from './esql_prompt';
 import { APP_UI_ID } from '../../../../common';
