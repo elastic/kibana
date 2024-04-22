@@ -76,6 +76,7 @@
       "packages/ml/data_grid",
       "packages/ml/data_view_utils",
       "packages/ml/date_picker",
+      "packages/ml/inference_integration_flyout",
       "packages/ml/trained_models_utils",
       "packages/ml/category_validator",
       "packages/ml/ui_actions",
