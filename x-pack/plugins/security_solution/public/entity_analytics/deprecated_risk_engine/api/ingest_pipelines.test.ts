@@ -42,7 +42,12 @@ describe('createIngestPipeline', () => {
   });
 
   it('handles error', () => {
-    expect(mockAddDanger.mock.calls[0][0]).toEqual('Failed to create Ingest pipeline');
+    expect(mockAddDanger.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "text": [Function],
+        "title": "Failed to create Ingest pipeline",
+      }
+    `);
     expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test error');
   });
 });
@@ -66,7 +71,12 @@ describe('deleteIngestPipelines', () => {
   });
 
   it('handles error', () => {
-    expect(mockAddDanger.mock.calls[0][0]).toEqual('Failed to delete Ingest pipelines');
+    expect(mockAddDanger.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "text": [Function],
+        "title": "Failed to delete Ingest pipelines",
+      }
+    `);
     expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test error');
   });
 });

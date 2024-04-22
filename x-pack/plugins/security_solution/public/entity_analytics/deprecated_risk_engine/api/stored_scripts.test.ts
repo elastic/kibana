@@ -42,7 +42,12 @@ describe('createStoredScript', () => {
   });
 
   it('handles error', () => {
-    expect(mockAddDanger.mock.calls[0][0]).toEqual('Failed to create stored script');
+    expect(mockAddDanger.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "text": [Function],
+        "title": "Failed to create stored script",
+      }
+    `);
     expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test error');
   });
 });
@@ -68,7 +73,12 @@ describe('deleteStoredScript', () => {
   });
 
   it('handles error', () => {
-    expect(mockAddDanger.mock.calls[0][0]).toEqual('Failed to delete stored script');
+    expect(mockAddDanger.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "text": [Function],
+        "title": "Failed to delete stored script",
+      }
+    `);
     expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test error');
   });
 });
