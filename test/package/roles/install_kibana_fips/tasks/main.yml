@@ -21,12 +21,9 @@
 - name: install and setup nvm
   block:
     - name: install nvm
-      shell: >
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | bash
-      args:
-        executable: /bin/bash
+      shell:
         chdir: "$HOME"
-        creates: "$HOME/.nvm/nvm.sh"
+        cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | bash
 
     - name: setup nvm for vagrant user
       lineinfile:
@@ -38,7 +35,6 @@
 - name: install kibana node version
   command: nvm install {{ node_version }}
   args:
-    executable: /bin/bash
     chdir: "$HOME"
 
 - name: install yarn
