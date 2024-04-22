@@ -307,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       getSharedTests({
         type,
-        savedSearch: 'esql test',
+        savedSearch: 'esql test with histogram',
         query1: 'from logstash-* | sort @timestamp desc | limit 10',
         query2: 'from logstash-* | limit 20',
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
