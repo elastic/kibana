@@ -1,8 +1,7 @@
 [
   {
-    "input": "Tell me a short funny joke about the moon from the perspective of the sun",
-    "reference": "Why did I break up with the Moon?\n\nBecause it was always going through phases and only showed me one side!",
-    "prediction": "Why did the sun break up with the moon? Because even though the sun was bigger, the moon thought it was the big cheese!"
+    "input": "Generate an ES|QL query that will count the number of connections made to external IP addresses, broken down by user. If the count is greater than 100 for a specific user, add a new field called \"follow_up\" that contains a value of \"true\", otherwise, it should contain \"false\". The user names should also be enriched with their respective group names.",
+    "reference": "FROM logs-*\n| WHERE NOT CIDR_MATCH(destination.ip, \"10.0.0.0/8\", \"172.16.0.0/12\", \"192.168.0.0/16\")\n| STATS destcount = COUNT(destination.ip) by user.name, host.name\n| ENRICH ldap_lookup_new ON user.name\n| WHERE group.name IS NOT NULL\n| EVAL follow_up = CASE(\n    destcount >= 100, \"true\",\n     \"false\")\n| SORT destcount desc\n| KEEP destcount, host.name, user.name, group.name, follow_up"
   },
   {
     "input": "Generate an ES|QL query that will parse the DNS registered domain from a DNS query, count the number distinct DNS queries being made per DNS registered domain and filter for when the distinct count is greater than 5. The query should sort the results by the distinct count of queries in descending order.",

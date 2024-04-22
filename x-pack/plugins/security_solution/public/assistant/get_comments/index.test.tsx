@@ -40,6 +40,7 @@ const testProps = {
   currentConversation,
   showAnonymizedValues,
   isFlyoutMode: false,
+  selectMessage: jest.fn(),
 };
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {

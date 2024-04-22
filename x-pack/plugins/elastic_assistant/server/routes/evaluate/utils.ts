@@ -49,7 +49,7 @@ export const fetchLangSmithDataset = async (
       examples.push(example);
     }
 
-    console.log('examples', JSON.stringify(examples, null, 2));
+    logger.debug(`examples:\n ${JSON.stringify(examples, null, 2)}`);
     // Convert to internal Dataset type -- TODO: add generic support for the different LangSmith test dataset formats
     const dataset: Dataset = examples.map((example) => ({
       id: example.id,
@@ -128,8 +128,8 @@ export const addToLangSmithDataset = async ({
       lsDataset = await client.createDataset(datasetId);
     }
 
-    console.log('lsDatasets:', JSON.stringify(lsDatasets, null, 2));
-    console.log('lsDataset:', JSON.stringify(lsDataset, null, 2));
+    logger.debug(`lsDatasets:\n ${JSON.stringify(lsDatasets, null, 2)}`);
+    logger.debug(`lsDataset:\n ${JSON.stringify(lsDataset, null, 2)}`);
 
     for (const { input, reference } of dataset) {
       await client.createExample(
@@ -160,9 +160,9 @@ export const writeLangSmithFeedback = async (
   evaluationId: string,
   logger: Logger | ToolingLog
 ): Promise<string> => {
-  console.log('writeLangSmithFeedback');
-  console.log('run', JSON.stringify(run, null, 2));
-  console.log('evaluationId', evaluationId);
+  logger.debug('writeLangSmithFeedback');
+  logger.debug(`run:\n ${JSON.stringify(run, null, 2)}`);
+  logger.debug(`evaluationId: ${evaluationId}`);
 
   try {
     const client = new Client();
@@ -178,8 +178,8 @@ export const writeLangSmithFeedback = async (
       eager: run.feedback_stats?.eager,
     };
     const feedbackResponse = await client.createFeedback(run.id, evaluationId, feedback);
-    console.log('feedback', JSON.stringify(feedback, null, 2));
-    console.log('feedbackResponse', JSON.stringify(feedbackResponse, null, 2));
+    logger.debug(`feedback:\n ${JSON.stringify(feedback, null, 2)}`);
+    logger.debug(`feedbackResponse:\n ${JSON.stringify(feedbackResponse, null, 2)}`);
     const runUrl = await client.getRunUrl({ runId: run.id });
     return runUrl;
   } catch (e) {
@@ -213,9 +213,9 @@ export const getLangSmithTracer = ({
     if (!isLangSmithEnabled() && apiKey == null) {
       return [];
     }
-    console.log('getLangSmithTracer');
-    console.log('projectName', projectName);
-    console.log('exampleId', exampleId);
+    logger.debug('getLangSmithTracer');
+    logger.debug(`projectName: ${projectName}`);
+    logger.debug(`exampleId: ${exampleId}`);
 
     const lcTracer = new LangChainTracer({
       projectName, // Shows as the 'test' run's 'name' in langsmith ui

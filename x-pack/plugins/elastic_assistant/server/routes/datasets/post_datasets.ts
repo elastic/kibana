@@ -15,12 +15,12 @@ import {
   PostDatasetsRequestQuery,
   PostDatasetsResponse,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { DATASETS } from '../../../common/constants';
 import { addToLangSmithDataset } from '../evaluate/utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
 
 export const postDatasetsRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -65,8 +65,8 @@ export const postDatasetsRoute = (router: IRouter<ElasticAssistantRequestHandler
           const { datasetId } = request.query;
           const { dataset } = request.body;
 
-          console.log('datasetId:', datasetId);
-          console.log('dataset:', JSON.stringify(dataset, null, 2));
+          // console.log('datasetId:', datasetId);
+          // console.log('dataset:', JSON.stringify(dataset, null, 2));
 
           const addToDatasetResponse = await addToLangSmithDataset({
             dataset,

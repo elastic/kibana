@@ -78,7 +78,7 @@ export const performEvaluation = async ({
   const startTime = new Date().getTime();
   const evaluationResults: EvaluationResult[] = [];
 
-  console.log('dataset', JSON.stringify(dataset, null, 2));
+  // console.log('dataset', JSON.stringify(dataset, null, 2));
 
   const predictionRequests = dataset.flatMap(({ input, reference, id: exampleId }) =>
     agentExecutorEvaluators.map(
@@ -162,13 +162,13 @@ export const performEvaluation = async ({
     });
 
     for (const result of evaluationResults) {
-      console.log('result', JSON.stringify(result, null, 2));
+      // console.log('result', JSON.stringify(result, null, 2));
       const { input, inputExampleId: exampleId, prediction, reference } = result;
       // Create an eval tracer so eval traces end up in the right project (runName in this instance as to correlate
       // with the test run), don't supply `exampleID` as that results in a new Dataset `Test` run being created and
       // polluting the `predictions` that ran above
       const evalTracer = new LangChainTracer({
-        projectName: `EAH Demo / Run I / Azure OpenAI / DefaultAgentExecutor`,
+        projectName: runName,
       });
       // Create RunCollector for uploading evals to LangSmith, no TS variant for `EvaluatorCallbackHandler` or
       // `run_on_dataset` w/ eval config, so using `RunCollectorCallbackHandler` and then uploading manually via

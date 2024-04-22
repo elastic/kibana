@@ -27,7 +27,11 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
+import type {
+  GetDatasetsResponse,
+  GetEvaluateResponse,
+  PostEvaluateResponse,
+} from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';

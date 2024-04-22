@@ -80,6 +80,7 @@ export interface AssistantProviderProps {
     setIsStreaming: (isStreaming: boolean) => void;
     currentUserAvatar?: UserAvatar;
     isFlyoutMode: boolean;
+    selectMessage: SelectMessage;
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;

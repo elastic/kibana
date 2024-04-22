@@ -28,7 +28,7 @@ import { useDatasets } from '../../api/datasets/use_datasets';
 import { useAddToDataset } from '../../api/datasets/use_add_to_dataset';
 
 interface Props {
-  selectedConversation: Conversation;
+  selectedConversation: Conversation | undefined;
 }
 
 /**
@@ -52,7 +52,7 @@ export const AddToDatasetButton: React.FC<Props> = React.memo(({ selectedConvers
   });
 
   useEffect(() => {
-    console.log('addToDatasetResponse', addToDatasetResponse);
+    // console.log('addToDatasetResponse', addToDatasetResponse);
   }, [addToDatasetResponse]);
 
   // Popover State
@@ -87,9 +87,8 @@ export const AddToDatasetButton: React.FC<Props> = React.memo(({ selectedConvers
 
   // Actions
   const handleAddToDataset = useCallback(() => {
-    const messageIds = selectedConversation.messages
-      .filter((m) => m.isSelected)
-      .map((m) => m.content ?? '');
+    const messageIds =
+      selectedConversation?.messages.filter((m) => m.isSelected).map((m) => m.content ?? '') ?? [];
 
     const datasetId = selectedDatasetOptions[0]?.label;
     if (datasetId && messageIds.length > 1) {
@@ -101,9 +100,10 @@ export const AddToDatasetButton: React.FC<Props> = React.memo(({ selectedConvers
       ];
       addToDataset({ datasetId, dataset });
     }
-  }, [addToDataset, selectedConversation.messages, selectedDatasetOptions]);
+  }, [addToDataset, selectedConversation?.messages, selectedDatasetOptions]);
 
-  const selectedMessageCount = selectedConversation.messages.filter((m) => m.isSelected).length;
+  const selectedMessageCount =
+    selectedConversation?.messages.filter((m) => m.isSelected).length ?? 0;
   const isDisabled = selectedMessageCount === 0;
 
   return (
@@ -155,7 +155,13 @@ export const AddToDatasetButton: React.FC<Props> = React.memo(({ selectedConvers
           />
         </EuiFormRow>
         <EuiPopoverFooter>
-          <EuiButton fullWidth size="s" isLoading={isAddingToDataset} onClick={handleAddToDataset}>
+          <EuiButton
+            fullWidth
+            size="s"
+            isLoading={isAddingToDataset}
+            onClick={handleAddToDataset}
+            disabled={selectedConversation === null}
+          >
             {i18n.ADD_TO_DATASET_BUTTON}
           </EuiButton>
         </EuiPopoverFooter>

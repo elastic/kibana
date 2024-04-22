@@ -150,15 +150,15 @@ export const AssistantHeader: React.FC<Props> = ({
 
                 <EuiFlexItem grow={false}>
                   <AssistantSettingsButton
-                  defaultConnector={defaultConnector}
+                    defaultConnector={defaultConnector}
                     isDisabled={isDisabled}
                     isSettingsModalVisible={isSettingsModalVisible}
-                  selectedConversationId={selectedConversationId}
+                    selectedConversationId={selectedConversationId}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  onConversationSelected={onConversationSelected}
-                  conversations={conversations}
-                  refetchConversationsState={refetchConversationsState}
-                  isFlyoutMode={false}
+                    onConversationSelected={onConversationSelected}
+                    conversations={conversations}
+                    refetchConversationsState={refetchConversationsState}
+                    isFlyoutMode={false}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

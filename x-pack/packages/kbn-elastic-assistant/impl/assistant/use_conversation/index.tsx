@@ -216,51 +216,54 @@ export const useConversation = (): UseConversation => {
    * Select a message within a conversation
    */
   const selectMessage = useCallback(
-    ({ conversationId, isSelected = true, messageIndex }: SelectMessageProps): void => {
-      // TODO: Use updateConversation()
-      // setConversations((prev: Record<string, Conversation>) => {
-      //   return {
-      //     ...prev,
-      //     [conversationId]: {
-      //       ...prev[conversationId],
-      //       messages: prev[conversationId].messages.map((message, index) => {
-      //         if (index === messageIndex) {
-      //           return {
-      //             ...message,
-      //             isSelected,
-      //           };
-      //         }
-      //         return message;
-      //       }),
-      //     },
-      //   };
-      // });
+    async ({
+      conversationId,
+      isSelected = true,
+      messageIndex,
+    }: SelectMessageProps): Promise<void> => {
+      let messages: ClientMessage[] = [];
+      const prevConversation = await getConversationById({ http, id: conversationId, toasts });
+      if (prevConversation != null) {
+        messages = prevConversation.messages.map((message, index) => {
+          if (index === messageIndex) {
+            return {
+              ...message,
+              isSelected,
+            };
+          }
+          return message;
+        });
+        await updateConversation({
+          http,
+          conversationId,
+          messages,
+        });
+      }
     },
-    []
+    [http, toasts]
   );
 
   /**
    * Clears selection of all messages within a conversation
    */
   const clearMessageSelection = useCallback(
-    ({ conversationId }: ClearMessageSelectionProps): void => {
-      // TODO: Use updateConversation()
-      // setConversations((prev: Record<string, Conversation>) => {
-      //   return {
-      //     ...prev,
-      //     [conversationId]: {
-      //       ...prev[conversationId],
-      //       messages: prev[conversationId].messages.map((message, index) => ({
-      //         ...message,
-      //         isSelected: false,
-      //       })),
-      //     },
-      //   };
-      // });
+    async ({ conversationId }: ClearMessageSelectionProps): Promise<void> => {
+      let messages: ClientMessage[] = [];
+      const prevConversation = await getConversationById({ http, id: conversationId, toasts });
+      if (prevConversation != null) {
+        messages = prevConversation.messages.map((message, index) => ({
+          ...message,
+          isSelected: false,
+        }));
+        await updateConversation({
+          http,
+          conversationId,
+          messages,
+        });
+      }
     },
-    []
+    [http, toasts]
   );
-
 
   return {
     clearConversation,

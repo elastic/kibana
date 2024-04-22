@@ -218,23 +218,23 @@ export const postEvaluateRoute = (
           logger.info(`Agents created: ${agents.length}`);
 
           try {
-            console.log('creating project first');
-            console.log('pSettings', pSettings);
-            console.log('dataset', dataset);
+            logger.debug('creating project first');
+            logger.debug(`pSettings: ${pSettings}`);
+            logger.debug(`dataset: ${dataset}`);
             const pNames = Array.from(new Set(pSettings));
             const referenceDatasetId = dataset[0]?.tags?.[0] ?? '';
             const client = new Client();
             for await (const p of pNames) {
-              const projecResp = await client.createProject({
+              const projectResp = await client.createProject({
                 projectName: p,
                 referenceDatasetId,
               });
-              console.log('projecResp', projecResp);
+              logger.debug(`projectResp: ${projectResp}`);
             }
           } catch (e) {
             logger.error(`Error creating LangSmith project!: ${e.message}`);
           }
-          console.log('datasetId', dataset[0]?.tags);
+          logger.debug(`datasetId: ${dataset[0]?.tags}`);
 
           // Evaluator Model is optional to support just running predictions
           const evaluatorModel =
@@ -263,7 +263,7 @@ export const postEvaluateRoute = (
           //     version: '1.2.3',
           //   },
           // });
-          // console.log('runResp', JSON.stringify(runResp, null, 2));
+          // logger.debug(`runResp:\n ${JSON.stringify(runResp, null, 2)}`);
 
           const { evaluationResults, evaluationSummary } = await performEvaluation({
             agentExecutorEvaluators: agents,

@@ -13,11 +13,11 @@ import {
   INTERNAL_API_ACCESS,
   GetDatasetsResponse,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { DATASETS } from '../../../common/constants';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
 import { getLangSmithDatasets } from '../evaluate/utils';
 
 export const getDatasetsRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {

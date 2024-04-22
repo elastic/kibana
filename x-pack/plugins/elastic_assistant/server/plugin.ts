@@ -24,8 +24,6 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
-import { getDatasetsRoute } from './routes/datasets/get_datasets';
-import { postDatasetsRoute } from './routes/datasets/post_datasets';
 
 export class ElasticAssistantPlugin
   implements
@@ -80,10 +78,6 @@ export class ElasticAssistantPlugin
 
     // this.assistantService registerKBTask
     registerRoutes(router, this.logger, plugins);
-    // TODO Move to above
-    // Datasets
-    getDatasetsRoute(router);
-    postDatasetsRoute(router);
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {
