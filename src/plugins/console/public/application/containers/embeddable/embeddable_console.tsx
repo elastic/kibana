@@ -48,6 +48,7 @@ export const EmbeddableConsole = ({
   usageCollection,
   setDispatch,
   alternateView,
+  isMonacoEnabled,
 }: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
@@ -149,7 +150,9 @@ export const EmbeddableConsole = ({
               )}
             </div>
           </EuiThemeProvider>
-          {showConsole ? <ConsoleWrapper {...{ core, usageCollection, onKeyDown }} /> : null}
+          {showConsole ? (
+            <ConsoleWrapper {...{ core, usageCollection, onKeyDown, isMonacoEnabled }} />
+          ) : null}
           {showAlternateView ? (
             <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
               <EuiWindowEvent event="keydown" handler={onKeyDown} />
