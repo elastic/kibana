@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -16,7 +17,6 @@ import {
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
-import { isInternalURL } from '../../../common/is_internal_url';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
