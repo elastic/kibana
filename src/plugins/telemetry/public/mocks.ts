@@ -8,7 +8,9 @@
 
 import {
   overlayServiceMock,
+  analyticsServiceMock,
   httpServiceMock,
+  i18nServiceMock,
   notificationServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
@@ -76,6 +78,8 @@ export function mockTelemetryNotifications({
   return new TelemetryNotifications({
     http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    i18n: i18nServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
     telemetryService,
     telemetryConstants: mockTelemetryConstants(),
