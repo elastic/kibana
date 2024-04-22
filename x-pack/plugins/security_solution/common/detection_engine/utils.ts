@@ -90,6 +90,6 @@ export const isSuppressionRuleConfiguredWithMissingFields = (ruleType: Type) =>
  * checks if rule type alert suppression is GA(Global availability)
  * needed to determine for which rule types to show Technical Preview badge
  */
-export const isAlertSuppressionGA = (ruleType: Type): boolean => {
+export const isSuppressionRuleInGA = (ruleType: Type): boolean => {
   return isSuppressibleAlertRule(ruleType) && SUPPRESSIBLE_ALERT_RULES_GA.includes(ruleType);
 };
