@@ -26,7 +26,8 @@
     "@kbn/repo-info",
     "@kbn/ui-theme",
     "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete"
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/code-editor"
   ],
   "exclude": [
     "target/**/*",
