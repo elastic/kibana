@@ -26,7 +26,9 @@ we have introduced the `detection_response` directory to consolidate all the int
 
    * `@skipInEss`: Skipped for ESS environment.
 
-   * `@skipInServerless`: Skipped for all quality gates and periodic pipeline.
+   * `@skipInServerless`: Skipped for all quality gates, CI and periodic pipeline.
+
+   * `@skipInServerlessMKI`: Skipped for all the MKI environments. 
 
 ex:
 ```
