@@ -7,20 +7,26 @@
 
 import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isAlertSuppressionGA } from '../../../../../common/detection_engine/utils';
 
 import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 
 interface TechnicalPreviewBadgeProps {
   label: string;
+  ruleType: Type | undefined;
 }
 
-export const AlertSuppressionTechnicalPreviewBadge = ({ label }: TechnicalPreviewBadgeProps) => {
+export const AlertSuppressionTechnicalPreviewBadge = ({
+  label,
+  ruleType,
+}: TechnicalPreviewBadgeProps) => {
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_details');
 
   return (
     <>
-      <TechnicalPreviewBadge label={label} />
+      {ruleType && isAlertSuppressionGA(ruleType) ? label : <TechnicalPreviewBadge label={label} />}
       {alertSuppressionUpsellingMessage && (
         <EuiToolTip position="top" content={alertSuppressionUpsellingMessage}>
           <EuiIcon

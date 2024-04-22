@@ -341,10 +341,11 @@ const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
 
 interface AlertSuppressionTitleProps {
   title: string;
+  ruleType: Type | undefined;
 }
 
-const AlertSuppressionTitle = ({ title }: AlertSuppressionTitleProps) => {
-  return <AlertSuppressionTechnicalPreviewBadge label={title} />;
+const AlertSuppressionTitle = ({ title, ruleType }: AlertSuppressionTitleProps) => {
+  return <AlertSuppressionTechnicalPreviewBadge label={title} ruleType={ruleType} />;
 };
 
 interface SuppressAlertsByFieldProps {
@@ -672,7 +673,10 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionGroupByPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
+            <AlertSuppressionTitle
+              title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL}
+              ruleType={rule.type}
+            />
           </span>
         ),
         description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
@@ -682,7 +686,10 @@ const prepareDefinitionSectionListItems = (
     definitionSectionListItems.push({
       title: (
         <span data-test-subj="alertSuppressionDurationPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
+          <AlertSuppressionTitle
+            title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL}
+            ruleType={rule.type}
+          />
         </span>
       ),
       description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
@@ -692,7 +699,10 @@ const prepareDefinitionSectionListItems = (
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionMissingFieldPropertyTitle">
-            <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
+            <AlertSuppressionTitle
+              title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL}
+              ruleType={rule.type}
+            />
           </span>
         ),
         description: (

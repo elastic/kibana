@@ -585,7 +585,11 @@ export const buildRequiredFieldsDescription = (
   ];
 };
 
-export const buildAlertSuppressionDescription = (label: string, values: string[]): ListItems[] => {
+export const buildAlertSuppressionDescription = (
+  label: string,
+  values: string[],
+  ruleType: Type
+): ListItems[] => {
   if (isEmpty(values)) {
     return [];
   }
@@ -603,7 +607,7 @@ export const buildAlertSuppressionDescription = (label: string, values: string[]
     </EuiFlexGroup>
   );
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -615,14 +619,15 @@ export const buildAlertSuppressionDescription = (label: string, values: string[]
 export const buildAlertSuppressionWindowDescription = (
   label: string,
   value: Duration,
-  groupByRadioSelection: GroupByOptions
+  groupByRadioSelection: GroupByOptions,
+  ruleType: Type
 ): ListItems[] => {
   const description =
     groupByRadioSelection === GroupByOptions.PerTimePeriod
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -633,7 +638,8 @@ export const buildAlertSuppressionWindowDescription = (
 
 export const buildAlertSuppressionMissingFieldsDescription = (
   label: string,
-  value: AlertSuppressionMissingFieldsStrategy
+  value: AlertSuppressionMissingFieldsStrategy,
+  ruleType: Type
 ): ListItems[] => {
   if (isEmpty(value)) {
     return [];
@@ -644,7 +650,7 @@ export const buildAlertSuppressionMissingFieldsDescription = (
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionTechnicalPreviewBadge label={label} ruleType={ruleType} />;
   return [
     {
       title,
