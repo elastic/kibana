@@ -22,40 +22,48 @@ export const logRateAnalysisTestData: TestData[] = [
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: false,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: false,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: true,
     zeroDocsFallback: false,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: false,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: true,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: false,
     zeroDocsFallback: true,
+    autoRun: false,
   }),
 ];

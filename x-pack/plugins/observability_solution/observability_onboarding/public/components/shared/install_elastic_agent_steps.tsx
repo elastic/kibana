@@ -74,15 +74,9 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
       : '/opt/Elastic/Agent/elastic-agent.yml';
 
   const isInstallStarted =
-    intersection(
-      Object.keys(installProgressSteps),
-      Object.keys(PROGRESS_STEP_TITLES(configPath))
-    ).length > 0;
-  const autoDownloadConfigStep = getStep(
-    'ea-config',
-    installProgressSteps,
-    configPath
-  );
+    intersection(Object.keys(installProgressSteps), Object.keys(PROGRESS_STEP_TITLES(configPath)))
+      .length > 0;
+  const autoDownloadConfigStep = getStep('ea-config', installProgressSteps, configPath);
 
   const customInstallStep = installAgentPlatformOptions.find(
     (step) => step.id === selectedPlatform
@@ -101,17 +95,9 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="column" gutterSize="m">
-            {(
-              ['ea-download', 'ea-extract', 'ea-install', 'ea-status'] as const
-            ).map((stepId) => {
-              const { title, status, message } = getStep(
-                stepId,
-                installProgressSteps,
-                configPath
-              );
-              return (
-                <StepStatus status={status} title={title} message={message} />
-              );
+            {(['ea-download', 'ea-extract', 'ea-install', 'ea-status'] as const).map((stepId) => {
+              const { title, status, message } = getStep(stepId, installProgressSteps, configPath);
+              return <StepStatus status={status} title={title} message={message} />;
             })}
           </EuiFlexGroup>
         </>
@@ -171,10 +157,9 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
       <EuiButton
         iconType="download"
         color="primary"
-        href={`data:application/yaml;base64,${Buffer.from(
-          configureAgentYaml,
-          'utf8'
-        ).toString('base64')}`}
+        href={`data:application/yaml;base64,${Buffer.from(configureAgentYaml, 'utf8').toString(
+          'base64'
+        )}`}
         download="elastic-agent.yml"
         target="_blank"
         isDisabled={autoDownloadConfig}
@@ -227,8 +212,7 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                           {i18n.translate(
                             'xpack.observability_onboarding.installElasticAgent.installStep.hostRequirements',
                             {
-                              defaultMessage:
-                                'host requirements and other installation options',
+                              defaultMessage: 'host requirements and other installation options',
                             }
                           )}
                         </EuiLink>
@@ -240,17 +224,12 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
               <EuiSpacer size="l" />
               <EuiSwitch
                 label={
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="xs"
-                    responsive={false}
-                  >
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                     <EuiFlexItem grow={false}>
                       {i18n.translate(
                         'xpack.observability_onboarding.installElasticAgent.installStep.autoDownloadConfig',
                         {
-                          defaultMessage:
-                            "Automatically download the agent's config",
+                          defaultMessage: "Automatically download the agent's config",
                         }
                       )}
                     </EuiFlexItem>
@@ -297,13 +276,11 @@ export function InstallElasticAgentSteps<PlatformId extends string>({
                   'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform',
                   { defaultMessage: 'Choose platform' }
                 )}
-                options={installAgentPlatformOptions.map(
-                  ({ id, label, isDisabled }) => ({
-                    id,
-                    label,
-                    isDisabled,
-                  })
-                )}
+                options={installAgentPlatformOptions.map(({ id, label, isDisabled }) => ({
+                  id,
+                  label,
+                  isDisabled,
+                }))}
                 type="single"
                 idSelected={selectedPlatform}
                 onChange={(id: string) => {
@@ -341,8 +318,7 @@ function getStep(
   installProgressSteps: Props<string>['installProgressSteps'],
   configPath: string
 ): { title: string; status: EuiStepStatus; message?: string } {
-  const { loadingTitle, completedTitle, incompleteTitle } =
-    PROGRESS_STEP_TITLES(configPath)[id];
+  const { loadingTitle, completedTitle, incompleteTitle } = PROGRESS_STEP_TITLES(configPath)[id];
   const stepProgress = installProgressSteps[id];
   if (stepProgress) {
     const { status, message } = stepProgress;

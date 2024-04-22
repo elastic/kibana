@@ -696,7 +696,7 @@
               },
               {
                 "plugin": "@kbn/core-root-server-internal",
-                "path": "packages/core/root/core-root-server-internal/src/server.ts"
+                "path": "packages/core/root/core-root-server-internal/src/events/kibana_started.ts"
               },
               {
                 "plugin": "security",
