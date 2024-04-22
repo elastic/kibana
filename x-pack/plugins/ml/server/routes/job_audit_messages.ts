@@ -7,7 +7,7 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 import {
   jobAuditMessagesQuerySchema,

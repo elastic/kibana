@@ -6,10 +6,19 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiFlexItem, EuiLink, EuiPageBody, EuiPageSection } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexItem,
+  EuiLink,
+  EuiPageBody,
+  EuiPageSection,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -19,8 +28,6 @@ import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 import type { ClosureType } from '../../containers/configure/types';
-
-import { SectionWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
@@ -37,22 +44,18 @@ import { usePersistConfiguration } from '../../containers/configure/use_persist_
 import { addOrReplaceCustomField } from '../custom_fields/utils';
 import { useLicense } from '../../common/use_license';
 
-const FormWrapper = styled.div`
-  ${({ theme }) => css`
-    & > * {
-      margin-top 40px;
-    }
+const sectionWrapperCss = css`
+  box-sizing: content-box;
+  max-width: 1175px;
+  width: 100%;
+`;
 
-    & > :first-child {
-      margin-top: 0;
-    }
-
-    padding-top: ${theme.eui.euiSizeXL};
-    padding-bottom: ${theme.eui.euiSizeXL};
-    .euiFlyout {
-      z-index: ${theme.eui.euiZNavigation + 1};
-    }
-  `}
+const getFormWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
+  padding-top: ${euiTheme.size.xl};
+  padding-bottom: ${euiTheme.size.xl};
+  .euiFlyout {
+    z-index: ${Number(euiTheme.levels.navigation) + 1};
+  }
 `;
 
 export const ConfigureCases: React.FC = React.memo(() => {
@@ -70,6 +73,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   );
   const [customFieldFlyoutVisible, setCustomFieldFlyoutVisibility] = useState<boolean>(false);
   const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
+  const { euiTheme } = useEuiTheme();
 
   const {
     data: {
@@ -335,39 +339,43 @@ export const ConfigureCases: React.FC = React.memo(() => {
         title={i18n.CONFIGURE_CASES_PAGE_TITLE}
       />
       <EuiPageBody restrictWidth={true}>
-        <FormWrapper style={{ paddingTop: 0 }}>
+        <div css={getFormWrapperCss(euiTheme)}>
           {hasMinimumLicensePermissions && (
             <>
               {!connectorIsValid && (
-                <SectionWrapper>
-                  <EuiCallOut
-                    title={i18n.WARNING_NO_CONNECTOR_TITLE}
-                    color="warning"
-                    iconType="help"
-                    data-test-subj="configure-cases-warning-callout"
-                  >
-                    <FormattedMessage
-                      defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
-                      id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
-                      values={{
-                        appropriateLicense: (
-                          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
-                            {i18n.LINK_APPROPRIATE_LICENSE}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiCallOut>
-                </SectionWrapper>
+                <>
+                  <div css={sectionWrapperCss}>
+                    <EuiCallOut
+                      title={i18n.WARNING_NO_CONNECTOR_TITLE}
+                      color="warning"
+                      iconType="help"
+                      data-test-subj="configure-cases-warning-callout"
+                    >
+                      <FormattedMessage
+                        defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+                        id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+                        values={{
+                          appropriateLicense: (
+                            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                              {i18n.LINK_APPROPRIATE_LICENSE}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiCallOut>
+                  </div>
+                  <EuiSpacer size="xl" />
+                </>
               )}
-              <SectionWrapper>
+              <div css={sectionWrapperCss}>
                 <ClosureOptions
                   closureTypeSelected={closureType}
                   disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
                   onChangeClosureType={onChangeClosureType}
                 />
-              </SectionWrapper>
-              <SectionWrapper>
+              </div>
+              <EuiSpacer size="xl" />
+              <div css={sectionWrapperCss}>
                 <Connectors
                   actionTypes={actionTypes}
                   connectors={connectors ?? []}
@@ -379,10 +387,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
                   selectedConnector={connector}
                   updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
                 />
-              </SectionWrapper>
+              </div>
+              <EuiSpacer size="xl" />
             </>
           )}
-          <SectionWrapper>
+          <div css={sectionWrapperCss}>
             <EuiFlexItem grow={false}>
               <CustomFields
                 customFields={customFields}
@@ -393,11 +402,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 handleEditCustomField={onEditCustomField}
               />
             </EuiFlexItem>
-          </SectionWrapper>
+          </div>
+          <EuiSpacer size="xl" />
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
           {CustomFieldAddFlyout}
-        </FormWrapper>
+        </div>
       </EuiPageBody>
     </EuiPageSection>
   );

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { MlPages, ML_PAGES } from '../../../locator';
+import type { MlPages } from '../../../locator';
+import { ML_PAGES } from '../../../locator';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 

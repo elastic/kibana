@@ -10,7 +10,7 @@ import React, { useReducer, useEffect } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
@@ -19,16 +19,17 @@ import {
   keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 
 import {
   EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
+  EmbeddableConsoleView,
 } from '../../../types/embeddable_console';
 
 import * as store from '../../stores/embeddable_console';
 import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
 
-import { ConsoleWrapper } from './console_wrapper';
 import './_index.scss';
 
 const KBN_BODY_CONSOLE_CLASS = 'kbnBody--hasEmbeddableConsole';
@@ -37,11 +38,17 @@ const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeadin
   defaultMessage: 'Developer console',
 });
 
+const ConsoleWrapper = dynamic(async () => ({
+  default: (await import('./console_wrapper')).ConsoleWrapper,
+}));
+
 export const EmbeddableConsole = ({
   size = 'm',
   core,
   usageCollection,
   setDispatch,
+  alternateView,
+  isMonacoEnabled,
 }: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
   const [consoleState, consoleDispatch] = useReducer(
     store.reducer,
@@ -54,22 +61,39 @@ export const EmbeddableConsole = ({
     return () => setDispatch(null);
   }, [setDispatch, consoleDispatch]);
   useEffect(() => {
-    if (consoleState.isOpen && consoleState.loadFromContent) {
+    if (consoleState.view === EmbeddableConsoleView.Console && consoleState.loadFromContent) {
       setLoadFromParameter(consoleState.loadFromContent);
-    } else if (!consoleState.isOpen) {
+    } else if (consoleState.view === EmbeddableConsoleView.Closed) {
       removeLoadFromParameter();
     }
-  }, [consoleState.isOpen, consoleState.loadFromContent]);
+  }, [consoleState.view, consoleState.loadFromContent]);
   useEffect(() => {
     document.body.classList.add(KBN_BODY_CONSOLE_CLASS);
     return () => document.body.classList.remove(KBN_BODY_CONSOLE_CLASS);
   }, []);
 
-  const isConsoleOpen = consoleState.isOpen;
+  const isOpen = consoleState.view !== EmbeddableConsoleView.Closed;
+  const showConsole =
+    consoleState.view !== EmbeddableConsoleView.Closed &&
+    (consoleState.view === EmbeddableConsoleView.Console || alternateView === undefined);
+  const showAlternateView =
+    consoleState.view === EmbeddableConsoleView.Alternate && alternateView !== undefined;
   const setIsConsoleOpen = (value: boolean) => {
     consoleDispatch(value ? { type: 'open' } : { type: 'close' });
   };
-  const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
+  const toggleConsole = () => setIsConsoleOpen(!isOpen);
+  const clickAlternateViewActivateButton: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault();
+    switch (consoleState.view) {
+      case EmbeddableConsoleView.Console:
+      case EmbeddableConsoleView.Closed:
+        consoleDispatch({ type: 'open', payload: { alternateView: true } });
+        break;
+      case EmbeddableConsoleView.Alternate:
+        consoleDispatch({ type: 'open', payload: { alternateView: false } });
+        break;
+    }
+  };
 
   const onKeyDown = (event: any) => {
     if (event.key === keys.ESCAPE) {
@@ -80,7 +104,7 @@ export const EmbeddableConsole = ({
   };
 
   const classes = classNames('embeddableConsole', {
-    'embeddableConsole-isOpen': isConsoleOpen,
+    'embeddableConsole-isOpen': isOpen,
     'embeddableConsole--large': size === 'l',
     'embeddableConsole--medium': size === 'm',
     'embeddableConsole--small': size === 's',
@@ -93,7 +117,7 @@ export const EmbeddableConsole = ({
 
   return (
     <EuiPortal>
-      <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isConsoleOpen}>
+      <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
         <section
           aria-label={landmarkHeading}
           className={classes}
@@ -104,27 +128,35 @@ export const EmbeddableConsole = ({
           </EuiScreenReaderOnly>
           <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
             <div className="embeddableConsole__controls">
-              <EuiButton
+              <EuiButtonEmpty
                 color="text"
-                iconType={isConsoleOpen ? 'arrowUp' : 'arrowDown'}
+                iconType={isOpen ? 'arrowUp' : 'arrowDown'}
                 onClick={toggleConsole}
-                fullWidth
-                contentProps={{
-                  className: 'embeddableConsole__controls--button',
-                }}
+                className="embeddableConsole__controls--button"
                 data-test-subj="consoleEmbeddedControlBar"
                 data-telemetry-id="console-embedded-controlbar-button"
               >
                 {i18n.translate('console.embeddableConsole.title', {
                   defaultMessage: 'Console',
                 })}
-              </EuiButton>
+              </EuiButtonEmpty>
+              {alternateView && (
+                <div className="embeddableConsole__controls--altViewButton-container">
+                  <alternateView.ActivationButton
+                    activeView={showAlternateView}
+                    onClick={clickAlternateViewActivateButton}
+                  />
+                </div>
+              )}
             </div>
           </EuiThemeProvider>
-          {isConsoleOpen ? (
+          {showConsole ? (
+            <ConsoleWrapper {...{ core, usageCollection, onKeyDown, isMonacoEnabled }} />
+          ) : null}
+          {showAlternateView ? (
             <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
               <EuiWindowEvent event="keydown" handler={onKeyDown} />
-              <ConsoleWrapper core={core} usageCollection={usageCollection} />
+              <alternateView.ViewContent />
             </div>
           ) : null}
         </section>
@@ -141,7 +173,3 @@ export const EmbeddableConsole = ({
     </EuiPortal>
   );
 };
-
-// Default Export is needed to lazy load this react component
-// eslint-disable-next-line import/no-default-export
-export default EmbeddableConsole;

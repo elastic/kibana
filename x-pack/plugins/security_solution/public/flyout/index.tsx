@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import { useEuiTheme } from '@elastic/eui';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
   IsolateHostPanel,
@@ -90,8 +91,30 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
 ];
 
+/**
+ * Flyout used for the Security Solution application
+ * We keep the default EUI 1000 z-index to ensure it is always rendered behind Timeline (which has a z-index of 1001)
+ */
 export const SecuritySolutionFlyout = memo(() => (
   <ExpandableFlyout registeredPanels={expandableFlyoutDocumentsPanels} paddingSize="none" />
 ));
 
 SecuritySolutionFlyout.displayName = 'SecuritySolutionFlyout';
+
+/**
+ * Flyout used in Timeline
+ * We set the z-index to 1002 to ensure it is always rendered above Timeline (which has a z-index of 1001)
+ */
+export const TimelineFlyout = memo(() => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <ExpandableFlyout
+      registeredPanels={expandableFlyoutDocumentsPanels}
+      paddingSize="none"
+      customStyles={{ 'z-index': (euiTheme.levels.flyout as number) + 2 }}
+    />
+  );
+});
+
+TimelineFlyout.displayName = 'TimelineFlyout';

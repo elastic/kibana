@@ -31,3 +31,5 @@ export interface FetchIndexResult {
     stats?: IndicesStatsIndicesStats;
   };
 }
+
+export type { ConnectorStats } from './connector_stats';

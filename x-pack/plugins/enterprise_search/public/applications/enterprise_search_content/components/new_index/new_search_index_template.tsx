@@ -7,6 +7,7 @@
 
 import React, { ChangeEvent } from 'react';
 
+import { css } from '@emotion/react';
 import { useValues, useActions } from 'kea';
 
 import {
@@ -107,6 +108,15 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     }
     return error;
   };
+  const searchHelpTest = i18n.translate(
+    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
+    {
+      defaultMessage: 'Your index will be named: {indexName}',
+      values: {
+        indexName: fullIndexName,
+      },
+    }
+  );
 
   return (
     <>
@@ -170,16 +180,26 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     }
                   )}
                   isInvalid={formInvalid}
-                  error={formError()}
-                  helpText={i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
-                    {
-                      defaultMessage: 'Your index will be named: {indexName}',
-                      values: {
-                        indexName: fullIndexName,
-                      },
-                    }
-                  )}
+                  error={
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        line-break: anywhere;
+                      `}
+                    >
+                      {formError()}
+                    </EuiText>
+                  }
+                  helpText={
+                    <EuiText
+                      size="xs"
+                      css={css`
+                        line-break: anywhere;
+                      `}
+                    >
+                      {searchHelpTest}
+                    </EuiText>
+                  }
                   fullWidth
                 >
                   <EuiFieldText

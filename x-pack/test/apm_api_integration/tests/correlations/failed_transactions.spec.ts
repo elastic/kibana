@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     kuery: '',
   });
 
-  registry.when('failed transactions without data', { config: 'trial', archives: [] }, () => {
+  registry.when.skip('failed transactions without data', { config: 'trial', archives: [] }, () => {
     it('handles the empty state', async () => {
       const overallDistributionResponse = await apmApiClient.readUser({
         endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',

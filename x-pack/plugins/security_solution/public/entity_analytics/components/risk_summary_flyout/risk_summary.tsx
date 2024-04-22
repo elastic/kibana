@@ -210,6 +210,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
               {riskData && (
                 <VisualizationEmbeddable
                   applyGlobalQueriesAndFilters={false}
+                  applyPageAndTabsFilters={false}
                   lensAttributes={lensAttributes}
                   id={`RiskSummary-risk_score_metric`}
                   timerange={timerange}
@@ -260,7 +261,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                 </div>
                 <EuiBasicTable
                   data-test-subj="risk-summary-table"
-                  responsive={false}
+                  responsiveBreakpoint={false}
                   columns={columns}
                   items={rows}
                   compressed

@@ -6,11 +6,11 @@
  */
 
 import type { RetrievalQAChain } from 'langchain/chains';
-import type { DynamicTool } from 'langchain/tools';
+import type { DynamicTool } from '@langchain/core/tools';
 import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base_tool';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { RequestBody } from '@kbn/elastic-assistant-plugin/server/lib/langchain/types';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 describe('EsqlLanguageKnowledgeBaseTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -26,7 +26,7 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
       replacements: { key: 'value' },
       size: 20,
     },
-  } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+  } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   const rest = {
     chain,
     esClient,

@@ -12,7 +12,7 @@ import {
   managementPluginMock,
 } from '@kbn/management-plugin/public/mocks';
 
-jest.mock('./services/alert_api', () => ({
+jest.mock('./services/rule_api', () => ({
   loadRule: jest.fn(),
   loadRuleType: jest.fn(),
 }));
@@ -24,7 +24,7 @@ const mockSection = createManagementSectionMock();
 describe('Alerting Public Plugin', () => {
   describe('start()', () => {
     it(`should fallback to the viewInAppRelativeUrl part of the rule object if navigation isn't registered`, async () => {
-      const { loadRule, loadRuleType } = jest.requireMock('./services/alert_api');
+      const { loadRule, loadRuleType } = jest.requireMock('./services/rule_api');
       loadRule.mockResolvedValue({
         alertTypeId: 'foo',
         consumer: 'abc',

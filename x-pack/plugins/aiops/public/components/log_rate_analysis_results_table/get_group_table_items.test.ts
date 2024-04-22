@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { finalSignificantItemGroups } from '../../../common/__mocks__/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 
 import { getGroupTableItems } from './get_group_table_items';
 
@@ -15,34 +15,10 @@ describe('getGroupTableItems', () => {
 
     expect(groupTableItems).toEqual([
       {
-        docCount: 632,
-        groupItemsSortedByUniqueness: [
-          {
-            key: 'user:Peter',
-            type: 'keyword',
-            fieldName: 'user',
-            fieldValue: 'Peter',
-            docCount: 632,
-            duplicate: 2,
-            pValue: 0.012783309213417932,
-          },
-          {
-            key: 'url:login.php',
-            type: 'keyword',
-            fieldName: 'url',
-            fieldValue: 'login.php',
-            docCount: 790,
-            duplicate: 2,
-            pValue: 0.012783309213417932,
-          },
-        ],
-        histogram: undefined,
-        id: '1937394803',
-        pValue: 0.012783309213417932,
-        uniqueItemsCount: 0,
-      },
-      {
+        id: '2675980076',
         docCount: 792,
+        pValue: 0.00974308761016614,
+        uniqueItemsCount: 0,
         groupItemsSortedByUniqueness: [
           {
             key: 'response_code:500',
@@ -50,8 +26,8 @@ describe('getGroupTableItems', () => {
             fieldName: 'response_code',
             fieldValue: '500',
             docCount: 792,
-            duplicate: 2,
             pValue: 0.012783309213417932,
+            duplicate: 2,
           },
           {
             key: 'url:home.php',
@@ -59,17 +35,16 @@ describe('getGroupTableItems', () => {
             fieldName: 'url',
             fieldValue: 'home.php',
             docCount: 792,
-            duplicate: 2,
             pValue: 0.00974308761016614,
+            duplicate: 2,
           },
         ],
-        histogram: undefined,
-        id: '2675980076',
-        pValue: 0.00974308761016614,
-        uniqueItemsCount: 0,
       },
       {
+        id: '3819687732',
         docCount: 790,
+        pValue: 0.012783309213417932,
+        uniqueItemsCount: 0,
         groupItemsSortedByUniqueness: [
           {
             key: 'url:login.php',
@@ -77,8 +52,8 @@ describe('getGroupTableItems', () => {
             fieldName: 'url',
             fieldValue: 'login.php',
             docCount: 790,
-            duplicate: 2,
             pValue: 0.012783309213417932,
+            duplicate: 2,
           },
           {
             key: 'response_code:500',
@@ -86,17 +61,16 @@ describe('getGroupTableItems', () => {
             fieldName: 'response_code',
             fieldValue: '500',
             docCount: 792,
-            duplicate: 2,
             pValue: 0.012783309213417932,
+            duplicate: 2,
           },
         ],
-        histogram: undefined,
-        id: '3819687732',
-        pValue: 0.012783309213417932,
-        uniqueItemsCount: 0,
       },
       {
+        id: '2091742187',
         docCount: 636,
+        pValue: 0.00974308761016614,
+        uniqueItemsCount: 0,
         groupItemsSortedByUniqueness: [
           {
             key: 'user:Peter',
@@ -104,8 +78,8 @@ describe('getGroupTableItems', () => {
             fieldName: 'user',
             fieldValue: 'Peter',
             docCount: 636,
-            duplicate: 2,
             pValue: 0.00974308761016614,
+            duplicate: 2,
           },
           {
             key: 'url:home.php',
@@ -113,14 +87,36 @@ describe('getGroupTableItems', () => {
             fieldName: 'url',
             fieldValue: 'home.php',
             docCount: 792,
-            duplicate: 2,
             pValue: 0.00974308761016614,
+            duplicate: 2,
           },
         ],
-        histogram: undefined,
-        id: '2091742187',
-        pValue: 0.00974308761016614,
+      },
+      {
+        id: '1937394803',
+        docCount: 632,
+        pValue: 0.012783309213417932,
         uniqueItemsCount: 0,
+        groupItemsSortedByUniqueness: [
+          {
+            key: 'user:Peter',
+            type: 'keyword',
+            fieldName: 'user',
+            fieldValue: 'Peter',
+            docCount: 632,
+            pValue: 0.012783309213417932,
+            duplicate: 2,
+          },
+          {
+            key: 'url:login.php',
+            type: 'keyword',
+            fieldName: 'url',
+            fieldValue: 'login.php',
+            docCount: 790,
+            pValue: 0.012783309213417932,
+            duplicate: 2,
+          },
+        ],
       },
     ]);
   });

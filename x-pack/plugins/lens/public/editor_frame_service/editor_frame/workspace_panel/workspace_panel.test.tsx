@@ -18,11 +18,6 @@ import {
 } from '../../../mocks';
 
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
-jest.mock('../../../debounced_component', () => {
-  return {
-    debouncedComponent: (fn: unknown) => fn,
-  };
-});
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
@@ -941,14 +936,12 @@ describe('workspace_panel', () => {
           datasourceState: {},
         }),
       });
-      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDragDrop-isDropTarget');
+      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDroppable--active');
     });
 
     it('should refuse to drop if there are no suggestions', () => {
       renderWithDndAndRedux();
-      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain(
-        'domDragDrop-isDropTarget'
-      );
+      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain('domDroppable--active');
     });
   });
 });

@@ -11,6 +11,7 @@ export {
   DISCOVER_APP_ID,
   VISUALIZE_APP_ID,
   DISCOVER_ESQL_LOCATOR,
+  DASHBOARD_APP_LOCATOR,
 } from './constants';
 
 export type { AppId, DeepLinkId } from './deep_links';

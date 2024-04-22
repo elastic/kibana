@@ -33,6 +33,7 @@ export const PACKAGE_POLICY_TABLE_LINK = 'PackagePoliciesTableLink';
 export const ADD_PACKAGE_POLICY_BTN = 'addPackagePolicyButton';
 export const GENERATE_FLEET_SERVER_POLICY_BUTTON = 'generateFleetServerPolicyButton';
 export const ADD_FLEET_SERVER_HEADER = 'addFleetServerHeader';
+export const ADD_AGENT_POLICY_BTN = 'createAgentPolicyButton';
 
 export const PLATFORM_TYPE_LINUX_BUTTON = 'platformTypeLinux';
 export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
@@ -123,7 +124,6 @@ export const SETTINGS_OUTPUTS = {
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
   ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
-  WARNING_KAFKA_CALLOUT: 'settingsOutputsFlyout.kafkaOutputTypeCallout',
   WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
   PRESET_INPUT: 'settingsOutputsFlyout.presetInput',
 };

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 1
-export * from './v1';
+// Latest version is 2
+export * from './v2';

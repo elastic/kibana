@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 
 import { basicCase } from './mock';
 
@@ -58,13 +58,12 @@ describe('useGetCaseFiles', () => {
   });
 
   it('calls filesClient.list with correct arguments', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useGetCaseFiles(hookParams), {
-        wrapper: appMockRender.AppWrapper,
-      });
-      await waitForNextUpdate();
-
-      expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
+    const { waitForNextUpdate } = renderHook(() => useGetCaseFiles(hookParams), {
+      wrapper: appMockRender.AppWrapper,
     });
+
+    await waitForNextUpdate();
+
+    expect(appMockRender.getFilesClient().list).toBeCalledWith(expectedCallParams);
   });
 });

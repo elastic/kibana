@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { firstValueFrom } from 'rxjs';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   EuiAccordion,
   EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
   EuiSelect,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { i18n } from '@kbn/i18n';
+import { CreateDataViewButton } from '../../../components/create_data_view_button';
 import { useMlKibana } from '../../../contexts/kibana';
 import { RUNNING_STATE } from './inference_base';
 import type { InferrerType } from '.';
@@ -44,6 +49,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({
     setSelectedDataViewId,
     selectedField,
     setSelectedField,
+    setDataViewListItems,
   } = data;
 
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
@@ -52,27 +58,57 @@ export const InferenceInputFormIndexControls: FC<Props> = ({
 
   return (
     <>
-      <EuiFormRow label="Index" fullWidth>
-        {disableIndexSelection ? (
-          <EuiText grow={false}>
-            <EuiCode>
-              {dataViewListItems.find((item) => item.value === selectedDataViewId)?.text}
-            </EuiCode>
-          </EuiText>
-        ) : (
-          <EuiSelect
-            options={dataViewListItems}
-            value={selectedDataViewId}
-            onChange={(e) => {
-              inferrer.setSelectedDataViewId(e.target.value);
-              setSelectedDataViewId(e.target.value);
-            }}
-            hasNoInitialSelection={true}
-            disabled={runningState === RUNNING_STATE.RUNNING}
+      <EuiFlexGroup gutterSize={'s'} justifyContent={'spaceBetween'} alignItems={'flexEnd'}>
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.trainedModels.testModelsFlyout.dataViewTitle"
+                defaultMessage="Data view"
+              />
+            }
             fullWidth
+          >
+            {disableIndexSelection ? (
+              <EuiText grow={false}>
+                <EuiCode>
+                  {dataViewListItems.find((item) => item.value === selectedDataViewId)?.text}
+                </EuiCode>
+              </EuiText>
+            ) : (
+              <EuiSelect
+                options={dataViewListItems}
+                value={selectedDataViewId}
+                onChange={(e) => {
+                  inferrer.setSelectedDataViewId(e.target.value);
+                  setSelectedDataViewId(e.target.value);
+                }}
+                hasNoInitialSelection={true}
+                disabled={runningState === RUNNING_STATE.RUNNING}
+                fullWidth
+              />
+            )}
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CreateDataViewButton
+            allowAdHocDataView
+            onDataViewCreated={(dataView) => {
+              setDataViewListItems((prev) => {
+                return [
+                  ...prev,
+                  {
+                    text: dataView.getIndexPattern(),
+                    value: dataView.id!,
+                  },
+                ].sort((a, b) => a.text.localeCompare(b.text));
+              });
+              setSelectedDataViewId(dataView.id!);
+            }}
           />
-        )}
-      </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.indexInput.fieldInput', {
@@ -276,5 +312,6 @@ export function useIndexInput({
     setSelectedDataViewId,
     selectedField,
     setSelectedField,
+    setDataViewListItems,
   };
 }

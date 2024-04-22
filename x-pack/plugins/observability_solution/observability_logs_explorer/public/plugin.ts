@@ -16,6 +16,7 @@ import {
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorDefinition,
+  DatasetQualityLocatorDefinition,
   ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
@@ -43,7 +44,7 @@ export class ObservabilityLogsExplorerPlugin
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogsExplorerSetupDeps
   ) {
-    const { share, serverless, discover } = _pluginsSetup;
+    const { share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -85,16 +86,18 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
-    if (serverless) {
-      discover.showLogsExplorerTabs();
-    }
-
     // Register Locators
     const allDatasetsLocator = share.url.locators.create(
       new AllDatasetsLocatorDefinition({
         useHash,
       })
     );
+    const datasetQualityLocator = share.url.locators.create(
+      new DatasetQualityLocatorDefinition({
+        useHash,
+      })
+    );
+
     const dataViewLocator = share.url.locators.create(
       new DataViewLocatorDefinition({
         useHash,
@@ -108,6 +111,7 @@ export class ObservabilityLogsExplorerPlugin
 
     this.locators = {
       allDatasetsLocator,
+      datasetQualityLocator,
       dataViewLocator,
       singleDatasetLocator,
     };

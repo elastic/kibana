@@ -17,6 +17,7 @@ import {
 } from '../../common/components/guided_onboarding_tour/tour_config';
 
 jest.mock('../../common/components/guided_onboarding_tour');
+jest.mock('../../common/lib/kibana');
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -51,6 +52,7 @@ describe('cases page in security', () => {
     });
     jest.clearAllMocks();
   });
+
   it('calls endTour on cases details page when SecurityStepId.alertsCases tour is active and step is AlertsCasesTourSteps.viewCase', () => {
     render(
       <Router history={mockHistory}>
@@ -58,8 +60,10 @@ describe('cases page in security', () => {
       </Router>,
       { wrapper: TestProviders }
     );
+
     expect(endTourStep).toHaveBeenCalledWith(SecurityStepId.alertsCases);
   });
+
   it('does not call endTour on cases details page when SecurityStepId.alertsCases tour is not active', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.viewCase,
@@ -73,8 +77,10 @@ describe('cases page in security', () => {
       </Router>,
       { wrapper: TestProviders }
     );
+
     expect(endTourStep).not.toHaveBeenCalled();
   });
+
   it('does not call endTour on cases details page when SecurityStepId.alertsCases tour is active and step is not AlertsCasesTourSteps.viewCase', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.expandEvent,
@@ -82,12 +88,14 @@ describe('cases page in security', () => {
       endTourStep,
       isTourShown: () => true,
     });
+
     render(
       <Router history={mockHistory}>
         <Cases />
       </Router>,
       { wrapper: TestProviders }
     );
+
     expect(endTourStep).not.toHaveBeenCalled();
   });
 });

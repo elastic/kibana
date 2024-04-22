@@ -45,7 +45,7 @@ jest.mock('../../../kibana_services', () => {
 describe('UpdateSourceEditor', () => {
   describe('narrow by map bounds switch', () => {
     function getNarrowByMapBoundsSwitch() {
-      return screen.getByText('Narrow ES|QL statement by visible map area');
+      return screen.getByText('Dynamically filter for data in the visible map area');
     }
 
     test('should set geoField when checked and geo field is not set', async () => {
@@ -97,7 +97,7 @@ describe('UpdateSourceEditor', () => {
 
   describe('narrow by time switch', () => {
     function getNarrowByTimeSwitch() {
-      return screen.getByText('Narrow ES|QL statement by global time');
+      return screen.getByText('Apply global time range to ES|QL statement');
     }
 
     test('should set dateField when checked and date field is not set', async () => {

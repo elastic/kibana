@@ -13,8 +13,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
-import { SanitizedRule } from '../types';
-import { AsApiContract } from './lib';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -29,6 +28,25 @@ describe('cloneRuleRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
 
+  const action: RuleAction = {
+    actionTypeId: 'test',
+    group: 'default',
+    id: '2',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+  };
+
   const mockedRule: SanitizedRule<{ bar: boolean }> = {
     alertTypeId: '1',
     consumer: 'bar',
@@ -39,17 +57,7 @@ describe('cloneRuleRoute', () => {
       bar: true,
     },
     throttle: '30s',
-    actions: [
-      {
-        actionTypeId: 'test',
-        group: 'default',
-        id: '2',
-        params: {
-          foo: true,
-        },
-        uuid: '123-456',
-      },
-    ],
+    actions: [action],
     enabled: true,
     muteAll: false,
     createdBy: '',
@@ -80,7 +88,7 @@ describe('cloneRuleRoute', () => {
     ],
   };
 
-  const cloneResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
+  const cloneResult = {
     ...ruleToClone,
     mute_all: mockedRule.muteAll,
     created_by: mockedRule.createdBy,
@@ -213,5 +221,55 @@ describe('cloneRuleRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('transforms the system actions in the response of the rules client correctly', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    cloneRuleRoute(router, licenseState);
+
+    const [_, handler] = router.post.mock.calls[0];
+
+    rulesClient.clone.mockResolvedValueOnce({
+      ...mockedRule,
+      actions: [action],
+      systemActions: [systemAction],
+    });
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+      },
+      ['ok']
+    );
+
+    const routeRes = await handler(context, req, res);
+
+    // @ts-expect-error: body exists
+    expect(routeRes.body.systemActions).toBeUndefined();
+    // @ts-expect-error: body exists
+    expect(routeRes.body.actions).toEqual([
+      {
+        connector_type_id: 'test',
+        group: 'default',
+        id: '2',
+        params: {
+          foo: true,
+        },
+        uuid: '123-456',
+      },
+      {
+        connector_type_id: 'test-2',
+        id: 'system_action-id',
+        params: {
+          foo: true,
+        },
+        uuid: '123-456',
+      },
+    ]);
   });
 });

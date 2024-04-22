@@ -10,7 +10,7 @@ import React, { Fragment, Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { LayerSelector } from './layer_selector';
-import { MlAnomalyLayersType } from './util';
+import type { MlAnomalyLayersType } from './util';
 
 interface Props {
   onChange: (...args: Array<{ propName: string; value: unknown }>) => void;

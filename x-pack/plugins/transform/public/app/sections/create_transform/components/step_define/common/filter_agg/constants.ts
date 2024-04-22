@@ -6,7 +6,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FilterAggType } from './types';
+import type { FilterAggType } from './types';
 
 export const FILTERS = {
   CUSTOM: 'custom',

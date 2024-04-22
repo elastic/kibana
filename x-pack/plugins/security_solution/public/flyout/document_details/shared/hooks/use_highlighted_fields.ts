@@ -34,7 +34,7 @@ export interface UseHighlightedFieldsResult {
     /**
      * If the field has a custom override
      */
-    overrideField?: string;
+    overrideField?: { field: string; values: string[] };
     /**
      * Values for the field
      */
@@ -114,7 +114,13 @@ export const useHighlightedFields = ({
     return {
       ...acc,
       [field.id]: {
-        ...(field.overrideField && { overrideField: field.overrideField }),
+        ...(field.overrideField && {
+          overrideField: {
+            field: field.overrideField,
+            values:
+              find({ field: field.overrideField }, dataFormattedForFieldBrowser)?.values ?? [],
+          },
+        }),
         values: fieldValues,
       },
     };

@@ -9,10 +9,10 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
-import { technicalPreviewBadgeProps } from '../beta_badge_props';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { TECH_PREVIEW_LABEL } from '../../translations';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as any),
@@ -392,7 +392,7 @@ describe('CreateConnectorFlyout', () => {
       expect(getByText(`selectMessage-${actionTypeModel.id}`)).toBeInTheDocument();
     });
 
-    it('does not show tech preview badge when isExperimental is undefined', async () => {
+    it('does not show beta badge when isExperimental is undefined', async () => {
       const { queryByText } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
@@ -402,10 +402,10 @@ describe('CreateConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(queryByText(technicalPreviewBadgeProps.label)).not.toBeInTheDocument();
+      expect(queryByText(TECH_PREVIEW_LABEL)).not.toBeInTheDocument();
     });
 
-    it('does not show tech preview badge when isExperimental is false', async () => {
+    it('does not show beta badge when isExperimental is false', async () => {
       actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: false });
       const { queryByText } = appMockRenderer.render(
         <CreateConnectorFlyout
@@ -416,10 +416,10 @@ describe('CreateConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(queryByText(technicalPreviewBadgeProps.label)).not.toBeInTheDocument();
+      expect(queryByText(TECH_PREVIEW_LABEL)).not.toBeInTheDocument();
     });
 
-    it('shows tech preview badge when isExperimental is true', async () => {
+    it('shows beta badge when isExperimental is true', async () => {
       actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, isExperimental: true });
       const { getByText } = appMockRenderer.render(
         <CreateConnectorFlyout
@@ -430,7 +430,7 @@ describe('CreateConnectorFlyout', () => {
         />
       );
       await act(() => Promise.resolve());
-      expect(getByText(technicalPreviewBadgeProps.label)).toBeInTheDocument();
+      expect(getByText(TECH_PREVIEW_LABEL)).toBeInTheDocument();
     });
   });
 

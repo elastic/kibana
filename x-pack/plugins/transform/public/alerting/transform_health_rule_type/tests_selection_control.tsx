@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiDescribedFormGroup, EuiForm, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
+import type {
   TransformHealthRuleTestsConfig,
   TransformHealthTests,
 } from '../../../common/types/alerting';

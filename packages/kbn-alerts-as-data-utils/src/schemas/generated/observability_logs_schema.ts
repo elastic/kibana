@@ -78,8 +78,8 @@ const ObservabilityLogsAlertOptional = rt.partial({
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(
     rt.partial({
-      field: schemaString,
-      value: schemaString,
+      field: schemaStringArray,
+      value: schemaStringArray,
     })
   ),
 });

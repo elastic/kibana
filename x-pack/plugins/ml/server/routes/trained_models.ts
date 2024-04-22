@@ -10,7 +10,7 @@ import { groupBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ElserVersion } from '@kbn/ml-trained-models-utils';
+import type { ElserVersion, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
@@ -31,11 +31,8 @@ import {
   createIngestPipelineSchema,
   modelDownloadsQuery,
 } from './schemas/inference_schema';
-import {
-  InferenceAPIConfigResponse,
-  PipelineDefinition,
-  type TrainedModelConfigResponse,
-} from '../../common/types/trained_models';
+import type { PipelineDefinition } from '../../common/types/trained_models';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';

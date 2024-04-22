@@ -31,6 +31,7 @@ import { getXmattersConnectorType } from './xmatters';
 import { getD3SecurityConnectorType } from './d3security';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { getSentinelOneConnectorType } from './sentinelone';
+import { getCrowdStrikeConnectorType } from './crowdstrike';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -69,14 +70,10 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
 
-  // get sentinelOne connector type
-  // when either feature flag is enabled
-  if (
-    // 8.12
-    ExperimentalFeaturesService.get().sentinelOneConnectorOn ||
-    // 8.13
-    ExperimentalFeaturesService.get().sentinelOneConnectorOnBeta
-  ) {
+  if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());
+  }
+  if (ExperimentalFeaturesService.get().crowdstrikeConnectorOn) {
+    connectorTypeRegistry.register(getCrowdStrikeConnectorType());
   }
 }

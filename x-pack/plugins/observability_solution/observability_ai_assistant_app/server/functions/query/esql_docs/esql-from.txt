@@ -1,0 +1,72 @@
+FROM
+
+Syntax
+```esql
+FROM index_pattern [METADATA fields] [OPTIONS options]
+```
+
+Parameters
+index_pattern
+A list of indices, data streams or aliases. Supports wildcards and date math.
+fields
+A comma-separated list of metadata fields to retrieve.
+options
+A comma-separated list of index options to configure
+data access.
+DescriptionThe
+```esql
+FROM source command returns a table with data from a data stream, index,
+```
+
+or alias. Each row in the resulting table represents a document. Each column
+corresponds to a field, and can be accessed by the name of that field.
+By default, an ES|QL query without an explicit LIMIT uses an implicit
+limit of 1000. This applies to
+```esql
+FROM too. A FROM command without LIMIT:
+```
+
+```esql
+FROM employees
+```
+
+is executed as:
+```esql
+FROM employees
+| LIMIT 1000
+```
+
+Examples
+```esql
+FROM employees
+```
+
+You can use date math to refer to indices, aliases
+and data streams. This can be useful for time series data, for example to access
+today’s index:
+```esql
+FROM <logs-{now/d}>
+```
+
+Use comma-separated lists or wildcards to query multiple data streams, indices,
+or aliases:
+```esql
+FROM employees-00001,other-employees-*
+```
+
+Use the format <remote_cluster_name>:<target> to query data streams and indices
+on remote clusters:
+```esql
+FROM cluster_one:employees-00001,cluster_two:other-employees-*
+```
+
+See using ES|QL across clusters.Use the optional METADATA directive to enable metadata fields:
+```esql
+FROM employees METADATA _id
+```
+
+Use the optional OPTIONS directive to specify index access options.
+This directive must follow METADATA, if both are specified:
+```esql
+FROM employees* METADATA _index OPTIONS "ignore_unavailable"="true"
+```

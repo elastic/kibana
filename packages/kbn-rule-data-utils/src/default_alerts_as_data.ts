@@ -43,6 +43,9 @@ const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 // kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
 const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
 
+// kibana.alert.consecutive_matches - count of consecutive times the alert has been active
+const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as const;
+
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
 
@@ -120,6 +123,7 @@ const fields = {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
@@ -160,6 +164,7 @@ export {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,

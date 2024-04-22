@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
-import { RareJobCreator } from '../../../../../common/job_creator';
+import type { RareJobCreator } from '../../../../../common/job_creator';
 import { RareCard, RareInPopulationCard, FrequentlyRareInPopulationCard } from './detector_cards';
 import { RARE_DETECTOR_TYPE } from '../rare_view';
 

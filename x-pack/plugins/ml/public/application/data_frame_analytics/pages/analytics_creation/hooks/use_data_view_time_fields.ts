@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useDataSource } from '../../../../contexts/ml';
 
-import { CreateAnalyticsFormProps } from '../../analytics_management/hooks/use_create_analytics_form';
+import type { CreateAnalyticsFormProps } from '../../analytics_management/hooks/use_create_analytics_form';
 
 export const useDataViewTimeFields = ({ actions, state }: CreateAnalyticsFormProps) => {
   const { setFormState } = actions;

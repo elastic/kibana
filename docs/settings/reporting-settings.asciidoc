@@ -254,11 +254,10 @@ Enables a check that warns you when there's a potential formula included in the 
 Escape formula values in cells with a `'`. See OWASP: https://www.owasp.org/index.php/CSV_Injection. Defaults to `true`.
 
 `xpack.reporting.csv.enablePanelActionDownload`::
-deprecated:[7.9.0,This setting has no effect.] Enables CSV export from a saved search on a dashboard. This action is available in the dashboard panel menu for the saved search.
-[NOTE]
-============
-This setting exists for backwards compatibility, and is hardcoded to `true`. CSV export from a saved search on a dashboard is enabled when Reporting is enabled.
-============
+deprecated:[8.14.0,This setting will be removed in an upcoming version of {kib}.] When `true`, this
+setting enables a deprecated feature which allows users to download a CSV export from a saved search
+panel on a dashboard. When `false`, users can generate regular CSV reports from a saved search panel on a
+dashboard and later download them in *Stack Management > Reporting*. Defaults to `false`.
 
 `xpack.reporting.csv.useByteOrderMarkEncoding`::
 Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.

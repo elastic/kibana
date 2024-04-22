@@ -78,10 +78,6 @@ export const optionalJobIdsSchema = schema.object({
   jobIds: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const jobsWithTimerangeSchema = schema.object({
-  dateFormatTz: schema.maybe(schema.string()),
-});
-
 export const lookBackProgressSchema = {
   jobId: schema.string(),
   start: schema.number(),

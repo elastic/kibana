@@ -387,9 +387,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.LogRateHistogramItem",
                 "text": "LogRateHistogramItem"
               },
@@ -410,9 +410,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.LogRateHistogramItem",
                 "text": "LogRateHistogramItem"
               },
@@ -499,9 +499,9 @@
             "signature": [
               "number | ",
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.WindowParameters",
                 "text": "WindowParameters"
               },
@@ -621,6 +621,29 @@
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.changePoint",
+            "type": "Object",
+            "tags": [],
+            "label": "changePoint",
+            "description": [
+              "Optional change point metadata"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-log-rate-analysis",
+                "scope": "common",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
+                "section": "def-common.DocumentCountStatsChangePoint",
+                "text": "DocumentCountStatsChangePoint"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -640,17 +663,17 @@
         "signature": [
           "(windowParameters: ",
           {
-            "pluginId": "@kbn/aiops-utils",
+            "pluginId": "@kbn/aiops-log-rate-analysis",
             "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
             "section": "def-common.WindowParameters",
             "text": "WindowParameters"
           },
           ", force: boolean, logRateAnalysisType: ",
           {
-            "pluginId": "@kbn/aiops-utils",
+            "pluginId": "@kbn/aiops-log-rate-analysis",
             "scope": "common",
-            "docId": "kibKbnAiopsUtilsPluginApi",
+            "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
             "section": "def-common.LogRateAnalysisType",
             "text": "LogRateAnalysisType"
           },
@@ -672,9 +695,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-log-rate-analysis",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
+                "docId": "kibKbnAiopsLogRateAnalysisPluginApi",
                 "section": "def-common.WindowParameters",
                 "text": "WindowParameters"
               }

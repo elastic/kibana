@@ -35,10 +35,8 @@ const ConnectedDegradedDocs = ({
   service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
-
-  if (state.matches('initialized') && state.context.rows) {
-    const row = state.context.rows[rowIndex];
-    return <DegradedDocs row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <DegradedDocs row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
@@ -52,17 +50,15 @@ const ConnectedStacktraceDocs = ({
   service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
-
-  if (state.matches('initialized') && state.context.rows) {
-    const row = state.context.rows[rowIndex];
-    return <Stacktrace row={row} rowIndex={rowIndex} />;
+  if (state.matches('initialized') && state.context.rows[rowIndex]) {
+    return <Stacktrace row={state.context.rows[rowIndex]} rowIndex={rowIndex} />;
   }
 
   return null;
 };
 
 const DegradedDocs = ({ row, rowIndex }: { row: DataTableRecord; rowIndex: number }) => {
-  const isDegradedDocumentExists = !!row.raw[constants.DEGRADED_DOCS_FIELD];
+  const isDegradedDocumentExists = constants.DEGRADED_DOCS_FIELD in row.raw;
 
   return isDegradedDocumentExists ? (
     <DataTableRowControl>

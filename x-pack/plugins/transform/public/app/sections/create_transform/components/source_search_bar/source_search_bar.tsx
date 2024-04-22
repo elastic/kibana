@@ -10,8 +10,9 @@ import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { PLUGIN } from '../../../../../../common/constants';
-import { SearchItems } from '../../../../hooks/use_search_items';
-import { StepDefineFormHook, QUERY_LANGUAGE_KUERY } from '../step_define';
+import type { SearchItems } from '../../../../hooks/use_search_items';
+import type { StepDefineFormHook } from '../step_define';
+import { QUERY_LANGUAGE_KUERY } from '../step_define';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SourceSearchBarProps {

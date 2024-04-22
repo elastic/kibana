@@ -41,7 +41,7 @@ export const App = (props: {
   const [panelActive, setPanelActive] = useState<number | null>(null);
 
   const configBuilder = useMemo(
-    () => new LensConfigBuilder(props.stateHelpers.formula, props.plugins.dataViews),
+    () => new LensConfigBuilder(props.plugins.dataViews, props.stateHelpers.formula),
     [props.plugins.dataViews, props.stateHelpers.formula]
   );
 

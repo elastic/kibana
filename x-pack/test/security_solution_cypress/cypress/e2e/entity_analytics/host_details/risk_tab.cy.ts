@@ -8,7 +8,6 @@
 import { login } from '../../../tasks/login';
 import { visitHostDetailsPage } from '../../../tasks/navigation';
 
-import { waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { openRiskInformationFlyout, mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
@@ -18,26 +17,20 @@ import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
-  // FLAKY: https://github.com/elastic/kibana/issues/169033
-  // FLAKY: https://github.com/elastic/kibana/issues/169034
-  describe.skip('with legacy risk score', () => {
-    before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
-    });
-
+  describe('with legacy risk score', () => {
     beforeEach(() => {
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       login();
       deleteRiskEngineConfiguration();
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_hosts');
+      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
     });
 
     it('renders risk tab', () => {
       visitHostDetailsPage('siem-kibana');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       cy.get('[data-test-subj="topRiskScoreContributors"]')
         .find(TABLE_ROWS)
@@ -49,7 +42,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     it('shows risk information overlay when button is clicked', () => {
       visitHostDetailsPage('siem-kibana');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       openRiskInformationFlyout();
 
@@ -69,7 +61,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
+      cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_complete_data' });
       deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
       deleteRiskEngineConfiguration();
     });
@@ -77,7 +69,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     it('renders risk tab', () => {
       visitHostDetailsPage('Host-fwarau82er');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       cy.get(ALERTS_COUNT).should('have.text', '1 alert');
       cy.get(ALERT_GRID_CELL).contains('Endpoint Security');
@@ -86,7 +77,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     it('shows risk information overlay when button is clicked', () => {
       visitHostDetailsPage('siem-kibana');
       navigateToHostRiskDetailTab();
-      waitForTableToLoad();
 
       openRiskInformationFlyout();
 

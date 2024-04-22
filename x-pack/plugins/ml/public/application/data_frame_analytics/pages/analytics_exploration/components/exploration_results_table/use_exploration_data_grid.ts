@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { useDataGrid, INIT_MAX_COLUMNS } from '@kbn/ml-data-grid';
 import {

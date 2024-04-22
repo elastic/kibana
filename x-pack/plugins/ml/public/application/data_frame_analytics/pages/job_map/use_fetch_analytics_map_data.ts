@@ -9,7 +9,7 @@ import { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
 import { uniqWith, isEqual } from 'lodash';
-import cytoscape from 'cytoscape';
+import type cytoscape from 'cytoscape';
 import {
   JOB_MAP_NODE_TYPES,
   type AnalyticsMapReturnType,

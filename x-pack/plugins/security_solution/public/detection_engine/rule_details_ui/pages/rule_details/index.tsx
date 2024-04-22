@@ -613,6 +613,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
+                          ruleName={rule?.name}
                         />
                         <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
                       </EuiFlexGroup>
@@ -723,11 +724,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <Display show={!globalFullScreen}>
                       <AlertsHistogramPanel
                         filters={alertMergedFilters}
-                        query={query}
                         signalIndexName={signalIndexName}
                         defaultStackByOption={defaultRuleStackByOption}
                         updateDateRange={updateDateRangeCallback}
-                        runtimeMappings={runtimeMappings}
                       />
                       <EuiSpacer />
                     </Display>

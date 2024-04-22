@@ -349,6 +349,14 @@ test('can specify socket timeouts', () => {
   expect(socketTimeout).toBe(5e5);
 });
 
+test('can specify payload timeouts', () => {
+  const obj = {
+    payloadTimeout: 654321,
+  };
+  const { payloadTimeout } = config.schema.validate(obj);
+  expect(payloadTimeout).toBe(654321);
+});
+
 describe('with compression', () => {
   test('accepts valid referrer whitelist', () => {
     const {

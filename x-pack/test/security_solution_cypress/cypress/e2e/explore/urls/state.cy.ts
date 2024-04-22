@@ -68,7 +68,9 @@ const ABSOLUTE_DATE = {
   firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
 
-describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
+const mockTimeline = getTimeline();
+
+describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -298,7 +300,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
     cy.get(LOADING_INDICATOR).should('not.exist');
-    addNameToTimelineAndSave(getTimeline().title);
+    addNameToTimelineAndSave(mockTimeline.title);
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
@@ -308,7 +310,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
+      cy.get(TIMELINE_TITLE).should('have.text', mockTimeline.title);
     });
   });
 });

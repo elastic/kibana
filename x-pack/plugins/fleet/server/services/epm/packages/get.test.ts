@@ -268,6 +268,7 @@ description: Elasticsearch description`,
               name: 'elasticsearch',
               version: '0.0.1',
               install_source: 'upload',
+              install_status: 'installed',
               package_assets: [],
               data_utf8: `
             name: elasticsearch
@@ -360,6 +361,7 @@ test: invalid manifest`,
               name: 'invalidpackage',
               version: '0.0.1',
               install_source: 'upload',
+              install_status: 'installed',
               package_assets: [],
               data_utf8: `
             name: invalidpackage
@@ -414,6 +416,7 @@ test: invalid manifest
               version: '0.0.1',
               install_source: 'upload',
               install_version: '0.0.1',
+              install_status: 'installed',
             },
             score: 0,
             type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -442,6 +445,7 @@ description: Elasticsearch description`,
             attributes: {
               name: 'elasticsearch',
               version: '0.0.1',
+              install_status: 'installed',
               install_source: 'upload',
               package_assets: [],
               data_utf8: `

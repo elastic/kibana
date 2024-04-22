@@ -78,7 +78,7 @@ describe('transformError', () => {
   });
 
   it('transforms a ResponseError returned by the elasticsearch client', () => {
-    const error: errors.ResponseError = {
+    const error = {
       name: 'ResponseError',
       message: 'illegal_argument_exception',
       headers: {},
@@ -90,7 +90,7 @@ describe('transformError', () => {
       },
       meta: {} as unknown as errors.ResponseError['meta'],
       statusCode: 400,
-    };
+    } as errors.ResponseError;
     const transformed = transformError(error);
 
     expect(transformed).toEqual({

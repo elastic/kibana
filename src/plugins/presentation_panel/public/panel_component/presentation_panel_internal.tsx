@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
   apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
-  useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -28,6 +28,7 @@ export const PresentationPanelInternal = <
   index,
   hideHeader,
   showShadow,
+  showBorder,
 
   showBadges,
   showNotifications,
@@ -56,7 +57,7 @@ export const PresentationPanelInternal = <
     defaultPanelTitle,
     rawViewMode,
     parentHidePanelTitle,
-  ] = useBatchedPublishingSubjects(
+  ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
     api?.blockingError,
     api?.panelTitle,
@@ -90,7 +91,11 @@ export const PresentationPanelInternal = <
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) attrs['data-loading'] = true;
+    if (dataLoading) {
+      attrs['data-loading'] = true;
+    } else {
+      attrs['data-render-complete'] = true;
+    }
     if (blockingError) attrs['data-error'] = true;
     return attrs;
   }, [dataLoading, blockingError]);
@@ -103,9 +108,11 @@ export const PresentationPanelInternal = <
         'embPanel--editing': viewMode === 'edit',
       })}
       hasShadow={showShadow}
+      hasBorder={showBorder}
       aria-labelledby={headerId}
       data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
+      {...contentAttrs}
     >
       {!hideHeader && api && (
         <PresentationPanelHeader
@@ -134,13 +141,14 @@ export const PresentationPanelInternal = <
       )}
       {!initialLoadComplete && <PanelLoader />}
       <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
-        <Component
-          {...(componentProps as React.ComponentProps<typeof Component>)}
-          {...contentAttrs}
-          ref={(newApi) => {
-            if (newApi && !api) setApi(newApi);
-          }}
-        />
+        <EuiErrorBoundary>
+          <Component
+            {...(componentProps as React.ComponentProps<typeof Component>)}
+            ref={(newApi) => {
+              if (newApi && !api) setApi(newApi);
+            }}
+          />
+        </EuiErrorBoundary>
       </div>
     </EuiPanel>
   );

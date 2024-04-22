@@ -163,7 +163,7 @@ function buildAllFormulasInLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): PersistedIndexPatternLayer {
   return layer.yAxis.reduce((acc, curr, valueIndex) => {
     const formulaColumn = getFormulaColumn(
@@ -181,7 +181,7 @@ function buildFormulaLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   if (layer.type === 'series') {
     const resultLayer = buildAllFormulasInLayer(layer, i, dataView, formulaAPI);

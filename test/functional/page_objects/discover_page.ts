@@ -16,7 +16,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
+  private readonly dataViews = this.ctx.getService('dataViews');
   private readonly unifiedFieldList = this.ctx.getPageObject('unifiedFieldList');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
@@ -27,7 +27,6 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
-  private readonly comboBox = this.ctx.getService('comboBox');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -239,8 +238,33 @@ export class DiscoverPageObject extends FtrService {
     await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
   }
 
-  public async chooseLensChart(chart: string) {
-    await this.comboBox.set('unifiedHistogramSuggestionSelector', chart);
+  public async chooseLensSuggestion(suggestionType: string) {
+    await this.testSubjects.click('discoverQueryTotalHits'); // cancel any tooltips which might hide the edit button
+    await this.testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    await this.retry.waitFor('flyout', async () => {
+      return await this.testSubjects.exists('lensSuggestionsPanelToggleButton');
+    });
+    await this.testSubjects.click('lensSuggestionsPanelToggleButton');
+
+    const suggestionTestSubj = `lnsSuggestion-${suggestionType}`;
+    await this.retry.waitFor('suggestion option', async () => {
+      return await this.testSubjects.exists(suggestionTestSubj);
+    });
+    await this.testSubjects.click(suggestionTestSubj);
+    await this.retry.waitFor('suggestion option to get selected', async () => {
+      return (
+        (await (
+          await this.testSubjects.find(`${suggestionTestSubj} > lnsSuggestion`)
+        ).getAttribute('aria-current')) === 'true'
+      );
+    });
+
+    await this.testSubjects.scrollIntoView('applyFlyoutButton');
+    await this.testSubjects.click('applyFlyoutButton');
+  }
+
+  public async getVisContextSuggestionType() {
+    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-suggestion-type');
   }
 
   public async getHistogramLegendList() {
@@ -350,7 +374,7 @@ export class DiscoverPageObject extends FtrService {
           return await cell.getVisibleText();
         } else {
           const textContent = await cell.getAttribute('textContent');
-          return textContent.trim();
+          return textContent?.trim();
         }
       })
     );
@@ -476,42 +500,6 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async clickAddNewField() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('indexPattern-add-field');
-      await this.find.byClassName('indexPatternFieldEditor__form');
-    });
-  }
-
-  public async clickCreateNewDataView() {
-    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
-      return await this.testSubjects.isDisplayed('dataview-create-new');
-    });
-    await this.testSubjects.click('dataview-create-new');
-    await this.retry.waitForWithTimeout(
-      'index pattern editor form to be visible',
-      15000,
-      async () => {
-        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
-      }
-    );
-    await (await this.find.byClassName('indexPatternEditor__form')).click();
-  }
-
-  async createAdHocDataView(name: string, hasTimeField = false) {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
-    await this.retry.waitFor('flyout to get closed', async () => {
-      return !(await this.testSubjects.exists('indexPatternEditor__form'));
-    });
-  }
-
-  async clickAddField() {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.testSubjects.existOrFail('indexPattern-add-field');
-    await this.testSubjects.click('indexPattern-add-field');
-  }
-
   public async hasNoResults() {
     return await this.testSubjects.exists('discoverNoResults');
   }
@@ -532,7 +520,25 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('the button before pressing it', async () => {
       return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
     });
-    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
+    await this.retry.waitForWithTimeout('view all matches to load', 60000, async () => {
+      try {
+        // We need to manually click the button since testSubjects.click will
+        // use a retry, but we want this to throw if the click fails since it
+        // means the button disappeared before we could click it
+        const button = await this.testSubjects.find('discoverNoResultsViewAllMatches', 1000);
+        // Don't click the button if it's disabled since it means the previous
+        // click succeeded and the request is still loading
+        if (await button.isEnabled()) {
+          await button.click();
+        }
+      } catch {
+        // We could get an exception here if the button isn't found or isn't in
+        // the DOM by the time we try to click it, so just ignore it and move on
+      }
+      await this.waitUntilSearchingHasFinished();
+      await this.header.waitUntilLoadingHasFinished();
+      return !(await this.testSubjects.exists('discoverNoResultsViewAllMatches'));
+    });
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
@@ -543,21 +549,14 @@ export class DiscoverPageObject extends FtrService {
     return await this.dataGrid.clickDocSortAsc(field, text);
   }
 
-  public async isAdHocDataViewSelected() {
-    const dataView = await this.getCurrentlySelectedDataView();
-    await this.testSubjects.click('discover-dataView-switch-link');
-    const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
-    await this.testSubjects.click('discover-dataView-switch-link');
-    return hasBadge;
-  }
-
-  public async selectIndexPattern(indexPattern: string) {
-    await this.testSubjects.click('discover-dataView-switch-link');
-    await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
-    await this.find.clickByCssSelector(
-      `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
-    );
-    await this.header.waitUntilLoadingHasFinished();
+  public async selectIndexPattern(
+    indexPattern: string,
+    waitUntilLoadingHasFinished: boolean = true
+  ) {
+    await this.dataViews.switchTo(indexPattern);
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async getIndexPatterns() {
@@ -697,12 +696,6 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async getCurrentlySelectedDataView() {
-    await this.testSubjects.existOrFail('discover-sidebar');
-    const button = await this.testSubjects.find('discover-dataView-switch-link');
-    return button.getAttribute('title');
-  }
-
   /**
    * Validates if data view references in the URL are equal.
    */
@@ -740,9 +733,12 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async addRuntimeField(name: string, script: string) {
-    await this.clickAddField();
+  public async addRuntimeField(name: string, script: string, type?: string) {
+    await this.dataViews.clickAddFieldFromSearchBar();
     await this.fieldEditor.setName(name);
+    if (type) {
+      await this.fieldEditor.setFieldType(type);
+    }
     await this.fieldEditor.enableValue();
     await this.fieldEditor.typeScript(script);
     await this.fieldEditor.save();
@@ -784,12 +780,12 @@ export class DiscoverPageObject extends FtrService {
    * */
   public async dragFieldWithKeyboardToTable(fieldName: string) {
     const field = await this.find.byCssSelector(
-      `[data-test-subj="domDragDrop_draggable-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+      `[data-test-subj="dscFieldListPanelField-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
     );
     await field.focus();
     await this.retry.try(async () => {
       await this.browser.pressKeys(this.browser.keys.ENTER);
-      await this.testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+      await this.testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
     });
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);

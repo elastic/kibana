@@ -15,4 +15,5 @@ export { getFieldFormats, setFieldFormats } from './services';
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
 export { ConfigSchema } from './config_schema';
 
+export * from './constants';
 export * from './types';

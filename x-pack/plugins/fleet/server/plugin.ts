@@ -8,7 +8,7 @@
 import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -85,6 +85,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   PLUGIN_ID,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
@@ -183,6 +184,7 @@ const allSavedObjectTypes = [
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -289,6 +291,7 @@ export class FleetPlugin
     registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -318,6 +321,115 @@ export class FleetPlugin
             },
           ],
         },
+        subFeatures: experimentalFeatures.subfeaturePrivileges
+          ? [
+              {
+                name: 'Agents',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `agents_all`,
+                        api: [`${PLUGIN_ID}-agents-read`, `${PLUGIN_ID}-agents-all`],
+                        name: 'All',
+                        ui: ['agents_read', 'agents_all'],
+                        savedObject: {
+                          all: allSavedObjectTypes,
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `agents_read`,
+                        api: [`${PLUGIN_ID}-agents-read`],
+                        name: 'Read',
+                        ui: ['agents_read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'Agent policies',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `agent_policies_all`,
+                        api: [
+                          `${PLUGIN_ID}-agent-policies-read`,
+                          `${PLUGIN_ID}-agent-policies-all`,
+                        ],
+                        name: 'All',
+                        ui: ['agent_policies_read', 'agent_policies_all'],
+                        savedObject: {
+                          all: allSavedObjectTypes,
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `agent_policies_read`,
+                        api: [`${PLUGIN_ID}-agent-policies-read`],
+                        name: 'Read',
+                        ui: ['agent_policies_read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: 'Settings',
+                requireAllSpaces: true,
+                privilegeGroups: [
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      {
+                        id: `settings_all`,
+                        api: [`${PLUGIN_ID}-settings-read`, `${PLUGIN_ID}-settings-all`],
+                        name: 'All',
+                        ui: ['settings_read', 'settings_all'],
+                        savedObject: {
+                          all: allSavedObjectTypes,
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'all',
+                      },
+                      {
+                        id: `settings_read`,
+                        api: [`${PLUGIN_ID}-settings-read`],
+                        name: 'Read',
+                        ui: ['settings_read'],
+                        savedObject: {
+                          all: [],
+                          read: allSavedObjectTypes,
+                        },
+                        includeIn: 'read',
+                        alerting: {},
+                      },
+                    ],
+                  },
+                ],
+              },
+            ]
+          : [],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
@@ -340,7 +452,6 @@ export class FleetPlugin
               read: allSavedObjectTypes,
             },
             ui: ['read'],
-            disabled: true,
           },
         },
       });
@@ -511,7 +622,7 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    this.policyWatcher = new PolicyWatcher(core.savedObjects, core.elasticsearch, logger);
+    this.policyWatcher = new PolicyWatcher(core.savedObjects, logger);
 
     this.policyWatcher.start(licenseService);
 
@@ -619,6 +730,8 @@ export class FleetPlugin
         getByIds: agentPolicyService.getByIDs,
         turnOffAgentTamperProtections:
           agentPolicyService.turnOffAgentTamperProtections.bind(agentPolicyService),
+        fetchAllAgentPolicies: agentPolicyService.fetchAllAgentPolicies,
+        fetchAllAgentPolicyIds: agentPolicyService.fetchAllAgentPolicyIds,
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {

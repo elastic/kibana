@@ -1,4 +1,4 @@
-steps: 
+steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
@@ -7,10 +7,10 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 5
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
@@ -21,10 +21,10 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 2
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -35,10 +35,10 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 4
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
@@ -49,8 +49,8 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1

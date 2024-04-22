@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { orderBy } from 'lodash';
 
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
@@ -18,7 +17,7 @@ import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/
 import {
   getPreviewAlerts,
   previewRule,
-  getOpenAlerts,
+  getAlerts,
   dataGeneratorFactory,
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
@@ -84,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       const createdRule = await createRule(supertest, log, rule);
-      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
 
       expect(alerts.hits.hits.length).toBe(1);
       expect(removeRandomValuedPropertiesFromAlert(alerts.hits.hits[0]._source)).toEqual({
@@ -384,13 +383,11 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        const previewAlertsOrderedByAgentName = orderBy(
-          previewAlerts,
-          ['_source', 'agent.name'],
-          'asc'
-        );
+        const previewAlertsOrderedByAgentName = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['agent.name'],
+        });
 
         expect(previewAlertsOrderedByAgentName.length).toBe(3);
         expect(previewAlertsOrderedByAgentName[0]._source).toEqual(
@@ -524,7 +521,11 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['event.ingested'],
+        });
 
         expect(previewAlerts.length).toBe(2);
         expect(previewAlerts[0]._source).toHaveProperty(['event.ingested'], expectedEventIngested);
@@ -785,7 +786,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
 
         // first rule run should generate 100 alerts from first 3 batches of index documents
-        const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+        const alertsResponseFromFirstRuleExecution = await getAlerts(
           supertest,
           log,
           es,
@@ -810,7 +811,7 @@ export default ({ getService }: FtrProviderContext) => {
           enabled: true,
         });
 
-        const alertsResponse = await getOpenAlerts(
+        const alertsResponse = await getAlerts(
           supertest,
           log,
           es,

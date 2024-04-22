@@ -30,9 +30,11 @@ import {
   SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON,
 } from '../../../screens/alerts_details';
 import { verifyInsightCount } from '../../../tasks/alerts_details';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
+    deleteAlertsAndRules();
     createRule(getNewRule());
   });
 

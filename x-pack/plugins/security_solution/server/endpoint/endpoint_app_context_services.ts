@@ -13,7 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
+import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
@@ -23,6 +23,9 @@ import type {
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { ResponseActionsClient } from './services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from './services';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -49,9 +52,8 @@ import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
-import type { ActionCreateService } from './services/actions/create/types';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
-
+import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;
@@ -73,14 +75,14 @@ export interface EndpointAppContextServiceStartContract {
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
-  cases: CasesStart | undefined;
+  cases: CasesServerStart | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
-  actionCreateService: ActionCreateService | undefined;
   esClient: ElasticsearchClient;
   productFeaturesService: ProductFeaturesService;
   savedObjectsClient: SavedObjectsClientContract;
+  connectorActions: ActionsPluginStartContract;
 }
 
 /**
@@ -271,12 +273,44 @@ export class EndpointAppContextService {
     return this.startDependencies.messageSigningService;
   }
 
-  public getActionCreateService(): ActionCreateService {
-    if (!this.startDependencies?.actionCreateService) {
+  public getInternalResponseActionsClient({
+    agentType = 'endpoint',
+    username = 'elastic',
+    taskId,
+    taskType,
+  }: {
+    agentType?: ResponseActionAgentType;
+    username?: string;
+    /** Used with background task and needed for `UnsecuredActionsClient`  */
+    taskId?: string;
+    /** Used with background task and needed for `UnsecuredActionsClient`  */
+    taskType?: string;
+  }): ResponseActionsClient {
+    if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.startDependencies.actionCreateService;
+    return getResponseActionsClient(agentType, {
+      endpointService: this,
+      esClient: this.startDependencies.esClient,
+      username,
+      isAutomated: true,
+      connectorActions: new NormalizedExternalConnectorClient(
+        this.startDependencies.connectorActions.getUnsecuredActionsClient(),
+        this.createLogger('responseActions'),
+        {
+          relatedSavedObjects:
+            taskId && taskType
+              ? [
+                  {
+                    id: taskId,
+                    type: taskType,
+                  },
+                ]
+              : undefined,
+        }
+      ),
+    });
   }
 
   public async getFleetToHostFilesClient() {

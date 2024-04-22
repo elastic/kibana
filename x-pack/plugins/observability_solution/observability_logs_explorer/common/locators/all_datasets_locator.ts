@@ -25,7 +25,7 @@ export class AllDatasetsLocatorDefinition implements LocatorDefinition<AllDatase
     const { useHash } = this.deps;
 
     return constructLocatorPath({
-      datasetSelection: AllDatasetSelection.create().toPlainSelection(),
+      dataSourceSelection: AllDatasetSelection.create().toPlainSelection(),
       locatorParams: params,
       useHash,
     });

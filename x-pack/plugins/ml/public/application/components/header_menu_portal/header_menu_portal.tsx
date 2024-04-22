@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, useContext, useEffect, useMemo } from 'react';
+import type { FC, ReactNode } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';

@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { DEV_TOOLS_FEATURE_ID, ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from './constants';
+export {
+  DEV_TOOLS_FEATURE_ID,
+  ENABLE_PERSISTENT_CONSOLE_UI_SETTING_ID as ENABLE_DOCKED_CONSOLE_UI_SETTING_ID,
+} from './constants';

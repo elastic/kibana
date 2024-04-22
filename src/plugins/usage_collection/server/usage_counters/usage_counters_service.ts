@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs/operators';
+import * as rxOp from 'rxjs';
 import {
   SavedObjectsRepository,
   SavedObjectsServiceSetup,

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 
 import {
   App,
@@ -164,6 +164,11 @@ export class DashboardPlugin
     // this trigger enables external consumers to register actions for
     // adding items to the add panel menu
     uiActions.registerTrigger(addPanelMenuTrigger);
+
+    core.analytics.registerEventType({
+      eventType: 'dashboard_loaded_with_data',
+      schema: {},
+    });
 
     if (share) {
       this.locator = share.url.locators.create(

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useDataVisualizerKibana } from '../../../kibana_context';

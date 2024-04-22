@@ -21,7 +21,6 @@ export type {
   TaskRunCreatorFunction,
   RunContext,
   IntervalSchedule,
-  LoadIndirectParamsResult,
 } from './task';
 
 export { TaskStatus, TaskPriority } from './task';
@@ -34,8 +33,6 @@ export {
   throwUnrecoverableError,
   throwRetryableError,
   isEphemeralTaskRejectedDueToCapacityError,
-  isSkipError,
-  createSkipError,
   createTaskRunError,
   TaskErrorSource,
 } from './task_running';

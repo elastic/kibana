@@ -79,3 +79,39 @@ export const cpuUsage: LensBaseLayer = {
   format: 'percent',
   decimals: 0,
 };
+
+export const load1m: LensBaseLayer = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.load1m', {
+    defaultMessage: 'Load (1m)',
+  }),
+  value: 'average(system.load.1)',
+  format: 'number',
+  decimals: 1,
+};
+
+export const load5m: LensBaseLayer = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.load5m', {
+    defaultMessage: 'Load (5m)',
+  }),
+  value: 'average(system.load.5)',
+  format: 'number',
+  decimals: 1,
+};
+
+export const load15m: LensBaseLayer = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.load15m', {
+    defaultMessage: 'Load (15m)',
+  }),
+  value: 'average(system.load.15)',
+  format: 'number',
+  decimals: 1,
+};
+
+export const normalizedLoad1m: LensBaseLayer = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.normalizedLoad1m', {
+    defaultMessage: 'Normalized Load',
+  }),
+  value: 'average(system.load.1) / max(system.load.cores)',
+  format: 'percent',
+  decimals: 0,
+};

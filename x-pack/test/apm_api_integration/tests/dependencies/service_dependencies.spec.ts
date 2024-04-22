@@ -47,6 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177123
   registry.when('Dependency for services', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       before(async () => {
@@ -84,6 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177125
   registry.when('Dependency for services breakdown', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       before(async () => {

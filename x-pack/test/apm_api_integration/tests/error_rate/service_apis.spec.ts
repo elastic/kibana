@@ -151,6 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177321
   registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;

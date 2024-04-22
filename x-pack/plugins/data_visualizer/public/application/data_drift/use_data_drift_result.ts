@@ -10,12 +10,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   MappingRuntimeFields,
   QueryDslBoolQuery,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
 import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -24,7 +24,7 @@ import type { Query } from '@kbn/data-plugin/common';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
-import { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
+import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
@@ -43,18 +43,17 @@ import {
   DATA_COMPARISON_TYPE,
 } from './constants';
 
-import {
+import type {
   NumericDriftData,
   CategoricalDriftData,
   Range,
-  FETCH_STATUS,
   Result,
-  isNumericDriftData,
   Feature,
   DataDriftField,
   TimeRange,
   ComparisonHistogram,
 } from './types';
+import { FETCH_STATUS, isNumericDriftData } from './types';
 import { isFulfilled, isRejected } from '../common/util/promise_all_settled_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataDriftField['type'] => {
@@ -509,7 +508,9 @@ const fetchComparisonDriftedData = async ({
   );
 
   fieldsWithNoOverlap.forEach((field) => {
+    // @ts-expect-error upgrade typescript v4.9.5
     if (driftedResp.aggregations) {
+      // @ts-expect-error upgrade typescript v4.9.5
       driftedResp.aggregations[`${field}_ks_test`] = {
         // Setting -Infinity to represent astronomically small number
         // which would be represented as < 0.000001 in table
@@ -801,6 +802,7 @@ export const useFetchDataComparisonResult = (
             randomSamplerWrapper,
 
             asyncFetchFn: (chunkedFields) =>
+              // @ts-expect-error upgrade typescript v4.9.5
               fetchReferenceBaselineData({
                 dataSearch,
                 baseRequest: baselineRequest,
@@ -862,6 +864,7 @@ export const useFetchDataComparisonResult = (
             fields,
             randomSamplerWrapper: prodRandomSamplerWrapper,
 
+            // @ts-expect-error upgrade typescript v4.9.5
             asyncFetchFn: (chunkedFields: DataDriftField[]) =>
               fetchComparisonDriftedData({
                 dataSearch,
@@ -904,11 +907,14 @@ export const useFetchDataComparisonResult = (
             fields,
             randomSamplerWrapper,
 
+            // @ts-expect-error upgrade typescript v4.9.5
             asyncFetchFn: (chunkedFields: DataDriftField[]) =>
               fetchHistogramData({
                 dataSearch,
                 baseRequest: referenceHistogramRequest,
+                // @ts-expect-error upgrade typescript v4.9.5
                 baselineResponseAggs,
+                // @ts-expect-error upgrade typescript v4.9.5
                 driftedRespAggs,
                 fields: chunkedFields,
                 randomSamplerWrapper,
@@ -946,11 +952,14 @@ export const useFetchDataComparisonResult = (
             fields,
             randomSamplerWrapper,
 
+            // @ts-expect-error upgrade typescript v4.9.5
             asyncFetchFn: (chunkedFields: DataDriftField[]) =>
               fetchHistogramData({
                 dataSearch,
                 baseRequest: comparisonHistogramRequest,
+                // @ts-expect-error upgrade typescript v4.9.5
                 baselineResponseAggs,
+                // @ts-expect-error upgrade typescript v4.9.5
                 driftedRespAggs,
                 fields: chunkedFields,
                 randomSamplerWrapper,
@@ -972,30 +981,42 @@ export const useFetchDataComparisonResult = (
           for (const { field, type, secondaryType } of fields) {
             if (
               type === DATA_COMPARISON_TYPE.NUMERIC &&
+              // @ts-expect-error upgrade typescript v4.9.5
               driftedRespAggs[`${field}_ks_test`] &&
+              // @ts-expect-error upgrade typescript v4.9.5
               referenceHistogramRespAggs[`${field}_histogram`] &&
+              // @ts-expect-error upgrade typescript v4.9.5
               comparisonHistogramRespAggs[`${field}_histogram`]
             ) {
               data[field] = {
                 secondaryType,
                 type: DATA_COMPARISON_TYPE.NUMERIC,
+                // @ts-expect-error upgrade typescript v4.9.5
                 pValue: driftedRespAggs[`${field}_ks_test`].two_sided,
+                // @ts-expect-error upgrade typescript v4.9.5
                 referenceHistogram: referenceHistogramRespAggs[`${field}_histogram`].buckets,
+                // @ts-expect-error upgrade typescript v4.9.5
                 comparisonHistogram: comparisonHistogramRespAggs[`${field}_histogram`].buckets,
               };
             }
             if (
               type === DATA_COMPARISON_TYPE.CATEGORICAL &&
+              // @ts-expect-error upgrade typescript v4.9.5
               driftedRespAggs[`${field}_terms`] &&
+              // @ts-expect-error upgrade typescript v4.9.5
               baselineResponseAggs[`${field}_terms`]
             ) {
               data[field] = {
                 secondaryType,
                 type: DATA_COMPARISON_TYPE.CATEGORICAL,
+                // @ts-expect-error upgrade typescript v4.9.5
                 driftedTerms: driftedRespAggs[`${field}_terms`].buckets ?? [],
+                // @ts-expect-error upgrade typescript v4.9.5
                 driftedSumOtherDocCount: driftedRespAggs[`${field}_terms`].sum_other_doc_count,
+                // @ts-expect-error upgrade typescript v4.9.5
                 baselineTerms: baselineResponseAggs[`${field}_terms`].buckets ?? [],
                 baselineSumOtherDocCount:
+                  // @ts-expect-error upgrade typescript v4.9.5
                   baselineResponseAggs[`${field}_terms`].sum_other_doc_count,
               };
             }

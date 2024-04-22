@@ -8,10 +8,10 @@
 
 import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
-
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
-import { ensureDeepObject } from '@kbn/std';
+import { ensureValidObjectPath } from '@kbn/std';
+import { splitKey, getUnsplittableKey } from './utils';
 
 const readYaml = (path: string) => safeLoad(readFileSync(path, 'utf8'));
 
@@ -26,40 +26,72 @@ function replaceEnvVarRefs(val: string) {
   });
 }
 
-function merge(target: Record<string, any>, value: any, key?: string) {
-  if (isPlainObject(value) && Object.keys(value).length > 0) {
-    for (const [subKey, subVal] of Object.entries(value)) {
-      merge(target, subVal, key ? `${key}.${subKey}` : subKey);
-    }
-  } else if (key !== undefined) {
-    set(target, key, recursiveReplaceEnvVar(value));
-  }
-
-  return target;
+interface YamlEntry {
+  path: string[];
+  value: any;
 }
 
-function recursiveReplaceEnvVar(value: any) {
+const listEntries = (root: Record<string, any>): YamlEntry[] => {
+  const entries: YamlEntry[] = [];
+
+  const recursiveListEntries = (currentLevel: any, currentPath: string[]) => {
+    if (isPlainObject(currentLevel) && Object.keys(currentLevel).length > 0) {
+      for (const [subKey, subVal] of Object.entries(currentLevel)) {
+        const subKeySplits = splitKey(subKey);
+        recursiveListEntries(subVal, [...currentPath, ...subKeySplits]);
+      }
+    } else if (currentPath.length) {
+      entries.push({
+        path: currentPath,
+        value: processEntryValue(currentLevel),
+      });
+    }
+  };
+
+  recursiveListEntries(root, []);
+  return entries;
+};
+
+const mergeEntries = (entries: YamlEntry[]): Record<string, any> => {
+  const root = {};
+
+  entries.forEach((entry) => {
+    set(root, entry.path, entry.value);
+  });
+
+  return root;
+};
+
+function processEntryValue(value: any) {
   if (isPlainObject(value) || Array.isArray(value)) {
     for (const [subKey, subVal] of Object.entries(value)) {
-      set(value, subKey, recursiveReplaceEnvVar(subVal));
+      const unsplitKey = getUnsplittableKey(subKey);
+      if (unsplitKey) {
+        delete value[subKey];
+        set(value, [unsplitKey], processEntryValue(subVal));
+      } else {
+        set(value, subKey, processEntryValue(subVal));
+      }
     }
-  }
-  if (typeof value === 'string') {
+  } else if (typeof value === 'string') {
     return replaceEnvVarRefs(value);
   }
   return value;
 }
 
-/** @internal */
 export const getConfigFromFiles = (configFiles: readonly string[]) => {
-  let mergedYaml = {};
+  const yamlEntries: YamlEntry[] = [];
 
   for (const configFile of configFiles) {
     const yaml = readYaml(configFile);
     if (yaml !== null) {
-      mergedYaml = merge(mergedYaml, yaml);
+      yamlEntries.push(...listEntries(yaml));
     }
   }
 
-  return ensureDeepObject(mergedYaml);
+  for (const entry of yamlEntries) {
+    ensureValidObjectPath(entry.path);
+  }
+
+  return mergeEntries(yamlEntries);
 };

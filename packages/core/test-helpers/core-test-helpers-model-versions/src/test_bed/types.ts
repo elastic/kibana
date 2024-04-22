@@ -121,7 +121,7 @@ export interface ModelVersionTestKit {
    * Cleanup function that will delete the test index.
    * Should be called before calling `testbed.prepareTestKit` again.
    */
-  tearsDown: () => Promise<void>;
+  tearDown: () => Promise<void>;
 }
 
 /**

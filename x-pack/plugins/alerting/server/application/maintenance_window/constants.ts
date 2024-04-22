@@ -17,8 +17,3 @@ export const maintenanceWindowCategoryIdTypes = {
   SECURITY_SOLUTION: 'securitySolution',
   MANAGEMENT: 'management',
 } as const;
-
-export const filterStateStore = {
-  APP_STATE: 'appState',
-  GLOBAL_STATE: 'globalState',
-} as const;

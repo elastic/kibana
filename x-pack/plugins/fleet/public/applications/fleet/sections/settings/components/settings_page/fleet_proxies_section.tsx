@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink } from '../../../../hooks';
+import { useAuthz, useLink } from '../../../../hooks';
 import type { FleetProxy } from '../../../../types';
 import { FleetProxiesTable } from '../fleet_proxies_table';
 
@@ -30,6 +30,7 @@ export const FleetProxiesSection: React.FunctionComponent<FleetProxiesSectionPro
   proxies,
   deleteFleetProxy,
 }) => {
+  const authz = useAuthz();
   const { getHref } = useLink();
 
   return (
@@ -57,17 +58,21 @@ export const FleetProxiesSection: React.FunctionComponent<FleetProxiesSectionPro
       </EuiText>
       <EuiSpacer size="m" />
       <FleetProxiesTable proxies={proxies} deleteFleetProxy={deleteFleetProxy} />
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        iconType="plusInCircle"
-        href={getHref('settings_create_fleet_proxy')}
-        data-test-subj="addProxyBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.settings.fleetProxiesSection.CreateButtonLabel"
-          defaultMessage="Add proxy"
-        />
-      </EuiButtonEmpty>
+      {authz.fleet.allSettings && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            iconType="plusInCircle"
+            href={getHref('settings_create_fleet_proxy')}
+            data-test-subj="addProxyBtn"
+          >
+            <FormattedMessage
+              id="xpack.fleet.settings.fleetProxiesSection.CreateButtonLabel"
+              defaultMessage="Add proxy"
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
     </>
   );
 };

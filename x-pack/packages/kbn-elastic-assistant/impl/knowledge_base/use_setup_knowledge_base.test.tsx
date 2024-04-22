@@ -57,6 +57,7 @@ describe('useSetupKnowledgeBase', () => {
         '/internal/elastic_assistant/knowledge_base/',
         {
           method: 'POST',
+          version: '1',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -79,6 +80,7 @@ describe('useSetupKnowledgeBase', () => {
         '/internal/elastic_assistant/knowledge_base/something',
         {
           method: 'POST',
+          version: '1',
         }
       );
     });

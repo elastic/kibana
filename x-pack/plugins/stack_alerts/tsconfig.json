@@ -49,6 +49,7 @@
     "@kbn/react-field",
     "@kbn/code-editor",
     "@kbn/esql-utils",
+    "@kbn/data-view-utils",
   ],
   "exclude": [
     "target/**/*",

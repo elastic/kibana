@@ -22,6 +22,7 @@ Object {
   "showCharts": true,
   "showSelectedInterval": false,
   "timeBuckets": TimeBuckets {
+    "_fieldFormats": undefined,
     "_timeBucketsConfig": Object {
       "dateFormat": undefined,
       "dateFormat:scaled": undefined,

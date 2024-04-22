@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import type { UseMessagesStorage } from './use_messages_storage';
 import { useMessagesStorage } from './use_messages_storage';
 
-describe('useLocalStorage', () => {
+describe('useMessagesStorage', () => {
   beforeEach(() => {
     localStorage.clear();
   });

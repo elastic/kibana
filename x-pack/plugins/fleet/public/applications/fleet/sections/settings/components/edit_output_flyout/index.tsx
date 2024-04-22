@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
 
@@ -49,7 +49,7 @@ import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../commo
 import type { Output, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
 
 import { OutputFormKafkaSection } from './output_form_kafka';
 
@@ -78,11 +78,25 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const form = useOutputForm(onClose, output, defaultOuput);
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
-  const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
-  const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
+  const fleetStatus = useFleetStatus();
+
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
+    'disabled'
+  );
+
+  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  }
+
   const onToggleSecretStorage = (secretEnabled: boolean) => {
-    setUseSecretsStorage(secretEnabled);
+    if (secretsToggleState === 'disabled') {
+      return;
+    }
+
+    setSecretsToggleState(secretEnabled);
   };
+
+  const useSecretsStorage = secretsToggleState === true;
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
@@ -166,18 +180,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderTypeSpecificWarning = () => {
-    const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
-    if (!isKafkaOutput && !isESOutput && !isRemoteESOutput) {
+    if (!isESOutput && !isRemoteESOutput) {
       return null;
     }
 
     const generateWarningMessage = () => {
       switch (inputs.typeInput.value) {
-        case outputType.Kafka:
-          return i18n.translate('xpack.fleet.settings.editOutputFlyout.kafkaOutputTypeCallout', {
-            defaultMessage:
-              'Kafka output is currently not supported on Agents using the Elastic Defend integration.',
-          });
         default:
         case outputType.Elasticsearch:
           return i18n.translate('xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout', {

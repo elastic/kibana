@@ -10,19 +10,34 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
-  { getService, getPageObjects }: FtrProviderContext,
+  { getService }: FtrProviderContext,
   mlDashboardJobSelectionTable: MlDashboardJobSelectionTable
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['discover']);
 
   return {
     async assertAnomalyChartsEmbeddableInitializerExists() {
       await retry.tryForTime(10 * 1000, async () => {
         await testSubjects.existOrFail('mlAnomalyChartsEmbeddableInitializer', { timeout: 1000 });
+      });
+    },
+
+    async assertSingleMetricViewerEmbeddableInitializerExists() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.existOrFail('mlSingleMetricViewerEmbeddableInitializer', {
+          timeout: 1000,
+        });
+      });
+    },
+
+    async assertSingleMetricViewerEmbeddableInitializerNotExists() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('mlSingleMetricViewerEmbeddableInitializer', {
+          timeout: 1000,
+        });
       });
     },
 
@@ -46,9 +61,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
       });
     },
 
-    async assertInitializerConfirmButtonEnabled() {
-      const subj = 'mlAnomalyChartsInitializerConfirmButton';
-
+    async assertInitializerConfirmButtonEnabled(subj: string) {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(subj);
         await testSubjects.isEnabled(subj);
@@ -58,9 +71,18 @@ export function MachineLearningDashboardEmbeddablesProvider(
     async clickInitializerConfirmButtonEnabled() {
       const subj = 'mlAnomalyChartsInitializerConfirmButton';
       await retry.tryForTime(60 * 1000, async () => {
-        await this.assertInitializerConfirmButtonEnabled();
+        await this.assertInitializerConfirmButtonEnabled(subj);
         await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
         await this.assertAnomalyChartsEmbeddableInitializerNotExists();
+      });
+    },
+
+    async clickSingleMetricViewerInitializerConfirmButtonEnabled() {
+      const subj = 'mlSingleMetricViewerInitializerConfirmButton';
+      await retry.tryForTime(60 * 1000, async () => {
+        await this.assertInitializerConfirmButtonEnabled(subj);
+        await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
+        await this.assertSingleMetricViewerEmbeddableInitializerNotExists();
       });
     },
 
@@ -101,7 +123,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
     },
 
     async openAnomalyJobSelectionFlyout(
-      mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts'
+      mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts' | 'ml_single_metric_viewer'
     ) {
       await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.clickEditorMenuButton();
@@ -111,16 +133,6 @@ export function MachineLearningDashboardEmbeddablesProvider(
         await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
 
         await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
-      });
-    },
-
-    async selectDiscoverIndexPattern(indexPattern: string) {
-      await retry.tryForTime(2 * 1000, async () => {
-        await PageObjects.discover.selectIndexPattern(indexPattern);
-        const indexPatternTitle = await testSubjects.getVisibleText(
-          'discover-dataView-switch-link'
-        );
-        expect(indexPatternTitle).to.be(indexPattern);
       });
     },
   };

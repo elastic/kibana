@@ -9,7 +9,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
-import { FullValidationConfig } from '@kbn/core-http-server';
+import { VersionedRouteValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -17,11 +17,7 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import {
-  FIELDS_FOR_WILDCARD_PATH as path,
-  DATA_VIEWS_FIELDS_EXCLUDED_TIERS,
-} from '../../../common/constants';
-import { getIndexFilterDsl } from './utils';
+import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
 
 /**
  * Accepts one of the following:
@@ -31,14 +27,14 @@ import { getIndexFilterDsl } from './utils';
  * @returns an array of field names
  * @param fields
  */
-export const parseFields = (fields: string | string[]): string[] => {
+export const parseFields = (fields: string | string[], fldName: string): string[] => {
   if (Array.isArray(fields)) return fields;
   try {
     return JSON.parse(fields);
   } catch (e) {
     if (!fields.includes(',')) return [fields];
     throw new Error(
-      'metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name'
+      `${fldName} should be an array of strings, a JSON-stringified array of strings, or a single string`
     );
   }
 };
@@ -53,8 +49,9 @@ export interface IQuery {
   rollup_index?: string;
   allow_no_index?: boolean;
   include_unmapped?: boolean;
-  fields?: string[];
+  fields?: string | string[];
   allow_hidden?: boolean;
+  field_types?: string | string[];
   include_empty_fields?: boolean;
 }
 
@@ -69,6 +66,11 @@ export const querySchema = schema.object({
   include_unmapped: schema.maybe(schema.boolean()),
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   allow_hidden: schema.maybe(schema.boolean()),
+  field_types: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+      defaultValue: [],
+    })
+  ),
   include_empty_fields: schema.maybe(schema.boolean()),
 });
 
@@ -104,7 +106,7 @@ const FieldDescriptorSchema = schema.object({
   defaultFormatter: schema.maybe(schema.string()),
 });
 
-export const validate: FullValidationConfig<any, any, any> = {
+export const validate: VersionedRouteValidation<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request
@@ -124,10 +126,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;
-    const excludedTiers = await core.uiSettings.client.get<string>(
-      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
-    );
-    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+    const uiSettings = core.uiSettings.client;
+    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, {
+      uiSettingsClient: uiSettings,
+      rollupsEnabled: isRollupsEnabled(),
+    });
 
     const {
       pattern,
@@ -137,6 +140,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
       allow_hidden: allowHidden,
+      field_types: fieldTypes,
       include_empty_fields: includeEmptyFields,
     } = request.query;
 
@@ -145,11 +149,13 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
     let parsedFields: string[] = [];
     let parsedMetaFields: string[] = [];
+    let parsedFieldTypes: string[] = [];
     try {
-      parsedMetaFields = parseFields(metaFields);
-      parsedFields = parseFields(request.query.fields ?? []);
+      parsedMetaFields = parseFields(metaFields, 'meta_fields');
+      parsedFields = parseFields(request.query.fields ?? [], 'fields');
+      parsedFieldTypes = parseFields(fieldTypes || [], 'field_types');
     } catch (error) {
-      return response.badRequest();
+      return response.badRequest({ body: error.message });
     }
 
     try {
@@ -162,7 +168,8 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
+        fieldTypes: parsedFieldTypes,
+        indexFilter,
         allowHidden,
         includeEmptyFields,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),

@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
+  const dataViews = getService('dataViews');
 
   describe('lens formula', () => {
     it('should transition from count to formula', async () => {
@@ -97,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.lens.clickAddField();
+      await dataViews.clickAddFieldFromSearchBar();
       await fieldEditor.setName(`ab' "'`, true, true);
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");
@@ -135,6 +136,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'formula',
         formula: `asdf`,
       });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql('asdf');
 
       await PageObjects.lens.assertMessageListContains('Field asdf was not found.', 'error');
     });

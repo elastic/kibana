@@ -103,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
             'hasAliases',
             'hasMappings',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
             'ignoreMissingComponentTemplates',
           ].sort();
@@ -124,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
             'indexPatterns',
             'template',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
             'ignoreMissingComponentTemplates',
           ].sort();

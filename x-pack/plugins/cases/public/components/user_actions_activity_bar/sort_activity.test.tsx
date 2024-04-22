@@ -10,7 +10,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { waitFor, fireEvent, screen } from '@testing-library/react';
 
-import { SortActivity, SortOptions } from './sort_activity';
+import { SortActivity, sortOptions } from './sort_activity';
 
 describe('SortActivity ', () => {
   const onSortActivityChange = jest.fn();
@@ -38,8 +38,8 @@ describe('SortActivity ', () => {
   it('renders options when opened', async () => {
     appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    expect(screen.getByText(`${SortOptions[0].text}`)).toBeInTheDocument();
-    expect(screen.getByText(`${SortOptions[1].text}`)).toBeInTheDocument();
+    expect(screen.getByText(`${sortOptions[0].text}`)).toBeInTheDocument();
+    expect(screen.getByText(`${sortOptions[1].text}`)).toBeInTheDocument();
   });
 
   it('onChange is called with asc value', async () => {
@@ -47,9 +47,9 @@ describe('SortActivity ', () => {
 
     const sortSelect = screen.getByTestId('user-actions-sort-select');
 
-    fireEvent.change(sortSelect, { target: { value: SortOptions[1].value } });
+    fireEvent.change(sortSelect, { target: { value: sortOptions[1].value } });
 
-    await waitFor(() => expect(onSortActivityChange).toHaveBeenCalledWith(SortOptions[1].value));
+    await waitFor(() => expect(onSortActivityChange).toHaveBeenCalledWith(sortOptions[1].value));
   });
 
   it('onChange is called with desc value', async () => {
@@ -57,8 +57,8 @@ describe('SortActivity ', () => {
 
     const sortSelect = screen.getByTestId('user-actions-sort-select');
 
-    fireEvent.change(sortSelect, { target: { value: SortOptions[0].value } });
+    fireEvent.change(sortSelect, { target: { value: sortOptions[0].value } });
 
-    await waitFor(() => expect(onSortActivityChange).toHaveBeenCalledWith(SortOptions[0].value));
+    await waitFor(() => expect(onSortActivityChange).toHaveBeenCalledWith(sortOptions[0].value));
   });
 });

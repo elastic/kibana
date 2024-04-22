@@ -106,9 +106,9 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   const { euiTheme } = useEuiTheme();
   const emptyLabelStyle = useMemo(
     () => ({
-      color: euiTheme.colors.disabled,
+      color: euiTheme.colors.darkShade,
     }),
-    [euiTheme.colors.disabled]
+    [euiTheme.colors.darkShade]
   );
   const className = isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate';
 

@@ -99,7 +99,7 @@ export class ServerlessSearchPlugin
 
     if (usageCollection) {
       getStartServices().then(() => {
-        registerTelemetryUsageCollector(usageCollection);
+        registerTelemetryUsageCollector(usageCollection, this.logger);
       });
     }
 

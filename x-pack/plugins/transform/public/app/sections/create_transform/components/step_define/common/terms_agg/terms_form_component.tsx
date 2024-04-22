@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { IPivotAggsConfigTerms } from './types';
+import type { IPivotAggsConfigTerms } from './types';
 
 export const TermsAggForm: IPivotAggsConfigTerms['AggFormComponent'] = ({
   aggConfig,

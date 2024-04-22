@@ -10,12 +10,12 @@ import moment from 'moment';
 
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import {
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   JobParamsDownloadCSV,
 } from '@kbn/reporting-export-types-csv-common';
 import type { ReportingCore } from '../../..';
-import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { PassThroughStream } from '../../../lib';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 

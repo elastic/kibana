@@ -13,6 +13,10 @@ import type { DataProvider } from '../../../../common/types/timeline';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_selector');
+const mockUseDataViewId = jest.fn();
+jest.mock('../../hooks/use_data_view_id', () => ({
+  useDataViewId: (scope: string) => mockUseDataViewId(scope),
+}));
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ browserFields: {} }),
 }));
@@ -31,6 +35,7 @@ describe('useHoverActionItems', () => {
     dataProvider: [{} as DataProvider],
     defaultFocusedButtonRef: null,
     field: 'kibana.alert.rule.name',
+    scopeId: 'timeline-test',
     handleHoverActionClicked: jest.fn(),
     hideAddToTimeline: false,
     hideTopN: false,
@@ -85,6 +90,14 @@ describe('useHoverActionItems', () => {
         'hover-actions-copy-button'
       );
     });
+  });
+
+  test('should call getDataViewId with the correct scope', () => {
+    renderHook(() => {
+      const defaultFocusedButtonRef = useRef(null);
+      return useHoverActionItems({ ...defaultProps, defaultFocusedButtonRef });
+    });
+    expect(mockUseDataViewId).toHaveBeenCalledWith('timeline');
   });
 
   test('should return overflowActionItems', async () => {

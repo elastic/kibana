@@ -13,21 +13,23 @@ export const ERROR_STATE_PATH = '/error_state';
 export const SEARCH_INDICES_PATH = `${ROOT_PATH}search_indices`;
 export const CONNECTORS_PATH = `${ROOT_PATH}connectors`;
 export const CRAWLERS_PATH = `${ROOT_PATH}crawlers`;
+export const PLAYGROUND_PATH = `${ROOT_PATH}playground`;
 export const SETTINGS_PATH = `${ROOT_PATH}settings`;
 
 export const NEW_INDEX_PATH = `${SEARCH_INDICES_PATH}/new_index`;
-export const NEW_INDEX_METHOD_PATH = `${NEW_INDEX_PATH}/:type`;
 export const NEW_API_PATH = `${NEW_INDEX_PATH}/api`;
 export const NEW_ES_INDEX_PATH = `${NEW_INDEX_PATH}/elasticsearch`;
 export const NEW_DIRECT_UPLOAD_PATH = `${NEW_INDEX_PATH}/upload`;
-export const NEW_INDEX_SELECT_CONNECTOR_PATH = `${NEW_INDEX_PATH}/select_connector`;
-export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${NEW_INDEX_PATH}/select_connector?filter=native`;
-export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${NEW_INDEX_PATH}/select_connector?filter=connector_clients`;
+export const NEW_INDEX_SELECT_CONNECTOR_PATH = `${CONNECTORS_PATH}/select_connector`;
+export const NEW_CONNECTOR_PATH = `${CONNECTORS_PATH}/new_connector`;
+export const NEW_CRAWLER_PATH = `${CRAWLERS_PATH}/new_crawler`;
+export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${CONNECTORS_PATH}/select_connector?filter=native`;
+export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${CONNECTORS_PATH}/select_connector?filter=connector_clients`;
 
 export const SEARCH_INDEX_PATH = `${SEARCH_INDICES_PATH}/:indexName`;
 export const SEARCH_INDEX_TAB_PATH = `${SEARCH_INDEX_PATH}/:tabId`;
 export const SEARCH_INDEX_TAB_DETAIL_PATH = `${SEARCH_INDEX_TAB_PATH}/:detailId`;
-export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/domain_management/:domainId`;
+export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_TAB_PATH}/:domainId`;
 export const OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/crawler/domains/:domainId`;
 
 export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';

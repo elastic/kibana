@@ -7,8 +7,9 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
-import { getResponseActionsClient } from '../../services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type {
@@ -319,7 +320,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         casesClient,
         endpointService: endpointContext.service,
         username: user?.username || 'unknown',
-        connectorActions,
+        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
       }
     );
 
@@ -374,9 +375,16 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
       const { action: actionId, ...data } = action;
 
+      // `action` is deprecated, but still returned in order to ensure backwards compatibility
+      const legacyResponseData = responseActionsWithLegacyActionProperty.includes(command)
+        ? {
+            action: actionId ?? data.id ?? '',
+          }
+        : {};
+
       return res.ok({
         body: {
-          action: actionId,
+          ...legacyResponseData,
           data,
         },
       });

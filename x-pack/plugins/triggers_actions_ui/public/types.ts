@@ -7,55 +7,59 @@
 
 import type { Moment } from 'moment';
 import type { ComponentType, ReactNode, RefObject } from 'react';
-import React from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridColumnCellAction,
-  EuiDataGridOnColumnResizeHandler,
-  EuiDataGridProps,
-  EuiDataGridRefProps,
-  EuiDataGridToolBarAdditionalControlsOptions,
-  EuiDataGridToolBarVisibilityOptions,
-  EuiSuperSelectOption,
   IconType,
   RecursivePartial,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridToolBarAdditionalControlsOptions,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridColumnCellAction,
+  EuiDataGridToolBarVisibilityOptions,
+  EuiSuperSelectOption,
+  EuiDataGridOnColumnResizeHandler,
+  EuiDataGridCellProps,
+  RenderCellValue,
+  EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
-import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
+import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
 import {
   ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
-  AlertHistoryDocumentTemplate,
-  AlertHistoryEsIndexConnectorId,
   AsApiContract,
 } from '@kbn/actions-plugin/common';
 import {
   ActionGroup,
-  ActionVariable,
-  AlertingFrameworkHealth,
-  AlertStatus,
+  RuleActionParam,
+  SanitizedRule as AlertingSanitizedRule,
+  ResolvedSanitizedRule,
+  RuleSystemAction,
+  RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
-  MaintenanceWindow,
+  AlertStatus,
   RawAlertInstance,
-  ResolvedSanitizedRule,
-  RuleAction,
-  RuleActionParam,
-  RuleLastRun,
+  AlertingFrameworkHealth,
   RuleNotifyWhenType,
-  RuleTaskState,
-  RuleTypeMetaData,
   RuleTypeParams,
-  SanitizedRule as AlertingSanitizedRule,
+  RuleTypeMetaData,
+  ActionVariable,
+  RuleLastRun,
+  MaintenanceWindow,
+  SanitizedRuleAction as RuleAction,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -64,6 +68,7 @@ import {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import React from 'react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import { TypeRegistry } from './application/type_registry';
@@ -72,23 +77,23 @@ import type { RuleTagFilterProps } from './application/sections/rules_list/compo
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
 import type {
-  RuleTagBadgeOptions,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
 } from './application/sections/rules_list/components/rule_tag_badge';
 import type {
-  RuleEventLogListOptions,
   RuleEventLogListProps,
+  RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
 import type { GlobalRuleEventLogListProps } from './application/sections/rule_details/components/global_rule_event_log_list';
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type {
-  BrowserFieldItem,
-  CreateFieldComponent,
   FieldBrowserOptions,
-  FieldBrowserProps,
+  CreateFieldComponent,
   GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
@@ -104,22 +109,31 @@ export {
   OPTIONAL_ACTION_VARIABLES,
 } from '@kbn/triggers-actions-ui-types';
 
+type RuleUiAction = RuleAction | RuleSystemAction;
+
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   AlertingSanitizedRule<Params>,
-  'alertTypeId'
+  'alertTypeId' | 'actions' | 'systemActions'
 > & {
   ruleTypeId: AlertingSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
-type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
+type ResolvedRule = Omit<
+  ResolvedSanitizedRule<RuleTypeParams>,
+  'alertTypeId' | 'actions' | 'systemActions'
+> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
+  actions: RuleUiAction[];
 };
 
 export type {
   Rule,
   RuleAction,
+  RuleSystemAction,
+  RuleUiAction,
   RuleTaskState,
   RuleSummary,
   ExecutionDuration,
@@ -173,13 +187,11 @@ export interface ConnectorValidationError {
 }
 
 export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | void | undefined>;
-
 export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
-
 export interface ActionReadOnlyElementProps {
   connectorId: string;
   connectorName: string;
@@ -211,12 +223,10 @@ interface BulkOperationAttributesByIds {
   ids: string[];
   filter?: never;
 }
-
 interface BulkOperationAttributesByFilter {
   ids?: never;
   filter: KueryNode | null;
 }
-
 export type BulkOperationAttributesWithoutHttp =
   | BulkOperationAttributesByIds
   | BulkOperationAttributesByFilter;
@@ -249,6 +259,7 @@ export interface ActionParamsProps<TParams> {
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
   onBlur?: (field?: string) => void;
+  producerId?: string;
 }
 
 export interface Pagination {
@@ -286,12 +297,12 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultActionParams?: RecursivePartial<ActionParams>;
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
-  isBeta?: boolean;
   isExperimental?: boolean;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   hideInUi?: boolean;
   modalWidth?: number;
+  isSystemActionType?: boolean;
 }
 
 export interface GenericValidationResult<T> {
@@ -405,7 +416,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (ruleParams: Params) => ValidationResult;
+  validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
   ruleParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
@@ -477,7 +488,6 @@ export interface RuleAddProps<
   useRuleProducer?: boolean;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
-
 export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
   rule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -512,7 +522,6 @@ export interface InspectQuery {
   request: string[];
   response: string[];
 }
-
 export type GetInspectQuery = () => InspectQuery;
 
 export type Alert = EcsFieldsResponse;
@@ -555,16 +564,14 @@ export type AlertsTableProps = {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  pageSize: number;
   pageSizeOptions: number[];
   id?: string;
-  leadingControlColumns: EuiDataGridControlColumn[];
+  leadingControlColumns?: EuiDataGridControlColumn[];
   showAlertStatusWithFlapping?: boolean;
-  trailingControlColumns: EuiDataGridControlColumn[];
-  useFetchAlertsData: () => FetchAlertData;
+  trailingControlColumns?: EuiDataGridControlColumn[];
+  cellContext?: EuiDataGridCellProps['cellContext'];
   visibleColumns: string[];
   'data-test-subj': string;
-  updatedAt: number;
   browserFields: any;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
@@ -583,6 +590,19 @@ export type AlertsTableProps = {
    */
   dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
+  pagination: RuleRegistrySearchRequestPagination;
+  sort: SortCombinations[];
+  isLoading: boolean;
+  alerts: Alerts;
+  oldAlertsData: FetchAlertData['oldAlertsData'];
+  ecsAlertsData: FetchAlertData['ecsAlertsData'];
+  getInspectQuery: GetInspectQuery;
+  refetch: () => void;
+  alertsCount: number;
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void;
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  renderCellPopover?: ReturnType<GetRenderCellPopover>;
+  fieldFormats: FieldFormatsRegistry;
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
 export type SetFlyoutAlert = (alertId: string) => void;
@@ -592,16 +612,13 @@ export interface TimelineNonEcsData {
   value?: string[] | null;
 }
 
-// TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
-export type GetRenderCellValue<T = unknown> = ({
-  setFlyoutAlert,
+export type GetRenderCellPopover<T = unknown> = ({
   context,
 }: {
-  setFlyoutAlert: SetFlyoutAlert;
   context?: T;
 }) => (
-  props: EuiDataGridCellValueElementProps & { data: TimelineNonEcsData[] }
-) => React.ReactNode | JSX.Element | null | string;
+  props: EuiDataGridCellPopoverElementProps & { alert: Alert }
+) => React.ReactNode | JSX.Element;
 
 export type PreFetchPageContext<T = unknown> = ({
   alerts,
@@ -666,7 +683,8 @@ interface ItemsPanelConfig extends PanelConfig {
 export type BulkActionsPanelConfig = ItemsPanelConfig | ContentPanelConfig;
 
 export type UseBulkActionsRegistry = (
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
+  refresh: () => void
 ) => BulkActionsPanelConfig[];
 
 export type UseCellActions = (props: {
@@ -675,6 +693,7 @@ export type UseCellActions = (props: {
   dataGridRef: RefObject<EuiDataGridRefProps>;
   ecsData: unknown[];
   pageSize: number;
+  pageIndex: number;
 }) => {
   // getCellAction function for system to return cell actions per Id
   getCellActions: (columnId: string, columnIndex: number) => EuiDataGridColumnCellAction[];
@@ -734,7 +753,8 @@ export interface AlertsTableConfigurationRegistry {
     footer: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
-  getRenderCellValue?: GetRenderCellValue;
+  getRenderCellValue?: RenderCellValue;
+  getRenderCellPopover?: GetRenderCellPopover;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;
@@ -745,11 +765,7 @@ export interface AlertsTableConfigurationRegistry {
   showInspectButton?: boolean;
   ruleTypeIds?: string[];
   useFetchPageContext?: PreFetchPageContext;
-}
-
-export interface AlertsTableConfigurationRegistryWithActions
-  extends AlertsTableConfigurationRegistry {
-  actions: {
+  actions?: {
     toggleColumn: (columnId: string) => void;
   };
 }
@@ -777,6 +793,7 @@ export interface BulkActionsState {
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+  updatedAt: number;
 }
 
 export type RowSelection = Map<number, RowSelectionState>;

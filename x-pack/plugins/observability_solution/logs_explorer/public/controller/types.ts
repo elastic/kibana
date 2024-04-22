@@ -11,7 +11,7 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { Observable } from 'rxjs';
 import {
   availableControlsPanels,
-  DatasetSelectionPlain,
+  DataSourceSelectionPlain,
   DisplayOptions,
   PartialDisplayOptions,
 } from '../../common';
@@ -62,13 +62,13 @@ export interface ControlOptions {
 export type LogsExplorerPublicState = QueryState &
   DisplayOptions & {
     controls: ControlOptions;
-    datasetSelection: DatasetSelectionPlain;
+    dataSourceSelection: DataSourceSelectionPlain;
   };
 
 export type LogsExplorerPublicStateUpdate = QueryState &
   PartialDisplayOptions & {
     controls?: ControlOptions;
-    datasetSelection?: DatasetSelectionPlain;
+    dataSourceSelection?: DataSourceSelectionPlain;
   };
 
 // a placeholder for now

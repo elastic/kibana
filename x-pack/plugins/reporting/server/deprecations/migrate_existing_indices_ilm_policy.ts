@@ -7,8 +7,7 @@
 
 import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { ILM_POLICY_NAME } from '@kbn/reporting-common';
-import { INTERNAL_ROUTES } from '../../common/constants';
+import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { ReportingCore } from '../core';
 import { deprecations } from '../lib/deprecations';
 

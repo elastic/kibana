@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
-import { NavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader } from '../../router';
+import type { NavigateToPath } from '../../../contexts/kibana';
+import type { MlRoute } from '../../router';
+import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { FileDataVisualizerPage } from '../../../datavisualizer/file_based';
 
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+
+const FileDataVisualizerPage = dynamic(async () => ({
+  default: (await import('../../../datavisualizer/file_based')).FileDataVisualizerPage,
+}));
 
 export const fileBasedRouteFactory = (
   navigateToPath: NavigateToPath,

@@ -7,8 +7,10 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { EuiAccordion, EuiPagination } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const PAGE_SIZE = 100;
 
@@ -27,6 +29,15 @@ interface Props {
 interface State {
   page: number;
 }
+
+const containerStyle = css({
+  maxHeight: '200px',
+  overflowY: 'auto',
+});
+
+const errorStyle = css({
+  color: euiThemeVars.euiColorDanger,
+});
 
 export class Failures extends Component<Props, State> {
   state: State = { page: 0 };
@@ -56,11 +67,11 @@ export class Failures extends Component<Props, State> {
         }
         paddingSize="m"
       >
-        <div className="failure-list">
+        <div css={containerStyle}>
           {this._renderPaginationControl()}
           {this.props.failedDocs.slice(startIndex, endIndex).map(({ item, reason, doc }) => (
             <div key={item}>
-              <div className="error-message">
+              <div css={errorStyle}>
                 {item}: {reason}
               </div>
               <div>{JSON.stringify(doc)}</div>

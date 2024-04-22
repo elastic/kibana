@@ -22,6 +22,7 @@ export interface HumanData {
 
 export interface Ghost {
   children: React.ReactElement;
+  className?: string;
   style: React.CSSProperties;
 }
 
@@ -56,7 +57,7 @@ export type DropIdentifier = DragDropIdentifier & {
  */
 export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => void;
 
-export type RegisteredDropTargets = Record<string, DropIdentifier | undefined> | undefined;
+export type RegisteredDropTargets = Record<string, DropIdentifier> | undefined;
 
 export interface DragContextState {
   /**
@@ -70,7 +71,7 @@ export interface DragContextState {
   /**
    * currently selected drop target
    */
-  activeDropTarget?: DropIdentifier;
+  hoveredDropTarget?: DropIdentifier;
   /**
    * currently registered drop targets
    */

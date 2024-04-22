@@ -209,7 +209,10 @@ export const installSentinelOneAgent = async ({
 
     try {
       // Generate an alert in SentinelOne
-      await hostVm.exec('nslookup amazon.com');
+      const command = 'nslookup elastic.co';
+
+      log?.info(`Triggering alert using command: ${command}`);
+      await hostVm.exec(command);
     } catch (e) {
       log?.warning(`Attempted to generate an alert on SentinelOne host failed: ${e.message}`);
     }

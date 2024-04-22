@@ -9,8 +9,8 @@ import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui'
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { BETA, BETA_TOOLTIP } from '../../../common/translations';
 import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
@@ -43,7 +43,7 @@ export const PanelHeader: FC = () => {
       </EuiFlexItem>
       {isSentinelOneV1Enabled && isSentinelOneAlert && (
         <EuiFlexItem grow={false}>
-          <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
+          <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

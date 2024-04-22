@@ -144,6 +144,20 @@ export default function ({ getService }: FtrProviderContext) {
           { pipelineName: `pipeline_${modelWithPipelineData.modelId}`, expectDefinition: false },
         ]);
       });
+
+      it('the add trained model flyout should display elements on Manual Download tab correctly', async () => {
+        await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
+        await ml.trainedModelsFlyout.open();
+
+        await ml.testExecution.logTestStep('Assert the Manual Download tab exists');
+        await ml.trainedModelsFlyout.assertFlyoutTabs(['manualDownload']);
+
+        await ml.testExecution.logTestStep('Assert all eland code blocks exist within the flyout');
+        await ml.trainedModelsFlyout.assertElandPythonClientCodeBlocks();
+
+        await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
+        await ml.trainedModelsFlyout.close();
+      });
     });
 
     describe('for ML power user', () => {
@@ -157,12 +171,26 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.securityUI.logout();
       });
 
+      it('should not be able to delete a model assigned to all spaces, and show a warning copy explaining the situation', async () => {
+        await ml.testExecution.logTestStep('should select the model named elser_model_2');
+        await ml.trainedModels.selectModel('.elser_model_2');
+
+        await ml.testExecution.logTestStep('should attempt to delete the model');
+        await ml.trainedModels.clickBulkDelete();
+
+        await ml.testExecution.logTestStep('assert the action is banned');
+        await ml.trainedModelsTable.assertSpaceAwareWarningMessage();
+
+        await ml.testExecution.logTestStep('close the eui modal');
+        await ml.trainedModels.closeCheckingSpacePermissionsModal();
+      });
+
       it('renders trained models list', async () => {
         await ml.testExecution.logTestStep(
           'should display the stats bar with the total number of models'
         );
         // +1 because of the built-in model
-        await ml.trainedModels.assertStats(37);
+        await ml.trainedModels.assertStats(38);
 
         await ml.testExecution.logTestStep('should display the table');
         await ml.trainedModels.assertTableExists();
@@ -449,8 +477,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToTrainedModels();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/175443
-      describe.skip('with imported models', function () {
+      describe('with imported models', function () {
         before(async () => {
           await ml.navigation.navigateToTrainedModels();
         });
@@ -484,6 +511,45 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.trainedModelsTable.deleteModel(model.id);
           });
         }
+      });
+    });
+
+    describe('add trained model flyout for ML power user', () => {
+      before(async () => {
+        await ml.securityUI.loginAsMlPowerUser();
+        await ml.navigation.navigateToTrainedModels();
+        await ml.commonUI.waitForRefreshButtonEnabled();
+
+        await ml.testExecution.logTestStep('Open the Add Trained Model Flyout');
+        await ml.trainedModelsFlyout.open();
+      });
+
+      after(async () => {
+        await ml.testExecution.logTestStep('Close the Add Trained Model flyout');
+        await ml.trainedModelsFlyout.close();
+
+        await ml.securityUI.logout();
+      });
+
+      it('should contain a Click to Download and a Manual Download tab', async () => {
+        await ml.testExecution.logTestStep(
+          'Assert the "Click to Download" and "Manual Download" tabs exists'
+        );
+        await ml.trainedModelsFlyout.assertFlyoutTabs(['clickToDownload', 'manualDownload']);
+      });
+
+      it('should list Elser and E5 panels contents correctly', async () => {
+        await ml.testExecution.logTestStep('should display the Elser header copy');
+        await ml.trainedModelsFlyout.assertElserModelHeaderCopy();
+
+        await ml.testExecution.logTestStep('should display the Elser Panels');
+        await ml.trainedModelsFlyout.assertElserPanelsExist();
+
+        await ml.testExecution.logTestStep('should display the E5 Panels');
+        await ml.trainedModelsFlyout.assertE5PanelsExist();
+
+        await ml.testExecution.logTestStep('should display a Download Button');
+        await ml.trainedModelsFlyout.assertDownloadButtonExists();
       });
     });
   });

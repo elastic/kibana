@@ -6,7 +6,8 @@
  */
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { CreateActionPayload } from '../../../endpoint/services/actions/create/types';
+import type { ResponseActionsRequestBody } from '../../../../common/api/endpoint';
+import type { CommonResponseActionMethodOptions } from '../../../endpoint/services';
 
 export type Alert = ParsedTechnicalFields & {
   _id: string;
@@ -33,6 +34,7 @@ export interface ResponseActionAlerts {
 }
 
 export type AlertsAction = Pick<
-  CreateActionPayload,
-  'alert_ids' | 'endpoint_ids' | 'hosts' | 'parameters' | 'error'
->;
+  ResponseActionsRequestBody,
+  'alert_ids' | 'endpoint_ids' | 'parameters'
+> &
+  Pick<CommonResponseActionMethodOptions, 'error' | 'hosts'>;
