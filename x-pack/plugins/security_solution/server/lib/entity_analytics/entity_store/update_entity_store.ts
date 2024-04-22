@@ -173,20 +173,20 @@ export const updateEntityStore = async ({
       const assetCriticality = assetCriticalitiesById[criticalityId];
 
       if (assetCriticality) {
-        logger.info(`Found asset criticality for host ${hostName}`);
+        logger.info(`Found asset criticality for composite host ${hostName}`);
         delete assetCriticalitiesById[criticalityId];
       }
 
       const riskScoreId = createRiskScoreId({ id_field: 'host.name', id_value: hostName });
       const riskScore = riskScoresById[riskScoreId];
       if (riskScore) {
-        logger.info(`Found risk score for host ${hostName}`);
+        logger.info(`Found risk score for composite host ${hostName}`);
         delete riskScoresById[riskScoreId];
       }
 
       const agent = agentRecordsById[hostName];
       if (agent) {
-        logger.info(`Found agent for host ${hostName}`);
+        logger.info(`Found agent for composite host ${hostName}`);
         delete agentRecordsById[hostName];
       }
 
