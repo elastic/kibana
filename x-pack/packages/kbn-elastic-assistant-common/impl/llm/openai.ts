@@ -195,7 +195,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
           signal: this.#signal,
           // This timeout is large because LangChain prompts can be complicated and take a long time
           // TODO put into constants file once merged: https://github.com/elastic/kibana/pull/181088
-          timeout: this.#timeout ?? 300000,
+          timeout: this.#timeout ?? 180000,
         },
       },
       signal: this.#signal,
