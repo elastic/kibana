@@ -23,7 +23,8 @@ const TIMESTAMP_FIELD = 'indicator.params.timestampField';
 export function IndexSelection() {
   const { control, getFieldState, setValue, watch } = useFormContext<CreateSLOForm>();
   const { dataViews: dataViewsService } = useKibana().services;
-  const { isLoading: isDataViewsLoading, data: dataViews = [] } = useFetchDataViews();
+
+  const { isLoading: isDataViewsLoading, data: dataViews = [], refetch } = useFetchDataViews();
 
   const { dataViewEditor } = useKibana<SloPublicPluginsStart>().services;
   const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>([]);
@@ -115,6 +116,7 @@ export function IndexSelection() {
                     field.onChange(dataView.id);
                     setValue(INDEX_FIELD, dataView.getIndexPattern());
                   } else {
+                    refetch();
                     field.onChange(dataView.id);
                     setValue(INDEX_FIELD, getDataViewPatternById(dataView.id)!);
                   }

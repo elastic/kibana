@@ -37,8 +37,7 @@ import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const LazyFieldRow = React.lazy(async () => ({
-  default: (await import('@kbn/management-settings-components-field-row'))
-    .FieldRow,
+  default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
 }));
 
 const FieldRow = withSuspense(LazyFieldRow);
@@ -60,9 +59,7 @@ function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
   ];
 
   if (isProfilingIntegrationEnabled) {
-    keys.push(
-      ...[apmEnableProfilingIntegration, apmEnableTransactionProfiling]
-    );
+    keys.push(...[apmEnableProfilingIntegration, apmEnableTransactionProfiling]);
   }
 
   return keys;
@@ -75,14 +72,8 @@ export function GeneralSettings() {
     ApmFeatureFlagName.ProfilingIntegrationAvailable
   );
   const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
-  const {
-    fields,
-    handleFieldChange,
-    unsavedChanges,
-    saveAll,
-    isSaving,
-    cleanUnsavedChanges,
-  } = useEditableSettings(apmSettingsKeys);
+  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
+    useEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
     try {
@@ -105,9 +96,7 @@ export function GeneralSettings() {
     }
   }
 
-  const hasInvalidChanges = Object.values(unsavedChanges).some(
-    ({ isInvalid }) => isInvalid
-  );
+  const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
   return (
     <>
@@ -118,8 +107,7 @@ export function GeneralSettings() {
           <FieldRowProvider
             {...{
               links: docLinks.links.management,
-              showDanger: (message: string) =>
-                notifications.toasts.addDanger(message),
+              showDanger: (message: string) => notifications.toasts.addDanger(message),
               validateChange: (key: string, value: any) =>
                 settings.client.validateValue(key, value),
             }}

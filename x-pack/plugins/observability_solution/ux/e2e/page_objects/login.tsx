@@ -20,8 +20,7 @@ export function loginPageProvider({
   return {
     async waitForLoadingToFinish() {
       while (true) {
-        if ((await page.$('[data-test-subj=kbnLoadingMessage]')) === null)
-          break;
+        if ((await page.$('[data-test-subj=kbnLoadingMessage]')) === null) break;
         await page.waitForTimeout(5 * 1000);
       }
     },
