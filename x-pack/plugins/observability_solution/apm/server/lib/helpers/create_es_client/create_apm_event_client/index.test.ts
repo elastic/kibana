@@ -6,15 +6,15 @@
  */
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import supertest from 'supertest';
 import { APMEventClient } from '.';
 
 describe('APMEventClient', () => {
-  let server: ReturnType<typeof createHttpServer>;
+  let server: ReturnType<typeof createHttpService>;
 
   beforeEach(() => {
-    server = createHttpServer();
+    server = createHttpService();
   });
 
   afterEach(async () => {
