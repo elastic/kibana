@@ -30,7 +30,7 @@ export class AssetsSynthtraceEsClient extends SynthtraceEsClient<OAMAssetDocumen
       ...options,
       pipeline: assetsPipeline(),
     });
-    this.dataStreams = ['assets-*'];
+    this.indices = ['assets'];
   }
 }
 
@@ -95,9 +95,8 @@ function getRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<OAMAssetDocument>, encoding, callback) {
-      console.log('### caue  transform  document:', document);
       if ('asset.type' in document) {
-        document._index = `assets-${document['asset.type']}-default`;
+        document._index = `assets`;
       } else {
         throw new Error(`Cannot determine index for event ${JSON.stringify(document)}`);
       }

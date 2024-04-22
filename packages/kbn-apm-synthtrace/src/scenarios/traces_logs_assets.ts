@@ -10,9 +10,9 @@ import {
   ApmFields,
   generateLongId,
   generateShortId,
+  Instance,
   log,
-  LogDocument,
-  SynthtraceGenerator,
+  Serializable,
 } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
@@ -23,79 +23,79 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
+  const { numServices = 3 } = runOptions.scenarioOpts || {};
 
   return {
     generate: ({ range, clients: { apmEsClient, assetsEsClient, logsEsClient } }) => {
-      const serviceName = 'my-service';
       const transactionName = '240rpm/75% 1000ms';
 
       const successfulTimestamps = range.interval('1m').rate(1);
       const failedTimestamps = range.interval('1m').rate(1);
+      const serviceNames = [...Array(numServices).keys()].map((index) => `synth-node-${index}`);
 
-      const instance = apm
-        .service({
-          name: serviceName,
-          environment: ENVIRONMENT,
-          agentName: 'nodejs',
-        })
-        .instance('instance');
-
-      const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
-        instance
-          .transaction({ transactionName })
-          .timestamp(timestamp)
-          .duration(1000)
-          .success()
-          .children(
-            instance
-              .span({
-                spanName: 'GET apm-*/_search',
-                spanType: 'db',
-                spanSubtype: 'elasticsearch',
-              })
-              .duration(1000)
-              .success()
-              .destination('elasticsearch')
-              .timestamp(timestamp),
-            instance
-              .span({ spanName: 'custom_operation', spanType: 'custom' })
-              .duration(100)
-              .success()
-              .timestamp(timestamp)
-          )
+      const instances = serviceNames.map((serviceName) =>
+        apm
+          .service({ name: serviceName, environment: ENVIRONMENT, agentName: 'nodejs' })
+          .instance('instance')
       );
+      const instanceSpans = (instance: Instance) => {
+        const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
+          instance
+            .transaction({ transactionName })
+            .timestamp(timestamp)
+            .duration(1000)
+            .success()
+            .children(
+              instance
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
+                .duration(1000)
+                .success()
+                .destination('elasticsearch')
+                .timestamp(timestamp),
+              instance
+                .span({ spanName: 'custom_operation', spanType: 'custom' })
+                .duration(100)
+                .success()
+                .timestamp(timestamp)
+            )
+        );
 
-      // const failedTraceEvents = failedTimestamps.generator((timestamp) =>
-      //   instance
-      //     .transaction({ transactionName })
-      //     .timestamp(timestamp)
-      //     .duration(1000)
-      //     .failure()
-      //     .errors(
-      //       instance
-      //         .error({
-      //           message: '[ResponseError] index_not_found_exception',
-      //           type: 'ResponseError',
-      //         })
-      //         .timestamp(timestamp + 50)
-      //     )
-      // );
+        const failedTraceEvents = failedTimestamps.generator((timestamp) =>
+          instance
+            .transaction({ transactionName })
+            .timestamp(timestamp)
+            .duration(1000)
+            .failure()
+            .errors(
+              instance
+                .error({
+                  message: '[ResponseError] index_not_found_exception',
+                  type: 'ResponseError',
+                })
+                .timestamp(timestamp + 50)
+            )
+        );
 
-      // const metricsets = range
-      //   .interval('30s')
-      //   .rate(1)
-      //   .generator((timestamp) =>
-      //     instance
-      //       .appMetrics({
-      //         'system.memory.actual.free': 800,
-      //         'system.memory.total': 1000,
-      //         'system.cpu.total.norm.pct': 0.6,
-      //         'system.process.cpu.total.norm.pct': 0.7,
-      //       })
-      //       .timestamp(timestamp)
-      //   );
+        const metricsets = range
+          .interval('30s')
+          .rate(1)
+          .generator((timestamp) =>
+            instance
+              .appMetrics({
+                'system.memory.actual.free': 800,
+                'system.memory.total': 1000,
+                'system.cpu.total.norm.pct': 0.6,
+                'system.process.cpu.total.norm.pct': 0.7,
+              })
+              .timestamp(timestamp)
+          );
 
-      // return [successfulTraceEvents];
+        return [...successfulTraceEvents, ...failedTraceEvents, ...metricsets];
+      };
 
       const logs = range
         .interval('1m')
@@ -118,14 +118,14 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create()
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service(serviceName)
+                .service(serviceNames[0])
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER.clusterName,
                   'orchestrator.cluster.id': CLUSTER.clusterId,
                   'orchestrator.namespace': CLUSTER.namespace,
-                  'container.name': `${serviceName}-${generateShortId()}`,
+                  'container.name': `${serviceNames[0]}-${generateShortId()}`,
                   'orchestrator.resource.id': generateShortId(),
                   'cloud.provider': 'gcp',
                   'cloud.region': 'eu-central-1',
@@ -138,18 +138,17 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             });
         });
 
-      function* createGeneratorFromArray(arr: any[]) {
+      function* createGeneratorFromArray(arr: Array<Serializable<any>>) {
         yield* arr;
       }
 
       const logsValuesArray = [...logs];
-      // Create new generators based on the values array
       const logsGen = createGeneratorFromArray(logsValuesArray);
       const logsGenAssets = createGeneratorFromArray(logsValuesArray);
 
-      const tracesValuesArray = [...successfulTraceEvents];
-      const tracesGen = createGeneratorFromArray(tracesValuesArray);
-      const tracesGenAssets = createGeneratorFromArray(tracesValuesArray);
+      const traces = instances.flatMap((instance) => instanceSpans(instance));
+      const tracesGen = createGeneratorFromArray(traces);
+      const tracesGenAssets = createGeneratorFromArray(traces);
 
       return [
         withClient(
