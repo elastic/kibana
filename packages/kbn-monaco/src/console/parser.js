@@ -413,7 +413,7 @@ export const createParser = () => {
       addRequestMethod(parsedMethod);
       strictWhite();
       const parsedUrl = url();
-      addRequestUrl(parsedUrl );
+      addRequestUrl(parsedUrl);
       strictWhite(); // advance to one new line
       newLine();
       strictWhite();

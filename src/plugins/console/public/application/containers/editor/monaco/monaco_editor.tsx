@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -22,6 +22,7 @@ import { useSetInitialValue } from './use_set_initial_value';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { useSetupAutocompletePolling } from './use_setup_autocomplete_polling';
 import { useSetupAutosave } from './use_setup_autosave';
+import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 
 export interface EditorProps {
   initialTextValue: string;
@@ -62,6 +63,9 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
     await actionsProvider.current?.sendRequests(toasts, dispatch, trackUiMetric, http);
   }, [dispatch, http, toasts, trackUiMetric]);
 
+  const suggestionProvider = useMemo(() => {
+    return getSuggestionProvider(actionsProvider);
+  }, []);
   const [value, setValue] = useState(initialTextValue);
 
   const setInitialValue = useSetInitialValue;
@@ -126,6 +130,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           theme: CONSOLE_THEME_ID,
         }}
         editorDidMount={editorDidMountCallback}
+        suggestionProvider={suggestionProvider}
       />
     </div>
   );
