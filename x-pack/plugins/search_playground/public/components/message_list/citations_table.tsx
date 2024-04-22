@@ -16,6 +16,13 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+
+  // Add an ID to each citation to use for expanding the row
+  const citationsWithId = citations.map((citation) => ({
+    ...citation,
+    id: citation.metadata._id,
+  }));
+
   const toggleDetails = (citation: Doc) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
@@ -51,6 +58,7 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
               <EuiButtonEmpty
                 iconSide="right"
                 size="s"
+                data-test-subj={`expandButton-${citation.metadata._id}`}
                 onClick={() => toggleDetails(citation)}
                 iconType={
                   itemIdToExpandedRowMapValues[citation.metadata._id] ? 'arrowDown' : 'arrowRight'
@@ -64,10 +72,9 @@ export const CitationsTable: React.FC<CitationsTableProps> = ({ citations }) => 
           },
         },
       ]}
-      items={citations}
+      items={citationsWithId}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable
     />
   );
 };
