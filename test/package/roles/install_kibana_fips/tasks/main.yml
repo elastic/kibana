@@ -6,9 +6,14 @@
       - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
-- name: find kibana node version
+- name: slurp kibana node version
+  slurp:
+    src: "{{ kibana_src_path }}/.node-version"
+  register: node_ver_file
+
+- name: set kibana node version
   set_fact:
-    node_version: "{{ lookup('file', kibana_src_path + '/.node-version') | regex_replace('^(.*)$', '\\1') }}"
+    node_version: "{{ node_ver_file['content'] | b64decode | first }}"
 
 - name: install and setup nvm
   block:
