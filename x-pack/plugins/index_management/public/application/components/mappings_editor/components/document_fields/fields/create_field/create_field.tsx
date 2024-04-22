@@ -383,7 +383,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 }}
               </FormDataProvider>
               {/* Field inference_id for semantic_text field type */}
-              <InferenceIdCombo inferenceToModelIdMap={inferenceToModelIdMap} setValue={setValue} />
+              <InferenceIdCombo setValue={setValue} />
               {renderFormActions()}
             </div>
           </div>
@@ -410,7 +410,6 @@ function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
 }
 
 interface InferenceProps {
-  inferenceToModelIdMap?: InferenceToModelIdMap;
   setValue: (value: string) => void;
 }
 
