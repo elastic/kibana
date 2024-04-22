@@ -93,7 +93,7 @@ export class ServerlessPlugin
             iconSide={'right'}
             target={'_blank'}
           >
-            {i18n.translate('serverless.header.giveFeedbackBtn.label', {
+            {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
               defaultMessage: 'Give feedback',
             })}
           </EuiButton>
