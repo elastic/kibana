@@ -32,6 +32,10 @@
     name: yarn
     global: true
 
+- name: sleep
+  shell:
+    cmd: sleep 1h
+
 - name: bootstrap kibana
   shell:
     chdir: "{{ kibana_src_path }}"
