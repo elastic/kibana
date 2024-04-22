@@ -13,6 +13,20 @@ import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plug
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import { FunctionRegistrationParameters } from '.';
 
+const getMessageForLLM = (
+  intention: VisualizeESQLUserIntention,
+  query: string,
+  hasErrors: boolean
+) => {
+  if (hasErrors) {
+    return 'The query has syntax errors';
+  }
+  return intention === VisualizeESQLUserIntention.executeAndReturnResults ||
+    intention === VisualizeESQLUserIntention.generateQueryOnly
+    ? 'These results are not visualized'
+    : 'Only following query is visualized: ```esql\n' + query + '\n```';
+};
+
 export function registerVisualizeESQLFunction({
   functions,
   resources,
@@ -20,63 +34,47 @@ export function registerVisualizeESQLFunction({
   functions.registerFunction(
     visualizeESQLFunction,
     async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
+      // recomputing the errors here as the user might click the Visualize query button
+      // and call the function manually.
+      const { errors } = await validateQuery(query, getAstAndSyntaxErrors, {
+        // setting this to true, we don't want to validate the index / fields existence
+        ignoreOnMissingCallbacks: true,
+      });
+      const errorMessages = errors?.map((error) => {
+        return 'text' in error ? error.text : error.message;
+      });
       // With limit 0 I get only the columns, it is much more performant
       const performantQuery = `${query} | limit 0`;
       const coreContext = await resources.context.core;
-      try {
-        const response = (await (
-          await coreContext
-        ).elasticsearch.client.asCurrentUser.transport.request({
-          method: 'POST',
-          path: '_query',
-          body: {
-            query: performantQuery,
-            version: ESQL_LATEST_VERSION,
-          },
-        })) as ESQLSearchReponse;
 
-        const columns =
-          response.columns?.map(({ name, type }) => ({
-            id: name,
-            name,
-            meta: { type: esFieldTypeToKibanaFieldType(type) },
-          })) ?? [];
-        const message =
-          intention === VisualizeESQLUserIntention.executeAndReturnResults ||
-          intention === VisualizeESQLUserIntention.generateQueryOnly
-            ? 'These results are not visualized'
-            : 'Only following query is visualized: ```esql\n' + query + '\n```';
+      const response = (await (
+        await coreContext
+      ).elasticsearch.client.asCurrentUser.transport.request({
+        method: 'POST',
+        path: '_query',
+        body: {
+          query: performantQuery,
+          version: ESQL_LATEST_VERSION,
+        },
+      })) as ESQLSearchReponse;
+      const columns =
+        response.columns?.map(({ name, type }) => ({
+          id: name,
+          name,
+          meta: { type: esFieldTypeToKibanaFieldType(type) },
+        })) ?? [];
 
-        return {
-          data: {
-            columns,
-          },
-          content: {
-            message,
-            errorMessages: [],
-          },
-        };
-      } catch (e) {
-        // recomputing the errors here as the user might click the Visualize query button
-        // and call the function manually.
-        const { errors } = await validateQuery(query, getAstAndSyntaxErrors, {
-          // setting this to true, we don't want to validate the index / fields existence
-          ignoreOnMissingCallbacks: true,
-        });
-        const errorMessages = errors?.map((error) => {
-          return 'text' in error ? error.text : error.message;
-        });
+      const message = getMessageForLLM(intention, query, Boolean(errorMessages.length));
 
-        return {
-          data: {
-            columns: [],
-          },
-          content: {
-            message: 'The query has syntax errors',
-            errorMessages,
-          },
-        };
-      }
+      return {
+        data: {
+          columns,
+        },
+        content: {
+          message,
+          errorMessages: !columns.length ? errorMessages : [],
+        },
+      };
     }
   );
 }
