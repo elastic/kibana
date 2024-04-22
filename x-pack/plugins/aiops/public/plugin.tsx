@@ -15,7 +15,7 @@ import type {
   AiopsPluginStart,
   AiopsPluginStartDeps,
 } from './types';
-import { getEmbeddableChangePointChart } from './embeddables/change_point_chart';
+import { getEmbeddableChangePointChart } from './embeddables/change_point_chart/embeddable_change_point_chart_component';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
