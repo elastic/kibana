@@ -6,27 +6,29 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
+  EuiAvatar,
   EuiCheckableCard,
-  EuiTitle,
-  EuiText,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
-  EuiIcon,
-  EuiAvatar,
-  useEuiTheme,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { OnboardingFlowPackageList } from '../packages_list';
+import { useCustomMargin } from '../shared/use_custom_margin';
+import { Category } from './types';
+import { useCustomCardsForCategory } from './use_custom_cards_for_category';
 
 interface UseCaseOption {
-  id: string;
+  id: Category;
   label: string;
   description: React.ReactNode;
 }
@@ -42,8 +44,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
-          defaultMessage:
-            'Detect patterns, troubleshoot in real time, gain insights from logs.',
+          defaultMessage: 'Detect patterns, troubleshoot in real time, gain insights from logs.',
         }
       ),
     },
@@ -56,8 +57,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
         {
-          defaultMessage:
-            'Collect distributed traces and catch application performance problems.',
+          defaultMessage: 'Collect distributed traces and catch application performance problems.',
         }
       ),
     },
@@ -77,11 +77,31 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
   ];
 
+  const customMargin = useCustomMargin();
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
-  const { euiTheme } = useEuiTheme();
-
   const [searchParams, setSearchParams] = useSearchParams();
+  const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
+  const [integrationSearch, setIntegrationSearch] = useState('');
+
+  const createCollectionCardHandler = useCallback(
+    (query: string) => () => {
+      setIntegrationSearch(query);
+      if (packageListSearchBarRef.current) {
+        packageListSearchBarRef.current.focus();
+        packageListSearchBarRef.current.scrollIntoView({
+          behavior: 'auto',
+          block: 'center',
+        });
+      }
+    },
+    [setIntegrationSearch]
+  );
+
+  const customCards = useCustomCardsForCategory(
+    createCollectionCardHandler,
+    searchParams.get('category') as Category | null
+  );
 
   return (
     <EuiPanel hasBorder>
@@ -96,12 +116,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup
-        css={{ margin: `calc(${euiTheme.size.xxl} / 2)` }}
-        gutterSize="m"
-        direction="column"
-      >
-        {options.map((option, index) => (
+      <EuiFlexGroup css={customMargin} gutterSize="m" direction="column">
+        {options.map((option) => (
           <EuiFlexItem key={option.id}>
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
@@ -116,9 +132,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
-              onChange={() =>
-                setSearchParams({ category: option.id }, { replace: true })
-              }
+              onChange={() => setSearchParams({ category: option.id }, { replace: true })}
             />
           </EuiFlexItem>
         ))}
@@ -137,32 +151,22 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           />
           <EuiSpacer size="m" />
 
-          {/* Mock integrations grid */}
-          <EuiFlexGrid columns={3} css={{ margin: 20 }}>
-            {new Array(6).fill(null).map((_, index) => (
-              <EuiCard
-                key={index}
-                layout="horizontal"
-                title={searchParams.get('category')!}
-                titleSize="xs"
-                description={searchParams.get('category')!}
-                icon={<EuiIcon type="logoObservability" size="l" />}
-                betaBadgeProps={
-                  index === 0
-                    ? {
-                        label: 'Quick Start',
-                        color: 'accent',
-                        size: 's',
-                      }
-                    : undefined
-                }
-                hasBorder
-                css={{
-                  borderColor: index === 0 ? '#ba3d76' : undefined,
-                }}
-              />
-            ))}
-          </EuiFlexGrid>
+          {Array.isArray(customCards) && <OnboardingFlowPackageList customCards={customCards} />}
+
+          <EuiText css={customMargin} size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
+              defaultMessage="Not seeing yours? Search through our 130 ways of ingesting data:"
+            />
+          </EuiText>
+          <OnboardingFlowPackageList
+            showSearchBar={true}
+            searchQuery={integrationSearch}
+            setSearchQuery={setIntegrationSearch}
+            ref={packageListSearchBarRef}
+            customCards={customCards?.filter(({ name, type }) => type === 'generated')}
+            joinCardLists
+          />
         </>
       )}
     </EuiPanel>
@@ -174,10 +178,7 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({
-  title,
-  iconType,
-}) => (
+const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />

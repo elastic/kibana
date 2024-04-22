@@ -8,8 +8,10 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import {
+  AlertsInsightsPostRequestBody,
+  ExecuteConnectorRequestBody,
+} from '@kbn/elastic-assistant-common';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>
@@ -31,7 +33,11 @@ export const getLangChainMessages = (
 ): BaseMessage[] => assistantMessages.map(getLangChainMessage);
 
 export const requestHasRequiredAnonymizationParams = (
-  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>
+  request: KibanaRequest<
+    unknown,
+    unknown,
+    ExecuteConnectorRequestBody | AlertsInsightsPostRequestBody
+  >
 ): boolean => {
   const { replacements } = request?.body ?? {};
 

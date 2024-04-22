@@ -35,13 +35,11 @@ export function DatePicker({
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
   );
 
-  const commonlyUsedRanges = timePickerQuickRanges.map(
-    ({ from, to, display }) => ({
-      start: from,
-      end: to,
-      label: display,
-    })
-  );
+  const commonlyUsedRanges = timePickerQuickRanges.map(({ from, to, display }) => ({
+    start: from,
+    end: to,
+    label: display,
+  }));
 
   function updateUrl(nextQuery: {
     rangeFrom?: string;
@@ -97,10 +95,7 @@ export function DatePicker({
         clearCache();
         onTimeRangeRefresh();
       }}
-      onRefreshChange={({
-        isPaused: nextRefreshPaused,
-        refreshInterval: nextRefreshInterval,
-      }) => {
+      onRefreshChange={({ isPaused: nextRefreshPaused, refreshInterval: nextRefreshInterval }) => {
         onRefreshChange({ nextRefreshPaused, nextRefreshInterval });
       }}
       showUpdateButton={true}
