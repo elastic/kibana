@@ -67,7 +67,11 @@ export function LatencyAlertsHistoryChart({
     end,
     kuery: '',
     numBuckets: 100,
-    type: ApmDocumentType.TransactionMetric,
+    // ServiceTransactionMetric does not have transactionName as a dimension, but it is faster than TransactionMetric
+    // We use TransactionMetric only when there is a transactionName
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
   });
   const { http, notifications } = useKibana().services;
   const { data, status } = useFetcher(
