@@ -8,7 +8,14 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiText, EuiLink } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiAvatar,
+  EuiText,
+  EuiLink,
+} from '@elastic/eui';
 import { URL_DEMO_ENV } from '@kbn/home-sample-data-tab/src/constants';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -104,7 +111,12 @@ export const Footer: FunctionComponent = () => {
     <EuiFlexGroup>
       {sections.map((section, index) => (
         <EuiFlexItem key={index}>
-          <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
+          <EuiAvatar
+            size="l"
+            name=""
+            imageUrl={section.iconUrl}
+            color="subdued"
+          />
           <EuiSpacer size="m" />
           <EuiText size="s">
             <strong>{section.title}</strong>
