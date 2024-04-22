@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useRef, Suspense, useState } from 'react';
+import React, { useRef, Suspense } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
@@ -54,7 +54,6 @@ const PackageListGridWrapper = ({
   customCards,
   joinCardLists = false,
 }: WrapperProps) => {
-  const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
@@ -67,15 +66,9 @@ const PackageListGridWrapper = ({
     joinCardLists
   );
 
-  React.useEffect(() => {
-    if (isInitialHidden && searchQuery) {
-      setIsInitialHidden(false);
-    }
-  }, [searchQuery, isInitialHidden]);
+  if (isLoading) return <Loading />;
 
-  if (!isInitialHidden && isLoading) return <Loading />;
-
-  const showPackageList = (showSearchBar && !isInitialHidden) || showSearchBar === false;
+  const showPackageList = (showSearchBar && !!searchQuery) || showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
@@ -91,12 +84,9 @@ const PackageListGridWrapper = ({
                 incremental: true,
               }}
               onChange={(arg) => {
-                if (setSearchQuery) {
-                  setSearchQuery(arg.queryText);
-                }
-                setIsInitialHidden(false);
+                setSearchQuery?.(arg.queryText);
               }}
-              query={searchQuery}
+              query={searchQuery ?? ''}
             />
           </div>
         )}

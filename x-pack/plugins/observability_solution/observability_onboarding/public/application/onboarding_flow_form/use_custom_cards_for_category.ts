@@ -155,11 +155,11 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         {
-          id: 'logs-logs',
+          id: 'custom-logs',
           type: 'virtual',
           title: 'Stream log files',
           description: 'Stream any logs into Elastic in a simple way and explore their data',
-          name: 'logs-logs-virtual',
+          name: 'custom-logs-virtual',
           categories: ['observability'],
           icons: [
             {
