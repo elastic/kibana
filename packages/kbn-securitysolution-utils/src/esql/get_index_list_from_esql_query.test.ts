@@ -10,7 +10,7 @@ import { getIndexListFromEsqlQuery } from './get_index_list_from_esql_query';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
-    getIndexPatternFromESQLQuery: jest.fn(),
+    getIndexPatternFromESQLQueryDeprecated: jest.fn(),
   };
 });
 

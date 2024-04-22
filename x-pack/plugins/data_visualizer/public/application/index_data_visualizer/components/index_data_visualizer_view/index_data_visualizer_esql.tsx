@@ -60,6 +60,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
   const [query, setQuery] = useState<ESQLQuery>({ esql: '' });
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
+  const [indexPattern, setIndexPattern] = useState<string | undefined>();
 
   const toggleShowEmptyFields = () => {
     setDataVisualizerListState({
@@ -95,17 +96,29 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   // Query that has been typed, but has not submitted with cmd + enter
   const [localQuery, setLocalQuery] = useState<ESQLQuery>({ esql: '' });
 
+  useEffect(() => {
+    const getIndex = async () => {
+      let indexPatternFromQuery: string | undefined;
+      if (isESQLQuery(query)) {
+        indexPatternFromQuery = await getIndexPatternFromESQLQuery(query.esql);
+        if (indexPatternFromQuery !== '') {
+          indexPatternFromQuery = undefined;
+        }
+      }
+      setIndexPattern(indexPatternFromQuery);
+    };
+    getIndex();
+  }, []);
+
   useEffect(
     function updateAdhocDataViewFromQuery() {
       let unmounted = false;
 
       const update = async () => {
-        if (!isESQLQuery(query)) return;
-        const indexPatternFromQuery = await getIndexPatternFromESQLQuery(query.esql);
-        if (!indexPatternFromQuery) return;
+        if (!indexPattern) return;
         const dv = await getOrCreateDataViewByIndexPattern(
           data.dataViews,
-          indexPatternFromQuery,
+          indexPattern,
           currentDataView
         );
 
@@ -135,7 +148,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       visibleFieldNames: undefined,
       allowEditDataView: true,
       id: 'esql_data_visualizer',
-      indexPattern: currentDataView?.name,
+      indexPattern,
     };
   }, [currentDataView, query?.esql]);
 
