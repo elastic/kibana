@@ -154,8 +154,7 @@ export class RulesClient {
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
-  public bulkEnableRules = <Params extends RuleTypeParams = never>(params: BulkEnableRulesParams) =>
-    bulkEnableRules<Params>(this.context, params);
+  public bulkEnableRules = (params: BulkEnableRulesParams) => bulkEnableRules(this.context, params);
   public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
     bulkDisableRules(this.context, options);
 

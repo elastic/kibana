@@ -38,7 +38,7 @@ export const bulkEnableRulesRoute = ({
 
           const body: BulkEnableRulesRequestBodyV1 = req.body;
           try {
-            const result = await rulesClient.bulkEnableRules<RuleParamsV1>({
+            const result = await rulesClient.bulkEnableRules({
               filter: body.filter,
               ids: body.ids,
             });

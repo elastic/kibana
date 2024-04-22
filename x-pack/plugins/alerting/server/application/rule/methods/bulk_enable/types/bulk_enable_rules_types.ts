@@ -23,7 +23,7 @@ export interface BulkEnableRulesError {
 }
 
 // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
-export interface BulkEnableRulesResult<Params extends RuleParams = never> {
+export interface BulkEnableRulesResult<Params extends RuleParams> {
   rules: Array<SanitizedRule<Params>>;
   errors: BulkEnableRulesError[];
   total: number;

@@ -68,7 +68,7 @@ const getShouldScheduleTask = async (
   }
 };
 
-export const bulkEnableRules = async <Params extends RuleParams = never>(
+export const bulkEnableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
   params: BulkEnableRulesParams
 ): Promise<BulkEnableRulesResult<Params>> => {
