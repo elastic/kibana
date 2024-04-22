@@ -267,6 +267,8 @@ export const useDashboardListingTable = ({
 
   const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
     async (userProfileIds: string[]) => {
+      if (userProfileIds.length === 0) return [];
+
       return (
         security.userProfiles?.bulkGet({ uids: new Set(userProfileIds), dataPath: 'avatar' }) ?? []
       );
