@@ -14722,6 +14722,10 @@
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/inference_models.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
