@@ -17,21 +17,20 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
 import React, { Component } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
-import type { I18nStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import type { NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
+import type { StartServices } from '../../..';
 import type { Role } from '../../../../common';
 import {
   getExtendedRoleDeprecationNotice,
@@ -41,17 +40,14 @@ import {
   isRoleReserved,
 } from '../../../../common/model';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
-import { ActionsEuiTableFormatting } from '../../table_utils';
 import type { RolesAPIClient } from '../roles_api_client';
 
-interface Props {
+export interface Props extends StartServices {
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   history: ScopedHistory;
   readOnly?: boolean;
   buildFlavor: BuildFlavor;
-  theme: ThemeServiceStart;
-  i18nStart: I18nStart;
   cloudOrgUrl?: string;
 }
 
@@ -180,71 +176,59 @@ export class RolesGridPage extends Component<Props, State> {
             onCancel={this.onCancelDelete}
             rolesToDelete={this.state.selection.map((role) => role.name)}
             callback={this.handleDelete}
-            notifications={this.props.notifications}
-            rolesAPIClient={this.props.rolesAPIClient}
-            buildFlavor={this.props.buildFlavor}
-            theme={this.props.theme}
-            i18nStart={this.props.i18nStart}
             cloudOrgUrl={this.props.cloudOrgUrl}
+            {...this.props}
           />
         ) : null}
 
-        <ActionsEuiTableFormatting>
-          <EuiInMemoryTable
-            itemId="name"
-            responsive={false}
-            columns={this.getColumnConfig()}
-            hasActions={true}
-            selection={
-              this.props.readOnly
-                ? undefined
-                : {
-                    selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
-                    selectableMessage: (selectable: boolean) =>
-                      !selectable ? 'Role is reserved' : '',
-                    onSelectionChange: (selection: Role[]) => this.setState({ selection }),
-                    selected: this.state.selection,
-                  }
-            }
-            pagination={{
-              initialPageSize: 20,
-              pageSizeOptions: [10, 20, 30, 50, 100],
-            }}
-            message={emptyResultsMessage}
-            items={this.state.visibleRoles}
-            loading={isLoading}
-            search={{
-              toolsLeft: this.renderToolsLeft(),
-              toolsRight: this.renderToolsRight(),
-              box: {
-                incremental: true,
-                'data-test-subj': 'searchRoles',
-              },
-              onChange: (query: Record<string, any>) => {
-                this.setState({
-                  filter: query.queryText,
-                  visibleRoles: this.getVisibleRoles(
-                    this.state.roles,
-                    query.queryText,
-                    this.state.includeReservedRoles
-                  ),
-                });
-              },
-            }}
-            sorting={{
-              sort: {
-                field: 'name',
-                direction: 'asc',
-              },
-            }}
-            rowProps={(role: Role) => {
-              return {
-                'data-test-subj': `roleRow`,
-              };
-            }}
-            isSelectable
-          />
-        </ActionsEuiTableFormatting>
+        <EuiInMemoryTable
+          itemId="name"
+          responsiveBreakpoint={false}
+          columns={this.getColumnConfig()}
+          selection={
+            this.props.readOnly
+              ? undefined
+              : {
+                  selectable: (role: Role) => !role.metadata || !role.metadata._reserved,
+                  selectableMessage: (selectable: boolean) =>
+                    !selectable ? 'Role is reserved' : '',
+                  onSelectionChange: (selection: Role[]) => this.setState({ selection }),
+                  selected: this.state.selection,
+                }
+          }
+          pagination={{
+            initialPageSize: 20,
+            pageSizeOptions: [10, 20, 30, 50, 100],
+          }}
+          message={emptyResultsMessage}
+          items={this.state.visibleRoles}
+          loading={isLoading}
+          search={{
+            toolsLeft: this.renderToolsLeft(),
+            toolsRight: this.renderToolsRight(),
+            box: {
+              incremental: true,
+              'data-test-subj': 'searchRoles',
+            },
+            onChange: (query: Record<string, any>) => {
+              this.setState({
+                filter: query.queryText,
+                visibleRoles: this.getVisibleRoles(
+                  this.state.roles,
+                  query.queryText,
+                  this.state.includeReservedRoles
+                ),
+              });
+            },
+          }}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
+          rowProps={{ 'data-test-subj': 'roleRow' }}
+        />
       </>
     );
   };
@@ -257,7 +241,7 @@ export class RolesGridPage extends Component<Props, State> {
           defaultMessage: 'Role',
         }),
         sortable: true,
-        render: (name: string, record: Role) => {
+        render: (name: string) => {
           return (
             <EuiText color="subdued" size="s">
               <EuiLink
@@ -278,7 +262,7 @@ export class RolesGridPage extends Component<Props, State> {
           defaultMessage: 'Status',
         }),
         sortable: (role: Role) => isRoleEnabled(role) && !isRoleDeprecated(role),
-        render: (metadata: Role['metadata'], record: Role) => {
+        render: (_metadata: Role['metadata'], record: Role) => {
           return this.getRoleStatusBadges(record);
         },
       });
@@ -292,100 +276,67 @@ export class RolesGridPage extends Component<Props, State> {
         width: '150px',
         actions: [
           {
+            type: 'icon',
+            icon: 'copy',
+            isPrimary: true,
             available: (role: Role) => !isRoleReserved(role),
-            isPrimary: true,
-            render: (role: Role) => {
-              const title = i18n.translate('xpack.security.management.roles.cloneRoleActionName', {
-                defaultMessage: `Clone`,
-              });
-
-              const label = i18n.translate('xpack.security.management.roles.cloneRoleActionLabel', {
-                defaultMessage: `Clone {roleName}`,
+            name: i18n.translate('xpack.security.management.roles.cloneRoleActionName', {
+              defaultMessage: 'Clone',
+            }),
+            description: (role: Role) =>
+              i18n.translate('xpack.security.management.roles.cloneRoleActionLabel', {
+                defaultMessage: 'Clone {roleName}',
                 values: { roleName: role.name },
-              });
-
-              return (
-                <EuiToolTip content={title}>
-                  <EuiButtonEmpty
-                    aria-label={label}
-                    color={'primary'}
-                    data-test-subj={`clone-role-action-${role.name}`}
-                    disabled={this.state.selection.length >= 1}
-                    iconType={'copy'}
-                    {...reactRouterNavigate(
-                      this.props.history,
-                      getRoleManagementHref('clone', role.name)
-                    )}
-                  >
-                    {title}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              );
-            },
+              }),
+            href: (role: Role) =>
+              reactRouterNavigate(this.props.history, getRoleManagementHref('clone', role.name))
+                .href,
+            onClick: (role: Role, event: React.MouseEvent) =>
+              reactRouterNavigate(
+                this.props.history,
+                getRoleManagementHref('clone', role.name)
+              ).onClick(event),
+            'data-test-subj': (role: Role) => `clone-role-action-${role.name}`,
           },
           {
+            type: 'icon',
+            icon: 'trash',
+            color: 'danger',
+            name: i18n.translate('xpack.security.management.roles.deleteRoleActionName', {
+              defaultMessage: 'Delete',
+            }),
+            description: (role: Role) =>
+              i18n.translate('xpack.security.management.roles.deleteRoleActionLabel', {
+                defaultMessage: `Delete {roleName}`,
+                values: { roleName: role.name },
+              }),
+            'data-test-subj': (role: Role) => `delete-role-action-${role.name}`,
+            onClick: (role: Role) => this.deleteOneRole(role),
             available: (role: Role) => !role.metadata || !role.metadata._reserved,
-            render: (role: Role) => {
-              const title = i18n.translate('xpack.security.management.roles.deleteRoleActionName', {
-                defaultMessage: `Delete`,
-              });
-
-              const label = i18n.translate(
-                'xpack.security.management.roles.deleteRoleActionLabel',
-                {
-                  defaultMessage: `Delete {roleName}`,
-                  values: { roleName: role.name },
-                }
-              );
-
-              return (
-                <EuiToolTip content={title}>
-                  <EuiButtonEmpty
-                    aria-label={label}
-                    color={'danger'}
-                    data-test-subj={`delete-role-action-${role.name}`}
-                    disabled={this.state.selection.length >= 1}
-                    iconType={'trash'}
-                    onClick={() => this.deleteOneRole(role)}
-                  >
-                    {title}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              );
-            },
           },
           {
-            available: (role: Role) => !isRoleReadOnly(role),
-            enabled: () => this.state.selection.length === 0,
             isPrimary: true,
-            render: (role: Role) => {
-              const title = i18n.translate('xpack.security.management.roles.editRoleActionName', {
-                defaultMessage: `Edit`,
-              });
-
-              const label = i18n.translate('xpack.security.management.roles.editRoleActionLabel', {
+            type: 'icon',
+            icon: 'pencil',
+            name: i18n.translate('xpack.security.management.roles.editRoleActionName', {
+              defaultMessage: 'Edit',
+            }),
+            description: (role: Role) =>
+              i18n.translate('xpack.security.management.roles.editRoleActionLabel', {
                 defaultMessage: `Edit {roleName}`,
                 values: { roleName: role.name },
-              });
-
-              return (
-                <EuiToolTip content={title}>
-                  <EuiButtonEmpty
-                    aria-label={label}
-                    color={'primary'}
-                    data-test-subj={`edit-role-action-${role.name}`}
-                    disabled={this.state.selection.length >= 1}
-                    iconType={'pencil'}
-                    {...reactRouterNavigate(
-                      this.props.history,
-                      getRoleManagementHref('edit', role.name)
-                    )}
-                  >
-                    {title}
-                  </EuiButtonEmpty>
-                </EuiToolTip>
-              );
-            },
+              }),
+            'data-test-subj': (role: Role) => `edit-role-action-${role.name}`,
+            href: (role: Role) =>
+              reactRouterNavigate(this.props.history, getRoleManagementHref('edit', role.name))
+                .href,
+            onClick: (role: Role, event: React.MouseEvent) =>
+              reactRouterNavigate(
+                this.props.history,
+                getRoleManagementHref('edit', role.name)
+              ).onClick(event),
+            available: (role: Role) => !isRoleReadOnly(role),
+            enabled: () => this.state.selection.length === 0,
           },
         ],
       });

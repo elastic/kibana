@@ -45,13 +45,7 @@ interface Props {
   isLoading: boolean;
 }
 
-function ActionMenuButton({
-  onClick,
-  isLoading,
-}: {
-  onClick: () => void;
-  isLoading: boolean;
-}) {
+function ActionMenuButton({ onClick, isLoading }: { onClick: () => void; isLoading: boolean }) {
   return (
     <EuiButton
       data-test-subj="apmActionMenuButtonInvestigateButton"
@@ -73,8 +67,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
 
-  const { isProfilingPluginInitialized, profilingLocators } =
-    useProfilingPlugin();
+  const { isProfilingPluginInitialized, profilingLocators } = useProfilingPlugin();
 
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
@@ -102,17 +95,12 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           <ActionMenuButton
             isLoading={isLoading || isProfilingPluginInitialized === undefined}
             onClick={() =>
-              setIsActionPopoverOpen(
-                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
-              )
+              setIsActionPopoverOpen((prevIsActionPopoverOpen) => !prevIsActionPopoverOpen)
             }
           />
         }
       >
-        <ActionMenuSections
-          transaction={transaction}
-          profilingLocators={profilingLocators}
-        />
+        <ActionMenuSections transaction={transaction} profilingLocators={profilingLocators} />
         {hasGoldLicense && (
           <CustomLinkMenuSection
             transaction={transaction}
@@ -136,14 +124,11 @@ function ActionMenuSections({
   const apmRouter = useApmRouter();
   const { dataView } = useAdHocApmDataView();
 
-  const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
-  )!;
+  const allDatasetsLocator =
+    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
   const logsLocators = getLogsLocatorsFromUrlService(share.url);
 
-  const infraLinksAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.InfraUiAvailable
-  );
+  const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
 
   const {
     query: { rangeFrom, rangeTo, environment },
@@ -205,9 +190,7 @@ function ActionMenuSections({
             {section.map((item) => (
               <Section key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                {item.subtitle && (
-                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                )}
+                {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
                 <SectionLinks>
                   {item.actions.map((action) => (
                     <SectionLink
