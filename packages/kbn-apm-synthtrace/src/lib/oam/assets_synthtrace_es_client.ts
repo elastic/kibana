@@ -8,12 +8,13 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { ESDocumentWithOperation, OAMAssetDocument } from '@kbn/apm-synthtrace-client';
-import { pipeline, Readable, Transform } from 'stream';
-import { ServiceAsset } from '@kbn/apm-synthtrace-client/src/lib/oam/service_assets';
+import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
+import { fork } from '../utils/stream_utils';
+import { createAssetsAggregator } from './aggregators/create_assets_aggregator';
 
 export type AssetsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -29,9 +30,12 @@ export class AssetsSynthtraceEsClient extends SynthtraceEsClient<OAMAssetDocumen
 
 function assetsPipeline() {
   return (base: Readable) => {
+    const aggregators = [createAssetsAggregator()];
     return pipeline(
       base,
       getSerializeTransform(),
+      fork(new PassThrough({ objectMode: true }), ...aggregators),
+      assetsFilterTransform(),
       getRoutingTransform(),
       getDedotTransform(),
       (err: unknown) => {
@@ -43,14 +47,28 @@ function assetsPipeline() {
   };
 }
 
+function assetsFilterTransform() {
+  return new Transform({
+    objectMode: true,
+    transform(document: ESDocumentWithOperation<OAMAssetDocument>, encoding, callback) {
+      if ('asset.id' in document) {
+        callback(null, document);
+      } else {
+        callback();
+      }
+    },
+  });
+}
+
 function getRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<OAMAssetDocument>, encoding, callback) {
+      console.log('### caue  transform  document:', document);
       if ('asset.type' in document) {
         document._index = `assets-${document['asset.type']}-default`;
       } else {
-        throw new Error('Cannot determine index for event22');
+        throw new Error(`Cannot determine index for event ${JSON.stringify(document)}`);
       }
 
       callback(null, document);

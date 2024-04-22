@@ -10,7 +10,7 @@ import { appendHash, Fields } from '@kbn/apm-synthtrace-client';
 import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/oam/service_assets';
 import { Duplex, PassThrough } from 'stream';
 
-export function createAssetsAggregatorFactory<TFields extends Fields>() {
+export function assetsAggregatorFactory<TFields extends Fields>() {
   return function <TAsset extends Record<string, any>, TOutput extends Record<string, any>>(
     {
       filter,
@@ -30,6 +30,7 @@ export function createAssetsAggregatorFactory<TFields extends Fields>() {
     let cb: (() => void) | undefined;
 
     function flush(stream: Duplex, callback?: () => void) {
+      console.log('### caue  flush:');
       const allItems = [...assets.values()];
 
       toFlush = [];
@@ -54,12 +55,15 @@ export function createAssetsAggregatorFactory<TFields extends Fields>() {
     return new PassThrough({
       objectMode: true,
       read() {
+        console.log('### read');
         flush(this, cb);
       },
       final(callback) {
+        console.log('### final');
         flush(this, callback);
       },
       write(event: TFields, encoding, callback) {
+        console.log('### write', event);
         if (!filter(event)) {
           callback();
           return;
