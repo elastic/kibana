@@ -109,7 +109,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await submitButton.click();
 
         // Wait for the success message to appear.
-        await find.byCssSelector('[data-test-subj="connectionDetailsApiKeySuccessForm"]');
+        const successForm = await find.byCssSelector(
+          '[data-test-subj="connectionDetailsApiKeySuccessForm"]'
+        );
+
+        // Check that user is shown the API key value.
+        const apiKeyRow = await successForm.findByTestSubject('connectionDetailsApiKeyValueRow');
+        const apiKeyText = await apiKeyRow.findByTestSubject('copyText');
+        const apiKeyTextValue = await apiKeyText.getVisibleText();
+        expect(apiKeyTextValue.length).to.be.greaterThan(40);
       });
     });
 

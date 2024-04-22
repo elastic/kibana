@@ -60,6 +60,7 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
             defaultMessage: 'API key value',
           })}
           fullWidth
+          data-test-subj={'connectionDetailsApiKeyValueRow'}
         >
           <CopyInput value={keyValue} />
         </EuiFormRow>
