@@ -154,7 +154,9 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       return [
         withClient(
           assetsEsClient,
-          logger.perf('generating_assets_events', () => [logsGenAssets, tracesGenAssets])
+          logger.perf('generating_assets_events', () =>
+            Readable.from(Array.from(logsGenAssets).concat(Array.from(tracesGenAssets)))
+          )
         ),
         withClient(
           logsEsClient,
