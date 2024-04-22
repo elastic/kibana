@@ -142,7 +142,7 @@ export class CasesClientFactory {
       alertsClient,
     });
 
-    const userInfo = await this.getUserInfo(request, scopedClusterClient);
+    const userInfo = await this.getUserInfo(request);
 
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
 
@@ -247,10 +247,7 @@ export class CasesClientFactory {
    * then the resulting object in ES will just be empty and it'll fail to encode the user when returning it to the API
    * request. If we force them to be null it will succeed.
    */
-  private async getUserInfo(
-    request: KibanaRequest,
-    esClient: ElasticsearchClient
-  ): Promise<{
+  private async getUserInfo(request: KibanaRequest): Promise<{
     username: string | null;
     full_name: string | null;
     email: string | null;
@@ -291,12 +288,10 @@ export class CasesClientFactory {
 
     try {
       if (request.isFakeRequest) {
-        const user = await esClient.security.authenticate();
-
         return {
-          username: user.username,
-          full_name: user.full_name ?? null,
-          email: user.email ?? null,
+          username: 'elastic/kibana',
+          full_name: null,
+          email: null,
         };
       }
     } catch (error) {

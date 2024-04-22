@@ -6,13 +6,13 @@
  */
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CasesClientFactory } from './client/factory';
-import { createCasesClientFactoryMockArgs } from './client/mocks';
-import { createCasesClient } from './client/client';
+import { CasesClientFactory } from './factory';
+import { createCasesClientFactoryMockArgs } from './mocks';
+import { createCasesClient } from './client';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
-jest.mock('./client/client');
+jest.mock('./client');
 
 describe('CasesClientFactory', () => {
   const coreStart = coreMock.createStart();
@@ -41,10 +41,6 @@ describe('CasesClientFactory', () => {
       const scopedClusterClient =
         coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
-      scopedClusterClient.security.authenticate = jest
-        .fn()
-        .mockResolvedValue({ username: 'user_fake_request' });
-
       await casesClientFactory.create({
         request: fakeRequest,
         savedObjectsService: coreStart.savedObjects,
@@ -54,7 +50,7 @@ describe('CasesClientFactory', () => {
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
       expect(args.securityPluginStart.authc.getCurrentUser).toHaveBeenCalled();
       expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
-        username: 'user_fake_request',
+        username: 'elastic/kibana',
         full_name: null,
         email: null,
       });
