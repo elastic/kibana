@@ -18,7 +18,6 @@ export function createAssetsAggregator() {
   return _createAssetsAggregator(
     {
       filter: (event) => {
-        console.log('### caue  createAssetsAggregator  filter:', event);
         // only uses APM transaction documents
         if ('processor.event' in event) {
           return event['processor.event'] === 'transaction';

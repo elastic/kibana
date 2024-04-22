@@ -30,7 +30,6 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
     let cb: (() => void) | undefined;
 
     function flush(stream: Duplex, callback?: () => void) {
-      console.log('### caue  flush:');
       const allItems = [...assets.values()];
 
       toFlush = [];
@@ -55,21 +54,18 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
     return new PassThrough({
       objectMode: true,
       read() {
-        console.log('### read');
         flush(this, cb);
       },
       final(callback) {
-        console.log('### final');
         flush(this, callback);
       },
       write(event: TFields, encoding, callback) {
-        console.log('### write', event);
         if (!filter(event)) {
           callback();
           return;
         }
 
-        function createAssetAggregator() {
+        function writeAssetAggregator() {
           const key = appendHash(getAggregateKey(event), '');
 
           let asset = assets.get(key);
@@ -83,7 +79,7 @@ export function assetsAggregatorFactory<TFields extends Fields>() {
           callback();
         }
 
-        createAssetAggregator();
+        writeAssetAggregator();
       },
     });
   };

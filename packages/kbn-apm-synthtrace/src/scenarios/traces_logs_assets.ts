@@ -138,36 +138,31 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             });
         });
 
-      function* copyGenerator(gen: SynthtraceGenerator<LogDocument | ApmFields>) {
-        for (const value of gen) {
-          yield value;
-        }
+      function* createGeneratorFromArray(arr: any[]) {
+        yield* arr;
       }
 
-      function cloneGenerator(original: SynthtraceGenerator<LogDocument | ApmFields>) {
-        const clone = Object.assign(Object.create(Object.getPrototypeOf(original)), original);
-        clone[Symbol.iterator] = function* () {
-          yield* original;
-        };
-        return clone;
-      }
+      const logsValuesArray = [...logs];
+      // Create new generators based on the values array
+      const logsGen = createGeneratorFromArray(logsValuesArray);
+      const logsGenAssets = createGeneratorFromArray(logsValuesArray);
 
-      const copyArray = Readable.from(Array.from(logs).concat(Array.from(successfulTraceEvents)));
-      // cloneGenerator(Array.from(logs)),
-      // cloneGenerator(Array.from(successfulTraceEvents)),
+      const tracesValuesArray = [...successfulTraceEvents];
+      const tracesGen = createGeneratorFromArray(tracesValuesArray);
+      const tracesGenAssets = createGeneratorFromArray(tracesValuesArray);
 
       return [
         withClient(
+          assetsEsClient,
+          logger.perf('generating_assets_events', () => [logsGenAssets, tracesGenAssets])
+        ),
+        withClient(
           logsEsClient,
-          logger.perf('generating_logs', () => logs)
+          logger.perf('generating_logs', () => logsGen)
         ),
         withClient(
           apmEsClient,
-          logger.perf('generating_apm_events', () => successfulTraceEvents)
-        ),
-        withClient(
-          assetsEsClient,
-          logger.perf('generating_assets_events', () => copyArray)
+          logger.perf('generating_apm_events', () => tracesGen)
         ),
       ];
     },
