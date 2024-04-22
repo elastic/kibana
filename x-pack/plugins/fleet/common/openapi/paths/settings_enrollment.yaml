@@ -16,7 +16,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/fleet_settings_response.yaml
+            $ref: ../components/schemas/fleet_settings_enrollment_response.yaml
     '400':
       $ref: ../components/responses/error.yaml
   operationId: get-enrollment-settings
