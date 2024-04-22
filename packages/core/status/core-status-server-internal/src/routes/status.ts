@@ -58,7 +58,11 @@ const SERVICE_UNAVAILABLE_NOT_REPORTED: ServiceStatus = {
   summary: 'Status not yet reported',
 };
 
-const responseSchema = schema.oneOf([redactedStatusResponse, statusResponse]);
+const responseSchema = schema.oneOf([redactedStatusResponse, statusResponse], {
+  meta: {
+    description: `Kibana's operational status. A minimal response is sent for unauthorized users.`,
+  },
+});
 
 export const registerStatusRoute = ({
   router,
@@ -94,6 +98,7 @@ export const registerStatusRoute = ({
         // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
         tags: ['api', 'security:acceptJWT'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
+        description: `Get Kibana's current status.`,
       },
       validate: {
         request: {

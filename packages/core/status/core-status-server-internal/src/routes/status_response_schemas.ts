@@ -79,7 +79,12 @@ export const statusResponse: Type<Omit<StatusResponse, 'metrics'>> = schema.obje
     status: statusInfo,
     metrics: serverMetrics,
   },
-  { meta: { id: 'core.status.response' } }
+  {
+    meta: {
+      id: 'core.status.response',
+      description: `Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.`,
+    },
+  }
 );
 
 export const redactedStatusResponse = schema.object(
@@ -90,7 +95,11 @@ export const redactedStatusResponse = schema.object(
       }),
     }),
   },
-  { meta: { id: 'core.status.redactedResponse' } }
+  {
+    meta: {
+      id: 'core.status.redactedResponse',
+    },
+  }
 );
 
 export type RedactedStatusHttpBody = TypeOf<typeof redactedStatusResponse>;
