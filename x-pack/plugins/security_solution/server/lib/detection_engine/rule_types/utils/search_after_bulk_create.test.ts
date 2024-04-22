@@ -84,7 +84,7 @@ describe('searchAfterAndBulkCreate', () => {
   sampleParams.maxSignals = 30;
   let tuple: RuleRangeTuple;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
     buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
     listClient = listMock.getListClient();
@@ -93,16 +93,18 @@ describe('searchAfterAndBulkCreate', () => {
     mockService = alertsMock.createRuleExecutorServices();
     alerting = alertsMock.createSetup();
     alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 1000 } } });
-    tuple = getRuleRangeTuples({
-      previousStartedAt: new Date(),
-      startedAt: new Date(),
-      from: sampleParams.from,
-      to: sampleParams.to,
-      interval: '5m',
-      maxSignals: sampleParams.maxSignals,
-      ruleExecutionLogger,
-      alerting,
-    }).tuples[0];
+    tuple = (
+      await getRuleRangeTuples({
+        previousStartedAt: new Date(),
+        startedAt: new Date(),
+        from: sampleParams.from,
+        to: sampleParams.to,
+        interval: '5m',
+        maxSignals: sampleParams.maxSignals,
+        ruleExecutionLogger,
+        alerting,
+      })
+    ).tuples[0];
     mockPersistenceServices = createPersistenceServicesMock();
     bulkCreate = bulkCreateFactory(
       mockPersistenceServices.alertWithPersistence,

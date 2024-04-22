@@ -411,7 +411,7 @@ export const errorAggregator = (
   }, Object.create(null));
 };
 
-export const getRuleRangeTuples = ({
+export const getRuleRangeTuples = async ({
   startedAt,
   previousStartedAt,
   from,
@@ -432,6 +432,7 @@ export const getRuleRangeTuples = ({
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  let wroteWarningStatus = false;
   if (originalFrom == null || originalTo == null) {
     throw new Error('Failed to parse date math of rule.from or rule.to');
   }
@@ -440,9 +441,12 @@ export const getRuleRangeTuples = ({
   let maxSignalsToUse = maxSignals;
   if (maxSignals > maxAlertsAllowed) {
     maxSignalsToUse = maxAlertsAllowed;
-    ruleExecutionLogger.warn(
-      `The rule's max_signals value (${maxSignals}) is greater than the Kibana alerting limit set in xpack.alerting.rules.run.alerts.max. The rule will only write a maximum of ${maxAlertsAllowed} per rule run.`
-    );
+    const warningStatusMessage = `The rule's max_signals value (${maxSignals}) is greater than the Kibana alerting limit set in xpack.alerting.rules.run.alerts.max (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} per rule run.`;
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: warningStatusMessage,
+    });
+    wroteWarningStatus = true;
   }
 
   const tuples = [
@@ -460,7 +464,7 @@ export const getRuleRangeTuples = ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0) };
+    return { tuples, remainingGap: moment.duration(0), wroteWarningStatus };
   }
 
   const gap = getGapBetweenRuns({
@@ -492,6 +496,7 @@ export const getRuleRangeTuples = ({
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
+    wroteWarningStatus,
   };
 };
 

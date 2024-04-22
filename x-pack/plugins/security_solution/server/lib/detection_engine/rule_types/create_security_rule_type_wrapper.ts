@@ -306,7 +306,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             wroteWarningStatus = true;
           }
 
-          const { tuples, remainingGap } = getRuleRangeTuples({
+          const {
+            tuples,
+            remainingGap,
+            wroteWarningStatus: rangeTuplesWarningStatus,
+          } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
             from,
@@ -316,6 +320,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ruleExecutionLogger,
             alerting,
           });
+          wroteWarningStatus = rangeTuplesWarningStatus;
 
           if (remainingGap.asMilliseconds() > 0) {
             hasError = true;

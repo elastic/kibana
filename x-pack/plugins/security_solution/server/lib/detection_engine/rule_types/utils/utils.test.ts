@@ -450,8 +450,8 @@ describe('utils', () => {
       alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 1000 } } });
     });
 
-    test('should return a single tuple if no gap', () => {
-      const { tuples, remainingGap } = getRuleRangeTuples({
+    test('should return a single tuple if no gap', async () => {
+      const { tuples, remainingGap, wroteWarningStatus } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
@@ -465,10 +465,11 @@ describe('utils', () => {
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
       expect(tuples.length).toEqual(1);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+      expect(wroteWarningStatus).toEqual(false);
     });
 
-    test('should return a single tuple if malformed interval prevents gap calculation', () => {
-      const { tuples, remainingGap } = getRuleRangeTuples({
+    test('should return a single tuple if malformed interval prevents gap calculation', async () => {
+      const { tuples, remainingGap, wroteWarningStatus } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: 'invalid',
@@ -482,10 +483,11 @@ describe('utils', () => {
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
       expect(tuples.length).toEqual(1);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+      expect(wroteWarningStatus).toEqual(false);
     });
 
-    test('should return two tuples if gap and previouslyStartedAt', () => {
-      const { tuples, remainingGap } = getRuleRangeTuples({
+    test('should return two tuples if gap and previouslyStartedAt', async () => {
+      const { tuples, remainingGap, wroteWarningStatus } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(65, 's').toDate(),
         startedAt: moment().toDate(),
         interval: '50s',
@@ -498,10 +500,11 @@ describe('utils', () => {
       const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+      expect(wroteWarningStatus).toEqual(false);
     });
 
-    test('should return five tuples when give long gap', () => {
-      const { tuples, remainingGap } = getRuleRangeTuples({
+    test('should return five tuples when give long gap', async () => {
+      const { tuples, remainingGap, wroteWarningStatus } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
         startedAt: moment().toDate(),
         interval: '10s',
@@ -521,10 +524,11 @@ describe('utils', () => {
         expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
+      expect(wroteWarningStatus).toEqual(false);
     });
 
-    test('should return a single tuple when give a negative gap (rule ran sooner than expected)', () => {
-      const { tuples, remainingGap } = getRuleRangeTuples({
+    test('should return a single tuple when give a negative gap (rule ran sooner than expected)', async () => {
+      const { tuples, remainingGap, wroteWarningStatus } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(-15, 's').toDate(),
         startedAt: moment().subtract(-15, 's').toDate(),
         interval: '10s',
@@ -538,11 +542,12 @@ describe('utils', () => {
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+      expect(wroteWarningStatus).toEqual(false);
     });
 
-    test('should use alerting framework max alerts value if maxSignals is greater than limit', () => {
+    test('should use alerting framework max alerts value if maxSignals is greater than limit', async () => {
       alerting.getConfig = jest.fn().mockReturnValue({ run: { alerts: { max: 10 } } });
-      const { tuples } = getRuleRangeTuples({
+      const { tuples, wroteWarningStatus } = await getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
         startedAt: moment().subtract(30, 's').toDate(),
         interval: '30s',
@@ -555,6 +560,7 @@ describe('utils', () => {
       const someTuple = tuples[0];
       expect(someTuple.maxSignals).toEqual(10);
       expect(tuples.length).toEqual(1);
+      expect(wroteWarningStatus).toEqual(true);
     });
   });
 
