@@ -37,11 +37,18 @@ export class SearchPlaygroundPlugin
       id: PLUGIN_ID,
       appRoute: '/app/search_playground',
       title: PLUGIN_NAME,
-      async mount(params: AppMountParameters) {
+      async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
 
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
+        return renderApp(
+          coreStart,
+          {
+            history,
+            ...depsStart,
+          } as AppPluginStartDependencies,
+          { element } as AppMountParameters
+        );
       },
     });
 

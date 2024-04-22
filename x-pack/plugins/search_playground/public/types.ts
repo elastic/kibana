@@ -19,6 +19,7 @@ import React, { ComponentType } from 'react';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
@@ -35,6 +36,7 @@ export interface SearchPlaygroundPluginStart {
 }
 
 export interface AppPluginStartDependencies {
+  history: AppMountParameters['history'];
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
