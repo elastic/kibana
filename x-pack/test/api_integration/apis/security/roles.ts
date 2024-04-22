@@ -461,8 +461,8 @@ export default function ({ getService }: FtrProviderContext) {
             const success = roles.every((role) => {
               return (
                 role.name !== 'space_role_not_to_get' &&
-                role.kibana.some((privelege) => {
-                  return privelege.spaces.includes('*') || privelege.spaces.includes('engineering');
+                role.kibana.some((privilege) => {
+                  return privilege.spaces.includes('*') || privilege.spaces.includes('engineering');
                 })
               );
             });
