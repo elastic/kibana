@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/home-plugin",
-  "owner": "@elastic/kibana-core",
+  "owner": "@elastic/appex-sharedux",
   "plugin": {
     "id": "home",
     "server": true,
