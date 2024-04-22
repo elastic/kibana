@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'serverlessConnectors',
         });
         await browser.refresh();
-        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmConnectorCreated();
       });
       describe('connector table', async () => {
         it('confirm searchBar to exist', async () => {
