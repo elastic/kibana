@@ -1470,11 +1470,6 @@ Object {
           "type": "alternatives",
         },
       ],
-      "metas": Array [
-        Object {
-          "x-oas-optional": true,
-        },
-      ],
       "rules": Array [
         Object {
           "args": Object {
