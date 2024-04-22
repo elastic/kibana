@@ -86,15 +86,19 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
     []
   );
 
-  const processInferenceToModelIdMap = useCallback(
-    (models?: InferenceModel, modelStats?: InferenceStatsResponse) => {
-      const deploymentStatsByModelId = getTrainedModelStats(modelStats);
-      const defaultInferenceIds = getDefaultInferenceIds(deploymentStatsByModelId);
-      const modelIdMap = getCustomInferenceIdMap(deploymentStatsByModelId, models);
-      return { ...defaultInferenceIds, ...modelIdMap };
-    },
-    [getCustomInferenceIdMap, getDefaultInferenceIds, getTrainedModelStats]
-  );
+  const getInferenceToModelIdMap = useCallback(async () => {
+    const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();
+
+    const deploymentStatsByModelId = getTrainedModelStats(trainedModelStats);
+    const defaultInferenceIds = getDefaultInferenceIds(deploymentStatsByModelId);
+    const modelIdMap = getCustomInferenceIdMap(deploymentStatsByModelId, inferenceModels);
+    return { ...defaultInferenceIds, ...modelIdMap };
+  }, [
+    getCustomInferenceIdMap,
+    getDefaultInferenceIds,
+    getTrainedModelStats,
+    fetchInferenceModelsAndTrainedModelStats,
+  ]);
 
   const getInferenceIdsInPendingList = useCallback(() => {
     const denormalizedFields = deNormalize(state.fields);
@@ -127,7 +131,7 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
 
   return {
     getPendingDeployments,
-    processInferenceToModelIdMap,
+    getInferenceToModelIdMap,
     fetchInferenceModelsAndTrainedModelStats,
     pendingDeployments,
     setPendingDeployments,
