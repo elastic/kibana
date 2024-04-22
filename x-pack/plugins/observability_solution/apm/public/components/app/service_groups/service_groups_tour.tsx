@@ -47,15 +47,10 @@ export function ServiceGroupsTour({
             defaultMessage="Learn more in the {docsLink}."
             values={{
               docsLink: (
-                <ElasticDocsLink
-                  section="/kibana"
-                  path="/services.html"
-                  target="blank"
-                >
-                  {i18n.translate(
-                    'xpack.apm.serviceGroups.tour.content.link.docs',
-                    { defaultMessage: 'docs' }
-                  )}
+                <ElasticDocsLink section="/kibana" path="/services.html" target="blank">
+                  {i18n.translate('xpack.apm.serviceGroups.tour.content.link.docs', {
+                    defaultMessage: 'docs',
+                  })}
                 </ElasticDocsLink>
               ),
             }}
