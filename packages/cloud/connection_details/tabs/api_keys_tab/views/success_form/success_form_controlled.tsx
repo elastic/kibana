@@ -36,6 +36,7 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
           defaultMessage: 'Created API key "{name}"',
           values: { name: apiKey.name },
         })}
+        data-test-subj={'connectionDetailsApiKeySuccessForm'}
       >
         <p>
           {i18n.translate('cloud.connectionDetails.apiKeys.successForm.message', {

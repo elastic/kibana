@@ -50,7 +50,12 @@ export const ConnectionDetails: React.FC = () => {
     <>
       <EuiTabs>
         {tabs.map(([id, name]) => (
-          <EuiTab key={id} onClick={() => setTab(id)} isSelected={tab === id}>
+          <EuiTab
+            key={id}
+            onClick={() => setTab(id)}
+            isSelected={tab === id}
+            data-test-subj={`connectionDetailsTabBtn-${id}`}
+          >
             {name}
           </EuiTab>
         ))}

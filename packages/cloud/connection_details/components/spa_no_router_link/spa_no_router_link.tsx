@@ -17,12 +17,20 @@ export interface SpaNoRouterLinkProps {
   url: string;
   go?: (url: string) => void;
   onClick?: React.MouseEventHandler;
+  'data-test-subj'?: string;
 }
 
-export const SpaNoRouterLink: React.FC<SpaNoRouterLinkProps> = ({ url, go, onClick, children }) => {
+export const SpaNoRouterLink: React.FC<SpaNoRouterLinkProps> = ({
+  url,
+  go,
+  onClick,
+  children,
+  ...rest
+}) => {
   return (
     /* eslint-disable-next-line @elastic/eui/href-or-on-click */
     <EuiLink
+      {...rest}
       href={url}
       onClick={(e: React.MouseEvent) => {
         if (!go) return;

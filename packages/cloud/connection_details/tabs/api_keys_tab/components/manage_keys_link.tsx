@@ -19,7 +19,11 @@ export const ManageKeysLink: React.FC = () => {
   if (!link) return null;
 
   return (
-    <SpaNoRouterLink url={link} go={service.opts?.navigateToUrl}>
+    <SpaNoRouterLink
+      url={link}
+      go={service.opts?.navigateToUrl}
+      data-test-subj={'connectionDetailsManageApiKeysLink'}
+    >
       {i18n.translate('cloud.connectionDetails.apiKeys.managerLinkLabel', {
         defaultMessage: 'Manage API keys',
       })}

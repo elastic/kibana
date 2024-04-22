@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.not.be(null);
       });
 
-      it('A button to open a modal to view the CloudID and ES endpoint is added', async () => {
+      it('Can open "Connection details" overlay with ES URL and Cloud ID', async () => {
         await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
         expect(await find.byCssSelector('[data-test-subj="connectionDetailsHelpLink"]')).to.not.be(
           null
@@ -76,6 +76,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(cloudIdTextValue).to.be(
           'ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM='
         );
+      });
+
+      it('Can create an API key', async () => {
+        // Open connection details overlay.
+        await PageObjects.common.clickAndValidate('helpMenuButton', 'connectionDetailsHelpLink');
+        await PageObjects.common.clickAndValidate(
+          'connectionDetailsHelpLink',
+          'deploymentDetailsModal'
+        );
+
+        // Navigate to the "API key" tab.
+        await PageObjects.common.clickAndValidate(
+          'connectionDetailsTabBtn-apiKeys',
+          'connectionDetailsApiKeyForm'
+        );
+
+        // Select the input form.
+        const form = await find.byCssSelector(
+          '[data-test-subj="connectionDetailsApiKeyConfigForm"]'
+        );
+
+        // Select the name <input> in that form.
+        const nameInput = await form.findByCssSelector('[name="api-key-name"]');
+
+        // Enter a name for the API key.
+        const keyName = 'test-api-key-' + Date.now().toString(36);
+        await nameInput.type(keyName);
+
+        // Click the submit button.
+        const submitButton = await form.findByCssSelector('button[type="submit"]');
+        await submitButton.click();
+
+        // Wait for the success message to appear.
+        await find.byCssSelector('[data-test-subj="connectionDetailsApiKeySuccessForm"]');
       });
     });
 

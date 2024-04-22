@@ -69,6 +69,7 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
           isLoading={loading}
           value={name}
           onChange={onNameChange}
+          data-test-subj={'connectionDetailsApiKeyNameInput'}
         />
       </EuiFormRow>
     </>
@@ -80,7 +81,7 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
         <ManageKeysLink />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill type="submit" data-test-subj="createKeySubmitBtn">
+        <EuiButton fill type="submit" data-test-subj="connectionDetailsApiKeySubmitBtn">
           {i18n.translate('cloud.connectionDetails.tab.apiKeys.nameField.createButton.label', {
             defaultMessage: 'Create API key',
           })}
@@ -90,7 +91,12 @@ export const ConfigurationFormControlled: React.FC<ConfigurationFormControlledPr
   );
 
   return (
-    <EuiForm component="form" fullWidth onSubmit={onSubmit}>
+    <EuiForm
+      component="form"
+      fullWidth
+      onSubmit={onSubmit}
+      data-test-subj={'connectionDetailsApiKeyConfigForm'}
+    >
       {body}
       <EuiSpacer />
       {footer}
