@@ -18,9 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
-import { getApi } from '../../../../../component_templates/lib';
 import { Field } from '../../../../types';
-
+import { createTextEmbeddingInference } from '../../../../../../services/api';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
@@ -34,8 +33,8 @@ import {
 } from '../../../../shared_imports';
 import { MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
-import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
+import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
 
@@ -53,7 +52,6 @@ export interface SemanticTextInfo {
   isSemanticTextEnabled?: boolean;
   indexName?: string;
   ml?: MlPluginStart;
-  api?: ReturnType<typeof getApi>;
   toasts?: NotificationsSetup['toasts'];
   setErrorsInTrainedModelDeployment: React.Dispatch<React.SetStateAction<string[]>>;
 }
@@ -93,7 +91,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   isAddingFields,
   semanticTextInfo,
 }: Props) {
-  const { isSemanticTextEnabled, indexName, api, ml, toasts, setErrorsInTrainedModelDeployment } =
+  const { isSemanticTextEnabled, indexName, ml, toasts, setErrorsInTrainedModelDeployment } =
     semanticTextInfo ?? {};
   const { inferenceToModelIdMap } = useMappingsState();
 
@@ -163,7 +161,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { trainedModelId, defaultInferenceEndpoint, isDeployed, isDeployable } = inferenceData;
 
     if (trainedModelId && defaultInferenceEndpoint) {
-      api?.createTextEmbeddingInference(data.inferenceId, trainedModelId);
+      createTextEmbeddingInference(data.inferenceId, trainedModelId);
     }
 
     if (isDeployable && trainedModelId && !isDeployed) {

@@ -89,7 +89,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     plugins: { ml },
     url,
   } = useAppContext();
-  const { api, toasts } = useComponentTemplatesContext();
+  const { toasts } = useComponentTemplatesContext();
 
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
     []
@@ -98,7 +98,6 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     isSemanticTextEnabled,
     indexName: index.name,
     ml,
-    api,
     toasts,
     setErrorsInTrainedModelDeployment,
   };

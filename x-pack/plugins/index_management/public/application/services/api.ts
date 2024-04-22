@@ -442,6 +442,14 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
   });
 }
 
+export function createTextEmbeddingInference(inferenceId: string, trainedModelId: string) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/inference/text_embedding/${encodeURIComponent(inferenceId)}`,
+    method: 'post',
+    body: JSON.stringify({ trainedModelId }),
+  });
+}
+
 export function useLoadInferenceModels() {
   return useRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,

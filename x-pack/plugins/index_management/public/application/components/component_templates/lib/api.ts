@@ -102,14 +102,6 @@ export const getApi = (
     });
   }
 
-  async function createTextEmbeddingInference(inferenceId: string, trainedModelId: string) {
-    return sendRequest({
-      path: `${apiBasePath}/inference/text_embedding/${encodeURIComponent(inferenceId)}`,
-      method: 'post',
-      body: JSON.stringify({ trainedModelId }),
-    });
-  }
-
   async function postDataStreamRollover(name: string) {
     return sendRequest<ComponentTemplateDatastreams>({
       path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/rollover`,
@@ -135,6 +127,5 @@ export const getApi = (
     postDataStreamRollover,
     postDataStreamMappingsFromTemplate,
     getInferenceModels,
-    createTextEmbeddingInference,
   };
 };
