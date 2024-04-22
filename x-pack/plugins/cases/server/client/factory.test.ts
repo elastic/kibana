@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CasesClientFactory } from './factory';
 import { createCasesClientFactoryMockArgs } from './mocks';
 import { createCasesClient } from './client';
@@ -16,6 +16,7 @@ jest.mock('./client');
 
 describe('CasesClientFactory', () => {
   const coreStart = coreMock.createStart();
+  const request = httpServerMock.createKibanaRequest();
 
   const rawRequest: FakeRawRequest = {
     headers: {},
@@ -37,6 +38,52 @@ describe('CasesClientFactory', () => {
   });
 
   describe('user info', () => {
+    it('constructs the user info from user profiles', async () => {
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      args.securityPluginStart.userProfiles.getCurrent.mockResolvedValueOnce({
+        // @ts-expect-error: not all fields are needed
+        user: { username: 'my_user', full_name: 'My user', email: 'elastic@elastic.co' },
+      });
+
+      await casesClientFactory.create({
+        request,
+        savedObjectsService: coreStart.savedObjects,
+        scopedClusterClient,
+      });
+
+      expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
+      expect(args.securityPluginStart.authc.getCurrentUser).not.toHaveBeenCalled();
+      expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
+        username: 'my_user',
+        full_name: 'My user',
+        email: 'elastic@elastic.co',
+      });
+    });
+
+    it('constructs the user info from the authc service if the user profile is not available', async () => {
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+      // @ts-expect-error: not all fields are needed
+      args.securityPluginStart.authc.getCurrentUser.mockReturnValueOnce({
+        username: 'my_user_2',
+        full_name: 'My user 2',
+        email: 'elastic2@elastic.co',
+      });
+
+      await casesClientFactory.create({
+        request,
+        savedObjectsService: coreStart.savedObjects,
+        scopedClusterClient,
+      });
+
+      expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
+      expect(args.securityPluginStart.authc.getCurrentUser).toHaveBeenCalled();
+      expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
+        username: 'my_user_2',
+        full_name: 'My user 2',
+        email: 'elastic2@elastic.co',
+      });
+    });
+
     it('constructs the user info from fake requests correctly', async () => {
       const scopedClusterClient =
         coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
@@ -51,6 +98,24 @@ describe('CasesClientFactory', () => {
       expect(args.securityPluginStart.authc.getCurrentUser).toHaveBeenCalled();
       expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
         username: 'elastic/kibana',
+        full_name: null,
+        email: null,
+      });
+    });
+
+    it('return null for all user fields if it cannot find the user info', async () => {
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+
+      await casesClientFactory.create({
+        request,
+        savedObjectsService: coreStart.savedObjects,
+        scopedClusterClient,
+      });
+
+      expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
+      expect(args.securityPluginStart.authc.getCurrentUser).toHaveBeenCalled();
+      expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
+        username: null,
         full_name: null,
         email: null,
       });

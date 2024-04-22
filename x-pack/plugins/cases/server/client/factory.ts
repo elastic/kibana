@@ -34,7 +34,7 @@ import type {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
-import { SAVED_OBJECT_TYPES } from '../../common/constants';
+import { KIBANA_SYSTEM_USERNAME, SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -286,16 +286,12 @@ export class CasesClientFactory {
       this.logger.debug(`Failed to retrieve user info from authc: ${error}`);
     }
 
-    try {
-      if (request.isFakeRequest) {
-        return {
-          username: 'elastic/kibana',
-          full_name: null,
-          email: null,
-        };
-      }
-    } catch (error) {
-      this.logger.debug(`Failed to retrieve user info from ES for a fake request: ${error}`);
+    if (request.isFakeRequest) {
+      return {
+        username: KIBANA_SYSTEM_USERNAME,
+        full_name: null,
+        email: null,
+      };
     }
 
     return {
