@@ -47,7 +47,7 @@ export const useOsqueryTab = ({
     : undefined;
 
   const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0]?.response_actions;
 
   const shouldEarlyReturn =
     !rawEventData ||
