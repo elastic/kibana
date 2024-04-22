@@ -120,6 +120,7 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/ml-time-buckets",
     "@kbn/aiops-change-point-detection",
+    "@kbn/inference_integration_flyout",
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",

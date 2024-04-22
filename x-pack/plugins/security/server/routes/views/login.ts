@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { parseNextURL } from '@kbn/std';
 
 import type { RouteDefinitionParams } from '..';
 import {
@@ -14,7 +15,6 @@ import {
 } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
 import { shouldProviderUseLoginForm } from '../../../common/model';
-import { parseNext } from '../../../common/parse_next';
 
 /**
  * Defines routes required for the Login view.
@@ -48,7 +48,7 @@ export function defineLoginRoutes({
       if (isUserAlreadyLoggedIn || !shouldShowLogin) {
         logger.debug('User is already authenticated, redirecting...');
         return response.redirected({
-          headers: { location: parseNext(request.url?.href ?? '', basePath.serverBasePath) },
+          headers: { location: parseNextURL(request.url?.href ?? '', basePath.serverBasePath) },
         });
       }
 
