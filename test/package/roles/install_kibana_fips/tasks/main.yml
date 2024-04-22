@@ -15,9 +15,6 @@
   set_fact:
     node_version: "{{ node_ver_file['content'] | b64decode | trim }}"
 
-- debug:
-    msg: "{{ node_version }}"
-
 - name: install nvm
   shell:
     chdir: "$HOME"
@@ -42,6 +39,7 @@
 
 # - name: install git?
 # - name: pull source?
+# - name: kbn bootstrap?
 # /var/log/kibana
 # es temp dir
 # sudo / yum broken
