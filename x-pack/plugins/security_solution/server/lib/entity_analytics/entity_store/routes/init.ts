@@ -8,13 +8,15 @@
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { ConfigType } from '../../../../config';
 import type { StartPlugins } from '../../../../plugin';
 import { ENTITY_STORE_INIT_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';
 export const entityStoreInitRoute = (
   router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  config: ConfigType
 ) => {
   router.versioned
     .post({
@@ -43,6 +45,7 @@ export const entityStoreInitRoute = (
 
           await entityStoreDataClient.init({
             taskManager,
+            config: config.entityAnalytics.entityStore,
           });
 
           return response.ok({

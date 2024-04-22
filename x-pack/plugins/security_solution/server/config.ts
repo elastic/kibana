@@ -169,6 +169,9 @@ export const configSchema = schema.object({
     riskEngine: schema.object({
       alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
     }),
+    entityStore: schema.object({
+      demoMode: schema.boolean({ defaultValue: false }),
+    }),
     assetCriticality: schema.object({
       csvUpload: schema.object({
         errorRetries: schema.number({ defaultValue: 1 }),

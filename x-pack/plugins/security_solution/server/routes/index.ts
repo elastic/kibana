@@ -149,6 +149,6 @@ export const initRoutes = (
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
   if (config.experimentalFeatures.entityStoreEnabled) {
-    entityStoreInitRoute(router, getStartServices);
+    entityStoreInitRoute(router, getStartServices, config);
   }
 };

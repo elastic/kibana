@@ -38,6 +38,9 @@ export const createMockConfig = (): ConfigType => {
       riskEngine: {
         alertSampleSizePerShard: 10_000,
       },
+      entityStore: {
+        demoMode: false,
+      },
       assetCriticality: {
         csvUpload: {
           errorRetries: 3,

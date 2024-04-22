@@ -27,7 +27,7 @@ import {
   stateSchemaByVersion,
   type LatestTaskStateSchema as EntityStoreTaskState,
 } from './state';
-import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
+import { SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe } from './helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
 import {
@@ -142,10 +142,12 @@ export const startEntityStoreTask = async ({
   logger,
   namespace,
   taskManager,
+  interval,
 }: {
   logger: Logger;
   namespace: string;
   taskManager: TaskManagerStartContract;
+  interval: string;
 }) => {
   const taskId = getTaskId(namespace);
   const log = logFactory(logger, taskId);
@@ -157,7 +159,7 @@ export const startEntityStoreTask = async ({
       taskType: getTaskName(),
       scope: SCOPE,
       schedule: {
-        interval: INTERVAL,
+        interval,
       },
       state: { ...defaultState, namespace },
       params: { version: VERSION },

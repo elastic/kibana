@@ -22,6 +22,7 @@ import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { entityStoreFieldMap, FIELD_HISTORY_MAX_SIZE } from './constants';
 import { startEntityStoreTask } from './tasks';
 import { maybeCreateAndStartEntityTransform } from './transform';
+import type { EntityAnalyticsConfig } from '../types';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -60,7 +61,13 @@ export class EntityStoreDataClient {
   /**
    * It creates the entity store index or update mappings if index exists
    */
-  public async init({ taskManager }: { taskManager: TaskManagerStartContract }) {
+  public async init({
+    taskManager,
+    config,
+  }: {
+    taskManager: TaskManagerStartContract;
+    config: EntityAnalyticsConfig['entityStore'];
+  }) {
     await createOrUpdateIndex({
       esClient: this.options.esClient,
       logger: this.options.logger,
@@ -70,13 +77,21 @@ export class EntityStoreDataClient {
       },
     });
 
+    const taskInterval = config.demoMode ? '30s' : '2m';
+
     await startEntityStoreTask({
       logger: this.options.logger,
       namespace: this.options.namespace,
       taskManager,
+      interval: taskInterval,
     });
 
-    await maybeCreateAndStartEntityTransform({ client: this.options.esClient });
+    const transformInterval = config.demoMode ? '1m' : '15m';
+
+    await maybeCreateAndStartEntityTransform({
+      client: this.options.esClient,
+      interval: transformInterval,
+    });
   }
 
   public async bulkUpsertEntities({ entities }: { entities: NewEntityStoreEntity[] }) {

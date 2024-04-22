@@ -35,6 +35,7 @@ describe('EntityStoreDataClient', () => {
   it('should initialize entity store resources successfully', async () => {
     await entityStoreDataClient.init({
       taskManager: {} as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      config: { demoMode: false },
     });
 
     expect(createOrUpdateIndex).toHaveBeenCalledWith({

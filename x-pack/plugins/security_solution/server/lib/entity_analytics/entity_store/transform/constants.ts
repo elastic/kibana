@@ -155,8 +155,9 @@ export const getEntityStoreTransform = (opts: {
   sourceIndex: string;
   id: string;
   destinationIndex: string;
+  interval: string;
 }): TransformPutTransformRequest => {
-  const { sourceIndex, id, destinationIndex } = opts;
+  const { sourceIndex, id, destinationIndex, interval } = opts;
   return {
     transform_id: id,
     source: {
@@ -174,7 +175,7 @@ export const getEntityStoreTransform = (opts: {
         '@timestamp': {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: '2m',
+            fixed_interval: interval,
           },
         },
         'host.name': {

@@ -19,13 +19,15 @@ const getTransformDestinationIndex = (name: string) => {
 
 export const maybeCreateAndStartEntityTransform = async ({
   client,
+  interval,
 }: {
   client: ElasticsearchClient;
+  interval: string;
 }) => {
   const transformExists = await doesEntityTransformExist({ client });
 
   if (!transformExists) {
-    await createEntityStoreTransform(client);
+    await createEntityStoreTransform(client, interval);
     await startEntityStoreTransform(client);
   }
 };
@@ -46,13 +48,14 @@ const createDestinationIndexMapping = async (client: ElasticsearchClient, index:
   });
 };
 
-const createEntityStoreTransform = async (client: ElasticsearchClient) => {
+const createEntityStoreTransform = async (client: ElasticsearchClient, interval: string) => {
   try {
     const destinationIndex = getTransformDestinationIndex('hosts');
 
     await createDestinationIndexMapping(client, destinationIndex);
 
     const entityStoreTransform = getEntityStoreTransform({
+      interval,
       destinationIndex,
       sourceIndex: SOURCE_INDEX_PATTERN,
       id: ENTITY_COMPOSITES_TRANSFORM_ID,
@@ -73,23 +76,3 @@ const startEntityStoreTransform = async (client: ElasticsearchClient) => {
     throw new Error(`Error starting entity store transform: ${error}`);
   }
 };
-
-// const stopEntityStoreTransform = async (client: ElasticsearchClient) => {
-//   try {
-//     return await client.transform.stopTransform({
-//       transform_id: ENTITY_COMPOSITES_TRANSFORM_ID,
-//     });
-//   } catch (error) {
-//     throw new Error(`Error stopping entity store transform: ${error}`);
-//   }
-// };
-
-// const deleteEntityStoreTransform = async (client: ElasticsearchClient) => {
-//   try {
-//     return await client.transform.deleteTransform({
-//       transform_id: ENTITY_COMPOSITES_TRANSFORM_ID,
-//     });
-//   } catch (error) {
-//     throw new Error(`Error deleting entity store transform: ${error}`);
-//   }
-// };
