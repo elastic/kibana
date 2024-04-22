@@ -13,7 +13,7 @@ This means you can get slightly different results using the same data.
 Example
 ```esql
 FROM employees
-| STATS median_salary = MEDIAN(salary), p50_salary = PERCENTILE(salary, 50)
+| STATS MEDIAN(salary), PERCENTILE(salary, 50)
 ```
 
 The expression can use inline functions. For example, to calculate the median of

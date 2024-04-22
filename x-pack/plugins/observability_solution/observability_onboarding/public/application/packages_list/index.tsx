@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type {
-  AvailablePackagesHookType,
-  IntegrationCardItem,
-} from '@kbn/fleet-plugin/public';
+import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiSearchBar,
-  EuiSkeletonText,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useRef, Suspense, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
@@ -37,9 +29,13 @@ interface Props {
    */
   selectedCategory?: string;
   showSearchBar?: boolean;
-  searchBarRef?: React.Ref<HTMLInputElement>;
+  packageListRef?: React.Ref<HTMLDivElement>;
   searchQuery?: string;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
+  /**
+   * When enabled, custom and integration cards are joined into a single list.
+   */
+  joinCardLists?: boolean;
 }
 
 type WrapperProps = Props & {
@@ -52,10 +48,11 @@ const PackageListGridWrapper = ({
   selectedCategory = 'observability',
   useAvailablePackages,
   showSearchBar = false,
-  searchBarRef,
+  packageListRef,
   searchQuery,
   setSearchQuery,
   customCards,
+  joinCardLists = false,
 }: WrapperProps) => {
   const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
@@ -66,7 +63,8 @@ const PackageListGridWrapper = ({
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
-    customCards
+    customCards,
+    joinCardLists
   );
 
   React.useEffect(() => {
@@ -77,12 +75,11 @@ const PackageListGridWrapper = ({
 
   if (!isInitialHidden && isLoading) return <Loading />;
 
-  const showPackageList =
-    (showSearchBar && !isInitialHidden) || showSearchBar === false;
+  const showPackageList = (showSearchBar && !isInitialHidden) || showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
-      <div css={customMargin}>
+      <div css={customMargin} ref={packageListRef}>
         {showSearchBar && (
           <div
             css={css`
@@ -92,11 +89,6 @@ const PackageListGridWrapper = ({
             <EuiSearchBar
               box={{
                 incremental: true,
-                inputRef: (ref: any) => {
-                  (
-                    searchBarRef as React.MutableRefObject<HTMLInputElement>
-                  ).current = ref;
-                },
               }}
               onChange={(arg) => {
                 if (setSearchQuery) {
@@ -130,7 +122,7 @@ const PackageListGridWrapper = ({
 };
 
 const WithAvailablePackages = React.forwardRef(
-  (props: Props, searchBarRef?: React.Ref<HTMLInputElement>) => {
+  (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
 
     const {
@@ -144,12 +136,9 @@ const WithAvailablePackages = React.forwardRef(
     if (errorLoading)
       return (
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.observability_onboarding.asyncLoadFailureCallout.title',
-            {
-              defaultMessage: 'Loading failure',
-            }
-          )}
+          title={i18n.translate('xpack.observability_onboarding.asyncLoadFailureCallout.title', {
+            defaultMessage: 'Loading failure',
+          })}
           color="warning"
           iconType="cross"
           size="m"
@@ -181,7 +170,7 @@ const WithAvailablePackages = React.forwardRef(
       <PackageListGridWrapper
         {...props}
         useAvailablePackages={ref.current}
-        searchBarRef={searchBarRef}
+        packageListRef={packageListRef}
       />
     );
   }

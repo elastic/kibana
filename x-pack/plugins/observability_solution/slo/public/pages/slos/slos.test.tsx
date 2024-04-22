@@ -25,6 +25,7 @@ import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/pub
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
+import { useGetSettings } from '../slo_settings/use_get_settings';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -36,10 +37,12 @@ jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_create_slo');
+jest.mock('../slo_settings/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_capabilities');
 
+const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
@@ -137,6 +140,13 @@ describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
+    useGetSettingsMock.mockReturnValue({
+      isLoading: false,
+      data: {
+        useAllRemoteClusters: false,
+        selectedRemoteClusters: [],
+      },
+    });
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
     jest
       .spyOn(Router, 'useLocation')

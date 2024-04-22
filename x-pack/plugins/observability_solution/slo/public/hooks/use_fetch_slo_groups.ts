@@ -17,9 +17,11 @@ import { FindSLOGroupsResponse } from '@kbn/slo-schema';
 import { useKibana } from '../utils/kibana_react';
 import { useCreateDataView } from './use_create_data_view';
 import { sloKeys } from './query_key_factory';
-import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
+import {
+  DEFAULT_SLO_GROUPS_PAGE_SIZE,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../common/constants';
 import { SearchState } from '../pages/slos/hooks/use_url_search_state';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
 
 interface SLOGroupsParams {
   page?: number;
@@ -61,7 +63,7 @@ export function useFetchSloGroups({
   } = useKibana().services;
 
   const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   });
 
   const filters = useMemo(() => {

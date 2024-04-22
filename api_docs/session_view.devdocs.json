@@ -2145,7 +2145,7 @@
         "label": "EventAction",
         "description": [],
         "signature": [
-          "\"end\" | \"fork\" | \"exec\" | \"text_output\""
+          "\"end\" | \"fork\" | \"exec\" | \"text_output\" | \"executed\""
         ],
         "path": "x-pack/plugins/session_view/common/types/v1.ts",
         "deprecated": false,
