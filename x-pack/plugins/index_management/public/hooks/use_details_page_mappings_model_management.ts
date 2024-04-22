@@ -34,7 +34,7 @@ export const useDetailsPageMappingsModelManagement = (state: State) => {
   const [pendingDeployments, setPendingDeployments] = useState<Set<string>>(new Set());
 
   const fetchInferenceModelsAndTrainedModelStats = useCallback(async () => {
-    const inferenceModels = (await api.getInferenceModels()) as InferenceModel;
+    const inferenceModels = await api.getInferenceModels();
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
 
     return { inferenceModels, trainedModelStats };
