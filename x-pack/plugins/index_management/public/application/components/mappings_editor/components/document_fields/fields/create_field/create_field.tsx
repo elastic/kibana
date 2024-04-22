@@ -16,25 +16,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
-import { useComponentTemplatesContext } from '../../../../../component_templates/component_templates_context';
+import React, { useEffect } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
-import {
-  Form,
-  FormDataProvider,
-  FormHook,
-  UseField,
-  useForm,
-  useFormData,
-} from '../../../../shared_imports';
+import { useDispatch } from '../../../../mappings_state_context';
+import { Form, FormDataProvider, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
+import { useSemanticText } from './use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
 export interface InferenceToModelIdMap {
@@ -64,19 +57,6 @@ interface Props {
   semanticTextInfo?: SemanticTextInfo;
 }
 
-const useFieldEffect = (
-  form: FormHook,
-  fieldName: string,
-  setState: React.Dispatch<React.SetStateAction<string | undefined>>
-) => {
-  const fieldValue = form.getFields()?.[fieldName]?.value;
-  useEffect(() => {
-    if (typeof fieldValue === 'string') {
-      setState(fieldValue);
-    }
-  }, [form, fieldValue, setState]);
-};
-
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
   isRootLevelField,
@@ -90,9 +70,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
 }: Props) {
   const { isSemanticTextEnabled, indexName, ml, setErrorsInTrainedModelDeployment } =
     semanticTextInfo ?? {};
-  const { inferenceToModelIdMap } = useMappingsState();
-
-  const { toasts } = useComponentTemplatesContext();
 
   const dispatch = useDispatch();
 
@@ -121,106 +98,18 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const [referenceFieldComboValue, setReferenceFieldComboValue] = useState<string>();
-  const [nameValue, setNameValue] = useState<string>();
-  const [inferenceIdComboValue, setInferenceIdComboValue] = useState<string>();
-  const [semanticFieldType, setSemanticTextFieldType] = useState<string>();
-
-  const [inferenceValue, setValue] = useState<string>('elser_model_2');
-  useFieldEffect(form, 'referenceField', setReferenceFieldComboValue);
-  useFieldEffect(form, 'name', setNameValue);
-
-  const fieldTypeValue = form.getFields()?.type?.value;
-  useEffect(() => {
-    if (!Array.isArray(fieldTypeValue) || fieldTypeValue.length === 0) {
-      return;
-    }
-    setSemanticTextFieldType(
-      fieldTypeValue[0]?.value === 'semantic_text' ? fieldTypeValue[0].value : undefined
-    );
-  }, [form, fieldTypeValue]);
-
-  const inferenceId = form.getFields()?.inferenceId?.value;
-  useEffect(() => {
-    if (typeof inferenceId === 'string') {
-      setInferenceIdComboValue(inferenceId);
-    }
-  }, [form, inferenceId, inferenceToModelIdMap]);
-
-  const handleSemanticText = (data: Field) => {
-    data.inferenceId = inferenceValue;
-    if (data.inferenceId === undefined) {
-      return;
-    }
-
-    const inferenceData = inferenceToModelIdMap?.[data.inferenceId];
-
-    if (!inferenceData) {
-      return;
-    }
-
-    const { trainedModelId, defaultInferenceEndpoint, isDeployed, isDeployable } = inferenceData;
-
-    if (trainedModelId && defaultInferenceEndpoint) {
-      const modelConfig = {
-        service: 'elasticsearch',
-        service_settings: {
-          num_allocations: 1,
-          num_threads: 1,
-          model_id: trainedModelId,
-        },
-      };
-      try {
-        ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
-          data.inferenceId,
-          'text_embedding',
-          modelConfig
-        );
-      } catch (error) {
-        setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
-        toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.inferenceEndpointCreationErrorTitle',
-            {
-              defaultMessage: 'Inference endpoint creation failed',
-            }
-          ),
-        });
-      }
-    }
-
-    if (isDeployable && trainedModelId && !isDeployed) {
-      try {
-        ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId);
-        toasts?.addSuccess({
-          title: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
-            {
-              defaultMessage: 'Model deployment started',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentNotification',
-            {
-              defaultMessage: '1 model is being deployed on your ml_node.',
-            }
-          ),
-        });
-      } catch (error) {
-        setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
-        toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle',
-            {
-              defaultMessage: 'Model deployment failed',
-            }
-          ),
-        });
-      }
-    }
-
-    dispatch({ type: 'field.addSemanticText', value: data });
-  };
+  const {
+    referenceFieldComboValue,
+    nameValue,
+    inferenceIdComboValue,
+    setInferenceValue,
+    semanticFieldType,
+    handleSemanticText,
+  } = useSemanticText({
+    form,
+    setErrorsInTrainedModelDeployment,
+    ml,
+  });
 
   const submitForm = async (
     e?: React.FormEvent,
@@ -395,7 +284,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 }}
               </FormDataProvider>
               {/* Field inference_id for semantic_text field type */}
-              <InferenceIdCombo setValue={setValue} />
+              <InferenceIdCombo setValue={setInferenceValue} />
               {renderFormActions()}
             </div>
           </div>
